@@ -73,6 +73,28 @@ struct gsm_trans *trans_find_by_callref(struct gsm_network *net,
 	return NULL;
 }
 
+/*! Find a transaction by SM-RP-MR (RP Message Reference)
+ * \param[in] conn Connection in which we want to find transaction
+ * \param[in] sm_rp_mr RP Message Reference (see GSM TS 04.11, section 8.2.3)
+ * \returns Matching transaction, NULL otherwise
+ */
+struct gsm_trans *trans_find_by_sm_rp_mr(struct gsm_subscriber_connection *conn,
+					 uint8_t sm_rp_mr)
+{
+	struct gsm_network *net = conn->network;
+	struct vlr_subscr *vsub = conn->vsub;
+	struct gsm_trans *trans;
+
+	llist_for_each_entry(trans, &net->trans_list, entry) {
+		if (trans->vsub == vsub &&
+		    trans->protocol == GSM48_PDISC_SMS &&
+		    trans->sms.sm_rp_mr == sm_rp_mr)
+			return trans;
+	}
+
+	return NULL;
+}
+
 /*! Allocate a new transaction and add it to network list
  *  \param[in] net Netwokr in which we allocate transaction
  *  \param[in] subscr Subscriber for which we allocate transaction
