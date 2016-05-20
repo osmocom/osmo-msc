@@ -40,6 +40,9 @@
 #include <openbsc/db.h>
 #include <openbsc/chan_alloc.h>
 #include <openbsc/vlr.h>
+#include <openbsc/iu.h>
+#include <openbsc/osmo_msc.h>
+#include <openbsc/msc_ifaces.h>
 
 int subscr_paging_dispatch(unsigned int hooknum, unsigned int event,
 			   struct msgb *msg, void *data, void *param)
@@ -49,27 +52,41 @@ int subscr_paging_dispatch(unsigned int hooknum, unsigned int event,
 	struct vlr_subscr *vsub = param;
 	struct paging_signal_data sig_data;
 
-	OSMO_ASSERT(vsub && vsub->cs.is_paging);
+	OSMO_ASSERT(vsub);
+	OSMO_ASSERT(hooknum == GSM_HOOK_RR_PAGING);
+	OSMO_ASSERT(!(conn && (conn->vsub != vsub)));
+	OSMO_ASSERT(!((event == GSM_PAGING_SUCCEEDED) && !conn));
 
-	/* FIXME: implement stop paging in libmsc;
-	 * faking it for the unit tests to still work */
-	msc_fake_paging_request_stop(vsub);
+	LOGP(DPAG, LOGL_DEBUG, "Paging %s for %s (event=%d)\n",
+	     event == GSM_PAGING_SUCCEEDED ? "success" : "failure",
+	     vlr_subscr_name(vsub), event);
+
+	if (!vsub->cs.is_paging) {
+		LOGP(DPAG, LOGL_ERROR,
+		     "Paging Response received for subscriber"
+		     " that is not paging.\n");
+		return -EINVAL;
+	}
+
+	if (event == GSM_PAGING_SUCCEEDED)
+		msc_stop_paging(vsub);
 
 	/* Inform parts of the system we don't know */
-	sig_data.vsub	= vsub;
-	sig_data.bts	= conn ? conn->bts : NULL;
-	sig_data.conn	= conn;
+	sig_data.vsub = vsub;
+	sig_data.conn = conn;
 	sig_data.paging_result = event;
-	osmo_signal_dispatch(
-		SS_PAGING,
-		event == GSM_PAGING_SUCCEEDED ?
-			S_PAGING_SUCCEEDED : S_PAGING_EXPIRED,
-		&sig_data
-	);
+	osmo_signal_dispatch(SS_PAGING,
+			     event == GSM_PAGING_SUCCEEDED ?
+				S_PAGING_SUCCEEDED : S_PAGING_EXPIRED,
+			     &sig_data);
 
 	llist_for_each_entry_safe(request, tmp, &vsub->cs.requests, entry) {
 		llist_del(&request->entry);
-		request->cbfn(hooknum, event, msg, data, request->param);
+		if (request->cbfn) {
+			LOGP(DPAG, LOGL_DEBUG, "Calling paging cbfn.\n");
+			request->cbfn(hooknum, event, msg, data, request->param);
+		} else
+			LOGP(DPAG, LOGL_DEBUG, "Paging without action.\n");
 		talloc_free(request);
 	}
 
@@ -79,21 +96,48 @@ int subscr_paging_dispatch(unsigned int hooknum, unsigned int event,
 	return 0;
 }
 
-struct subscr_request *subscr_request_conn(struct vlr_subscr *vsub, int channel_type, gsm_cbfn *cbfn,
-					   void *param)
+int msc_paging_request(struct vlr_subscr *vsub)
+{
+	/* The subscriber was last seen in subscr->lac. Find out which
+	 * BSCs/RNCs are responsible and send them a paging request via open
+	 * SCCP connections (if any). */
+	/* TODO Implementing only RNC paging, since this is code on the iu branch.
+	 * Need to add BSC paging at some point. */
+	switch (vsub->cs.attached_via_ran) {
+	case RAN_GERAN_A:
+		return a_page(vsub->imsi, vsub->tmsi, vsub->lac);
+	case RAN_UTRAN_IU:
+		return iu_page_cs(vsub->imsi,
+				  vsub->tmsi == GSM_RESERVED_TMSI?
+				  NULL : &vsub->tmsi,
+				  vsub->lac);
+	default:
+		break;
+	}
+
+	LOGP(DPAG, LOGL_ERROR, "%s: Cannot page, subscriber not attached\n",
+	     vlr_subscr_name(vsub));
+	return -EINVAL;
+}
+
+/*! \brief Start a paging request for vsub, call cbfn(param) when done.
+ * \param vsub  subscriber to page.
+ * \param cbfn  function to call when the conn is established.
+ * \param param  caller defined param to pass to cbfn().
+ * \param label  human readable label of the request kind used for logging.
+ */
+struct subscr_request *subscr_request_conn(struct vlr_subscr *vsub,
+					   gsm_cbfn *cbfn, void *param,
+					   const char *label)
 {
 	int rc;
 	struct subscr_request *request;
 
 	/* Start paging.. we know it is async so we can do it before */
 	if (!vsub->cs.is_paging) {
-		LOGP(DMM, LOGL_DEBUG, "Subscriber %s not paged yet.\n",
+		LOGP(DMM, LOGL_DEBUG, "Subscriber %s not paged yet, start paging.\n",
 		     vlr_subscr_name(vsub));
-
-		/* FIXME: implement paging in libmsc;
-		 * faking it for the unit tests to still work */
-		rc = msc_fake_paging_request(vsub);
-
+		rc = msc_paging_request(vsub);
 		if (rc <= 0) {
 			LOGP(DMM, LOGL_ERROR, "Subscriber %s paging failed: %d\n",
 			     vlr_subscr_name(vsub), rc);
@@ -102,6 +146,9 @@ struct subscr_request *subscr_request_conn(struct vlr_subscr *vsub, int channel_
 		/* reduced on the first paging callback */
 		vlr_subscr_get(vsub);
 		vsub->cs.is_paging = true;
+	} else {
+		LOGP(DMM, LOGL_DEBUG, "Subscriber %s already paged.\n",
+			vlr_subscr_name(vsub));
 	}
 
 	/* TODO: Stop paging in case of memory allocation failure */

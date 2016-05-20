@@ -21,9 +21,8 @@
 #include <stdlib.h>
 #include <limits.h>
 #include <unistd.h>
-#include <stdbool.h>
-#include <inttypes.h>
 #include <time.h>
+#include <inttypes.h>
 
 #include <osmocom/vty/command.h>
 #include <osmocom/vty/buffer.h>
@@ -474,17 +473,6 @@ DEFUN(subscriber_ussd_notify,
 	return CMD_SUCCESS;
 }
 
-DEFUN(ena_subscr_delete,
-      ena_subscr_delete_cmd,
-      "subscriber " SUBSCR_TYPES " ID delete",
-	SUBSCR_HELP "Delete subscriber in VLR\n")
-{
-	vty_out(vty, "%% 'subscriber delete' is no longer supported.%s"
-		"%% This is now up to osmo-hlr.%s",
-		VTY_NEWLINE, VTY_NEWLINE);
-	return CMD_WARNING;
-}
-
 DEFUN(ena_subscr_expire,
       ena_subscr_expire_cmd,
       "subscriber " SUBSCR_TYPES " ID expire",
@@ -516,43 +504,6 @@ DEFUN(ena_subscr_expire,
 	return CMD_SUCCESS;
 }
 
-DEFUN(ena_subscr_authorized,
-      ena_subscr_authorized_cmd,
-      "subscriber " SUBSCR_TYPES " ID authorized (0|1)",
-	SUBSCR_HELP "(De-)Authorize subscriber in HLR\n"
-	"Subscriber should NOT be authorized\n"
-	"Subscriber should be authorized\n")
-{
-	vty_out(vty, "%% 'subscriber authorized' is no longer supported.%s"
-		"%% Authorization is now up to osmo-hlr.%s",
-		VTY_NEWLINE, VTY_NEWLINE);
-	return CMD_WARNING;
-}
-
-DEFUN(ena_subscr_name,
-      ena_subscr_name_cmd,
-      "subscriber " SUBSCR_TYPES " ID name .NAME",
-	SUBSCR_HELP "Set the name of the subscriber\n"
-	"Name of the Subscriber\n")
-{
-	vty_out(vty, "%% 'subscriber name' is no longer supported.%s"
-		"%% This is now up to osmo-hlr.%s",
-		VTY_NEWLINE, VTY_NEWLINE);
-	return CMD_WARNING;
-}
-
-DEFUN(ena_subscr_extension,
-      ena_subscr_extension_cmd,
-      "subscriber " SUBSCR_TYPES " ID extension EXTENSION",
-	SUBSCR_HELP "Set the extension (phone number) of the subscriber\n"
-	"Extension (phone number)\n")
-{
-	vty_out(vty, "%% 'subscriber extension' is no longer supported.%s"
-		"%% This is now up to osmo-hlr.%s",
-		VTY_NEWLINE, VTY_NEWLINE);
-	return CMD_WARNING;
-}
-
 #define A3A8_ALG_TYPES "(none|xor|comp128v1)"
 #define A3A8_ALG_HELP 			\
 	"Use No A3A8 algorithm\n"	\
@@ -566,18 +517,6 @@ DEFUN(ena_subscr_a3a8,
       A3A8_ALG_HELP "Encryption Key Ki\n")
 {
 	vty_out(vty, "%% 'subscriber a3a8' is no longer supported.%s"
-		"%% This is now up to osmo-hlr.%s",
-		VTY_NEWLINE, VTY_NEWLINE);
-	return CMD_WARNING;
-}
-
-DEFUN(subscriber_purge,
-      subscriber_purge_cmd,
-      "subscriber purge-inactive",
-      "Operations on a Subscriber\n" "Purge subscribers with a zero use count.\n")
-{
-	/* TODO: does this still have a use with the VLR? */
-	vty_out(vty, "%% 'subscriber purge-inactive' is no longer supported.%s"
 		"%% This is now up to osmo-hlr.%s",
 		VTY_NEWLINE, VTY_NEWLINE);
 	return CMD_WARNING;
@@ -834,7 +773,6 @@ DEFUN(logging_fltr_imsi,
       "Filter log messages by IMSI\n" "IMSI to be used as filter\n")
 {
 	struct vlr_subscr *vlr_subscr;
-	struct bsc_subscr *bsc_subscr;
 	struct gsm_network *gsmnet = gsmnet_from_vty(vty);
 	struct log_target *tgt = osmo_log_vty2tgt(vty);
 	const char *imsi = argv[0];
@@ -843,16 +781,14 @@ DEFUN(logging_fltr_imsi,
 		return CMD_WARNING;
 
 	vlr_subscr = vlr_subscr_find_by_imsi(gsmnet->vlr, imsi);
-	bsc_subscr = bsc_subscr_find_by_imsi(gsmnet->bsc_subscribers, imsi);
 
-	if (!vlr_subscr && !bsc_subscr) {
+	if (!vlr_subscr) {
 		vty_out(vty, "%%no subscriber with IMSI(%s)%s",
 			argv[0], VTY_NEWLINE);
 		return CMD_WARNING;
 	}
 
 	log_set_filter_vlr_subscr(tgt, vlr_subscr);
-	log_set_filter_bsc_subscr(tgt, bsc_subscr);
 	return CMD_SUCCESS;
 }
 
@@ -900,81 +836,6 @@ static int config_write_hlr(struct vty *vty)
 	return CMD_SUCCESS;
 }
 
-static struct cmd_node nitb_node = {
-	NITB_NODE,
-	"%s(config-nitb)# ",
-	1,
-};
-
-DEFUN(cfg_nitb, cfg_nitb_cmd,
-      "nitb", "Configure NITB options")
-{
-	vty->node = NITB_NODE;
-	return CMD_SUCCESS;
-}
-
-/* Note: limit on the parameter length is set by internal vty code limitations */
-DEFUN(cfg_nitb_subscr_random, cfg_nitb_subscr_random_cmd,
-      "subscriber-create-on-demand random <1-9999999999> <2-9999999999>",
-      "Set random parameters for a new record when a subscriber is first seen.\n"
-      "Set random parameters for a new record when a subscriber is first seen.\n"
-      "Minimum for subscriber extension\n""Maximum for subscriber extension\n")
-{
-	vty_out(vty, "%% 'subscriber-create-on-demand' is no longer supported.%s"
-		"%% This is now up to osmo-hlr.%s",
-		VTY_NEWLINE, VTY_NEWLINE);
-	return CMD_WARNING;
-}
-
-DEFUN(cfg_nitb_subscr_create, cfg_nitb_subscr_create_cmd,
-      "subscriber-create-on-demand [no-extension]",
-      "Make a new record when a subscriber is first seen.\n"
-      "Do not automatically assign extension to created subscribers\n")
-{
-	vty_out(vty, "%% 'subscriber-create-on-demand' is no longer supported.%s"
-		"%% This is now up to osmo-hlr.%s",
-		VTY_NEWLINE, VTY_NEWLINE);
-	return CMD_WARNING;
-}
-
-DEFUN(cfg_nitb_no_subscr_create, cfg_nitb_no_subscr_create_cmd,
-      "no subscriber-create-on-demand",
-      NO_STR "Make a new record when a subscriber is first seen.\n")
-{
-	vty_out(vty, "%% 'subscriber-create-on-demand' is no longer supported.%s"
-		"%% This is now up to osmo-hlr.%s",
-		VTY_NEWLINE, VTY_NEWLINE);
-	return CMD_WARNING;
-}
-
-DEFUN(cfg_nitb_assign_tmsi, cfg_nitb_assign_tmsi_cmd,
-      "assign-tmsi",
-      "Assign TMSI during Location Updating.\n")
-{
-	struct gsm_network *gsmnet = gsmnet_from_vty(vty);
-	gsmnet->vlr->cfg.assign_tmsi = true;
-	return CMD_SUCCESS;
-}
-
-DEFUN(cfg_nitb_no_assign_tmsi, cfg_nitb_no_assign_tmsi_cmd,
-      "no assign-tmsi",
-      NO_STR "Assign TMSI during Location Updating.\n")
-{
-	struct gsm_network *gsmnet = gsmnet_from_vty(vty);
-	gsmnet->vlr->cfg.assign_tmsi = false;
-	return CMD_SUCCESS;
-}
-
-static int config_write_nitb(struct vty *vty)
-{
-	struct gsm_network *gsmnet = gsmnet_from_vty(vty);
-
-	vty_out(vty, "nitb%s", VTY_NEWLINE);
-	vty_out(vty, " %sassign-tmsi%s",
-		gsmnet->vlr->cfg.assign_tmsi? "" : "no ", VTY_NEWLINE);
-	return CMD_SUCCESS;
-}
-
 int bsc_vty_init_extra(void)
 {
 	osmo_signal_register_handler(SS_SCALL, scall_cbfn, NULL);
@@ -995,13 +856,8 @@ int bsc_vty_init_extra(void)
 	install_element_ve(&show_smsqueue_cmd);
 	install_element_ve(&logging_fltr_imsi_cmd);
 
-	install_element(ENABLE_NODE, &ena_subscr_delete_cmd);
 	install_element(ENABLE_NODE, &ena_subscr_expire_cmd);
-	install_element(ENABLE_NODE, &ena_subscr_name_cmd);
-	install_element(ENABLE_NODE, &ena_subscr_extension_cmd);
-	install_element(ENABLE_NODE, &ena_subscr_authorized_cmd);
 	install_element(ENABLE_NODE, &ena_subscr_a3a8_cmd);
-	install_element(ENABLE_NODE, &subscriber_purge_cmd);
 	install_element(ENABLE_NODE, &smsqueue_trigger_cmd);
 	install_element(ENABLE_NODE, &smsqueue_max_cmd);
 	install_element(ENABLE_NODE, &smsqueue_clear_cmd);
@@ -1024,14 +880,6 @@ int bsc_vty_init_extra(void)
 	install_node(&hlr_node, config_write_hlr);
 	install_element(HLR_NODE, &cfg_hlr_remote_ip_cmd);
 	install_element(HLR_NODE, &cfg_hlr_remote_port_cmd);
-
-	install_element(CONFIG_NODE, &cfg_nitb_cmd);
-	install_node(&nitb_node, config_write_nitb);
-	install_element(NITB_NODE, &cfg_nitb_subscr_create_cmd);
-	install_element(NITB_NODE, &cfg_nitb_subscr_random_cmd);
-	install_element(NITB_NODE, &cfg_nitb_no_subscr_create_cmd);
-	install_element(NITB_NODE, &cfg_nitb_assign_tmsi_cmd);
-	install_element(NITB_NODE, &cfg_nitb_no_assign_tmsi_cmd);
 
 	return 0;
 }
