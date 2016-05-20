@@ -12,6 +12,9 @@ AM_CFLAGS = \
 	$(LIBCRYPTO_CFLAGS) \
 	$(LIBOSMOVTY_CFLAGS) \
 	$(LIBOSMOABIS_CFLAGS) \
+	$(LIBOSMOSIGTRAN_CFLAGS) \
+	$(LIBOSMORANAP_CFLAGS) \
+	$(LIBASN1C_CFLAGS) \
 	$(NULL)
 
 noinst_HEADERS = \
@@ -45,13 +48,24 @@ COMMON_LDADD = \
 	$(top_builddir)/src/libvlr/libvlr.a \
 	$(top_builddir)/src/libbsc/libbsc.a \
 	$(top_builddir)/src/libtrau/libtrau.a \
+	$(top_builddir)/src/libmgcp/libmgcp.a \
 	$(top_builddir)/src/libcommon/libcommon.a \
+	$(NULL)
+if BUILD_IU
+COMMON_LDADD += \
+	$(top_builddir)/src/libiu/libiu.a \
+	$(NULL)
+endif
+COMMON_LDADD += \
 	$(LIBSMPP34_LIBS) \
 	$(LIBOSMOCORE_LIBS) \
 	$(LIBOSMOGSM_LIBS) \
 	$(LIBCRYPTO_LIBS) \
 	$(LIBOSMOVTY_LIBS) \
 	$(LIBOSMOABIS_LIBS) \
+	$(LIBOSMOSIGTRAN_LIBS) \
+	$(LIBOSMORANAP_LIBS) \
+	$(LIBASN1C_LIBS) \
 	-ldbi \
 	-lrt \
 	$(NULL)
@@ -59,9 +73,13 @@ COMMON_LDADD = \
 COMMON_LDFLAGS = \
 	-Wl,--wrap=gsup_client_create \
 	-Wl,--wrap=gsup_client_send \
-	-Wl,--wrap=gsm0808_submit_dtap \
-	-Wl,--wrap=msc_fake_paging_request \
-	-Wl,--wrap=msc_fake_paging_request_stop \
+	-Wl,--wrap=a_tx \
+	-Wl,--wrap=a_page \
+	-Wl,--wrap=iu_tx \
+	-Wl,--wrap=iu_tx_release \
+	-Wl,--wrap=iu_tx_common_id \
+	-Wl,--wrap=iu_page_cs \
+	-Wl,--wrap=msc_stop_paging \
 	-Wl,--wrap=gsm340_gen_scts \
 	-Wl,--wrap=RAND_bytes \
 	$(NULL)

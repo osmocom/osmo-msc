@@ -28,6 +28,7 @@
 #include <openbsc/db.h>
 #include <openbsc/vlr.h>
 #include <openbsc/osmo_msc.h>
+#include <openbsc/iu.h>
 
 #include <openbsc/gsm_04_11.h>
 
@@ -40,24 +41,6 @@ static void msc_sapi_n_reject(struct gsm_subscriber_connection *conn, int dlci)
 		gsm411_sapi_n_reject(conn);
 }
 
-static bool keep_conn(struct gsm_subscriber_connection *conn)
-{
-	/* TODO: what about a silent call? */
-
-	if (!conn->conn_fsm) {
-		DEBUGP(DMM, "No conn_fsm, release conn\n");
-		return false;
-	}
-
-	switch (conn->conn_fsm->state) {
-	case SUBSCR_CONN_S_NEW:
-	case SUBSCR_CONN_S_ACCEPTED:
-		return true;
-	default:
-		return false;
-	}
-}
-
 static void subscr_conn_bump(struct gsm_subscriber_connection *conn)
 {
 	if (!conn)
@@ -65,39 +48,32 @@ static void subscr_conn_bump(struct gsm_subscriber_connection *conn)
 	if (!conn->conn_fsm)
 		return;
 	if (!(conn->conn_fsm->state == SUBSCR_CONN_S_ACCEPTED
-	      || conn->conn_fsm->state == SUBSCR_CONN_S_COMMUNICATING))
+	      || conn->conn_fsm->state == SUBSCR_CONN_S_COMMUNICATING)) {
+		DEBUGP(DMM, "%s: bump: conn still being established (%s)\n",
+		       vlr_subscr_name(conn->vsub),
+		       osmo_fsm_inst_state_name(conn->conn_fsm));
 		return;
+	}
 	osmo_fsm_inst_dispatch(conn->conn_fsm, SUBSCR_CONN_E_BUMP, NULL);
 }
 
 /* receive a Level 3 Complete message and return MSC_CONN_ACCEPT or
  * MSC_CONN_REJECT */
-static int msc_compl_l3(struct gsm_subscriber_connection *conn,
-			struct msgb *msg, uint16_t chosen_channel)
+int msc_compl_l3(struct gsm_subscriber_connection *conn,
+		 struct msgb *msg, uint16_t chosen_channel)
 {
-	/* Ownership of the gsm_subscriber_connection is still a bit mucky
-	 * between libbsc and libmsc. In libmsc, we use ref counting, but not
-	 * in libbsc. This will become simpler with the MSCSPLIT. */
-
-	/* reserve for the duration of this function */
 	msc_subscr_conn_get(conn);
-
 	gsm0408_dispatch(conn, msg);
-
-	if (!keep_conn(conn)) {
-		DEBUGP(DMM, "compl_l3: Discarding conn\n");
-		/* keep the use_count reserved, libbsc will discard. If we
-		 * released the ref count and discarded here, libbsc would
-		 * double-free. And we will not change bsc_api semantics. */
-		return MSC_CONN_REJECT;
-	}
-	DEBUGP(DMM, "compl_l3: Keeping conn\n");
 
 	/* Bump whether the conn wants to be closed */
 	subscr_conn_bump(conn);
 
 	/* If this should be kept, the conn->conn_fsm has placed a use_count */
 	msc_subscr_conn_put(conn);
+
+	/* Always return acceptance, because even if the conn was not accepted,
+	 * we assumed ownership of it and the caller shall not interfere with
+	 * that. We may even already have discarded the conn. */
 	return MSC_CONN_ACCEPT;
 
 #if 0
@@ -119,7 +95,7 @@ static int msc_compl_l3(struct gsm_subscriber_connection *conn,
 }
 
 /* Receive a DTAP message from BSC */
-static void msc_dtap(struct gsm_subscriber_connection *conn, uint8_t link_id, struct msgb *msg)
+void msc_dtap(struct gsm_subscriber_connection *conn, uint8_t link_id, struct msgb *msg)
 {
 	msc_subscr_conn_get(conn);
 	gsm0408_dispatch(conn, msg);
@@ -170,8 +146,8 @@ static void msc_classmark_chg(struct gsm_subscriber_connection *conn,
 }
 
 /* Receive a CIPHERING MODE COMPLETE from BSC */
-static void msc_ciph_m_compl(struct gsm_subscriber_connection *conn,
-			     struct msgb *msg, uint8_t alg_id)
+void msc_cipher_mode_compl(struct gsm_subscriber_connection *conn,
+			   struct msgb *msg, uint8_t alg_id)
 {
 	struct gsm48_hdr *gh = msgb_l3(msg);
 	unsigned int payload_len = msgb_l3len(msg) - sizeof(*gh);
@@ -289,7 +265,7 @@ static struct bsc_api msc_handler = {
 	.assign_compl = msc_assign_compl,
 	.assign_fail = msc_assign_fail,
 	.classmark_chg = msc_classmark_chg,
-	.cipher_mode_compl = msc_ciph_m_compl,
+	.cipher_mode_compl = msc_cipher_mode_compl,
 	.conn_cleanup = msc_subscr_con_cleanup,
 };
 
@@ -308,7 +284,10 @@ static void msc_subscr_conn_release_all(struct gsm_subscriber_connection *conn, 
 
 	switch (conn->via_ran) {
 	case RAN_UTRAN_IU:
-		/* future: iu_tx_release(conn->iu.ue_ctx, NULL); */
+		iu_tx_release(conn->iu.ue_ctx, NULL);
+		/* FIXME: keep the conn until the Iu Release Outcome is
+		 * received from the UE, or a timeout expires. For now, the log
+		 * says "unknown UE" for each release outcome. */
 		break;
 	case RAN_GERAN_A:
 		/* future: a_iface_tx_clear_cmd(conn); */
@@ -390,8 +369,12 @@ void _msc_subscr_conn_put(struct gsm_subscriber_connection *conn,
 		"%s: MSC conn use - 1 == %u\n",
 		vlr_subscr_name(conn->vsub), conn->use_count);
 
-	if (conn->use_count == 0) {
-		gsm0808_clear(conn);
-		bsc_subscr_con_free(conn);
-	}
+	if (conn->use_count == 0)
+		msc_subscr_con_free(conn);
+}
+
+void msc_stop_paging(struct vlr_subscr *vsub)
+{
+	DEBUGP(DPAG, "Paging can stop for %s\n", vlr_subscr_name(vsub));
+	/* tell BSCs and RNCs to stop paging? How? */
 }

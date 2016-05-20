@@ -8,6 +8,12 @@ AM_CFLAGS = \
 	-ggdb3 \
 	$(LIBOSMOCORE_CFLAGS) \
 	$(LIBOSMOGSM_CFLAGS) \
+	$(LIBCRYPTO_CFLAGS) \
+	$(LIBOSMOVTY_CFLAGS) \
+	$(LIBOSMOABIS_CFLAGS) \
+	$(LIBOSMOSIGTRAN_CFLAGS) \
+	$(LIBOSMORANAP_CFLAGS) \
+	$(LIBASN1C_CFLAGS) \
 	$(NULL)
 
 EXTRA_DIST = \
@@ -28,14 +34,25 @@ sms_queue_test_LDADD = \
 	$(top_builddir)/src/libvlr/libvlr.a \
 	$(top_builddir)/src/libbsc/libbsc.a \
 	$(top_builddir)/src/libtrau/libtrau.a \
+	$(top_builddir)/src/libmgcp/libmgcp.a \
 	$(top_builddir)/src/libcommon/libcommon.a \
 	$(top_builddir)/src/libcommon-cs/libcommon-cs.a \
+	$(NULL)
+if BUILD_IU
+sms_queue_test_LDADD += \
+	$(top_builddir)/src/libiu/libiu.a \
+	$(NULL)
+endif
+sms_queue_test_LDADD += \
 	$(LIBSMPP34_LIBS) \
 	$(LIBOSMOCORE_LIBS) \
 	$(LIBOSMOGSM_LIBS) \
 	$(LIBCRYPTO_LIBS) \
 	$(LIBOSMOVTY_LIBS) \
 	$(LIBOSMOABIS_LIBS) \
+	$(LIBOSMOSIGTRAN_LIBS) \
+	$(LIBOSMORANAP_LIBS) \
+	$(LIBASN1C_LIBS) \
 	-ldbi \
 	-lrt \
 	$(NULL)

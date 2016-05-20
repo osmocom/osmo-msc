@@ -34,6 +34,8 @@
 #include <openbsc/gsm_04_11.h>
 #include <openbsc/bsc_subscriber.h>
 #include <openbsc/debug.h>
+#include <openbsc/iu.h>
+#include <openbsc/iucs_ranap.h>
 
 #include "msc_vlr_tests.h"
 
@@ -69,6 +71,7 @@ struct msgb *msgb_from_hex(const char *label, uint16_t size, const char *hex)
 
 void dtap_expect_tx(const char *hex)
 {
+	/* Has the previously expected dtap been received? */
 	OSMO_ASSERT(!dtap_tx_expected);
 	if (!hex)
 		return;
@@ -132,6 +135,14 @@ struct gsm_subscriber_connection *conn_new(void)
 	conn = msc_subscr_con_allocate(net);
 	conn->bts = the_bts;
 	conn->via_ran = rx_from_ran;
+	if (conn->via_ran == RAN_UTRAN_IU) {
+		struct ue_conn_ctx *ue_ctx = talloc_zero(conn, struct ue_conn_ctx);
+		*ue_ctx = (struct ue_conn_ctx){
+			.link = (void*)0x23,
+			.conn_id = 42,
+		};
+		conn->iu.ue_ctx = ue_ctx;
+	}
 	return conn;
 }
 
@@ -151,7 +162,7 @@ void rx_from_ms(struct msgb *msg)
 	if (!g_conn) {
 		log("new conn");
 		g_conn = conn_new();
-		rc = net->bsc_api->compl_l3(g_conn, msg, 23);
+		rc = msc_compl_l3(g_conn, msg, 23);
 		if (rc == BSC_API_CONN_POL_REJECT) {
 			msc_subscr_con_free(g_conn);
 			g_conn = NULL;
@@ -159,9 +170,9 @@ void rx_from_ms(struct msgb *msg)
 	} else {
 		if ((gsm48_hdr_pdisc(gh) == GSM48_PDISC_RR)
 		    && (gsm48_hdr_msg_type(gh) == GSM48_MT_RR_CIPH_M_COMPL))
-			net->bsc_api->cipher_mode_compl(g_conn, msg, 0);
+			msc_cipher_mode_compl(g_conn, msg, 0);
 		else
-			net->bsc_api->dtap(g_conn, 23, msg);
+			msc_dtap(g_conn, 23, msg);
 	}
 
 	if (g_conn && !conn_exists(g_conn))
@@ -252,25 +263,38 @@ void paging_expect_tmsi(uint32_t tmsi)
 	paging_expecting_imsi = NULL;
 }
 
-/* override, requires '-Wl,--wrap=msc_fake_paging_request' */
-int __real_msc_fake_paging_request(struct vlr_subscr *vsub);
-int __wrap_msc_fake_paging_request(struct vlr_subscr *vsub)
+int _paging_sent(enum ran_type via_ran, const char *imsi, uint32_t tmsi, uint32_t lac)
 {
-	log("BTS/BSC sends out paging request to %s",
-	    vlr_subscr_name(vsub));
+	log("%s sends out paging request to IMSI %s, TMSI 0x%08x, LAC %u",
+	    ran_type_name(via_ran), imsi, tmsi, lac);
 	OSMO_ASSERT(paging_expecting_imsi || (paging_expecting_tmsi != GSM_RESERVED_TMSI));
 	if (paging_expecting_imsi)
-		VERBOSE_ASSERT(strcmp(paging_expecting_imsi, vsub->imsi), == 0, "%d");
-	if (paging_expecting_tmsi != GSM_RESERVED_TMSI)
-		VERBOSE_ASSERT(paging_expecting_tmsi, == vsub->tmsi, "0x%08x");
+		VERBOSE_ASSERT(strcmp(paging_expecting_imsi, imsi), == 0, "%d");
+	if (paging_expecting_tmsi != GSM_RESERVED_TMSI) {
+		VERBOSE_ASSERT(paging_expecting_tmsi, == tmsi, "0x%08x");
+	}
 	paging_sent = true;
 	paging_stopped = false;
 	return 1;
 }
 
-/* override, requires '-Wl,--wrap=msc_fake_paging_request_stop' */
-void __real_msc_fake_paging_request_stop(struct vlr_subscr *vsub);
-void __wrap_msc_fake_paging_request_stop(struct vlr_subscr *vsub)
+/* override, requires '-Wl,--wrap=iu_page_cs' */
+int __real_iu_page_cs(const char *imsi, const uint32_t *tmsi, uint16_t lac);
+int __wrap_iu_page_cs(const char *imsi, const uint32_t *tmsi, uint16_t lac)
+{
+	return _paging_sent(RAN_UTRAN_IU, imsi, tmsi ? *tmsi : GSM_RESERVED_TMSI, lac);
+}
+
+/* override, requires '-Wl,--wrap=a_page' */
+int __real_a_page(const char *imsi, uint32_t tmsi, uint16_t lac);
+int __wrap_a_page(const char *imsi, uint32_t tmsi, uint16_t lac)
+{
+	return _paging_sent(RAN_GERAN_A, imsi, tmsi, lac);
+}
+
+/* override, requires '-Wl,--wrap=msc_stop_paging' */
+void __real_msc_stop_paging(struct vlr_subscr *vsub);
+void __wrap_msc_stop_paging(struct vlr_subscr *vsub)
 {
 	paging_stopped = true;
 }
@@ -340,6 +364,16 @@ static struct log_info_cat test_categories[] = {
 		.description = "Reference Counting",
 		.enabled = 1, .loglevel = LOGL_DEBUG,
 	},
+	[DPAG]	= {
+		.name = "DPAG",
+		.description = "Paging Subsystem",
+		.enabled = 1, .loglevel = LOGL_DEBUG,
+	},
+	[DIUCS] = {
+		.name = "DIUCS",
+		.description = "Iu-CS Protocol",
+		.enabled = 1, .loglevel = LOGL_DEBUG,
+	},
 };
 
 static struct log_info info = {
@@ -391,13 +425,11 @@ int __wrap_gsup_client_send(struct gsup_client *gsupc, struct msgb *msg)
 	return 0;
 }
 
-/* override, requires '-Wl,--wrap=gsm0808_submit_dtap' */
-int __real_gsm0808_submit_dtap(struct gsm_subscriber_connection *conn,
-			       struct msgb *msg, int link_id, int allow_sacch);
-int __wrap_gsm0808_submit_dtap(struct gsm_subscriber_connection *conn,
-			       struct msgb *msg, int link_id, int allow_sacch)
+int _validate_dtap(struct msgb *msg, enum ran_type to_ran)
 {
-	btw("DTAP --> MS: %s", osmo_hexdump_nospc(msg->data, msg->len));
+	btw("DTAP --%s--> MS: %s",
+	    ran_type_name(to_ran),
+	    osmo_hexdump_nospc(msg->data, msg->len));
 
 	OSMO_ASSERT(dtap_tx_expected);
 	if (msg->len != dtap_tx_expected->len
@@ -415,6 +447,36 @@ int __wrap_gsm0808_submit_dtap(struct gsm_subscriber_connection *conn,
 	talloc_free(dtap_tx_expected);
 	dtap_tx_expected = NULL;
 	return 0;
+}
+
+/* override, requires '-Wl,--wrap=iu_tx' */
+int __real_iu_tx(struct msgb *msg, uint8_t sapi);
+int __wrap_iu_tx(struct msgb *msg, uint8_t sapi)
+{
+	return _validate_dtap(msg, RAN_UTRAN_IU);
+}
+
+/* override, requires '-Wl,--wrap=iu_tx_release' */
+int __real_iu_tx_release(struct ue_conn_ctx *ctx, const struct RANAP_Cause *cause);
+int __wrap_iu_tx_release(struct ue_conn_ctx *ctx, const struct RANAP_Cause *cause)
+{
+	btw("Iu Release --%s--> MS", ran_type_name(RAN_UTRAN_IU));
+	return 0;
+}
+
+/* override, requires '-Wl,--wrap=iu_tx_common_id' */
+int __real_iu_tx_common_id(struct ue_conn_ctx *ue_ctx, const char *imsi);
+int __wrap_iu_tx_common_id(struct ue_conn_ctx *ue_ctx, const char *imsi)
+{
+	btw("Iu Common ID --%s--> MS (IMSI=%s)", ran_type_name(RAN_UTRAN_IU), imsi);
+	return 0;
+}
+
+/* override, requires '-Wl,--wrap=a_tx' */
+int __real_a_tx(struct msgb *msg, uint8_t sapi);
+int __wrap_a_tx(struct msgb *msg, uint8_t sapi)
+{
+	return _validate_dtap(msg, RAN_GERAN_A);
 }
 
 static int fake_vlr_tx_lu_acc(void *msc_conn_ref, uint32_t send_tmsi)
@@ -516,15 +578,35 @@ static int fake_vlr_tx_ciph_mode_cmd(void *msc_conn_ref, enum vlr_ciph ciph,
 	 * gsm0808_cipher_mode() directly. When the MSCSPLIT is ready, check
 	 * the tx bytes in the sense of dtap_expect_tx() above. */
 	struct gsm_subscriber_connection *conn = msc_conn_ref;
-	btw("sending Ciphering Mode Command for %s: cipher=%s kc=%s"
-	    " retrieve_imeisv=%d",
-	    vlr_subscr_name(conn->vsub),
-	    vlr_ciph_name(conn->network->a5_encryption),
-	    osmo_hexdump_nospc(conn->vsub->last_tuple->vec.kc, 8),
-	    retrieve_imeisv);
+	switch (conn->via_ran) {
+	case RAN_GERAN_A:
+		btw("sending Ciphering Mode Command for %s: cipher=%s kc=%s"
+		    " retrieve_imeisv=%d",
+		    vlr_subscr_name(conn->vsub),
+		    vlr_ciph_name(conn->network->a5_encryption),
+		    osmo_hexdump_nospc(conn->vsub->last_tuple->vec.kc, 8),
+		    retrieve_imeisv);
+		break;
+	case RAN_UTRAN_IU:
+		btw("sending SecurityModeControl for %s",
+		    vlr_subscr_name(conn->vsub));
+		break;
+	default:
+		btw("UNKNOWN RAN TYPE %d", conn->via_ran);
+		OSMO_ASSERT(false);
+		return -1;
+	}
 	cipher_mode_cmd_sent = true;
 	cipher_mode_cmd_sent_with_imeisv = retrieve_imeisv;
 	return 0;
+}
+
+void ms_sends_security_mode_complete()
+{
+	OSMO_ASSERT(g_conn);
+	OSMO_ASSERT(g_conn->via_ran == RAN_UTRAN_IU);
+	OSMO_ASSERT(g_conn->iu.ue_ctx);
+	msc_rx_sec_mode_compl(g_conn);
 }
 
 const struct timeval fake_time_start_time = { 123, 456 };
@@ -615,7 +697,7 @@ void run_tests(int nr)
 		if (cmdline_opts.verbose)
 			fprintf(stderr, "(test nr %d)\n", test_nr + 1);
 
-		check_talloc(msgb_ctx, tall_bsc_ctx, 75);
+		check_talloc(msgb_ctx, tall_bsc_ctx, 9);
 	} while(0);
 }
 
@@ -636,8 +718,6 @@ int main(int argc, char **argv)
 	log_set_print_category(osmo_stderr_target, 1);
 
 	net = gsm_network_init(tall_bsc_ctx, 1, 1, fake_mncc_recv);
-	bsc_api_init(net, msc_bsc_api());
-	the_bts = gsm_bts_alloc(net);
 	net->gsup_server_addr_str = talloc_strdup(net, "no_gsup_server");
 	net->gsup_server_port = 0;
 
@@ -655,6 +735,8 @@ int main(int argc, char **argv)
 	net->vlr->ops.tx_auth_req = fake_vlr_tx_auth_req;
 	net->vlr->ops.tx_auth_rej = fake_vlr_tx_auth_rej;
 	net->vlr->ops.set_ciph_mode = fake_vlr_tx_ciph_mode_cmd;
+
+	clear_vlr();
 
 	if (optind >= argc)
 		run_tests(-1);

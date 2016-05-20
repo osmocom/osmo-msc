@@ -14,6 +14,9 @@ AM_CFLAGS = \
 	$(LIBOSMOABIS_CFLAGS) \
 	$(LIBSMPP34_CFLAGS) \
 	$(LIBCRYPTO_CFLAGS) \
+	$(LIBOSMORANAP_CFLAGS) \
+	$(LIBASN1C_CFLAGS) \
+	$(LIBOSMOSIGTRAN_CFLAGS) \
 	$(NULL)
 
 AM_LDFLAGS = \
@@ -21,20 +24,20 @@ AM_LDFLAGS = \
 	$(NULL)
 
 bin_PROGRAMS = \
-	osmo-nitb \
+	osmo-msc \
 	$(NULL)
 
-osmo_nitb_SOURCES = \
-	bsc_hack.c \
+osmo_msc_SOURCES = \
+	msc_main.c \
 	$(NULL)
 
-osmo_nitb_LDADD = \
-	$(top_builddir)/src/libbsc/libbsc.a \
-	$(top_builddir)/src/libcommon-cs/libcommon-cs.a \
+osmo_msc_LDADD = \
 	$(top_builddir)/src/libmsc/libmsc.a \
 	$(top_builddir)/src/libvlr/libvlr.a \
+	$(top_builddir)/src/libcommon-cs/libcommon-cs.a \
 	$(top_builddir)/src/libtrau/libtrau.a \
 	$(top_builddir)/src/libcommon/libcommon.a \
+	$(top_builddir)/src/libmgcp/libmgcp.a \
 	$(LIBOSMOGSM_LIBS) \
 	$(LIBOSMOVTY_LIBS) \
 	$(LIBOSMOCORE_LIBS) \
@@ -42,5 +45,13 @@ osmo_nitb_LDADD = \
 	$(LIBOSMOABIS_LIBS) \
 	$(LIBSMPP34_LIBS) \
 	$(LIBCRYPTO_LIBS) \
+	$(LIBOSMOSIGTRAN_LIBS) \
 	-ldbi \
 	$(NULL)
+if BUILD_IU
+osmo_msc_LDADD += \
+	$(top_builddir)/src/libiu/libiu.a \
+	$(LIBOSMORANAP_LIBS) \
+	$(LIBASN1C_LIBS) \
+	$(NULL)
+endif
