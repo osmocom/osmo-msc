@@ -1053,7 +1053,6 @@ DEFUN(logging_fltr_imsi,
 		return CMD_WARNING;
 	}
 
-	log_set_filter_vlr_subscr(tgt, vlr_subscr);
 	log_set_filter_bsc_subscr(tgt, bsc_subscr);
 	return CMD_SUCCESS;
 }

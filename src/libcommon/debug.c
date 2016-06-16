@@ -180,6 +180,11 @@ static const struct log_info_cat default_categories[] = {
 		.description = "PCU Interface",
 		.enabled = 1, .loglevel = LOGL_DEBUG,
 	},
+	[DVLR] = {
+		.name = "DVLR",
+		.description = "Visitor Location Register",
+		.enabled = 1, .loglevel = LOGL_DEBUG,
+	},
 };
 
 static int filter_fn(const struct log_context *ctx, struct log_target *tar)

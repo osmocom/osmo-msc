@@ -22,9 +22,6 @@ enum iu_event_type {
 	IU_EVENT_SECURITY_MODE_COMPLETE,
 	IU_EVENT_IU_RELEASE, /* An actual Iu Release message was received */
 	IU_EVENT_LINK_INVALIDATED, /* A SUA link was lost or closed down */
-	/* FIXME: maybe IU_EVENT_IU_RELEASE and IU_EVENT_LINK_INVALIDATED
-	 * should be combined to one generic event that simply means the
-	 * ue_conn_ctx should no longer be used, for whatever reason. */
 };
 
 extern const struct value_string iu_event_type_names[];
@@ -35,7 +32,6 @@ static inline const char *iu_event_type_str(enum iu_event_type e)
 
 /* Implementations of iu_recv_cb_t shall find the ue_conn_ctx in msg->dst. */
 typedef int (* iu_recv_cb_t )(struct msgb *msg, struct gprs_ra_id *ra_id,
-			      /* TODO "gprs_" in generic CS+PS domain ^ */
 			      uint16_t *sai);
 
 typedef int (* iu_event_cb_t )(struct ue_conn_ctx *ue_ctx,

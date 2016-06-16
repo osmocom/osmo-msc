@@ -225,6 +225,7 @@ AC_OUTPUT(
     src/libtrau/Makefile
     src/libbsc/Makefile
     src/libmsc/Makefile
+    src/libvlr/Makefile
     src/libmgcp/Makefile
     src/libcommon/Makefile
     src/libfilter/Makefile
