@@ -49,19 +49,9 @@ struct gsm_network *gsm_network_init(void *ctx,
 	if (!net)
 		return NULL;
 
-	net->subscr_group = talloc_zero(net, struct gsm_subscriber_group);
-	if (!net->subscr_group) {
-		talloc_free(net);
-		return NULL;
-	}
-
 	if (gsm_parse_reg(net, &net->authorized_regexp, &net->authorized_reg_str, 1,
 			  &default_regexp) != 0)
 		return NULL;
-
-	net->subscr_group->net = net;
-	net->auto_create_subscr = true;
-	net->auto_assign_exten = true;
 
 	net->country_code = country_code;
 	net->network_code = network_code;
@@ -78,8 +68,6 @@ struct gsm_network *gsm_network_init(void *ctx,
 	net->active_calls = osmo_counter_alloc("msc.active_calls");
 
 	net->mncc_recv = mncc_recv;
-	net->ext_min = GSM_MIN_EXTEN;
-	net->ext_max = GSM_MAX_EXTEN;
 
 	net->dyn_ts_allow_tch_f = true;
 

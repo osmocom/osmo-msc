@@ -11,6 +11,8 @@
 // for GSM_NAME_LENGTH
 #include <openbsc/gsm_subscriber.h>
 
+struct log_target;
+
 /* from 3s to 10s */
 #define GSM_29002_TIMER_S	10
 /* from 15s to 30s */
@@ -19,7 +21,6 @@
 #define GSM_29002_TIMER_ML	(10*60)
 /* from 28h to 38h */
 #define GSM_29002_TIMER_L	(32*60*60)
-
 
 /* VLR subscriber authentication state */
 enum vlr_subscr_auth_state {

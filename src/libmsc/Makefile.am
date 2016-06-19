@@ -35,13 +35,13 @@ libmsc_a_SOURCES = \
 	rrlp.c \
 	silent_call.c \
 	sms_queue.c \
-	token_auth.c \
 	ussd.c \
 	vty_interface_layer3.c \
 	transaction.c \
 	osmo_msc.c \
 	ctrl_commands.c \
 	meas_feed.c \
+	subscr_conn.c \
 	$(NULL)
 
 if BUILD_SMPP

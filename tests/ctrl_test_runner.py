@@ -474,54 +474,14 @@ class TestCtrlNITB(TestCtrlBase):
         self.assertEquals(r['var'], 'number-of-bts')
         self.assertEquals(r['value'], '1')
 
-    def testSubscriberAddWithKi(self):
-        """Test that we can set the algorithm to none, xor, comp128v1"""
-
-        r = self.do_set('subscriber-modify-v1', '2620345,445566')
-        self.assertEquals(r['mtype'], 'SET_REPLY')
-        self.assertEquals(r['var'], 'subscriber-modify-v1')
-        self.assertEquals(r['value'], 'OK')
-
-        r = self.do_set('subscriber-modify-v1', '2620345,445566,none')
-        self.assertEquals(r['mtype'], 'SET_REPLY')
-        self.assertEquals(r['var'], 'subscriber-modify-v1')
-        self.assertEquals(r['value'], 'OK')
-
-        r = self.do_set('subscriber-modify-v1', '2620345,445566,xor')
-        self.assertEquals(r['mtype'], 'ERROR')
-        self.assertEquals(r['error'], 'Value failed verification.')
-
-        r = self.do_set('subscriber-modify-v1', '2620345,445566,comp128v1,00112233445566778899AABBCCDDEEFF')
-        self.assertEquals(r['mtype'], 'SET_REPLY')
-        self.assertEquals(r['var'], 'subscriber-modify-v1')
-        self.assertEquals(r['value'], 'OK')
-
-        r = self.do_set('subscriber-modify-v1', '2620345,445566,none')
-        self.assertEquals(r['mtype'], 'SET_REPLY')
-        self.assertEquals(r['var'], 'subscriber-modify-v1')
-        self.assertEquals(r['value'], 'OK')
-
     def testSubscriberAddRemove(self):
         r = self.do_set('subscriber-modify-v1', '2620345,445566')
-        self.assertEquals(r['mtype'], 'SET_REPLY')
-        self.assertEquals(r['var'], 'subscriber-modify-v1')
-        self.assertEquals(r['value'], 'OK')
-
-        r = self.do_set('subscriber-modify-v1', '2620345,445567')
-        self.assertEquals(r['mtype'], 'SET_REPLY')
-        self.assertEquals(r['var'], 'subscriber-modify-v1')
-        self.assertEquals(r['value'], 'OK')
-
-        # TODO. verify that the entry has been created and modified? Invoke
-        # the sqlite3 CLI or do it through the DB libraries?
-
-        r = self.do_set('subscriber-delete-v1', '2620345')
-        self.assertEquals(r['mtype'], 'SET_REPLY')
-        self.assertEquals(r['value'], 'Removed')
+        self.assertEquals(r['mtype'], 'ERROR')
+        self.assertEquals(r['error'], 'Command moved to osmo-hlr, no longer available here')
 
         r = self.do_set('subscriber-delete-v1', '2620345')
         self.assertEquals(r['mtype'], 'ERROR')
-        self.assertEquals(r['error'], 'Failed to find subscriber')
+        self.assertEquals(r['error'], 'Command moved to osmo-hlr, no longer available here')
 
     def testSubscriberList(self):
         # TODO. Add command to mark a subscriber as active

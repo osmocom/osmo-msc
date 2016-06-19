@@ -271,7 +271,7 @@ int main(int argc, char **argv)
 {
 	unsigned long long i;
 	char *server_host = "127.0.0.1";
-	uint16_t server_port = 2222;
+	uint16_t server_port = OSMO_GSUP_PORT;
 
 	osmo_init_logging(&gsup_test_client_log_info);
 

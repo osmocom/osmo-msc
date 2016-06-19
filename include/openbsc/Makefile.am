@@ -79,7 +79,6 @@ noinst_HEADERS = \
 	sms_queue.h \
 	socket.h \
 	system_information.h \
-	token_auth.h \
 	transaction.h \
 	trau_mux.h \
 	trau_upqueue.h \
