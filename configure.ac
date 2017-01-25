@@ -261,6 +261,7 @@ AC_OUTPUT(
     tests/v42bis/Makefile
     tests/nanobts_omlattr/Makefile
     tests/sms_queue/Makefile
+    tests/msc_vlr/Makefile
     doc/Makefile
     doc/examples/Makefile
     contrib/Makefile
