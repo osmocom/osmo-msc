@@ -1,9 +1,9 @@
 ===== test_ciph
 - Location Update request causes a GSUP Send Auth Info request to HLR
-  rx from MS: pdisc=0x05 msg_type=0x08
+  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
   new conn
 DREF unknown: MSC conn use + 1 == 1
-DRLL Dispatching 04.08 message, pdisc=5
+DRLL Dispatching 04.08 message GSM48_MT_MM_LOC_UPD_REQUEST (0x5:0x8)
 DREF unknown: MSC conn use + 1 == 2
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: Allocated
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: Received Event SUBSCR_CONN_E_START
@@ -46,9 +46,9 @@ DREF VLR subscr IMSI:901700000004620 usage decreases to: 1
   lu_result_sent == 0
   auth_request_sent == 1
 - MS sends Authen Response, VLR accepts and sends Ciphering Mode Command to MS
-  rx from MS: pdisc=0x05 msg_type=0x54
+  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_AUTH_RESP
 DREF IMSI:901700000004620: MSC conn use + 1 == 2
-DRLL Dispatching 04.08 message, pdisc=5
+DRLL Dispatching 04.08 message GSM48_MT_MM_AUTH_RESP (0x5:0x14)
 DMM IMSI:901700000004620: MM GSM AUTHENTICATION RESPONSE (sres = 2d8b2c3e)
 DVLR VLR_Authenticate(901700000004620){VLR_SUB_AS_WAIT_RESP}: Received Event VLR_AUTH_E_MS_AUTH_RESP
 DVLR SUBSCR(IMSI:901700000004620) received res: 2d 8b 2c 3e 
@@ -69,17 +69,17 @@ DREF IMSI:901700000004620: MSC conn use - 1 == 1
 - needs ciph, not yet accepted
 msc_subscr_conn_is_accepted() == false
   requests shall be thwarted
-DRLL Dispatching 04.08 message, pdisc=3
-DRLL subscr IMSI:901700000004620: Message not permitted for initial conn: pdisc=0x03 msg_type=0x05
-DRLL Dispatching 04.08 message, pdisc=5
-DRLL subscr IMSI:901700000004620: Message not permitted for initial conn: pdisc=0x05 msg_type=0x33
-DRLL Dispatching 04.08 message, pdisc=6
-DRLL subscr IMSI:901700000004620: Message not permitted for initial conn: pdisc=0x06 msg_type=0x19
-DRLL Dispatching 04.08 message, pdisc=9
-DRLL subscr IMSI:901700000004620: Message not permitted for initial conn: pdisc=0x09 msg_type=0x01
+DRLL Dispatching 04.08 message GSM48_MT_CC_SETUP (0x3:0x5)
+DRLL subscr IMSI:901700000004620: Message not permitted for initial conn: GSM48_MT_CC_SETUP
+DRLL Dispatching 04.08 message unknown 0x33 (0x5:0x33)
+DRLL subscr IMSI:901700000004620: Message not permitted for initial conn: unknown 0x33
+DRLL Dispatching 04.08 message GSM48_MT_RR_SYSINFO_1 (0x6:0x19)
+DRLL subscr IMSI:901700000004620: Message not permitted for initial conn: GSM48_MT_RR_SYSINFO_1
+DRLL Dispatching 04.08 message GSM48_PDISC_SMS:0x01 (0x9:0x1)
+DRLL subscr IMSI:901700000004620: Message not permitted for initial conn: GSM48_PDISC_SMS:0x01
   lu_result_sent == 0
 - MS sends Ciphering Mode Complete, VLR accepts and sends GSUP LU Req to HLR
-  rx from MS: pdisc=0x06 msg_type=0x32
+  MSC <--RAN_GERAN_A-- MS: GSM48_MT_RR_CIPH_M_COMPL
 DRR IMSI:901700000004620: CIPHERING MODE COMPLETE
 DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_WAIT_CIPH}: Received Event VLR_ULA_E_CIPH_RES
 DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_WAIT_CIPH}: vlr_loc_upd_post_ciph()
@@ -162,10 +162,10 @@ DREF VLR subscr MSISDN:46071 usage decreases to: 1
   llist_count(&net->subscr_conns) == 0
 ---
 - after a while, a new conn sends a CM Service Request. VLR responds with Auth Req, 2nd auth vector
-  rx from MS: pdisc=0x05 msg_type=0x24
+  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_CM_SERV_REQ
   new conn
 DREF unknown: MSC conn use + 1 == 1
-DRLL Dispatching 04.08 message, pdisc=5
+DRLL Dispatching 04.08 message GSM48_MT_MM_CM_SERV_REQ (0x5:0x24)
 DMM <- CM SERVICE REQUEST serv_type=0x08 MI(IMSI)=901700000004620
 DREF unknown: MSC conn use + 1 == 2
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: Allocated
@@ -195,18 +195,18 @@ DREF MSISDN:46071: MSC conn use - 1 == 1
 - needs auth, not yet accepted
 msc_subscr_conn_is_accepted() == false
   requests shall be thwarted
-DRLL Dispatching 04.08 message, pdisc=3
-DRLL subscr MSISDN:46071: Message not permitted for initial conn: pdisc=0x03 msg_type=0x05
-DRLL Dispatching 04.08 message, pdisc=5
-DRLL subscr MSISDN:46071: Message not permitted for initial conn: pdisc=0x05 msg_type=0x33
-DRLL Dispatching 04.08 message, pdisc=6
-DRLL subscr MSISDN:46071: Message not permitted for initial conn: pdisc=0x06 msg_type=0x19
-DRLL Dispatching 04.08 message, pdisc=9
-DRLL subscr MSISDN:46071: Message not permitted for initial conn: pdisc=0x09 msg_type=0x01
+DRLL Dispatching 04.08 message GSM48_MT_CC_SETUP (0x3:0x5)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_MT_CC_SETUP
+DRLL Dispatching 04.08 message unknown 0x33 (0x5:0x33)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: unknown 0x33
+DRLL Dispatching 04.08 message GSM48_MT_RR_SYSINFO_1 (0x6:0x19)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_MT_RR_SYSINFO_1
+DRLL Dispatching 04.08 message GSM48_PDISC_SMS:0x01 (0x9:0x1)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_PDISC_SMS:0x01
 - MS sends Authen Response, VLR accepts and requests Ciphering
-  rx from MS: pdisc=0x05 msg_type=0x54
+  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_AUTH_RESP
 DREF MSISDN:46071: MSC conn use + 1 == 2
-DRLL Dispatching 04.08 message, pdisc=5
+DRLL Dispatching 04.08 message GSM48_MT_MM_AUTH_RESP (0x5:0x14)
 DMM MSISDN:46071: MM GSM AUTHENTICATION RESPONSE (sres = 20bde240)
 DVLR VLR_Authenticate(901700000004620){VLR_SUB_AS_WAIT_RESP}: Received Event VLR_AUTH_E_MS_AUTH_RESP
 DVLR SUBSCR(MSISDN:46071) received res: 20 bd e2 40 
@@ -229,16 +229,16 @@ DREF MSISDN:46071: MSC conn use - 1 == 1
 - needs ciph, not yet accepted
 msc_subscr_conn_is_accepted() == false
   requests shall be thwarted
-DRLL Dispatching 04.08 message, pdisc=3
-DRLL subscr MSISDN:46071: Message not permitted for initial conn: pdisc=0x03 msg_type=0x05
-DRLL Dispatching 04.08 message, pdisc=5
-DRLL subscr MSISDN:46071: Message not permitted for initial conn: pdisc=0x05 msg_type=0x33
-DRLL Dispatching 04.08 message, pdisc=6
-DRLL subscr MSISDN:46071: Message not permitted for initial conn: pdisc=0x06 msg_type=0x19
-DRLL Dispatching 04.08 message, pdisc=9
-DRLL subscr MSISDN:46071: Message not permitted for initial conn: pdisc=0x09 msg_type=0x01
+DRLL Dispatching 04.08 message GSM48_MT_CC_SETUP (0x3:0x5)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_MT_CC_SETUP
+DRLL Dispatching 04.08 message unknown 0x33 (0x5:0x33)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: unknown 0x33
+DRLL Dispatching 04.08 message GSM48_MT_RR_SYSINFO_1 (0x6:0x19)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_MT_RR_SYSINFO_1
+DRLL Dispatching 04.08 message GSM48_PDISC_SMS:0x01 (0x9:0x1)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_PDISC_SMS:0x01
 - MS sends Ciphering Mode Complete, VLR accepts; above Ciphering is an implicit CM Service Accept
-  rx from MS: pdisc=0x06 msg_type=0x32
+  MSC <--RAN_GERAN_A-- MS: GSM48_MT_RR_CIPH_M_COMPL
 DRR MSISDN:46071: CIPHERING MODE COMPLETE
 DVLR Process_Access_Request_VLR(901700000004620){PR_ARQ_S_WAIT_CIPH}: Received Event PR_ARQ_E_CIPH_RES
 DVLR Process_Access_Request_VLR(901700000004620){PR_ARQ_S_WAIT_CIPH}: _proc_arq_vlr_node2_post_ciph()
@@ -259,16 +259,16 @@ DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_ACCEPTED}: bump: still awaiting f
 - a USSD request is serviced
   expecting USSD:
   Your extension is 46071
-  rx from MS: pdisc=0x0b msg_type=0x3b
+  MSC <--RAN_GERAN_A-- MS: GSM48_PDISC_NC_SS:0x3b
 DREF MSISDN:46071: MSC conn use + 1 == 2
-DRLL Dispatching 04.08 message, pdisc=11
-DMM MSISDN:46071 pdisc=11 msg_type=0x3b: received_cm_service_request changes to false
+DRLL Dispatching 04.08 message GSM48_PDISC_NC_SS:0x3b (0xb:0x3b)
+DMM MSISDN:46071: rx msg GSM48_PDISC_NC_SS:0x3b: received_cm_service_request changes to false
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_ACCEPTED}: Received Event SUBSCR_CONN_E_COMMUNICATING
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_ACCEPTED}: state_chg to SUBSCR_CONN_S_COMMUNICATING
 DMM USSD: Own number requested
 DMM MSISDN:46071: MSISDN = 46071
 DMSC msc_tx 43 bytes to MSISDN:46071 via RAN_GERAN_A
-- DTAP --RAN_GERAN_A--> MS: 8b2a1c27a225020100302002013b301b04010f0416d9775d0e2ae3e965f73cfd7683d27310cd06bbc51a0d
+- DTAP --RAN_GERAN_A--> MS: GSM48_PDISC_NC_SS:0x2a: 8b2a1c27a225020100302002013b301b04010f0416d9775d0e2ae3e965f73cfd7683d27310cd06bbc51a0d
 - DTAP matches expected message
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_COMMUNICATING}: Received Event SUBSCR_CONN_E_BUMP
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_COMMUNICATING}: bump: releasing conn
@@ -305,10 +305,10 @@ DREF VLR subscr MSISDN:46071 usage increases to: 4
   llist_count(&vsub->cs.requests) == 1
 DREF VLR subscr MSISDN:46071 usage decreases to: 3
 - MS replies with Paging Response, and VLR sends Auth Request with third key
-  rx from MS: pdisc=0x06 msg_type=0x27
+  MSC <--RAN_GERAN_A-- MS: GSM48_MT_RR_PAG_RESP
   new conn
 DREF unknown: MSC conn use + 1 == 1
-DRLL Dispatching 04.08 message, pdisc=6
+DRLL Dispatching 04.08 message GSM48_MT_RR_PAG_RESP (0x6:0x27)
 DRR PAGING RESPONSE: MI(IMSI)=901700000004620
 DREF unknown: MSC conn use + 1 == 2
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: Allocated
@@ -337,18 +337,18 @@ DREF MSISDN:46071: MSC conn use - 1 == 1
 - needs auth, not yet accepted
 msc_subscr_conn_is_accepted() == false
   requests shall be thwarted
-DRLL Dispatching 04.08 message, pdisc=3
-DRLL subscr MSISDN:46071: Message not permitted for initial conn: pdisc=0x03 msg_type=0x05
-DRLL Dispatching 04.08 message, pdisc=5
-DRLL subscr MSISDN:46071: Message not permitted for initial conn: pdisc=0x05 msg_type=0x33
-DRLL Dispatching 04.08 message, pdisc=6
-DRLL subscr MSISDN:46071: Message not permitted for initial conn: pdisc=0x06 msg_type=0x19
-DRLL Dispatching 04.08 message, pdisc=9
-DRLL subscr MSISDN:46071: Message not permitted for initial conn: pdisc=0x09 msg_type=0x01
+DRLL Dispatching 04.08 message GSM48_MT_CC_SETUP (0x3:0x5)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_MT_CC_SETUP
+DRLL Dispatching 04.08 message unknown 0x33 (0x5:0x33)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: unknown 0x33
+DRLL Dispatching 04.08 message GSM48_MT_RR_SYSINFO_1 (0x6:0x19)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_MT_RR_SYSINFO_1
+DRLL Dispatching 04.08 message GSM48_PDISC_SMS:0x01 (0x9:0x1)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_PDISC_SMS:0x01
 - MS sends Authen Response, VLR accepts and requests Ciphering
-  rx from MS: pdisc=0x05 msg_type=0x54
+  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_AUTH_RESP
 DREF MSISDN:46071: MSC conn use + 1 == 2
-DRLL Dispatching 04.08 message, pdisc=5
+DRLL Dispatching 04.08 message GSM48_MT_MM_AUTH_RESP (0x5:0x14)
 DMM MSISDN:46071: MM GSM AUTHENTICATION RESPONSE (sres = a29514ae)
 DVLR VLR_Authenticate(901700000004620){VLR_SUB_AS_WAIT_RESP}: Received Event VLR_AUTH_E_MS_AUTH_RESP
 DVLR SUBSCR(MSISDN:46071) received res: a2 95 14 ae 
@@ -370,16 +370,16 @@ DREF MSISDN:46071: MSC conn use - 1 == 1
 - needs ciph, not yet accepted
 msc_subscr_conn_is_accepted() == false
   requests shall be thwarted
-DRLL Dispatching 04.08 message, pdisc=3
-DRLL subscr MSISDN:46071: Message not permitted for initial conn: pdisc=0x03 msg_type=0x05
-DRLL Dispatching 04.08 message, pdisc=5
-DRLL subscr MSISDN:46071: Message not permitted for initial conn: pdisc=0x05 msg_type=0x33
-DRLL Dispatching 04.08 message, pdisc=6
-DRLL subscr MSISDN:46071: Message not permitted for initial conn: pdisc=0x06 msg_type=0x19
-DRLL Dispatching 04.08 message, pdisc=9
-DRLL subscr MSISDN:46071: Message not permitted for initial conn: pdisc=0x09 msg_type=0x01
+DRLL Dispatching 04.08 message GSM48_MT_CC_SETUP (0x3:0x5)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_MT_CC_SETUP
+DRLL Dispatching 04.08 message unknown 0x33 (0x5:0x33)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: unknown 0x33
+DRLL Dispatching 04.08 message GSM48_MT_RR_SYSINFO_1 (0x6:0x19)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_MT_RR_SYSINFO_1
+DRLL Dispatching 04.08 message GSM48_PDISC_SMS:0x01 (0x9:0x1)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_PDISC_SMS:0x01
 - MS sends Ciphering Mode Complete, VLR accepts and sends pending SMS
-  rx from MS: pdisc=0x06 msg_type=0x32
+  MSC <--RAN_GERAN_A-- MS: GSM48_MT_RR_CIPH_M_COMPL
 DRR MSISDN:46071: CIPHERING MODE COMPLETE
 DVLR Process_Access_Request_VLR(901700000004620){PR_ARQ_S_WAIT_CIPH}: Received Event PR_ARQ_E_CIPH_RES
 DVLR Process_Access_Request_VLR(901700000004620){PR_ARQ_S_WAIT_CIPH}: _proc_arq_vlr_node2_post_ciph()
@@ -398,7 +398,7 @@ DPAG Calling paging cbfn.
 DREF VLR subscr MSISDN:46071 usage increases to: 5
 DREF MSISDN:46071: MSC conn use + 1 == 2
 DMSC msc_tx 91 bytes to MSISDN:46071 via RAN_GERAN_A
-- DTAP --RAN_GERAN_A--> MS: 09015801000791447758100650004c0005806470f1000007101000000000445079da1e1ee7416937485e9ea7c965373d1d6683c270383b3d0ed3d36ff71c949e83c22072799e9687c5ec32a81d96afcbf4b4fb0c7ac3e9e9b7db05
+- DTAP --RAN_GERAN_A--> MS: GSM48_PDISC_SMS:0x01: 09015801000791447758100650004c0005806470f1000007101000000000445079da1e1ee7416937485e9ea7c965373d1d6683c270383b3d0ed3d36ff71c949e83c22072799e9687c5ec32a81d96afcbf4b4fb0c7ac3e9e9b7db05
 - DTAP matches expected message
 DREF VLR subscr MSISDN:46071 usage decreases to: 4
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_ACCEPTED}: Received Event SUBSCR_CONN_E_BUMP
@@ -412,9 +412,9 @@ DREF VLR subscr MSISDN:46071 usage decreases to: 4
 - conn is still open to wait for SMS ack dance
   llist_count(&net->subscr_conns) == 1
 - MS replies with CP-ACK for received SMS
-  rx from MS: pdisc=0x89 msg_type=0x04
+  MSC <--RAN_GERAN_A-- MS: GSM48_PDISC_SMS:0x04
 DREF MSISDN:46071: MSC conn use + 1 == 3
-DRLL Dispatching 04.08 message, pdisc=9
+DRLL Dispatching 04.08 message GSM48_PDISC_SMS:0x04 (0x9:0x4)
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_ACCEPTED}: Received Event SUBSCR_CONN_E_COMMUNICATING
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_ACCEPTED}: state_chg to SUBSCR_CONN_S_COMMUNICATING
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_COMMUNICATING}: Received Event SUBSCR_CONN_E_BUMP
@@ -422,12 +422,12 @@ DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_COMMUNICATING}: bump: connection 
 DREF MSISDN:46071: MSC conn use - 1 == 2
   llist_count(&net->subscr_conns) == 1
 - MS also sends RP-ACK, MSC in turn sends CP-ACK for that
-  rx from MS: pdisc=0x89 msg_type=0x01
+  MSC <--RAN_GERAN_A-- MS: GSM48_PDISC_SMS:0x01
 DREF MSISDN:46071: MSC conn use + 1 == 3
-DRLL Dispatching 04.08 message, pdisc=9
+DRLL Dispatching 04.08 message GSM48_PDISC_SMS:0x01 (0x9:0x1)
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_COMMUNICATING}: Received Event SUBSCR_CONN_E_COMMUNICATING
 DMSC msc_tx 2 bytes to MSISDN:46071 via RAN_GERAN_A
-- DTAP --RAN_GERAN_A--> MS: 0904
+- DTAP --RAN_GERAN_A--> MS: GSM48_PDISC_SMS:0x04: 0904
 - DTAP matches expected message
 DREF VLR subscr MSISDN:46071 usage decreases to: 3
 DREF VLR subscr MSISDN:46071 usage decreases to: 2
@@ -452,10 +452,10 @@ DREF VLR subscr MSISDN:46071 usage decreases to: 1
   llist_count(&net->subscr_conns) == 0
 ---
 - subscriber detaches
-  rx from MS: pdisc=0x05 msg_type=0x01
+  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_IMSI_DETACH_IND
   new conn
 DREF unknown: MSC conn use + 1 == 1
-DRLL Dispatching 04.08 message, pdisc=5
+DRLL Dispatching 04.08 message GSM48_MT_MM_IMSI_DETACH_IND (0x5:0x1)
 DMM IMSI DETACH INDICATION: MI(IMSI)=901700000004620
 DREF VLR subscr MSISDN:46071 usage increases to: 2
 DMM IMSI DETACH for MSISDN:46071
@@ -473,10 +473,10 @@ talloc_total_blocks(tall_bsc_ctx) == 9
 
 ===== test_ciph_tmsi
 - Location Update request causes a GSUP Send Auth Info request to HLR
-  rx from MS: pdisc=0x05 msg_type=0x08
+  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
   new conn
 DREF unknown: MSC conn use + 1 == 1
-DRLL Dispatching 04.08 message, pdisc=5
+DRLL Dispatching 04.08 message GSM48_MT_MM_LOC_UPD_REQUEST (0x5:0x8)
 DREF unknown: MSC conn use + 1 == 2
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: Allocated
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: Received Event SUBSCR_CONN_E_START
@@ -519,9 +519,9 @@ DREF VLR subscr IMSI:901700000004620 usage decreases to: 1
   auth_request_sent == 1
   lu_result_sent == 0
 - MS sends Authen Response, VLR accepts and sends Ciphering Mode Command to MS
-  rx from MS: pdisc=0x05 msg_type=0x54
+  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_AUTH_RESP
 DREF IMSI:901700000004620: MSC conn use + 1 == 2
-DRLL Dispatching 04.08 message, pdisc=5
+DRLL Dispatching 04.08 message GSM48_MT_MM_AUTH_RESP (0x5:0x14)
 DMM IMSI:901700000004620: MM GSM AUTHENTICATION RESPONSE (sres = 2d8b2c3e)
 DVLR VLR_Authenticate(901700000004620){VLR_SUB_AS_WAIT_RESP}: Received Event VLR_AUTH_E_MS_AUTH_RESP
 DVLR SUBSCR(IMSI:901700000004620) received res: 2d 8b 2c 3e 
@@ -543,17 +543,17 @@ DREF IMSI:901700000004620: MSC conn use - 1 == 1
 - needs ciph, not yet accepted
 msc_subscr_conn_is_accepted() == false
   requests shall be thwarted
-DRLL Dispatching 04.08 message, pdisc=3
-DRLL subscr IMSI:901700000004620: Message not permitted for initial conn: pdisc=0x03 msg_type=0x05
-DRLL Dispatching 04.08 message, pdisc=5
-DRLL subscr IMSI:901700000004620: Message not permitted for initial conn: pdisc=0x05 msg_type=0x33
-DRLL Dispatching 04.08 message, pdisc=6
-DRLL subscr IMSI:901700000004620: Message not permitted for initial conn: pdisc=0x06 msg_type=0x19
-DRLL Dispatching 04.08 message, pdisc=9
-DRLL subscr IMSI:901700000004620: Message not permitted for initial conn: pdisc=0x09 msg_type=0x01
+DRLL Dispatching 04.08 message GSM48_MT_CC_SETUP (0x3:0x5)
+DRLL subscr IMSI:901700000004620: Message not permitted for initial conn: GSM48_MT_CC_SETUP
+DRLL Dispatching 04.08 message unknown 0x33 (0x5:0x33)
+DRLL subscr IMSI:901700000004620: Message not permitted for initial conn: unknown 0x33
+DRLL Dispatching 04.08 message GSM48_MT_RR_SYSINFO_1 (0x6:0x19)
+DRLL subscr IMSI:901700000004620: Message not permitted for initial conn: GSM48_MT_RR_SYSINFO_1
+DRLL Dispatching 04.08 message GSM48_PDISC_SMS:0x01 (0x9:0x1)
+DRLL subscr IMSI:901700000004620: Message not permitted for initial conn: GSM48_PDISC_SMS:0x01
   lu_result_sent == 0
 - MS sends Ciphering Mode Complete, VLR accepts and sends GSUP LU Req to HLR
-  rx from MS: pdisc=0x06 msg_type=0x32
+  MSC <--RAN_GERAN_A-- MS: GSM48_MT_RR_CIPH_M_COMPL
 DRR IMSI:901700000004620: CIPHERING MODE COMPLETE
 DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_WAIT_CIPH}: Received Event VLR_ULA_E_CIPH_RES
 DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_WAIT_CIPH}: vlr_loc_upd_post_ciph()
@@ -612,14 +612,14 @@ DREF VLR subscr MSISDN:46071 usage decreases to: 1
   lu_result_sent == 1
 msc_subscr_conn_is_accepted() == false
   requests shall be thwarted
-DRLL Dispatching 04.08 message, pdisc=3
-DRLL subscr MSISDN:46071: Message not permitted for initial conn: pdisc=0x03 msg_type=0x05
-DRLL Dispatching 04.08 message, pdisc=5
-DRLL subscr MSISDN:46071: Message not permitted for initial conn: pdisc=0x05 msg_type=0x33
-DRLL Dispatching 04.08 message, pdisc=6
-DRLL subscr MSISDN:46071: Message not permitted for initial conn: pdisc=0x06 msg_type=0x19
-DRLL Dispatching 04.08 message, pdisc=9
-DRLL subscr MSISDN:46071: Message not permitted for initial conn: pdisc=0x09 msg_type=0x01
+DRLL Dispatching 04.08 message GSM48_MT_CC_SETUP (0x3:0x5)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_MT_CC_SETUP
+DRLL Dispatching 04.08 message unknown 0x33 (0x5:0x33)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: unknown 0x33
+DRLL Dispatching 04.08 message GSM48_MT_RR_SYSINFO_1 (0x6:0x19)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_MT_RR_SYSINFO_1
+DRLL Dispatching 04.08 message GSM48_PDISC_SMS:0x01 (0x9:0x1)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_PDISC_SMS:0x01
 - even though the TMSI is not acked, we can already find the subscr with it
 DREF VLR subscr MSISDN:46071 usage increases to: 2
   vsub != NULL == 1
@@ -628,9 +628,9 @@ DREF VLR subscr MSISDN:46071 usage increases to: 2
   vsub->tmsi == 0xffffffff
 DREF VLR subscr MSISDN:46071 usage decreases to: 1
 - MS sends TMSI Realloc Complete
-  rx from MS: pdisc=0x05 msg_type=0x5b
+  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_TMSI_REALL_COMPL
 DREF MSISDN:46071: MSC conn use + 1 == 2
-DRLL Dispatching 04.08 message, pdisc=5
+DRLL Dispatching 04.08 message GSM48_MT_MM_TMSI_REALL_COMPL (0x5:0x1b)
 DMM TMSI Reallocation Completed. Subscriber: MSISDN:46071
 DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_WAIT_LU_COMPL}: Received Event VLR_ULA_E_NEW_TMSI_ACK
 DVLR lu_compl_vlr_fsm(901700000004620){LU_COMPL_VLR_S_WAIT_TMSI_CNF}: Received Event LU_COMPL_VLR_E_NEW_TMSI_ACK
@@ -672,10 +672,10 @@ DREF VLR subscr MSISDN:46071 usage increases to: 2
 DREF VLR subscr MSISDN:46071 usage decreases to: 1
 ---
 - after a while, a new conn sends a CM Service Request using above TMSI. VLR responds with Auth Req, 2nd auth vector
-  rx from MS: pdisc=0x05 msg_type=0x24
+  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_CM_SERV_REQ
   new conn
 DREF unknown: MSC conn use + 1 == 1
-DRLL Dispatching 04.08 message, pdisc=5
+DRLL Dispatching 04.08 message GSM48_MT_MM_CM_SERV_REQ (0x5:0x24)
 DMM <- CM SERVICE REQUEST serv_type=0x08 MI(TMSI)=50462976
 DREF unknown: MSC conn use + 1 == 2
 DMM Subscr_Conn(50462976){SUBSCR_CONN_S_INIT}: Allocated
@@ -705,18 +705,18 @@ DREF MSISDN:46071: MSC conn use - 1 == 1
 - needs auth, not yet accepted
 msc_subscr_conn_is_accepted() == false
   requests shall be thwarted
-DRLL Dispatching 04.08 message, pdisc=3
-DRLL subscr MSISDN:46071: Message not permitted for initial conn: pdisc=0x03 msg_type=0x05
-DRLL Dispatching 04.08 message, pdisc=5
-DRLL subscr MSISDN:46071: Message not permitted for initial conn: pdisc=0x05 msg_type=0x33
-DRLL Dispatching 04.08 message, pdisc=6
-DRLL subscr MSISDN:46071: Message not permitted for initial conn: pdisc=0x06 msg_type=0x19
-DRLL Dispatching 04.08 message, pdisc=9
-DRLL subscr MSISDN:46071: Message not permitted for initial conn: pdisc=0x09 msg_type=0x01
+DRLL Dispatching 04.08 message GSM48_MT_CC_SETUP (0x3:0x5)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_MT_CC_SETUP
+DRLL Dispatching 04.08 message unknown 0x33 (0x5:0x33)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: unknown 0x33
+DRLL Dispatching 04.08 message GSM48_MT_RR_SYSINFO_1 (0x6:0x19)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_MT_RR_SYSINFO_1
+DRLL Dispatching 04.08 message GSM48_PDISC_SMS:0x01 (0x9:0x1)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_PDISC_SMS:0x01
 - MS sends Authen Response, VLR accepts and requests Ciphering
-  rx from MS: pdisc=0x05 msg_type=0x54
+  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_AUTH_RESP
 DREF MSISDN:46071: MSC conn use + 1 == 2
-DRLL Dispatching 04.08 message, pdisc=5
+DRLL Dispatching 04.08 message GSM48_MT_MM_AUTH_RESP (0x5:0x14)
 DMM MSISDN:46071: MM GSM AUTHENTICATION RESPONSE (sres = 20bde240)
 DVLR VLR_Authenticate(50462976){VLR_SUB_AS_WAIT_RESP}: Received Event VLR_AUTH_E_MS_AUTH_RESP
 DVLR SUBSCR(MSISDN:46071) received res: 20 bd e2 40 
@@ -739,16 +739,16 @@ DREF MSISDN:46071: MSC conn use - 1 == 1
 - needs ciph, not yet accepted
 msc_subscr_conn_is_accepted() == false
   requests shall be thwarted
-DRLL Dispatching 04.08 message, pdisc=3
-DRLL subscr MSISDN:46071: Message not permitted for initial conn: pdisc=0x03 msg_type=0x05
-DRLL Dispatching 04.08 message, pdisc=5
-DRLL subscr MSISDN:46071: Message not permitted for initial conn: pdisc=0x05 msg_type=0x33
-DRLL Dispatching 04.08 message, pdisc=6
-DRLL subscr MSISDN:46071: Message not permitted for initial conn: pdisc=0x06 msg_type=0x19
-DRLL Dispatching 04.08 message, pdisc=9
-DRLL subscr MSISDN:46071: Message not permitted for initial conn: pdisc=0x09 msg_type=0x01
+DRLL Dispatching 04.08 message GSM48_MT_CC_SETUP (0x3:0x5)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_MT_CC_SETUP
+DRLL Dispatching 04.08 message unknown 0x33 (0x5:0x33)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: unknown 0x33
+DRLL Dispatching 04.08 message GSM48_MT_RR_SYSINFO_1 (0x6:0x19)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_MT_RR_SYSINFO_1
+DRLL Dispatching 04.08 message GSM48_PDISC_SMS:0x01 (0x9:0x1)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_PDISC_SMS:0x01
 - MS sends Ciphering Mode Complete, VLR accepts; above Ciphering is an implicit CM Service Accept
-  rx from MS: pdisc=0x06 msg_type=0x32
+  MSC <--RAN_GERAN_A-- MS: GSM48_MT_RR_CIPH_M_COMPL
 DRR MSISDN:46071: CIPHERING MODE COMPLETE
 DVLR Process_Access_Request_VLR(50462976){PR_ARQ_S_WAIT_CIPH}: Received Event PR_ARQ_E_CIPH_RES
 DVLR Process_Access_Request_VLR(50462976){PR_ARQ_S_WAIT_CIPH}: _proc_arq_vlr_node2_post_ciph()
@@ -769,16 +769,16 @@ DMM Subscr_Conn(50462976){SUBSCR_CONN_S_ACCEPTED}: bump: still awaiting first re
 - a USSD request is serviced
   expecting USSD:
   Your extension is 46071
-  rx from MS: pdisc=0x0b msg_type=0x3b
+  MSC <--RAN_GERAN_A-- MS: GSM48_PDISC_NC_SS:0x3b
 DREF MSISDN:46071: MSC conn use + 1 == 2
-DRLL Dispatching 04.08 message, pdisc=11
-DMM MSISDN:46071 pdisc=11 msg_type=0x3b: received_cm_service_request changes to false
+DRLL Dispatching 04.08 message GSM48_PDISC_NC_SS:0x3b (0xb:0x3b)
+DMM MSISDN:46071: rx msg GSM48_PDISC_NC_SS:0x3b: received_cm_service_request changes to false
 DMM Subscr_Conn(50462976){SUBSCR_CONN_S_ACCEPTED}: Received Event SUBSCR_CONN_E_COMMUNICATING
 DMM Subscr_Conn(50462976){SUBSCR_CONN_S_ACCEPTED}: state_chg to SUBSCR_CONN_S_COMMUNICATING
 DMM USSD: Own number requested
 DMM MSISDN:46071: MSISDN = 46071
 DMSC msc_tx 43 bytes to MSISDN:46071 via RAN_GERAN_A
-- DTAP --RAN_GERAN_A--> MS: 8b2a1c27a225020100302002013b301b04010f0416d9775d0e2ae3e965f73cfd7683d27310cd06bbc51a0d
+- DTAP --RAN_GERAN_A--> MS: GSM48_PDISC_NC_SS:0x2a: 8b2a1c27a225020100302002013b301b04010f0416d9775d0e2ae3e965f73cfd7683d27310cd06bbc51a0d
 - DTAP matches expected message
 DMM Subscr_Conn(50462976){SUBSCR_CONN_S_COMMUNICATING}: Received Event SUBSCR_CONN_E_BUMP
 DMM Subscr_Conn(50462976){SUBSCR_CONN_S_COMMUNICATING}: bump: releasing conn
@@ -815,10 +815,10 @@ DREF VLR subscr MSISDN:46071 usage increases to: 4
   llist_count(&vsub->cs.requests) == 1
 DREF VLR subscr MSISDN:46071 usage decreases to: 3
 - MS replies with Paging Response using TMSI, and VLR sends Auth Request with third key
-  rx from MS: pdisc=0x06 msg_type=0x27
+  MSC <--RAN_GERAN_A-- MS: GSM48_MT_RR_PAG_RESP
   new conn
 DREF unknown: MSC conn use + 1 == 1
-DRLL Dispatching 04.08 message, pdisc=6
+DRLL Dispatching 04.08 message GSM48_MT_RR_PAG_RESP (0x6:0x27)
 DRR PAGING RESPONSE: MI(TMSI)=50462976
 DREF unknown: MSC conn use + 1 == 2
 DMM Subscr_Conn(50462976){SUBSCR_CONN_S_INIT}: Allocated
@@ -847,18 +847,18 @@ DREF MSISDN:46071: MSC conn use - 1 == 1
 - needs auth, not yet accepted
 msc_subscr_conn_is_accepted() == false
   requests shall be thwarted
-DRLL Dispatching 04.08 message, pdisc=3
-DRLL subscr MSISDN:46071: Message not permitted for initial conn: pdisc=0x03 msg_type=0x05
-DRLL Dispatching 04.08 message, pdisc=5
-DRLL subscr MSISDN:46071: Message not permitted for initial conn: pdisc=0x05 msg_type=0x33
-DRLL Dispatching 04.08 message, pdisc=6
-DRLL subscr MSISDN:46071: Message not permitted for initial conn: pdisc=0x06 msg_type=0x19
-DRLL Dispatching 04.08 message, pdisc=9
-DRLL subscr MSISDN:46071: Message not permitted for initial conn: pdisc=0x09 msg_type=0x01
+DRLL Dispatching 04.08 message GSM48_MT_CC_SETUP (0x3:0x5)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_MT_CC_SETUP
+DRLL Dispatching 04.08 message unknown 0x33 (0x5:0x33)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: unknown 0x33
+DRLL Dispatching 04.08 message GSM48_MT_RR_SYSINFO_1 (0x6:0x19)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_MT_RR_SYSINFO_1
+DRLL Dispatching 04.08 message GSM48_PDISC_SMS:0x01 (0x9:0x1)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_PDISC_SMS:0x01
 - MS sends Authen Response, VLR accepts and requests Ciphering
-  rx from MS: pdisc=0x05 msg_type=0x54
+  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_AUTH_RESP
 DREF MSISDN:46071: MSC conn use + 1 == 2
-DRLL Dispatching 04.08 message, pdisc=5
+DRLL Dispatching 04.08 message GSM48_MT_MM_AUTH_RESP (0x5:0x14)
 DMM MSISDN:46071: MM GSM AUTHENTICATION RESPONSE (sres = a29514ae)
 DVLR VLR_Authenticate(50462976){VLR_SUB_AS_WAIT_RESP}: Received Event VLR_AUTH_E_MS_AUTH_RESP
 DVLR SUBSCR(MSISDN:46071) received res: a2 95 14 ae 
@@ -880,16 +880,16 @@ DREF MSISDN:46071: MSC conn use - 1 == 1
 - needs ciph, not yet accepted
 msc_subscr_conn_is_accepted() == false
   requests shall be thwarted
-DRLL Dispatching 04.08 message, pdisc=3
-DRLL subscr MSISDN:46071: Message not permitted for initial conn: pdisc=0x03 msg_type=0x05
-DRLL Dispatching 04.08 message, pdisc=5
-DRLL subscr MSISDN:46071: Message not permitted for initial conn: pdisc=0x05 msg_type=0x33
-DRLL Dispatching 04.08 message, pdisc=6
-DRLL subscr MSISDN:46071: Message not permitted for initial conn: pdisc=0x06 msg_type=0x19
-DRLL Dispatching 04.08 message, pdisc=9
-DRLL subscr MSISDN:46071: Message not permitted for initial conn: pdisc=0x09 msg_type=0x01
+DRLL Dispatching 04.08 message GSM48_MT_CC_SETUP (0x3:0x5)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_MT_CC_SETUP
+DRLL Dispatching 04.08 message unknown 0x33 (0x5:0x33)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: unknown 0x33
+DRLL Dispatching 04.08 message GSM48_MT_RR_SYSINFO_1 (0x6:0x19)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_MT_RR_SYSINFO_1
+DRLL Dispatching 04.08 message GSM48_PDISC_SMS:0x01 (0x9:0x1)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_PDISC_SMS:0x01
 - MS sends Ciphering Mode Complete, VLR accepts and sends pending SMS
-  rx from MS: pdisc=0x06 msg_type=0x32
+  MSC <--RAN_GERAN_A-- MS: GSM48_MT_RR_CIPH_M_COMPL
 DRR MSISDN:46071: CIPHERING MODE COMPLETE
 DVLR Process_Access_Request_VLR(50462976){PR_ARQ_S_WAIT_CIPH}: Received Event PR_ARQ_E_CIPH_RES
 DVLR Process_Access_Request_VLR(50462976){PR_ARQ_S_WAIT_CIPH}: _proc_arq_vlr_node2_post_ciph()
@@ -908,7 +908,7 @@ DPAG Calling paging cbfn.
 DREF VLR subscr MSISDN:46071 usage increases to: 5
 DREF MSISDN:46071: MSC conn use + 1 == 2
 DMSC msc_tx 91 bytes to MSISDN:46071 via RAN_GERAN_A
-- DTAP --RAN_GERAN_A--> MS: 09015801000791447758100650004c0005806470f1000007101000000000445079da1e1ee7416937485e9ea7c965373d1d6683c270383b3d0ed3d36ff71c949e83c22072799e9687c5ec32a81d96afcbf4b4fb0c7ac3e9e9b7db05
+- DTAP --RAN_GERAN_A--> MS: GSM48_PDISC_SMS:0x01: 09015801000791447758100650004c0005806470f1000007101000000000445079da1e1ee7416937485e9ea7c965373d1d6683c270383b3d0ed3d36ff71c949e83c22072799e9687c5ec32a81d96afcbf4b4fb0c7ac3e9e9b7db05
 - DTAP matches expected message
 DREF VLR subscr MSISDN:46071 usage decreases to: 4
 DMM Subscr_Conn(50462976){SUBSCR_CONN_S_ACCEPTED}: Received Event SUBSCR_CONN_E_BUMP
@@ -922,9 +922,9 @@ DREF VLR subscr MSISDN:46071 usage decreases to: 4
 - conn is still open to wait for SMS ack dance
   llist_count(&net->subscr_conns) == 1
 - MS replies with CP-ACK for received SMS
-  rx from MS: pdisc=0x89 msg_type=0x04
+  MSC <--RAN_GERAN_A-- MS: GSM48_PDISC_SMS:0x04
 DREF MSISDN:46071: MSC conn use + 1 == 3
-DRLL Dispatching 04.08 message, pdisc=9
+DRLL Dispatching 04.08 message GSM48_PDISC_SMS:0x04 (0x9:0x4)
 DMM Subscr_Conn(50462976){SUBSCR_CONN_S_ACCEPTED}: Received Event SUBSCR_CONN_E_COMMUNICATING
 DMM Subscr_Conn(50462976){SUBSCR_CONN_S_ACCEPTED}: state_chg to SUBSCR_CONN_S_COMMUNICATING
 DMM Subscr_Conn(50462976){SUBSCR_CONN_S_COMMUNICATING}: Received Event SUBSCR_CONN_E_BUMP
@@ -932,12 +932,12 @@ DMM Subscr_Conn(50462976){SUBSCR_CONN_S_COMMUNICATING}: bump: connection still h
 DREF MSISDN:46071: MSC conn use - 1 == 2
   llist_count(&net->subscr_conns) == 1
 - MS also sends RP-ACK, MSC in turn sends CP-ACK for that
-  rx from MS: pdisc=0x89 msg_type=0x01
+  MSC <--RAN_GERAN_A-- MS: GSM48_PDISC_SMS:0x01
 DREF MSISDN:46071: MSC conn use + 1 == 3
-DRLL Dispatching 04.08 message, pdisc=9
+DRLL Dispatching 04.08 message GSM48_PDISC_SMS:0x01 (0x9:0x1)
 DMM Subscr_Conn(50462976){SUBSCR_CONN_S_COMMUNICATING}: Received Event SUBSCR_CONN_E_COMMUNICATING
 DMSC msc_tx 2 bytes to MSISDN:46071 via RAN_GERAN_A
-- DTAP --RAN_GERAN_A--> MS: 0904
+- DTAP --RAN_GERAN_A--> MS: GSM48_PDISC_SMS:0x04: 0904
 - DTAP matches expected message
 DREF VLR subscr MSISDN:46071 usage decreases to: 3
 DREF VLR subscr MSISDN:46071 usage decreases to: 2
@@ -962,10 +962,10 @@ DREF VLR subscr MSISDN:46071 usage decreases to: 1
   llist_count(&net->subscr_conns) == 0
 ---
 - subscriber detaches, using TMSI
-  rx from MS: pdisc=0x05 msg_type=0x01
+  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_IMSI_DETACH_IND
   new conn
 DREF unknown: MSC conn use + 1 == 1
-DRLL Dispatching 04.08 message, pdisc=5
+DRLL Dispatching 04.08 message GSM48_MT_MM_IMSI_DETACH_IND (0x5:0x1)
 DMM IMSI DETACH INDICATION: MI(TMSI)=50462976
 DREF VLR subscr MSISDN:46071 usage increases to: 2
 DMM IMSI DETACH for MSISDN:46071
@@ -983,10 +983,10 @@ talloc_total_blocks(tall_bsc_ctx) == 9
 
 ===== test_ciph_imei
 - Location Update request causes a GSUP Send Auth Info request to HLR
-  rx from MS: pdisc=0x05 msg_type=0x08
+  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
   new conn
 DREF unknown: MSC conn use + 1 == 1
-DRLL Dispatching 04.08 message, pdisc=5
+DRLL Dispatching 04.08 message GSM48_MT_MM_LOC_UPD_REQUEST (0x5:0x8)
 DREF unknown: MSC conn use + 1 == 2
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: Allocated
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: Received Event SUBSCR_CONN_E_START
@@ -1029,9 +1029,9 @@ DREF VLR subscr IMSI:901700000004620 usage decreases to: 1
   auth_request_sent == 1
   lu_result_sent == 0
 - MS sends Authen Response, VLR accepts and sends Ciphering Mode Command to MS
-  rx from MS: pdisc=0x05 msg_type=0x54
+  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_AUTH_RESP
 DREF IMSI:901700000004620: MSC conn use + 1 == 2
-DRLL Dispatching 04.08 message, pdisc=5
+DRLL Dispatching 04.08 message GSM48_MT_MM_AUTH_RESP (0x5:0x14)
 DMM IMSI:901700000004620: MM GSM AUTHENTICATION RESPONSE (sres = 2d8b2c3e)
 DVLR VLR_Authenticate(901700000004620){VLR_SUB_AS_WAIT_RESP}: Received Event VLR_AUTH_E_MS_AUTH_RESP
 DVLR SUBSCR(IMSI:901700000004620) received res: 2d 8b 2c 3e 
@@ -1052,17 +1052,17 @@ DREF IMSI:901700000004620: MSC conn use - 1 == 1
 - needs ciph, not yet accepted
 msc_subscr_conn_is_accepted() == false
   requests shall be thwarted
-DRLL Dispatching 04.08 message, pdisc=3
-DRLL subscr IMSI:901700000004620: Message not permitted for initial conn: pdisc=0x03 msg_type=0x05
-DRLL Dispatching 04.08 message, pdisc=5
-DRLL subscr IMSI:901700000004620: Message not permitted for initial conn: pdisc=0x05 msg_type=0x33
-DRLL Dispatching 04.08 message, pdisc=6
-DRLL subscr IMSI:901700000004620: Message not permitted for initial conn: pdisc=0x06 msg_type=0x19
-DRLL Dispatching 04.08 message, pdisc=9
-DRLL subscr IMSI:901700000004620: Message not permitted for initial conn: pdisc=0x09 msg_type=0x01
+DRLL Dispatching 04.08 message GSM48_MT_CC_SETUP (0x3:0x5)
+DRLL subscr IMSI:901700000004620: Message not permitted for initial conn: GSM48_MT_CC_SETUP
+DRLL Dispatching 04.08 message unknown 0x33 (0x5:0x33)
+DRLL subscr IMSI:901700000004620: Message not permitted for initial conn: unknown 0x33
+DRLL Dispatching 04.08 message GSM48_MT_RR_SYSINFO_1 (0x6:0x19)
+DRLL subscr IMSI:901700000004620: Message not permitted for initial conn: GSM48_MT_RR_SYSINFO_1
+DRLL Dispatching 04.08 message GSM48_PDISC_SMS:0x01 (0x9:0x1)
+DRLL subscr IMSI:901700000004620: Message not permitted for initial conn: GSM48_PDISC_SMS:0x01
   lu_result_sent == 0
 - MS sends Ciphering Mode Complete, VLR accepts and sends GSUP LU Req to HLR
-  rx from MS: pdisc=0x06 msg_type=0x32
+  MSC <--RAN_GERAN_A-- MS: GSM48_MT_RR_CIPH_M_COMPL
 DRR IMSI:901700000004620: CIPHERING MODE COMPLETE
 DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_WAIT_CIPH}: Received Event VLR_ULA_E_CIPH_RES
 DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_WAIT_CIPH}: vlr_loc_upd_post_ciph()
@@ -1113,7 +1113,7 @@ DVLR sub_pres_vlr_fsm(901700000004620){SUB_PRES_VLR_S_DONE}: Deallocated
 DVLR lu_compl_vlr_fsm(901700000004620){LU_COMPL_VLR_S_WAIT_SUB_PRES}: Received Event LU_COMPL_VLR_E_SUB_PRES_COMPL
 DVLR lu_compl_vlr_fsm(901700000004620){LU_COMPL_VLR_S_WAIT_SUB_PRES}: state_chg to LU_COMPL_VLR_S_WAIT_IMEI
 DMSC msc_tx 3 bytes to MSISDN:46071 via RAN_GERAN_A
-- DTAP --RAN_GERAN_A--> MS: 051802
+- DTAP --RAN_GERAN_A--> MS: GSM48_MT_MM_ID_REQ: 051802
 - DTAP matches expected message
 DREF VLR subscr MSISDN:46071 usage decreases to: 1
 <-- GSUP rx OSMO_GSUP_MSGT_UPDATE_LOCATION_RESULT: vlr_gsupc_read_cb() returns 0
@@ -1124,18 +1124,18 @@ DREF VLR subscr MSISDN:46071 usage increases to: 2
 DREF VLR subscr MSISDN:46071 usage decreases to: 1
 msc_subscr_conn_is_accepted() == false
   requests shall be thwarted
-DRLL Dispatching 04.08 message, pdisc=3
-DRLL subscr MSISDN:46071: Message not permitted for initial conn: pdisc=0x03 msg_type=0x05
-DRLL Dispatching 04.08 message, pdisc=5
-DRLL subscr MSISDN:46071: Message not permitted for initial conn: pdisc=0x05 msg_type=0x33
-DRLL Dispatching 04.08 message, pdisc=6
-DRLL subscr MSISDN:46071: Message not permitted for initial conn: pdisc=0x06 msg_type=0x19
-DRLL Dispatching 04.08 message, pdisc=9
-DRLL subscr MSISDN:46071: Message not permitted for initial conn: pdisc=0x09 msg_type=0x01
+DRLL Dispatching 04.08 message GSM48_MT_CC_SETUP (0x3:0x5)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_MT_CC_SETUP
+DRLL Dispatching 04.08 message unknown 0x33 (0x5:0x33)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: unknown 0x33
+DRLL Dispatching 04.08 message GSM48_MT_RR_SYSINFO_1 (0x6:0x19)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_MT_RR_SYSINFO_1
+DRLL Dispatching 04.08 message GSM48_PDISC_SMS:0x01 (0x9:0x1)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_PDISC_SMS:0x01
 - MS replies with an Identity Response
-  rx from MS: pdisc=0x05 msg_type=0x59
+  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_ID_RESP
 DREF MSISDN:46071: MSC conn use + 1 == 2
-DRLL Dispatching 04.08 message, pdisc=5
+DRLL Dispatching 04.08 message GSM48_MT_MM_ID_RESP (0x5:0x19)
 DMM IDENTITY RESPONSE: MI(IMEI)=423423423423423
 DVLR set IMEI on subscriber; IMSI=901700000004620 IMEI=423423423423423
 DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_WAIT_LU_COMPL}: Received Event VLR_ULA_E_ID_IMEI
@@ -1177,10 +1177,10 @@ DREF VLR subscr MSISDN:46071 usage increases to: 2
 DREF VLR subscr MSISDN:46071 usage decreases to: 1
 ---
 - subscriber detaches
-  rx from MS: pdisc=0x05 msg_type=0x01
+  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_IMSI_DETACH_IND
   new conn
 DREF unknown: MSC conn use + 1 == 1
-DRLL Dispatching 04.08 message, pdisc=5
+DRLL Dispatching 04.08 message GSM48_MT_MM_IMSI_DETACH_IND (0x5:0x1)
 DMM IMSI DETACH INDICATION: MI(IMSI)=901700000004620
 DREF VLR subscr MSISDN:46071 usage increases to: 2
 DMM IMSI DETACH for MSISDN:46071
@@ -1198,10 +1198,10 @@ talloc_total_blocks(tall_bsc_ctx) == 9
 
 ===== test_ciph_imeisv
 - Location Update request causes a GSUP Send Auth Info request to HLR
-  rx from MS: pdisc=0x05 msg_type=0x08
+  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
   new conn
 DREF unknown: MSC conn use + 1 == 1
-DRLL Dispatching 04.08 message, pdisc=5
+DRLL Dispatching 04.08 message GSM48_MT_MM_LOC_UPD_REQUEST (0x5:0x8)
 DREF unknown: MSC conn use + 1 == 2
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: Allocated
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: Received Event SUBSCR_CONN_E_START
@@ -1244,9 +1244,9 @@ DREF VLR subscr IMSI:901700000004620 usage decreases to: 1
   auth_request_sent == 1
   lu_result_sent == 0
 - MS sends Authen Response, VLR accepts and sends Ciphering Mode Command to MS
-  rx from MS: pdisc=0x05 msg_type=0x54
+  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_AUTH_RESP
 DREF IMSI:901700000004620: MSC conn use + 1 == 2
-DRLL Dispatching 04.08 message, pdisc=5
+DRLL Dispatching 04.08 message GSM48_MT_MM_AUTH_RESP (0x5:0x14)
 DMM IMSI:901700000004620: MM GSM AUTHENTICATION RESPONSE (sres = 2d8b2c3e)
 DVLR VLR_Authenticate(901700000004620){VLR_SUB_AS_WAIT_RESP}: Received Event VLR_AUTH_E_MS_AUTH_RESP
 DVLR SUBSCR(IMSI:901700000004620) received res: 2d 8b 2c 3e 
@@ -1269,20 +1269,20 @@ DREF IMSI:901700000004620: MSC conn use - 1 == 1
 - needs ciph, not yet accepted
 msc_subscr_conn_is_accepted() == false
   requests shall be thwarted
-DRLL Dispatching 04.08 message, pdisc=3
-DRLL subscr IMSI:901700000004620: Message not permitted for initial conn: pdisc=0x03 msg_type=0x05
-DRLL Dispatching 04.08 message, pdisc=5
-DRLL subscr IMSI:901700000004620: Message not permitted for initial conn: pdisc=0x05 msg_type=0x33
-DRLL Dispatching 04.08 message, pdisc=6
-DRLL subscr IMSI:901700000004620: Message not permitted for initial conn: pdisc=0x06 msg_type=0x19
-DRLL Dispatching 04.08 message, pdisc=9
-DRLL subscr IMSI:901700000004620: Message not permitted for initial conn: pdisc=0x09 msg_type=0x01
+DRLL Dispatching 04.08 message GSM48_MT_CC_SETUP (0x3:0x5)
+DRLL subscr IMSI:901700000004620: Message not permitted for initial conn: GSM48_MT_CC_SETUP
+DRLL Dispatching 04.08 message unknown 0x33 (0x5:0x33)
+DRLL subscr IMSI:901700000004620: Message not permitted for initial conn: unknown 0x33
+DRLL Dispatching 04.08 message GSM48_MT_RR_SYSINFO_1 (0x6:0x19)
+DRLL subscr IMSI:901700000004620: Message not permitted for initial conn: GSM48_MT_RR_SYSINFO_1
+DRLL Dispatching 04.08 message GSM48_PDISC_SMS:0x01 (0x9:0x1)
+DRLL subscr IMSI:901700000004620: Message not permitted for initial conn: GSM48_PDISC_SMS:0x01
   lu_result_sent == 0
 DREF VLR subscr IMSI:901700000004620 usage increases to: 2
   vsub->imeisv[0] == 0
 DREF VLR subscr IMSI:901700000004620 usage decreases to: 1
 - MS sends Ciphering Mode Complete with IMEISV, VLR accepts and sends GSUP LU Req to HLR
-  rx from MS: pdisc=0x06 msg_type=0x32
+  MSC <--RAN_GERAN_A-- MS: GSM48_MT_RR_CIPH_M_COMPL
 DRR IMSI:901700000004620: CIPHERING MODE COMPLETE
 DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_WAIT_CIPH}: Received Event VLR_ULA_E_CIPH_RES
 DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_WAIT_CIPH}: got IMEISV: 4234234234234235F
@@ -1303,18 +1303,18 @@ DREF VLR subscr IMSI:901700000004620 usage increases to: 2
 DREF VLR subscr IMSI:901700000004620 usage decreases to: 1
 msc_subscr_conn_is_accepted() == false
   requests shall be thwarted
-DRLL Dispatching 04.08 message, pdisc=3
-DRLL subscr IMSI:901700000004620: Message not permitted for initial conn: pdisc=0x03 msg_type=0x05
-DRLL Dispatching 04.08 message, pdisc=5
-DRLL subscr IMSI:901700000004620: Message not permitted for initial conn: pdisc=0x05 msg_type=0x33
-DRLL Dispatching 04.08 message, pdisc=6
-DRLL subscr IMSI:901700000004620: Message not permitted for initial conn: pdisc=0x06 msg_type=0x19
-DRLL Dispatching 04.08 message, pdisc=9
-DRLL subscr IMSI:901700000004620: Message not permitted for initial conn: pdisc=0x09 msg_type=0x01
+DRLL Dispatching 04.08 message GSM48_MT_CC_SETUP (0x3:0x5)
+DRLL subscr IMSI:901700000004620: Message not permitted for initial conn: GSM48_MT_CC_SETUP
+DRLL Dispatching 04.08 message unknown 0x33 (0x5:0x33)
+DRLL subscr IMSI:901700000004620: Message not permitted for initial conn: unknown 0x33
+DRLL Dispatching 04.08 message GSM48_MT_RR_SYSINFO_1 (0x6:0x19)
+DRLL subscr IMSI:901700000004620: Message not permitted for initial conn: GSM48_MT_RR_SYSINFO_1
+DRLL Dispatching 04.08 message GSM48_PDISC_SMS:0x01 (0x9:0x1)
+DRLL subscr IMSI:901700000004620: Message not permitted for initial conn: GSM48_PDISC_SMS:0x01
 - MS replies with an Identity Response
-  rx from MS: pdisc=0x05 msg_type=0x59
+  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_ID_RESP
 DREF IMSI:901700000004620: MSC conn use + 1 == 2
-DRLL Dispatching 04.08 message, pdisc=5
+DRLL Dispatching 04.08 message GSM48_MT_MM_ID_RESP (0x5:0x19)
 DMM IDENTITY RESPONSE: MI(IMEI)=423423423423423
 DVLR set IMEI on subscriber; IMSI=901700000004620 IMEI=423423423423423
 DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_WAIT_HLR_UPD}: Received Event VLR_ULA_E_ID_IMEI
@@ -1391,10 +1391,10 @@ DREF VLR subscr MSISDN:46071 usage decreases to: 1
   llist_count(&net->subscr_conns) == 0
 ---
 - subscriber detaches
-  rx from MS: pdisc=0x05 msg_type=0x01
+  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_IMSI_DETACH_IND
   new conn
 DREF unknown: MSC conn use + 1 == 1
-DRLL Dispatching 04.08 message, pdisc=5
+DRLL Dispatching 04.08 message GSM48_MT_MM_IMSI_DETACH_IND (0x5:0x1)
 DMM IMSI DETACH INDICATION: MI(IMSI)=901700000004620
 DREF VLR subscr MSISDN:46071 usage increases to: 2
 DMM IMSI DETACH for MSISDN:46071
@@ -1412,10 +1412,10 @@ talloc_total_blocks(tall_bsc_ctx) == 9
 
 ===== test_ciph_tmsi_imei
 - Location Update request causes a GSUP Send Auth Info request to HLR
-  rx from MS: pdisc=0x05 msg_type=0x08
+  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
   new conn
 DREF unknown: MSC conn use + 1 == 1
-DRLL Dispatching 04.08 message, pdisc=5
+DRLL Dispatching 04.08 message GSM48_MT_MM_LOC_UPD_REQUEST (0x5:0x8)
 DREF unknown: MSC conn use + 1 == 2
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: Allocated
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: Received Event SUBSCR_CONN_E_START
@@ -1458,9 +1458,9 @@ DREF VLR subscr IMSI:901700000004620 usage decreases to: 1
   auth_request_sent == 1
   lu_result_sent == 0
 - MS sends Authen Response, VLR accepts and sends Ciphering Mode Command to MS
-  rx from MS: pdisc=0x05 msg_type=0x54
+  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_AUTH_RESP
 DREF IMSI:901700000004620: MSC conn use + 1 == 2
-DRLL Dispatching 04.08 message, pdisc=5
+DRLL Dispatching 04.08 message GSM48_MT_MM_AUTH_RESP (0x5:0x14)
 DMM IMSI:901700000004620: MM GSM AUTHENTICATION RESPONSE (sres = 2d8b2c3e)
 DVLR VLR_Authenticate(901700000004620){VLR_SUB_AS_WAIT_RESP}: Received Event VLR_AUTH_E_MS_AUTH_RESP
 DVLR SUBSCR(IMSI:901700000004620) received res: 2d 8b 2c 3e 
@@ -1481,17 +1481,17 @@ DREF IMSI:901700000004620: MSC conn use - 1 == 1
 - needs ciph, not yet accepted
 msc_subscr_conn_is_accepted() == false
   requests shall be thwarted
-DRLL Dispatching 04.08 message, pdisc=3
-DRLL subscr IMSI:901700000004620: Message not permitted for initial conn: pdisc=0x03 msg_type=0x05
-DRLL Dispatching 04.08 message, pdisc=5
-DRLL subscr IMSI:901700000004620: Message not permitted for initial conn: pdisc=0x05 msg_type=0x33
-DRLL Dispatching 04.08 message, pdisc=6
-DRLL subscr IMSI:901700000004620: Message not permitted for initial conn: pdisc=0x06 msg_type=0x19
-DRLL Dispatching 04.08 message, pdisc=9
-DRLL subscr IMSI:901700000004620: Message not permitted for initial conn: pdisc=0x09 msg_type=0x01
+DRLL Dispatching 04.08 message GSM48_MT_CC_SETUP (0x3:0x5)
+DRLL subscr IMSI:901700000004620: Message not permitted for initial conn: GSM48_MT_CC_SETUP
+DRLL Dispatching 04.08 message unknown 0x33 (0x5:0x33)
+DRLL subscr IMSI:901700000004620: Message not permitted for initial conn: unknown 0x33
+DRLL Dispatching 04.08 message GSM48_MT_RR_SYSINFO_1 (0x6:0x19)
+DRLL subscr IMSI:901700000004620: Message not permitted for initial conn: GSM48_MT_RR_SYSINFO_1
+DRLL Dispatching 04.08 message GSM48_PDISC_SMS:0x01 (0x9:0x1)
+DRLL subscr IMSI:901700000004620: Message not permitted for initial conn: GSM48_PDISC_SMS:0x01
   lu_result_sent == 0
 - MS sends Ciphering Mode Complete, VLR accepts and sends GSUP LU Req to HLR
-  rx from MS: pdisc=0x06 msg_type=0x32
+  MSC <--RAN_GERAN_A-- MS: GSM48_MT_RR_CIPH_M_COMPL
 DRR IMSI:901700000004620: CIPHERING MODE COMPLETE
 DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_WAIT_CIPH}: Received Event VLR_ULA_E_CIPH_RES
 DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_WAIT_CIPH}: vlr_loc_upd_post_ciph()
@@ -1542,7 +1542,7 @@ DVLR sub_pres_vlr_fsm(901700000004620){SUB_PRES_VLR_S_DONE}: Deallocated
 DVLR lu_compl_vlr_fsm(901700000004620){LU_COMPL_VLR_S_WAIT_SUB_PRES}: Received Event LU_COMPL_VLR_E_SUB_PRES_COMPL
 DVLR lu_compl_vlr_fsm(901700000004620){LU_COMPL_VLR_S_WAIT_SUB_PRES}: state_chg to LU_COMPL_VLR_S_WAIT_IMEI_TMSI
 DMSC msc_tx 3 bytes to MSISDN:46071 via RAN_GERAN_A
-- DTAP --RAN_GERAN_A--> MS: 051802
+- DTAP --RAN_GERAN_A--> MS: GSM48_MT_MM_ID_REQ: 051802
 - DTAP matches expected message
 DREF VLR subscr MSISDN:46071 usage decreases to: 1
 <-- GSUP rx OSMO_GSUP_MSGT_UPDATE_LOCATION_RESULT: vlr_gsupc_read_cb() returns 0
@@ -1553,18 +1553,18 @@ DREF VLR subscr MSISDN:46071 usage increases to: 2
 DREF VLR subscr MSISDN:46071 usage decreases to: 1
 msc_subscr_conn_is_accepted() == false
   requests shall be thwarted
-DRLL Dispatching 04.08 message, pdisc=3
-DRLL subscr MSISDN:46071: Message not permitted for initial conn: pdisc=0x03 msg_type=0x05
-DRLL Dispatching 04.08 message, pdisc=5
-DRLL subscr MSISDN:46071: Message not permitted for initial conn: pdisc=0x05 msg_type=0x33
-DRLL Dispatching 04.08 message, pdisc=6
-DRLL subscr MSISDN:46071: Message not permitted for initial conn: pdisc=0x06 msg_type=0x19
-DRLL Dispatching 04.08 message, pdisc=9
-DRLL subscr MSISDN:46071: Message not permitted for initial conn: pdisc=0x09 msg_type=0x01
+DRLL Dispatching 04.08 message GSM48_MT_CC_SETUP (0x3:0x5)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_MT_CC_SETUP
+DRLL Dispatching 04.08 message unknown 0x33 (0x5:0x33)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: unknown 0x33
+DRLL Dispatching 04.08 message GSM48_MT_RR_SYSINFO_1 (0x6:0x19)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_MT_RR_SYSINFO_1
+DRLL Dispatching 04.08 message GSM48_PDISC_SMS:0x01 (0x9:0x1)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_PDISC_SMS:0x01
 - MS replies with an Identity Response
-  rx from MS: pdisc=0x05 msg_type=0x59
+  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_ID_RESP
 DREF MSISDN:46071: MSC conn use + 1 == 2
-DRLL Dispatching 04.08 message, pdisc=5
+DRLL Dispatching 04.08 message GSM48_MT_MM_ID_RESP (0x5:0x19)
 DMM IDENTITY RESPONSE: MI(IMEI)=423423423423423
 DVLR set IMEI on subscriber; IMSI=901700000004620 IMEI=423423423423423
 DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_WAIT_LU_COMPL}: Received Event VLR_ULA_E_ID_IMEI
@@ -1579,14 +1579,14 @@ DREF MSISDN:46071: MSC conn use - 1 == 1
   lu_result_sent == 1
 msc_subscr_conn_is_accepted() == false
   requests shall be thwarted
-DRLL Dispatching 04.08 message, pdisc=3
-DRLL subscr MSISDN:46071: Message not permitted for initial conn: pdisc=0x03 msg_type=0x05
-DRLL Dispatching 04.08 message, pdisc=5
-DRLL subscr MSISDN:46071: Message not permitted for initial conn: pdisc=0x05 msg_type=0x33
-DRLL Dispatching 04.08 message, pdisc=6
-DRLL subscr MSISDN:46071: Message not permitted for initial conn: pdisc=0x06 msg_type=0x19
-DRLL Dispatching 04.08 message, pdisc=9
-DRLL subscr MSISDN:46071: Message not permitted for initial conn: pdisc=0x09 msg_type=0x01
+DRLL Dispatching 04.08 message GSM48_MT_CC_SETUP (0x3:0x5)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_MT_CC_SETUP
+DRLL Dispatching 04.08 message unknown 0x33 (0x5:0x33)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: unknown 0x33
+DRLL Dispatching 04.08 message GSM48_MT_RR_SYSINFO_1 (0x6:0x19)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_MT_RR_SYSINFO_1
+DRLL Dispatching 04.08 message GSM48_PDISC_SMS:0x01 (0x9:0x1)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_PDISC_SMS:0x01
 - even though the TMSI is not acked, we can already find the subscr with it
 DREF VLR subscr MSISDN:46071 usage increases to: 2
   vsub != NULL == 1
@@ -1595,9 +1595,9 @@ DREF VLR subscr MSISDN:46071 usage increases to: 2
   vsub->tmsi == 0xffffffff
 DREF VLR subscr MSISDN:46071 usage decreases to: 1
 - MS sends TMSI Realloc Complete
-  rx from MS: pdisc=0x05 msg_type=0x5b
+  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_TMSI_REALL_COMPL
 DREF MSISDN:46071: MSC conn use + 1 == 2
-DRLL Dispatching 04.08 message, pdisc=5
+DRLL Dispatching 04.08 message GSM48_MT_MM_TMSI_REALL_COMPL (0x5:0x1b)
 DMM TMSI Reallocation Completed. Subscriber: MSISDN:46071
 DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_WAIT_LU_COMPL}: Received Event VLR_ULA_E_NEW_TMSI_ACK
 DVLR lu_compl_vlr_fsm(901700000004620){LU_COMPL_VLR_S_WAIT_TMSI_CNF}: Received Event LU_COMPL_VLR_E_NEW_TMSI_ACK
@@ -1637,10 +1637,10 @@ DREF VLR subscr MSISDN:46071 usage increases to: 2
 DREF VLR subscr MSISDN:46071 usage decreases to: 1
 ---
 - subscriber detaches, using TMSI
-  rx from MS: pdisc=0x05 msg_type=0x01
+  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_IMSI_DETACH_IND
   new conn
 DREF unknown: MSC conn use + 1 == 1
-DRLL Dispatching 04.08 message, pdisc=5
+DRLL Dispatching 04.08 message GSM48_MT_MM_IMSI_DETACH_IND (0x5:0x1)
 DMM IMSI DETACH INDICATION: MI(TMSI)=50462976
 DREF VLR subscr MSISDN:46071 usage increases to: 2
 DMM IMSI DETACH for MSISDN:46071
