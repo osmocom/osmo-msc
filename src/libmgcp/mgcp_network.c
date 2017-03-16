@@ -667,6 +667,19 @@ int mgcp_send(struct mgcp_endpoint *endp, int dest, int is_rtp,
 			forward_data(rtp_end->rtp.fd, &endp->taps[tap_idx],
 				     buf, len);
 
+			/* FIXME: HACK HACK HACK. See OS#2459.
+			 * The ip.access nano3G needs the first RTP payload's first two bytes to read hex
+			 * 'e400', or it will reject the RAB assignment. It seems to not harm other femto
+			 * cells (as long as we patch only the first RTP payload in each stream).
+			 */
+			if (tap_idx == MGCP_TAP_BTS_OUT
+			    && !rtp_state->patched_first_rtp_payload) {
+				uint8_t *data = (uint8_t*)&buf[12];
+				data[0] = 0xe4;
+				data[1] = 0x00;
+				rtp_state->patched_first_rtp_payload = true;
+			}
+
 			rc = mgcp_udp_send(rtp_end->rtp.fd,
 					   &rtp_end->addr,
 					   rtp_end->rtp_port, buf, len);
