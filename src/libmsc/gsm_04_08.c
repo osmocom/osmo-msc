@@ -79,6 +79,8 @@
 #include <openbsc/iu.h>
 #endif
 
+#include <openbsc/a_iface.h>
+
 #include <assert.h>
 
 
@@ -1267,6 +1269,8 @@ static int mncc_recvmsg(struct gsm_network *net, struct gsm_trans *trans,
 	struct msgb *msg;
 	unsigned char *data;
 
+	DEBUGP(DMNCC, "transmit message %s\n", get_mncc_name(msg_type));
+
 #if BEFORE_MSCSPLIT
 	/* Re-enable this log output once we can obtain this information via
 	 * A-interface, see OS#2391. */
@@ -1323,6 +1327,9 @@ int mncc_release_ind(struct gsm_network *net, struct gsm_trans *trans,
 void _gsm48_cc_trans_free(struct gsm_trans *trans)
 {
 	gsm48_stop_cc_timer(trans);
+
+	/* Make sure call also gets released on the mgcp side */
+	msc_call_release(trans);
 
 	/* send release to L4, if callref still exists */
 	if (trans->callref) {
@@ -1549,6 +1556,12 @@ static int gsm48_cc_rx_setup(struct gsm_trans *trans, struct msgb *msg)
 		setup.fields |= MNCC_F_BEARER_CAP;
 		gsm48_decode_bearer_cap(&setup.bearer_cap,
 				  TLVP_VAL(&tp, GSM48_IE_BEARER_CAP)-1);
+
+		/* Create a copy of the bearer capability
+		 * in the transaction struct, so we can use
+		 * this information later */
+		memcpy(&trans->bearer_cap,&setup.bearer_cap,
+		       sizeof(trans->bearer_cap));
 	}
 	/* facility */
 	if (TLVP_PRESENT(&tp, GSM48_IE_FACILITY)) {
@@ -1682,6 +1695,7 @@ static int gsm48_cc_rx_call_conf(struct gsm_trans *trans, struct msgb *msg)
 	unsigned int payload_len = msgb_l3len(msg) - sizeof(*gh);
 	struct tlv_parsed tp;
 	struct gsm_mncc call_conf;
+	int rc;
 
 	gsm48_stop_cc_timer(trans);
 	gsm48_start_cc_timer(trans, 0x310, GSM48_T310);
@@ -1702,6 +1716,12 @@ static int gsm48_cc_rx_call_conf(struct gsm_trans *trans, struct msgb *msg)
 		call_conf.fields |= MNCC_F_BEARER_CAP;
 		gsm48_decode_bearer_cap(&call_conf.bearer_cap,
 				  TLVP_VAL(&tp, GSM48_IE_BEARER_CAP)-1);
+
+		/* Create a copy of the bearer capability
+		 * in the transaction struct, so we can use
+		 * this information later */
+		memcpy(&trans->bearer_cap,&call_conf.bearer_cap,
+		       sizeof(trans->bearer_cap));
 	}
 	/* cause */
 	if (TLVP_PRESENT(&tp, GSM48_IE_CAUSE)) {
@@ -1721,7 +1741,18 @@ static int gsm48_cc_rx_call_conf(struct gsm_trans *trans, struct msgb *msg)
 
 	new_cc_state(trans, GSM_CSTATE_MO_TERM_CALL_CONF);
 
-	msc_call_assignment(trans);
+	/* Assign call (if not done yet) */
+	if (trans->assignment_done == false) {
+		rc = msc_call_assignment(trans);
+		trans->assignment_done = true;
+	}
+	else
+		rc = 0;
+
+	/* don't continue, if there were problems with
+	 * the call assignment. */
+	if (rc)
+		return rc;
 
 	return mncc_recvmsg(trans->net, trans, MNCC_CALL_CONF_IND,
 			    &call_conf);
@@ -1752,7 +1783,15 @@ static int gsm48_cc_tx_call_proc_and_assign(struct gsm_trans *trans, void *arg)
 	if (rc)
 		return rc;
 
-	return msc_call_assignment(trans);
+	/* Assign call (if not done yet) */
+	if (trans->assignment_done == false) {
+		rc = msc_call_assignment(trans);
+		trans->assignment_done = true;
+	}
+	else
+		rc = 0;
+
+	return rc;
 }
 
 static int gsm48_cc_rx_alerting(struct gsm_trans *trans, struct msgb *msg)
@@ -2398,6 +2437,12 @@ static int gsm48_cc_rx_modify(struct gsm_trans *trans, struct msgb *msg)
 		modify.fields |= MNCC_F_BEARER_CAP;
 		gsm48_decode_bearer_cap(&modify.bearer_cap,
 				  TLVP_VAL(&tp, GSM48_IE_BEARER_CAP)-1);
+
+		/* Create a copy of the bearer capability
+		 * in the transaction struct, so we can use
+		 * this information later */
+		memcpy(&trans->bearer_cap,&modify.bearer_cap,
+		       sizeof(trans->bearer_cap));
 	}
 
 	new_cc_state(trans, GSM_CSTATE_MO_ORIG_MODIFY);
@@ -2440,6 +2485,12 @@ static int gsm48_cc_rx_modify_complete(struct gsm_trans *trans, struct msgb *msg
 		modify.fields |= MNCC_F_BEARER_CAP;
 		gsm48_decode_bearer_cap(&modify.bearer_cap,
 				  TLVP_VAL(&tp, GSM48_IE_BEARER_CAP)-1);
+
+		/* Create a copy of the bearer capability
+		 * in the transaction struct, so we can use
+		 * this information later */
+		memcpy(&trans->bearer_cap,&modify.bearer_cap,
+		       sizeof(trans->bearer_cap));
 	}
 
 	new_cc_state(trans, GSM_CSTATE_ACTIVE);
@@ -2480,6 +2531,12 @@ static int gsm48_cc_rx_modify_reject(struct gsm_trans *trans, struct msgb *msg)
 		modify.fields |= GSM48_IE_BEARER_CAP;
 		gsm48_decode_bearer_cap(&modify.bearer_cap,
 				  TLVP_VAL(&tp, GSM48_IE_BEARER_CAP)-1);
+
+		/* Create a copy of the bearer capability
+		 * in the transaction struct, so we can use
+		 * this information later */
+		memcpy(&trans->bearer_cap,&modify.bearer_cap,
+		       sizeof(trans->bearer_cap));
 	}
 	/* cause */
 	if (TLVP_PRESENT(&tp, GSM48_IE_CAUSE)) {
@@ -2582,6 +2639,139 @@ static int gsm48_cc_rx_userinfo(struct gsm_trans *trans, struct msgb *msg)
 	return mncc_recvmsg(trans->net, trans, MNCC_USERINFO_IND, &user);
 }
 
+static void mncc_recv_rtp(struct gsm_network *net, uint32_t callref,
+		int cmd, uint32_t addr, uint16_t port, uint32_t payload_type,
+		uint32_t payload_msg_type)
+{
+	uint8_t data[sizeof(struct gsm_mncc)];
+	struct gsm_mncc_rtp *rtp;
+
+	memset(&data, 0, sizeof(data));
+	rtp = (struct gsm_mncc_rtp *) &data[0];
+
+	rtp->callref = callref;
+	rtp->msg_type = cmd;
+	rtp->ip = addr;
+	rtp->port = port;
+	rtp->payload_type = payload_type;
+	rtp->payload_msg_type = payload_msg_type;
+	mncc_recvmsg(net, NULL, cmd, (struct gsm_mncc *)data);
+}
+
+static void mncc_recv_rtp_sock(struct gsm_network *net, struct gsm_trans *trans, int cmd)
+{
+	int msg_type;
+
+	/* FIXME This has to be set to some meaningful value.
+	 * Possible options are:
+	 * GSM_TCHF_FRAME, GSM_TCHF_FRAME_EFR,
+	 * GSM_TCHH_FRAME, GSM_TCH_FRAME_AMR
+	 * (0 if unknown) */
+	msg_type = GSM_TCHF_FRAME;
+
+	uint32_t addr = mgcpgw_client_remote_addr_n(net->mgcpgw.client);
+	uint16_t port = trans->conn->rtp.port_cn;
+
+	/* FIXME: This has to be set to some meaningful value,
+	 * before the MSC-Split, this value was pulled from
+	 * lchan->abis_ip.rtp_payload */
+	uint32_t payload_type = 0;
+
+	return mncc_recv_rtp(net, trans->callref, cmd,
+			addr,
+			port,
+		        payload_type,
+			msg_type);
+}
+
+static void mncc_recv_rtp_err(struct gsm_network *net, uint32_t callref, int cmd)
+{
+	return mncc_recv_rtp(net, callref, cmd, 0, 0, 0, 0);
+}
+
+static int tch_rtp_create(struct gsm_network *net, uint32_t callref)
+{
+	struct gsm_trans *trans;
+	int rc;
+
+	/* Find callref */
+	trans = trans_find_by_callref(net, callref);
+	if (!trans) {
+		LOGP(DMNCC, LOGL_ERROR, "RTP create for non-existing trans\n");
+		mncc_recv_rtp_err(net, callref, MNCC_RTP_CREATE);
+		return -EIO;
+	}
+	log_set_context(LOG_CTX_VLR_SUBSCR, trans->vsub);
+	if (!trans->conn) {
+		LOGP(DMNCC, LOGL_NOTICE, "RTP create for trans without conn\n");
+		mncc_recv_rtp_err(net, callref, MNCC_RTP_CREATE);
+		return 0;
+	}
+
+	trans->conn->mncc_rtp_bridge = 1;
+
+	/* When we call msc_call_assignment() we will trigger, depending
+	 * on the RAN type the call assignment on the A or Iu interface.
+	 * msc_call_assignment() also takes care about sending the CRCX
+	 * command to the MGCP-GW. The CRCX will return the port number,
+	 * where the PBX (e.g. Asterisk) will send its RTP stream to. We
+	 * have to return this port number back to the MNCC by sending
+	 * it back with the TCH_RTP_CREATE message. To make sure that
+	 * this message is sent AFTER the response to CRCX from the
+	 * MGCP-GW has arrived, we need will instruct msc_call_assignment()
+	 * to take care of this by setting trans->tch_rtp_create to true.
+	 * This will make sure that gsm48_tch_rtp_create() (below) is
+	 * called as soon as the local port number has become known. */
+	trans->tch_rtp_create = true;
+
+	/* Assign call (if not done yet) */
+	if (trans->assignment_done == false) {
+		rc = msc_call_assignment(trans);
+		trans->assignment_done = true;
+	}
+	else
+		rc = 0;
+
+	return rc;
+}
+
+/* Trigger TCH_RTP_CREATE acknowledgement */
+int gsm48_tch_rtp_create(struct gsm_trans *trans)
+{
+	/* This function is called as soon as the port, on which the
+	 * mgcp-gw expects the incoming RTP stream from the remote
+	 * end (e.g. Asterisk) is known. */
+
+	struct gsm_subscriber_connection *conn = trans->conn;
+	struct gsm_network *network = conn->network;
+
+	mncc_recv_rtp_sock(network, trans, MNCC_RTP_CREATE);
+	return 0;
+}
+
+static int tch_rtp_connect(struct gsm_network *net, void *arg)
+{
+	struct gsm_trans *trans;
+	struct gsm_mncc_rtp *rtp = arg;
+
+	/* Find callref */
+	trans = trans_find_by_callref(net, rtp->callref);
+	if (!trans) {
+		LOGP(DMNCC, LOGL_ERROR, "RTP connect for non-existing trans\n");
+		mncc_recv_rtp_err(net, rtp->callref, MNCC_RTP_CONNECT);
+		return -EIO;
+	}
+	log_set_context(LOG_CTX_VLR_SUBSCR, trans->vsub);
+	if (!trans->conn) {
+		LOGP(DMNCC, LOGL_ERROR, "RTP connect for trans without conn\n");
+		mncc_recv_rtp_err(net, rtp->callref, MNCC_RTP_CONNECT);
+		return 0;
+	}
+
+	msc_call_connect(trans,rtp->port,rtp->ip);
+	return 0;
+}
+
 static struct downstate {
 	uint32_t	states;
 	int		type;
@@ -2657,11 +2847,16 @@ int mncc_tx_to_cc(struct gsm_network *net, int msg_type, void *arg)
 		if (rc < 0)
 			disconnect_bridge(net, arg, -rc);
 		return rc;
+	case MNCC_RTP_CREATE:
+		return tch_rtp_create(net, data->callref);
+	case MNCC_RTP_CONNECT:
+		return tch_rtp_connect(net, arg);
+	case MNCC_RTP_FREE:
+		/* unused right now */
+		return -EIO;
+
 	case MNCC_FRAME_DROP:
 	case MNCC_FRAME_RECV:
-	case MNCC_RTP_CREATE:
-	case MNCC_RTP_CONNECT:
-	case MNCC_RTP_FREE:
 	case GSM_TCHF_FRAME:
 	case GSM_TCHF_FRAME_EFR:
 	case GSM_TCHH_FRAME:
@@ -3211,8 +3406,8 @@ static int msc_vlr_set_ciph_mode(void *msc_conn_ref,
 	case RAN_GERAN_A:
 		DEBUGP(DMM, "-> CIPHER MODE COMMAND %s\n",
 		       vlr_subscr_name(conn->vsub));
-		return msc_gsm0808_tx_cipher_mode(conn, ciph, tuple->vec.kc, 8,
-						  retrieve_imeisv);
+		return a_iface_tx_cipher_mode(conn, ciph, tuple->vec.kc, 8,
+					      retrieve_imeisv);
 	case RAN_UTRAN_IU:
 #ifdef BUILD_IU
 		DEBUGP(DMM, "-> SECURITY MODE CONTROL %s\n",

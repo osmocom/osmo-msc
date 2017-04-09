@@ -43,8 +43,8 @@ EXTRA_DIST = \
 	$(NULL)
 
 COMMON_LDADD = \
-	$(top_builddir)/src/libcommon-cs/libcommon-cs.a \
 	$(top_builddir)/src/libmsc/libmsc.a \
+	$(top_builddir)/src/libcommon-cs/libcommon-cs.a \
 	$(top_builddir)/src/libvlr/libvlr.a \
 	$(top_builddir)/src/libbsc/libbsc.a \
 	$(top_builddir)/src/libtrau/libtrau.a \
@@ -73,8 +73,9 @@ COMMON_LDADD += \
 COMMON_LDFLAGS = \
 	-Wl,--wrap=gsup_client_create \
 	-Wl,--wrap=gsup_client_send \
-	-Wl,--wrap=a_tx \
-	-Wl,--wrap=a_page \
+	-Wl,--wrap=a_iface_tx_dtap \
+	-Wl,--wrap=a_iface_tx_clear_cmd \
+	-Wl,--wrap=a_iface_tx_paging \
 	-Wl,--wrap=iu_tx \
 	-Wl,--wrap=iu_tx_release \
 	-Wl,--wrap=iu_tx_common_id \

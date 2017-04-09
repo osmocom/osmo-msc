@@ -29,11 +29,12 @@
 #include <openbsc/vlr.h>
 #include <openbsc/osmo_msc.h>
 #include <openbsc/iu.h>
+#include <openbsc/a_iface.h>
 
 #include <openbsc/gsm_04_11.h>
 
 /* Receive a SAPI-N-REJECT from BSC */
-static void msc_sapi_n_reject(struct gsm_subscriber_connection *conn, int dlci)
+void msc_sapi_n_reject(struct gsm_subscriber_connection *conn, int dlci)
 {
 	int sapi = dlci & 0x7;
 
@@ -106,24 +107,24 @@ void msc_dtap(struct gsm_subscriber_connection *conn, uint8_t link_id, struct ms
 }
 
 /* Receive an ASSIGNMENT COMPLETE from BSC */
-static void msc_assign_compl(struct gsm_subscriber_connection *conn,
-			     uint8_t rr_cause, uint8_t chosen_channel,
-			     uint8_t encr_alg_id, uint8_t speec)
+void msc_assign_compl(struct gsm_subscriber_connection *conn,
+		      uint8_t rr_cause, uint8_t chosen_channel,
+		      uint8_t encr_alg_id, uint8_t speec)
 {
 	LOGP(DRR, LOGL_DEBUG, "MSC assign complete (do nothing).\n");
 }
 
 /* Receive an ASSIGNMENT FAILURE from BSC */
-static void msc_assign_fail(struct gsm_subscriber_connection *conn,
-			    uint8_t cause, uint8_t *rr_cause)
+void msc_assign_fail(struct gsm_subscriber_connection *conn,
+		     uint8_t cause, uint8_t *rr_cause)
 {
 	LOGP(DRR, LOGL_DEBUG, "MSC assign failure (do nothing).\n");
 }
 
 /* Receive a CLASSMARK CHANGE from BSC */
-static void msc_classmark_chg(struct gsm_subscriber_connection *conn,
-			      const uint8_t *cm2, uint8_t cm2_len,
-			      const uint8_t *cm3, uint8_t cm3_len)
+void msc_classmark_chg(struct gsm_subscriber_connection *conn,
+		       const uint8_t *cm2, uint8_t cm2_len,
+		       const uint8_t *cm3, uint8_t cm3_len)
 {
 	if (cm2 && cm2_len) {
 		if (cm2_len > sizeof(conn->classmark.classmark2)) {
@@ -250,7 +251,7 @@ void msc_subscr_con_free(struct gsm_subscriber_connection *conn)
 }
 
 /* Receive a CLEAR REQUEST from BSC */
-static int msc_clear_request(struct gsm_subscriber_connection *conn, uint32_t cause)
+int msc_clear_request(struct gsm_subscriber_connection *conn, uint32_t cause)
 {
 	msc_subscr_conn_close(conn, cause);
 	return 1;
@@ -290,7 +291,7 @@ static void msc_subscr_conn_release_all(struct gsm_subscriber_connection *conn, 
 		 * says "unknown UE" for each release outcome. */
 		break;
 	case RAN_GERAN_A:
-		/* future: a_iface_tx_clear_cmd(conn); */
+		a_iface_tx_clear_cmd(conn);
 		break;
 	default:
 		LOGP(DMM, LOGL_ERROR, "%s: Unknown RAN type, cannot tx release/clear\n",

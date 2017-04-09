@@ -2327,6 +2327,8 @@ static void ipac_parse_rtp(struct gsm_lchan *lchan, struct tlv_parsed *tv)
 		DEBUGPC(DRSL, "REMOTE_PORT=%u ", port);
 		lchan->abis_ip.connect_port = port;
 	}
+
+	DEBUGPC(DRSL, "\n");
 }
 
 /*! \brief Issue IPA RSL CRCX to configure RTP on BTS side
@@ -2558,7 +2560,6 @@ static int abis_rsl_rx_ipacc(struct msgb *msg)
 			rllh->c.msg_type);
 		break;
 	}
-	DEBUGPC(DRSL, "\n");
 
 	return rc;
 }

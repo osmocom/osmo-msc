@@ -14,6 +14,7 @@ AM_CFLAGS = \
 	$(LIBOSMOSCCP_CFLAGS) \
 	$(COVERAGE_CFLAGS) \
 	$(LIBOSMOABIS_CFLAGS) \
+	$(LIBOSMOSIGTRAN_CFLAGS) \
 	$(NULL)
 
 AM_LDFLAGS = \
@@ -30,7 +31,7 @@ osmo_bsc_SOURCES = \
 	osmo_bsc_api.c \
 	osmo_bsc_grace.c \
 	osmo_bsc_msc.c \
-	osmo_bsc_sccp.c \
+	osmo_bsc_sigtran.c \
 	osmo_bsc_filter.c \
 	osmo_bsc_bssap.c \
 	osmo_bsc_audio.c \
@@ -52,4 +53,5 @@ osmo_bsc_LDADD = \
 	$(LIBOSMOCTRL_LIBS) \
 	$(COVERAGE_LDFLAGS) \
 	$(LIBOSMOABIS_LIBS) \
+	$(LIBOSMOSIGTRAN_LIBS) \
 	$(NULL)

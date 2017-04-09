@@ -28,6 +28,7 @@
 #include <openbsc/vty.h>
 #include <openbsc/ipaccess.h>
 #include <openbsc/ctrl.h>
+#include <openbsc/osmo_bsc_sigtran.h>
 
 #include <osmocom/ctrl/control_cmd.h>
 #include <osmocom/ctrl/control_if.h>
@@ -217,6 +218,10 @@ int main(int argc, char **argv)
 	bsc_msg_lst_vty_init(tall_bsc_ctx, &access_lists, BSC_NODE);
 	ctrl_vty_init(tall_bsc_ctx);
 
+	/* Initalize SS7 */
+	osmo_ss7_init();
+	osmo_ss7_vty_init_asp(tall_bsc_ctx);
+
 	INIT_LLIST_HEAD(&access_lists);
 
 	/* parse options */
@@ -269,9 +274,8 @@ int main(int argc, char **argv)
 		}
 	}
 
-
-	if (osmo_bsc_sccp_init(bsc_gsmnet) != 0) {
-		LOGP(DNM, LOGL_ERROR, "Failed to register SCCP.\n");
+	if (osmo_bsc_sigtran_init(&bsc_gsmnet->bsc_data->mscs) != 0) {
+		LOGP(DNM, LOGL_ERROR, "Failed to initalize sigtran backhaul.\n");
 		exit(1);
 	}
 

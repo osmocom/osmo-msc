@@ -2,6 +2,8 @@ noinst_HEADERS = \
 	abis_nm.h \
 	abis_om2000.h \
 	abis_rsl.h \
+	a_iface.h \
+	a_iface_bssap.h \
 	arfcn_range_encode.h \
 	auth.h \
 	bsc_msc.h \
@@ -66,8 +68,10 @@ noinst_HEADERS = \
 	openbscdefines.h \
 	osmo_bsc.h \
 	osmo_bsc_grace.h \
+	a_reset.h \
 	osmo_bsc_rf.h \
 	osmo_msc.h \
+	osmo_bsc_sigtran.h \
 	bsc_msc_data.h \
 	osmux.h \
 	paging.h \

@@ -12,11 +12,13 @@
 #include <osmocom/core/stats.h>
 
 #include <osmocom/crypt/auth.h>
+#include <osmocom/sigtran/sccp_sap.h>
 
 #include <openbsc/common.h>
 #include <openbsc/rest_octets.h>
 #include <openbsc/common_cs.h>
 #include <openbsc/mgcpgw_client.h>
+
 
 /** annotations for msgb ownership */
 #define __uses
@@ -193,14 +195,33 @@ struct gsm_subscriber_connection {
 	uint16_t lac;
 	struct gsm_encr encr;
 
+	struct {
+		unsigned int mgcp_rtp_endpoint;
+		uint16_t port_subscr;
+		uint16_t port_cn;
+	} rtp;
+
 	/* which Iu-CS connection, if any. */
 	struct {
 		struct ue_conn_ctx *ue_ctx;
-		unsigned int mgcp_rtp_endpoint;
-		uint16_t mgcp_rtp_port_ue;
-		uint16_t mgcp_rtp_port_cn;
 		uint8_t rab_id;
 	} iu;
+
+	struct {
+		/* A pointer to the SCCP user that handles
+		 * the SCCP connections for this subscriber
+		 * connection */
+		struct osmo_sccp_user *scu;
+
+		/* The address of the BSC that is associated
+		 * with this subscriber connection */
+		struct osmo_sccp_addr bsc_addr;
+
+		/* The connection identifier that is used
+		 * to reference the SCCP connection that is
+		 * associated with this subscriber connection */
+		int conn_id;
+	} a;
 };
 
 
@@ -470,8 +491,20 @@ struct gsm_network {
 	} mgcpgw;
 
 	struct {
+		/* CS7 instance id number (set via VTY) */
+		uint32_t cs7_instance;
 		enum nsap_addr_enc rab_assign_addr_enc;
+		struct osmo_sccp_instance *sccp;
 	} iu;
+
+	struct {
+		/* CS7 instance id number (set via VTY) */
+		uint32_t cs7_instance;
+		/* A list with the context information about
+		 * all BSCs we have connections with */
+		struct llist_head bscs;
+		struct osmo_sccp_instance *sccp;
+	} a;
 };
 
 struct osmo_esme;

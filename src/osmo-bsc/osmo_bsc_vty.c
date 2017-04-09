@@ -28,6 +28,7 @@
 
 #include <osmocom/core/talloc.h>
 #include <osmocom/vty/logging.h>
+#include <osmocom/sccp/sccp_types.h>
 
 #include <time.h>
 
@@ -184,6 +185,16 @@ static void write_msc(struct vty *vty, struct bsc_msc_data *msc)
 
 	/* write amr options */
 	write_msc_amr_options(vty, msc);
+
+	/* write sccp connection configuration */
+	if (msc->a.bsc_addr_name) {
+		vty_out(vty, " bsc-addr %s%s",
+			msc->a.bsc_addr_name, VTY_NEWLINE);
+	}
+	if (msc->a.msc_addr_name) {
+		vty_out(vty, " msc-addr %s%s",
+			msc->a.msc_addr_name, VTY_NEWLINE);
+	}
 }
 
 static int config_write_msc(struct vty *vty)
@@ -685,6 +696,87 @@ DEFUN(cfg_msc_no_acc_lst_name,
 	return CMD_SUCCESS;
 }
 
+/* Make sure only standard SSN numbers are used. If no ssn number is
+ * configured, silently apply the default SSN */
+static void enforce_standard_ssn(struct vty *vty, struct osmo_sccp_addr *addr)
+{
+	if (addr->presence & OSMO_SCCP_ADDR_T_SSN) {
+		if (addr->ssn != SCCP_SSN_BSSAP)
+			vty_out(vty,
+				"setting an SSN (%u) different from the standard (%u) is not allowd, will use standard SSN for address: %s%s",
+				addr->ssn, SCCP_SSN_BSSAP, osmo_sccp_addr_dump(addr), VTY_NEWLINE);
+	}
+
+	addr->presence |= OSMO_SCCP_ADDR_T_SSN;
+	addr->ssn = SCCP_SSN_BSSAP;
+}
+
+DEFUN(cfg_msc_cs7_bsc_addr,
+      cfg_msc_cs7_bsc_addr_cmd,
+      "bsc-addr NAME",
+      "Calling Address (local address of this BSC)\n" "SCCP address name\n")
+{
+	struct bsc_msc_data *msc = bsc_msc_data(vty);
+	const char *bsc_addr_name = argv[0];
+	struct osmo_ss7_instance *ss7;
+
+	ss7 = osmo_sccp_addr_by_name(&msc->a.bsc_addr, bsc_addr_name);
+	if (!ss7) {
+		vty_out(vty, "No sccp address %s found%s", bsc_addr_name,
+			VTY_NEWLINE);
+		return CMD_WARNING;
+	}
+
+	/* Prevent mixing addresses from different CS7/SS7 instances */
+	if (msc->a.cs7_instance_valid) {
+		if (msc->a.cs7_instance != ss7->cfg.id) {
+			vty_out(vty,
+				"SCCP address %s from different CS7 instance%s",
+				bsc_addr_name, VTY_NEWLINE);
+			return CMD_WARNING;
+		}
+	}
+
+	msc->a.cs7_instance = ss7->cfg.id;
+	msc->a.cs7_instance_valid = true;
+	enforce_standard_ssn(vty, &msc->a.bsc_addr);
+	msc->a.bsc_addr_name = talloc_strdup(msc, bsc_addr_name);
+	return CMD_SUCCESS;
+}
+
+DEFUN(cfg_msc_cs7_msc_addr,
+      cfg_msc_cs7_msc_addr_cmd,
+      "msc-addr NAME",
+      "Called Address (remote address of the MSC)\n" "SCCP address name\n")
+{
+	struct bsc_msc_data *msc = bsc_msc_data(vty);
+	const char *msc_addr_name = argv[0];
+	struct osmo_ss7_instance *ss7;
+
+	ss7 = osmo_sccp_addr_by_name(&msc->a.msc_addr, msc_addr_name);
+	if (!ss7) {
+		vty_out(vty, "No sccp address %s found%s", msc_addr_name,
+			VTY_NEWLINE);
+		return CMD_WARNING;
+	}
+
+	/* Prevent mixing addresses from different CS7/SS7 instances */
+	if (msc->a.cs7_instance_valid) {
+		if (msc->a.cs7_instance != ss7->cfg.id) {
+			vty_out(vty,
+				"SCCP address %s from different CS7 instance%s",
+				msc_addr_name, VTY_NEWLINE);
+			return CMD_WARNING;
+		}
+	}
+
+	msc->a.cs7_instance = ss7->cfg.id;
+	msc->a.cs7_instance_valid = true;
+	enforce_standard_ssn(vty, &msc->a.msc_addr);
+	msc->a.msc_addr_name = talloc_strdup(msc, msc_addr_name);
+	return CMD_SUCCESS;
+}
+
 DEFUN(cfg_net_bsc_mid_call_text,
       cfg_net_bsc_mid_call_text_cmd,
       "mid-call-text .TEXT",
@@ -931,6 +1023,8 @@ int bsc_vty_init_extra(void)
 	install_element(MSC_NODE, &cfg_net_msc_amr_4_75_cmd);
 	install_element(MSC_NODE, &cfg_msc_acc_lst_name_cmd);
 	install_element(MSC_NODE, &cfg_msc_no_acc_lst_name_cmd);
+	install_element(MSC_NODE, &cfg_msc_cs7_bsc_addr_cmd);
+	install_element(MSC_NODE, &cfg_msc_cs7_msc_addr_cmd);
 
 	install_element_ve(&show_statistics_cmd);
 	install_element_ve(&show_mscs_cmd);

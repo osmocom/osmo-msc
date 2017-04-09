@@ -32,6 +32,14 @@
 #include <osmocom/core/timer.h>
 #include <osmocom/gsm/protocol/gsm_04_08.h>
 
+
+#include <osmocom/sigtran/osmo_ss7.h>
+#include <osmocom/sigtran/sccp_sap.h>
+#include <osmocom/sigtran/sccp_helpers.h>
+#include <osmocom/sigtran/protocol/sua.h>
+#include <osmocom/sigtran/protocol/m3ua.h>
+#include <osmocom/core/fsm.h>
+
 #include <regex.h>
 
 struct osmo_bsc_rf;
@@ -103,6 +111,30 @@ struct bsc_msc_data {
 	char *ussd_grace_txt;
 
 	char *acc_lst_name;
+
+	/* Sigtran connection data */
+	struct {
+		uint32_t cs7_instance;
+		bool cs7_instance_valid;
+		struct osmo_sccp_instance *sccp;
+		struct osmo_sccp_user *sccp_user;
+
+		/* Holds a copy of the our local MSC address,
+		 * this will be the sccp-address that is associated
+		 * with the A interface of this particular BSC,
+		 * this address is filled up by the VTY interface */
+		struct osmo_sccp_addr bsc_addr;
+		char *bsc_addr_name;
+
+		/* Holds a copy of the MSC address. This is the
+		 * address of the MSC that handles the calls of
+		 * this BSC. The address is configured via the
+		 * VTY interface */
+		struct osmo_sccp_addr msc_addr;
+		char *msc_addr_name;
+
+		struct a_reset_ctx *reset;
+	} a;
 };
 
 /*

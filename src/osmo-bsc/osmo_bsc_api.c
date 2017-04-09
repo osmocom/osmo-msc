@@ -27,6 +27,7 @@
 #include <osmocom/gsm/gsm0808.h>
 
 #include <osmocom/sccp/sccp.h>
+#include <openbsc/osmo_bsc_sigtran.h>
 
 #define return_when_not_connected(conn) \
 	if (!conn->sccp_con) {\
@@ -45,7 +46,7 @@
 		LOGP(DMSC, LOGL_ERROR, "Failed to allocate response.\n"); \
 		return; \
 	} \
-	bsc_queue_for_msc(conn->sccp_con, resp);
+	osmo_bsc_sigtran_send(conn->sccp_con, resp);
 
 static int bsc_clear_request(struct gsm_subscriber_connection *conn, uint32_t cause);
 static int complete_layer3(struct gsm_subscriber_connection *conn,
@@ -263,7 +264,8 @@ static int complete_layer3(struct gsm_subscriber_connection *conn,
 	}
 
 	/* allocate resource for a new connection */
-	ret = bsc_create_new_connection(conn, msc, send_ping);
+	//ret = bsc_create_new_connection(conn, msc, send_ping);
+	ret = osmo_bsc_sigtran_new_conn(conn, msc);
 
 	if (ret != BSC_CON_SUCCESS) {
 		/* allocation has failed */
@@ -292,13 +294,13 @@ static int complete_layer3(struct gsm_subscriber_connection *conn,
 	if (!resp) {
 		LOGP(DMSC, LOGL_DEBUG, "Failed to create layer3 message.\n");
 		sccp_connection_free(conn->sccp_con->sccp);
-		bsc_delete_connection(conn->sccp_con);
+		osmo_bsc_sigtran_del_conn(conn->sccp_con);
 		return BSC_API_CONN_POL_REJECT;
 	}
 
-	if (bsc_open_connection(conn->sccp_con, resp) != 0) {
+	if (osmo_bsc_sigtran_open_conn(conn->sccp_con, resp) != 0) {
 		sccp_connection_free(conn->sccp_con->sccp);
-		bsc_delete_connection(conn->sccp_con);
+		osmo_bsc_sigtran_del_conn(conn->sccp_con);
 		msgb_free(resp);
 		return BSC_API_CONN_POL_REJECT;
 	}
@@ -433,11 +435,28 @@ static void bsc_assign_compl(struct gsm_subscriber_connection *conn, uint8_t rr_
 	struct msgb *resp;
 	return_when_not_connected(conn);
 
-	LOGP(DMSC, LOGL_INFO, "Tx MSC ASSIGN COMPL\n");
+	if (is_ipaccess_bts(conn->bts) && conn->sccp_con->rtp_ip) {
+		/* NOTE: In a network that makes use of an IPA base station
+		 * and AoIP, we have to wait until the BTS reports its RTP
+		 * IP/Port combination back to BSC via RSL. Unfortunately, the
+		 * IPA protocol sends its Abis assignment complete message
+		 * before it sends its RTP IP/Port via IPACC. So we will now
+		 * postpone the AoIP assignment completed message until we
+		 * know the RTP IP/Port combination. */
+		LOGP(DMSC, LOGL_INFO, "POSTPONE MSC ASSIGN COMPL\n");
+		conn->lchan->abis_ip.ass_compl.rr_cause = rr_cause;
+		conn->lchan->abis_ip.ass_compl.chosen_channel = chosen_channel;
+		conn->lchan->abis_ip.ass_compl.encr_alg_id = encr_alg_id;
+		conn->lchan->abis_ip.ass_compl.speech_mode = speech_model;
+		conn->lchan->abis_ip.ass_compl.valid = true;
 
-	resp = gsm0808_create_assignment_completed(rr_cause, chosen_channel,
-						   encr_alg_id, speech_model);
-	queue_msg_or_return(resp);
+	} else {
+		/* NOTE: Send the A assignment complete message immediately. */
+		LOGP(DMSC, LOGL_INFO, "Tx MSC ASSIGN COMPL\n");
+		resp = gsm0808_create_assignment_completed(rr_cause, chosen_channel,
+							   encr_alg_id, speech_model);
+		queue_msg_or_return(resp);
+	}
 }
 
 static void bsc_assign_fail(struct gsm_subscriber_connection *conn,
@@ -474,7 +493,7 @@ static int bsc_clear_request(struct gsm_subscriber_connection *conn, uint32_t ca
 		return 1;
 	}
 
-	bsc_queue_for_msc(sccp, resp);
+	osmo_bsc_sigtran_send(sccp, resp);
 	return 1;
 }
 

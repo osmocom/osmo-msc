@@ -35,15 +35,6 @@
 #include <unistd.h>
 #include <string.h>
 
-struct mgcpgw_client {
-	struct mgcpgw_client_conf actual;
-	uint32_t remote_addr;
-	struct osmo_wqueue wq;
-	mgcp_trans_id_t next_trans_id;
-	uint16_t next_endpoint;
-	struct llist_head responses_pending;
-};
-
 void mgcpgw_client_conf_init(struct mgcpgw_client_conf *conf)
 {
 	/* NULL and -1 default to MGCPGW_CLIENT_*_DEFAULT values */
@@ -52,12 +43,68 @@ void mgcpgw_client_conf_init(struct mgcpgw_client_conf *conf)
 		.local_port = -1,
 		.remote_addr = NULL,
 		.remote_port = -1,
+		.first_endpoint = 0,
+		.last_endpoint = 0,
+		.bts_base = 0,
 	};
 }
 
-unsigned int mgcpgw_client_next_endpoint(struct mgcpgw_client *client)
+/* Test if a given endpoint id is currently in use */
+static bool endpoint_in_use(uint16_t id, struct mgcpgw_client *client)
 {
-	return client->next_endpoint ++;
+	struct mgcp_inuse_endpoint *endpoint;
+	llist_for_each_entry(endpoint, &client->inuse_endpoints, entry) {
+		if (endpoint->id == id)
+			return true;
+	}
+
+	return false;
+}
+
+/* Find and seize an unsused endpoint id */
+int mgcpgw_client_next_endpoint(struct mgcpgw_client *client)
+{
+	int i;
+	uint16_t first_endpoint = client->actual.first_endpoint;
+	uint16_t last_endpoint = client->actual.last_endpoint;
+	struct mgcp_inuse_endpoint *endpoint;
+
+	/* Use the maximum permitted range if the VTY
+	 * configuration does not specify a range */
+	if (client->actual.last_endpoint == 0) {
+		first_endpoint = 1;
+		last_endpoint = 65534;
+	}
+
+	/* Test the permitted endpoint range for an endpoint
+	 * number that is not in use. When a suitable endpoint
+	 * number can be found, seize it by adding it to the
+	 * inuse list. */
+	for (i=first_endpoint;i<last_endpoint;i++)
+	{
+		if (endpoint_in_use(i,client) == false) {
+			endpoint = talloc_zero(client, struct mgcp_inuse_endpoint);
+			endpoint->id = i;
+			llist_add_tail(&endpoint->entry, &client->inuse_endpoints);
+			return endpoint->id;
+		}
+	}
+
+	/* All endpoints are busy! */
+	return -EINVAL;
+}
+
+/* Release a seized endpoint id to make it available again for other calls */
+void mgcpgw_client_release_endpoint(uint16_t id, struct mgcpgw_client *client)
+{
+	struct mgcp_inuse_endpoint *endpoint;
+	struct mgcp_inuse_endpoint *endpoint_tmp;
+	llist_for_each_entry_safe(endpoint, endpoint_tmp, &client->inuse_endpoints, entry) {
+		if (endpoint->id == id) {
+			llist_del(&endpoint->entry);
+			talloc_free(endpoint);
+		}
+	}
 }
 
 static void mgcpgw_client_handle_response(struct mgcpgw_client *mgcp,
@@ -257,9 +304,16 @@ static int mgcp_do_write(struct osmo_fd *fd, struct msgb *msg)
 {
 	int ret;
 	static char strbuf[4096];
-	unsigned int l = msg->len < sizeof(strbuf)-1 ? msg->len : sizeof(strbuf)-1;
+	unsigned int l = msg->len < sizeof(strbuf) ? msg->len : sizeof(strbuf);
+	unsigned int i;
+
 	strncpy(strbuf, (const char*)msg->data, l);
-	strbuf[l] = '\0';
+	for (i = 0; i < sizeof(strbuf); i++) {
+		if (strbuf[i] == '\n' || strbuf[i] == '\r') {
+			strbuf[i] = '\0';
+			break;
+		}
+	}
 	DEBUGP(DMGCP, "Tx MGCP msg to MGCP GW: '%s'\n", strbuf);
 
 	LOGP(DMGCP, LOGL_DEBUG, "Sending msg to MGCP GW size: %u\n", msg->len);
@@ -280,9 +334,9 @@ struct mgcpgw_client *mgcpgw_client_init(void *ctx,
 	mgcp = talloc_zero(ctx, struct mgcpgw_client);
 
 	INIT_LLIST_HEAD(&mgcp->responses_pending);
+	INIT_LLIST_HEAD(&mgcp->inuse_endpoints);
 
 	mgcp->next_trans_id = 1;
-	mgcp->next_endpoint = 1;
 
 	mgcp->actual.local_addr = conf->local_addr ? conf->local_addr :
 		MGCPGW_CLIENT_LOCAL_ADDR_DEFAULT;
@@ -293,6 +347,10 @@ struct mgcpgw_client *mgcpgw_client_init(void *ctx,
 		MGCPGW_CLIENT_REMOTE_ADDR_DEFAULT;
 	mgcp->actual.remote_port = conf->remote_port >= 0 ? (uint16_t)conf->remote_port :
 		MGCPGW_CLIENT_REMOTE_PORT_DEFAULT;
+
+	mgcp->actual.first_endpoint = conf->first_endpoint > 0 ? (uint16_t)conf->first_endpoint : 0;
+	mgcp->actual.last_endpoint = conf->last_endpoint > 0 ? (uint16_t)conf->last_endpoint : 0;
+	mgcp->actual.bts_base = conf->bts_base > 0 ? (uint16_t)conf->bts_base : 4000;
 
 	return mgcp;
 }
@@ -546,4 +604,13 @@ struct msgb *mgcp_msg_mdcx(struct mgcpgw_client *mgcp,
 		 mgcp_cmode_name(mode),
 		 rtp_conn_addr,
 		 rtp_port);
+}
+
+struct msgb *mgcp_msg_dlcx(struct mgcpgw_client *mgcp, uint16_t rtp_endpoint,
+			   unsigned int call_id)
+{
+	mgcp_trans_id_t trans_id = mgcpgw_client_next_trans_id(mgcp);
+	return mgcp_msg_from_str(trans_id,
+				 "DLCX %u %x@mgw MGCP 1.0\r\n"
+				 "C: %x\r\n", trans_id, rtp_endpoint, call_id);
 }

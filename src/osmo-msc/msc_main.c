@@ -63,6 +63,7 @@
 #include <openbsc/ctrl.h>
 #include <openbsc/osmo_bsc_rf.h>
 #include <openbsc/smpp.h>
+#include <osmocom/sigtran/osmo_ss7.h>
 #include <openbsc/mgcpgw_client.h>
 
 #include <openbsc/msc_ifaces.h>
@@ -70,6 +71,7 @@
 #include <openbsc/iu.h>
 #include <openbsc/iucs.h>
 #include <openbsc/iucs_ranap.h>
+#include <openbsc/a_iface.h>
 
 static const char * const osmomsc_copyright =
 	"OsmoMSC - Osmocom Circuit-Switched Core Network implementation\r\n"
@@ -310,8 +312,7 @@ static struct vty_app_info msc_vty_info = {
 	.is_config_node	= bsc_vty_is_config_node,
 };
 
-static int rcvmsg_iu_cs(struct msgb *msg, struct gprs_ra_id *ra_id,
-			uint16_t *sai)
+static int rcvmsg_iu_cs(struct msgb *msg, struct gprs_ra_id *ra_id, uint16_t *sai)
 {
 	DEBUGP(DIUCS, "got IuCS message"
 	       " %d bytes: %s\n",
@@ -334,6 +335,68 @@ static int rx_iu_event(struct ue_conn_ctx *ctx, enum iu_event_type type,
 	return iucs_rx_ranap_event(msc_network, ctx, type, data);
 }
 
+#define DEFAULT_M3UA_REMOTE_IP "127.0.0.1"
+#define DEFAULT_PC_A "0.23.1"
+#define DEFAULT_PC_IU "0.23.2"
+#define DEFAULT_PC_A_IU DEFAULT_PC_A
+
+static struct osmo_sccp_instance *sccp_setup(void *ctx, uint32_t cs7_instance,
+					     const char *label, const char *default_pc_str)
+{
+	int default_pc = osmo_ss7_pointcode_parse(NULL, default_pc_str);
+	if (default_pc < 0)
+		return NULL;
+
+	return osmo_sccp_simple_client_on_ss7_id(ctx, cs7_instance, label, default_pc,
+						 OSMO_SS7_ASP_PROT_M3UA,
+						 0, NULL, /* local: use arbitrary port and 0.0.0.0. */
+						 0, /* remote: use protocol default port */
+						 DEFAULT_M3UA_REMOTE_IP);
+	/* Note: If a differing remote IP is to be used, it was already entered in the vty config at
+	 * 'cs7' / 'asp' / 'remote-ip', and this default remote IP has no effect.
+	 * Similarly, 'cs7' / 'listen' can specify the local IP address. */
+}
+
+static int ss7_setup(void *ctx)
+{
+	uint32_t cs7_instance_a = msc_network->a.cs7_instance;
+#if BUILD_IU
+	uint32_t cs7_instance_iu = msc_network->iu.cs7_instance;
+
+	if (cs7_instance_a == cs7_instance_iu) {
+		/* Create one single SCCP instance which will be used for both,
+		 * Iu and A at the same time, under the same point-code */
+		LOGP(DMSC, LOGL_NOTICE, "CS7 Instance identifiers: A = Iu = %u\n", cs7_instance_a);
+
+		msc_network->a.sccp = sccp_setup(ctx, cs7_instance_a, "OsmoMSC-A-Iu", DEFAULT_PC_A_IU);
+		if (!msc_network->a.sccp)
+			return -EINVAL;
+
+		msc_network->iu.sccp = msc_network->a.sccp;
+	} else {
+		/* Create two separate SCCP instances to run A and Iu independently on different
+		 * pointcodes */
+		LOGP(DMSC, LOGL_NOTICE, "CS7 Instance identifiers: A = %u, Iu = %u\n",
+		     cs7_instance_a, cs7_instance_iu);
+
+		msc_network->a.sccp = sccp_setup(ctx, cs7_instance_a, "OsmoMSC-A", DEFAULT_PC_A);
+		if (!msc_network->a.sccp)
+			return -EINVAL;
+
+		msc_network->iu.sccp = sccp_setup(ctx, cs7_instance_iu, "OsmoMSC-Iu", DEFAULT_PC_IU);
+		if (!msc_network->iu.sccp)
+			return -EINVAL;
+	}
+#else
+	/* No Iu support, just open up an A instance */
+	msc_network->a.sccp = sccp_setup(ctx, cs7_instance_a, "OsmoMSC-A", DEFAULT_PC_A);
+	if (!msc_network->a.sccp)
+		return -EINVAL;
+#endif
+
+	return 0;
+}
+
 int main(int argc, char **argv)
 {
 	int rc;
@@ -348,6 +411,9 @@ int main(int argc, char **argv)
 
 	/* For --version, vty_init() must be called before handling options */
 	vty_init(&msc_vty_info);
+
+	osmo_ss7_init();
+	osmo_ss7_vty_init_asp(tall_msc_ctx);
 
 	/* Parse options */
 	handle_options(argc, argv);
@@ -491,13 +557,18 @@ TODO: we probably want some of the _net_ ctrl commands from bsc_base_ctrl_cmds_i
 		return 7;
 	}
 
-	/* Set up A-Interface */
-	/* TODO: implement A-Interface and remove above legacy stuff. */
+	if (ss7_setup(tall_msc_ctx)) {
+		printf("Setting up SCCP client failed.\n");
+		return 8;
+	}
 
 #ifdef BUILD_IU
 	/* Set up IuCS */
-	iu_init(tall_msc_ctx, "127.0.0.1", 14001, rcvmsg_iu_cs, rx_iu_event);
+	iu_init(tall_msc_ctx, msc_network->iu.sccp, rcvmsg_iu_cs, rx_iu_event);
 #endif
+
+	/* Set up A interface */
+	a_init(msc_network->a.sccp, msc_network);
 
 	if (msc_cmdline_config.daemonize) {
 		rc = osmo_daemonize();

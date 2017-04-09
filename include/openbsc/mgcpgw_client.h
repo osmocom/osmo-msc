@@ -3,11 +3,11 @@
 #include <stdint.h>
 
 #include <osmocom/core/linuxlist.h>
+#include <osmocom/core/write_queue.h>
 
 enum mgcp_connection_mode;
 
 struct msgb;
-struct mgcpgw_client;
 struct vty;
 
 #define MGCPGW_CLIENT_LOCAL_ADDR_DEFAULT "0.0.0.0"
@@ -24,6 +24,9 @@ struct mgcpgw_client_conf {
 	int local_port;
 	const char *remote_addr;
 	int remote_port;
+	uint16_t first_endpoint;
+	uint16_t last_endpoint;
+	uint16_t bts_base;
 };
 
 struct mgcp_response_head {
@@ -36,6 +39,20 @@ struct mgcp_response {
 	char *body;
 	struct mgcp_response_head head;
 	uint16_t audio_port;
+};
+
+struct mgcpgw_client {
+	struct mgcpgw_client_conf actual;
+	uint32_t remote_addr;
+	struct osmo_wqueue wq;
+	mgcp_trans_id_t next_trans_id;
+	struct llist_head responses_pending;
+	struct llist_head inuse_endpoints;
+};
+
+struct mgcp_inuse_endpoint {
+	struct llist_head entry;
+	uint16_t id;
 };
 
 /* Invoked when an MGCP response is received or sending failed.  When the
@@ -61,7 +78,11 @@ const char *mgcpgw_client_remote_addr_str(struct mgcpgw_client *mgcp);
 uint16_t mgcpgw_client_remote_port(struct mgcpgw_client *mgcp);
 uint32_t mgcpgw_client_remote_addr_n(struct mgcpgw_client *mgcp);
 
-unsigned int mgcpgw_client_next_endpoint(struct mgcpgw_client *client);
+/* Find and seize an unsused endpoint id */
+int mgcpgw_client_next_endpoint(struct mgcpgw_client *client);
+
+/* Release a seized endpoint id to make it available again for other calls */
+void mgcpgw_client_release_endpoint(uint16_t id, struct mgcpgw_client *client);
 
 int mgcp_response_parse_params(struct mgcp_response *r);
 
@@ -75,6 +96,9 @@ struct msgb *mgcp_msg_crcx(struct mgcpgw_client *mgcp,
 struct msgb *mgcp_msg_mdcx(struct mgcpgw_client *mgcp,
 			   uint16_t rtp_endpoint, const char *rtp_conn_addr,
 			   uint16_t rtp_port, enum mgcp_connection_mode mode);
+
+struct msgb *mgcp_msg_dlcx(struct mgcpgw_client *mgcp, uint16_t rtp_endpoint,
+			   unsigned int call_id);
 
 void mgcpgw_client_vty_init(int node, struct mgcpgw_client_conf *conf);
 int mgcpgw_client_config_write(struct vty *vty, const char *indent);

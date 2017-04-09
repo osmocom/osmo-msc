@@ -46,6 +46,16 @@ struct gsm_trans {
 	/* is thats one paging? */
 	struct subscr_request *paging_request;
 
+	/* bearer capabilities (rate and codec) */
+	struct gsm_mncc_bearer_cap bearer_cap;
+
+	/* status of the assignment, true when done */
+	bool assignment_done;
+
+	/* if true, TCH_RTP_CREATE is sent after the
+	 * assignment is done */
+	bool tch_rtp_create;
+
 	union {
 		struct {
 
