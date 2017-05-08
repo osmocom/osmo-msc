@@ -65,21 +65,6 @@ static struct gsm_call *get_call_ref(uint32_t callref)
 	return NULL;
 }
 
-uint8_t mncc_codec_for_mode(int lchan_type)
-{
-	/* FIXME: check codec capabilities of the phone */
-
-	if (lchan_type != GSM_LCHAN_TCH_H)
-		return mncc_int.def_codec[0];
-	else
-		return mncc_int.def_codec[1];
-}
-
-static uint8_t determine_lchan_mode(struct gsm_mncc *setup)
-{
-	return mncc_codec_for_mode(setup->lchan_type);
-}
-
 /* on incoming call, look up database and send setup to remote subscr. */
 static int mncc_setup_ind(struct gsm_call *call, int msg_type,
 			  struct gsm_mncc *setup)
@@ -137,9 +122,7 @@ static int mncc_setup_ind(struct gsm_call *call, int msg_type,
 	/* modify mode */
 	memset(&mncc, 0, sizeof(struct gsm_mncc));
 	mncc.callref = call->callref;
-	mncc.lchan_mode = determine_lchan_mode(setup);
-	DEBUGP(DMNCC, "(call %x) Modify channel mode: %s\n", call->callref,
-	       get_value_string(gsm48_chan_mode_names, mncc.lchan_mode));
+	DEBUGP(DMNCC, "(call %x) Modify channel mode\n", call->callref);
 	mncc_tx_to_cc(call->net, MNCC_LCHAN_MODIFY, &mncc);
 
 	/* send setup to remote */
@@ -206,10 +189,6 @@ static int mncc_setup_cnf(struct gsm_call *call, int msg_type,
 	bridge.callref[0] = call->callref;
 	bridge.callref[1] = call->remote_ref;
 	DEBUGP(DMNCC, "(call %x) Bridging with remote.\n", call->callref);
-
-	/* in direct mode, we always have to bridge the channels */
-	if (ipacc_rtp_direct)
-		return mncc_tx_to_cc(call->net, MNCC_BRIDGE, &bridge);
 
 	/* proxy mode */
 	if (!net->handover.active) {
@@ -279,28 +258,6 @@ static int mncc_rel_cnf(struct gsm_call *call, int msg_type, struct gsm_mncc *re
 	return 0;
 }
 
-/* receiving a (speech) traffic frame from the BSC code */
-static int mncc_rcv_data(struct gsm_call *call, int msg_type,
-			 struct gsm_data_frame *dfr)
-{
-	struct gsm_trans *remote_trans;
-
-	remote_trans = trans_find_by_callref(call->net, call->remote_ref);
-
-	/* this shouldn't really happen */
-	if (!remote_trans || !remote_trans->conn) {
-		LOGP(DMNCC, LOGL_ERROR, "No transaction or transaction without lchan?!?\n");
-		return -EIO;
-	}
-
-	/* RTP socket of remote end has meanwhile died */
-	if (!remote_trans->conn->lchan->abis_ip.rtp_socket)
-		return -EIO;
-
-	return rtp_send_frame(remote_trans->conn->lchan->abis_ip.rtp_socket, dfr);
-}
-
-
 /* Internal MNCC handler input function (from CC -> MNCC -> here) */
 int int_mncc_recv(struct gsm_network *net, struct msgb *msg)
 {
@@ -346,7 +303,8 @@ int int_mncc_recv(struct gsm_network *net, struct msgb *msg)
 	}
 
 	if (mncc_is_data_frame(msg_type)) {
-		rc = mncc_rcv_data(call, msg_type, arg);
+		LOGP(DMNCC, LOGL_ERROR, "(call %x) Received data frame, which is not supported.\n",
+		     call->callref);
 		goto out_free;
 	}
 
@@ -364,7 +322,6 @@ int int_mncc_recv(struct gsm_network *net, struct msgb *msg)
 		break;
 	case MNCC_CALL_CONF_IND:
 		/* we now need to MODIFY the channel */
-		data->lchan_mode = determine_lchan_mode(data);
 		mncc_tx_to_cc(call->net, MNCC_LCHAN_MODIFY, data);
 		break;
 	case MNCC_ALERT_IND:

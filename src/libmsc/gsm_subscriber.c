@@ -41,43 +41,6 @@
 #include <openbsc/chan_alloc.h>
 #include <openbsc/vlr.h>
 
-void *tall_sub_req_ctx;
-
-int gsm48_secure_channel(struct gsm_subscriber_connection *conn, int key_seq,
-                         gsm_cbfn *cb, void *cb_data);
-
-
-/*
- * Struct for pending channel requests. This is managed in the
- * llist_head requests of each subscriber. The reference counting
- * should work in such a way that a subscriber with a pending request
- * remains in memory.
- */
-struct subscr_request {
-	struct llist_head entry;
-
-	/* the callback data */
-	gsm_cbfn *cbfn;
-	void *param;
-};
-
-static struct bsc_subscr *vlr_subscr_to_bsc_sub(struct llist_head *bsc_subscribers,
-						struct vlr_subscr *vsub)
-{
-	struct bsc_subscr *sub;
-	/* TODO MSC split -- creating a BSC subscriber directly from MSC data
-	 * structures in RAM. At some point the MSC will send a message to the
-	 * BSC instead. */
-	sub = bsc_subscr_find_or_create_by_imsi(bsc_subscribers, vsub->imsi);
-	sub->tmsi = vsub->tmsi;
-	sub->lac = vsub->lac;
-	return sub;
-}
-
-/*
- * We got the channel assigned and can now hand this channel
- * over to one of our callbacks.
- */
 int subscr_paging_dispatch(unsigned int hooknum, unsigned int event,
 			   struct msgb *msg, void *data, void *param)
 {
@@ -85,22 +48,12 @@ int subscr_paging_dispatch(unsigned int hooknum, unsigned int event,
 	struct gsm_subscriber_connection *conn = data;
 	struct vlr_subscr *vsub = param;
 	struct paging_signal_data sig_data;
-	struct bsc_subscr *bsub;
-	struct gsm_network *net;
 
 	OSMO_ASSERT(vsub && vsub->cs.is_paging);
-	net = vsub->vlr->user_ctx;
 
-	/*
-	 * Stop paging on all other BTS. E.g. if this is
-	 * the first timeout on a BTS then the others will
-	 * timeout soon as well. Let's just stop everything
-	 * and forget we wanted to page.
-	 */
-
-	bsub = vlr_subscr_to_bsc_sub(conn->network->bsc_subscribers, vsub);
-	paging_request_stop(&net->bts_list, NULL, bsub, NULL, NULL);
-	bsc_subscr_put(bsub);
+	/* FIXME: implement stop paging in libmsc;
+	 * faking it for the unit tests to still work */
+	msc_fake_paging_request_stop(vsub);
 
 	/* Inform parts of the system we don't know */
 	sig_data.vsub	= vsub;
@@ -126,22 +79,21 @@ int subscr_paging_dispatch(unsigned int hooknum, unsigned int event,
 	return 0;
 }
 
-struct subscr_request *subscr_request_channel(struct vlr_subscr *vsub,
-					      int channel_type,
-					      gsm_cbfn *cbfn, void *param)
+struct subscr_request *subscr_request_conn(struct vlr_subscr *vsub, int channel_type, gsm_cbfn *cbfn,
+					   void *param)
 {
 	int rc;
 	struct subscr_request *request;
-	struct bsc_subscr *bsub;
-	struct gsm_network *net = vsub->vlr->user_ctx;
 
 	/* Start paging.. we know it is async so we can do it before */
 	if (!vsub->cs.is_paging) {
 		LOGP(DMM, LOGL_DEBUG, "Subscriber %s not paged yet.\n",
 		     vlr_subscr_name(vsub));
-		bsub = vlr_subscr_to_bsc_sub(net->bsc_subscribers, vsub);
-		rc = paging_request(net, bsub, channel_type, NULL, NULL);
-		bsc_subscr_put(bsub);
+
+		/* FIXME: implement paging in libmsc;
+		 * faking it for the unit tests to still work */
+		rc = msc_fake_paging_request(vsub);
+
 		if (rc <= 0) {
 			LOGP(DMM, LOGL_ERROR, "Subscriber %s paging failed: %d\n",
 			     vlr_subscr_name(vsub), rc);

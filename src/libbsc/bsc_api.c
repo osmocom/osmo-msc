@@ -264,6 +264,7 @@ struct gsm_subscriber_connection *bsc_subscr_con_allocate(struct gsm_lchan *lcha
 	conn->lchan = lchan;
 	conn->bts = lchan->ts->trx->bts;
 	conn->via_ran = RAN_GERAN_A;
+	conn->lac = conn->bts->location_area_code;
 	lchan->conn = conn;
 	llist_add_tail(&conn->entry, &net->subscr_conns);
 	return conn;

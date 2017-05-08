@@ -155,9 +155,6 @@ struct gsm_mncc {
 	int		notify; /* 0..127 */
 	int		emergency;
 	char		imsi[16];
-
-	unsigned char	lchan_type;
-	unsigned char	lchan_mode;
 };
 
 struct gsm_data_frame {
@@ -179,7 +176,6 @@ struct gsm_mncc_hello {
 	uint32_t	called_offset;
 	uint32_t	signal_offset;
 	uint32_t	emergency_offset;
-	uint32_t	lchan_type_offset;
 };
 
 struct gsm_mncc_rtp {

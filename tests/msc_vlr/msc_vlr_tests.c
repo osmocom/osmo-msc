@@ -252,33 +252,25 @@ void paging_expect_tmsi(uint32_t tmsi)
 	paging_expecting_imsi = NULL;
 }
 
-/* override, requires '-Wl,--wrap=paging_request' */
-int __real_paging_request(struct gsm_network *network, struct bsc_subscr *sub,
-			  int type, gsm_cbfn *cbfn, void *data);
-int __wrap_paging_request(struct gsm_network *network, struct bsc_subscr *sub,
-			  int type, gsm_cbfn *cbfn, void *data)
+/* override, requires '-Wl,--wrap=msc_fake_paging_request' */
+int __real_msc_fake_paging_request(struct vlr_subscr *vsub);
+int __wrap_msc_fake_paging_request(struct vlr_subscr *vsub)
 {
-	log("BTS/BSC sends out paging request to %s for channel type %d",
-	    bsc_subscr_name(sub), type);
+	log("BTS/BSC sends out paging request to %s",
+	    vlr_subscr_name(vsub));
 	OSMO_ASSERT(paging_expecting_imsi || (paging_expecting_tmsi != GSM_RESERVED_TMSI));
 	if (paging_expecting_imsi)
-		VERBOSE_ASSERT(strcmp(paging_expecting_imsi, sub->imsi), == 0, "%d");
+		VERBOSE_ASSERT(strcmp(paging_expecting_imsi, vsub->imsi), == 0, "%d");
 	if (paging_expecting_tmsi != GSM_RESERVED_TMSI)
-		VERBOSE_ASSERT(paging_expecting_tmsi, == sub->tmsi, "0x%08x");
+		VERBOSE_ASSERT(paging_expecting_tmsi, == vsub->tmsi, "0x%08x");
 	paging_sent = true;
 	paging_stopped = false;
 	return 1;
 }
 
-/* override, requires '-Wl,--wrap=paging_request_stop' */
-void __real_paging_request_stop(struct gsm_bts *_bts,
-				struct vlr_subscr *vsub,
-				struct gsm_subscriber_connection *conn,
-				struct msgb *msg);
-void __wrap_paging_request_stop(struct gsm_bts *_bts,
-				struct vlr_subscr *vsub,
-				struct gsm_subscriber_connection *conn,
-				struct msgb *msg)
+/* override, requires '-Wl,--wrap=msc_fake_paging_request_stop' */
+void __real_msc_fake_paging_request_stop(struct vlr_subscr *vsub);
+void __wrap_msc_fake_paging_request_stop(struct vlr_subscr *vsub)
 {
 	paging_stopped = true;
 }

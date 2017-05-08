@@ -253,9 +253,8 @@ DREF VLR subscr MSISDN:42342 usage increases to: 2
   llist_count(&vsub->cs.requests) == 0
 DREF VLR subscr MSISDN:42342 usage increases to: 3
 DMM Subscriber MSISDN:42342 not paged yet.
-  BTS/BSC sends out paging request to IMSI:901700000010650 for channel type 1
-  strcmp(paging_expecting_imsi, sub->imsi) == 0
-DREF BSC subscr IMSI:901700000010650 usage decreases to: 0
+  BTS/BSC sends out paging request to MSISDN:42342
+  strcmp(paging_expecting_imsi, vsub->imsi) == 0
 DREF VLR subscr MSISDN:42342 usage increases to: 4
   llist_count(&vsub->cs.requests) == 1
 DREF VLR subscr MSISDN:42342 usage decreases to: 3
@@ -335,7 +334,6 @@ DVLR Process_Access_Request_VLR(901700000010650){PR_ARQ_S_DONE}: Process Access 
 DVLR Subscr_Conn(901700000010650){SUBSCR_CONN_S_NEW}: Received Event SUBSCR_CONN_E_ACCEPTED
 DVLR Subscr_Conn(901700000010650){SUBSCR_CONN_S_NEW}: SUBSCR_CONN_FROM_PAGING_RESP
 DVLR Subscr_Conn(901700000010650){SUBSCR_CONN_S_NEW}: state_chg to SUBSCR_CONN_S_ACCEPTED
-DREF BSC subscr IMSI:901700000010650 usage decreases to: 0
 DREF VLR subscr MSISDN:42342 usage increases to: 5
 DREF MSISDN:42342: MSC conn use + 1 == 3
 - DTAP --> MS: 09015801000791447758100650004c0005802443f2000007101000000000445079da1e1ee7416937485e9ea7c965373d1d6683c270383b3d0ed3d36ff71c949e83c22072799e9687c5ec32a81d96afcbf4b4fb0c7ac3e9e9b7db05
@@ -665,9 +663,8 @@ DREF VLR subscr MSISDN:42342 usage increases to: 2
   llist_count(&vsub->cs.requests) == 0
 DREF VLR subscr MSISDN:42342 usage increases to: 3
 DMM Subscriber MSISDN:42342 not paged yet.
-  BTS/BSC sends out paging request to IMSI:901700000010650 for channel type 1
-  strcmp(paging_expecting_imsi, sub->imsi) == 0
-DREF BSC subscr IMSI:901700000010650 usage decreases to: 0
+  BTS/BSC sends out paging request to MSISDN:42342
+  strcmp(paging_expecting_imsi, vsub->imsi) == 0
 DREF VLR subscr MSISDN:42342 usage increases to: 4
   llist_count(&vsub->cs.requests) == 1
 DREF VLR subscr MSISDN:42342 usage decreases to: 3
@@ -747,7 +744,6 @@ DVLR Process_Access_Request_VLR(901700000010650){PR_ARQ_S_DONE}: Process Access 
 DVLR Subscr_Conn(901700000010650){SUBSCR_CONN_S_NEW}: Received Event SUBSCR_CONN_E_ACCEPTED
 DVLR Subscr_Conn(901700000010650){SUBSCR_CONN_S_NEW}: SUBSCR_CONN_FROM_PAGING_RESP
 DVLR Subscr_Conn(901700000010650){SUBSCR_CONN_S_NEW}: state_chg to SUBSCR_CONN_S_ACCEPTED
-DREF BSC subscr IMSI:901700000010650 usage decreases to: 0
 DREF VLR subscr MSISDN:42342 usage increases to: 5
 DREF MSISDN:42342: MSC conn use + 1 == 3
 - DTAP --> MS: 09015801000791447758100650004c0005802443f2000007101000000000445079da1e1ee7416937485e9ea7c965373d1d6683c270383b3d0ed3d36ff71c949e83c22072799e9687c5ec32a81d96afcbf4b4fb0c7ac3e9e9b7db05

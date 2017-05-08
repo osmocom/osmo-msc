@@ -270,61 +270,6 @@ int send_siemens_mrpci(struct gsm_lchan *lchan,
 	return rsl_siemens_mrpci(lchan, &mrpci);
 }
 
-int gsm48_extract_mi(uint8_t *classmark2_lv, int length, char *mi_string, uint8_t *mi_type)
-{
-	/* Check the size for the classmark */
-	if (length < 1 + *classmark2_lv)
-		return -1;
-
-	uint8_t *mi_lv = classmark2_lv + *classmark2_lv + 1;
-	if (length < 2 + *classmark2_lv + mi_lv[0])
-		return -2;
-
-	*mi_type = mi_lv[1] & GSM_MI_TYPE_MASK;
-	return gsm48_mi_to_string(mi_string, GSM48_MI_SIZE, mi_lv+1, *mi_lv);
-}
-
-int gsm48_paging_extract_mi(struct gsm48_pag_resp *resp, int length,
-			    char *mi_string, uint8_t *mi_type)
-{
-	static const uint32_t classmark_offset =
-		offsetof(struct gsm48_pag_resp, classmark2);
-	uint8_t *classmark2_lv = (uint8_t *) &resp->classmark2;
-	return gsm48_extract_mi(classmark2_lv, length - classmark_offset,
-				mi_string, mi_type);
-}
-
-int gsm48_handle_paging_resp(struct gsm_subscriber_connection *conn,
-			     struct msgb *msg, struct bsc_subscr *bsub)
-{
-	struct gsm_bts *bts = msg->lchan->ts->trx->bts;
-	struct gsm48_hdr *gh = msgb_l3(msg);
-	uint8_t *classmark2_lv = gh->data + 1;
-
-	if (is_siemens_bts(bts))
-		send_siemens_mrpci(msg->lchan, classmark2_lv);
-
-	if (!conn->bsub) {
-		conn->bsub = bsub;
-	} else if (conn->bsub != bsub) {
-		LOGP(DRR, LOGL_ERROR,
-		     "<- Channel already owned by someone else?\n");
-		bsc_subscr_put(bsub);
-		return -EINVAL;
-	} else {
-		DEBUGP(DRR, "<- Channel already owned by us\n");
-		bsc_subscr_put(bsub);
-		bsub = conn->bsub;
-	}
-
-	rate_ctr_inc(&bts->network->bsc_ctrs->ctr[BSC_CTR_PAGING_COMPLETED]);
-
-	/* Stop paging on the bts we received the paging response */
-	paging_request_stop(&bts->network->bts_list, conn->bts, bsub, conn,
-			    msg);
-	return 0;
-}
-
 /* Chapter 9.1.9: Ciphering Mode Command */
 int gsm48_send_rr_ciph_mode(struct gsm_lchan *lchan, int want_imeisv)
 {
