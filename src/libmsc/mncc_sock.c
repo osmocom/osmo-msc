@@ -224,7 +224,6 @@ static void queue_hello(struct mncc_sock_state *mncc)
 	hello->called_offset = offsetof(struct gsm_mncc, called);
 	hello->signal_offset = offsetof(struct gsm_mncc, signal);
 	hello->emergency_offset = offsetof(struct gsm_mncc, emergency);
-	hello->lchan_type_offset = offsetof(struct gsm_mncc, lchan_type);
 
 	msgb_enqueue(&mncc->net->upqueue, msg);
 	mncc->conn_bfd.when |= BSC_FD_WRITE;

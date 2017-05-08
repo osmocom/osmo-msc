@@ -60,8 +60,8 @@ COMMON_LDFLAGS = \
 	-Wl,--wrap=gsup_client_create \
 	-Wl,--wrap=gsup_client_send \
 	-Wl,--wrap=gsm0808_submit_dtap \
-	-Wl,--wrap=paging_request \
-	-Wl,--wrap=paging_request_stop \
+	-Wl,--wrap=msc_fake_paging_request \
+	-Wl,--wrap=msc_fake_paging_request_stop \
 	-Wl,--wrap=gsm340_gen_scts \
 	-Wl,--wrap=RAND_bytes \
 	$(NULL)

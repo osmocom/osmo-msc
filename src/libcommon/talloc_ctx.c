@@ -44,7 +44,6 @@ void talloc_ctx_init(void *ctx_root)
 	tall_authciphop_ctx = talloc_named_const(ctx_root, 0, "auth_ciph_oper");
 	tall_gsms_ctx = talloc_named_const(ctx_root, 0, "sms");
 	tall_subscr_ctx = talloc_named_const(ctx_root, 0, "subscriber");
-	tall_sub_req_ctx = talloc_named_const(ctx_root, 0, "subscr_request");
 	tall_call_ctx = talloc_named_const(ctx_root, 0, "gsm_call");
 	tall_paging_ctx = talloc_named_const(ctx_root, 0, "paging_request");
 	tall_sigh_ctx = talloc_named_const(ctx_root, 0, "signal_handler");

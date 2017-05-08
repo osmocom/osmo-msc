@@ -593,18 +593,12 @@ static void config_write_bts_single(struct vty *vty, struct gsm_bts *bts)
 				(sp->penalty_time*20)+20, VTY_NEWLINE);
 	}
 
-	/* Is periodic LU enabled or disabled? */
-	if (bts->si_common.chan_desc.t3212 == 0)
-		vty_out(vty, "  no periodic location update%s", VTY_NEWLINE);
-	else
-		vty_out(vty, "  periodic location update %u%s",
-			bts->si_common.chan_desc.t3212 * 6, VTY_NEWLINE);
-
 	if (gsm_bts_get_radio_link_timeout(bts) < 0)
 		vty_out(vty, "  radio-link-timeout infinite%s", VTY_NEWLINE);
 	else
 		vty_out(vty, "  radio-link-timeout %d%s",
 			gsm_bts_get_radio_link_timeout(bts), VTY_NEWLINE);
+	
 	vty_out(vty, "  channel allocator %s%s",
 		bts->chan_alloc_reverse ? "descending" : "ascending",
 		VTY_NEWLINE);
@@ -841,6 +835,11 @@ static int config_write_net(struct vty *vty)
 			vty_out(vty, " timezone %d %d%s",
 				gsmnet->tz.hr, gsmnet->tz.mn, VTY_NEWLINE);
 	}
+	if (gsmnet->t3212 == 0)
+		vty_out(vty, " no periodic location update%s", VTY_NEWLINE);
+	else
+		vty_out(vty, " periodic location update %u%s",
+			gsmnet->t3212 * 6, VTY_NEWLINE);
 
 	return CMD_SUCCESS;
 }
@@ -2262,34 +2261,6 @@ DEFUN(cfg_bts_penalty_time_rsvd, cfg_bts_penalty_time_rsvd_cmd,
 
 	bts->si_common.cell_ro_sel_par.present = 1;
 	bts->si_common.cell_ro_sel_par.penalty_time = 31;
-
-	return CMD_SUCCESS;
-}
-
-DEFUN(cfg_bts_per_loc_upd, cfg_bts_per_loc_upd_cmd,
-      "periodic location update <6-1530>",
-      "Periodic Location Updating Interval\n"
-      "Periodic Location Updating Interval\n"
-      "Periodic Location Updating Interval\n"
-      "Periodic Location Updating Interval in Minutes\n")
-{
-	struct gsm_bts *bts = vty->index;
-
-	bts->si_common.chan_desc.t3212 = atoi(argv[0]) / 6;
-
-	return CMD_SUCCESS;
-}
-
-DEFUN(cfg_bts_no_per_loc_upd, cfg_bts_no_per_loc_upd_cmd,
-      "no periodic location update",
-      NO_STR
-      "Periodic Location Updating Interval\n"
-      "Periodic Location Updating Interval\n"
-      "Periodic Location Updating Interval\n")
-{
-	struct gsm_bts *bts = vty->index;
-
-	bts->si_common.chan_desc.t3212 = 0;
 
 	return CMD_SUCCESS;
 }
@@ -4129,7 +4100,6 @@ int bsc_vty_init(struct gsm_network *network)
 	install_element_ve(&show_paging_group_cmd);
 
 	logging_vty_add_cmds(NULL);
-	osmo_stats_vty_add_cmds();
 
 	install_element(GSMNET_NODE, &cfg_net_neci_cmd);
 	install_element(GSMNET_NODE, &cfg_net_handover_cmd);
@@ -4189,8 +4159,6 @@ int bsc_vty_init(struct gsm_network *network)
 	install_element(BTS_NODE, &cfg_bts_rach_ec_allowed_cmd);
 	install_element(BTS_NODE, &cfg_bts_rach_ac_class_cmd);
 	install_element(BTS_NODE, &cfg_bts_ms_max_power_cmd);
-	install_element(BTS_NODE, &cfg_bts_per_loc_upd_cmd);
-	install_element(BTS_NODE, &cfg_bts_no_per_loc_upd_cmd);
 	install_element(BTS_NODE, &cfg_bts_cell_resel_hyst_cmd);
 	install_element(BTS_NODE, &cfg_bts_rxlev_acc_min_cmd);
 	install_element(BTS_NODE, &cfg_bts_cell_bar_qualify_cmd);

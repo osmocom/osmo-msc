@@ -553,57 +553,6 @@ DEFUN(ena_subscr_extension,
 	return CMD_WARNING;
 }
 
-DEFUN(ena_subscr_handover,
-      ena_subscr_handover_cmd,
-      "subscriber " SUBSCR_TYPES " ID handover BTS_NR",
-	SUBSCR_HELP "Handover the active connection\n"
-	"Number of the BTS to handover to\n")
-{
-	int ret;
-	struct gsm_subscriber_connection *conn;
-	struct gsm_bts *bts;
-	struct gsm_network *gsmnet = gsmnet_from_vty(vty);
-	struct vlr_subscr *vsub =
-			get_vsub_by_argv(gsmnet, argv[0], argv[1]);
-
-	if (!vsub) {
-		vty_out(vty, "%% No subscriber found for %s %s.%s",
-			argv[0], argv[1], VTY_NEWLINE);
-		return CMD_WARNING;
-	}
-
-	conn = connection_for_subscr(vsub);
-	if (!conn) {
-		vty_out(vty, "%% No active connection for subscriber %s %s.%s",
-			argv[0], argv[1], VTY_NEWLINE);
-		vlr_subscr_put(vsub);
-		return CMD_WARNING;
-	}
-
-	bts = gsm_bts_num(gsmnet, atoi(argv[2]));
-	if (!bts) {
-		vty_out(vty, "%% BTS with number(%d) could not be found.%s",
-			atoi(argv[2]), VTY_NEWLINE);
-		vlr_subscr_put(vsub);
-		return CMD_WARNING;
-	}
-
-	/* now start the handover */
-	ret = bsc_handover_start(conn->lchan, bts);
-	if (ret != 0) {
-		vty_out(vty, "%% Handover failed with errno %d.%s",
-			ret, VTY_NEWLINE);
-	} else {
-		vty_out(vty, "%% Handover started from %s",
-			gsm_lchan_name(conn->lchan));
-		vty_out(vty, " to %s.%s", gsm_lchan_name(conn->ho_lchan),
-			VTY_NEWLINE);
-	}
-
-	vlr_subscr_put(vsub);
-	return CMD_SUCCESS;
-}
-
 #define A3A8_ALG_TYPES "(none|xor|comp128v1)"
 #define A3A8_ALG_HELP 			\
 	"Use No A3A8 algorithm\n"	\
@@ -652,9 +601,7 @@ static int scall_cbfn(unsigned int subsys, unsigned int signal,
 
 	switch (signal) {
 	case S_SCALL_SUCCESS:
-		vty_out(vty, "%% silent call on ARFCN %u timeslot %u%s",
-			sigdata->conn->lchan->ts->trx->arfcn, sigdata->conn->lchan->ts->nr,
-			VTY_NEWLINE);
+		vty_out(vty, "%% silent call success%s", VTY_NEWLINE);
 		break;
 	case S_SCALL_EXPIRED:
 		vty_out(vty, "%% silent call expired paging%s", VTY_NEWLINE);
@@ -670,7 +617,6 @@ DEFUN(show_stats,
 {
 	struct gsm_network *net = gsmnet_from_vty(vty);
 
-	openbsc_vty_print_statistics(vty, net);
 	vty_out(vty, "Location Update         : %lu attach, %lu normal, %lu periodic%s",
 		net->msc_ctrs->ctr[MSC_CTR_LOC_UPDATE_TYPE_ATTACH].current,
 		net->msc_ctrs->ctr[MSC_CTR_LOC_UPDATE_TYPE_NORMAL].current,
@@ -1055,7 +1001,6 @@ int bsc_vty_init_extra(void)
 	install_element(ENABLE_NODE, &ena_subscr_extension_cmd);
 	install_element(ENABLE_NODE, &ena_subscr_authorized_cmd);
 	install_element(ENABLE_NODE, &ena_subscr_a3a8_cmd);
-	install_element(ENABLE_NODE, &ena_subscr_handover_cmd);
 	install_element(ENABLE_NODE, &subscriber_purge_cmd);
 	install_element(ENABLE_NODE, &smsqueue_trigger_cmd);
 	install_element(ENABLE_NODE, &smsqueue_max_cmd);
