@@ -829,7 +829,7 @@ class TestVTYSGSN(TestVTYGenericBSC):
 
     def vty_command(self):
         return ["./src/gprs/osmo-sgsn", "-c",
-                "doc/examples/osmo-sgsn/osmo-sgsn.cfg"]
+                "doc/examples/osmo-sgsn/osmo-sgsn-accept-all.cfg"]
 
     def vty_app(self):
         return (4245, "./src/gprs/osmo-sgsn", "OsmoSGSN", "sgsn")
