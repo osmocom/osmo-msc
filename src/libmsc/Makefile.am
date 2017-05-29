@@ -30,6 +30,7 @@ libmsc_a_SOURCES = \
 	db.c \
 	gsm_04_08.c \
 	gsm_04_11.c \
+	gsm_04_14.c \
 	gsm_04_80.c \
 	gsm_subscriber.c \
 	iucs.c \
