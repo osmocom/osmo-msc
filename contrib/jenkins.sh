@@ -43,7 +43,6 @@ echo
 set -x
 
 cd "$base"
-cd openbsc
 autoreconf --install --force
 ./configure --enable-osmo-bsc --enable-nat $SMPP $MGCP $IU --enable-vty-tests --enable-external-tests
 $MAKE $PARALLEL_MAKE
