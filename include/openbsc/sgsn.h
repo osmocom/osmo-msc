@@ -5,6 +5,7 @@
 #include <osmocom/core/msgb.h>
 #include <osmocom/crypt/gprs_cipher.h>
 #include <osmocom/gprs/gprs_ns.h>
+#include <osmocom/ranap/iu_client.h>
 #include <openbsc/gprs_sgsn.h>
 #include <openbsc/oap_client.h>
 #include <openbsc/common.h>
@@ -112,7 +113,7 @@ struct sgsn_config {
 	} dcomp_v42bis;
 
 	struct {
-		enum nsap_addr_enc rab_assign_addr_enc;
+		enum ranap_nsap_addr_enc rab_assign_addr_enc;
 	} iu;
 };
 

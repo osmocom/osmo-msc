@@ -21,6 +21,8 @@
  *
  */
 
+#include <osmocom/ranap/iu_client.h>
+
 #include <openbsc/osmo_msc.h>
 #include <openbsc/bsc_api.h>
 #include <openbsc/debug.h>
@@ -28,7 +30,6 @@
 #include <openbsc/db.h>
 #include <openbsc/vlr.h>
 #include <openbsc/osmo_msc.h>
-#include <openbsc/iu.h>
 
 #include <openbsc/gsm_04_11.h>
 
@@ -284,7 +285,7 @@ static void msc_subscr_conn_release_all(struct gsm_subscriber_connection *conn, 
 
 	switch (conn->via_ran) {
 	case RAN_UTRAN_IU:
-		iu_tx_release(conn->iu.ue_ctx, NULL);
+		ranap_iu_tx_release(conn->iu.ue_ctx, NULL);
 		/* FIXME: keep the conn until the Iu Release Outcome is
 		 * received from the UE, or a timeout expires. For now, the log
 		 * says "unknown UE" for each release outcome. */

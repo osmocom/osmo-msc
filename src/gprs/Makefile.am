@@ -106,7 +106,6 @@ osmo_sgsn_LDADD = \
 	$(NULL)
 if BUILD_IU
 osmo_sgsn_LDADD += \
-	$(top_builddir)/src/libiu/libiu.a \
 	$(LIBOSMOSIGTRAN_LIBS) \
 	$(LIBOSMORANAP_LIBS) \
 	$(LIBASN1C_LIBS) \

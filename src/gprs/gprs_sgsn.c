@@ -30,6 +30,7 @@
 #include <osmocom/gprs/gprs_ns.h>
 #include <osmocom/gprs/gprs_bssgp.h>
 #include <osmocom/gsm/protocol/gsm_04_08_gprs.h>
+#include <osmocom/ranap/iu_client.h>
 
 #include <openbsc/gprs_subscriber.h>
 #include <openbsc/debug.h>
@@ -39,7 +40,6 @@
 #include <openbsc/gprs_utils.h>
 #include <openbsc/signal.h>
 #include "openbsc/gprs_llc.h"
-#include <openbsc/iu.h>
 
 #include <pdp.h>
 
