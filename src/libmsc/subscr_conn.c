@@ -24,15 +24,14 @@
 #include <osmocom/core/logging.h>
 #include <osmocom/core/fsm.h>
 #include <osmocom/core/signal.h>
+#include <osmocom/ranap/iu_client.h>
 
 #include <openbsc/osmo_msc.h>
 #include <openbsc/vlr.h>
 #include <openbsc/debug.h>
 #include <openbsc/transaction.h>
 #include <openbsc/signal.h>
-#include <openbsc/iu.h>
 #include <openbsc/a_iface.h>
-
 
 #define SUBSCR_CONN_TIMEOUT 5 /* seconds */
 

@@ -13,6 +13,7 @@
 
 #include <osmocom/crypt/auth.h>
 #include <osmocom/sigtran/sccp_sap.h>
+#include <osmocom/ranap/iu_client.h>
 
 #include <openbsc/common.h>
 #include <openbsc/rest_octets.h>
@@ -202,7 +203,7 @@ struct gsm_subscriber_connection {
 
 	/* which Iu-CS connection, if any. */
 	struct {
-		struct ue_conn_ctx *ue_ctx;
+		struct ranap_ue_conn_ctx *ue_ctx;
 		int integrity_protection;
 		unsigned int mgcp_rtp_endpoint;
 		uint8_t rab_id;
@@ -486,7 +487,7 @@ struct gsm_network {
 	struct {
 		/* CS7 instance id number (set via VTY) */
 		uint32_t cs7_instance;
-		enum nsap_addr_enc rab_assign_addr_enc;
+		enum ranap_nsap_addr_enc rab_assign_addr_enc;
 		struct osmo_sccp_instance *sccp;
 	} iu;
 

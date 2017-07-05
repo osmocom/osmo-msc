@@ -74,7 +74,6 @@ sgsn_test_LDADD = \
 
 if BUILD_IU
 sgsn_test_LDADD += \
-	$(top_builddir)/src/libiu/libiu.a \
 	$(LIBOSMORANAP_LIBS) \
 	$(LIBOSMOSIGTRAN_LIBS) \
 	$(LIBASN1C_LIBS) \
