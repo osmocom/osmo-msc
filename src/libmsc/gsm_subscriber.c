@@ -20,6 +20,8 @@
  *
  */
 
+#include "../../bscconfig.h"
+
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -32,6 +34,12 @@
 
 #include <osmocom/vty/vty.h>
 
+#ifdef BUILD_IU
+#include <osmocom/ranap/iu_client.h>
+#else
+#include <openbsc/iu_dummy.h>
+#endif
+
 #include <openbsc/gsm_subscriber.h>
 #include <openbsc/gsm_04_08.h>
 #include <openbsc/debug.h>
@@ -40,7 +48,6 @@
 #include <openbsc/db.h>
 #include <openbsc/chan_alloc.h>
 #include <openbsc/vlr.h>
-#include <openbsc/iu.h>
 #include <openbsc/osmo_msc.h>
 #include <openbsc/msc_ifaces.h>
 #include <openbsc/a_iface.h>
@@ -108,10 +115,10 @@ int msc_paging_request(struct vlr_subscr *vsub)
 	case RAN_GERAN_A:
 		return a_iface_tx_paging(vsub->imsi, vsub->tmsi, vsub->lac);
 	case RAN_UTRAN_IU:
-		return iu_page_cs(vsub->imsi,
-				  vsub->tmsi == GSM_RESERVED_TMSI?
-				  NULL : &vsub->tmsi,
-				  vsub->lac);
+		return ranap_iu_page_cs(vsub->imsi,
+					vsub->tmsi == GSM_RESERVED_TMSI?
+					NULL : &vsub->tmsi,
+					vsub->lac);
 	default:
 		break;
 	}

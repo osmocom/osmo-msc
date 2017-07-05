@@ -52,7 +52,7 @@
 #include <openbsc/gprs_sndcp.h>
 
 #ifdef BUILD_IU
-#include <openbsc/iu.h>
+#include <osmocom/ranap/iu_client.h>
 #include <osmocom/ranap/ranap_ies_defs.h>
 #endif
 
@@ -548,7 +548,7 @@ static int delete_pdp_conf(struct pdp_t *pdp, void *cbp, int cause)
 		} else {
 #ifdef BUILD_IU
 			/* Deactivate radio bearer */
-			iu_rab_deact(pctx->mm->iu.ue_ctx, 1);
+			ranap_iu_rab_deact(pctx->mm->iu.ue_ctx, 1);
 #else
 			return -ENOTSUP;
 #endif
@@ -687,7 +687,7 @@ static int cb_data_ind(struct pdp_t *lib, void *packet, unsigned int len)
 #ifdef BUILD_IU
 		/* Ignore the packet for now and page the UE to get the RAB
 		 * reestablished */
-		iu_page_ps(mm->imsi, &mm->p_tmsi, mm->ra.lac, mm->ra.rac);
+		ranap_iu_page_ps(mm->imsi, &mm->p_tmsi, mm->ra.lac, mm->ra.rac);
 
 		return 0;
 #else

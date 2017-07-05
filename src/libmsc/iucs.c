@@ -25,17 +25,17 @@
 #include <inttypes.h>
 
 #include <osmocom/core/logging.h>
+#include <osmocom/ranap/iu_client.h>
 #include <openbsc/debug.h>
 
 #include <openbsc/gsm_data.h>
-#include <openbsc/iu.h>
 #include <openbsc/gsm_subscriber.h>
 #include <openbsc/osmo_msc.h>
 #include <openbsc/vlr.h>
 
 /* For A-interface see libbsc/bsc_api.c subscr_con_allocate() */
 static struct gsm_subscriber_connection *subscr_conn_allocate_iu(struct gsm_network *network,
-								 struct ue_conn_ctx *ue,
+								 struct ranap_ue_conn_ctx *ue,
 								 uint16_t lac)
 {
 	struct gsm_subscriber_connection *conn;
@@ -57,7 +57,7 @@ static struct gsm_subscriber_connection *subscr_conn_allocate_iu(struct gsm_netw
 	return conn;
 }
 
-static int same_ue_conn(struct ue_conn_ctx *a, struct ue_conn_ctx *b)
+static int same_ue_conn(struct ranap_ue_conn_ctx *a, struct ranap_ue_conn_ctx *b)
 {
 	if (a == b)
 		return 1;
@@ -103,7 +103,7 @@ static inline void log_subscribers(struct gsm_network *network)
  * connection IDs, or return NULL if not found. */
 struct gsm_subscriber_connection *subscr_conn_lookup_iu(
 						struct gsm_network *network,
-						struct ue_conn_ctx *ue)
+						struct ranap_ue_conn_ctx *ue)
 {
 	struct gsm_subscriber_connection *conn;
 
@@ -126,7 +126,7 @@ struct gsm_subscriber_connection *subscr_conn_lookup_iu(
 }
 
 /* Receive MM/CC/... message from IuCS (SCCP user SAP).
- * msg->dst must reference a struct ue_conn_ctx, which identifies the peer that
+ * msg->dst must reference a struct ranap_ue_conn_ctx, which identifies the peer that
  * sent the msg.
  *
  * For A-interface see libbsc/bsc_api.c gsm0408_rcvmsg(). */
@@ -134,10 +134,10 @@ int gsm0408_rcvmsg_iucs(struct gsm_network *network, struct msgb *msg,
 			uint16_t *lac)
 {
 	int rc;
-	struct ue_conn_ctx *ue_ctx;
+	struct ranap_ue_conn_ctx *ue_ctx;
 	struct gsm_subscriber_connection *conn;
 
-	ue_ctx = (struct ue_conn_ctx*)msg->dst;
+	ue_ctx = (struct ranap_ue_conn_ctx*)msg->dst;
 
 	/* TODO: are there message types that could allow us to skip this
 	 * search? */

@@ -58,7 +58,6 @@
 #include <openbsc/sgsn.h>
 #include <openbsc/gprs_llc.h>
 #include <openbsc/gprs_gmm.h>
-#include <openbsc/iu.h>
 
 #include <osmocom/ctrl/control_if.h>
 #include <osmocom/ctrl/ports.h>
@@ -68,6 +67,10 @@
 #include <gtp.h>
 
 #include "../../bscconfig.h"
+
+#if BUILD_IU
+#include <osmocom/ranap/iu_client.h>
+#endif
 
 #define _GNU_SOURCE
 #include <getopt.h>
@@ -322,7 +325,7 @@ static const struct log_info gprs_log_info = {
 	.num_cat = ARRAY_SIZE(gprs_categories),
 };
 
-int sgsn_ranap_iu_event(struct ue_conn_ctx *ctx, enum iu_event_type type, void *data);
+int sgsn_ranap_iu_event(struct ue_conn_ctx *ctx, enum ranap_iu_event_type type, void *data);
 
 int main(int argc, char **argv)
 {
@@ -451,7 +454,7 @@ int main(int argc, char **argv)
 		return 8;
 	}
 
-	iu_init(tall_bsc_ctx, sccp, gsm0408_gprs_rcvmsg_iu, sgsn_ranap_iu_event);
+	ranap_iu_init(tall_bsc_ctx, DRANAP, "OsmoSGSN-IuPS", sccp, gsm0408_gprs_rcvmsg_iu, sgsn_ranap_iu_event);
 #endif
 
 	if (daemonize) {

@@ -48,7 +48,7 @@
 #include "../../bscconfig.h"
 
 #ifdef BUILD_IU
-#include <openbsc/iu.h>
+#include <osmocom/ranap/iu_client.h>
 #endif
 
 static struct sgsn_config *g_cfg = NULL;
@@ -291,7 +291,7 @@ static int config_write_sgsn(struct vty *vty)
 		vty_out(vty, " no compression v42bis%s", VTY_NEWLINE);
 
 #ifdef BUILD_IU
-	iu_vty_config_write(vty, " ");
+	ranap_iu_vty_config_write(vty, " ");
 #endif
 
 	return CMD_SUCCESS;
@@ -1285,7 +1285,7 @@ int sgsn_vty_init(struct sgsn_config *cfg)
 	install_element(SGSN_NODE, &cfg_comp_v42bisp_cmd);
 
 #ifdef BUILD_IU
-	iu_vty_init(SGSN_NODE, &g_cfg->iu.rab_assign_addr_enc);
+	ranap_iu_vty_init(SGSN_NODE, &g_cfg->iu.rab_assign_addr_enc);
 #endif
 	return 0;
 }

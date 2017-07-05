@@ -29,7 +29,6 @@
 #include <openbsc/gsm_data.h>
 #include <openbsc/a_iface_bssap.h>
 #include <openbsc/a_iface.h>
-#include <openbsc/iu.h>
 #include <openbsc/osmo_msc.h>
 #include <osmocom/core/byteswap.h>
 #include <openbsc/a_reset.h>

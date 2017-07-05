@@ -72,13 +72,11 @@
 #include <osmocom/core/utils.h>
 #include <osmocom/gsm/tlv.h>
 #include <osmocom/crypt/auth.h>
-
-#include <openbsc/msc_ifaces.h>
-
 #ifdef BUILD_IU
-#include <openbsc/iu.h>
+#include <osmocom/ranap/iu_client.h>
 #endif
 
+#include <openbsc/msc_ifaces.h>
 #include <openbsc/a_iface.h>
 
 #include <assert.h>
@@ -3412,7 +3410,7 @@ static int msc_vlr_set_ciph_mode(void *msc_conn_ref,
 #ifdef BUILD_IU
 		DEBUGP(DMM, "-> SECURITY MODE CONTROL %s\n",
 		       vlr_subscr_name(conn->vsub));
-		return iu_tx_sec_mode_cmd(conn->iu.ue_ctx, tuple, 0, 1);
+		return ranap_iu_tx_sec_mode_cmd(conn->iu.ue_ctx, &tuple->vec, 0, 1);
 #else
 		LOGP(DMM, LOGL_ERROR, "Cannot send Security Mode Control over RAN_UTRAN_IU,"
 		     " built without Iu support\n");

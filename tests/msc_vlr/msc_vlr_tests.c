@@ -34,8 +34,13 @@
 #include <openbsc/gsm_04_11.h>
 #include <openbsc/bsc_subscriber.h>
 #include <openbsc/debug.h>
-#include <openbsc/iu.h>
+
+#if BUILD_IU
 #include <openbsc/iucs_ranap.h>
+#include <osmocom/ranap/iu_client.h>
+#else
+#include <openbsc/iu_dummy.h>
+#endif
 
 #include "msc_vlr_tests.h"
 
@@ -152,8 +157,8 @@ struct gsm_subscriber_connection *conn_new(void)
 	conn->bts = the_bts;
 	conn->via_ran = rx_from_ran;
 	if (conn->via_ran == RAN_UTRAN_IU) {
-		struct ue_conn_ctx *ue_ctx = talloc_zero(conn, struct ue_conn_ctx);
-		*ue_ctx = (struct ue_conn_ctx){
+		struct ranap_ue_conn_ctx *ue_ctx = talloc_zero(conn, struct ranap_ue_conn_ctx);
+		*ue_ctx = (struct ranap_ue_conn_ctx){
 			.conn_id = 42,
 		};
 		conn->iu.ue_ctx = ue_ctx;
@@ -295,9 +300,9 @@ int _paging_sent(enum ran_type via_ran, const char *imsi, uint32_t tmsi, uint32_
 	return 1;
 }
 
-/* override, requires '-Wl,--wrap=iu_page_cs' */
-int __real_iu_page_cs(const char *imsi, const uint32_t *tmsi, uint16_t lac);
-int __wrap_iu_page_cs(const char *imsi, const uint32_t *tmsi, uint16_t lac)
+/* override, requires '-Wl,--wrap=ranap_iu_page_cs' */
+int __real_ranap_iu_page_cs(const char *imsi, const uint32_t *tmsi, uint16_t lac);
+int __wrap_ranap_iu_page_cs(const char *imsi, const uint32_t *tmsi, uint16_t lac)
 {
 	return _paging_sent(RAN_UTRAN_IU, imsi, tmsi ? *tmsi : GSM_RESERVED_TMSI, lac);
 }
@@ -472,16 +477,16 @@ int _validate_dtap(struct msgb *msg, enum ran_type to_ran)
 	return 0;
 }
 
-/* override, requires '-Wl,--wrap=iu_tx' */
-int __real_iu_tx(struct msgb *msg, uint8_t sapi);
-int __wrap_iu_tx(struct msgb *msg, uint8_t sapi)
+/* override, requires '-Wl,--wrap=ranap_iu_tx' */
+int __real_ranap_iu_tx(struct msgb *msg, uint8_t sapi);
+int __wrap_ranap_iu_tx(struct msgb *msg, uint8_t sapi)
 {
 	return _validate_dtap(msg, RAN_UTRAN_IU);
 }
 
-/* override, requires '-Wl,--wrap=iu_tx_release' */
-int __real_iu_tx_release(struct ue_conn_ctx *ctx, const struct RANAP_Cause *cause);
-int __wrap_iu_tx_release(struct ue_conn_ctx *ctx, const struct RANAP_Cause *cause)
+/* override, requires '-Wl,--wrap=ranap_iu_tx_release' */
+int __real_ranap_iu_tx_release(struct ranap_ue_conn_ctx *ctx, const struct RANAP_Cause *cause);
+int __wrap_ranap_iu_tx_release(struct ranap_ue_conn_ctx *ctx, const struct RANAP_Cause *cause)
 {
 	btw("Iu Release --%s--> MS", ran_type_name(RAN_UTRAN_IU));
 	OSMO_ASSERT(iu_release_expected);
@@ -491,8 +496,8 @@ int __wrap_iu_tx_release(struct ue_conn_ctx *ctx, const struct RANAP_Cause *caus
 }
 
 /* override, requires '-Wl,--wrap=iu_tx_common_id' */
-int __real_iu_tx_common_id(struct ue_conn_ctx *ue_ctx, const char *imsi);
-int __wrap_iu_tx_common_id(struct ue_conn_ctx *ue_ctx, const char *imsi)
+int __real_ranap_iu_tx_common_id(struct ranap_ue_conn_ctx *ue_ctx, const char *imsi);
+int __wrap_ranap_iu_tx_common_id(struct ranap_ue_conn_ctx *ue_ctx, const char *imsi)
 {
 	btw("Iu Common ID --%s--> MS (IMSI=%s)", ran_type_name(RAN_UTRAN_IU), imsi);
 	return 0;

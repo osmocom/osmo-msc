@@ -50,13 +50,6 @@ COMMON_LDADD = \
 	$(top_builddir)/src/libtrau/libtrau.a \
 	$(top_builddir)/src/libmgcp/libmgcp.a \
 	$(top_builddir)/src/libcommon/libcommon.a \
-	$(NULL)
-if BUILD_IU
-COMMON_LDADD += \
-	$(top_builddir)/src/libiu/libiu.a \
-	$(NULL)
-endif
-COMMON_LDADD += \
 	$(LIBSMPP34_LIBS) \
 	$(LIBOSMOCORE_LIBS) \
 	$(LIBOSMOGSM_LIBS) \
@@ -76,10 +69,10 @@ COMMON_LDFLAGS = \
 	-Wl,--wrap=a_iface_tx_dtap \
 	-Wl,--wrap=a_iface_tx_clear_cmd \
 	-Wl,--wrap=a_iface_tx_paging \
-	-Wl,--wrap=iu_tx \
-	-Wl,--wrap=iu_tx_release \
-	-Wl,--wrap=iu_tx_common_id \
-	-Wl,--wrap=iu_page_cs \
+	-Wl,--wrap=ranap_iu_tx \
+	-Wl,--wrap=ranap_iu_tx_release \
+	-Wl,--wrap=ranap_iu_tx_common_id \
+	-Wl,--wrap=ranap_iu_page_cs \
 	-Wl,--wrap=msc_stop_paging \
 	-Wl,--wrap=gsm340_gen_scts \
 	-Wl,--wrap=RAND_bytes \

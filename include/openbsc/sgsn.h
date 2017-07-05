@@ -112,7 +112,7 @@ struct sgsn_config {
 	} dcomp_v42bis;
 
 	struct {
-		enum nsap_addr_enc rab_assign_addr_enc;
+		int rab_assign_addr_enc;
 	} iu;
 };
 

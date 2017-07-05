@@ -50,7 +50,6 @@ osmo_msc_LDADD = \
 	$(NULL)
 if BUILD_IU
 osmo_msc_LDADD += \
-	$(top_builddir)/src/libiu/libiu.a \
 	$(LIBOSMORANAP_LIBS) \
 	$(LIBASN1C_LIBS) \
 	$(NULL)

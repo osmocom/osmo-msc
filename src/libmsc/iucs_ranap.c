@@ -27,11 +27,11 @@
 #include <osmocom/core/logging.h>
 
 #include <osmocom/ranap/ranap_ies_defs.h>
+#include <osmocom/ranap/iu_client.h>
 
 #include <openbsc/debug.h>
 #include <openbsc/gsm_data.h>
 #include <openbsc/gsm_subscriber.h>
-#include <openbsc/iu.h>
 #include <openbsc/iucs.h>
 #include <openbsc/vlr.h>
 #include <openbsc/iucs_ranap.h>
@@ -67,7 +67,7 @@ int iucs_rx_sec_mode_compl(struct gsm_subscriber_connection *conn,
 }
 
 int iucs_rx_ranap_event(struct gsm_network *network,
-			struct ue_conn_ctx *ue_ctx, int type, void *data)
+			struct ranap_ue_conn_ctx *ue_ctx, int type, void *data)
 {
 	struct gsm_subscriber_connection *conn;
 
@@ -79,19 +79,19 @@ int iucs_rx_ranap_event(struct gsm_network *network,
 	}
 
 	switch (type) {
-	case IU_EVENT_IU_RELEASE:
-	case IU_EVENT_LINK_INVALIDATED:
+	case RANAP_IU_EVENT_IU_RELEASE:
+	case RANAP_IU_EVENT_LINK_INVALIDATED:
 		LOGP(DIUCS, LOGL_INFO, "IuCS release for %s\n",
 		     vlr_subscr_name(conn->vsub));
 		msc_subscr_conn_close(conn, 0);
 		return 0;
 
-	case IU_EVENT_SECURITY_MODE_COMPLETE:
+	case RANAP_IU_EVENT_SECURITY_MODE_COMPLETE:
 		LOGP(DIUCS, LOGL_INFO, "IuCS security mode complete for %s\n",
 		     vlr_subscr_name(conn->vsub));
 		return iucs_rx_sec_mode_compl(conn,
 					      (RANAP_SecurityModeCompleteIEs_t*)data);
-	case IU_EVENT_RAB_ASSIGN:
+	case RANAP_IU_EVENT_RAB_ASSIGN:
 		return iucs_rx_rab_assign(conn,
 				(RANAP_RAB_SetupOrModifiedItemIEs_t*)data);
 	default:

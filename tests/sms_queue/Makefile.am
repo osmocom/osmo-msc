@@ -37,13 +37,6 @@ sms_queue_test_LDADD = \
 	$(top_builddir)/src/libmgcp/libmgcp.a \
 	$(top_builddir)/src/libcommon/libcommon.a \
 	$(top_builddir)/src/libcommon-cs/libcommon-cs.a \
-	$(NULL)
-if BUILD_IU
-sms_queue_test_LDADD += \
-	$(top_builddir)/src/libiu/libiu.a \
-	$(NULL)
-endif
-sms_queue_test_LDADD += \
 	$(LIBSMPP34_LIBS) \
 	$(LIBOSMOCORE_LIBS) \
 	$(LIBOSMOGSM_LIBS) \

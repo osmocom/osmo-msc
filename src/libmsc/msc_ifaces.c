@@ -23,7 +23,6 @@
 #include <openbsc/debug.h>
 #include <openbsc/gsm_data.h>
 #include <openbsc/msc_ifaces.h>
-#include <openbsc/iu.h>
 #include <openbsc/gsm_subscriber.h>
 #include <openbsc/transaction.h>
 #include <openbsc/mgcp.h>
@@ -34,10 +33,13 @@
 #include "../../bscconfig.h"
 
 #ifdef BUILD_IU
+#include <osmocom/ranap/iu_client.h>
 extern struct msgb *ranap_new_msg_rab_assign_voice(uint8_t rab_id,
 						   uint32_t rtp_ip,
 						   uint16_t rtp_port,
 						   bool use_x213_nsap);
+#else
+#include <openbsc/iu_dummy.h>
 #endif /* BUILD_IU */
 
 static int msc_tx(struct gsm_subscriber_connection *conn, struct msgb *msg)
@@ -57,7 +59,7 @@ static int msc_tx(struct gsm_subscriber_connection *conn, struct msgb *msg)
 
 	case RAN_UTRAN_IU:
 		msg->dst = conn->iu.ue_ctx;
-		return iu_tx(msg, 0);
+		return ranap_iu_tx(msg, 0);
 
 	default:
 		LOGP(DMSC, LOGL_ERROR,
@@ -134,10 +136,10 @@ int msc_tx_common_id(struct gsm_subscriber_connection *conn)
 
 	DEBUGP(DIUCS, "%s: tx CommonID %s\n",
 	       vlr_subscr_name(conn->vsub), conn->vsub->imsi);
-	return iu_tx_common_id(conn->iu.ue_ctx, conn->vsub->imsi);
+	return ranap_iu_tx_common_id(conn->iu.ue_ctx, conn->vsub->imsi);
 }
 
-static int iu_rab_act_cs(struct ue_conn_ctx *uectx, uint8_t rab_id,
+static int iu_rab_act_cs(struct ranap_ue_conn_ctx *uectx, uint8_t rab_id,
 			 uint32_t rtp_ip, uint16_t rtp_port)
 {
 #ifdef BUILD_IU
@@ -145,7 +147,7 @@ static int iu_rab_act_cs(struct ue_conn_ctx *uectx, uint8_t rab_id,
 	bool use_x213_nsap;
 	uint32_t conn_id = uectx->conn_id;
 
-	use_x213_nsap = (uectx->rab_assign_addr_enc == NSAP_ADDR_ENC_X213);
+	use_x213_nsap = (uectx->rab_assign_addr_enc == RANAP_NSAP_ADDR_ENC_X213);
 
 	LOGP(DIUCS, LOGL_DEBUG, "Assigning RAB: conn_id=%u, rab_id=%d,"
 	     " rtp=%x:%u, use_x213_nsap=%d\n", conn_id, rab_id, rtp_ip,
@@ -155,7 +157,7 @@ static int iu_rab_act_cs(struct ue_conn_ctx *uectx, uint8_t rab_id,
 					     use_x213_nsap);
 	msg->l2h = msg->data;
 
-	if (iu_rab_act(uectx, msg))
+	if (ranap_iu_rab_act(uectx, msg))
 		LOGP(DIUCS, LOGL_ERROR, "Failed to send RAB Assignment:"
 		     " conn_id=%d rab_id=%d rtp=%x:%u\n",
 		     conn_id, rab_id, rtp_ip, rtp_port);
@@ -170,7 +172,6 @@ static void mgcp_response_rab_act_cs_crcx(struct mgcp_response *r, void *priv)
 {
 	struct gsm_trans *trans = priv;
 	struct gsm_subscriber_connection *conn = trans->conn;
-	struct ue_conn_ctx *uectx = conn->iu.ue_ctx;
 	uint32_t rtp_ip;
 	int rc;
 
@@ -195,7 +196,7 @@ static void mgcp_response_rab_act_cs_crcx(struct mgcp_response *r, void *priv)
 
 	if (trans->conn->via_ran == RAN_UTRAN_IU) {
 		/* Assign a voice channel via RANAP on 3G */
-		if (iu_rab_act_cs(uectx, conn->iu.rab_id, rtp_ip, conn->rtp.port_subscr))
+		if (iu_rab_act_cs(conn->iu.ue_ctx, conn->iu.rab_id, rtp_ip, conn->rtp.port_subscr))
 			goto rab_act_cs_error;
 	} else if (trans->conn->via_ran == RAN_GERAN_A) {
 		/* Assign a voice channel via A on 2G */
@@ -234,7 +235,7 @@ int msc_call_assignment(struct gsm_trans *trans)
 	mgcp = conn->network->mgcpgw.client;
 
 #ifdef BUILD_IU
-	/* FIXME: HACK. where to scope the RAB Id? At the conn / subscriber / ue_conn_ctx? */
+	/* FIXME: HACK. where to scope the RAB Id? At the conn / subscriber / ranap_ue_conn_ctx? */
 	static uint8_t next_iu_rab_id = 1;
 	if (conn->via_ran == RAN_UTRAN_IU)
 		conn->iu.rab_id = next_iu_rab_id ++;

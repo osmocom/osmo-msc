@@ -23,15 +23,19 @@
 /* NOTE: I would have liked to call this the MSC_NODE instead of the MSC_NODE,
  * but MSC_NODE already exists to configure a remote MSC for osmo-bsc. */
 
+#include "../../bscconfig.h"
+
 #include <inttypes.h>
 
 #include <osmocom/vty/command.h>
+#ifdef BUILD_IU
+#include <osmocom/ranap/iu_client.h>
+#endif
 
 #include <openbsc/vty.h>
 #include <openbsc/gsm_data.h>
 #include <openbsc/gsm_subscriber.h>
 #include <openbsc/vlr.h>
-#include <openbsc/iu.h>
 
 static struct cmd_node msc_node = {
 	MSC_NODE,
@@ -99,7 +103,7 @@ static int config_write_msc(struct vty *vty)
 
 	mgcpgw_client_config_write(vty, " ");
 #ifdef BUILD_IU
-	iu_vty_config_write(vty, " ");
+	ranap_iu_vty_config_write(vty, " ");
 #endif
 
 	return CMD_SUCCESS;
@@ -153,6 +157,6 @@ void msc_vty_init(struct gsm_network *msc_network)
 
 	mgcpgw_client_vty_init(MSC_NODE, &msc_network->mgcpgw.conf);
 #ifdef BUILD_IU
-	iu_vty_init(MSC_NODE, &msc_network->iu.rab_assign_addr_enc);
+	ranap_iu_vty_init(MSC_NODE, &msc_network->iu.rab_assign_addr_enc);
 #endif
 }

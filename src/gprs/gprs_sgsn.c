@@ -40,13 +40,18 @@
 #include <openbsc/gprs_utils.h>
 #include <openbsc/signal.h>
 #include "openbsc/gprs_llc.h"
-#include <openbsc/iu.h>
 
 #include <pdp.h>
 
 #include <time.h>
 
 #include <openssl/rand.h>
+
+#include "../../bscconfig.h"
+
+#if BUILD_IU
+#include <osmocom/ranap/iu_client.h>
+#endif
 
 #define GPRS_LLME_CHECK_TICK 30
 
@@ -246,6 +251,7 @@ struct sgsn_mm_ctx *sgsn_mm_ctx_alloc_gb(uint32_t tlli,
 /* Allocate a new SGSN MM context */
 struct sgsn_mm_ctx *sgsn_mm_ctx_alloc_iu(void *uectx)
 {
+#if BUILD_IU
 	struct sgsn_mm_ctx *ctx;
 
 	ctx = talloc_zero(tall_bsc_ctx, struct sgsn_mm_ctx);
@@ -274,6 +280,9 @@ struct sgsn_mm_ctx *sgsn_mm_ctx_alloc_iu(void *uectx)
 	llist_add(&ctx->list, &sgsn_mm_ctxts);
 
 	return ctx;
+#else
+	return NULL;
+#endif
 }
 
 

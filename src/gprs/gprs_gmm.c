@@ -52,6 +52,7 @@
 #ifdef BUILD_IU
 #include <osmocom/ranap/ranap_ies_defs.h>
 #include <osmocom/ranap/ranap_msg_factory.h>
+#include <osmocom/ranap/iu_client.h>
 #endif
 
 #include <openbsc/debug.h>
@@ -67,7 +68,6 @@
 #include <openbsc/gprs_subscriber.h>
 #include <openbsc/sgsn.h>
 #include <openbsc/signal.h>
-#include <openbsc/iu.h>
 #include <openbsc/gprs_sndcp.h>
 
 #include <pdp.h>
@@ -174,7 +174,7 @@ void mmctx_set_mm_state(struct sgsn_mm_ctx *ctx, enum gprs_pmm_state state)
 
 #ifdef BUILD_IU
 int sgsn_ranap_rab_ass_resp(struct sgsn_mm_ctx *ctx, RANAP_RAB_SetupOrModifiedItemIEs_t *setup_ies);
-int sgsn_ranap_iu_event(struct ue_conn_ctx *ctx, enum iu_event_type type, void *data)
+int sgsn_ranap_iu_event(struct ranap_ue_conn_ctx *ctx, enum ranap_iu_event_type type, void *data)
 {
 	struct sgsn_mm_ctx *mm;
 	int rc = -1;
@@ -188,14 +188,14 @@ int sgsn_ranap_iu_event(struct ue_conn_ctx *ctx, enum iu_event_type type, void *
 	}
 
 	switch (type) {
-	case IU_EVENT_RAB_ASSIGN:
+	case RANAP_IU_EVENT_RAB_ASSIGN:
 		REQUIRE_MM
 		rc = sgsn_ranap_rab_ass_resp(mm, (RANAP_RAB_SetupOrModifiedItemIEs_t *)data);
 		break;
-	case IU_EVENT_IU_RELEASE:
+	case RANAP_IU_EVENT_IU_RELEASE:
 		/* fall thru */
-	case IU_EVENT_LINK_INVALIDATED:
-		/* Clean up ue_conn_ctx here */
+	case RANAP_IU_EVENT_LINK_INVALIDATED:
+		/* Clean up ranap_ue_conn_ctx here */
 		if (mm)
 			LOGMMCTXP(LOGL_INFO, mm, "IU release for imsi %s\n", mm->imsi);
 		else
@@ -205,7 +205,7 @@ int sgsn_ranap_iu_event(struct ue_conn_ctx *ctx, enum iu_event_type type, void *
 			mmctx_set_pmm_state(mm, PMM_IDLE);
 		rc = 0;
 		break;
-	case IU_EVENT_SECURITY_MODE_COMPLETE:
+	case RANAP_IU_EVENT_SECURITY_MODE_COMPLETE:
 		REQUIRE_MM
 		/* Continue authentication here */
 		mm->iu.ue_ctx->integrity_active = 1;
@@ -262,16 +262,16 @@ static int gsm48_gmm_sendmsg(struct msgb *msg, int command,
 		rate_ctr_inc(&mm->ctrg->ctr[GMM_CTR_PKTS_SIG_OUT]);
 #ifdef BUILD_IU
 		if (mm->ran_type == MM_CTX_T_UTRAN_Iu)
-			return iu_tx(msg, GPRS_SAPI_GMM);
+			return ranap_iu_tx(msg, GPRS_SAPI_GMM);
 #endif
 	}
 
 #ifdef BUILD_IU
-	/* In Iu mode, msg->dst contains the ue_conn_ctx pointer, in Gb mode
+	/* In Iu mode, msg->dst contains the ranap_ue_conn_ctx pointer, in Gb mode
 	 * dst is empty. */
 	/* FIXME: have a more explicit indicator for Iu messages */
 	if (msg->dst)
-		return iu_tx(msg, GPRS_SAPI_GMM);
+		return ranap_iu_tx(msg, GPRS_SAPI_GMM);
 #endif
 
 	/* caller needs to provide TLLI, BVCI and NSEI */
@@ -296,9 +296,12 @@ static void msgid2mmctx(struct sgsn_mm_ctx *mm, const struct msgb *msg)
 	/* In case a Iu connection is reconnected we need to update the ue ctx */
 	mm->iu.ue_ctx = msg->dst;
 	if (mm->ran_type == MM_CTX_T_UTRAN_Iu
-	    && mm->iu.ue_ctx)
+	    && mm->iu.ue_ctx) {
+#ifdef BUILD_IU
 		mm->iu.ue_ctx->rab_assign_addr_enc =
 			sgsn->cfg.iu.rab_assign_addr_enc;
+#endif
+	}
 }
 
 /* Store BVCI/NSEI in MM context */
@@ -1048,7 +1051,7 @@ static int gsm48_gmm_authorize(struct sgsn_mm_ctx *ctx)
 	/* The MS is authorized */
 #ifdef BUILD_IU
 	if (ctx->ran_type == MM_CTX_T_UTRAN_Iu && !ctx->iu.ue_ctx->integrity_active) {
-		rc = iu_tx_sec_mode_cmd(ctx->iu.ue_ctx, &ctx->auth_triplet, 0, ctx->iu.new_key);
+		rc = ranap_iu_tx_sec_mode_cmd(ctx->iu.ue_ctx, &ctx->auth_triplet.vec, 0, ctx->iu.new_key);
 		ctx->iu.new_key = 0;
 		return rc;
 	}
@@ -1259,14 +1262,20 @@ static int gsm48_rx_gmm_att_req(struct sgsn_mm_ctx *ctx, struct msgb *msg,
 	 * with a foreign TLLI (P-TMSI that was allocated to the MS before),
 	 * or with random TLLI. */
 
-	/* In Iu mode, msg->dst contains the ue_conn_ctx pointer, in Gb mode
+	/* In Iu mode, msg->dst contains the ranap_ue_conn_ctx pointer, in Gb mode
 	 * dst is empty. */
 	/* FIXME: have a more explicit indicator for Iu messages */
 	if (!msg->dst) {
 		/* Gb mode */
 		cid = bssgp_parse_cell_id(&ra_id, msgb_bcid(msg));
-	} else
-		ra_id = ((struct ue_conn_ctx*)msg->dst)->ra_id;
+	} else {
+#ifdef BUILD_IU
+		ra_id = ((struct ranap_ue_conn_ctx*)msg->dst)->ra_id;
+#else
+		LOGMMCTXP(LOGL_ERROR, ctx, "Cannot handle Iu Attach Request, built without Iu support\n");
+		return -ENOTSUP;
+#endif
+	}
 
 	/* MS network capability 10.5.5.12 */
 	msnc_len = *cur++;
@@ -1627,7 +1636,7 @@ static int gsm48_rx_gmm_ra_upd_req(struct sgsn_mm_ctx *mmctx, struct msgb *msg,
 		 * is an optimization to avoid the RA reject (impl detached)
 		 * below, which will cause a new attach cycle. */
 		/* Look-up the MM context based on old RA-ID and TLLI */
-		/* In Iu mode, msg->dst contains the ue_conn_ctx pointer, in Gb
+		/* In Iu mode, msg->dst contains the ranap_ue_conn_ctx pointer, in Gb
 		 * mode dst is empty. */
 		/* FIXME: have a more explicit indicator for Iu messages */
 		if (!msg->dst) {
@@ -2905,12 +2914,12 @@ int iu_rab_act_ps(uint8_t rab_id, struct sgsn_pdp_ctx *pdp)
 {
 	struct msgb *msg;
 	struct sgsn_mm_ctx *mm = pdp->mm;
-	struct ue_conn_ctx *uectx;
+	struct ranap_ue_conn_ctx *uectx;
 	uint32_t ggsn_ip;
 	bool use_x213_nsap;
 
 	uectx = mm->iu.ue_ctx;
-	use_x213_nsap = (uectx->rab_assign_addr_enc == NSAP_ADDR_ENC_X213);
+	use_x213_nsap = (uectx->rab_assign_addr_enc == RANAP_NSAP_ADDR_ENC_X213);
 
 	/* Get the IP address for ggsn user plane */
 	memcpy(&ggsn_ip, pdp->lib->gsnru.v, pdp->lib->gsnru.l);
@@ -2923,6 +2932,6 @@ int iu_rab_act_ps(uint8_t rab_id, struct sgsn_pdp_ctx *pdp)
 	msg = ranap_new_msg_rab_assign_data(rab_id, ggsn_ip,
 					    pdp->lib->teid_gn, use_x213_nsap);
 	msg->l2h = msg->data;
-	return iu_rab_act(uectx, msg);
+	return ranap_iu_rab_act(uectx, msg);
 }
 #endif
