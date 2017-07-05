@@ -25,11 +25,11 @@
 #include <osmocom/sccp/sccp_types.h>
 #include <osmocom/gsm/gsm0808.h>
 #include <osmocom/gsm/gsm0808_utils.h>
+#include <osmocom/ranap/iu_client.h>
 #include <openbsc/debug.h>
 #include <openbsc/gsm_data.h>
 #include <openbsc/a_iface_bssap.h>
 #include <openbsc/a_iface.h>
-#include <openbsc/iu.h>
 #include <openbsc/osmo_msc.h>
 #include <osmocom/core/byteswap.h>
 #include <openbsc/a_reset.h>

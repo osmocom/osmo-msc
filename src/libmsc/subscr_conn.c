@@ -24,13 +24,13 @@
 #include <osmocom/core/logging.h>
 #include <osmocom/core/fsm.h>
 #include <osmocom/core/signal.h>
+#include <osmocom/ranap/iu_client.h>
 
 #include <openbsc/osmo_msc.h>
 #include <openbsc/vlr.h>
 #include <openbsc/debug.h>
 #include <openbsc/transaction.h>
 #include <openbsc/signal.h>
-#include <openbsc/iu.h>
 
 #define SUBSCR_CONN_TIMEOUT 5 /* seconds */
 
@@ -233,7 +233,7 @@ static void subscr_conn_fsm_cleanup(struct osmo_fsm_inst *fi,
 	trans_conn_closed(conn);
 
 	if (conn->via_ran == RAN_UTRAN_IU)
-		iu_tx_release(conn->iu.ue_ctx, NULL);
+		ranap_iu_tx_release(conn->iu.ue_ctx, NULL);
 		/* FIXME: keep the conn until the Iu Release Outcome is
 		 * received from the UE, or a timeout expires. For now, the log
 		 * says "unknown UE" for each release outcome. */

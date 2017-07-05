@@ -202,7 +202,7 @@ struct gsm_subscriber_connection {
 
 	/* which Iu-CS connection, if any. */
 	struct {
-		struct ue_conn_ctx *ue_ctx;
+		struct ranap_ue_conn_ctx *ue_ctx;
 		int integrity_protection;
 		unsigned int mgcp_rtp_endpoint;
 		uint8_t rab_id;

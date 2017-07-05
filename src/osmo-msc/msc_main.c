@@ -68,8 +68,8 @@
 #include <osmocom/sigtran/osmo_ss7.h>
 #include <openbsc/mgcpgw_client.h>
 
+#include <osmocom/ranap/iu_client.h>
 #include <openbsc/msc_ifaces.h>
-#include <openbsc/iu.h>
 #include <openbsc/iucs.h>
 #include <openbsc/iucs_ranap.h>
 #include <openbsc/a_iface.h>
@@ -329,11 +329,11 @@ static int rcvmsg_iu_cs(struct msgb *msg, struct gprs_ra_id *ra_id, /* FIXME gpr
 	return gsm0408_rcvmsg_iucs(msc_network, msg, ra_id? &ra_id->lac : NULL);
 }
 
-static int rx_iu_event(struct ue_conn_ctx *ctx, enum iu_event_type type,
+static int rx_iu_event(struct ranap_ue_conn_ctx *ctx, enum ranap_iu_event_type type,
 		       void *data)
 {
 	DEBUGP(DIUCS, "got IuCS event %u: %s\n", type,
-	       iu_event_type_str(type));
+	       ranap_iu_event_type_str(type));
 
 	return iucs_rx_ranap_event(msc_network, ctx, type, data);
 }
@@ -508,7 +508,7 @@ TODO: we probably want some of the _net_ ctrl commands from bsc_base_ctrl_cmds_i
 	}
 
 	/* Set up IuCS */
-	iu_init(tall_msc_ctx, msc_network->sccp, rcvmsg_iu_cs, rx_iu_event);
+	ranap_iu_init(tall_msc_ctx, DRANAP, "OsmoMSC-IuCS", msc_network->sccp, rcvmsg_iu_cs, rx_iu_event);
 
 	/* Set up A interface */
 	a_init(msc_network->sccp, msc_network);

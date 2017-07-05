@@ -19,11 +19,11 @@
  */
 
 #include <osmocom/core/logging.h>
+#include <osmocom/ranap/iu_client.h>
 
 #include <openbsc/debug.h>
 #include <openbsc/gsm_data.h>
 #include <openbsc/msc_ifaces.h>
-#include <openbsc/iu.h>
 #include <openbsc/gsm_subscriber.h>
 #include <openbsc/transaction.h>
 #include <openbsc/mgcp.h>
@@ -50,7 +50,7 @@ static int msc_tx(struct gsm_subscriber_connection *conn, struct msgb *msg)
 
 	case RAN_UTRAN_IU:
 		msg->dst = conn->iu.ue_ctx;
-		return iu_tx(msg, 0);
+		return ranap_iu_tx(msg, 0);
 
 	default:
 		LOGP(DMSC, LOGL_ERROR,
@@ -115,7 +115,7 @@ int msc_tx_common_id(struct gsm_subscriber_connection *conn)
 #ifdef BUILD_IU
 	DEBUGP(DIUCS, "%s: tx CommonID %s\n",
 	       vlr_subscr_name(conn->vsub), conn->vsub->imsi);
-	return iu_tx_common_id(conn->iu.ue_ctx, conn->vsub->imsi);
+	return ranap_iu_tx_common_id(conn->iu.ue_ctx, conn->vsub->imsi);
 #else
 	LOGP(DMM, LOGL_ERROR,
 	     "Cannot send CommonID: RAN_UTRAN_IU but IuCS support not built\n");
@@ -124,14 +124,14 @@ int msc_tx_common_id(struct gsm_subscriber_connection *conn)
 }
 
 #ifdef BUILD_IU
-static void iu_rab_act_cs(struct ue_conn_ctx *uectx, uint8_t rab_id,
+static void iu_rab_act_cs(struct ranap_ue_conn_ctx *uectx, uint8_t rab_id,
 			  uint32_t rtp_ip, uint16_t rtp_port)
 {
 	struct msgb *msg;
 	bool use_x213_nsap;
 	uint32_t conn_id = uectx->conn_id;
 
-	use_x213_nsap = (uectx->rab_assign_addr_enc == NSAP_ADDR_ENC_X213);
+	use_x213_nsap = (uectx->rab_assign_addr_enc == RANAP_NSAP_ADDR_ENC_X213);
 
 	LOGP(DIUCS, LOGL_DEBUG, "Assigning RAB: conn_id=%u, rab_id=%d,"
 	     " rtp=%x:%u, use_x213_nsap=%d\n", conn_id, rab_id, rtp_ip,
@@ -141,7 +141,7 @@ static void iu_rab_act_cs(struct ue_conn_ctx *uectx, uint8_t rab_id,
 					     use_x213_nsap);
 	msg->l2h = msg->data;
 
-	if (iu_rab_act(uectx, msg))
+	if (ranap_iu_rab_act(uectx, msg))
 		LOGP(DIUCS, LOGL_ERROR, "Failed to send RAB Assignment:"
 		     " conn_id=%d rab_id=%d rtp=%x:%u\n",
 		     conn_id, rab_id, rtp_ip, rtp_port);
@@ -151,7 +151,7 @@ static void mgcp_response_rab_act_cs_crcx(struct mgcp_response *r, void *priv)
 {
 	struct gsm_trans *trans = priv;
 	struct gsm_subscriber_connection *conn = trans->conn;
-	struct ue_conn_ctx *uectx = conn->iu.ue_ctx;
+	struct ranap_ue_conn_ctx *uectx = conn->iu.ue_ctx;
 	uint32_t rtp_ip;
 	int rc;
 
@@ -200,7 +200,7 @@ static int conn_iu_rab_act_cs(struct gsm_trans *trans)
 	uint16_t bts_base;
 
 	/* HACK. where to scope the RAB Id? At the conn / subscriber /
-	 * ue_conn_ctx? */
+	 * ranap_ue_conn_ctx? */
 	static uint8_t next_rab_id = 1;
 	conn->iu.rab_id = next_rab_id ++;
 

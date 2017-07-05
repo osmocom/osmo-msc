@@ -31,13 +31,6 @@ SUBDIRS = \
 	libcommon-cs \
 	$(NULL)
 
-# Conditional Libraries
-if BUILD_IU
-SUBDIRS += \
-	libiu \
-	$(NULL)
-endif
-
 # Programs
 SUBDIRS += \
 	osmo-msc \

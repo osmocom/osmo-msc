@@ -21,6 +21,8 @@
  *
  */
 
+#include <osmocom/ranap/iu_client.h>
+
 #include <openbsc/osmo_msc.h>
 #include <openbsc/bsc_api.h>
 #include <openbsc/debug.h>
@@ -28,7 +30,6 @@
 #include <openbsc/db.h>
 #include <openbsc/vlr.h>
 #include <openbsc/osmo_msc.h>
-#include <openbsc/iu.h>
 
 #include <openbsc/gsm_04_11.h>
 

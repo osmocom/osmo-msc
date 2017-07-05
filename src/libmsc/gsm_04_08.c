@@ -71,9 +71,9 @@
 #include <osmocom/core/utils.h>
 #include <osmocom/gsm/tlv.h>
 #include <osmocom/crypt/auth.h>
+#include <osmocom/ranap/iu_client.h>
 
 #include <openbsc/msc_ifaces.h>
-#include <openbsc/iu.h>
 #include <openbsc/a_iface.h>
 
 #include <assert.h>
@@ -3810,7 +3810,7 @@ static int msc_vlr_set_ciph_mode(void *msc_conn_ref,
 	case RAN_UTRAN_IU:
 		DEBUGP(DMM, "-> SECURITY MODE CONTROL %s\n",
 		       vlr_subscr_name(conn->vsub));
-		return iu_tx_sec_mode_cmd(conn->iu.ue_ctx, tuple, 0, 1);
+		return ranap_iu_tx_sec_mode_cmd(conn->iu.ue_ctx, &tuple->vec, 0, 1);
 
 	default:
 		break;
