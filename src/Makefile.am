@@ -33,5 +33,4 @@ SUBDIRS += \
 	osmo-msc \
 	osmo-bsc_mgcp \
 	utils \
-	ipaccess \
 	$(NULL)
