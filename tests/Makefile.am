@@ -1,48 +1,13 @@
 SUBDIRS = \
 	libiudummy \
-	gsm0408 \
-	channel \
-	gprs \
-	abis \
-	gbproxy \
-	trau \
-	subscr \
-	nanobts_omlattr \
 	sms_queue \
 	msc_vlr \
 	$(NULL)
 
-if BUILD_NAT
-SUBDIRS += \
-	bsc-nat \
-	bsc-nat-trie \
-	$(NULL)
-endif
-if BUILD_BSC
-SUBDIRS += \
-	bsc \
-	$(NULL)
-endif
 if BUILD_SMPP
 SUBDIRS += \
 	smpp \
 	$(NULL)
-endif
-if HAVE_LIBGTP
-SUBDIRS += \
-	gtphub \
-	$(NULL)
-
-if HAVE_LIBCARES
-SUBDIRS += \
-	sgsn \
-	oap \
-	xid \
-	sndcp_xid \
-	slhc \
-	v42bis \
-	$(NULL)
-endif
 endif
 
 # The `:;' works around a Bash 3.2 bug when the output is not writeable.
@@ -87,7 +52,7 @@ python-tests: $(BUILT_SOURCES)
 if BUILD_SMPP
 	$(PYTHON) $(srcdir)/smpp_test_runner.py -w $(abs_top_builddir) -v
 endif
-	rm -f $(top_builddir)/sms.db $(top_builddir)/gsn_restart $(top_builddir)/gtphub_restart_count
+	rm -f $(top_builddir)/sms.db
 else
 python-tests: $(BUILT_SOURCES)
 	echo "Not running python-based tests (determined at configure-time)"

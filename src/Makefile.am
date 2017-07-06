@@ -23,10 +23,7 @@ AM_LDFLAGS = \
 SUBDIRS = \
 	libcommon \
 	libvlr \
-	libbsc \
 	libmsc \
-	libtrau \
-	libfilter \
 	libcommon-cs \
 	$(NULL)
 
@@ -34,19 +31,4 @@ SUBDIRS = \
 SUBDIRS += \
 	osmo-msc \
 	utils \
-	ipaccess \
-	gprs \
 	$(NULL)
-
-# Conditional Programs
-if BUILD_NAT
-SUBDIRS += \
-	osmo-bsc_nat \
-	$(NULL)
-endif
-
-if BUILD_BSC
-SUBDIRS += \
-	osmo-bsc \
-	$(NULL)
-endif

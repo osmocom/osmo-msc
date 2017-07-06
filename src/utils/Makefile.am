@@ -23,8 +23,6 @@ noinst_HEADERS = \
 	$(NULL)
 
 bin_PROGRAMS = \
-	bs11_config \
-	isdnsync \
 	meas_json \
 	$(NULL)
 if HAVE_SQLITE3
@@ -48,24 +46,6 @@ noinst_PROGRAMS = \
 	smpp_mirror \
 	$(NULL)
 endif
-
-bs11_config_SOURCES = \
-	bs11_config.c \
-	$(NULL)
-
-bs11_config_LDADD = \
-	$(top_builddir)/src/libbsc/libbsc.a \
-	$(top_builddir)/src/libcommon-cs/libcommon-cs.a \
-	$(top_builddir)/src/libtrau/libtrau.a \
-	$(top_builddir)/src/libcommon/libcommon.a \
-	$(LIBOSMOCORE_LIBS) \
-	$(LIBOSMOGSM_LIBS) \
-	$(LIBOSMOABIS_LIBS) \
-	$(NULL)
-
-isdnsync_SOURCES = \
-	isdnsync.c \
-	$(NULL)
 
 smpp_mirror_SOURCES = \
 	smpp_mirror.c \
