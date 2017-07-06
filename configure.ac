@@ -44,29 +44,10 @@ PKG_CHECK_MODULES(LIBOSMOVTY, libosmovty >= 0.3.0)
 PKG_CHECK_MODULES(LIBOSMOCTRL, libosmoctrl)
 PKG_CHECK_MODULES(LIBOSMOGSM, libosmogsm >= 0.9.5)
 PKG_CHECK_MODULES(LIBOSMOABIS, libosmoabis >= 0.2.0)
-PKG_CHECK_MODULES(LIBOSMOGB, libosmogb >= 0.6.4)
 PKG_CHECK_MODULES(LIBOSMONETIF, libosmo-netif >= 0.0.1)
 PKG_CHECK_MODULES(LIBOSMOSIGTRAN, libosmo-sigtran) # TODO version?
 PKG_CHECK_MODULES(LIBCRYPTO, libcrypto >= 0.9.5)
 PKG_CHECK_MODULES(LIBOSMOLEGACYMGCP, libosmo-legacy-mgcp >= 0.0.1)
-
-# Enabke/disable the NAT?
-AC_ARG_ENABLE([nat], [AS_HELP_STRING([--enable-nat], [Build the BSC NAT. Requires SCCP])],
-    [osmo_ac_build_nat="$enableval"],[osmo_ac_build_nat="no"])
-if test "$osmo_ac_build_nat" = "yes" ; then
-        PKG_CHECK_MODULES(LIBOSMOSCCP, libosmo-sccp >= 0.0.2)
-fi
-AM_CONDITIONAL(BUILD_NAT, test "x$osmo_ac_build_nat" = "xyes")
-AC_SUBST(osmo_ac_build_nat)
-
-# Enable/disable the BSC?
-AC_ARG_ENABLE([osmo-bsc], [AS_HELP_STRING([--enable-osmo-bsc], [Build the Osmo BSC])],
-    [osmo_ac_build_bsc="$enableval"],[osmo_ac_build_bsc="no"])
-if test "$osmo_ac_build_bsc" = "yes" ; then
-    PKG_CHECK_MODULES(LIBOSMOSCCP, libosmo-sccp >= 0.0.6)
-fi
-AM_CONDITIONAL(BUILD_BSC, test "x$osmo_ac_build_bsc" = "xyes")
-AC_SUBST(osmo_ac_build_bsc)
 
 # Enable/disable smpp support in the msc?
 AC_ARG_ENABLE([smpp], [AS_HELP_STRING([--enable-smpp], [Build the SMPP interface])],
@@ -104,23 +85,6 @@ if test "x$osmo_ac_iu" = "xyes" ; then
 fi
 AM_CONDITIONAL(BUILD_IU, test "x$osmo_ac_iu" = "xyes")
 AC_SUBST(osmo_ac_iu)
-
-
-found_libgtp=yes
-PKG_CHECK_MODULES(LIBGTP, libgtp >= 0.92, , found_libgtp=no)
-AM_CONDITIONAL(HAVE_LIBGTP, test "$found_libgtp" = yes)
-AC_SUBST(found_libgtp)
-
-found_libcares=yes
-PKG_CHECK_MODULES([LIBCARES], [libcares], [], [found_libcares=no])
-AM_CONDITIONAL(HAVE_LIBCARES, test "$found_libcares" = yes)
-AC_SUBST(found_libcares)
-
-found_libgtp_and_libcares=no
-if test "$found_libgtp" = "yes" -a "$found_libcares" = "yes"; then
-    found_libgtp_and_libcares=yes
-fi
-AC_SUBST(found_libgtp_and_libcares)
 
 dnl checks for header files
 AC_HEADER_STDC
@@ -227,40 +191,15 @@ AC_OUTPUT(
     include/openbsc/Makefile
     include/Makefile
     src/Makefile
-    src/libtrau/Makefile
-    src/libbsc/Makefile
     src/libmsc/Makefile
     src/libvlr/Makefile
     src/libcommon/Makefile
-    src/libfilter/Makefile
     src/libcommon-cs/Makefile
     src/osmo-msc/Makefile
-    src/osmo-bsc/Makefile
-    src/osmo-bsc_nat/Makefile
-    src/ipaccess/Makefile
     src/utils/Makefile
-    src/gprs/Makefile
     tests/Makefile
     tests/atlocal
-    tests/gsm0408/Makefile
-    tests/channel/Makefile
-    tests/bsc/Makefile
-    tests/bsc-nat/Makefile
-    tests/bsc-nat-trie/Makefile
-    tests/gprs/Makefile
-    tests/gbproxy/Makefile
-    tests/abis/Makefile
     tests/smpp/Makefile
-    tests/trau/Makefile
-    tests/sgsn/Makefile
-    tests/subscr/Makefile
-    tests/oap/Makefile
-    tests/gtphub/Makefile
-    tests/xid/Makefile
-    tests/sndcp_xid/Makefile
-    tests/slhc/Makefile
-    tests/v42bis/Makefile
-    tests/nanobts_omlattr/Makefile
     tests/sms_queue/Makefile
     tests/msc_vlr/Makefile
     doc/Makefile

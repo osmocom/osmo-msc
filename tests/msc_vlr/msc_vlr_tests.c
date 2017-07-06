@@ -32,7 +32,6 @@
 #include <osmocom/gsm/gsup.h>
 #include <openbsc/gsup_client.h>
 #include <openbsc/gsm_04_11.h>
-#include <openbsc/bsc_subscriber.h>
 #include <openbsc/debug.h>
 
 #if BUILD_IU

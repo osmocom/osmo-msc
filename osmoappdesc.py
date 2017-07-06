@@ -28,25 +28,14 @@ nitb_e1_configs = [
 
 
 app_configs = {
-    "osmo-bsc": ["doc/examples/osmo-bsc/osmo-bsc.cfg"],
-    "nat": ["doc/examples/osmo-bsc_nat/osmo-bsc_nat.cfg"],
-    "gbproxy": ["doc/examples/osmo-gbproxy/osmo-gbproxy.cfg",
-             "doc/examples/osmo-gbproxy/osmo-gbproxy-legacy.cfg"],
-    "sgsn": ["doc/examples/osmo-sgsn/osmo-sgsn.cfg"],
     "msc": ["doc/examples/osmo-msc/osmo-msc.cfg"],
-    "gtphub": ["doc/examples/osmo-gtphub/osmo-gtphub-1iface.cfg"]
 }
 
 
-apps = [(4242, "src/osmo-bsc/osmo-bsc", "OsmoBSC", "osmo-bsc"),
-        (4244, "src/osmo-bsc_nat/osmo-bsc_nat",  "OsmoBSCNAT", "nat"),
-        (4246, "src/gprs/osmo-gbproxy", "OsmoGbProxy", "gbproxy"),
-        (4245, "src/gprs/osmo-sgsn", "OsmoSGSN", "sgsn"),
-        (4254, "src/osmo-msc/osmo-msc", "OsmoMSC", "msc"),
-        (4253, "src/gprs/osmo-gtphub", "OsmoGTPhub", "gtphub")
+apps = [(4254, "src/osmo-msc/osmo-msc", "OsmoMSC", "msc"),
         ]
 
 vty_command = ["./src/osmo-msc/osmo-msc", "-c",
                "doc/examples/osmo-msc/osmo-msc.cfg"]
 
-vty_app = apps[4] # reference apps[] entry for osmo-msc
+vty_app = apps[0] # reference apps[] entry for osmo-msc
