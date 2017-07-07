@@ -29,6 +29,7 @@
 #include <openbsc/vlr.h>
 #include <openbsc/osmo_msc.h>
 #include <openbsc/iu.h>
+#include <openbsc/a_iface.h>
 
 #include <openbsc/gsm_04_11.h>
 
@@ -219,6 +220,7 @@ void msc_subscr_con_cleanup(struct gsm_subscriber_connection *conn)
 		return;
 
 	if (conn->vsub) {
+		a_iface_tx_clear_cmd(conn);
 		DEBUGP(DRLL, "subscr %s: Freeing subscriber connection\n",
 		       vlr_subscr_name(conn->vsub));
 		msc_subscr_cleanup(conn->vsub);
