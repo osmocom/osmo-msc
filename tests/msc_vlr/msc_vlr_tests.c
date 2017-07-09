@@ -33,7 +33,6 @@
 #include <osmocom/ranap/iu_client.h>
 #include <openbsc/gsup_client.h>
 #include <openbsc/gsm_04_11.h>
-#include <openbsc/bsc_subscriber.h>
 #include <openbsc/debug.h>
 #include <openbsc/iucs_ranap.h>
 
