@@ -27,7 +27,6 @@
 #include <osmocom/core/timer.h>
 
 #include <openbsc/gsm_data.h>
-#include <openbsc/bsc_subscriber.h>
 
 /**
  * A pending paging request

@@ -27,8 +27,6 @@
 #include <openbsc/gsm_data.h>
 #include <openbsc/debug.h>
 #include <openbsc/gsm_subscriber.h>
-#include <openbsc/bsc_nat.h>
-#include <openbsc/abis_om2000.h>
 
 #include <osmocom/vty/telnet_interface.h>
 #include <osmocom/vty/command.h>
@@ -44,24 +42,6 @@ int bsc_vty_go_parent(struct vty *vty)
 		vty->node = CONFIG_NODE;
 		vty->index = NULL;
 		break;
-	case BTS_NODE:
-		vty->node = GSMNET_NODE;
-		{
-			/* set vty->index correctly ! */
-			struct gsm_bts *bts = vty->index;
-			vty->index = bts->network;
-			vty->index_sub = NULL;
-		}
-		break;
-	case TRX_NODE:
-		vty->node = BTS_NODE;
-		{
-			/* set vty->index correctly ! */
-			struct gsm_bts_trx *trx = vty->index;
-			vty->index = trx->bts;
-			vty->index_sub = &trx->bts->description;
-		}
-		break;
 	case TS_NODE:
 		vty->node = TRX_NODE;
 		{
@@ -70,36 +50,6 @@ int bsc_vty_go_parent(struct vty *vty)
 			vty->index = ts->trx;
 			vty->index_sub = &ts->trx->description;
 		}
-		break;
-	case OML_NODE:
-	case OM2K_NODE:
-		vty->node = ENABLE_NODE;
-		/* NOTE: this only works because it's not part of the config
-		 * tree, where outer commands are searched via vty_go_parent()
-		 * and only (!) executed when a matching one is found.
-		 */
-		talloc_free(vty->index);
-		vty->index = NULL;
-		break;
-	case OM2K_CON_GROUP_NODE:
-		vty->node = BTS_NODE;
-		{
-			struct con_group *cg = vty->index;
-			struct gsm_bts *bts = cg->bts;
-			vty->index = bts;
-			vty->index_sub = &bts->description;
-		}
-		break;
-	case NAT_BSC_NODE:
-		vty->node = NAT_NODE;
-		{
-			struct bsc_config *bsc_config = vty->index;
-			vty->index = bsc_config->nat;
-		}
-		break;
-	case PGROUP_NODE:
-		vty->node = NAT_NODE;
-		vty->index = NULL;
 		break;
 	case TRUNK_NODE:
 		vty->node = MGCP_NODE;
@@ -111,13 +61,8 @@ int bsc_vty_go_parent(struct vty *vty)
 		break;
 	case SMPP_NODE:
 	case MGCP_NODE:
-	case GBPROXY_NODE:
-	case SGSN_NODE:
-	case NAT_NODE:
-	case BSC_NODE:
 	case MSC_NODE:
 	case MNCC_INT_NODE:
-	case NITB_NODE:
 		vty->node = CONFIG_NODE;
 		vty->index = NULL;
 		break;
@@ -141,8 +86,6 @@ int bsc_vty_is_config_node(struct vty *vty, int node)
 
 	switch (node) {
 	/* add items that are not config */
-	case OML_NODE:
-	case OM2K_NODE:
 	case SUBSCR_NODE:
 	case CONFIG_NODE:
 		return 0;
