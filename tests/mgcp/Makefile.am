@@ -40,7 +40,6 @@ mgcp_test_SOURCES = \
 	$(NULL)
 
 mgcp_test_LDADD = \
-	$(top_builddir)/src/libbsc/libbsc.a \
 	$(top_builddir)/src/libmgcp/libmgcp.a \
 	$(top_builddir)/src/libcommon/libcommon.a \
 	$(LIBOSMOCORE_LIBS) \
@@ -58,7 +57,6 @@ mgcp_transcoding_test_SOURCES = \
 	$(NULL)
 
 mgcp_transcoding_test_LDADD = \
-	$(top_builddir)/src/libbsc/libbsc.a \
 	$(top_builddir)/src/libmgcp/libmgcp.a \
 	$(top_builddir)/src/libcommon/libcommon.a \
 	$(LIBOSMOCORE_LIBS) \
@@ -78,7 +76,6 @@ mgcpgw_client_test_SOURCES = \
 	$(NULL)
 
 mgcpgw_client_test_LDADD = \
-	$(top_builddir)/src/libbsc/libbsc.a \
 	$(top_builddir)/src/libmgcp/libmgcp.a \
 	$(top_builddir)/src/libcommon/libcommon.a \
 	$(LIBOSMOCORE_LIBS) \

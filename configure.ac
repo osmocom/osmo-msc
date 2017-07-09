@@ -197,10 +197,8 @@ AC_OUTPUT(
     tests/Makefile
     tests/atlocal
     tests/libiudummy/Makefile
-    tests/gsm0408/Makefile
     tests/mgcp/Makefile
     tests/smpp/Makefile
-    tests/subscr/Makefile
     tests/sms_queue/Makefile
     tests/msc_vlr/Makefile
     doc/Makefile

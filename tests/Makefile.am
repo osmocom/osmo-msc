@@ -1,8 +1,6 @@
 SUBDIRS = \
 	libiudummy \
-	gsm0408 \
 	mgcp \
-	subscr \
 	sms_queue \
 	msc_vlr \
 	$(NULL)
