@@ -31,6 +31,35 @@
 #include <openbsc/gsm_subscriber.h>
 #include <openbsc/vlr.h>
 
+void test_bts_debug_print(void)
+{
+	struct gsm_network *network;
+	struct gsm_bts *bts;
+	struct gsm_bts_trx *trx;
+
+	printf("Testing the lchan printing:");
+
+	/* Create a dummy network */
+	network = bsc_network_init(tall_bsc_ctx, 1, 1, NULL);
+	if (!network)
+		exit(1);
+	/* Add a BTS with some reasonanbly non-zero id */
+	bts = gsm_bts_alloc(network, 45);
+	/* Add a second TRX to test on multiple TRXs */
+	gsm_bts_trx_alloc(bts);
+
+	llist_for_each_entry(trx, &bts->trx_list, list) {
+		char *name = gsm_lchan_name(&trx->ts[3].lchan[4]);
+
+		if (name)
+			printf(" %s", name);
+		else
+			printf("NULL name");
+	}
+	printf("\n");
+}
+
+
 void test_dyn_ts_subslots(void)
 {
 	struct gsm_bts_trx_ts ts;
@@ -66,6 +95,7 @@ int main(int argc, char **argv)
 	osmo_init_logging(&log_info);
 
 	test_dyn_ts_subslots();
+	test_bts_debug_print();
 
 	return EXIT_SUCCESS;
 }
