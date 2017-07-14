@@ -88,6 +88,8 @@ DREF IMSI:901700000004620: MSC conn use - 1 == 0
 DRLL subscr IMSI:901700000004620: Freeing subscriber connection
 DREF VLR subscr IMSI:901700000004620 usage decreases to: 0
 DREF freeing VLR subscr IMSI:901700000004620
+- Sending clear command to BSC (conn_id=0)
+
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Freeing instance
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Deallocated
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Received Event SUBSCR_CONN_E_CN_CLOSE
@@ -237,6 +239,8 @@ DMM msc_subscr_conn_close(vsub=MSISDN:46071, cause=2): no conn fsm, releasing di
 DREF MSISDN:46071: MSC conn use - 1 == 0
 DRLL subscr MSISDN:46071: Freeing subscriber connection
 DREF VLR subscr MSISDN:46071 usage decreases to: 2
+- Sending clear command to BSC (conn_id=0)
+
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Freeing instance
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Deallocated
 DREF VLR subscr MSISDN:46071 usage decreases to: 1
@@ -318,6 +322,8 @@ DMM msc_subscr_conn_close(vsub=MSISDN:46071, cause=2): no conn fsm, releasing di
 DREF MSISDN:46071: MSC conn use - 1 == 0
 DRLL subscr MSISDN:46071: Freeing subscriber connection
 DREF VLR subscr MSISDN:46071 usage decreases to: 1
+- Sending clear command to BSC (conn_id=0)
+
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Freeing instance
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Deallocated
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Received Event SUBSCR_CONN_E_CN_CLOSE
