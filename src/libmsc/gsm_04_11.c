@@ -809,7 +809,7 @@ int gsm0411_rcv_sms(struct gsm_subscriber_connection *conn,
 		return -EIO;
 		/* FIXME: send some error message */
 
-	DEBUGP(DLSMS, "receiving data (trans_id=%x)\n", transaction_id);
+	DEBUGP(DLSMS, "receiving data (trans_id=%x, msg_type=%d)\n", transaction_id, msg_type);
 	trans = trans_find_by_id(conn, GSM48_PDISC_SMS, transaction_id);
 
 	/*
