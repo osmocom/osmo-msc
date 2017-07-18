@@ -18,6 +18,7 @@ DREF VLR subscr unknown usage increases to: 1
 DVLR set IMSI on subscriber; IMSI=901700000004620 id=901700000004620
 DVLR New subscr, IMSI: 901700000004620
 DREF VLR subscr IMSI:901700000004620 usage increases to: 2
+DREF VLR subscr IMSI:901700000004620 usage decreases to: 1
 DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_IDLE}: vlr_loc_upd_node1()
 DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_IDLE}: state_chg to VLR_ULA_S_WAIT_AUTH
 DVLR VLR_Authenticate(901700000004620){VLR_SUB_AS_NEEDS_AUTH}: Allocated
@@ -26,7 +27,6 @@ DVLR VLR_Authenticate(901700000004620){VLR_SUB_AS_NEEDS_AUTH}: Received Event VL
 DVLR GSUP tx: 08010809710000004026f0
 GSUP --> HLR: OSMO_GSUP_MSGT_SEND_AUTH_INFO_REQUEST: 08010809710000004026f0
 DVLR VLR_Authenticate(901700000004620){VLR_SUB_AS_NEEDS_AUTH}: state_chg to VLR_SUB_AS_NEEDS_AUTH_WAIT_AI
-DREF VLR subscr IMSI:901700000004620 usage decreases to: 1
 DMM compl_l3: Keeping conn
 DREF IMSI:901700000004620: MSC conn use - 1 == 1
   lu_result_sent == 0
@@ -446,6 +446,7 @@ DREF VLR subscr unknown usage increases to: 1
 DVLR set IMSI on subscriber; IMSI=901700000004620 id=901700000004620
 DVLR New subscr, IMSI: 901700000004620
 DREF VLR subscr IMSI:901700000004620 usage increases to: 2
+DREF VLR subscr IMSI:901700000004620 usage decreases to: 1
 DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_IDLE}: vlr_loc_upd_node1()
 DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_IDLE}: state_chg to VLR_ULA_S_WAIT_AUTH
 DVLR VLR_Authenticate(901700000004620){VLR_SUB_AS_NEEDS_AUTH}: Allocated
@@ -454,7 +455,6 @@ DVLR VLR_Authenticate(901700000004620){VLR_SUB_AS_NEEDS_AUTH}: Received Event VL
 DVLR GSUP tx: 08010809710000004026f0
 GSUP --> HLR: OSMO_GSUP_MSGT_SEND_AUTH_INFO_REQUEST: 08010809710000004026f0
 DVLR VLR_Authenticate(901700000004620){VLR_SUB_AS_NEEDS_AUTH}: state_chg to VLR_SUB_AS_NEEDS_AUTH_WAIT_AI
-DREF VLR subscr IMSI:901700000004620 usage decreases to: 1
 DMM compl_l3: Keeping conn
 DREF IMSI:901700000004620: MSC conn use - 1 == 1
   lu_result_sent == 0
@@ -887,6 +887,7 @@ DVLR vlr_lu_fsm(50462976){VLR_ULA_S_IDLE}: rev=GSM net=GERAN Auth (no Ciph)
 DVLR vlr_lu_fsm(50462976){VLR_ULA_S_IDLE}: Received Event VLR_ULA_E_UPDATE_LA
 DREF VLR subscr MSISDN:46071 usage increases to: 2
 DREF VLR subscr MSISDN:46071 usage increases to: 3
+DREF VLR subscr MSISDN:46071 usage decreases to: 2
 DVLR vlr_lu_fsm(50462976){VLR_ULA_S_IDLE}: vlr_loc_upd_node1()
 DVLR vlr_lu_fsm(50462976){VLR_ULA_S_IDLE}: state_chg to VLR_ULA_S_WAIT_AUTH
 DVLR VLR_Authenticate(50462976){VLR_SUB_AS_NEEDS_AUTH}: Allocated
@@ -897,7 +898,6 @@ DVLR VLR_Authenticate(50462976){VLR_SUB_AS_WAIT_RESP}: got auth tuple: use_count
 - sending GSM Auth Request for MSISDN:46071: tuple use_count=1 key_seq=3 auth_types=0x1 and...
 - ...rand=fa8f20b781b5881329d4fea26b1a3c51
 - ...expecting sres=5afc8d72
-DREF VLR subscr MSISDN:46071 usage decreases to: 2
 DMM compl_l3: Keeping conn
 DREF MSISDN:46071: MSC conn use - 1 == 1
   auth_request_sent == 1
@@ -1073,6 +1073,7 @@ DREF VLR subscr unknown usage increases to: 1
 DVLR set IMSI on subscriber; IMSI=901700000004620 id=901700000004620
 DVLR New subscr, IMSI: 901700000004620
 DREF VLR subscr IMSI:901700000004620 usage increases to: 2
+DREF VLR subscr IMSI:901700000004620 usage decreases to: 1
 DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_IDLE}: vlr_loc_upd_node1()
 DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_IDLE}: state_chg to VLR_ULA_S_WAIT_AUTH
 DVLR VLR_Authenticate(901700000004620){VLR_SUB_AS_NEEDS_AUTH}: Allocated
@@ -1081,7 +1082,6 @@ DVLR VLR_Authenticate(901700000004620){VLR_SUB_AS_NEEDS_AUTH}: Received Event VL
 DVLR GSUP tx: 08010809710000004026f0
 GSUP --> HLR: OSMO_GSUP_MSGT_SEND_AUTH_INFO_REQUEST: 08010809710000004026f0
 DVLR VLR_Authenticate(901700000004620){VLR_SUB_AS_NEEDS_AUTH}: state_chg to VLR_SUB_AS_NEEDS_AUTH_WAIT_AI
-DREF VLR subscr IMSI:901700000004620 usage decreases to: 1
 DMM compl_l3: Keeping conn
 DREF IMSI:901700000004620: MSC conn use - 1 == 1
   lu_result_sent == 0
@@ -1286,6 +1286,7 @@ DREF VLR subscr unknown usage increases to: 1
 DVLR set IMSI on subscriber; IMSI=901700000004620 id=901700000004620
 DVLR New subscr, IMSI: 901700000004620
 DREF VLR subscr IMSI:901700000004620 usage increases to: 2
+DREF VLR subscr IMSI:901700000004620 usage decreases to: 1
 DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_IDLE}: vlr_loc_upd_node1()
 DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_IDLE}: state_chg to VLR_ULA_S_WAIT_AUTH
 DVLR VLR_Authenticate(901700000004620){VLR_SUB_AS_NEEDS_AUTH}: Allocated
@@ -1294,7 +1295,6 @@ DVLR VLR_Authenticate(901700000004620){VLR_SUB_AS_NEEDS_AUTH}: Received Event VL
 DVLR GSUP tx: 08010809710000004026f0
 GSUP --> HLR: OSMO_GSUP_MSGT_SEND_AUTH_INFO_REQUEST: 08010809710000004026f0
 DVLR VLR_Authenticate(901700000004620){VLR_SUB_AS_NEEDS_AUTH}: state_chg to VLR_SUB_AS_NEEDS_AUTH_WAIT_AI
-DREF VLR subscr IMSI:901700000004620 usage decreases to: 1
 DMM compl_l3: Keeping conn
 DREF IMSI:901700000004620: MSC conn use - 1 == 1
   lu_result_sent == 0
@@ -1529,6 +1529,7 @@ DREF VLR subscr unknown usage increases to: 1
 DVLR set IMSI on subscriber; IMSI=901700000010650 id=901700000010650
 DVLR New subscr, IMSI: 901700000010650
 DREF VLR subscr IMSI:901700000010650 usage increases to: 2
+DREF VLR subscr IMSI:901700000010650 usage decreases to: 1
 DVLR vlr_lu_fsm(901700000010650){VLR_ULA_S_IDLE}: vlr_loc_upd_node1()
 DVLR vlr_lu_fsm(901700000010650){VLR_ULA_S_IDLE}: state_chg to VLR_ULA_S_WAIT_AUTH
 DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_NEEDS_AUTH}: Allocated
@@ -1537,7 +1538,6 @@ DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_NEEDS_AUTH}: Received Event VL
 DVLR GSUP tx: 08010809710000000156f0
 GSUP --> HLR: OSMO_GSUP_MSGT_SEND_AUTH_INFO_REQUEST: 08010809710000000156f0
 DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_NEEDS_AUTH}: state_chg to VLR_SUB_AS_NEEDS_AUTH_WAIT_AI
-DREF VLR subscr IMSI:901700000010650 usage decreases to: 1
 DMM compl_l3: Keeping conn
 DREF IMSI:901700000010650: MSC conn use - 1 == 1
   lu_result_sent == 0

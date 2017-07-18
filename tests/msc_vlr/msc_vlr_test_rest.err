@@ -102,6 +102,7 @@ DREF VLR subscr unknown usage increases to: 1
 DVLR set IMSI on subscriber; IMSI=901700000004620 id=901700000004620
 DVLR New subscr, IMSI: 901700000004620
 DREF VLR subscr IMSI:901700000004620 usage increases to: 2
+DREF VLR subscr IMSI:901700000004620 usage decreases to: 1
 DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_IDLE}: vlr_loc_upd_node1()
 DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_IDLE}: vlr_loc_upd_post_auth()
 DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_IDLE}: vlr_loc_upd_post_ciph()
@@ -113,7 +114,6 @@ DVLR upd_hlr_vlr_fsm(901700000004620){UPD_HLR_VLR_S_INIT}: Received Event UPD_HL
 DVLR GSUP tx: 04010809710000004026f0
 GSUP --> HLR: OSMO_GSUP_MSGT_UPDATE_LOCATION_REQUEST: 04010809710000004026f0
 DVLR upd_hlr_vlr_fsm(901700000004620){UPD_HLR_VLR_S_INIT}: state_chg to UPD_HLR_VLR_S_WAIT_FOR_DATA
-DREF VLR subscr IMSI:901700000004620 usage decreases to: 1
 DMM compl_l3: Keeping conn
 DREF IMSI:901700000004620: MSC conn use - 1 == 1
   lu_result_sent == 0
@@ -215,6 +215,7 @@ DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_IDLE}: rev=GSM net=GERAN (no Auth)
 DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_IDLE}: Received Event VLR_ULA_E_UPDATE_LA
 DREF VLR subscr MSISDN:46071 usage increases to: 2
 DREF VLR subscr MSISDN:46071 usage increases to: 3
+DREF VLR subscr MSISDN:46071 usage decreases to: 2
 DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_IDLE}: vlr_loc_upd_node1()
 DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_IDLE}: vlr_loc_upd_post_auth()
 DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_IDLE}: vlr_loc_upd_post_ciph()
@@ -226,7 +227,6 @@ DVLR upd_hlr_vlr_fsm(901700000004620){UPD_HLR_VLR_S_INIT}: Received Event UPD_HL
 DVLR GSUP tx: 04010809710000004026f0
 GSUP --> HLR: OSMO_GSUP_MSGT_UPDATE_LOCATION_REQUEST: 04010809710000004026f0
 DVLR upd_hlr_vlr_fsm(901700000004620){UPD_HLR_VLR_S_INIT}: state_chg to UPD_HLR_VLR_S_WAIT_FOR_DATA
-DREF VLR subscr MSISDN:46071 usage decreases to: 2
 DMM compl_l3: Keeping conn
 DREF MSISDN:46071: MSC conn use - 1 == 1
   lu_result_sent == 0
@@ -349,11 +349,11 @@ DVLR vlr_lu_fsm(591536962){VLR_ULA_S_IDLE}: Received Event VLR_ULA_E_UPDATE_LA
 DREF VLR subscr unknown usage increases to: 1
 DVLR New subscr, TMSI: 0x23422342
 DREF VLR subscr TMSI:0x23422342 usage increases to: 2
+DREF VLR subscr TMSI:0x23422342 usage decreases to: 1
 DVLR vlr_lu_fsm(591536962){VLR_ULA_S_IDLE}: vlr_loc_upd_want_imsi()
 DVLR vlr_lu_fsm(591536962){VLR_ULA_S_IDLE}: state_chg to VLR_ULA_S_WAIT_IMSI
 - DTAP --> MS: 051801
 - DTAP matches expected message
-DREF VLR subscr TMSI:0x23422342 usage decreases to: 1
 DMM compl_l3: Keeping conn
 DREF TMSI:0x23422342: MSC conn use - 1 == 1
   lu_result_sent == 0

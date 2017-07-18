@@ -565,7 +565,7 @@ void test_ciph_imeisv()
 
 	/* implicit: net->authentication_required = true; */
 	net->a5_encryption = VLR_CIPH_A5_1;
-	net->vlr->cfg.retrieve_imeisv = true;
+	net->vlr->cfg.retrieve_imeisv_ciphered = true;
 
 	btw("Location Update request causes a GSUP Send Auth Info request to HLR");
 	lu_result_sent = RES_NONE;

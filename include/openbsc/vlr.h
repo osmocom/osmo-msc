@@ -211,7 +211,8 @@ struct vlr_instance {
 	struct gsup_client *gsup_client;
 	struct vlr_ops ops;
 	struct {
-		bool retrieve_imeisv;
+		bool retrieve_imeisv_early;
+		bool retrieve_imeisv_ciphered;
 		bool assign_tmsi;
 		bool check_imei_rqd;
 		int auth_tuple_max_use_count;

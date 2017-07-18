@@ -294,7 +294,8 @@ void clear_vlr()
 	net->a5_encryption = VLR_CIPH_NONE;
 	net->vlr->cfg.check_imei_rqd = false;
 	net->vlr->cfg.assign_tmsi = false;
-	net->vlr->cfg.retrieve_imeisv = false;
+	net->vlr->cfg.retrieve_imeisv_early = false;
+	net->vlr->cfg.retrieve_imeisv_ciphered = false;
 
 	rx_from_ran = RAN_GERAN_A;
 	auth_request_sent = false;

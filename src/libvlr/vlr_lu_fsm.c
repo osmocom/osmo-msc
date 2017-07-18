@@ -814,7 +814,7 @@ static void vlr_loc_upd_post_auth(struct osmo_fsm_inst *fi)
 
 	if (vlr_set_ciph_mode(vsub->vlr, fi, lfp->msc_conn_ref,
 			      lfp->ciphering_required,
-			      vsub->vlr->cfg.retrieve_imeisv)) {
+			      vsub->vlr->cfg.retrieve_imeisv_ciphered)) {
 		LOGPFSML(fi, LOGL_ERROR,
 			 "Failed to send Ciphering Mode Command\n");
 		vlr_lu_compl_fsm_failure(fi, GSM48_REJECT_NETWORK_FAILURE);
@@ -896,13 +896,62 @@ static const char *lai_name(struct osmo_location_area_id *lai)
 	return buf;
 }
 
+static int _lu_fsm_associate_vsub(struct osmo_fsm_inst *fi)
+{
+	struct lu_fsm_priv *lfp = fi->priv;
+	struct vlr_instance *vlr = lfp->vlr;
+	struct vlr_subscr *vsub = NULL;
+
+	if (!lfp->imsi[0]) {
+		/* TMSI was used */
+		lfp->lu_by_tmsi = true;
+		/* TMSI clash: if a different subscriber already has this TMSI,
+		 * we will find that other subscriber in the VLR. So the IMSIs
+		 * would mismatch, but we don't know about it. Theoretically,
+		 * an authentication process would thwart any attempt to use
+		 * someone else's TMSI.
+		 * TODO: Otherwise we can ask for the IMSI and verify that it
+		 * matches the IMSI on record. */
+		vsub = vlr_subscr_find_or_create_by_tmsi(vlr, lfp->tmsi, NULL);
+
+		if (!vsub) {
+			LOGPFSML(fi, LOGL_ERROR, "VLR subscriber allocation failed\n");
+			lu_fsm_failure(fi, GSM48_REJECT_SRV_OPT_TMP_OUT_OF_ORDER);
+			return -1;
+		}
+
+		vsub->sub_dataconf_by_hlr_ind = false;
+		if (assoc_lfp_with_sub(fi, vsub)) {
+			vlr_subscr_put(vsub);
+			return -1; /* error, fsm failure invoked in assoc_lfp_with_sub() */
+		}
+		vlr_subscr_put(vsub);
+	} else {
+		/* IMSI was used */
+		vsub = vlr_subscr_find_or_create_by_imsi(vlr, lfp->imsi, NULL);
+
+		if (!vsub) {
+			LOGPFSML(fi, LOGL_ERROR, "VLR subscriber allocation failed\n");
+			lu_fsm_failure(fi, GSM48_REJECT_SRV_OPT_TMP_OUT_OF_ORDER);
+			vlr_subscr_put(vsub);
+			return -1;
+		}
+
+		vsub->sub_dataconf_by_hlr_ind = false;
+		if (assoc_lfp_with_sub(fi, vsub)) {
+			vlr_subscr_put(vsub);
+			return -1; /* error, fsm failure invoked in assoc_lfp_with_sub() */
+		}
+		vlr_subscr_put(vsub);
+	}
+	return 0;
+}
+
 /* 4.1.2.1: Subscriber (via MSC/SGSN) requests location update */
 static void _start_lu_main(struct osmo_fsm_inst *fi)
 {
 	struct lu_fsm_priv *lfp = fi->priv;
 	struct vlr_instance *vlr = lfp->vlr;
-	struct vlr_subscr *vsub = NULL;
-	bool created;
 
 	/* TODO: PUESBINE related handling */
 
@@ -919,61 +968,13 @@ static void _start_lu_main(struct osmo_fsm_inst *fi)
 			 lai_name(&lfp->old_lai));
 	}
 
-	if (!lfp->imsi[0]) {
-		/* TMSI was used */
-		lfp->lu_by_tmsi = true;
-		/* TMSI clash: if a different subscriber already has this TMSI,
-		 * we will find that other subscriber in the VLR. So the IMSIs
-		 * would mismatch, but we don't know about it. Theoretically,
-		 * an authentication process would thwart any attempt to use
-		 * someone else's TMSI.
-		 * TODO: Otherwise we can ask for the IMSI and verify that it
-		 * matches the IMSI on record. */
-		vsub = vlr_subscr_find_or_create_by_tmsi(vlr, lfp->tmsi,
-							 &created);
-
-		if (!vsub) {
-			LOGPFSML(fi, LOGL_ERROR,
-				 "VLR subscriber allocation failed\n");
-			lu_fsm_failure(fi, GSM48_REJECT_SRV_OPT_TMP_OUT_OF_ORDER);
-			return;
-		}
-
-		vsub->sub_dataconf_by_hlr_ind = false;
-		if (assoc_lfp_with_sub(fi, vsub)) {
-			vlr_subscr_put(vsub);
-			return; /* error */
-		}
-
-		if (created)
-			vlr_loc_upd_want_imsi(fi);
-		else
-			vlr_loc_upd_node1(fi);
-		/* We cannot have MSC area change, as the VLR
-		 * serves only one MSC */
-		vlr_subscr_put(vsub);
-	} else {
-		/* IMSI was used */
-		vsub = vlr_subscr_find_or_create_by_imsi(vlr, lfp->imsi, NULL);
-
-		if (!vsub) {
-			LOGPFSML(fi, LOGL_ERROR,
-				 "VLR subscriber allocation failed\n");
-			lu_fsm_failure(fi, GSM48_REJECT_SRV_OPT_TMP_OUT_OF_ORDER);
-			vlr_subscr_put(vsub);
-			return;
-		}
-
-		vsub->sub_dataconf_by_hlr_ind = false;
-		if (assoc_lfp_with_sub(fi, vsub)) {
-			vlr_subscr_put(vsub);
-			return; /* error */
-		}
+	/* If this is a TMSI based LU, we may not have the IMSI. Make sure that
+	 * we know the IMSI, either on record, or request it. */
+	if (!lfp->vsub->imsi[0])
+		vlr_loc_upd_want_imsi(fi);
+	else
 		vlr_loc_upd_node1(fi);
-		vlr_subscr_put(vsub);
-	}
 }
-
 
 static void lu_fsm_idle(struct osmo_fsm_inst *fi, uint32_t event,
 			void *data)
@@ -983,8 +984,14 @@ static void lu_fsm_idle(struct osmo_fsm_inst *fi, uint32_t event,
 
 	OSMO_ASSERT(event == VLR_ULA_E_UPDATE_LA);
 
-	if (1) { // FIXME
-	//if (lfp->type == VLR_LU_TYPE_PERIODIC && lfp->vsub->imeisv[0])
+	if (_lu_fsm_associate_vsub(fi))
+		return; /* error. FSM already terminated. */
+
+	OSMO_ASSERT(lfp->vsub);
+
+	/* See 3GPP TS 23.012, procedure Retrieve_IMEISV_If_Required */
+	if ((!vlr->cfg.retrieve_imeisv_early)
+	    || (lfp->type == VLR_LU_TYPE_PERIODIC && lfp->vsub->imeisv[0])) {
 		/* R_IMEISV_IR1 passed */
 		_start_lu_main(fi);
 	} else {
@@ -999,7 +1006,8 @@ static void lu_fsm_wait_imeisv(struct osmo_fsm_inst *fi, uint32_t event,
 {
 	switch (event) {
 	case VLR_ULA_E_ID_IMEISV:
-		/* FIXME: copy IMEISV */
+		/* IMEISV was copied in vlr_subscr_rx_id_resp(), and that's
+		 * where we received this event from. */
 		_start_lu_main(fi);
 		break;
 	default:
@@ -1257,6 +1265,8 @@ static const struct osmo_fsm_state vlr_lu_fsm_states[] = {
 		.in_event_mask = S(VLR_ULA_E_ID_IMEISV),
 		.out_state_mask = S(VLR_ULA_S_WAIT_PVLR) |
 				  S(VLR_ULA_S_WAIT_IMSI) |
+				  S(VLR_ULA_S_WAIT_AUTH) |
+				  S(VLR_ULA_S_WAIT_HLR_UPD) |
 				  S(VLR_ULA_S_DONE),
 		.name = OSMO_STRINGIFY(VLR_ULA_S_WAIT_IMEISV),
 		.action = lu_fsm_wait_imeisv,
