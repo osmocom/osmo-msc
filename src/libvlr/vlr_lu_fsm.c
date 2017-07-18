@@ -760,7 +760,9 @@ static void vlr_loc_upd_node_b(struct osmo_fsm_inst *fi)
 {
 	LOGPFSM(fi, "%s()\n", __func__);
 
-	/* FIXME */
+	/* OsmoHLR does not support PgA, neither stores the IMEISV, so we have no need to update the HLR
+	 * with either. TODO: depend on actual HLR configuration. See 3GPP TS 23.012 Release 14, process
+	 * Update_Location_Area_VLR (ULA_VLR2). */
 	if (0) { /* IMEISV or PgA to send */
 		vlr_loc_upd_node_4(fi);
 	} else {
@@ -1149,6 +1151,7 @@ static void lu_fsm_wait_hlr_ul_res(struct osmo_fsm_inst *fi, uint32_t event,
 			/* unsuccessful case */
 			enum gsm48_gmm_cause cause =
 				*(enum gsm48_gmm_cause *)data;
+			/* Ignoring standalone mode for now. */
 			if (0 /* procedure_error && vlr->cfg.standalone_mode */) {
 				osmo_fsm_inst_state_chg(fi,
 						VLR_ULA_S_WAIT_LU_COMPL_STANDALONE,
