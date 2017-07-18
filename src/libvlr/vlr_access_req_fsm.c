@@ -172,6 +172,7 @@ static void _proc_arq_vlr_post_imei(struct osmo_fsm_inst *fi)
 
 	LOGPFSM(fi, "%s()\n", __func__);
 
+	/* See 3GPP TS 29.002 Proc_Acc_Req_VLR3. */
 	/* TODO: Identity := IMSI */
 	if (0 /* TODO: TMSI reallocation at access: vlr->cfg.alloc_tmsi_arq */) {
 		vlr_subscr_alloc_tmsi(vsub);
@@ -194,6 +195,7 @@ static void _proc_arq_vlr_post_trace(struct osmo_fsm_inst *fi)
 	LOGPFSM(fi, "%s()\n", __func__);
 
 	/* Node 3 */
+	/* See 3GPP TS 29.002 Proc_Acc_Req_VLR3. */
 	if (0 /* IMEI check required */) {
 		/* Chck_IMEI_VLR */
 		vlr->ops.tx_id_req(par->msc_conn_ref, GSM_MI_TYPE_IMEI);
@@ -207,6 +209,7 @@ static void _proc_arq_vlr_post_trace(struct osmo_fsm_inst *fi)
 static void _proc_arq_vlr_post_pres(struct osmo_fsm_inst *fi)
 {
 	LOGPFSM(fi, "%s()\n", __func__);
+	/* See 3GPP TS 29.002 Proc_Acc_Req_VLR3. */
 	if (0 /* TODO: tracing required */) {
 		/* TODO: Trace_Subscriber_Activity_VLR */
 		osmo_fsm_inst_state_chg(fi, PR_ARQ_S_WAIT_TRACE_SUB, 0, 0);
@@ -227,6 +230,7 @@ static void _proc_arq_vlr_node2_post_vlr(struct osmo_fsm_inst *fi)
 		proc_arq_fsm_done(fi, VLR_PR_ARQ_RES_UNIDENT_SUBSCR);
 		return;
 	}
+	/* We don't feature location area specific blocking (yet). */
 	if (0 /* roaming not allowed in LA */) {
 		/* Set User Error: Roaming not allowed in this LA */
 		proc_arq_fsm_done(fi, VLR_PR_ARQ_RES_ROAMING_NOTALLOWED);
