@@ -1159,6 +1159,7 @@ static void lu_fsm_wait_hlr_ul_res(struct osmo_fsm_inst *fi, uint32_t event,
 			/* unsuccessful case */
 			enum gsm48_gmm_cause cause =
 				*(enum gsm48_gmm_cause *)data;
+			/* Ignoring standalone mode for now. */
 			if (0 /* procedure_error && vlr->cfg.standalone_mode */) {
 				osmo_fsm_inst_state_chg(fi,
 						VLR_ULA_S_WAIT_LU_COMPL_STANDALONE,
