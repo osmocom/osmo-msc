@@ -13,6 +13,7 @@ AM_CFLAGS = \
 	$(LIBOSMOVTY_CFLAGS) \
 	$(LIBOSMOABIS_CFLAGS) \
 	$(LIBOSMOSIGTRAN_CFLAGS) \
+	$(LIBOSMOLEGACYMGCP_CFLAGS) \
 	$(NULL)
 
 noinst_HEADERS = \
@@ -46,7 +47,6 @@ COMMON_LDADD = \
 	$(top_builddir)/src/libvlr/libvlr.a \
 	$(top_builddir)/src/libbsc/libbsc.a \
 	$(top_builddir)/src/libtrau/libtrau.a \
-	$(top_builddir)/src/libmgcp/libmgcp.a \
 	$(top_builddir)/tests/libiudummy/libiudummy.a \
 	$(top_builddir)/src/libcommon/libcommon.a \
 	$(LIBSMPP34_LIBS) \
@@ -56,6 +56,8 @@ COMMON_LDADD = \
 	$(LIBOSMOVTY_LIBS) \
 	$(LIBOSMOABIS_LIBS) \
 	$(LIBOSMOSIGTRAN_LIBS) \
+	$(LIBOSMOLEGACYMGCP_LIBS) \
+	$(LIBRARY_GSM) \
 	-ldbi \
 	-lrt \
 	$(NULL)

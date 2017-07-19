@@ -23,7 +23,6 @@ AM_LDFLAGS = \
 SUBDIRS = \
 	libcommon \
 	libvlr \
-	libmgcp \
 	libbsc \
 	libmsc \
 	libtrau \
@@ -34,7 +33,6 @@ SUBDIRS = \
 # Programs
 SUBDIRS += \
 	osmo-msc \
-	osmo-bsc_mgcp \
 	utils \
 	ipaccess \
 	gprs \

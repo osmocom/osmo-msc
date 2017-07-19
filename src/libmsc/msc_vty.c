@@ -149,6 +149,6 @@ void msc_vty_init(struct gsm_network *msc_network)
 	install_element(MSC_NODE, &cfg_msc_cs7_instance_a_cmd);
 	install_element(MSC_NODE, &cfg_msc_cs7_instance_iu_cmd);
 
-	mgcpgw_client_vty_init(MSC_NODE, &msc_network->mgcpgw.conf);
+	mgcpgw_client_vty_init(msc_network, MSC_NODE, &msc_network->mgcpgw.conf);
 	ranap_iu_vty_init(MSC_NODE, &msc_network->iu.rab_assign_addr_enc);
 }

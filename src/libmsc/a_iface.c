@@ -34,7 +34,7 @@
 #include <openbsc/a_iface.h>
 #include <openbsc/a_iface_bssap.h>
 #include <openbsc/transaction.h>
-#include <openbsc/mgcpgw_client.h>
+#include <osmocom/legacy_mgcp/mgcpgw_client.h>
 #include <osmocom/core/byteswap.h>
 #include <osmocom/sccp/sccp_types.h>
 #include <openbsc/a_reset.h>

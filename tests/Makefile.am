@@ -2,7 +2,6 @@ SUBDIRS = \
 	libiudummy \
 	gsm0408 \
 	channel \
-	mgcp \
 	gprs \
 	abis \
 	gbproxy \
