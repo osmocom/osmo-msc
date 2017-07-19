@@ -25,7 +25,7 @@
 #include <openbsc/bsc_msg_filter.h>
 #include <openbsc/bsc_msc.h>
 #include <openbsc/gsm_04_08.h>
-#include <openbsc/mgcp.h>
+#include <osmocom/legacy_mgcp/mgcp.h>
 #include <openbsc/vty.h>
 #include <openbsc/nat_rewrite_trie.h>
 
@@ -1213,15 +1213,15 @@ DEFUN(cfg_bsc_osmux,
 		conf->osmux = OSMUX_USAGE_ONLY;
 
 	if (old == 0 && conf->osmux > 0 && !conf->nat->mgcp_cfg->osmux_init) {
-		LOGP(DMGCP, LOGL_NOTICE, "Setting up OSMUX socket\n");
+		LOGP(DLMGCP, LOGL_NOTICE, "Setting up OSMUX socket\n");
 		if (osmux_init(OSMUX_ROLE_BSC_NAT, conf->nat->mgcp_cfg) < 0) {
-			LOGP(DMGCP, LOGL_ERROR, "Cannot init OSMUX\n");
+			LOGP(DLMGCP, LOGL_ERROR, "Cannot init OSMUX\n");
 			vty_out(vty, "%% failed to create Osmux socket%s",
 				VTY_NEWLINE);
 			return CMD_WARNING;
 		}
 	} else if (old > 0 && conf->osmux == 0) {
-		LOGP(DMGCP, LOGL_NOTICE, "Disabling OSMUX socket\n");
+		LOGP(DLMGCP, LOGL_NOTICE, "Disabling OSMUX socket\n");
 		/* Don't stop the socket, we may already have ongoing voice
 		 * flows already using Osmux. This just switch indicates that
 		 * new upcoming flows should use RTP.

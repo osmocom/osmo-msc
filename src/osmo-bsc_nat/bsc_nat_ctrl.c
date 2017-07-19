@@ -32,6 +32,7 @@
 #include <openbsc/bsc_msg_filter.h>
 #include <openbsc/vty.h>
 #include <openbsc/gsm_data.h>
+#include <openbsc/debug.h>
 
 #include <unistd.h>
 #include <string.h>

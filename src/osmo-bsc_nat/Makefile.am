@@ -13,6 +13,7 @@ AM_CFLAGS = \
 	$(LIBOSMOSCCP_CFLAGS) \
 	$(LIBOSMOABIS_CFLAGS) \
 	$(LIBOSMONETIF_CFLAGS) \
+	$(LIBOSMOLEGACYMGCP_CFLAGS) \
 	$(LIBCRYPTO_CFLAGS) \
 	$(COVERAGE_CFLAGS) \
 	$(NULL)
@@ -40,7 +41,6 @@ osmo_bsc_nat_SOURCES = \
 	$(NULL)
 
 osmo_bsc_nat_LDADD = \
-	$(top_builddir)/src/libmgcp/libmgcp.a \
 	$(top_builddir)/src/libfilter/libfilter.a \
 	$(top_builddir)/src/libbsc/libbsc.a \
 	$(top_builddir)/src/libcommon-cs/libcommon-cs.a \
@@ -54,6 +54,8 @@ osmo_bsc_nat_LDADD = \
 	$(LIBOSMOABIS_LIBS) \
 	$(LIBOSMONETIF_LIBS) \
 	$(LIBOSMOSIGTRAN_LIBS) \
+	$(LIBOSMOLEGACYMGCP_LIBS) \
 	$(LIBCRYPTO_LIBS) \
+	$(LIBRARY_GSM) \
 	-lrt \
 	$(NULL)

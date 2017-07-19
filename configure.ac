@@ -48,6 +48,7 @@ PKG_CHECK_MODULES(LIBOSMOGB, libosmogb >= 0.6.4)
 PKG_CHECK_MODULES(LIBOSMONETIF, libosmo-netif >= 0.0.1)
 PKG_CHECK_MODULES(LIBOSMOSIGTRAN, libosmo-sigtran) # TODO version?
 PKG_CHECK_MODULES(LIBCRYPTO, libcrypto >= 0.9.5)
+PKG_CHECK_MODULES(LIBOSMOLEGACYMGCP, libosmo-legacy-mgcp >= 0.0.1)
 
 # Enabke/disable the NAT?
 AC_ARG_ENABLE([nat], [AS_HELP_STRING([--enable-nat], [Build the BSC NAT. Requires SCCP])],
@@ -230,14 +231,12 @@ AC_OUTPUT(
     src/libbsc/Makefile
     src/libmsc/Makefile
     src/libvlr/Makefile
-    src/libmgcp/Makefile
     src/libcommon/Makefile
     src/libfilter/Makefile
     src/libcommon-cs/Makefile
     src/osmo-msc/Makefile
     src/osmo-bsc/Makefile
     src/osmo-bsc_nat/Makefile
-    src/osmo-bsc_mgcp/Makefile
     src/ipaccess/Makefile
     src/utils/Makefile
     src/gprs/Makefile
@@ -248,7 +247,6 @@ AC_OUTPUT(
     tests/bsc/Makefile
     tests/bsc-nat/Makefile
     tests/bsc-nat-trie/Makefile
-    tests/mgcp/Makefile
     tests/gprs/Makefile
     tests/gbproxy/Makefile
     tests/abis/Makefile

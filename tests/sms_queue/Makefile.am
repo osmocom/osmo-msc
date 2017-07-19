@@ -14,6 +14,7 @@ AM_CFLAGS = \
 	$(LIBOSMOSIGTRAN_CFLAGS) \
 	$(LIBOSMORANAP_CFLAGS) \
 	$(LIBASN1C_CFLAGS) \
+	$(LIBOSMOLEGACYMGCP_CFLAGS) \
 	$(NULL)
 
 EXTRA_DIST = \
@@ -34,7 +35,6 @@ sms_queue_test_LDADD = \
 	$(top_builddir)/src/libvlr/libvlr.a \
 	$(top_builddir)/src/libbsc/libbsc.a \
 	$(top_builddir)/src/libtrau/libtrau.a \
-	$(top_builddir)/src/libmgcp/libmgcp.a \
 	$(top_builddir)/src/libcommon/libcommon.a \
 	$(top_builddir)/src/libcommon-cs/libcommon-cs.a \
 	$(LIBSMPP34_LIBS) \
@@ -46,6 +46,8 @@ sms_queue_test_LDADD = \
 	$(LIBOSMOSIGTRAN_LIBS) \
 	$(LIBOSMORANAP_LIBS) \
 	$(LIBASN1C_LIBS) \
+	$(LIBOSMOLEGACYMGCP_LIBS) \
+	$(LIBRARY_GSM) \
 	-ldbi \
 	-lrt \
 	$(NULL)

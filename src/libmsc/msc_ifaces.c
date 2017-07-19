@@ -25,8 +25,8 @@
 #include <openbsc/msc_ifaces.h>
 #include <openbsc/gsm_subscriber.h>
 #include <openbsc/transaction.h>
-#include <openbsc/mgcp.h>
-#include <openbsc/mgcpgw_client.h>
+#include <osmocom/legacy_mgcp/mgcp.h>
+#include <osmocom/legacy_mgcp/mgcpgw_client.h>
 #include <openbsc/vlr.h>
 #include <openbsc/a_iface.h>
 
@@ -249,7 +249,7 @@ int msc_call_assignment(struct gsm_trans *trans)
 	 * its RTP traffic to that port on the MGCPGW side. The MGCPGW only
 	 * gets the endpoint ID via the CRCX. It will do the same calculation
 	 * on his side too to get knowledge of the rtp port. */
-	bts_base = mgcp->actual.bts_base;
+	bts_base = mgcpgw_client_conf_actual(mgcp)->bts_base;
 	conn->rtp.port_subscr = bts_base + 2 * conn->rtp.mgcp_rtp_endpoint;
 
 	/* Establish the RTP stream first as looping back to the originator.

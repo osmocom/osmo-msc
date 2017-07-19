@@ -64,7 +64,7 @@
 #include <openbsc/osmo_bsc_rf.h>
 #include <openbsc/smpp.h>
 #include <osmocom/sigtran/osmo_ss7.h>
-#include <openbsc/mgcpgw_client.h>
+#include <osmocom/legacy_mgcp/mgcpgw_client.h>
 
 #ifdef BUILD_IU
 #include <osmocom/ranap/iu_client.h>

@@ -17,6 +17,7 @@ AM_CFLAGS = \
 	$(LIBOSMORANAP_CFLAGS) \
 	$(LIBASN1C_CFLAGS) \
 	$(LIBOSMOSIGTRAN_CFLAGS) \
+	$(LIBOSMOLEGACYMGCP_CFLAGS) \
 	$(NULL)
 
 AM_LDFLAGS = \
@@ -37,7 +38,6 @@ osmo_msc_LDADD = \
 	$(top_builddir)/src/libcommon-cs/libcommon-cs.a \
 	$(top_builddir)/src/libtrau/libtrau.a \
 	$(top_builddir)/src/libcommon/libcommon.a \
-	$(top_builddir)/src/libmgcp/libmgcp.a \
 	$(LIBOSMOGSM_LIBS) \
 	$(LIBOSMOVTY_LIBS) \
 	$(LIBOSMOCORE_LIBS) \
@@ -46,6 +46,8 @@ osmo_msc_LDADD = \
 	$(LIBSMPP34_LIBS) \
 	$(LIBCRYPTO_LIBS) \
 	$(LIBOSMOSIGTRAN_LIBS) \
+	$(LIBOSMOLEGACYMGCP_LIBS) \
+	$(LIBRARY_GSM) \
 	-ldbi \
 	$(NULL)
 if BUILD_IU

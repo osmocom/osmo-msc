@@ -24,7 +24,7 @@
 #include <openbsc/bsc_msc_data.h>
 #include <openbsc/debug.h>
 #include <openbsc/bsc_subscriber.h>
-#include <openbsc/mgcp.h>
+#include <osmocom/legacy_mgcp/mgcp.h>
 #include <openbsc/paging.h>
 
 #include <osmocom/gsm/protocol/gsm_08_08.h>

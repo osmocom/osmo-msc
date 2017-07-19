@@ -1,7 +1,6 @@
 SUBDIRS = \
 	gsm0408 \
 	channel \
-	mgcp \
 	gprs \
 	abis \
 	gbproxy \

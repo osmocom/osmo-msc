@@ -20,6 +20,7 @@
 
 #include <openbsc/bsc_msg_filter.h>
 #include <openbsc/bsc_nat.h>
+#include <openbsc/debug.h>
 
 #include <osmocom/core/rate_ctr.h>
 #include <osmocom/core/stats.h>

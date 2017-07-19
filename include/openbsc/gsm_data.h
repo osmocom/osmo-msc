@@ -17,7 +17,7 @@
 #include <openbsc/common.h>
 #include <openbsc/rest_octets.h>
 #include <openbsc/common_cs.h>
-#include <openbsc/mgcpgw_client.h>
+#include <osmocom/legacy_mgcp/mgcpgw_client.h>
 
 
 /** annotations for msgb ownership */

@@ -71,64 +71,6 @@ class TestVTYBase(unittest.TestCase):
         self.vty = None
         osmoutil.end_proc(self.proc)
 
-class TestVTYMGCP(TestVTYBase):
-    def vty_command(self):
-        return ["./src/osmo-bsc_mgcp/osmo-bsc_mgcp", "-c",
-                "doc/examples/osmo-bsc_mgcp/mgcp.cfg"]
-
-    def vty_app(self):
-        return (4243, "./src/osmo-bsc_mgcp/osmo-bsc_mgcp", "OpenBSC MGCP", "mgcp")
-
-    def testForcePtime(self):
-        self.vty.enable()
-        res = self.vty.command("show running-config")
-        self.assert_(res.find('  rtp force-ptime 20\r') > 0)
-        self.assertEquals(res.find('  no rtp force-ptime\r'), -1)
-
-        self.vty.command("configure terminal")
-        self.vty.command("mgcp")
-        self.vty.command("no rtp force-ptime")
-        res = self.vty.command("show running-config")
-        self.assertEquals(res.find('  rtp force-ptime 20\r'), -1)
-        self.assertEquals(res.find('  no rtp force-ptime\r'), -1)
-
-    def testOmitAudio(self):
-        self.vty.enable()
-        res = self.vty.command("show running-config")
-        self.assert_(res.find('  sdp audio-payload send-name\r') > 0)
-        self.assertEquals(res.find('  no sdp audio-payload send-name\r'), -1)
-
-        self.vty.command("configure terminal")
-        self.vty.command("mgcp")
-        self.vty.command("no sdp audio-payload send-name")
-        res = self.vty.command("show running-config")
-        self.assertEquals(res.find('  rtp sdp audio-payload send-name\r'), -1)
-        self.assert_(res.find('  no sdp audio-payload send-name\r') > 0)
-
-        # TODO: test it for the trunk!
-
-    def testBindAddr(self):
-        self.vty.enable()
-
-        self.vty.command("configure terminal")
-        self.vty.command("mgcp")
-
-        # enable.. disable bts-bind-ip
-        self.vty.command("rtp bts-bind-ip 254.253.252.250")
-        res = self.vty.command("show running-config")
-        self.assert_(res.find('rtp bts-bind-ip 254.253.252.250') > 0)
-        self.vty.command("no rtp bts-bind-ip")
-        res = self.vty.command("show running-config")
-        self.assertEquals(res.find('  rtp bts-bind-ip'), -1)
-
-        # enable.. disable net-bind-ip
-        self.vty.command("rtp net-bind-ip 254.253.252.250")
-        res = self.vty.command("show running-config")
-        self.assert_(res.find('rtp net-bind-ip 254.253.252.250') > 0)
-        self.vty.command("no rtp net-bind-ip")
-        res = self.vty.command("show running-config")
-        self.assertEquals(res.find('  rtp net-bind-ip'), -1)
-
 
 class TestVTYGenericBSC(TestVTYBase):
 
@@ -1152,7 +1094,6 @@ if __name__ == '__main__':
     os.chdir(workdir)
     print "Running tests for specific VTY commands"
     suite = unittest.TestSuite()
-    suite.addTest(unittest.TestLoader().loadTestsFromTestCase(TestVTYMGCP))
     suite.addTest(unittest.TestLoader().loadTestsFromTestCase(TestVTYMSC))
     add_bsc_test(suite, workdir)
     add_nat_test(suite, workdir)
