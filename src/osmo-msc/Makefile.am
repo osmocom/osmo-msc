@@ -36,7 +36,6 @@ osmo_msc_LDADD = \
 	$(top_builddir)/src/libvlr/libvlr.a \
 	$(top_builddir)/src/libcommon-cs/libcommon-cs.a \
 	$(top_builddir)/src/libcommon/libcommon.a \
-	$(top_builddir)/src/libmgcp/libmgcp.a \
 	$(LIBOSMOGSM_LIBS) \
 	$(LIBOSMOVTY_LIBS) \
 	$(LIBOSMOCORE_LIBS) \
@@ -48,4 +47,5 @@ osmo_msc_LDADD = \
 	$(LIBOSMORANAP_LIBS) \
 	$(LIBASN1C_LIBS) \
 	$(LIBOSMOSIGTRAN_LIBS) \
+	$(LIBOSMOLEGACYMGCP_LIBS) \
 	$(NULL)

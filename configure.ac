@@ -42,6 +42,7 @@ PKG_CHECK_MODULES(LIBOSMOGSM, libosmogsm >= 0.9.5)
 PKG_CHECK_MODULES(LIBOSMOABIS, libosmoabis >= 0.2.0)
 PKG_CHECK_MODULES(LIBOSMONETIF, libosmo-netif >= 0.0.1)
 PKG_CHECK_MODULES(LIBCRYPTO, libcrypto >= 0.9.5)
+PKG_CHECK_MODULES(LIBOSMOLEGACYMGCP, libosmo-legacy-mgcp >= 0.0.1)
 
 # Enable/disable smpp support in the msc?
 AC_ARG_ENABLE([smpp], [AS_HELP_STRING([--enable-smpp], [Build the SMPP interface])],

@@ -65,7 +65,7 @@
 #include <openbsc/smpp.h>
 #include <osmocom/sigtran/sccp_sap.h>
 #include <osmocom/sigtran/osmo_ss7.h>
-#include <openbsc/mgcpgw_client.h>
+#include <osmocom/legacy_mgcp/mgcpgw_client.h>
 
 #include <osmocom/ranap/iu_client.h>
 #include <openbsc/msc_ifaces.h>
