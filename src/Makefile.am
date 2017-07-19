@@ -23,7 +23,6 @@ AM_LDFLAGS = \
 SUBDIRS = \
 	libcommon \
 	libvlr \
-	libmgcp \
 	libmsc \
 	libcommon-cs \
 	$(NULL)
@@ -31,6 +30,5 @@ SUBDIRS = \
 # Programs
 SUBDIRS += \
 	osmo-msc \
-	osmo-bsc_mgcp \
 	utils \
 	$(NULL)

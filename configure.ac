@@ -188,16 +188,13 @@ AC_OUTPUT(
     src/Makefile
     src/libmsc/Makefile
     src/libvlr/Makefile
-    src/libmgcp/Makefile
     src/libcommon/Makefile
     src/libcommon-cs/Makefile
     src/osmo-msc/Makefile
-    src/osmo-bsc_mgcp/Makefile
     src/utils/Makefile
     tests/Makefile
     tests/atlocal
     tests/libiudummy/Makefile
-    tests/mgcp/Makefile
     tests/smpp/Makefile
     tests/sms_queue/Makefile
     tests/msc_vlr/Makefile
