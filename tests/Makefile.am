@@ -2,6 +2,7 @@ SUBDIRS = \
 	libiudummy \
 	sms_queue \
 	msc_vlr \
+	vlr \
 	$(NULL)
 
 if BUILD_SMPP
