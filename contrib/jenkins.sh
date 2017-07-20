@@ -48,5 +48,7 @@ autoreconf --install --force
 $MAKE $PARALLEL_MAKE
 LD_LIBRARY_PATH="$inst/lib" $MAKE check \
   || cat-testlogs.sh
-LD_LIBRARY_PATH="$inst/lib" $MAKE distcheck \
+LD_LIBRARY_PATH="$inst/lib" \
+  DISTCHECK_CONFIGURE_FLAGS="--enable-osmo-bsc --enable-nat $SMPP $MGCP $IU --enable-vty-tests --enable-external-tests" \
+  $MAKE distcheck \
   || cat-testlogs.sh
