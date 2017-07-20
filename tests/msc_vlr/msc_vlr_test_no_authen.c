@@ -425,7 +425,9 @@ void test_no_authen_imei()
 
 	btw("MS replies with an Identity Response");
 	expect_bssap_clear();
-	ms_sends_msg("0559084a32244332244332");
+	/* 3GPP TS 23.003: 6.2.1 Composition of IMEI: the IMEI ends with a
+	 * spare digit that shall be sent as zero by the MS. */
+	ms_sends_msg("0559084a32244332244302");
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
 	btw("LU was successful, and the conn has already been closed");
@@ -435,7 +437,7 @@ void test_no_authen_imei()
 	btw("Subscriber has the IMEI");
 	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi);
 	OSMO_ASSERT(vsub);
-	VERBOSE_ASSERT(strcmp(vsub->imei, "423423423423423"), == 0, "%d");
+	VERBOSE_ASSERT(strcmp(vsub->imei, "423423423423420"), == 0, "%d");
 	vlr_subscr_put(vsub);
 
 	BTW("subscriber detaches");
@@ -491,7 +493,7 @@ void test_no_authen_tmsi_imei()
 	thwart_rx_non_initial_requests();
 
 	btw("MS replies with an Identity Response");
-	ms_sends_msg("0559084a32244332244332");
+	ms_sends_msg("0559084a32244332244302");
 
 	btw("a LU Accept with a new TMSI was sent, waiting for TMSI Realloc Compl");
 	EXPECT_CONN_COUNT(1);
@@ -511,7 +513,7 @@ void test_no_authen_tmsi_imei()
 	btw("Subscriber has the IMEI and TMSI");
 	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi);
 	OSMO_ASSERT(vsub);
-	VERBOSE_ASSERT(strcmp(vsub->imei, "423423423423423"), == 0, "%d");
+	VERBOSE_ASSERT(strcmp(vsub->imei, "423423423423420"), == 0, "%d");
 	VERBOSE_ASSERT(vsub->tmsi, == 0x03020100, "0x%08x");
 	vlr_subscr_put(vsub);
 
@@ -525,10 +527,382 @@ void test_no_authen_tmsi_imei()
 	comment_end();
 }
 
+void test_no_authen_imeisv()
+{
+	struct vlr_subscr *vsub;
+	const char *imsi = "901700000004620";
+	
+	/* No auth only works on GERAN */
+	rx_from_ran = RAN_GERAN_A;
+
+	comment_start();
+
+	net->vlr->cfg.retrieve_imeisv_early = true;
+
+	btw("Location Update request causes an IMEISV ID request back to the MS");
+	lu_result_sent = RES_NONE;
+	dtap_expect_tx("051803");
+	ms_sends_msg("050802008168000130089910070000006402");
+	OSMO_ASSERT(dtap_tx_confirmed);
+
+	btw("MS replies with an Identity Response, causes LU to commence with a GSUP LU request to HLR");
+	gsup_expect_tx("04010809710000004026f0");
+	ms_sends_msg("0559094332244332244372f5");
+	OSMO_ASSERT(gsup_tx_confirmed);
+	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
+
+	btw("Subscriber has the IMEISV from the ID Response");
+	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi);
+	OSMO_ASSERT(vsub);
+	VERBOSE_ASSERT(strcmp(vsub->imeisv, "4234234234234275"), == 0, "%d");
+	vlr_subscr_put(vsub);
+
+	btw("HLR sends _INSERT_DATA_REQUEST, VLR responds with _INSERT_DATA_RESULT");
+	gsup_rx("10010809710000004026f00804036470f1",
+		"12010809710000004026f0");
+	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
+
+	btw("having received subscriber data does not mean acceptance");
+	EXPECT_ACCEPTED(false);
+
+	thwart_rx_non_initial_requests();
+
+	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
+
+	btw("HLR also sends GSUP _UPDATE_LOCATION_RESULT");
+	expect_bssap_clear();
+	gsup_rx("06010809710000004026f0", NULL);
+
+	btw("LU was successful, and the conn has already been closed");
+	VERBOSE_ASSERT(lu_result_sent, == RES_ACCEPT, "%d");
+	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
+	EXPECT_CONN_COUNT(0);
+
+	BTW("subscriber detaches");
+	expect_bssap_clear();
+	ms_sends_msg("050130089910070000006402");
+	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
+
+	EXPECT_CONN_COUNT(0);
+	clear_vlr();
+	comment_end();
+}
+
+void test_no_authen_imeisv_imei()
+{
+	struct vlr_subscr *vsub;
+	const char *imsi = "901700000004620";
+
+	rx_from_ran = RAN_GERAN_A;
+
+	comment_start();
+
+	net->vlr->cfg.retrieve_imeisv_early = true;
+	net->vlr->cfg.check_imei_rqd = true;
+
+	btw("Location Update request causes an IMEISV ID request back to the MS");
+	lu_result_sent = RES_NONE;
+	dtap_expect_tx("051803");
+	ms_sends_msg("050802008168000130089910070000006402");
+	OSMO_ASSERT(dtap_tx_confirmed);
+
+	btw("MS replies with an Identity Response, causes LU to commence with a GSUP LU request to HLR");
+	gsup_expect_tx("04010809710000004026f0");
+	ms_sends_msg("0559094332244332244372f5");
+	OSMO_ASSERT(gsup_tx_confirmed);
+	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
+
+	btw("Subscriber has the IMEISV from the ID Response");
+	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi);
+	OSMO_ASSERT(vsub);
+	VERBOSE_ASSERT(strcmp(vsub->imeisv, "4234234234234275"), == 0, "%d");
+	vlr_subscr_put(vsub);
+
+	btw("HLR sends _INSERT_DATA_REQUEST, VLR responds with _INSERT_DATA_RESULT");
+	gsup_rx("10010809710000004026f00804036470f1",
+		"12010809710000004026f0");
+	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
+
+	btw("having received subscriber data does not mean acceptance");
+	EXPECT_ACCEPTED(false);
+	thwart_rx_non_initial_requests();
+	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
+
+	btw("HLR also sends GSUP _UPDATE_LOCATION_RESULT, and we send an ID Request for the IMEI to the MS");
+	dtap_expect_tx("051802");
+	gsup_rx("06010809710000004026f0", NULL);
+
+	btw("We will only do business when the IMEI is known");
+	EXPECT_CONN_COUNT(1);
+	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi);
+	OSMO_ASSERT(vsub);
+	VERBOSE_ASSERT(vsub->imei[0], == 0, "%d");
+	vlr_subscr_put(vsub);
+	EXPECT_ACCEPTED(false);
+	thwart_rx_non_initial_requests();
+
+	btw("MS replies with an Identity Response");
+	expect_bssap_clear();
+	ms_sends_msg("0559084a32244332244302");
+	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
+
+	btw("LU was successful, and the conn has already been closed");
+	VERBOSE_ASSERT(lu_result_sent, == RES_ACCEPT, "%d");
+	EXPECT_CONN_COUNT(0);
+
+	btw("Subscriber has the IMEI");
+	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi);
+	OSMO_ASSERT(vsub);
+	VERBOSE_ASSERT(strcmp(vsub->imei, "423423423423420"), == 0, "%d");
+	vlr_subscr_put(vsub);
+
+	BTW("subscriber detaches");
+	expect_bssap_clear();
+	ms_sends_msg("050130089910070000006402");
+	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
+
+	EXPECT_CONN_COUNT(0);
+	clear_vlr();
+	comment_end();
+}
+
+void test_no_authen_imeisv_tmsi()
+{
+	struct vlr_subscr *vsub;
+	const char *imsi = "901700000004620";
+
+	rx_from_ran = RAN_GERAN_A;
+
+	comment_start();
+
+	net->vlr->cfg.retrieve_imeisv_early = true;
+	net->vlr->cfg.assign_tmsi = true;
+
+	btw("Location Update request causes an IMEISV ID request back to the MS");
+	lu_result_sent = RES_NONE;
+	dtap_expect_tx("051803");
+	ms_sends_msg("050802008168000130089910070000006402");
+	OSMO_ASSERT(dtap_tx_confirmed);
+
+	btw("MS replies with an Identity Response, causes LU to commence with a GSUP LU request to HLR");
+	gsup_expect_tx("04010809710000004026f0");
+	ms_sends_msg("0559094332244332244372f5");
+	OSMO_ASSERT(gsup_tx_confirmed);
+	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
+
+	btw("Subscriber has the IMEISV from the ID Response");
+	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi);
+	OSMO_ASSERT(vsub);
+	VERBOSE_ASSERT(strcmp(vsub->imeisv, "4234234234234275"), == 0, "%d");
+	vlr_subscr_put(vsub);
+
+	btw("HLR sends _INSERT_DATA_REQUEST, VLR responds with _INSERT_DATA_RESULT");
+	gsup_rx("10010809710000004026f00804036470f1",
+		"12010809710000004026f0");
+	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
+
+	btw("having received subscriber data does not mean acceptance");
+	EXPECT_ACCEPTED(false);
+	thwart_rx_non_initial_requests();
+	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
+
+	btw("HLR also sends GSUP _UPDATE_LOCATION_RESULT");
+	gsup_rx("06010809710000004026f0", NULL);
+
+	btw("a LU Accept with a new TMSI was sent, waiting for TMSI Realloc Compl");
+	EXPECT_CONN_COUNT(1);
+	VERBOSE_ASSERT(lu_result_sent, == RES_ACCEPT, "%d");
+	EXPECT_ACCEPTED(false);
+	thwart_rx_non_initial_requests();
+
+	btw("even though the TMSI is not acked, we can already find the subscr with it");
+	vsub = vlr_subscr_find_by_tmsi(net->vlr, 0x03020100);
+	VERBOSE_ASSERT(vsub != NULL, == true, "%d");
+	VERBOSE_ASSERT(strcmp(vsub->imsi, imsi), == 0, "%d");
+	VERBOSE_ASSERT(vsub->tmsi_new, == 0x03020100, "0x%08x");
+	VERBOSE_ASSERT(vsub->tmsi, == GSM_RESERVED_TMSI, "0x%08x");
+	vlr_subscr_put(vsub);
+
+	btw("MS sends TMSI Realloc Complete");
+	expect_bssap_clear();
+	ms_sends_msg("055b");
+	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
+
+	btw("LU was successful, and the conn has already been closed");
+	EXPECT_CONN_COUNT(0);
+
+
+	BTW("subscriber sends LU Request, this time with the TMSI");
+	btw("Location Update request causes an IMEISV ID request back to the MS");
+	lu_result_sent = RES_NONE;
+	dtap_expect_tx("051803");
+	ms_sends_msg("050802008168000130089910070000006402");
+	OSMO_ASSERT(dtap_tx_confirmed);
+
+	btw("MS replies with an Identity Response, causes LU to commence with a GSUP LU request to HLR");
+	gsup_expect_tx("04010809710000004026f0");
+	ms_sends_msg("0559095332244332244372f6");
+	OSMO_ASSERT(gsup_tx_confirmed);
+	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
+
+	btw("Subscriber has the IMEISV from the ID Response");
+	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi);
+	OSMO_ASSERT(vsub);
+	VERBOSE_ASSERT(strcmp(vsub->imeisv, "5234234234234276"), == 0, "%d");
+	vlr_subscr_put(vsub);
+
+	btw("HLR sends _INSERT_DATA_REQUEST, VLR responds with _INSERT_DATA_RESULT");
+	gsup_rx("10010809710000004026f00804036470f1",
+		"12010809710000004026f0");
+	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
+
+	btw("having received subscriber data does not mean acceptance");
+	EXPECT_ACCEPTED(false);
+	thwart_rx_non_initial_requests();
+	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
+
+	btw("HLR also sends GSUP _UPDATE_LOCATION_RESULT");
+	gsup_rx("06010809710000004026f0", NULL);
+
+	btw("a LU Accept with a new TMSI was sent, waiting for TMSI Realloc Compl");
+	EXPECT_CONN_COUNT(1);
+	VERBOSE_ASSERT(lu_result_sent, == RES_ACCEPT, "%d");
+	EXPECT_ACCEPTED(false);
+	thwart_rx_non_initial_requests();
+
+	btw("even though the TMSI is not acked, we can already find the subscr with it");
+	vsub = vlr_subscr_find_by_tmsi(net->vlr, 0x07060504);
+	VERBOSE_ASSERT(vsub != NULL, == true, "%d");
+	VERBOSE_ASSERT(strcmp(vsub->imsi, imsi), == 0, "%d");
+	VERBOSE_ASSERT(vsub->tmsi_new, == 0x07060504, "0x%08x");
+	VERBOSE_ASSERT(vsub->tmsi, == 0x03020100, "0x%08x");
+	vlr_subscr_put(vsub);
+
+	btw("MS sends TMSI Realloc Complete");
+	expect_bssap_clear();
+	ms_sends_msg("055b");
+	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
+
+	btw("LU was successful, and the conn has already been closed");
+	EXPECT_CONN_COUNT(0);
+
+	btw("subscriber has the new TMSI");
+	vsub = vlr_subscr_find_by_tmsi(net->vlr, 0x07060504);
+	VERBOSE_ASSERT(vsub != NULL, == true, "%d");
+	VERBOSE_ASSERT(strcmp(vsub->imsi, imsi), == 0, "%d");
+	VERBOSE_ASSERT(vsub->tmsi_new, == GSM_RESERVED_TMSI, "0x%08x");
+	VERBOSE_ASSERT(vsub->tmsi, == 0x07060504, "0x%08x");
+	vlr_subscr_put(vsub);
+
+	BTW("subscriber detaches, using new TMSI");
+	expect_bssap_clear();
+	ms_sends_msg("050130" "05f4" "07060504");
+	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
+
+	EXPECT_CONN_COUNT(0);
+	clear_vlr();
+	comment_end();
+}
+
+void test_no_authen_imeisv_tmsi_imei()
+{
+	struct vlr_subscr *vsub;
+	const char *imsi = "901700000004620";
+
+	rx_from_ran = RAN_GERAN_A;
+
+	comment_start();
+
+	net->vlr->cfg.retrieve_imeisv_early = true;
+	net->vlr->cfg.assign_tmsi = true;
+	net->vlr->cfg.check_imei_rqd = true;
+
+	btw("Location Update request causes an IMEISV ID request back to the MS");
+	lu_result_sent = RES_NONE;
+	dtap_expect_tx("051803");
+	ms_sends_msg("050802008168000130089910070000006402");
+	OSMO_ASSERT(dtap_tx_confirmed);
+
+	btw("MS replies with an Identity Response, causes LU to commence with a GSUP LU request to HLR");
+	gsup_expect_tx("04010809710000004026f0");
+	ms_sends_msg("0559094332244332244372f5");
+	OSMO_ASSERT(gsup_tx_confirmed);
+	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
+
+	btw("Subscriber has the IMEISV from the ID Response");
+	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi);
+	OSMO_ASSERT(vsub);
+	VERBOSE_ASSERT(strcmp(vsub->imeisv, "4234234234234275"), == 0, "%d");
+	vlr_subscr_put(vsub);
+
+	btw("HLR sends _INSERT_DATA_REQUEST, VLR responds with _INSERT_DATA_RESULT");
+	gsup_rx("10010809710000004026f00804036470f1",
+		"12010809710000004026f0");
+	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
+
+	btw("having received subscriber data does not mean acceptance");
+	EXPECT_ACCEPTED(false);
+	thwart_rx_non_initial_requests();
+	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
+
+	btw("HLR also sends GSUP _UPDATE_LOCATION_RESULT, and we send an ID Request for the IMEI to the MS");
+	dtap_expect_tx("051802");
+	gsup_rx("06010809710000004026f0", NULL);
+
+	btw("We will only do business when the IMEI is known");
+	EXPECT_CONN_COUNT(1);
+	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi);
+	OSMO_ASSERT(vsub);
+	VERBOSE_ASSERT(vsub->imei[0], == 0, "%d");
+	vlr_subscr_put(vsub);
+	EXPECT_ACCEPTED(false);
+	thwart_rx_non_initial_requests();
+
+	btw("MS replies with an Identity Response");
+	ms_sends_msg("0559084a32244332244302");
+
+	btw("a LU Accept with a new TMSI was sent, waiting for TMSI Realloc Compl");
+	EXPECT_CONN_COUNT(1);
+	VERBOSE_ASSERT(lu_result_sent, == RES_ACCEPT, "%d");
+	EXPECT_ACCEPTED(false);
+	thwart_rx_non_initial_requests();
+
+	btw("MS sends TMSI Realloc Complete");
+	expect_bssap_clear();
+	ms_sends_msg("055b");
+	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
+
+	btw("LU was successful, and the conn has already been closed");
+	VERBOSE_ASSERT(lu_result_sent, == RES_ACCEPT, "%d");
+	EXPECT_CONN_COUNT(0);
+
+	btw("Subscriber has the IMEISV, IMEI and TMSI");
+	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi);
+	OSMO_ASSERT(vsub);
+	VERBOSE_ASSERT(strcmp(vsub->imeisv, "4234234234234275"), == 0, "%d");
+	VERBOSE_ASSERT(strcmp(vsub->imei, "423423423423420"), == 0, "%d");
+	VERBOSE_ASSERT(vsub->tmsi, == 0x03020100, "0x%08x");
+	vlr_subscr_put(vsub);
+
+	BTW("subscriber detaches");
+	expect_bssap_clear();
+	ms_sends_msg("050130089910070000006402");
+	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
+
+	EXPECT_CONN_COUNT(0);
+	clear_vlr();
+	comment_end();
+}
+
+
 msc_vlr_test_func_t msc_vlr_tests[] = {
 	test_no_authen,
 	test_no_authen_tmsi,
 	test_no_authen_imei,
 	test_no_authen_tmsi_imei,
+	test_no_authen_imeisv,
+	test_no_authen_imeisv_imei,
+	test_no_authen_imeisv_tmsi,
+	test_no_authen_imeisv_tmsi_imei,
 	NULL
 };
