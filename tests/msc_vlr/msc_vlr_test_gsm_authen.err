@@ -1250,8 +1250,8 @@ DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_PDISC_SM
   MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_ID_RESP
 DREF MSISDN:46071: MSC conn use + 1 == 2
 DRLL Dispatching 04.08 message GSM48_MT_MM_ID_RESP (0x5:0x19)
-DMM IDENTITY RESPONSE: MI(IMEI)=423423423423423
-DVLR set IMEI on subscriber; IMSI=901700000004620 IMEI=423423423423423
+DMM IDENTITY RESPONSE: MI(IMEI)=423423423423420
+DVLR set IMEI on subscriber; IMSI=901700000004620 IMEI=423423423423420
 DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_WAIT_LU_COMPL}: Received Event VLR_ULA_E_ID_IMEI
 DVLR lu_compl_vlr_fsm(901700000004620){LU_COMPL_VLR_S_WAIT_IMEI}: Received Event LU_COMPL_VLR_E_IMEI_CHECK_ACK
 - sending LU Accept for MSISDN:46071
@@ -1289,7 +1289,7 @@ DREF VLR subscr MSISDN:46071 usage decreases to: 1
   llist_count(&net->subscr_conns) == 0
 - Subscriber has the IMEI
 DREF VLR subscr MSISDN:46071 usage increases to: 2
-  strcmp(vsub->imei, "423423423423423") == 0
+  strcmp(vsub->imei, "423423423423420") == 0
 DREF VLR subscr MSISDN:46071 usage decreases to: 1
 ---
 - subscriber detaches
@@ -1469,8 +1469,8 @@ DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_PDISC_SM
   MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_ID_RESP
 DREF MSISDN:46071: MSC conn use + 1 == 2
 DRLL Dispatching 04.08 message GSM48_MT_MM_ID_RESP (0x5:0x19)
-DMM IDENTITY RESPONSE: MI(IMEI)=423423423423423
-DVLR set IMEI on subscriber; IMSI=901700000004620 IMEI=423423423423423
+DMM IDENTITY RESPONSE: MI(IMEI)=423423423423420
+DVLR set IMEI on subscriber; IMSI=901700000004620 IMEI=423423423423420
 DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_WAIT_LU_COMPL}: Received Event VLR_ULA_E_ID_IMEI
 DVLR lu_compl_vlr_fsm(901700000004620){LU_COMPL_VLR_S_WAIT_IMEI_TMSI}: Received Event LU_COMPL_VLR_E_IMEI_CHECK_ACK
 DVLR lu_compl_vlr_fsm(901700000004620){LU_COMPL_VLR_S_WAIT_IMEI_TMSI}: lu_compl_vlr_new_tmsi()
@@ -1538,7 +1538,7 @@ DREF VLR subscr MSISDN:46071 usage decreases to: 1
   llist_count(&net->subscr_conns) == 0
 - Subscriber has the IMEI and TMSI
 DREF VLR subscr MSISDN:46071 usage increases to: 2
-  strcmp(vsub->imei, "423423423423423") == 0
+  strcmp(vsub->imei, "423423423423420") == 0
   vsub->tmsi == 0x03020100
 DREF VLR subscr MSISDN:46071 usage decreases to: 1
 ---

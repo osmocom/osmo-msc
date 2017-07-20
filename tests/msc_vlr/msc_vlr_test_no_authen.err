@@ -938,8 +938,8 @@ DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_PDISC_SM
   MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_ID_RESP
 DREF MSISDN:46071: MSC conn use + 1 == 2
 DRLL Dispatching 04.08 message GSM48_MT_MM_ID_RESP (0x5:0x19)
-DMM IDENTITY RESPONSE: MI(IMEI)=423423423423423
-DVLR set IMEI on subscriber; IMSI=901700000004620 IMEI=423423423423423
+DMM IDENTITY RESPONSE: MI(IMEI)=423423423423420
+DVLR set IMEI on subscriber; IMSI=901700000004620 IMEI=423423423423420
 DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_WAIT_LU_COMPL}: Received Event VLR_ULA_E_ID_IMEI
 DVLR lu_compl_vlr_fsm(901700000004620){LU_COMPL_VLR_S_WAIT_IMEI}: Received Event LU_COMPL_VLR_E_IMEI_CHECK_ACK
 - sending LU Accept for MSISDN:46071
@@ -977,7 +977,7 @@ DREF VLR subscr MSISDN:46071 usage decreases to: 1
   llist_count(&net->subscr_conns) == 0
 - Subscriber has the IMEI
 DREF VLR subscr MSISDN:46071 usage increases to: 2
-  strcmp(vsub->imei, "423423423423423") == 0
+  strcmp(vsub->imei, "423423423423420") == 0
 DREF VLR subscr MSISDN:46071 usage decreases to: 1
 ---
 - subscriber detaches
@@ -1110,8 +1110,8 @@ DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_PDISC_SM
   MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_ID_RESP
 DREF MSISDN:46071: MSC conn use + 1 == 2
 DRLL Dispatching 04.08 message GSM48_MT_MM_ID_RESP (0x5:0x19)
-DMM IDENTITY RESPONSE: MI(IMEI)=423423423423423
-DVLR set IMEI on subscriber; IMSI=901700000004620 IMEI=423423423423423
+DMM IDENTITY RESPONSE: MI(IMEI)=423423423423420
+DVLR set IMEI on subscriber; IMSI=901700000004620 IMEI=423423423423420
 DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_WAIT_LU_COMPL}: Received Event VLR_ULA_E_ID_IMEI
 DVLR lu_compl_vlr_fsm(901700000004620){LU_COMPL_VLR_S_WAIT_IMEI_TMSI}: Received Event LU_COMPL_VLR_E_IMEI_CHECK_ACK
 DVLR lu_compl_vlr_fsm(901700000004620){LU_COMPL_VLR_S_WAIT_IMEI_TMSI}: lu_compl_vlr_new_tmsi()
@@ -1173,7 +1173,7 @@ DREF VLR subscr MSISDN:46071 usage decreases to: 1
   llist_count(&net->subscr_conns) == 0
 - Subscriber has the IMEI and TMSI
 DREF VLR subscr MSISDN:46071 usage increases to: 2
-  strcmp(vsub->imei, "423423423423423") == 0
+  strcmp(vsub->imei, "423423423423420") == 0
   vsub->tmsi == 0x03020100
 DREF VLR subscr MSISDN:46071 usage decreases to: 1
 ---
@@ -1195,6 +1195,921 @@ DRLL Freeing subscriber connection with NULL subscriber
   bssap_clear_sent == 1
   llist_count(&net->subscr_conns) == 0
 ===== test_no_authen_tmsi_imei: SUCCESS
+
+full talloc report on 'msgb' (total      0 bytes in   1 blocks)
+talloc_total_blocks(tall_bsc_ctx) == 9
+
+===== test_no_authen_imeisv
+- Location Update request causes an IMEISV ID request back to the MS
+  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
+  new conn
+DREF unknown: MSC conn use + 1 == 1
+DRLL Dispatching 04.08 message GSM48_MT_MM_LOC_UPD_REQUEST (0x5:0x8)
+DREF unknown: MSC conn use + 1 == 2
+DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: Allocated
+DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: Received Event SUBSCR_CONN_E_START
+DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: state_chg to SUBSCR_CONN_S_NEW
+DMM LOCATION UPDATING REQUEST: MI(IMSI)=901700000004620 type=IMSI ATTACH
+DMM LU/new-LAC: 1/0
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_IDLE}: Allocated
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_IDLE}: is child of Subscr_Conn(901700000004620)
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_IDLE}: rev=GSM net=GERAN (no Auth)
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_IDLE}: Received Event VLR_ULA_E_UPDATE_LA
+DREF VLR subscr unknown usage increases to: 1
+DVLR set IMSI on subscriber; IMSI=901700000004620 id=901700000004620
+DVLR New subscr, IMSI: 901700000004620
+DREF VLR subscr IMSI:901700000004620 usage increases to: 2
+DREF VLR subscr IMSI:901700000004620 usage decreases to: 1
+DMSC msc_tx 3 bytes to IMSI:901700000004620 via RAN_GERAN_A
+- DTAP --RAN_GERAN_A--> MS: GSM48_MT_MM_ID_REQ: 051803
+- DTAP matches expected message
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_IDLE}: state_chg to VLR_ULA_S_WAIT_IMEISV
+DMM IMSI:901700000004620: bump: conn still being established (SUBSCR_CONN_S_NEW)
+DREF IMSI:901700000004620: MSC conn use - 1 == 1
+- MS replies with an Identity Response, causes LU to commence with a GSUP LU request to HLR
+  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_ID_RESP
+DREF IMSI:901700000004620: MSC conn use + 1 == 2
+DRLL Dispatching 04.08 message GSM48_MT_MM_ID_RESP (0x5:0x19)
+DMM IDENTITY RESPONSE: MI(IMEI-SV)=4234234234234275
+DVLR set IMEISV on subscriber; IMSI=901700000004620 IMEISV=4234234234234275
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_WAIT_IMEISV}: Received Event VLR_ULA_E_ID_IMEISV
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_WAIT_IMEISV}: vlr_loc_upd_node1()
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_WAIT_IMEISV}: vlr_loc_upd_post_auth()
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_WAIT_IMEISV}: vlr_loc_upd_post_ciph()
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_WAIT_IMEISV}: vlr_loc_upd_node_4()
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_WAIT_IMEISV}: state_chg to VLR_ULA_S_WAIT_HLR_UPD
+DVLR upd_hlr_vlr_fsm(901700000004620){UPD_HLR_VLR_S_INIT}: Allocated
+DVLR upd_hlr_vlr_fsm(901700000004620){UPD_HLR_VLR_S_INIT}: is child of vlr_lu_fsm(901700000004620)
+DVLR upd_hlr_vlr_fsm(901700000004620){UPD_HLR_VLR_S_INIT}: Received Event UPD_HLR_VLR_E_START
+DVLR GSUP tx: 04010809710000004026f0
+GSUP --> HLR: OSMO_GSUP_MSGT_UPDATE_LOCATION_REQUEST: 04010809710000004026f0
+DVLR upd_hlr_vlr_fsm(901700000004620){UPD_HLR_VLR_S_INIT}: state_chg to UPD_HLR_VLR_S_WAIT_FOR_DATA
+DMM IMSI:901700000004620: bump: conn still being established (SUBSCR_CONN_S_NEW)
+DREF IMSI:901700000004620: MSC conn use - 1 == 1
+  lu_result_sent == 0
+- Subscriber has the IMEISV from the ID Response
+DREF VLR subscr IMSI:901700000004620 usage increases to: 2
+  strcmp(vsub->imeisv, "4234234234234275") == 0
+DREF VLR subscr IMSI:901700000004620 usage decreases to: 1
+- HLR sends _INSERT_DATA_REQUEST, VLR responds with _INSERT_DATA_RESULT
+<-- GSUP rx OSMO_GSUP_MSGT_INSERT_DATA_REQUEST: 10010809710000004026f00804036470f1
+DVLR GSUP rx 17: 10010809710000004026f00804036470f1
+DREF VLR subscr IMSI:901700000004620 usage increases to: 2
+DVLR IMSI:901700000004620 has MSISDN:46071
+DVLR GSUP tx: 12010809710000004026f0
+GSUP --> HLR: OSMO_GSUP_MSGT_INSERT_DATA_RESULT: 12010809710000004026f0
+DREF VLR subscr MSISDN:46071 usage decreases to: 1
+<-- GSUP rx OSMO_GSUP_MSGT_INSERT_DATA_REQUEST: vlr_gsupc_read_cb() returns 0
+  lu_result_sent == 0
+- having received subscriber data does not mean acceptance
+msc_subscr_conn_is_accepted() == false
+  requests shall be thwarted
+DRLL Dispatching 04.08 message GSM48_MT_CC_SETUP (0x3:0x5)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_MT_CC_SETUP
+DRLL Dispatching 04.08 message unknown 0x33 (0x5:0x33)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: unknown 0x33
+DRLL Dispatching 04.08 message GSM48_MT_RR_SYSINFO_1 (0x6:0x19)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_MT_RR_SYSINFO_1
+DRLL Dispatching 04.08 message GSM48_PDISC_SMS:0x01 (0x9:0x1)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_PDISC_SMS:0x01
+  lu_result_sent == 0
+- HLR also sends GSUP _UPDATE_LOCATION_RESULT
+<-- GSUP rx OSMO_GSUP_MSGT_UPDATE_LOCATION_RESULT: 06010809710000004026f0
+DVLR GSUP rx 11: 06010809710000004026f0
+DREF VLR subscr MSISDN:46071 usage increases to: 2
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_WAIT_HLR_UPD}: Received Event VLR_ULA_E_HLR_LU_RES
+DVLR upd_hlr_vlr_fsm(901700000004620){UPD_HLR_VLR_S_WAIT_FOR_DATA}: Received Event UPD_HLR_VLR_E_UPD_LOC_ACK
+DVLR upd_hlr_vlr_fsm(901700000004620){UPD_HLR_VLR_S_WAIT_FOR_DATA}: state_chg to UPD_HLR_VLR_S_DONE
+DVLR upd_hlr_vlr_fsm(901700000004620){UPD_HLR_VLR_S_DONE}: Terminating (cause = OSMO_FSM_TERM_REGULAR)
+DVLR upd_hlr_vlr_fsm(901700000004620){UPD_HLR_VLR_S_DONE}: Removing from parent vlr_lu_fsm(901700000004620)
+DVLR upd_hlr_vlr_fsm(901700000004620){UPD_HLR_VLR_S_DONE}: Freeing instance
+DVLR upd_hlr_vlr_fsm(901700000004620){UPD_HLR_VLR_S_DONE}: Deallocated
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_WAIT_HLR_UPD}: Received Event VLR_ULA_E_UPD_HLR_COMPL
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_WAIT_HLR_UPD}: state_chg to VLR_ULA_S_WAIT_LU_COMPL
+DVLR lu_compl_vlr_fsm(901700000004620){LU_COMPL_VLR_S_INIT}: Allocated
+DVLR lu_compl_vlr_fsm(901700000004620){LU_COMPL_VLR_S_INIT}: is child of vlr_lu_fsm(901700000004620)
+DVLR lu_compl_vlr_fsm(901700000004620){LU_COMPL_VLR_S_INIT}: Received Event LU_COMPL_VLR_E_START
+DVLR lu_compl_vlr_fsm(901700000004620){LU_COMPL_VLR_S_INIT}: state_chg to LU_COMPL_VLR_S_WAIT_SUB_PRES
+DVLR sub_pres_vlr_fsm(901700000004620){SUB_PRES_VLR_S_INIT}: Allocated
+DVLR sub_pres_vlr_fsm(901700000004620){SUB_PRES_VLR_S_INIT}: is child of lu_compl_vlr_fsm(901700000004620)
+DVLR sub_pres_vlr_fsm(901700000004620){SUB_PRES_VLR_S_INIT}: Received Event SUB_PRES_VLR_E_START
+DVLR sub_pres_vlr_fsm(901700000004620){SUB_PRES_VLR_S_INIT}: state_chg to SUB_PRES_VLR_S_DONE
+DVLR sub_pres_vlr_fsm(901700000004620){SUB_PRES_VLR_S_DONE}: Terminating (cause = OSMO_FSM_TERM_REGULAR)
+DVLR sub_pres_vlr_fsm(901700000004620){SUB_PRES_VLR_S_DONE}: Removing from parent lu_compl_vlr_fsm(901700000004620)
+DVLR sub_pres_vlr_fsm(901700000004620){SUB_PRES_VLR_S_DONE}: Freeing instance
+DVLR sub_pres_vlr_fsm(901700000004620){SUB_PRES_VLR_S_DONE}: Deallocated
+DVLR lu_compl_vlr_fsm(901700000004620){LU_COMPL_VLR_S_WAIT_SUB_PRES}: Received Event LU_COMPL_VLR_E_SUB_PRES_COMPL
+- sending LU Accept for MSISDN:46071
+DREF VLR subscr MSISDN:46071 usage increases to: 3
+DVLR lu_compl_vlr_fsm(901700000004620){LU_COMPL_VLR_S_WAIT_SUB_PRES}: state_chg to LU_COMPL_VLR_S_DONE
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_WAIT_LU_COMPL}: Received Event VLR_ULA_E_LU_COMPL_SUCCESS
+DVLR lu_compl_vlr_fsm(901700000004620){LU_COMPL_VLR_S_DONE}: Terminating (cause = OSMO_FSM_TERM_PARENT)
+DVLR lu_compl_vlr_fsm(901700000004620){LU_COMPL_VLR_S_DONE}: Removing from parent vlr_lu_fsm(901700000004620)
+DVLR lu_compl_vlr_fsm(901700000004620){LU_COMPL_VLR_S_DONE}: Freeing instance
+DVLR lu_compl_vlr_fsm(901700000004620){LU_COMPL_VLR_S_DONE}: Deallocated
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_WAIT_LU_COMPL}: state_chg to VLR_ULA_S_DONE
+DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_NEW}: Received Event SUBSCR_CONN_E_ACCEPTED
+DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_NEW}: SUBSCR_CONN_FROM_LU
+DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_NEW}: state_chg to SUBSCR_CONN_S_ACCEPTED
+DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_ACCEPTED}: Received Event SUBSCR_CONN_E_BUMP
+DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_ACCEPTED}: bump: releasing conn
+DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_ACCEPTED}: state_chg to SUBSCR_CONN_S_RELEASED
+DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Terminating (cause = OSMO_FSM_TERM_REGULAR)
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_DONE}: Terminating (cause = OSMO_FSM_TERM_PARENT)
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_DONE}: Removing from parent Subscr_Conn(901700000004620)
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_DONE}: fsm_lu_cleanup called with cause OSMO_FSM_TERM_PARENT
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_DONE}: Freeing instance
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_DONE}: Deallocated
+DMM msc_subscr_conn_close(vsub=MSISDN:46071, cause=2): no conn fsm, releasing directly without release event.
+- BSSAP Clear --RAN_GERAN_A--> MS
+DREF MSISDN:46071: MSC conn use - 1 == 0
+DRLL subscr MSISDN:46071: Freeing subscriber connection
+DREF VLR subscr MSISDN:46071 usage decreases to: 2
+DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Freeing instance
+DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Deallocated
+DREF VLR subscr MSISDN:46071 usage decreases to: 1
+<-- GSUP rx OSMO_GSUP_MSGT_UPDATE_LOCATION_RESULT: vlr_gsupc_read_cb() returns 0
+- LU was successful, and the conn has already been closed
+  lu_result_sent == 1
+  bssap_clear_sent == 1
+  llist_count(&net->subscr_conns) == 0
+---
+- subscriber detaches
+  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_IMSI_DETACH_IND
+  new conn
+DREF unknown: MSC conn use + 1 == 1
+DRLL Dispatching 04.08 message GSM48_MT_MM_IMSI_DETACH_IND (0x5:0x1)
+DMM IMSI DETACH INDICATION: MI(IMSI)=901700000004620
+DREF VLR subscr MSISDN:46071 usage increases to: 2
+DMM IMSI DETACH for MSISDN:46071
+DREF VLR subscr MSISDN:46071 usage decreases to: 1
+DREF VLR subscr MSISDN:46071 usage decreases to: 0
+DREF freeing VLR subscr MSISDN:46071
+DMM msc_subscr_conn_close(vsub=unknown, cause=0): no conn fsm, releasing directly without release event.
+- BSSAP Clear --RAN_GERAN_A--> MS
+DREF unknown: MSC conn use - 1 == 0
+DRLL Freeing subscriber connection with NULL subscriber
+  bssap_clear_sent == 1
+  llist_count(&net->subscr_conns) == 0
+===== test_no_authen_imeisv: SUCCESS
+
+full talloc report on 'msgb' (total      0 bytes in   1 blocks)
+talloc_total_blocks(tall_bsc_ctx) == 9
+
+===== test_no_authen_imeisv_imei
+- Location Update request causes an IMEISV ID request back to the MS
+  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
+  new conn
+DREF unknown: MSC conn use + 1 == 1
+DRLL Dispatching 04.08 message GSM48_MT_MM_LOC_UPD_REQUEST (0x5:0x8)
+DREF unknown: MSC conn use + 1 == 2
+DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: Allocated
+DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: Received Event SUBSCR_CONN_E_START
+DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: state_chg to SUBSCR_CONN_S_NEW
+DMM LOCATION UPDATING REQUEST: MI(IMSI)=901700000004620 type=IMSI ATTACH
+DMM LU/new-LAC: 1/0
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_IDLE}: Allocated
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_IDLE}: is child of Subscr_Conn(901700000004620)
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_IDLE}: rev=GSM net=GERAN (no Auth)
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_IDLE}: Received Event VLR_ULA_E_UPDATE_LA
+DREF VLR subscr unknown usage increases to: 1
+DVLR set IMSI on subscriber; IMSI=901700000004620 id=901700000004620
+DVLR New subscr, IMSI: 901700000004620
+DREF VLR subscr IMSI:901700000004620 usage increases to: 2
+DREF VLR subscr IMSI:901700000004620 usage decreases to: 1
+DMSC msc_tx 3 bytes to IMSI:901700000004620 via RAN_GERAN_A
+- DTAP --RAN_GERAN_A--> MS: GSM48_MT_MM_ID_REQ: 051803
+- DTAP matches expected message
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_IDLE}: state_chg to VLR_ULA_S_WAIT_IMEISV
+DMM IMSI:901700000004620: bump: conn still being established (SUBSCR_CONN_S_NEW)
+DREF IMSI:901700000004620: MSC conn use - 1 == 1
+- MS replies with an Identity Response, causes LU to commence with a GSUP LU request to HLR
+  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_ID_RESP
+DREF IMSI:901700000004620: MSC conn use + 1 == 2
+DRLL Dispatching 04.08 message GSM48_MT_MM_ID_RESP (0x5:0x19)
+DMM IDENTITY RESPONSE: MI(IMEI-SV)=4234234234234275
+DVLR set IMEISV on subscriber; IMSI=901700000004620 IMEISV=4234234234234275
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_WAIT_IMEISV}: Received Event VLR_ULA_E_ID_IMEISV
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_WAIT_IMEISV}: vlr_loc_upd_node1()
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_WAIT_IMEISV}: vlr_loc_upd_post_auth()
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_WAIT_IMEISV}: vlr_loc_upd_post_ciph()
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_WAIT_IMEISV}: vlr_loc_upd_node_4()
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_WAIT_IMEISV}: state_chg to VLR_ULA_S_WAIT_HLR_UPD
+DVLR upd_hlr_vlr_fsm(901700000004620){UPD_HLR_VLR_S_INIT}: Allocated
+DVLR upd_hlr_vlr_fsm(901700000004620){UPD_HLR_VLR_S_INIT}: is child of vlr_lu_fsm(901700000004620)
+DVLR upd_hlr_vlr_fsm(901700000004620){UPD_HLR_VLR_S_INIT}: Received Event UPD_HLR_VLR_E_START
+DVLR GSUP tx: 04010809710000004026f0
+GSUP --> HLR: OSMO_GSUP_MSGT_UPDATE_LOCATION_REQUEST: 04010809710000004026f0
+DVLR upd_hlr_vlr_fsm(901700000004620){UPD_HLR_VLR_S_INIT}: state_chg to UPD_HLR_VLR_S_WAIT_FOR_DATA
+DMM IMSI:901700000004620: bump: conn still being established (SUBSCR_CONN_S_NEW)
+DREF IMSI:901700000004620: MSC conn use - 1 == 1
+  lu_result_sent == 0
+- Subscriber has the IMEISV from the ID Response
+DREF VLR subscr IMSI:901700000004620 usage increases to: 2
+  strcmp(vsub->imeisv, "4234234234234275") == 0
+DREF VLR subscr IMSI:901700000004620 usage decreases to: 1
+- HLR sends _INSERT_DATA_REQUEST, VLR responds with _INSERT_DATA_RESULT
+<-- GSUP rx OSMO_GSUP_MSGT_INSERT_DATA_REQUEST: 10010809710000004026f00804036470f1
+DVLR GSUP rx 17: 10010809710000004026f00804036470f1
+DREF VLR subscr IMSI:901700000004620 usage increases to: 2
+DVLR IMSI:901700000004620 has MSISDN:46071
+DVLR GSUP tx: 12010809710000004026f0
+GSUP --> HLR: OSMO_GSUP_MSGT_INSERT_DATA_RESULT: 12010809710000004026f0
+DREF VLR subscr MSISDN:46071 usage decreases to: 1
+<-- GSUP rx OSMO_GSUP_MSGT_INSERT_DATA_REQUEST: vlr_gsupc_read_cb() returns 0
+  lu_result_sent == 0
+- having received subscriber data does not mean acceptance
+msc_subscr_conn_is_accepted() == false
+  requests shall be thwarted
+DRLL Dispatching 04.08 message GSM48_MT_CC_SETUP (0x3:0x5)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_MT_CC_SETUP
+DRLL Dispatching 04.08 message unknown 0x33 (0x5:0x33)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: unknown 0x33
+DRLL Dispatching 04.08 message GSM48_MT_RR_SYSINFO_1 (0x6:0x19)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_MT_RR_SYSINFO_1
+DRLL Dispatching 04.08 message GSM48_PDISC_SMS:0x01 (0x9:0x1)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_PDISC_SMS:0x01
+  lu_result_sent == 0
+- HLR also sends GSUP _UPDATE_LOCATION_RESULT, and we send an ID Request for the IMEI to the MS
+<-- GSUP rx OSMO_GSUP_MSGT_UPDATE_LOCATION_RESULT: 06010809710000004026f0
+DVLR GSUP rx 11: 06010809710000004026f0
+DREF VLR subscr MSISDN:46071 usage increases to: 2
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_WAIT_HLR_UPD}: Received Event VLR_ULA_E_HLR_LU_RES
+DVLR upd_hlr_vlr_fsm(901700000004620){UPD_HLR_VLR_S_WAIT_FOR_DATA}: Received Event UPD_HLR_VLR_E_UPD_LOC_ACK
+DVLR upd_hlr_vlr_fsm(901700000004620){UPD_HLR_VLR_S_WAIT_FOR_DATA}: state_chg to UPD_HLR_VLR_S_DONE
+DVLR upd_hlr_vlr_fsm(901700000004620){UPD_HLR_VLR_S_DONE}: Terminating (cause = OSMO_FSM_TERM_REGULAR)
+DVLR upd_hlr_vlr_fsm(901700000004620){UPD_HLR_VLR_S_DONE}: Removing from parent vlr_lu_fsm(901700000004620)
+DVLR upd_hlr_vlr_fsm(901700000004620){UPD_HLR_VLR_S_DONE}: Freeing instance
+DVLR upd_hlr_vlr_fsm(901700000004620){UPD_HLR_VLR_S_DONE}: Deallocated
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_WAIT_HLR_UPD}: Received Event VLR_ULA_E_UPD_HLR_COMPL
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_WAIT_HLR_UPD}: state_chg to VLR_ULA_S_WAIT_LU_COMPL
+DVLR lu_compl_vlr_fsm(901700000004620){LU_COMPL_VLR_S_INIT}: Allocated
+DVLR lu_compl_vlr_fsm(901700000004620){LU_COMPL_VLR_S_INIT}: is child of vlr_lu_fsm(901700000004620)
+DVLR lu_compl_vlr_fsm(901700000004620){LU_COMPL_VLR_S_INIT}: Received Event LU_COMPL_VLR_E_START
+DVLR lu_compl_vlr_fsm(901700000004620){LU_COMPL_VLR_S_INIT}: state_chg to LU_COMPL_VLR_S_WAIT_SUB_PRES
+DVLR sub_pres_vlr_fsm(901700000004620){SUB_PRES_VLR_S_INIT}: Allocated
+DVLR sub_pres_vlr_fsm(901700000004620){SUB_PRES_VLR_S_INIT}: is child of lu_compl_vlr_fsm(901700000004620)
+DVLR sub_pres_vlr_fsm(901700000004620){SUB_PRES_VLR_S_INIT}: Received Event SUB_PRES_VLR_E_START
+DVLR sub_pres_vlr_fsm(901700000004620){SUB_PRES_VLR_S_INIT}: state_chg to SUB_PRES_VLR_S_DONE
+DVLR sub_pres_vlr_fsm(901700000004620){SUB_PRES_VLR_S_DONE}: Terminating (cause = OSMO_FSM_TERM_REGULAR)
+DVLR sub_pres_vlr_fsm(901700000004620){SUB_PRES_VLR_S_DONE}: Removing from parent lu_compl_vlr_fsm(901700000004620)
+DVLR sub_pres_vlr_fsm(901700000004620){SUB_PRES_VLR_S_DONE}: Freeing instance
+DVLR sub_pres_vlr_fsm(901700000004620){SUB_PRES_VLR_S_DONE}: Deallocated
+DVLR lu_compl_vlr_fsm(901700000004620){LU_COMPL_VLR_S_WAIT_SUB_PRES}: Received Event LU_COMPL_VLR_E_SUB_PRES_COMPL
+DVLR lu_compl_vlr_fsm(901700000004620){LU_COMPL_VLR_S_WAIT_SUB_PRES}: state_chg to LU_COMPL_VLR_S_WAIT_IMEI
+DMSC msc_tx 3 bytes to MSISDN:46071 via RAN_GERAN_A
+- DTAP --RAN_GERAN_A--> MS: GSM48_MT_MM_ID_REQ: 051802
+- DTAP matches expected message
+DREF VLR subscr MSISDN:46071 usage decreases to: 1
+<-- GSUP rx OSMO_GSUP_MSGT_UPDATE_LOCATION_RESULT: vlr_gsupc_read_cb() returns 0
+- We will only do business when the IMEI is known
+  llist_count(&net->subscr_conns) == 1
+DREF VLR subscr MSISDN:46071 usage increases to: 2
+  vsub->imei[0] == 0
+DREF VLR subscr MSISDN:46071 usage decreases to: 1
+msc_subscr_conn_is_accepted() == false
+  requests shall be thwarted
+DRLL Dispatching 04.08 message GSM48_MT_CC_SETUP (0x3:0x5)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_MT_CC_SETUP
+DRLL Dispatching 04.08 message unknown 0x33 (0x5:0x33)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: unknown 0x33
+DRLL Dispatching 04.08 message GSM48_MT_RR_SYSINFO_1 (0x6:0x19)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_MT_RR_SYSINFO_1
+DRLL Dispatching 04.08 message GSM48_PDISC_SMS:0x01 (0x9:0x1)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_PDISC_SMS:0x01
+- MS replies with an Identity Response
+  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_ID_RESP
+DREF MSISDN:46071: MSC conn use + 1 == 2
+DRLL Dispatching 04.08 message GSM48_MT_MM_ID_RESP (0x5:0x19)
+DMM IDENTITY RESPONSE: MI(IMEI)=423423423423420
+DVLR set IMEI on subscriber; IMSI=901700000004620 IMEI=423423423423420
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_WAIT_LU_COMPL}: Received Event VLR_ULA_E_ID_IMEI
+DVLR lu_compl_vlr_fsm(901700000004620){LU_COMPL_VLR_S_WAIT_IMEI}: Received Event LU_COMPL_VLR_E_IMEI_CHECK_ACK
+- sending LU Accept for MSISDN:46071
+DREF VLR subscr MSISDN:46071 usage increases to: 2
+DVLR lu_compl_vlr_fsm(901700000004620){LU_COMPL_VLR_S_WAIT_IMEI}: state_chg to LU_COMPL_VLR_S_DONE
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_WAIT_LU_COMPL}: Received Event VLR_ULA_E_LU_COMPL_SUCCESS
+DVLR lu_compl_vlr_fsm(901700000004620){LU_COMPL_VLR_S_DONE}: Terminating (cause = OSMO_FSM_TERM_PARENT)
+DVLR lu_compl_vlr_fsm(901700000004620){LU_COMPL_VLR_S_DONE}: Removing from parent vlr_lu_fsm(901700000004620)
+DVLR lu_compl_vlr_fsm(901700000004620){LU_COMPL_VLR_S_DONE}: Freeing instance
+DVLR lu_compl_vlr_fsm(901700000004620){LU_COMPL_VLR_S_DONE}: Deallocated
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_WAIT_LU_COMPL}: state_chg to VLR_ULA_S_DONE
+DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_NEW}: Received Event SUBSCR_CONN_E_ACCEPTED
+DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_NEW}: SUBSCR_CONN_FROM_LU
+DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_NEW}: state_chg to SUBSCR_CONN_S_ACCEPTED
+DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_ACCEPTED}: Received Event SUBSCR_CONN_E_BUMP
+DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_ACCEPTED}: bump: releasing conn
+DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_ACCEPTED}: state_chg to SUBSCR_CONN_S_RELEASED
+DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Terminating (cause = OSMO_FSM_TERM_REGULAR)
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_DONE}: Terminating (cause = OSMO_FSM_TERM_PARENT)
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_DONE}: Removing from parent Subscr_Conn(901700000004620)
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_DONE}: fsm_lu_cleanup called with cause OSMO_FSM_TERM_PARENT
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_DONE}: Freeing instance
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_DONE}: Deallocated
+DMM msc_subscr_conn_close(vsub=MSISDN:46071, cause=2): no conn fsm, releasing directly without release event.
+- BSSAP Clear --RAN_GERAN_A--> MS
+DREF MSISDN:46071: MSC conn use - 1 == 1
+DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Freeing instance
+DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Deallocated
+DREF MSISDN:46071: MSC conn use - 1 == 0
+DRLL subscr MSISDN:46071: Freeing subscriber connection
+DREF VLR subscr MSISDN:46071 usage decreases to: 1
+  bssap_clear_sent == 1
+- LU was successful, and the conn has already been closed
+  lu_result_sent == 1
+  llist_count(&net->subscr_conns) == 0
+- Subscriber has the IMEI
+DREF VLR subscr MSISDN:46071 usage increases to: 2
+  strcmp(vsub->imei, "423423423423420") == 0
+DREF VLR subscr MSISDN:46071 usage decreases to: 1
+---
+- subscriber detaches
+  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_IMSI_DETACH_IND
+  new conn
+DREF unknown: MSC conn use + 1 == 1
+DRLL Dispatching 04.08 message GSM48_MT_MM_IMSI_DETACH_IND (0x5:0x1)
+DMM IMSI DETACH INDICATION: MI(IMSI)=901700000004620
+DREF VLR subscr MSISDN:46071 usage increases to: 2
+DMM IMSI DETACH for MSISDN:46071
+DREF VLR subscr MSISDN:46071 usage decreases to: 1
+DREF VLR subscr MSISDN:46071 usage decreases to: 0
+DREF freeing VLR subscr MSISDN:46071
+DMM msc_subscr_conn_close(vsub=unknown, cause=0): no conn fsm, releasing directly without release event.
+- BSSAP Clear --RAN_GERAN_A--> MS
+DREF unknown: MSC conn use - 1 == 0
+DRLL Freeing subscriber connection with NULL subscriber
+  bssap_clear_sent == 1
+  llist_count(&net->subscr_conns) == 0
+===== test_no_authen_imeisv_imei: SUCCESS
+
+full talloc report on 'msgb' (total      0 bytes in   1 blocks)
+talloc_total_blocks(tall_bsc_ctx) == 9
+
+===== test_no_authen_imeisv_tmsi
+- Location Update request causes an IMEISV ID request back to the MS
+  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
+  new conn
+DREF unknown: MSC conn use + 1 == 1
+DRLL Dispatching 04.08 message GSM48_MT_MM_LOC_UPD_REQUEST (0x5:0x8)
+DREF unknown: MSC conn use + 1 == 2
+DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: Allocated
+DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: Received Event SUBSCR_CONN_E_START
+DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: state_chg to SUBSCR_CONN_S_NEW
+DMM LOCATION UPDATING REQUEST: MI(IMSI)=901700000004620 type=IMSI ATTACH
+DMM LU/new-LAC: 1/0
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_IDLE}: Allocated
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_IDLE}: is child of Subscr_Conn(901700000004620)
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_IDLE}: rev=GSM net=GERAN (no Auth)
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_IDLE}: Received Event VLR_ULA_E_UPDATE_LA
+DREF VLR subscr unknown usage increases to: 1
+DVLR set IMSI on subscriber; IMSI=901700000004620 id=901700000004620
+DVLR New subscr, IMSI: 901700000004620
+DREF VLR subscr IMSI:901700000004620 usage increases to: 2
+DREF VLR subscr IMSI:901700000004620 usage decreases to: 1
+DMSC msc_tx 3 bytes to IMSI:901700000004620 via RAN_GERAN_A
+- DTAP --RAN_GERAN_A--> MS: GSM48_MT_MM_ID_REQ: 051803
+- DTAP matches expected message
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_IDLE}: state_chg to VLR_ULA_S_WAIT_IMEISV
+DMM IMSI:901700000004620: bump: conn still being established (SUBSCR_CONN_S_NEW)
+DREF IMSI:901700000004620: MSC conn use - 1 == 1
+- MS replies with an Identity Response, causes LU to commence with a GSUP LU request to HLR
+  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_ID_RESP
+DREF IMSI:901700000004620: MSC conn use + 1 == 2
+DRLL Dispatching 04.08 message GSM48_MT_MM_ID_RESP (0x5:0x19)
+DMM IDENTITY RESPONSE: MI(IMEI-SV)=4234234234234275
+DVLR set IMEISV on subscriber; IMSI=901700000004620 IMEISV=4234234234234275
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_WAIT_IMEISV}: Received Event VLR_ULA_E_ID_IMEISV
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_WAIT_IMEISV}: vlr_loc_upd_node1()
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_WAIT_IMEISV}: vlr_loc_upd_post_auth()
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_WAIT_IMEISV}: vlr_loc_upd_post_ciph()
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_WAIT_IMEISV}: vlr_loc_upd_node_4()
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_WAIT_IMEISV}: state_chg to VLR_ULA_S_WAIT_HLR_UPD
+DVLR upd_hlr_vlr_fsm(901700000004620){UPD_HLR_VLR_S_INIT}: Allocated
+DVLR upd_hlr_vlr_fsm(901700000004620){UPD_HLR_VLR_S_INIT}: is child of vlr_lu_fsm(901700000004620)
+DVLR upd_hlr_vlr_fsm(901700000004620){UPD_HLR_VLR_S_INIT}: Received Event UPD_HLR_VLR_E_START
+DVLR GSUP tx: 04010809710000004026f0
+GSUP --> HLR: OSMO_GSUP_MSGT_UPDATE_LOCATION_REQUEST: 04010809710000004026f0
+DVLR upd_hlr_vlr_fsm(901700000004620){UPD_HLR_VLR_S_INIT}: state_chg to UPD_HLR_VLR_S_WAIT_FOR_DATA
+DMM IMSI:901700000004620: bump: conn still being established (SUBSCR_CONN_S_NEW)
+DREF IMSI:901700000004620: MSC conn use - 1 == 1
+  lu_result_sent == 0
+- Subscriber has the IMEISV from the ID Response
+DREF VLR subscr IMSI:901700000004620 usage increases to: 2
+  strcmp(vsub->imeisv, "4234234234234275") == 0
+DREF VLR subscr IMSI:901700000004620 usage decreases to: 1
+- HLR sends _INSERT_DATA_REQUEST, VLR responds with _INSERT_DATA_RESULT
+<-- GSUP rx OSMO_GSUP_MSGT_INSERT_DATA_REQUEST: 10010809710000004026f00804036470f1
+DVLR GSUP rx 17: 10010809710000004026f00804036470f1
+DREF VLR subscr IMSI:901700000004620 usage increases to: 2
+DVLR IMSI:901700000004620 has MSISDN:46071
+DVLR GSUP tx: 12010809710000004026f0
+GSUP --> HLR: OSMO_GSUP_MSGT_INSERT_DATA_RESULT: 12010809710000004026f0
+DREF VLR subscr MSISDN:46071 usage decreases to: 1
+<-- GSUP rx OSMO_GSUP_MSGT_INSERT_DATA_REQUEST: vlr_gsupc_read_cb() returns 0
+  lu_result_sent == 0
+- having received subscriber data does not mean acceptance
+msc_subscr_conn_is_accepted() == false
+  requests shall be thwarted
+DRLL Dispatching 04.08 message GSM48_MT_CC_SETUP (0x3:0x5)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_MT_CC_SETUP
+DRLL Dispatching 04.08 message unknown 0x33 (0x5:0x33)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: unknown 0x33
+DRLL Dispatching 04.08 message GSM48_MT_RR_SYSINFO_1 (0x6:0x19)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_MT_RR_SYSINFO_1
+DRLL Dispatching 04.08 message GSM48_PDISC_SMS:0x01 (0x9:0x1)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_PDISC_SMS:0x01
+  lu_result_sent == 0
+- HLR also sends GSUP _UPDATE_LOCATION_RESULT
+<-- GSUP rx OSMO_GSUP_MSGT_UPDATE_LOCATION_RESULT: 06010809710000004026f0
+DVLR GSUP rx 11: 06010809710000004026f0
+DREF VLR subscr MSISDN:46071 usage increases to: 2
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_WAIT_HLR_UPD}: Received Event VLR_ULA_E_HLR_LU_RES
+DVLR upd_hlr_vlr_fsm(901700000004620){UPD_HLR_VLR_S_WAIT_FOR_DATA}: Received Event UPD_HLR_VLR_E_UPD_LOC_ACK
+DVLR upd_hlr_vlr_fsm(901700000004620){UPD_HLR_VLR_S_WAIT_FOR_DATA}: state_chg to UPD_HLR_VLR_S_DONE
+DVLR upd_hlr_vlr_fsm(901700000004620){UPD_HLR_VLR_S_DONE}: Terminating (cause = OSMO_FSM_TERM_REGULAR)
+DVLR upd_hlr_vlr_fsm(901700000004620){UPD_HLR_VLR_S_DONE}: Removing from parent vlr_lu_fsm(901700000004620)
+DVLR upd_hlr_vlr_fsm(901700000004620){UPD_HLR_VLR_S_DONE}: Freeing instance
+DVLR upd_hlr_vlr_fsm(901700000004620){UPD_HLR_VLR_S_DONE}: Deallocated
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_WAIT_HLR_UPD}: Received Event VLR_ULA_E_UPD_HLR_COMPL
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_WAIT_HLR_UPD}: state_chg to VLR_ULA_S_WAIT_LU_COMPL
+DVLR lu_compl_vlr_fsm(901700000004620){LU_COMPL_VLR_S_INIT}: Allocated
+DVLR lu_compl_vlr_fsm(901700000004620){LU_COMPL_VLR_S_INIT}: is child of vlr_lu_fsm(901700000004620)
+DVLR lu_compl_vlr_fsm(901700000004620){LU_COMPL_VLR_S_INIT}: Received Event LU_COMPL_VLR_E_START
+DVLR lu_compl_vlr_fsm(901700000004620){LU_COMPL_VLR_S_INIT}: state_chg to LU_COMPL_VLR_S_WAIT_SUB_PRES
+DVLR sub_pres_vlr_fsm(901700000004620){SUB_PRES_VLR_S_INIT}: Allocated
+DVLR sub_pres_vlr_fsm(901700000004620){SUB_PRES_VLR_S_INIT}: is child of lu_compl_vlr_fsm(901700000004620)
+DVLR sub_pres_vlr_fsm(901700000004620){SUB_PRES_VLR_S_INIT}: Received Event SUB_PRES_VLR_E_START
+DVLR sub_pres_vlr_fsm(901700000004620){SUB_PRES_VLR_S_INIT}: state_chg to SUB_PRES_VLR_S_DONE
+DVLR sub_pres_vlr_fsm(901700000004620){SUB_PRES_VLR_S_DONE}: Terminating (cause = OSMO_FSM_TERM_REGULAR)
+DVLR sub_pres_vlr_fsm(901700000004620){SUB_PRES_VLR_S_DONE}: Removing from parent lu_compl_vlr_fsm(901700000004620)
+DVLR sub_pres_vlr_fsm(901700000004620){SUB_PRES_VLR_S_DONE}: Freeing instance
+DVLR sub_pres_vlr_fsm(901700000004620){SUB_PRES_VLR_S_DONE}: Deallocated
+DVLR lu_compl_vlr_fsm(901700000004620){LU_COMPL_VLR_S_WAIT_SUB_PRES}: Received Event LU_COMPL_VLR_E_SUB_PRES_COMPL
+DVLR lu_compl_vlr_fsm(901700000004620){LU_COMPL_VLR_S_WAIT_SUB_PRES}: lu_compl_vlr_new_tmsi()
+DVLR lu_compl_vlr_fsm(901700000004620){LU_COMPL_VLR_S_WAIT_SUB_PRES}: state_chg to LU_COMPL_VLR_S_WAIT_TMSI_CNF
+- sending LU Accept for MSISDN:46071, with TMSI 0x03020100
+DREF VLR subscr MSISDN:46071 usage decreases to: 1
+<-- GSUP rx OSMO_GSUP_MSGT_UPDATE_LOCATION_RESULT: vlr_gsupc_read_cb() returns 0
+- a LU Accept with a new TMSI was sent, waiting for TMSI Realloc Compl
+  llist_count(&net->subscr_conns) == 1
+  lu_result_sent == 1
+msc_subscr_conn_is_accepted() == false
+  requests shall be thwarted
+DRLL Dispatching 04.08 message GSM48_MT_CC_SETUP (0x3:0x5)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_MT_CC_SETUP
+DRLL Dispatching 04.08 message unknown 0x33 (0x5:0x33)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: unknown 0x33
+DRLL Dispatching 04.08 message GSM48_MT_RR_SYSINFO_1 (0x6:0x19)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_MT_RR_SYSINFO_1
+DRLL Dispatching 04.08 message GSM48_PDISC_SMS:0x01 (0x9:0x1)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_PDISC_SMS:0x01
+- even though the TMSI is not acked, we can already find the subscr with it
+DREF VLR subscr MSISDN:46071 usage increases to: 2
+  vsub != NULL == 1
+  strcmp(vsub->imsi, imsi) == 0
+  vsub->tmsi_new == 0x03020100
+  vsub->tmsi == 0xffffffff
+DREF VLR subscr MSISDN:46071 usage decreases to: 1
+- MS sends TMSI Realloc Complete
+  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_TMSI_REALL_COMPL
+DREF MSISDN:46071: MSC conn use + 1 == 2
+DRLL Dispatching 04.08 message GSM48_MT_MM_TMSI_REALL_COMPL (0x5:0x1b)
+DMM TMSI Reallocation Completed. Subscriber: MSISDN:46071
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_WAIT_LU_COMPL}: Received Event VLR_ULA_E_NEW_TMSI_ACK
+DVLR lu_compl_vlr_fsm(901700000004620){LU_COMPL_VLR_S_WAIT_TMSI_CNF}: Received Event LU_COMPL_VLR_E_NEW_TMSI_ACK
+DREF VLR subscr MSISDN:46071 usage increases to: 2
+DVLR lu_compl_vlr_fsm(901700000004620){LU_COMPL_VLR_S_WAIT_TMSI_CNF}: state_chg to LU_COMPL_VLR_S_DONE
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_WAIT_LU_COMPL}: Received Event VLR_ULA_E_LU_COMPL_SUCCESS
+DVLR lu_compl_vlr_fsm(901700000004620){LU_COMPL_VLR_S_DONE}: Terminating (cause = OSMO_FSM_TERM_PARENT)
+DVLR lu_compl_vlr_fsm(901700000004620){LU_COMPL_VLR_S_DONE}: Removing from parent vlr_lu_fsm(901700000004620)
+DVLR lu_compl_vlr_fsm(901700000004620){LU_COMPL_VLR_S_DONE}: Freeing instance
+DVLR lu_compl_vlr_fsm(901700000004620){LU_COMPL_VLR_S_DONE}: Deallocated
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_WAIT_LU_COMPL}: state_chg to VLR_ULA_S_DONE
+DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_NEW}: Received Event SUBSCR_CONN_E_ACCEPTED
+DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_NEW}: SUBSCR_CONN_FROM_LU
+DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_NEW}: state_chg to SUBSCR_CONN_S_ACCEPTED
+DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_ACCEPTED}: Received Event SUBSCR_CONN_E_BUMP
+DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_ACCEPTED}: bump: releasing conn
+DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_ACCEPTED}: state_chg to SUBSCR_CONN_S_RELEASED
+DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Terminating (cause = OSMO_FSM_TERM_REGULAR)
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_DONE}: Terminating (cause = OSMO_FSM_TERM_PARENT)
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_DONE}: Removing from parent Subscr_Conn(901700000004620)
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_DONE}: fsm_lu_cleanup called with cause OSMO_FSM_TERM_PARENT
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_DONE}: Freeing instance
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_DONE}: Deallocated
+DMM msc_subscr_conn_close(vsub=MSISDN:46071, cause=2): no conn fsm, releasing directly without release event.
+- BSSAP Clear --RAN_GERAN_A--> MS
+DREF MSISDN:46071: MSC conn use - 1 == 1
+DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Freeing instance
+DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Deallocated
+DREF MSISDN:46071: MSC conn use - 1 == 0
+DRLL subscr MSISDN:46071: Freeing subscriber connection
+DREF VLR subscr MSISDN:46071 usage decreases to: 1
+  bssap_clear_sent == 1
+- LU was successful, and the conn has already been closed
+  llist_count(&net->subscr_conns) == 0
+---
+- subscriber sends LU Request, this time with the TMSI
+- Location Update request causes an IMEISV ID request back to the MS
+  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
+  new conn
+DREF unknown: MSC conn use + 1 == 1
+DRLL Dispatching 04.08 message GSM48_MT_MM_LOC_UPD_REQUEST (0x5:0x8)
+DREF unknown: MSC conn use + 1 == 2
+DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: Allocated
+DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: Received Event SUBSCR_CONN_E_START
+DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: state_chg to SUBSCR_CONN_S_NEW
+DMM LOCATION UPDATING REQUEST: MI(IMSI)=901700000004620 type=IMSI ATTACH
+DMM LU/new-LAC: 1/0
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_IDLE}: Allocated
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_IDLE}: is child of Subscr_Conn(901700000004620)
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_IDLE}: rev=GSM net=GERAN (no Auth)
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_IDLE}: Received Event VLR_ULA_E_UPDATE_LA
+DREF VLR subscr MSISDN:46071 usage increases to: 2
+DREF VLR subscr MSISDN:46071 usage increases to: 3
+DREF VLR subscr MSISDN:46071 usage decreases to: 2
+DMSC msc_tx 3 bytes to MSISDN:46071 via RAN_GERAN_A
+- DTAP --RAN_GERAN_A--> MS: GSM48_MT_MM_ID_REQ: 051803
+- DTAP matches expected message
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_IDLE}: state_chg to VLR_ULA_S_WAIT_IMEISV
+DMM MSISDN:46071: bump: conn still being established (SUBSCR_CONN_S_NEW)
+DREF MSISDN:46071: MSC conn use - 1 == 1
+- MS replies with an Identity Response, causes LU to commence with a GSUP LU request to HLR
+  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_ID_RESP
+DREF MSISDN:46071: MSC conn use + 1 == 2
+DRLL Dispatching 04.08 message GSM48_MT_MM_ID_RESP (0x5:0x19)
+DMM IDENTITY RESPONSE: MI(IMEI-SV)=5234234234234276
+DVLR set IMEISV on subscriber; IMSI=901700000004620 IMEISV=5234234234234276
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_WAIT_IMEISV}: Received Event VLR_ULA_E_ID_IMEISV
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_WAIT_IMEISV}: vlr_loc_upd_node1()
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_WAIT_IMEISV}: vlr_loc_upd_post_auth()
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_WAIT_IMEISV}: vlr_loc_upd_post_ciph()
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_WAIT_IMEISV}: vlr_loc_upd_node_4()
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_WAIT_IMEISV}: state_chg to VLR_ULA_S_WAIT_HLR_UPD
+DVLR upd_hlr_vlr_fsm(901700000004620){UPD_HLR_VLR_S_INIT}: Allocated
+DVLR upd_hlr_vlr_fsm(901700000004620){UPD_HLR_VLR_S_INIT}: is child of vlr_lu_fsm(901700000004620)
+DVLR upd_hlr_vlr_fsm(901700000004620){UPD_HLR_VLR_S_INIT}: Received Event UPD_HLR_VLR_E_START
+DVLR GSUP tx: 04010809710000004026f0
+GSUP --> HLR: OSMO_GSUP_MSGT_UPDATE_LOCATION_REQUEST: 04010809710000004026f0
+DVLR upd_hlr_vlr_fsm(901700000004620){UPD_HLR_VLR_S_INIT}: state_chg to UPD_HLR_VLR_S_WAIT_FOR_DATA
+DMM MSISDN:46071: bump: conn still being established (SUBSCR_CONN_S_NEW)
+DREF MSISDN:46071: MSC conn use - 1 == 1
+  lu_result_sent == 0
+- Subscriber has the IMEISV from the ID Response
+DREF VLR subscr MSISDN:46071 usage increases to: 3
+  strcmp(vsub->imeisv, "5234234234234276") == 0
+DREF VLR subscr MSISDN:46071 usage decreases to: 2
+- HLR sends _INSERT_DATA_REQUEST, VLR responds with _INSERT_DATA_RESULT
+<-- GSUP rx OSMO_GSUP_MSGT_INSERT_DATA_REQUEST: 10010809710000004026f00804036470f1
+DVLR GSUP rx 17: 10010809710000004026f00804036470f1
+DREF VLR subscr MSISDN:46071 usage increases to: 3
+DVLR IMSI:901700000004620 has MSISDN:46071
+DVLR GSUP tx: 12010809710000004026f0
+GSUP --> HLR: OSMO_GSUP_MSGT_INSERT_DATA_RESULT: 12010809710000004026f0
+DREF VLR subscr MSISDN:46071 usage decreases to: 2
+<-- GSUP rx OSMO_GSUP_MSGT_INSERT_DATA_REQUEST: vlr_gsupc_read_cb() returns 0
+  lu_result_sent == 0
+- having received subscriber data does not mean acceptance
+msc_subscr_conn_is_accepted() == false
+  requests shall be thwarted
+DRLL Dispatching 04.08 message GSM48_MT_CC_SETUP (0x3:0x5)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_MT_CC_SETUP
+DRLL Dispatching 04.08 message unknown 0x33 (0x5:0x33)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: unknown 0x33
+DRLL Dispatching 04.08 message GSM48_MT_RR_SYSINFO_1 (0x6:0x19)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_MT_RR_SYSINFO_1
+DRLL Dispatching 04.08 message GSM48_PDISC_SMS:0x01 (0x9:0x1)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_PDISC_SMS:0x01
+  lu_result_sent == 0
+- HLR also sends GSUP _UPDATE_LOCATION_RESULT
+<-- GSUP rx OSMO_GSUP_MSGT_UPDATE_LOCATION_RESULT: 06010809710000004026f0
+DVLR GSUP rx 11: 06010809710000004026f0
+DREF VLR subscr MSISDN:46071 usage increases to: 3
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_WAIT_HLR_UPD}: Received Event VLR_ULA_E_HLR_LU_RES
+DVLR upd_hlr_vlr_fsm(901700000004620){UPD_HLR_VLR_S_WAIT_FOR_DATA}: Received Event UPD_HLR_VLR_E_UPD_LOC_ACK
+DVLR upd_hlr_vlr_fsm(901700000004620){UPD_HLR_VLR_S_WAIT_FOR_DATA}: state_chg to UPD_HLR_VLR_S_DONE
+DVLR upd_hlr_vlr_fsm(901700000004620){UPD_HLR_VLR_S_DONE}: Terminating (cause = OSMO_FSM_TERM_REGULAR)
+DVLR upd_hlr_vlr_fsm(901700000004620){UPD_HLR_VLR_S_DONE}: Removing from parent vlr_lu_fsm(901700000004620)
+DVLR upd_hlr_vlr_fsm(901700000004620){UPD_HLR_VLR_S_DONE}: Freeing instance
+DVLR upd_hlr_vlr_fsm(901700000004620){UPD_HLR_VLR_S_DONE}: Deallocated
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_WAIT_HLR_UPD}: Received Event VLR_ULA_E_UPD_HLR_COMPL
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_WAIT_HLR_UPD}: state_chg to VLR_ULA_S_WAIT_LU_COMPL
+DVLR lu_compl_vlr_fsm(901700000004620){LU_COMPL_VLR_S_INIT}: Allocated
+DVLR lu_compl_vlr_fsm(901700000004620){LU_COMPL_VLR_S_INIT}: is child of vlr_lu_fsm(901700000004620)
+DVLR lu_compl_vlr_fsm(901700000004620){LU_COMPL_VLR_S_INIT}: Received Event LU_COMPL_VLR_E_START
+DVLR lu_compl_vlr_fsm(901700000004620){LU_COMPL_VLR_S_INIT}: state_chg to LU_COMPL_VLR_S_WAIT_SUB_PRES
+DVLR sub_pres_vlr_fsm(901700000004620){SUB_PRES_VLR_S_INIT}: Allocated
+DVLR sub_pres_vlr_fsm(901700000004620){SUB_PRES_VLR_S_INIT}: is child of lu_compl_vlr_fsm(901700000004620)
+DVLR sub_pres_vlr_fsm(901700000004620){SUB_PRES_VLR_S_INIT}: Received Event SUB_PRES_VLR_E_START
+DVLR sub_pres_vlr_fsm(901700000004620){SUB_PRES_VLR_S_INIT}: state_chg to SUB_PRES_VLR_S_DONE
+DVLR sub_pres_vlr_fsm(901700000004620){SUB_PRES_VLR_S_DONE}: Terminating (cause = OSMO_FSM_TERM_REGULAR)
+DVLR sub_pres_vlr_fsm(901700000004620){SUB_PRES_VLR_S_DONE}: Removing from parent lu_compl_vlr_fsm(901700000004620)
+DVLR sub_pres_vlr_fsm(901700000004620){SUB_PRES_VLR_S_DONE}: Freeing instance
+DVLR sub_pres_vlr_fsm(901700000004620){SUB_PRES_VLR_S_DONE}: Deallocated
+DVLR lu_compl_vlr_fsm(901700000004620){LU_COMPL_VLR_S_WAIT_SUB_PRES}: Received Event LU_COMPL_VLR_E_SUB_PRES_COMPL
+DVLR lu_compl_vlr_fsm(901700000004620){LU_COMPL_VLR_S_WAIT_SUB_PRES}: lu_compl_vlr_new_tmsi()
+DVLR lu_compl_vlr_fsm(901700000004620){LU_COMPL_VLR_S_WAIT_SUB_PRES}: state_chg to LU_COMPL_VLR_S_WAIT_TMSI_CNF
+- sending LU Accept for MSISDN:46071, with TMSI 0x07060504
+DREF VLR subscr MSISDN:46071 usage decreases to: 2
+<-- GSUP rx OSMO_GSUP_MSGT_UPDATE_LOCATION_RESULT: vlr_gsupc_read_cb() returns 0
+- a LU Accept with a new TMSI was sent, waiting for TMSI Realloc Compl
+  llist_count(&net->subscr_conns) == 1
+  lu_result_sent == 1
+msc_subscr_conn_is_accepted() == false
+  requests shall be thwarted
+DRLL Dispatching 04.08 message GSM48_MT_CC_SETUP (0x3:0x5)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_MT_CC_SETUP
+DRLL Dispatching 04.08 message unknown 0x33 (0x5:0x33)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: unknown 0x33
+DRLL Dispatching 04.08 message GSM48_MT_RR_SYSINFO_1 (0x6:0x19)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_MT_RR_SYSINFO_1
+DRLL Dispatching 04.08 message GSM48_PDISC_SMS:0x01 (0x9:0x1)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_PDISC_SMS:0x01
+- even though the TMSI is not acked, we can already find the subscr with it
+DREF VLR subscr MSISDN:46071 usage increases to: 3
+  vsub != NULL == 1
+  strcmp(vsub->imsi, imsi) == 0
+  vsub->tmsi_new == 0x07060504
+  vsub->tmsi == 0x03020100
+DREF VLR subscr MSISDN:46071 usage decreases to: 2
+- MS sends TMSI Realloc Complete
+  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_TMSI_REALL_COMPL
+DREF MSISDN:46071: MSC conn use + 1 == 2
+DRLL Dispatching 04.08 message GSM48_MT_MM_TMSI_REALL_COMPL (0x5:0x1b)
+DMM TMSI Reallocation Completed. Subscriber: MSISDN:46071
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_WAIT_LU_COMPL}: Received Event VLR_ULA_E_NEW_TMSI_ACK
+DVLR lu_compl_vlr_fsm(901700000004620){LU_COMPL_VLR_S_WAIT_TMSI_CNF}: Received Event LU_COMPL_VLR_E_NEW_TMSI_ACK
+DVLR lu_compl_vlr_fsm(901700000004620){LU_COMPL_VLR_S_WAIT_TMSI_CNF}: state_chg to LU_COMPL_VLR_S_DONE
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_WAIT_LU_COMPL}: Received Event VLR_ULA_E_LU_COMPL_SUCCESS
+DVLR lu_compl_vlr_fsm(901700000004620){LU_COMPL_VLR_S_DONE}: Terminating (cause = OSMO_FSM_TERM_PARENT)
+DVLR lu_compl_vlr_fsm(901700000004620){LU_COMPL_VLR_S_DONE}: Removing from parent vlr_lu_fsm(901700000004620)
+DVLR lu_compl_vlr_fsm(901700000004620){LU_COMPL_VLR_S_DONE}: Freeing instance
+DVLR lu_compl_vlr_fsm(901700000004620){LU_COMPL_VLR_S_DONE}: Deallocated
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_WAIT_LU_COMPL}: state_chg to VLR_ULA_S_DONE
+DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_NEW}: Received Event SUBSCR_CONN_E_ACCEPTED
+DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_NEW}: SUBSCR_CONN_FROM_LU
+DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_NEW}: state_chg to SUBSCR_CONN_S_ACCEPTED
+DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_ACCEPTED}: Received Event SUBSCR_CONN_E_BUMP
+DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_ACCEPTED}: bump: releasing conn
+DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_ACCEPTED}: state_chg to SUBSCR_CONN_S_RELEASED
+DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Terminating (cause = OSMO_FSM_TERM_REGULAR)
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_DONE}: Terminating (cause = OSMO_FSM_TERM_PARENT)
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_DONE}: Removing from parent Subscr_Conn(901700000004620)
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_DONE}: fsm_lu_cleanup called with cause OSMO_FSM_TERM_PARENT
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_DONE}: Freeing instance
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_DONE}: Deallocated
+DMM msc_subscr_conn_close(vsub=MSISDN:46071, cause=2): no conn fsm, releasing directly without release event.
+- BSSAP Clear --RAN_GERAN_A--> MS
+DREF MSISDN:46071: MSC conn use - 1 == 1
+DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Freeing instance
+DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Deallocated
+DREF MSISDN:46071: MSC conn use - 1 == 0
+DRLL subscr MSISDN:46071: Freeing subscriber connection
+DREF VLR subscr MSISDN:46071 usage decreases to: 1
+  bssap_clear_sent == 1
+- LU was successful, and the conn has already been closed
+  llist_count(&net->subscr_conns) == 0
+- subscriber has the new TMSI
+DREF VLR subscr MSISDN:46071 usage increases to: 2
+  vsub != NULL == 1
+  strcmp(vsub->imsi, imsi) == 0
+  vsub->tmsi_new == 0xffffffff
+  vsub->tmsi == 0x07060504
+DREF VLR subscr MSISDN:46071 usage decreases to: 1
+---
+- subscriber detaches, using new TMSI
+  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_IMSI_DETACH_IND
+  new conn
+DREF unknown: MSC conn use + 1 == 1
+DRLL Dispatching 04.08 message GSM48_MT_MM_IMSI_DETACH_IND (0x5:0x1)
+DMM IMSI DETACH INDICATION: MI(TMSI)=117835012
+DREF VLR subscr MSISDN:46071 usage increases to: 2
+DMM IMSI DETACH for MSISDN:46071
+DREF VLR subscr MSISDN:46071 usage decreases to: 1
+DREF VLR subscr MSISDN:46071 usage decreases to: 0
+DREF freeing VLR subscr MSISDN:46071
+DMM msc_subscr_conn_close(vsub=unknown, cause=0): no conn fsm, releasing directly without release event.
+- BSSAP Clear --RAN_GERAN_A--> MS
+DREF unknown: MSC conn use - 1 == 0
+DRLL Freeing subscriber connection with NULL subscriber
+  bssap_clear_sent == 1
+  llist_count(&net->subscr_conns) == 0
+===== test_no_authen_imeisv_tmsi: SUCCESS
+
+full talloc report on 'msgb' (total      0 bytes in   1 blocks)
+talloc_total_blocks(tall_bsc_ctx) == 9
+
+===== test_no_authen_imeisv_tmsi_imei
+- Location Update request causes an IMEISV ID request back to the MS
+  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
+  new conn
+DREF unknown: MSC conn use + 1 == 1
+DRLL Dispatching 04.08 message GSM48_MT_MM_LOC_UPD_REQUEST (0x5:0x8)
+DREF unknown: MSC conn use + 1 == 2
+DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: Allocated
+DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: Received Event SUBSCR_CONN_E_START
+DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: state_chg to SUBSCR_CONN_S_NEW
+DMM LOCATION UPDATING REQUEST: MI(IMSI)=901700000004620 type=IMSI ATTACH
+DMM LU/new-LAC: 1/0
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_IDLE}: Allocated
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_IDLE}: is child of Subscr_Conn(901700000004620)
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_IDLE}: rev=GSM net=GERAN (no Auth)
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_IDLE}: Received Event VLR_ULA_E_UPDATE_LA
+DREF VLR subscr unknown usage increases to: 1
+DVLR set IMSI on subscriber; IMSI=901700000004620 id=901700000004620
+DVLR New subscr, IMSI: 901700000004620
+DREF VLR subscr IMSI:901700000004620 usage increases to: 2
+DREF VLR subscr IMSI:901700000004620 usage decreases to: 1
+DMSC msc_tx 3 bytes to IMSI:901700000004620 via RAN_GERAN_A
+- DTAP --RAN_GERAN_A--> MS: GSM48_MT_MM_ID_REQ: 051803
+- DTAP matches expected message
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_IDLE}: state_chg to VLR_ULA_S_WAIT_IMEISV
+DMM IMSI:901700000004620: bump: conn still being established (SUBSCR_CONN_S_NEW)
+DREF IMSI:901700000004620: MSC conn use - 1 == 1
+- MS replies with an Identity Response, causes LU to commence with a GSUP LU request to HLR
+  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_ID_RESP
+DREF IMSI:901700000004620: MSC conn use + 1 == 2
+DRLL Dispatching 04.08 message GSM48_MT_MM_ID_RESP (0x5:0x19)
+DMM IDENTITY RESPONSE: MI(IMEI-SV)=4234234234234275
+DVLR set IMEISV on subscriber; IMSI=901700000004620 IMEISV=4234234234234275
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_WAIT_IMEISV}: Received Event VLR_ULA_E_ID_IMEISV
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_WAIT_IMEISV}: vlr_loc_upd_node1()
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_WAIT_IMEISV}: vlr_loc_upd_post_auth()
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_WAIT_IMEISV}: vlr_loc_upd_post_ciph()
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_WAIT_IMEISV}: vlr_loc_upd_node_4()
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_WAIT_IMEISV}: state_chg to VLR_ULA_S_WAIT_HLR_UPD
+DVLR upd_hlr_vlr_fsm(901700000004620){UPD_HLR_VLR_S_INIT}: Allocated
+DVLR upd_hlr_vlr_fsm(901700000004620){UPD_HLR_VLR_S_INIT}: is child of vlr_lu_fsm(901700000004620)
+DVLR upd_hlr_vlr_fsm(901700000004620){UPD_HLR_VLR_S_INIT}: Received Event UPD_HLR_VLR_E_START
+DVLR GSUP tx: 04010809710000004026f0
+GSUP --> HLR: OSMO_GSUP_MSGT_UPDATE_LOCATION_REQUEST: 04010809710000004026f0
+DVLR upd_hlr_vlr_fsm(901700000004620){UPD_HLR_VLR_S_INIT}: state_chg to UPD_HLR_VLR_S_WAIT_FOR_DATA
+DMM IMSI:901700000004620: bump: conn still being established (SUBSCR_CONN_S_NEW)
+DREF IMSI:901700000004620: MSC conn use - 1 == 1
+  lu_result_sent == 0
+- Subscriber has the IMEISV from the ID Response
+DREF VLR subscr IMSI:901700000004620 usage increases to: 2
+  strcmp(vsub->imeisv, "4234234234234275") == 0
+DREF VLR subscr IMSI:901700000004620 usage decreases to: 1
+- HLR sends _INSERT_DATA_REQUEST, VLR responds with _INSERT_DATA_RESULT
+<-- GSUP rx OSMO_GSUP_MSGT_INSERT_DATA_REQUEST: 10010809710000004026f00804036470f1
+DVLR GSUP rx 17: 10010809710000004026f00804036470f1
+DREF VLR subscr IMSI:901700000004620 usage increases to: 2
+DVLR IMSI:901700000004620 has MSISDN:46071
+DVLR GSUP tx: 12010809710000004026f0
+GSUP --> HLR: OSMO_GSUP_MSGT_INSERT_DATA_RESULT: 12010809710000004026f0
+DREF VLR subscr MSISDN:46071 usage decreases to: 1
+<-- GSUP rx OSMO_GSUP_MSGT_INSERT_DATA_REQUEST: vlr_gsupc_read_cb() returns 0
+  lu_result_sent == 0
+- having received subscriber data does not mean acceptance
+msc_subscr_conn_is_accepted() == false
+  requests shall be thwarted
+DRLL Dispatching 04.08 message GSM48_MT_CC_SETUP (0x3:0x5)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_MT_CC_SETUP
+DRLL Dispatching 04.08 message unknown 0x33 (0x5:0x33)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: unknown 0x33
+DRLL Dispatching 04.08 message GSM48_MT_RR_SYSINFO_1 (0x6:0x19)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_MT_RR_SYSINFO_1
+DRLL Dispatching 04.08 message GSM48_PDISC_SMS:0x01 (0x9:0x1)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_PDISC_SMS:0x01
+  lu_result_sent == 0
+- HLR also sends GSUP _UPDATE_LOCATION_RESULT, and we send an ID Request for the IMEI to the MS
+<-- GSUP rx OSMO_GSUP_MSGT_UPDATE_LOCATION_RESULT: 06010809710000004026f0
+DVLR GSUP rx 11: 06010809710000004026f0
+DREF VLR subscr MSISDN:46071 usage increases to: 2
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_WAIT_HLR_UPD}: Received Event VLR_ULA_E_HLR_LU_RES
+DVLR upd_hlr_vlr_fsm(901700000004620){UPD_HLR_VLR_S_WAIT_FOR_DATA}: Received Event UPD_HLR_VLR_E_UPD_LOC_ACK
+DVLR upd_hlr_vlr_fsm(901700000004620){UPD_HLR_VLR_S_WAIT_FOR_DATA}: state_chg to UPD_HLR_VLR_S_DONE
+DVLR upd_hlr_vlr_fsm(901700000004620){UPD_HLR_VLR_S_DONE}: Terminating (cause = OSMO_FSM_TERM_REGULAR)
+DVLR upd_hlr_vlr_fsm(901700000004620){UPD_HLR_VLR_S_DONE}: Removing from parent vlr_lu_fsm(901700000004620)
+DVLR upd_hlr_vlr_fsm(901700000004620){UPD_HLR_VLR_S_DONE}: Freeing instance
+DVLR upd_hlr_vlr_fsm(901700000004620){UPD_HLR_VLR_S_DONE}: Deallocated
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_WAIT_HLR_UPD}: Received Event VLR_ULA_E_UPD_HLR_COMPL
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_WAIT_HLR_UPD}: state_chg to VLR_ULA_S_WAIT_LU_COMPL
+DVLR lu_compl_vlr_fsm(901700000004620){LU_COMPL_VLR_S_INIT}: Allocated
+DVLR lu_compl_vlr_fsm(901700000004620){LU_COMPL_VLR_S_INIT}: is child of vlr_lu_fsm(901700000004620)
+DVLR lu_compl_vlr_fsm(901700000004620){LU_COMPL_VLR_S_INIT}: Received Event LU_COMPL_VLR_E_START
+DVLR lu_compl_vlr_fsm(901700000004620){LU_COMPL_VLR_S_INIT}: state_chg to LU_COMPL_VLR_S_WAIT_SUB_PRES
+DVLR sub_pres_vlr_fsm(901700000004620){SUB_PRES_VLR_S_INIT}: Allocated
+DVLR sub_pres_vlr_fsm(901700000004620){SUB_PRES_VLR_S_INIT}: is child of lu_compl_vlr_fsm(901700000004620)
+DVLR sub_pres_vlr_fsm(901700000004620){SUB_PRES_VLR_S_INIT}: Received Event SUB_PRES_VLR_E_START
+DVLR sub_pres_vlr_fsm(901700000004620){SUB_PRES_VLR_S_INIT}: state_chg to SUB_PRES_VLR_S_DONE
+DVLR sub_pres_vlr_fsm(901700000004620){SUB_PRES_VLR_S_DONE}: Terminating (cause = OSMO_FSM_TERM_REGULAR)
+DVLR sub_pres_vlr_fsm(901700000004620){SUB_PRES_VLR_S_DONE}: Removing from parent lu_compl_vlr_fsm(901700000004620)
+DVLR sub_pres_vlr_fsm(901700000004620){SUB_PRES_VLR_S_DONE}: Freeing instance
+DVLR sub_pres_vlr_fsm(901700000004620){SUB_PRES_VLR_S_DONE}: Deallocated
+DVLR lu_compl_vlr_fsm(901700000004620){LU_COMPL_VLR_S_WAIT_SUB_PRES}: Received Event LU_COMPL_VLR_E_SUB_PRES_COMPL
+DVLR lu_compl_vlr_fsm(901700000004620){LU_COMPL_VLR_S_WAIT_SUB_PRES}: state_chg to LU_COMPL_VLR_S_WAIT_IMEI_TMSI
+DMSC msc_tx 3 bytes to MSISDN:46071 via RAN_GERAN_A
+- DTAP --RAN_GERAN_A--> MS: GSM48_MT_MM_ID_REQ: 051802
+- DTAP matches expected message
+DREF VLR subscr MSISDN:46071 usage decreases to: 1
+<-- GSUP rx OSMO_GSUP_MSGT_UPDATE_LOCATION_RESULT: vlr_gsupc_read_cb() returns 0
+- We will only do business when the IMEI is known
+  llist_count(&net->subscr_conns) == 1
+DREF VLR subscr MSISDN:46071 usage increases to: 2
+  vsub->imei[0] == 0
+DREF VLR subscr MSISDN:46071 usage decreases to: 1
+msc_subscr_conn_is_accepted() == false
+  requests shall be thwarted
+DRLL Dispatching 04.08 message GSM48_MT_CC_SETUP (0x3:0x5)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_MT_CC_SETUP
+DRLL Dispatching 04.08 message unknown 0x33 (0x5:0x33)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: unknown 0x33
+DRLL Dispatching 04.08 message GSM48_MT_RR_SYSINFO_1 (0x6:0x19)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_MT_RR_SYSINFO_1
+DRLL Dispatching 04.08 message GSM48_PDISC_SMS:0x01 (0x9:0x1)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_PDISC_SMS:0x01
+- MS replies with an Identity Response
+  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_ID_RESP
+DREF MSISDN:46071: MSC conn use + 1 == 2
+DRLL Dispatching 04.08 message GSM48_MT_MM_ID_RESP (0x5:0x19)
+DMM IDENTITY RESPONSE: MI(IMEI)=423423423423420
+DVLR set IMEI on subscriber; IMSI=901700000004620 IMEI=423423423423420
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_WAIT_LU_COMPL}: Received Event VLR_ULA_E_ID_IMEI
+DVLR lu_compl_vlr_fsm(901700000004620){LU_COMPL_VLR_S_WAIT_IMEI_TMSI}: Received Event LU_COMPL_VLR_E_IMEI_CHECK_ACK
+DVLR lu_compl_vlr_fsm(901700000004620){LU_COMPL_VLR_S_WAIT_IMEI_TMSI}: lu_compl_vlr_new_tmsi()
+DVLR lu_compl_vlr_fsm(901700000004620){LU_COMPL_VLR_S_WAIT_IMEI_TMSI}: state_chg to LU_COMPL_VLR_S_WAIT_TMSI_CNF
+- sending LU Accept for MSISDN:46071, with TMSI 0x03020100
+DMM MSISDN:46071: bump: conn still being established (SUBSCR_CONN_S_NEW)
+DREF MSISDN:46071: MSC conn use - 1 == 1
+- a LU Accept with a new TMSI was sent, waiting for TMSI Realloc Compl
+  llist_count(&net->subscr_conns) == 1
+  lu_result_sent == 1
+msc_subscr_conn_is_accepted() == false
+  requests shall be thwarted
+DRLL Dispatching 04.08 message GSM48_MT_CC_SETUP (0x3:0x5)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_MT_CC_SETUP
+DRLL Dispatching 04.08 message unknown 0x33 (0x5:0x33)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: unknown 0x33
+DRLL Dispatching 04.08 message GSM48_MT_RR_SYSINFO_1 (0x6:0x19)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_MT_RR_SYSINFO_1
+DRLL Dispatching 04.08 message GSM48_PDISC_SMS:0x01 (0x9:0x1)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_PDISC_SMS:0x01
+- MS sends TMSI Realloc Complete
+  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_TMSI_REALL_COMPL
+DREF MSISDN:46071: MSC conn use + 1 == 2
+DRLL Dispatching 04.08 message GSM48_MT_MM_TMSI_REALL_COMPL (0x5:0x1b)
+DMM TMSI Reallocation Completed. Subscriber: MSISDN:46071
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_WAIT_LU_COMPL}: Received Event VLR_ULA_E_NEW_TMSI_ACK
+DVLR lu_compl_vlr_fsm(901700000004620){LU_COMPL_VLR_S_WAIT_TMSI_CNF}: Received Event LU_COMPL_VLR_E_NEW_TMSI_ACK
+DREF VLR subscr MSISDN:46071 usage increases to: 2
+DVLR lu_compl_vlr_fsm(901700000004620){LU_COMPL_VLR_S_WAIT_TMSI_CNF}: state_chg to LU_COMPL_VLR_S_DONE
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_WAIT_LU_COMPL}: Received Event VLR_ULA_E_LU_COMPL_SUCCESS
+DVLR lu_compl_vlr_fsm(901700000004620){LU_COMPL_VLR_S_DONE}: Terminating (cause = OSMO_FSM_TERM_PARENT)
+DVLR lu_compl_vlr_fsm(901700000004620){LU_COMPL_VLR_S_DONE}: Removing from parent vlr_lu_fsm(901700000004620)
+DVLR lu_compl_vlr_fsm(901700000004620){LU_COMPL_VLR_S_DONE}: Freeing instance
+DVLR lu_compl_vlr_fsm(901700000004620){LU_COMPL_VLR_S_DONE}: Deallocated
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_WAIT_LU_COMPL}: state_chg to VLR_ULA_S_DONE
+DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_NEW}: Received Event SUBSCR_CONN_E_ACCEPTED
+DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_NEW}: SUBSCR_CONN_FROM_LU
+DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_NEW}: state_chg to SUBSCR_CONN_S_ACCEPTED
+DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_ACCEPTED}: Received Event SUBSCR_CONN_E_BUMP
+DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_ACCEPTED}: bump: releasing conn
+DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_ACCEPTED}: state_chg to SUBSCR_CONN_S_RELEASED
+DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Terminating (cause = OSMO_FSM_TERM_REGULAR)
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_DONE}: Terminating (cause = OSMO_FSM_TERM_PARENT)
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_DONE}: Removing from parent Subscr_Conn(901700000004620)
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_DONE}: fsm_lu_cleanup called with cause OSMO_FSM_TERM_PARENT
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_DONE}: Freeing instance
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_DONE}: Deallocated
+DMM msc_subscr_conn_close(vsub=MSISDN:46071, cause=2): no conn fsm, releasing directly without release event.
+- BSSAP Clear --RAN_GERAN_A--> MS
+DREF MSISDN:46071: MSC conn use - 1 == 1
+DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Freeing instance
+DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Deallocated
+DREF MSISDN:46071: MSC conn use - 1 == 0
+DRLL subscr MSISDN:46071: Freeing subscriber connection
+DREF VLR subscr MSISDN:46071 usage decreases to: 1
+  bssap_clear_sent == 1
+- LU was successful, and the conn has already been closed
+  lu_result_sent == 1
+  llist_count(&net->subscr_conns) == 0
+- Subscriber has the IMEISV, IMEI and TMSI
+DREF VLR subscr MSISDN:46071 usage increases to: 2
+  strcmp(vsub->imeisv, "4234234234234275") == 0
+  strcmp(vsub->imei, "423423423423420") == 0
+  vsub->tmsi == 0x03020100
+DREF VLR subscr MSISDN:46071 usage decreases to: 1
+---
+- subscriber detaches
+  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_IMSI_DETACH_IND
+  new conn
+DREF unknown: MSC conn use + 1 == 1
+DRLL Dispatching 04.08 message GSM48_MT_MM_IMSI_DETACH_IND (0x5:0x1)
+DMM IMSI DETACH INDICATION: MI(IMSI)=901700000004620
+DREF VLR subscr MSISDN:46071 usage increases to: 2
+DMM IMSI DETACH for MSISDN:46071
+DREF VLR subscr MSISDN:46071 usage decreases to: 1
+DREF VLR subscr MSISDN:46071 usage decreases to: 0
+DREF freeing VLR subscr MSISDN:46071
+DMM msc_subscr_conn_close(vsub=unknown, cause=0): no conn fsm, releasing directly without release event.
+- BSSAP Clear --RAN_GERAN_A--> MS
+DREF unknown: MSC conn use - 1 == 0
+DRLL Freeing subscriber connection with NULL subscriber
+  bssap_clear_sent == 1
+  llist_count(&net->subscr_conns) == 0
+===== test_no_authen_imeisv_tmsi_imei: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
 talloc_total_blocks(tall_bsc_ctx) == 9

@@ -563,7 +563,7 @@ void test_gsm_authen_imei()
 
 	btw("MS replies with an Identity Response");
 	expect_bssap_clear();
-	ms_sends_msg("0559084a32244332244332");
+	ms_sends_msg("0559084a32244332244302");
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
 	btw("LU was successful, and the conn has already been closed");
@@ -573,7 +573,7 @@ void test_gsm_authen_imei()
 	btw("Subscriber has the IMEI");
 	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi);
 	OSMO_ASSERT(vsub);
-	VERBOSE_ASSERT(strcmp(vsub->imei, "423423423423423"), == 0, "%d");
+	VERBOSE_ASSERT(strcmp(vsub->imei, "423423423423420"), == 0, "%d");
 	vlr_subscr_put(vsub);
 
 	BTW("subscriber detaches");
@@ -661,7 +661,7 @@ void test_gsm_authen_tmsi_imei()
 	thwart_rx_non_initial_requests();
 
 	btw("MS replies with an Identity Response");
-	ms_sends_msg("0559084a32244332244332");
+	ms_sends_msg("0559084a32244332244302");
 
 	btw("a LU Accept with a new TMSI was sent, waiting for TMSI Realloc Compl");
 	EXPECT_CONN_COUNT(1);
@@ -688,7 +688,7 @@ void test_gsm_authen_tmsi_imei()
 	btw("Subscriber has the IMEI and TMSI");
 	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi);
 	OSMO_ASSERT(vsub);
-	VERBOSE_ASSERT(strcmp(vsub->imei, "423423423423423"), == 0, "%d");
+	VERBOSE_ASSERT(strcmp(vsub->imei, "423423423423420"), == 0, "%d");
 	VERBOSE_ASSERT(vsub->tmsi, == 0x03020100, "0x%08x");
 	vlr_subscr_put(vsub);
 
