@@ -87,7 +87,7 @@ python-tests: $(BUILT_SOURCES)
 if BUILD_SMPP
 	$(PYTHON) $(srcdir)/smpp_test_runner.py -w $(abs_top_builddir) -v
 endif
-	rm -f $(top_builddir)/hlr.sqlite3
+	rm -f $(top_builddir)/hlr.sqlite3 $(top_builddir)/gsn_restart $(top_builddir)/gtphub_restart_count
 else
 python-tests: $(BUILT_SOURCES)
 	echo "Not running python-based tests (determined at configure-time)"

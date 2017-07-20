@@ -1220,7 +1220,7 @@ def add_nat_test(suite, workdir):
 def nat_bsc_reload(x):
     x.vty.command("configure terminal")
     x.vty.command("nat")
-    x.vty.command("bscs-config-file bscs.config")
+    x.vty.command("bscs-config-file bscs.cfg")
     x.vty.command("end")
 
 def nat_msc_ip(x, ip, port):

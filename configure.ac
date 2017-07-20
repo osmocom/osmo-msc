@@ -263,4 +263,5 @@ AC_OUTPUT(
     tests/nanobts_omlattr/Makefile
     doc/Makefile
     doc/examples/Makefile
+    contrib/Makefile
     Makefile)
