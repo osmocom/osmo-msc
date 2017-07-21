@@ -31,6 +31,8 @@
 #include <openbsc/transaction.h>
 #include <openbsc/signal.h>
 #include <openbsc/iu.h>
+#include <openbsc/a_iface.h>
+
 
 #define SUBSCR_CONN_TIMEOUT 5 /* seconds */
 
@@ -226,7 +228,6 @@ static void subscr_conn_fsm_cleanup(struct osmo_fsm_inst *fi,
 
 	conn->conn_fsm = NULL;
  	msc_subscr_conn_close(conn, cause);
-	msc_subscr_conn_put(conn);
 }
 
 int subscr_conn_fsm_timeout(struct osmo_fsm_inst *fi)
