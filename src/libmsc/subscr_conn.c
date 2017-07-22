@@ -225,9 +225,9 @@ static void subscr_conn_fsm_cleanup(struct osmo_fsm_inst *fi,
 
 	if (!conn)
 		return;
-
 	conn->conn_fsm = NULL;
  	msc_subscr_conn_close(conn, cause);
+	msc_subscr_conn_put(conn);
 }
 
 int subscr_conn_fsm_timeout(struct osmo_fsm_inst *fi)
