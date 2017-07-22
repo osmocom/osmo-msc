@@ -64,6 +64,7 @@ COMMON_LDFLAGS = \
 	-Wl,--wrap=a_tx \
 	-Wl,--wrap=a_page \
 	-Wl,--wrap=iu_tx \
+	-Wl,--wrap=iu_tx_release \
 	-Wl,--wrap=iu_page_cs \
 	-Wl,--wrap=msc_stop_paging \
 	-Wl,--wrap=gsm340_gen_scts \
