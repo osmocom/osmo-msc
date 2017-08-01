@@ -251,18 +251,28 @@ struct sgsn_pdp_ctx *sgsn_create_pdp_ctx(struct sgsn_ggsn_ctx *ggsn,
 	memcpy(pdp->gsnlu.v, &sgsn->cfg.gtp_listenaddr.sin_addr,
 		sizeof(sgsn->cfg.gtp_listenaddr.sin_addr));
 
-	/* Routing Area Identifier with LAC and RAC fixed values, as
-	 * requested in 29.006 7.3.1 */
+	/* Encode RAT Type according to TS 29.060 7.7.50 */
+	pdp->rattype.l = 1;
+	if (mmctx->ran_type == MM_CTX_T_UTRAN_Iu)
+		pdp->rattype.v[0] = 1;
+	else
+		pdp->rattype.v[0] = 2;
+	pdp->rattype_given = 1;
+
+	/* Include RAI and ULI all the time */
 	pdp->rai_given = 1;
 	pdp->rai.l = 6;
+
+	/* Routing Area Identifier with LAC and RAC fixed values, as
+	 * requested in 29.006 7.3.1 */
 	raid = mmctx->ra;
 	raid.lac = 0xFFFE;
 	raid.rac = 0xFF;
 	gsm48_construct_ra(pdp->rai.v, &raid);
 
-	pdp->rattype.l = 1;
-	pdp->rattype_given = 1;
-
+	/* Encode User Location Information accordint to TS 29.060 7.7.51 */
+	pdp->userloc_given = 1;
+	pdp->userloc.l = 8;
 	switch (mmctx->ran_type) {
 	case MM_CTX_T_GERAN_Gb:
 	case MM_CTX_T_GERAN_Iu:
@@ -274,8 +284,9 @@ struct sgsn_pdp_ctx *sgsn_create_pdp_ctx(struct sgsn_ggsn_ctx *ggsn,
 		bssgp_create_cell_id(&pdp->userloc.v[1], &mmctx->ra, mmctx->gb.cell_id);
 		break;
 	case MM_CTX_T_UTRAN_Iu:
-		pdp->rattype.v[0] = 1;
-		/* FIXME: Optional User Location Information with SAI */
+		pdp->userloc.v[0] = 1; /* SAI for UTRAN */
+		/* SAI is like CGI but with SAC instead of CID, so we can abuse this function */
+		bssgp_create_cell_id(&pdp->userloc.v[1], &mmctx->ra, mmctx->iu.sac);
 		break;
 	}
 
