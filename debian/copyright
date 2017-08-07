@@ -1,75 +1,83 @@
 Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
-Upstream-Name: OpenBSC
-Source: http://openbsc.osmocom.org/
+Upstream-Name: osmo-msc
+Source: git://git.osmocom.org/osmo-msc
 
-Files: *
-Copyright: 2008-2015        Harald Welte <laforge@gnumonks.org>
-           2008-2015        Holger Hans Peter Freyther <zecke@selfish.org>
-           2009-2015        On-Waves
-           2008             Jan Luebbe <jluebbe@debian.org>
-           2008,2010-2011   Daniel Willmann <daniel@totalueberwachung.de>
-           2009,2011,2013   Andreas Eversberg <Andreas.Eversberg@versatel.de>
-           2009,2011        Dieter Spaar <spaar@mirider.augusta.de>
-           2009             Mike Haben <michael.haben@btinternet.com>
-           2010             Sylvain Munaut <246tnt@gmail.com>
-           2012-2013        Pablo Neira Ayuso <pablo@gnumonks.org>
-           2013-2015        Sysmocom s.f.m.c. GmbH  (Jacob Erlbeck)
-           2014             Alexander Chemeris <Alexander.Chemeris@fairwaves.co>
-License: AGPL-3+
-Comment: Contributions by Stefan Schmidt <stefan@datenfreihafen.org> as well
-
-Files: wireshark/0001-abis_oml.patch
-       wireshark/0002-ericsson_rbs2409.patch
-       wireshark/0003-lucent-hnb.patch
-       wireshark/0005-rsl-hsl.patch
-Copyright: 1998         Gerald Combs <gerald@wireshark.org>
-           2007,2011    Anders Broman <anders.broman@ericsson.com>
-           2009         Holger Hans Peter Freyther <zecke@selfish.org>
-           2009-2011    Harald Welte <laforge@gnumonks.org>
-License: GPL-2+
-
-Files: openbsc/include/mISDNif.h
-Copyright: 2008         Karsten Keil <kkeil@novell.com>
-License: LGPL-2.1
-
-Files: openbsc/src/libmgcp/g711common.h
-Copyright: 2009         Abramo Bagnara <abramo@alsa-project.org>
-License: GPL-2+
-
-Files: openbsc/git-version-gen
-Copyright: 2007-2010    Free Software Foundation
-License: GPL-3+
-
-Files: openbsc/osmoappdesc.py
-       openbsc/tests/smpp_test_runner.py
-       openbsc/tests/ctrl_test_runner.py
-       openbsc/tests/vty_test_runner.py
-Copyright: 2013         Katerina Barone-Adesi <kat.obsc@gmail.com>
-           2013         Jacob Erlbeck <jerlbeck@sysmocom.de>
-           2013-2014    Holger Hans Peter Freyther <zecke@selfish.org>
-License: GPL-3+
-
-Files: openbsc/src/libbsc/bsc_ctrl_lookup.c
-Copyright: 2010-2011    Daniel Willmann <daniel@totalueberwachung.de>
-           2010-2011    On-Waves
-License: GPL-2+
-
-Files: openbsc/src/libmsc/mncc_sock.c
-       openbsc/src/libmsc/mncc_builtin.c
-Copyright: 2008-2010    Harald Welte <laforge@gnumonks.org>
-           2009         Andreas Eversberg <Andreas.Eversberg@versatel.de>
-           2012         Holger Hans Peter Freyther <zecke@selfish.org>
-License: GPL-2+
-
-Files: debian/*
-Copyright: 2012-2015    Holger Hans Peter Freyther <zecke@selfish.org>
-           2016         Ruben Undheim <ruben.undheim@gmail.com>
-License: GPL-2+
-
-
-License: AGPL-3+
- This package is free software; you can redistribute it and/or modify
+Files:     *
+Copyright: 2008 Daniel Willmann <daniel@totalueberwachung.de>
+           2008 Jan Luebbe <jluebbe@debian.org>
+           2008-2015 Holger Hans Peter Freyther <zecke@selfish.org>
+           2008-2016 Harald Welte <laforge@gnumonks.org>
+           2009 Andreas Eversberg <Andreas.Eversberg@versatel.de>
+           2009 Mike Haben <michael.haben@btinternet.com>
+           2010 Sylvain Munaut <tnt@246tNt.com>
+           2010-2013 On-Waves
+           2013 Jacob Erlbeck <jerlbeck@sysmocom.de>
+           2011 Andreas Eversberg <jolly@eversberg.eu>
+           2011-2017 sysmocom s.f.m.c. GmbH <info@sysmocom.de>
+           2014-2015 Alexander Chemeris <Alexander.Chemeris@fairwaves.co>
+License:   AGPL-3.0+
+ This program is free software; you can redistribute it and/or modify
  it under the terms of the GNU Affero General Public License as published by
+ the Free Software Foundation; either version 3 of the License, or
+ (at your option) any later version.
+ .
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU Affero General Public License for more details.
+ .
+ You should have received a copy of the GNU Affero General Public License
+ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Files:     src/libmsc/mncc_builtin.c
+           src/libmsc/mncc_sock.c
+Copyright: 2008-2010 Harald Welte <laforge@gnumonks.org>
+           2009 Andreas Eversberg <Andreas.Eversberg@versatel.de>
+           2012 Holger Hans Peter Freyther
+License:   GPL-2.0+
+ This program is free software; you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation; either version 2 of the License, or
+ (at your option) any later version.
+ .
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+ .
+ You should have received a copy of the GNU General Public License along
+ with this program; if not, write to the Free Software Foundation, Inc.,
+ 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ .
+ On Debian systems, the complete text of the GNU General Public License
+ Version 2 can be found in `/usr/share/common-licenses/GPL-2'.
+
+Files:     osmoappdesc.py
+Copyright: 2013 Katerina Barone-Adesi <kat.obsc@gmail.com>
+License:   GPL-3.0+
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+ .
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+ .
+ You should have received a copy of the GNU General Public License
+ along with this program.  If not, see <http://www.gnu.org/licenses/>
+ .
+ Most systems won't be able to use these, so they're separated out
+ .
+ On Debian systems, the complete text of the GNU General Public License
+ Version 3 can be found in `/usr/share/common-licenses/GPL-3'.
+
+Files:     git-version-gen
+Copyright: 2007-2010 Free Software Foundation, Inc.
+License:   GPL-3.0+
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
  the Free Software Foundation; either version 3 of the License, or
  (at your option) any later version.
  .
@@ -78,60 +86,88 @@ License: AGPL-3+
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  GNU General Public License for more details.
  .
- You should have received a copy of the GNU Affero General Public License
- along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-
-License: GPL-2+
- This package is free software: you can redistribute it and/or modify it
- under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 2 of the License, or (at
- your option) any later version.
- .
- This program is distributed in the hope that it will be useful, but
- WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
- or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
- for more details.
- .
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  .
- On Debian systems, the complete text of the GNU General Public
- License version 2 can be found in "/usr/share/common-licenses/GPL-2".
-
-
-License: GPL-3+
- This package is free software: you can redistribute it and/or modify it
- under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or (at
- your option) any later version.
+ This script is derived from GIT-VERSION-GEN from GIT: http://git.or.cz/.
+ It may be run two ways:
+ - from a git repository in which the "git describe" command below
+ produces useful output (thus requiring at least one signed tag)
+ - from a non-git-repo directory containing a .tarball-version file, which
+ presumes this script is invoked like "./git-version-gen .tarball-version".
  .
- This program is distributed in the hope that it will be useful, but
- WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
- or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
- for more details.
+ In order to use intra-version strings in your project, you will need two
+ separate generated version string files:
  .
- You should have received a copy of the GNU General Public License
- along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ .tarball-version - present only in a distribution tarball, and not in
+ a checked-out repository.  Created with contents that were learned at
+ the last time autoconf was run, and used by git-version-gen.  Must not
+ be present in either $(srcdir) or $(builddir) for git-version-gen to
+ give accurate answers during normal development with a checked out tree,
+ but must be present in a tarball when there is no version control system.
+ Therefore, it cannot be used in any dependencies.  GNUmakefile has
+ hooks to force a reconfigure at distribution time to get the value
+ correct, without penalizing normal development with extra reconfigures.
  .
- On Debian systems, the complete text of the GNU General Public
- License version 3 can be found in "/usr/share/common-licenses/GPL-3".
+ .version - present in a checked-out repository and in a distribution
+ tarball.  Usable in dependencies, particularly for files that don't
+ want to depend on config.h but do want to track version changes.
+ Delete this file prior to any autoconf run where you want to rebuild
+ files to pick up a version string change; and leave it stale to
+ minimize rebuild time after unrelated changes to configure sources.
+ .
+ It is probably wise to add these two files to .gitignore, so that you
+ don't accidentally commit either generated file.
+ .
+ Use the following line in your configure.ac, so that $(VERSION) will
+ automatically be up-to-date each time configure is run (and note that
+ since configure.ac no longer includes a version string, Makefile rules
+ should not depend on configure.ac for version updates).
+ .
+ On Debian systems, the complete text of the GNU General Public License
+ Version 3 can be found in `/usr/share/common-licenses/GPL-3'.
 
-
-License: LGPL-2.1
- This library is free software; you can redistribute it and/or
- modify it under the terms of the GNU Lesser General Public
- License as published by the Free Software Foundation; version
- 2.1 of the License.
+Files:     tests/vty_test_runner.py
+Copyright: 2013 Holger Hans Peter Freyther
+           2013 Katerina Barone-Adesi <kat.obsc@gmail.com>
+License:   GPL-3.0+
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
  .
- This library is distributed in the hope that it will be useful,
+ This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
  .
- You should have received a copy of the GNU Lesser General Public
- License along with this library; if not, see <http://www.gnu.org/licenses/>.
+ You should have received a copy of the GNU General Public License
+ along with this program.  If not, see <http://www.gnu.org/licenses/>.
  .
- On Debian systems, the complete text of the GNU Lesser General
- Public License version 2.1 can be found in
- "/usr/share/common-licenses/LGPL-2.1".
+ On Debian systems, the complete text of the GNU General Public License
+ Version 3 can be found in `/usr/share/common-licenses/GPL-3'.
+
+Files:     include/openbsc/slhc.h
+Copyright: 1989 Regents of the University of California.
+License:   __UNKNOWN__
+ Redistribution and use in source and binary forms are permitted
+ provided that the above copyright notice and this paragraph are
+ duplicated in all such forms and that any documentation,
+ advertising materials, and other materials related to such
+ distribution and use acknowledge that the software was developed
+ by the University of California, Berkeley.  The name of the
+ University may not be used to endorse or promote products derived
+ from this software without specific prior written permission.
+ THIS SOFTWARE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
+ IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
+ WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ .
+ Van Jacobson (van@helios.ee.lbl.gov), Dec 31, 1989:
+ - Initial distribution.
+ .
+ modified for KA9Q Internet Software Package by
+ Katie Stevens (dkstevens@ucdavis.edu)
+ University of California, Davis
+ Computing Services
+ - 01-31-90	initial adaptation
+
