@@ -521,7 +521,7 @@ void smpp_cmd_ack(struct osmo_smpp_cmd *cmd)
 	conn = connection_for_subscr(cmd->vsub);
 	if (!conn) {
 		LOGP(DSMPP, LOGL_ERROR, "No connection to subscriber anymore\n");
-		return;
+		goto out;
 	}
 
 	trans = trans_find_by_id(conn, GSM48_PDISC_SMS,
@@ -529,10 +529,11 @@ void smpp_cmd_ack(struct osmo_smpp_cmd *cmd)
 	if (!trans) {
 		LOGP(DSMPP, LOGL_ERROR, "GSM transaction %u is gone\n",
 		     cmd->sms->gsm411.transaction_id);
-		return;
+		goto out;
 	}
 
 	gsm411_send_rp_ack(trans, cmd->sms->gsm411.msg_ref);
+out:
 	smpp_cmd_free(cmd);
 }
 
@@ -545,7 +546,7 @@ void smpp_cmd_err(struct osmo_smpp_cmd *cmd, uint32_t status)
 	conn = connection_for_subscr(cmd->vsub);
 	if (!conn) {
 		LOGP(DSMPP, LOGL_ERROR, "No connection to subscriber anymore\n");
-		return;
+		goto out;
 	}
 
 	trans = trans_find_by_id(conn, GSM48_PDISC_SMS,
@@ -553,14 +554,14 @@ void smpp_cmd_err(struct osmo_smpp_cmd *cmd, uint32_t status)
 	if (!trans) {
 		LOGP(DSMPP, LOGL_ERROR, "GSM transaction %u is gone\n",
 		     cmd->sms->gsm411.transaction_id);
-		return;
+		goto out;
 	}
 
 	if (smpp_to_gsm411_err(status, &gsm411_cause) < 0)
 		gsm411_cause = GSM411_RP_CAUSE_MO_NET_OUT_OF_ORDER;
 
 	gsm411_send_rp_error(trans, cmd->sms->gsm411.msg_ref, gsm411_cause);
-
+out:
 	smpp_cmd_free(cmd);
 }
 
