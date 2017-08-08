@@ -454,7 +454,6 @@ int __wrap_gsup_client_send(struct gsup_client *gsupc, struct msgb *msg)
 
 int _validate_dtap(struct msgb *msg, enum ran_type to_ran)
 {
-	struct gsm48_hdr *gh = (void*)msg->data;
 	btw("DTAP --%s--> MS: %s: %s",
 	    ran_type_name(to_ran), msg_type_name(msg),
 	    osmo_hexdump_nospc(msg->data, msg->len));
