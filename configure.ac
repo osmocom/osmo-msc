@@ -64,17 +64,6 @@ AC_ARG_ENABLE([mgcp-transcoding], [AS_HELP_STRING([--enable-mgcp-transcoding], [
     [osmo_ac_mgcp_transcoding="$enableval"],[osmo_ac_mgcp_transcoding="no"])
 AC_ARG_WITH([g729], [AS_HELP_STRING([--with-g729], [Enable G.729 encoding/decoding.])], [osmo_ac_with_g729="$withval"],[osmo_ac_with_g729="no"])
 
-if test "$osmo_ac_mgcp_transcoding" = "yes" ; then
-    AC_SEARCH_LIBS([gsm_create], [gsm], [LIBRARY_GSM="$LIBS";LIBS=""], [AC_MSG_ERROR([--enable-mgcp-transcoding: cannot find usable libgsm])])
-    AC_SUBST(LIBRARY_GSM)
-    if test "$osmo_ac_with_g729" = "yes" ; then
-	PKG_CHECK_MODULES(LIBBCG729, libbcg729 >= 0.1, [AC_DEFINE([HAVE_BCG729], [1], [Use bgc729 decoder/encoder])])
-    fi
-    AC_DEFINE(BUILD_MGCP_TRANSCODING, 1, [Define if we want to build the MGCP gateway with transcoding support])
-fi
-AM_CONDITIONAL(BUILD_MGCP_TRANSCODING, test "x$osmo_ac_mgcp_transcoding" = "xyes")
-AC_SUBST(osmo_ac_mgcp_transcoding)
-
 # Enable/disable 3G aka IuPS + IuCS support?
 AC_ARG_ENABLE([iu], [AS_HELP_STRING([--enable-iu], [Build 3G support, aka IuPS and IuCS interfaces])],
     [osmo_ac_iu="$enableval"],[osmo_ac_iu="no"])
@@ -136,6 +125,33 @@ if test "$enable_coverage" = "yes"; then
    COVERAGE_LDFLAGS="-ftest-coverage -fprofile-arcs"
    AC_SUBST([COVERAGE_CFLAGS])
    AC_SUBST([COVERAGE_LDFLAGS])
+fi
+
+AC_DEFUN([CHECK_LIBOSMO_LEGACY_MGCP_NEEDS_LIBGSM], [
+  AC_CACHE_CHECK(
+    [whether libosmo-legacy-mgcp needs -lgsm],
+    libosmo_cv_legacy_mgcp_needs_libgsm, [
+       SAVE_LDFLAGS="${LDFLAGS}"
+       LDFLAGS="${LIBOSMOLEGACYMGCP_LIBS} ${LIBOSMOVTY_LIBS}"
+       AC_LINK_IFELSE(
+         [AC_LANG_PROGRAM([
+                           #include <osmocom/legacy_mgcp/mgcpgw_client.h>
+                         ], [
+                           mgcpgw_client_init(0, 0);
+                         ])],
+         [libosmo_cv_legacy_mgcp_needs_libgsm=no],
+         [libosmo_cv_legacy_mgcp_needs_libgsm=yes])
+       LDFLAGS="${SAVE_LDFLAGS}"
+       ])
+  ])
+CHECK_LIBOSMO_LEGACY_MGCP_NEEDS_LIBGSM
+if test "x$libosmo_cv_legacy_mgcp_needs_libgsm" = xyes; then
+    AC_SEARCH_LIBS([gsm_create], [gsm], [LIBRARY_GSM="$LIBS";LIBS=""],
+		   [AC_MSG_ERROR([libosmo-legacy-mgcp is built with transcoding and needs -lgsm but cannot find usable libgsm])])
+    AC_SUBST(LIBRARY_GSM)
+    if test "$osmo_ac_with_g729" = "yes" ; then
+	PKG_CHECK_MODULES(LIBBCG729, libbcg729 >= 0.1, [AC_DEFINE([HAVE_BCG729], [1], [Use bgc729 decoder/encoder])])
+    fi
 fi
 
 AC_DEFUN([CHECK_TM_INCLUDES_TM_GMTOFF], [
