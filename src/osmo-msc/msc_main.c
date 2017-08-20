@@ -266,6 +266,7 @@ static void signal_handler(int signal)
 
 	switch (signal) {
 	case SIGINT:
+	case SIGTERM:
 		msc_network_shutdown(msc_network);
 		osmo_signal_dispatch(SS_L_GLOBAL, S_L_GLOBAL_SHUTDOWN, NULL);
 		sleep(3);
@@ -472,6 +473,7 @@ TODO: we probably want some of the _net_ ctrl commands from bsc_base_ctrl_cmds_i
 		osmo_timer_schedule(&db_sync_timer, DB_SYNC_INTERVAL);
 
 	signal(SIGINT, &signal_handler);
+	signal(SIGTERM, &signal_handler);
 	signal(SIGABRT, &signal_handler);
 	signal(SIGUSR1, &signal_handler);
 	signal(SIGUSR2, &signal_handler);
