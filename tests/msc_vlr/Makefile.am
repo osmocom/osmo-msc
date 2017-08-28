@@ -18,6 +18,38 @@ AM_CFLAGS = \
 	$(LIBOSMOLEGACYMGCP_CFLAGS) \
 	$(NULL)
 
+AM_LDFLAGS = \
+	-Wl,--wrap=gsup_client_create \
+	-Wl,--wrap=gsup_client_send \
+	-Wl,--wrap=a_iface_tx_dtap \
+	-Wl,--wrap=a_iface_tx_clear_cmd \
+	-Wl,--wrap=a_iface_tx_paging \
+	-Wl,--wrap=ranap_iu_tx \
+	-Wl,--wrap=ranap_iu_tx_release \
+	-Wl,--wrap=ranap_iu_tx_common_id \
+	-Wl,--wrap=ranap_iu_page_cs \
+	-Wl,--wrap=msc_stop_paging \
+	-Wl,--wrap=gsm340_gen_scts \
+	-Wl,--wrap=RAND_bytes \
+	$(top_builddir)/src/libmsc/libmsc.a \
+	$(top_builddir)/src/libcommon-cs/libcommon-cs.a \
+	$(top_builddir)/src/libvlr/libvlr.a \
+	$(top_builddir)/src/libcommon/libcommon.a \
+	$(LIBSMPP34_LIBS) \
+	$(LIBOSMOCORE_LIBS) \
+	$(LIBOSMOGSM_LIBS) \
+	$(LIBCRYPTO_LIBS) \
+	$(LIBOSMOVTY_LIBS) \
+	$(LIBOSMOABIS_LIBS) \
+	$(LIBOSMOSIGTRAN_LIBS) \
+	$(LIBOSMORANAP_LIBS) \
+	$(LIBASN1C_LIBS) \
+	$(LIBOSMOLEGACYMGCP_LIBS) \
+	$(LIBRARY_GSM) \
+	-ldbi \
+	-lrt \
+	$(NULL)
+
 noinst_HEADERS = \
 	msc_vlr_tests.h \
 	$(NULL)
@@ -43,41 +75,6 @@ EXTRA_DIST = \
 	msc_vlr_test_rest.err \
 	$(NULL)
 
-COMMON_LDADD = \
-	$(top_builddir)/src/libmsc/libmsc.a \
-	$(top_builddir)/src/libcommon-cs/libcommon-cs.a \
-	$(top_builddir)/src/libvlr/libvlr.a \
-	$(top_builddir)/src/libcommon/libcommon.a \
-	$(LIBSMPP34_LIBS) \
-	$(LIBOSMOCORE_LIBS) \
-	$(LIBOSMOGSM_LIBS) \
-	$(LIBCRYPTO_LIBS) \
-	$(LIBOSMOVTY_LIBS) \
-	$(LIBOSMOABIS_LIBS) \
-	$(LIBOSMOSIGTRAN_LIBS) \
-	$(LIBOSMORANAP_LIBS) \
-	$(LIBASN1C_LIBS) \
-	$(LIBOSMOLEGACYMGCP_LIBS) \
-	$(LIBRARY_GSM) \
-	-ldbi \
-	-lrt \
-	$(NULL)
-
-COMMON_LDFLAGS = \
-	-Wl,--wrap=gsup_client_create \
-	-Wl,--wrap=gsup_client_send \
-	-Wl,--wrap=a_iface_tx_dtap \
-	-Wl,--wrap=a_iface_tx_clear_cmd \
-	-Wl,--wrap=a_iface_tx_paging \
-	-Wl,--wrap=ranap_iu_tx \
-	-Wl,--wrap=ranap_iu_tx_release \
-	-Wl,--wrap=ranap_iu_tx_common_id \
-	-Wl,--wrap=ranap_iu_page_cs \
-	-Wl,--wrap=msc_stop_paging \
-	-Wl,--wrap=gsm340_gen_scts \
-	-Wl,--wrap=RAND_bytes \
-	$(NULL)
-
 noinst_PROGRAMS = \
 	msc_vlr_test_no_authen \
 	msc_vlr_test_gsm_authen \
@@ -94,64 +91,46 @@ msc_vlr_test_no_authen_SOURCES = \
 	msc_vlr_test_no_authen.c \
 	msc_vlr_tests.c \
 	$(NULL)
-msc_vlr_test_no_authen_LDADD = $(COMMON_LDADD)
-msc_vlr_test_no_authen_LDFLAGS = $(COMMON_LDFLAGS)
 
 msc_vlr_test_gsm_authen_SOURCES = \
 	msc_vlr_test_gsm_authen.c \
 	msc_vlr_tests.c \
 	$(NULL)
-msc_vlr_test_gsm_authen_LDADD = $(COMMON_LDADD)
-msc_vlr_test_gsm_authen_LDFLAGS = $(COMMON_LDFLAGS)
 
 msc_vlr_test_gsm_ciph_SOURCES = \
 	msc_vlr_test_gsm_ciph.c \
 	msc_vlr_tests.c \
 	$(NULL)
-msc_vlr_test_gsm_ciph_LDADD = $(COMMON_LDADD)
-msc_vlr_test_gsm_ciph_LDFLAGS = $(COMMON_LDFLAGS)
 
 msc_vlr_test_umts_authen_SOURCES = \
 	msc_vlr_test_umts_authen.c \
 	msc_vlr_tests.c \
 	$(NULL)
-msc_vlr_test_umts_authen_LDADD = $(COMMON_LDADD)
-msc_vlr_test_umts_authen_LDFLAGS = $(COMMON_LDFLAGS)
 
 msc_vlr_test_hlr_reject_SOURCES = \
 	msc_vlr_test_hlr_reject.c \
 	msc_vlr_tests.c \
 	$(NULL)
-msc_vlr_test_hlr_reject_LDADD = $(COMMON_LDADD)
-msc_vlr_test_hlr_reject_LDFLAGS = $(COMMON_LDFLAGS)
 
 msc_vlr_test_hlr_timeout_SOURCES = \
 	msc_vlr_test_hlr_timeout.c \
 	msc_vlr_tests.c \
 	$(NULL)
-msc_vlr_test_hlr_timeout_LDADD = $(COMMON_LDADD)
-msc_vlr_test_hlr_timeout_LDFLAGS = $(COMMON_LDFLAGS)
 
 msc_vlr_test_ms_timeout_SOURCES = \
 	msc_vlr_test_ms_timeout.c \
 	msc_vlr_tests.c \
 	$(NULL)
-msc_vlr_test_ms_timeout_LDADD = $(COMMON_LDADD)
-msc_vlr_test_ms_timeout_LDFLAGS = $(COMMON_LDFLAGS)
 
 msc_vlr_test_reject_concurrency_SOURCES = \
 	msc_vlr_test_reject_concurrency.c \
 	msc_vlr_tests.c \
 	$(NULL)
-msc_vlr_test_reject_concurrency_LDADD = $(COMMON_LDADD)
-msc_vlr_test_reject_concurrency_LDFLAGS = $(COMMON_LDFLAGS)
 
 msc_vlr_test_rest_SOURCES = \
 	msc_vlr_test_rest.c \
 	msc_vlr_tests.c \
 	$(NULL)
-msc_vlr_test_rest_LDADD = $(COMMON_LDADD)
-msc_vlr_test_rest_LDFLAGS = $(COMMON_LDFLAGS)
 
 .PHONY: update_exp
 update_exp:
