@@ -101,7 +101,7 @@ static int config_write_msc(struct vty *vty)
 	vty_out(vty, " cs7-instance-iu %u%s", gsmnet->iu.cs7_instance,
 		VTY_NEWLINE);
 
-	mgcpgw_client_config_write(vty, " ");
+	mgcp_client_config_write(vty, " ");
 #ifdef BUILD_IU
 	ranap_iu_vty_config_write(vty, " ");
 #endif
@@ -155,7 +155,7 @@ void msc_vty_init(struct gsm_network *msc_network)
 	install_element(MSC_NODE, &cfg_msc_cs7_instance_a_cmd);
 	install_element(MSC_NODE, &cfg_msc_cs7_instance_iu_cmd);
 
-	mgcpgw_client_vty_init(msc_network, MSC_NODE, &msc_network->mgcpgw.conf);
+	mgcp_client_vty_init(msc_network, MSC_NODE, &msc_network->mgw.conf);
 #ifdef BUILD_IU
 	ranap_iu_vty_init(MSC_NODE, &msc_network->iu.rab_assign_addr_enc);
 #endif

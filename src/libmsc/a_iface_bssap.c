@@ -557,7 +557,7 @@ static int bssmap_rx_ass_compl(const struct osmo_sccp_user *scu, const struct a_
 {
 	struct gsm_network *network = a_conn_info->network;
 	struct gsm_subscriber_connection *conn;
-	struct mgcpgw_client *mgcp;
+	struct mgcp_client *mgcp;
 	struct tlv_parsed tp;
 	struct sockaddr_storage rtp_addr;
 	struct sockaddr_in *rtp_addr_in;
@@ -567,7 +567,7 @@ static int bssmap_rx_ass_compl(const struct osmo_sccp_user *scu, const struct a_
 	if (!conn)
 		goto fail;
 
-	mgcp = conn->network->mgcpgw.client;
+	mgcp = conn->network->mgw.client;
 	OSMO_ASSERT(mgcp);
 
 	LOGP(DMSC, LOGL_NOTICE, "BSC sends assignment complete message (conn_id=%i)\n", conn->a.conn_id);

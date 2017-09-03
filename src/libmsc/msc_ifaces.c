@@ -26,7 +26,7 @@
 #include <osmocom/msc/gsm_subscriber.h>
 #include <osmocom/msc/transaction.h>
 #include <osmocom/legacy_mgcp/mgcp.h>
-#include <osmocom/legacy_mgcp/mgcpgw_client.h>
+#include <osmocom/mgcp_client/mgcp_client.h>
 #include <osmocom/msc/vlr.h>
 #include <osmocom/msc/a_iface.h>
 
@@ -192,7 +192,7 @@ static void mgcp_response_rab_act_cs_crcx(struct mgcp_response *r, void *priv)
 
 	conn->rtp.port_cn = r->audio_port;
 
-	rtp_ip = mgcpgw_client_remote_addr_n(conn->network->mgcpgw.client);
+	rtp_ip = mgcp_client_remote_addr_n(conn->network->mgw.client);
 
 	if (trans->conn->via_ran == RAN_UTRAN_IU) {
 		/* Assign a voice channel via RANAP on 3G */
@@ -222,7 +222,7 @@ rab_act_cs_error:
 int msc_call_assignment(struct gsm_trans *trans)
 {
 	struct gsm_subscriber_connection *conn;
-	struct mgcpgw_client *mgcp;
+	struct mgcp_client *mgcp;
 	struct msgb *msg;
 	uint16_t bts_base;
 
@@ -232,7 +232,7 @@ int msc_call_assignment(struct gsm_trans *trans)
 		return -EINVAL;
 
 	conn = trans->conn;
-	mgcp = conn->network->mgcpgw.client;
+	mgcp = conn->network->mgw.client;
 
 #ifdef BUILD_IU
 	/* FIXME: HACK. where to scope the RAB Id? At the conn / subscriber / ranap_ue_conn_ctx? */
@@ -242,14 +242,14 @@ int msc_call_assignment(struct gsm_trans *trans)
 #endif
 
 	conn->rtp.mgcp_rtp_endpoint =
-		mgcpgw_client_next_endpoint(conn->network->mgcpgw.client);
+		mgcp_client_next_endpoint(conn->network->mgw.client);
 
 	/* This will calculate the port we assign to the BTS via AoIP
 	 * assignment command (or rab-assignment on 3G) The BTS will send
 	 * its RTP traffic to that port on the MGCPGW side. The MGCPGW only
 	 * gets the endpoint ID via the CRCX. It will do the same calculation
 	 * on his side too to get knowledge of the rtp port. */
-	bts_base = mgcpgw_client_conf_actual(mgcp)->bts_base;
+	bts_base = mgcp_client_conf_actual(mgcp)->bts_base;
 	conn->rtp.port_subscr = bts_base + 2 * conn->rtp.mgcp_rtp_endpoint;
 
 	/* Establish the RTP stream first as looping back to the originator.
@@ -257,7 +257,7 @@ int msc_call_assignment(struct gsm_trans *trans)
 	 * tone instead. */
 	msg = mgcp_msg_crcx(mgcp, conn->rtp.mgcp_rtp_endpoint,
 			    conn->rtp.mgcp_rtp_endpoint, MGCP_CONN_LOOPBACK);
-	return mgcpgw_client_tx(mgcp, msg, mgcp_response_rab_act_cs_crcx, trans);
+	return mgcp_client_tx(mgcp, msg, mgcp_response_rab_act_cs_crcx, trans);
 }
 
 static void mgcp_response_bridge_mdcx(struct mgcp_response *r, void *priv);
@@ -268,7 +268,7 @@ static void mgcp_bridge(struct gsm_trans *from, struct gsm_trans *to,
 {
 	struct gsm_subscriber_connection *conn1 = from->conn;
 	struct gsm_subscriber_connection *conn2 = to->conn;
-	struct mgcpgw_client *mgcp = conn1->network->mgcpgw.client;
+	struct mgcp_client *mgcp = conn1->network->mgw.client;
 	const char *ip;
 	struct msgb *msg;
 
@@ -278,13 +278,13 @@ static void mgcp_bridge(struct gsm_trans *from, struct gsm_trans *to,
 	from->bridge.state = state;
 
 	/* Loop back to the same MGCP GW */
-	ip = mgcpgw_client_remote_addr_str(mgcp);
+	ip = mgcp_client_remote_addr_str(mgcp);
 
 	msg = mgcp_msg_mdcx(mgcp,
 			    conn1->rtp.mgcp_rtp_endpoint,
 			    ip, conn2->rtp.port_cn,
 			    mode);
-	if (mgcpgw_client_tx(mgcp, msg, mgcp_response_bridge_mdcx, from))
+	if (mgcp_client_tx(mgcp, msg, mgcp_response_bridge_mdcx, from))
 		LOGP(DMGCP, LOGL_ERROR,
 		     "Failed to send MDCX message for %s\n",
 		     vlr_subscr_name(from->vsub));
@@ -346,7 +346,7 @@ int msc_call_connect(struct gsm_trans *trans, uint16_t port, uint32_t ip)
 	 * is in use */
 
 	struct gsm_subscriber_connection *conn;
-	struct mgcpgw_client *mgcp;
+	struct mgcp_client *mgcp;
 	struct msgb *msg;
 
 	if (!trans)
@@ -355,10 +355,10 @@ int msc_call_connect(struct gsm_trans *trans, uint16_t port, uint32_t ip)
 		return -EINVAL;
 	if (!trans->conn->network)
 		return -EINVAL;
-	if (!trans->conn->network->mgcpgw.client)
+	if (!trans->conn->network->mgw.client)
 		return -EINVAL;
 
-	mgcp = trans->conn->network->mgcpgw.client;
+	mgcp = trans->conn->network->mgw.client;
 
 	struct in_addr ip_addr;
 	ip_addr.s_addr = ntohl(ip);
@@ -368,7 +368,7 @@ int msc_call_connect(struct gsm_trans *trans, uint16_t port, uint32_t ip)
 	msg = mgcp_msg_mdcx(mgcp,
 			    conn->rtp.mgcp_rtp_endpoint,
 			    inet_ntoa(ip_addr), port, MGCP_CONN_RECV_SEND);
-	if (mgcpgw_client_tx(mgcp, msg, NULL, trans))
+	if (mgcp_client_tx(mgcp, msg, NULL, trans))
 		LOGP(DMGCP, LOGL_ERROR,
 		     "Failed to send MDCX message for %s\n",
 		     vlr_subscr_name(trans->vsub));
@@ -398,7 +398,7 @@ void msc_call_release(struct gsm_trans *trans)
 {
 	struct msgb *msg;
 	struct gsm_subscriber_connection *conn;
-	struct mgcpgw_client *mgcp;
+	struct mgcp_client *mgcp;
 
 	if (!trans)
 		return;
@@ -408,16 +408,16 @@ void msc_call_release(struct gsm_trans *trans)
 		return;
 
 	conn = trans->conn;
-	mgcp = conn->network->mgcpgw.client;
+	mgcp = conn->network->mgw.client;
 
 	/* Send DLCX */
 	msg = mgcp_msg_dlcx(mgcp, conn->rtp.mgcp_rtp_endpoint,
 			    conn->rtp.mgcp_rtp_endpoint);
-	if (mgcpgw_client_tx(mgcp, msg, NULL, NULL))
+	if (mgcp_client_tx(mgcp, msg, NULL, NULL))
 		LOGP(DMGCP, LOGL_ERROR,
 		     "Failed to send DLCX message for %s\n",
 		     vlr_subscr_name(trans->vsub));
 
 	/* Release endpoint id */
-	mgcpgw_client_release_endpoint(conn->rtp.mgcp_rtp_endpoint, mgcp);
+	mgcp_client_release_endpoint(conn->rtp.mgcp_rtp_endpoint, mgcp);
 }

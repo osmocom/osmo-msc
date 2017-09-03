@@ -2667,7 +2667,7 @@ static void mncc_recv_rtp_sock(struct gsm_network *net, struct gsm_trans *trans,
 	 * (0 if unknown) */
 	msg_type = GSM_TCHF_FRAME;
 
-	uint32_t addr = mgcpgw_client_remote_addr_n(net->mgcpgw.client);
+	uint32_t addr = mgcp_client_remote_addr_n(net->mgw.client);
 	uint16_t port = trans->conn->rtp.port_cn;
 
 	/* FIXME: This has to be set to some meaningful value,

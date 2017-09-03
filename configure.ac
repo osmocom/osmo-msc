@@ -47,7 +47,7 @@ PKG_CHECK_MODULES(LIBOSMOABIS, libosmoabis >= 0.2.0)
 PKG_CHECK_MODULES(LIBOSMONETIF, libosmo-netif >= 0.0.1)
 PKG_CHECK_MODULES(LIBOSMOSIGTRAN, libosmo-sigtran) # TODO version?
 PKG_CHECK_MODULES(LIBCRYPTO, libcrypto >= 0.9.5)
-PKG_CHECK_MODULES(LIBOSMOLEGACYMGCP, libosmo-legacy-mgcp >= 0.0.1)
+PKG_CHECK_MODULES(LIBOSMOMGCPCLIENT, libosmo-mgcp-client >= 1.0.0)
 
 # Enable/disable smpp support in the msc?
 AC_ARG_ENABLE([smpp], [AS_HELP_STRING([--enable-smpp], [Build the SMPP interface])],
@@ -125,33 +125,6 @@ if test "$enable_coverage" = "yes"; then
    COVERAGE_LDFLAGS="-ftest-coverage -fprofile-arcs"
    AC_SUBST([COVERAGE_CFLAGS])
    AC_SUBST([COVERAGE_LDFLAGS])
-fi
-
-AC_DEFUN([CHECK_LIBOSMO_LEGACY_MGCP_NEEDS_LIBGSM], [
-  AC_CACHE_CHECK(
-    [whether libosmo-legacy-mgcp needs -lgsm],
-    libosmo_cv_legacy_mgcp_needs_libgsm, [
-       SAVE_LDFLAGS="${LDFLAGS}"
-       LDFLAGS="${LIBOSMOLEGACYMGCP_LIBS} ${LIBOSMOVTY_LIBS}"
-       AC_LINK_IFELSE(
-         [AC_LANG_PROGRAM([
-                           #include <osmocom/legacy_mgcp/mgcpgw_client.h>
-                         ], [
-                           mgcpgw_client_init(0, 0);
-                         ])],
-         [libosmo_cv_legacy_mgcp_needs_libgsm=no],
-         [libosmo_cv_legacy_mgcp_needs_libgsm=yes])
-       LDFLAGS="${SAVE_LDFLAGS}"
-       ])
-  ])
-CHECK_LIBOSMO_LEGACY_MGCP_NEEDS_LIBGSM
-if test "x$libosmo_cv_legacy_mgcp_needs_libgsm" = xyes; then
-    AC_SEARCH_LIBS([gsm_create], [gsm], [LIBRARY_GSM="$LIBS";LIBS=""],
-		   [AC_MSG_ERROR([libosmo-legacy-mgcp is built with transcoding and needs -lgsm but cannot find usable libgsm])])
-    AC_SUBST(LIBRARY_GSM)
-    if test "$osmo_ac_with_g729" = "yes" ; then
-	PKG_CHECK_MODULES(LIBBCG729, libbcg729 >= 0.1, [AC_DEFINE([HAVE_BCG729], [1], [Use bgc729 decoder/encoder])])
-    fi
 fi
 
 AC_DEFUN([CHECK_TM_INCLUDES_TM_GMTOFF], [

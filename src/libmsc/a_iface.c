@@ -34,7 +34,7 @@
 #include <osmocom/msc/a_iface.h>
 #include <osmocom/msc/a_iface_bssap.h>
 #include <osmocom/msc/transaction.h>
-#include <osmocom/legacy_mgcp/mgcpgw_client.h>
+#include <osmocom/mgcp_client/mgcp_client.h>
 #include <osmocom/core/byteswap.h>
 #include <osmocom/sccp/sccp_types.h>
 #include <osmocom/msc/a_reset.h>
@@ -401,7 +401,7 @@ int a_iface_tx_assignment(const struct gsm_trans *trans)
 	memset(&rtp_addr_in, 0, sizeof(rtp_addr_in));
 	rtp_addr_in.sin_family = AF_INET;
 	rtp_addr_in.sin_port = osmo_htons(conn->rtp.port_subscr);
-	rtp_addr_in.sin_addr.s_addr = osmo_htonl(mgcpgw_client_remote_addr_n(gsm_network->mgcpgw.client));
+	rtp_addr_in.sin_addr.s_addr = osmo_htonl(mgcp_client_remote_addr_n(gsm_network->mgw.client));
 
 	memset(&rtp_addr, 0, sizeof(rtp_addr));
 	memcpy(&rtp_addr, &rtp_addr_in, sizeof(rtp_addr_in));

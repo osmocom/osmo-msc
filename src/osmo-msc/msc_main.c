@@ -64,7 +64,7 @@
 #include <osmocom/msc/osmo_bsc_rf.h>
 #include <osmocom/msc/smpp.h>
 #include <osmocom/sigtran/osmo_ss7.h>
-#include <osmocom/legacy_mgcp/mgcpgw_client.h>
+#include <osmocom/mgcp_client/mgcp_client.h>
 
 #ifdef BUILD_IU
 #include <osmocom/ranap/iu_client.h>
@@ -251,7 +251,7 @@ struct gsm_network *msc_network_alloc(void *ctx,
 						  MSC_HLR_REMOTE_IP_DEFAULT);
 	net->gsup_server_port = MSC_HLR_REMOTE_PORT_DEFAULT;
 
-	mgcpgw_client_conf_init(&net->mgcpgw.conf);
+	mgcp_client_conf_init(&net->mgw.conf);
 
 	return net;
 }
@@ -553,10 +553,10 @@ TODO: we probably want some of the _net_ ctrl commands from bsc_base_ctrl_cmds_i
 	if (sms_queue_start(msc_network, 20) != 0)
 		return -1;
 
-	msc_network->mgcpgw.client = mgcpgw_client_init(
-			msc_network, &msc_network->mgcpgw.conf);
+	msc_network->mgw.client = mgcp_client_init(
+			msc_network, &msc_network->mgw.conf);
 
-	if (mgcpgw_client_connect(msc_network->mgcpgw.client)) {
+	if (mgcp_client_connect(msc_network->mgw.client)) {
 		printf("MGCPGW connect failed\n");
 		return 7;
 	}
