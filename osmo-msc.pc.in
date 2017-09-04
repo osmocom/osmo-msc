@@ -3,8 +3,8 @@ exec_prefix=@exec_prefix@
 libdir=@libdir@
 includedir=@includedir@/
 
-Name: OpenBSC
-Description: OpenBSC base station controller
+Name: OsmoMSC
+Description: Osmocom Mobile Switching Center
 Requires:
 Version: @VERSION@
 Cflags: -I${includedir}
