@@ -14,23 +14,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>
 
-
-# Most systems won't be able to use these, so they're separated out
-nitb_e1_configs = [
-    "doc/examples/osmo-nitb/bs11/openbsc-2bts-2trx.cfg",
-    "doc/examples/osmo-nitb/bs11/openbsc-1bts-2trx-hopping.cfg",
-    "doc/examples/osmo-nitb/bs11/openbsc-1bts-2trx.cfg",
-    "doc/examples/osmo-nitb/bs11/openbsc.cfg",
-    "doc/examples/osmo-nitb/nokia/openbsc_nokia_3trx.cfg",
-    "doc/examples/osmo-nitb/nanobts/openbsc-multitrx.cfg",
-    "doc/examples/osmo-nitb/rbs2308/openbsc.cfg"
-]
-
-
 app_configs = {
     "msc": ["doc/examples/osmo-msc/osmo-msc.cfg"],
 }
-
 
 apps = [(4254, "src/osmo-msc/osmo-msc", "OsmoMSC", "msc"),
         ]
