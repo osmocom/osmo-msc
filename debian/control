@@ -23,9 +23,9 @@ Build-Depends: debhelper (>=9),
                libosmo-netif-dev,
                libosmo-ranap-dev
 Standards-Version: 3.9.8
-Vcs-Git: git://git.osmocom.org/osmo-bsc.git
-Vcs-Browser: https://git.osmocom.org/osmo-bsc/
-Homepage: https://projects.osmocom.org/projects/osmo-bsc
+Vcs-Git: git://git.osmocom.org/osmo-msc.git
+Vcs-Browser: https://git.osmocom.org/osmo-msc/
+Homepage: https://osmocom.org/projects/osmomsc
 
 Package: osmo-msc
 Architecture: any
