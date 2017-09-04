@@ -43,21 +43,21 @@
 #include <osmocom/gsm/gsm0411_utils.h>
 #include <osmocom/gsm/protocol/gsm_04_11.h>
 
-#include <openbsc/debug.h>
-#include <openbsc/gsm_data.h>
-#include <openbsc/db.h>
-#include <openbsc/gsm_subscriber.h>
-#include <openbsc/gsm_04_08.h>
-#include <openbsc/abis_rsl.h>
-#include <openbsc/signal.h>
-#include <openbsc/db.h>
-#include <openbsc/transaction.h>
-#include <openbsc/paging.h>
-#include <openbsc/bsc_rll.h>
-#include <openbsc/chan_alloc.h>
-#include <openbsc/msc_ifaces.h>
-#include <openbsc/osmo_msc.h>
-#include <openbsc/vlr.h>
+#include <osmocom/msc/debug.h>
+#include <osmocom/msc/gsm_data.h>
+#include <osmocom/msc/db.h>
+#include <osmocom/msc/gsm_subscriber.h>
+#include <osmocom/msc/gsm_04_08.h>
+#include <osmocom/msc/abis_rsl.h>
+#include <osmocom/msc/signal.h>
+#include <osmocom/msc/db.h>
+#include <osmocom/msc/transaction.h>
+#include <osmocom/msc/paging.h>
+#include <osmocom/msc/bsc_rll.h>
+#include <osmocom/msc/chan_alloc.h>
+#include <osmocom/msc/msc_ifaces.h>
+#include <osmocom/msc/osmo_msc.h>
+#include <osmocom/msc/vlr.h>
 
 #ifdef BUILD_SMPP
 #include "smpp_smsc.h"

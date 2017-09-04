@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include <openbsc/a_reset.h>
+#include <osmocom/msc/a_reset.h>
 
 /* A struct to keep a context information about the BSCs we are associated with */
 struct bsc_context {

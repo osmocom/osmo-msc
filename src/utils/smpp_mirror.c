@@ -18,7 +18,7 @@
 #include <osmocom/core/socket.h>
 #include <osmocom/core/write_queue.h>
 
-#include <openbsc/debug.h>
+#include <osmocom/msc/debug.h>
 
 /* FIXME: merge with smpp_smsc.c */
 #define SMPP_SYS_ID_LEN	16

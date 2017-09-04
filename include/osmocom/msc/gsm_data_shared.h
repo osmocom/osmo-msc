@@ -24,7 +24,7 @@
 #include <osmocom/gsm/lapdm.h>
 #endif
 
-#include <openbsc/common_cs.h>
+#include <osmocom/msc/common_cs.h>
 
 /* 16 is the max. number of SI2quater messages according to 3GPP TS 44.018 Table 10.5.2.33b.1:
    4-bit index is used (2#1111 = 10#15) */

@@ -14,9 +14,9 @@
 #include <osmocom/crypt/auth.h>
 #include <osmocom/sigtran/sccp_sap.h>
 
-#include <openbsc/common.h>
-#include <openbsc/rest_octets.h>
-#include <openbsc/common_cs.h>
+#include <osmocom/msc/common.h>
+#include <osmocom/msc/rest_octets.h>
+#include <osmocom/msc/common_cs.h>
 #include <osmocom/legacy_mgcp/mgcpgw_client.h>
 
 

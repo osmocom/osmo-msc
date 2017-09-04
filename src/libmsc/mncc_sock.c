@@ -35,9 +35,9 @@
 #include <osmocom/core/socket.h>
 #include <osmocom/gsm/protocol/gsm_04_08.h>
 
-#include <openbsc/debug.h>
-#include <openbsc/mncc.h>
-#include <openbsc/gsm_data.h>
+#include <osmocom/msc/debug.h>
+#include <osmocom/msc/mncc.h>
+#include <osmocom/msc/gsm_data.h>
 
 struct mncc_sock_state {
 	struct gsm_network *net;

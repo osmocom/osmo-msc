@@ -26,7 +26,7 @@
 #include <osmocom/gsm/abis_nm.h>
 #include <osmocom/gsm/protocol/gsm_12_21.h>
 
-#include <openbsc/gsm_data.h>
+#include <osmocom/msc/gsm_data.h>
 
 /* max number of attributes represented as 3GPP TS 52.021 §9.4.62 SW Description array */
 #define MAX_BTS_ATTR 5

@@ -21,11 +21,11 @@
 
 #include <osmocom/ctrl/control_cmd.h>
 #include <osmocom/core/utils.h>
-#include <openbsc/gsm_data.h>
-#include <openbsc/gsm_subscriber.h>
-#include <openbsc/db.h>
-#include <openbsc/debug.h>
-#include <openbsc/vlr.h>
+#include <osmocom/msc/gsm_data.h>
+#include <osmocom/msc/gsm_subscriber.h>
+#include <osmocom/msc/db.h>
+#include <osmocom/msc/debug.h>
+#include <osmocom/msc/vlr.h>
 
 #include <stdbool.h>
 

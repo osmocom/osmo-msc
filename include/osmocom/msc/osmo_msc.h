@@ -6,7 +6,7 @@
 #include <osmocom/core/fsm.h>
 #include <osmocom/gsm/gsup.h>
 
-#include <openbsc/gsm_data.h>
+#include <osmocom/msc/gsm_data.h>
 
 #include "bsc_api.h"
 

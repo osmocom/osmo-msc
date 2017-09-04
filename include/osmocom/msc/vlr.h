@@ -7,9 +7,9 @@
 #include <osmocom/gsm/protocol/gsm_23_003.h>
 #include <osmocom/gsm/protocol/gsm_04_08_gprs.h>
 #include <osmocom/gsm/gsm23003.h>
-#include <openbsc/gsm_data.h>
+#include <osmocom/msc/gsm_data.h>
 // for GSM_NAME_LENGTH
-#include <openbsc/gsm_subscriber.h>
+#include <osmocom/msc/gsm_subscriber.h>
 
 struct log_target;
 

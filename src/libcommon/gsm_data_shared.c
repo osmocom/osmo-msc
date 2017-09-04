@@ -32,7 +32,7 @@
 #include <osmocom/gsm/abis_nm.h>
 #include <osmocom/core/statistics.h>
 
-#include <openbsc/gsm_data.h>
+#include <osmocom/msc/gsm_data.h>
 
 void gsm_abis_mo_reset(struct gsm_abis_mo *mo)
 {

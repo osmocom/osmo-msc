@@ -20,8 +20,8 @@
 
 #pragma once
 
-#include <openbsc/gsm_data.h>
-#include <openbsc/bsc_msc_data.h>
+#include <osmocom/msc/gsm_data.h>
+#include <osmocom/msc/bsc_msc_data.h>
 
 /* Allocate resources to make a new connection oriented sigtran connection
  * (not the connection ittself!) */

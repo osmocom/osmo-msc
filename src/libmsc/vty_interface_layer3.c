@@ -31,30 +31,30 @@
 #include <arpa/inet.h>
 
 #include <osmocom/core/linuxlist.h>
-#include <openbsc/gsm_data.h>
-#include <openbsc/gsm_subscriber.h>
-#include <openbsc/silent_call.h>
-#include <openbsc/gsm_04_11.h>
+#include <osmocom/msc/gsm_data.h>
+#include <osmocom/msc/gsm_subscriber.h>
+#include <osmocom/msc/silent_call.h>
+#include <osmocom/msc/gsm_04_11.h>
 #include <osmocom/abis/e1_input.h>
-#include <openbsc/abis_nm.h>
+#include <osmocom/msc/abis_nm.h>
 #include <osmocom/gsm/gsm_utils.h>
 #include <osmocom/core/utils.h>
-#include <openbsc/db.h>
+#include <osmocom/msc/db.h>
 #include <osmocom/core/talloc.h>
-#include <openbsc/signal.h>
-#include <openbsc/debug.h>
-#include <openbsc/vty.h>
-#include <openbsc/gsm_04_80.h>
-#include <openbsc/gsm_04_14.h>
-#include <openbsc/chan_alloc.h>
-#include <openbsc/sms_queue.h>
-#include <openbsc/mncc_int.h>
-#include <openbsc/handover.h>
-#include <openbsc/vlr.h>
+#include <osmocom/msc/signal.h>
+#include <osmocom/msc/debug.h>
+#include <osmocom/msc/vty.h>
+#include <osmocom/msc/gsm_04_80.h>
+#include <osmocom/msc/gsm_04_14.h>
+#include <osmocom/msc/chan_alloc.h>
+#include <osmocom/msc/sms_queue.h>
+#include <osmocom/msc/mncc_int.h>
+#include <osmocom/msc/handover.h>
+#include <osmocom/msc/vlr.h>
 
 #include <osmocom/vty/logging.h>
 
-#include <openbsc/osmo_msc.h>
+#include <osmocom/msc/osmo_msc.h>
 
 #include "meas_feed.h"
 

@@ -21,22 +21,22 @@
  *
  */
 
-#include <openbsc/osmo_msc.h>
-#include <openbsc/bsc_api.h>
-#include <openbsc/debug.h>
-#include <openbsc/transaction.h>
-#include <openbsc/db.h>
-#include <openbsc/vlr.h>
-#include <openbsc/osmo_msc.h>
-#include <openbsc/a_iface.h>
+#include <osmocom/msc/osmo_msc.h>
+#include <osmocom/msc/bsc_api.h>
+#include <osmocom/msc/debug.h>
+#include <osmocom/msc/transaction.h>
+#include <osmocom/msc/db.h>
+#include <osmocom/msc/vlr.h>
+#include <osmocom/msc/osmo_msc.h>
+#include <osmocom/msc/a_iface.h>
 
-#include <openbsc/gsm_04_11.h>
+#include <osmocom/msc/gsm_04_11.h>
 
 #include "../../bscconfig.h"
 #ifdef BUILD_IU
 #include <osmocom/ranap/iu_client.h>
 #else
-#include <openbsc/iu_dummy.h>
+#include <osmocom/msc/iu_dummy.h>
 #endif
 
 /* Receive a SAPI-N-REJECT from BSC */

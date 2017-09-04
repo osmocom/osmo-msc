@@ -25,7 +25,7 @@
 #include <stdlib.h>
 #include <errno.h>
 
-#include <openbsc/gsm_data.h>
+#include <osmocom/msc/gsm_data.h>
 
 #include <osmocom/core/signal.h>
 

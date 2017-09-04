@@ -26,12 +26,12 @@
 
 #include <osmocom/core/logging.h>
 #include <osmocom/ranap/iu_client.h>
-#include <openbsc/debug.h>
+#include <osmocom/msc/debug.h>
 
-#include <openbsc/gsm_data.h>
-#include <openbsc/gsm_subscriber.h>
-#include <openbsc/osmo_msc.h>
-#include <openbsc/vlr.h>
+#include <osmocom/msc/gsm_data.h>
+#include <osmocom/msc/gsm_subscriber.h>
+#include <osmocom/msc/osmo_msc.h>
+#include <osmocom/msc/vlr.h>
 
 /* For A-interface see libbsc/bsc_api.c subscr_con_allocate() */
 static struct gsm_subscriber_connection *subscr_conn_allocate_iu(struct gsm_network *network,

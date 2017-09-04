@@ -20,10 +20,10 @@
  *
  */
 
-#include <openbsc/db.h>
-#include <openbsc/debug.h>
-#include <openbsc/auth.h>
-#include <openbsc/gsm_data.h>
+#include <osmocom/msc/db.h>
+#include <osmocom/msc/debug.h>
+#include <osmocom/msc/auth.h>
+#include <osmocom/msc/gsm_data.h>
 
 #include <osmocom/gsm/comp128.h>
 #include <osmocom/core/utils.h>

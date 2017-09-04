@@ -26,7 +26,7 @@
 #include <osmocom/core/linuxlist.h>
 #include <osmocom/core/timer.h>
 
-#include <openbsc/gsm_data.h>
+#include <osmocom/msc/gsm_data.h>
 
 /**
  * A pending paging request

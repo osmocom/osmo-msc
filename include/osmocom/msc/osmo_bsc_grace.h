@@ -21,8 +21,8 @@
 #ifndef OSMO_BSC_GRACE_H
 #define OSMO_BSC_GRACE_H
 
-#include <openbsc/gsm_data.h>
-#include <openbsc/signal.h>
+#include <osmocom/msc/gsm_data.h>
+#include <osmocom/msc/signal.h>
 
 struct bsc_msc_data;
 

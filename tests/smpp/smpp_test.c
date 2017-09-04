@@ -20,7 +20,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include <openbsc/debug.h>
+#include <osmocom/msc/debug.h>
 
 #include <osmocom/core/application.h>
 #include <osmocom/core/backtrace.h>

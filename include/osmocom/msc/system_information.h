@@ -3,7 +3,7 @@
 
 #include <osmocom/gsm/sysinfo.h>
 
-#include <openbsc/arfcn_range_encode.h>
+#include <osmocom/msc/arfcn_range_encode.h>
 
 struct gsm_bts;
 

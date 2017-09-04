@@ -25,14 +25,14 @@
 #include <errno.h>
 
 #include <osmocom/core/msgb.h>
-#include <openbsc/signal.h>
-#include <openbsc/debug.h>
-#include <openbsc/paging.h>
-#include <openbsc/gsm_data.h>
-#include <openbsc/gsm_subscriber.h>
-#include <openbsc/abis_rsl.h>
-#include <openbsc/chan_alloc.h>
-#include <openbsc/osmo_msc.h>
+#include <osmocom/msc/signal.h>
+#include <osmocom/msc/debug.h>
+#include <osmocom/msc/paging.h>
+#include <osmocom/msc/gsm_data.h>
+#include <osmocom/msc/gsm_subscriber.h>
+#include <osmocom/msc/abis_rsl.h>
+#include <osmocom/msc/chan_alloc.h>
+#include <osmocom/msc/osmo_msc.h>
 
 /* paging of the requested subscriber has completed */
 static int paging_cb_silent(unsigned int hooknum, unsigned int event,

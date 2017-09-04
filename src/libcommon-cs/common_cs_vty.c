@@ -25,10 +25,10 @@
 #include <osmocom/vty/logging.h>
 #include <osmocom/vty/stats.h>
 
-#include <openbsc/vty.h>
+#include <osmocom/msc/vty.h>
 
-#include <openbsc/gsm_data.h>
-#include <openbsc/gsm_subscriber.h>
+#include <osmocom/msc/gsm_data.h>
+#include <osmocom/msc/gsm_subscriber.h>
 
 struct cmd_node net_node = {
 	GSMNET_NODE,

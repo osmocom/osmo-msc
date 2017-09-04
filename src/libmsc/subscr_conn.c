@@ -25,12 +25,12 @@
 #include <osmocom/core/fsm.h>
 #include <osmocom/core/signal.h>
 
-#include <openbsc/osmo_msc.h>
-#include <openbsc/vlr.h>
-#include <openbsc/debug.h>
-#include <openbsc/transaction.h>
-#include <openbsc/signal.h>
-#include <openbsc/a_iface.h>
+#include <osmocom/msc/osmo_msc.h>
+#include <osmocom/msc/vlr.h>
+#include <osmocom/msc/debug.h>
+#include <osmocom/msc/transaction.h>
+#include <osmocom/msc/signal.h>
+#include <osmocom/msc/a_iface.h>
 
 #define SUBSCR_CONN_TIMEOUT 5 /* seconds */
 

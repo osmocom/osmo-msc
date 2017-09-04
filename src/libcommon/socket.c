@@ -35,8 +35,8 @@
 #include <osmocom/core/select.h>
 #include <osmocom/gsm/tlv.h>
 #include <osmocom/core/msgb.h>
-#include <openbsc/debug.h>
-#include <openbsc/gsm_data.h>
+#include <osmocom/msc/debug.h>
+#include <osmocom/msc/gsm_data.h>
 #include <osmocom/core/talloc.h>
 
 int make_sock(struct osmo_fd *bfd, int proto,

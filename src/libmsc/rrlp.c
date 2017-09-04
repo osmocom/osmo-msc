@@ -21,10 +21,10 @@
 
 
 
-#include <openbsc/gsm_04_08.h>
-#include <openbsc/signal.h>
-#include <openbsc/gsm_subscriber.h>
-#include <openbsc/chan_alloc.h>
+#include <osmocom/msc/gsm_04_08.h>
+#include <osmocom/msc/signal.h>
+#include <osmocom/msc/gsm_subscriber.h>
+#include <osmocom/msc/chan_alloc.h>
 
 /* RRLP msPositionReq, nsBased,
  *	Accuracy=60, Method=gps, ResponseTime=2, oneSet */

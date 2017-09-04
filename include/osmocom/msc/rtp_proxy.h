@@ -27,7 +27,7 @@
 #include <osmocom/core/linuxlist.h>
 #include <osmocom/core/select.h>
 
-#include <openbsc/mncc.h>
+#include <osmocom/msc/mncc.h>
 
 #define RTP_PT_GSM_FULL 3
 #define RTP_PT_GSM_HALF 96

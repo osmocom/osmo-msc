@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-#include <openbsc/meas_rep.h>
+#include <osmocom/msc/meas_rep.h>
 
 struct meas_feed_hdr {
 	uint8_t msg_type;

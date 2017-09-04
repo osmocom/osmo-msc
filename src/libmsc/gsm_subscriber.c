@@ -37,20 +37,20 @@
 #ifdef BUILD_IU
 #include <osmocom/ranap/iu_client.h>
 #else
-#include <openbsc/iu_dummy.h>
+#include <osmocom/msc/iu_dummy.h>
 #endif
 
-#include <openbsc/gsm_subscriber.h>
-#include <openbsc/gsm_04_08.h>
-#include <openbsc/debug.h>
-#include <openbsc/paging.h>
-#include <openbsc/signal.h>
-#include <openbsc/db.h>
-#include <openbsc/chan_alloc.h>
-#include <openbsc/vlr.h>
-#include <openbsc/osmo_msc.h>
-#include <openbsc/msc_ifaces.h>
-#include <openbsc/a_iface.h>
+#include <osmocom/msc/gsm_subscriber.h>
+#include <osmocom/msc/gsm_04_08.h>
+#include <osmocom/msc/debug.h>
+#include <osmocom/msc/paging.h>
+#include <osmocom/msc/signal.h>
+#include <osmocom/msc/db.h>
+#include <osmocom/msc/chan_alloc.h>
+#include <osmocom/msc/vlr.h>
+#include <osmocom/msc/osmo_msc.h>
+#include <osmocom/msc/msc_ifaces.h>
+#include <osmocom/msc/a_iface.h>
 
 int subscr_paging_dispatch(unsigned int hooknum, unsigned int event,
 			   struct msgb *msg, void *data, void *param)

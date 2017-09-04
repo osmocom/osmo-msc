@@ -23,8 +23,8 @@
 
 #include <osmocom/core/application.h>
 
-#include <openbsc/debug.h>
-#include <openbsc/vlr.h>
+#include <osmocom/msc/debug.h>
+#include <osmocom/msc/vlr.h>
 
 static void *talloc_ctx = NULL;
 

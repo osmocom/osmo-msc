@@ -21,8 +21,8 @@
 
 #include <osmocom/core/fsm.h>
 #include <osmocom/gsm/gsup.h>
-#include <openbsc/vlr.h>
-#include <openbsc/debug.h>
+#include <osmocom/msc/vlr.h>
+#include <osmocom/msc/debug.h>
 
 #include "vlr_core.h"
 #include "vlr_auth_fsm.h"

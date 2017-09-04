@@ -28,7 +28,7 @@
 #include <osmocom/core/talloc.h>
 #include <osmocom/core/utils.h>
 #include <osmocom/gsm/gsm_utils.h>
-#include <openbsc/meas_rep.h>
+#include <osmocom/msc/meas_rep.h>
 
 #include "meas_db.h"
 

@@ -29,16 +29,16 @@
 #include <osmocom/gsm/protocol/gsm_08_08.h>
 #include <osmocom/gsm/protocol/gsm_04_08.h>
 #include <osmocom/gsm/gsm0808_utils.h>
-#include <openbsc/debug.h>
-#include <openbsc/msc_ifaces.h>
-#include <openbsc/a_iface.h>
-#include <openbsc/a_iface_bssap.h>
-#include <openbsc/transaction.h>
+#include <osmocom/msc/debug.h>
+#include <osmocom/msc/msc_ifaces.h>
+#include <osmocom/msc/a_iface.h>
+#include <osmocom/msc/a_iface_bssap.h>
+#include <osmocom/msc/transaction.h>
 #include <osmocom/legacy_mgcp/mgcpgw_client.h>
 #include <osmocom/core/byteswap.h>
 #include <osmocom/sccp/sccp_types.h>
-#include <openbsc/a_reset.h>
-#include <openbsc/osmo_msc.h>
+#include <osmocom/msc/a_reset.h>
+#include <osmocom/msc/osmo_msc.h>
 
 /* A pointer to the GSM network we work with. By the current paradigm,
  * there can only be one gsm_network per MSC. The pointer is set once

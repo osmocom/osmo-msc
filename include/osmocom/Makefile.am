@@ -1,3 +1,3 @@
 SUBDIRS = \
-	osmocom \
+	msc \
 	$(NULL)

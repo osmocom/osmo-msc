@@ -2,7 +2,7 @@
 #define _OPENBSC_NWL_H
 
 #include <stdint.h>
-#include <openbsc/gsm_data.h>
+#include <osmocom/msc/gsm_data.h>
 
 void ipac_nwl_init(void);
 

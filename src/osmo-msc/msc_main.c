@@ -37,32 +37,32 @@
 /* build switches from the configure script */
 #include "../../bscconfig.h"
 
-#include <openbsc/db.h>
+#include <osmocom/msc/db.h>
 #include <osmocom/core/application.h>
 #include <osmocom/core/select.h>
 #include <osmocom/core/stats.h>
-#include <openbsc/debug.h>
+#include <osmocom/msc/debug.h>
 #include <osmocom/abis/abis.h>
 #include <osmocom/abis/e1_input.h>
 #include <osmocom/core/talloc.h>
-#include <openbsc/signal.h>
-#include <openbsc/osmo_msc.h>
-#include <openbsc/bsc_msc_data.h>
-#include <openbsc/sms_queue.h>
+#include <osmocom/msc/signal.h>
+#include <osmocom/msc/osmo_msc.h>
+#include <osmocom/msc/bsc_msc_data.h>
+#include <osmocom/msc/sms_queue.h>
 #include <osmocom/vty/telnet_interface.h>
 #include <osmocom/vty/ports.h>
 #include <osmocom/vty/logging.h>
-#include <openbsc/vty.h>
-#include <openbsc/bss.h>
-#include <openbsc/mncc.h>
-#include <openbsc/handover_decision.h>
-#include <openbsc/rrlp.h>
+#include <osmocom/msc/vty.h>
+#include <osmocom/msc/bss.h>
+#include <osmocom/msc/mncc.h>
+#include <osmocom/msc/handover_decision.h>
+#include <osmocom/msc/rrlp.h>
 #include <osmocom/ctrl/control_if.h>
 #include <osmocom/ctrl/control_vty.h>
 #include <osmocom/ctrl/ports.h>
-#include <openbsc/ctrl.h>
-#include <openbsc/osmo_bsc_rf.h>
-#include <openbsc/smpp.h>
+#include <osmocom/msc/ctrl.h>
+#include <osmocom/msc/osmo_bsc_rf.h>
+#include <osmocom/msc/smpp.h>
 #include <osmocom/sigtran/osmo_ss7.h>
 #include <osmocom/legacy_mgcp/mgcpgw_client.h>
 
@@ -70,10 +70,10 @@
 #include <osmocom/ranap/iu_client.h>
 #endif
 
-#include <openbsc/msc_ifaces.h>
-#include <openbsc/iucs.h>
-#include <openbsc/iucs_ranap.h>
-#include <openbsc/a_iface.h>
+#include <osmocom/msc/msc_ifaces.h>
+#include <osmocom/msc/iucs.h>
+#include <osmocom/msc/iucs_ranap.h>
+#include <osmocom/msc/a_iface.h>
 
 static const char * const osmomsc_copyright =
 	"OsmoMSC - Osmocom Circuit-Switched Core Network implementation\r\n"

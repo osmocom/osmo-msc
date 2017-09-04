@@ -29,12 +29,12 @@
 #include <errno.h>
 #include <dbi/dbi.h>
 
-#include <openbsc/gsm_data.h>
-#include <openbsc/gsm_subscriber.h>
-#include <openbsc/gsm_04_11.h>
-#include <openbsc/db.h>
-#include <openbsc/debug.h>
-#include <openbsc/vlr.h>
+#include <osmocom/msc/gsm_data.h>
+#include <osmocom/msc/gsm_subscriber.h>
+#include <osmocom/msc/gsm_04_11.h>
+#include <osmocom/msc/db.h>
+#include <osmocom/msc/debug.h>
+#include <osmocom/msc/vlr.h>
 
 #include <osmocom/gsm/protocol/gsm_23_003.h>
 #include <osmocom/core/talloc.h>

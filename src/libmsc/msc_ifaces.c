@@ -20,15 +20,15 @@
 
 #include <osmocom/core/logging.h>
 
-#include <openbsc/debug.h>
-#include <openbsc/gsm_data.h>
-#include <openbsc/msc_ifaces.h>
-#include <openbsc/gsm_subscriber.h>
-#include <openbsc/transaction.h>
+#include <osmocom/msc/debug.h>
+#include <osmocom/msc/gsm_data.h>
+#include <osmocom/msc/msc_ifaces.h>
+#include <osmocom/msc/gsm_subscriber.h>
+#include <osmocom/msc/transaction.h>
 #include <osmocom/legacy_mgcp/mgcp.h>
 #include <osmocom/legacy_mgcp/mgcpgw_client.h>
-#include <openbsc/vlr.h>
-#include <openbsc/a_iface.h>
+#include <osmocom/msc/vlr.h>
+#include <osmocom/msc/a_iface.h>
 
 #include "../../bscconfig.h"
 
@@ -39,7 +39,7 @@ extern struct msgb *ranap_new_msg_rab_assign_voice(uint8_t rab_id,
 						   uint16_t rtp_port,
 						   bool use_x213_nsap);
 #else
-#include <openbsc/iu_dummy.h>
+#include <osmocom/msc/iu_dummy.h>
 #endif /* BUILD_IU */
 
 static int msc_tx(struct gsm_subscriber_connection *conn, struct msgb *msg)

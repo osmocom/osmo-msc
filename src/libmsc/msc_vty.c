@@ -32,10 +32,10 @@
 #include <osmocom/ranap/iu_client.h>
 #endif
 
-#include <openbsc/vty.h>
-#include <openbsc/gsm_data.h>
-#include <openbsc/gsm_subscriber.h>
-#include <openbsc/vlr.h>
+#include <osmocom/msc/vty.h>
+#include <osmocom/msc/gsm_data.h>
+#include <osmocom/msc/gsm_subscriber.h>
+#include <osmocom/msc/vlr.h>
 
 static struct cmd_node msc_node = {
 	MSC_NODE,

@@ -36,16 +36,16 @@
 #include <osmocom/gsm/protocol/gsm_04_11.h>
 #include <osmocom/gsm/protocol/smpp34_osmocom.h>
 
-#include <openbsc/gsm_subscriber.h>
-#include <openbsc/debug.h>
-#include <openbsc/db.h>
-#include <openbsc/gsm_04_11.h>
-#include <openbsc/gsm_data.h>
-#include <openbsc/signal.h>
-#include <openbsc/transaction.h>
-#include <openbsc/gsm_subscriber.h>
-#include <openbsc/chan_alloc.h>
-#include <openbsc/vlr.h>
+#include <osmocom/msc/gsm_subscriber.h>
+#include <osmocom/msc/debug.h>
+#include <osmocom/msc/db.h>
+#include <osmocom/msc/gsm_04_11.h>
+#include <osmocom/msc/gsm_data.h>
+#include <osmocom/msc/signal.h>
+#include <osmocom/msc/transaction.h>
+#include <osmocom/msc/gsm_subscriber.h>
+#include <osmocom/msc/chan_alloc.h>
+#include <osmocom/msc/vlr.h>
 
 #include "smpp_smsc.h"
 

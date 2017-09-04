@@ -32,7 +32,7 @@
 #include <osmocom/core/utils.h>
 #include <osmocom/core/talloc.h>
 
-#include <openbsc/vty.h>
+#include <osmocom/msc/vty.h>
 
 #include "smpp_smsc.h"
 

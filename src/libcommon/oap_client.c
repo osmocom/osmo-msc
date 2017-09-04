@@ -27,8 +27,8 @@
 #include <osmocom/crypt/auth.h>
 #include <osmocom/gsm/oap.h>
 
-#include <openbsc/oap_client.h>
-#include <openbsc/debug.h>
+#include <osmocom/msc/oap_client.h>
+#include <osmocom/msc/debug.h>
 
 int oap_client_init(struct oap_client_config *config,
 		    struct oap_client_state *state)

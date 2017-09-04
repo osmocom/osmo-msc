@@ -26,7 +26,7 @@
 #include "../../bscconfig.h"
 #ifndef BUILD_IU
 
-#include <openbsc/iu_dummy.h>
+#include <osmocom/msc/iu_dummy.h>
 
 #include <osmocom/core/logging.h>
 #include <osmocom/vty/logging.h>

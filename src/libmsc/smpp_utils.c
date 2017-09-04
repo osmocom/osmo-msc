@@ -19,7 +19,7 @@
 
 
 #include "smpp_smsc.h"
-#include <openbsc/debug.h>
+#include <osmocom/msc/debug.h>
 
 
 int smpp_determine_scheme(uint8_t dcs, uint8_t *data_coding, int *mode)

@@ -35,33 +35,33 @@
 
 #include "bscconfig.h"
 
-#include <openbsc/auth.h>
-#include <openbsc/db.h>
-#include <openbsc/debug.h>
-#include <openbsc/gsm_data.h>
-#include <openbsc/gsm_subscriber.h>
-#include <openbsc/gsm_04_11.h>
-#include <openbsc/gsm_04_08.h>
-#include <openbsc/gsm_04_80.h>
-#include <openbsc/gsm_04_14.h>
-#include <openbsc/abis_rsl.h>
-#include <openbsc/chan_alloc.h>
-#include <openbsc/paging.h>
-#include <openbsc/signal.h>
+#include <osmocom/msc/auth.h>
+#include <osmocom/msc/db.h>
+#include <osmocom/msc/debug.h>
+#include <osmocom/msc/gsm_data.h>
+#include <osmocom/msc/gsm_subscriber.h>
+#include <osmocom/msc/gsm_04_11.h>
+#include <osmocom/msc/gsm_04_08.h>
+#include <osmocom/msc/gsm_04_80.h>
+#include <osmocom/msc/gsm_04_14.h>
+#include <osmocom/msc/abis_rsl.h>
+#include <osmocom/msc/chan_alloc.h>
+#include <osmocom/msc/paging.h>
+#include <osmocom/msc/signal.h>
 #include <osmocom/abis/trau_frame.h>
-#include <openbsc/trau_mux.h>
-#include <openbsc/rtp_proxy.h>
-#include <openbsc/transaction.h>
-#include <openbsc/ussd.h>
-#include <openbsc/silent_call.h>
-#include <openbsc/bsc_api.h>
-#include <openbsc/osmo_msc.h>
-#include <openbsc/handover.h>
-#include <openbsc/mncc_int.h>
+#include <osmocom/msc/trau_mux.h>
+#include <osmocom/msc/rtp_proxy.h>
+#include <osmocom/msc/transaction.h>
+#include <osmocom/msc/ussd.h>
+#include <osmocom/msc/silent_call.h>
+#include <osmocom/msc/bsc_api.h>
+#include <osmocom/msc/osmo_msc.h>
+#include <osmocom/msc/handover.h>
+#include <osmocom/msc/mncc_int.h>
 #include <osmocom/abis/e1_input.h>
 #include <osmocom/core/bitvec.h>
-#include <openbsc/vlr.h>
-#include <openbsc/msc_ifaces.h>
+#include <osmocom/msc/vlr.h>
+#include <osmocom/msc/msc_ifaces.h>
 
 #include <osmocom/gsm/gsm48.h>
 #include <osmocom/gsm/gsm0480.h>
@@ -76,8 +76,8 @@
 #include <osmocom/ranap/iu_client.h>
 #endif
 
-#include <openbsc/msc_ifaces.h>
-#include <openbsc/a_iface.h>
+#include <osmocom/msc/msc_ifaces.h>
+#include <osmocom/msc/a_iface.h>
 
 #include <assert.h>
 

@@ -5,7 +5,7 @@
 #include <osmocom/gsm/gsm_utils.h>
 #include <osmocom/gsm/protocol/gsm_04_08.h>
 
-#include <openbsc/meas_rep.h>
+#include <osmocom/msc/meas_rep.h>
 
 struct msgb;
 struct gsm_bts;

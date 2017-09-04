@@ -24,11 +24,11 @@
 
 #include <osmocom/gsm/gsm0480.h>
 
-#include <openbsc/common_cs.h>
-#include <openbsc/gsm_data.h>
-#include <openbsc/gsm_subscriber.h>
-#include <openbsc/gsm_data.h>
-#include <openbsc/gsm_04_11.h>
+#include <osmocom/msc/common_cs.h>
+#include <osmocom/msc/gsm_data.h>
+#include <osmocom/msc/gsm_subscriber.h>
+#include <osmocom/msc/gsm_data.h>
+#include <osmocom/msc/gsm_04_11.h>
 
 /* Warning: if bsc_network_init() is not called, some of the members of
  * gsm_network are not initialized properly and must not be used! (In

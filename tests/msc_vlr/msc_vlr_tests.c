@@ -30,15 +30,15 @@
 #include <osmocom/core/application.h>
 #include <osmocom/gsm/protocol/gsm_04_11.h>
 #include <osmocom/gsm/gsup.h>
-#include <openbsc/gsup_client.h>
-#include <openbsc/gsm_04_11.h>
-#include <openbsc/debug.h>
+#include <osmocom/msc/gsup_client.h>
+#include <osmocom/msc/gsm_04_11.h>
+#include <osmocom/msc/debug.h>
 
 #if BUILD_IU
-#include <openbsc/iucs_ranap.h>
+#include <osmocom/msc/iucs_ranap.h>
 #include <osmocom/ranap/iu_client.h>
 #else
-#include <openbsc/iu_dummy.h>
+#include <osmocom/msc/iu_dummy.h>
 #endif
 
 #include "msc_vlr_tests.h"

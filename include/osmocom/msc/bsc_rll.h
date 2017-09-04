@@ -1,7 +1,7 @@
 #ifndef _BSC_RLL_H
 #define _BSC_RLL_H
 
-#include <openbsc/gsm_data.h>
+#include <osmocom/msc/gsm_data.h>
 
 enum bsc_rllr_ind {
 	BSC_RLLR_IND_EST_CONF,

@@ -13,12 +13,12 @@
 #include <osmocom/vty/command.h>
 #include <osmocom/vty/vty.h>
 
-#include <openbsc/meas_rep.h>
-#include <openbsc/signal.h>
-#include <openbsc/gsm_subscriber.h>
-#include <openbsc/meas_feed.h>
-#include <openbsc/vty.h>
-#include <openbsc/vlr.h>
+#include <osmocom/msc/meas_rep.h>
+#include <osmocom/msc/signal.h>
+#include <osmocom/msc/gsm_subscriber.h>
+#include <osmocom/msc/meas_feed.h>
+#include <osmocom/msc/vty.h>
+#include <osmocom/msc/vlr.h>
 
 #include "meas_feed.h"
 

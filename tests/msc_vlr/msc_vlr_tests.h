@@ -26,9 +26,9 @@
 #include <stdbool.h>
 #include <stdio.h>
 
-#include <openbsc/gsm_data.h>
-#include <openbsc/osmo_msc.h>
-#include <openbsc/vlr.h>
+#include <osmocom/msc/gsm_data.h>
+#include <osmocom/msc/osmo_msc.h>
+#include <osmocom/msc/vlr.h>
 
 extern bool _log_lines;
 #define _log(fmt, args...) do { \

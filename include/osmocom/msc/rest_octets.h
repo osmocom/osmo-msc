@@ -2,7 +2,7 @@
 #define _REST_OCTETS_H
 
 #include <stdbool.h>
-#include <openbsc/gsm_04_08.h>
+#include <osmocom/msc/gsm_04_08.h>
 #include <osmocom/gsm/sysinfo.h>
 
 /* generate SI1 rest octets */

@@ -29,9 +29,9 @@
 
 #include <osmocom/core/talloc.h>
 #include <osmocom/core/utils.h>
-#include <openbsc/gsm_subscriber.h>
-#include <openbsc/debug.h>
-#include <openbsc/vlr.h>
+#include <osmocom/msc/gsm_subscriber.h>
+#include <osmocom/msc/debug.h>
+#include <osmocom/msc/vlr.h>
 
 LLIST_HEAD(active_subscribers);
 void *tall_subscr_ctx;

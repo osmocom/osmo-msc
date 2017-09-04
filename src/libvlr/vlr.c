@@ -25,10 +25,10 @@
 #include <osmocom/gsm/protocol/gsm_04_08_gprs.h>
 #include <osmocom/gsm/gsup.h>
 #include <osmocom/gsm/apn.h>
-#include <openbsc/gsm_subscriber.h>
-#include <openbsc/gsup_client.h>
-#include <openbsc/vlr.h>
-#include <openbsc/debug.h>
+#include <osmocom/msc/gsm_subscriber.h>
+#include <osmocom/msc/gsup_client.h>
+#include <osmocom/msc/vlr.h>
+#include <osmocom/msc/debug.h>
 
 #include <openssl/rand.h>
 

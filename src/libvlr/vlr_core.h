@@ -1,6 +1,6 @@
 #pragma once
 
-#include <openbsc/vlr.h>
+#include <osmocom/msc/vlr.h>
 
 #define LOGGSUPP(level, gsup, fmt, args...) \
 	LOGP(DVLR, level, "GSUP(%s) " fmt, \

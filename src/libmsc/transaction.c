@@ -18,16 +18,16 @@
  *
  */
 
-#include <openbsc/transaction.h>
-#include <openbsc/gsm_data.h>
-#include <openbsc/mncc.h>
-#include <openbsc/debug.h>
+#include <osmocom/msc/transaction.h>
+#include <osmocom/msc/gsm_data.h>
+#include <osmocom/msc/mncc.h>
+#include <osmocom/msc/debug.h>
 #include <osmocom/core/talloc.h>
-#include <openbsc/gsm_04_08.h>
-#include <openbsc/mncc.h>
-#include <openbsc/paging.h>
-#include <openbsc/osmo_msc.h>
-#include <openbsc/vlr.h>
+#include <osmocom/msc/gsm_04_08.h>
+#include <osmocom/msc/mncc.h>
+#include <osmocom/msc/paging.h>
+#include <osmocom/msc/osmo_msc.h>
+#include <osmocom/msc/vlr.h>
 
 void *tall_trans_ctx;
 

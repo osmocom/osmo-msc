@@ -41,8 +41,8 @@
 
 #include "smpp_smsc.h"
 
-#include <openbsc/debug.h>
-#include <openbsc/gsm_data.h>
+#include <osmocom/msc/debug.h>
+#include <osmocom/msc/gsm_data.h>
 
 /*! \brief Ugly wrapper. libsmpp34 should do this itself! */
 #define SMPP34_UNPACK(rc, type, str, data, len)		\

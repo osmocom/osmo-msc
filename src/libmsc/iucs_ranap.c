@@ -29,13 +29,13 @@
 #include <osmocom/ranap/ranap_ies_defs.h>
 #include <osmocom/ranap/iu_client.h>
 
-#include <openbsc/debug.h>
-#include <openbsc/gsm_data.h>
-#include <openbsc/gsm_subscriber.h>
-#include <openbsc/iucs.h>
-#include <openbsc/vlr.h>
-#include <openbsc/iucs_ranap.h>
-#include <openbsc/osmo_msc.h>
+#include <osmocom/msc/debug.h>
+#include <osmocom/msc/gsm_data.h>
+#include <osmocom/msc/gsm_subscriber.h>
+#include <osmocom/msc/iucs.h>
+#include <osmocom/msc/vlr.h>
+#include <osmocom/msc/iucs_ranap.h>
+#include <osmocom/msc/osmo_msc.h>
 
 /* To continue authorization after a Security Mode Complete */
 int gsm0408_authorize(struct gsm_subscriber_connection *conn);

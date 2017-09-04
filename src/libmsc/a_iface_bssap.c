@@ -25,13 +25,13 @@
 #include <osmocom/sccp/sccp_types.h>
 #include <osmocom/gsm/gsm0808.h>
 #include <osmocom/gsm/gsm0808_utils.h>
-#include <openbsc/debug.h>
-#include <openbsc/gsm_data.h>
-#include <openbsc/a_iface_bssap.h>
-#include <openbsc/a_iface.h>
-#include <openbsc/osmo_msc.h>
+#include <osmocom/msc/debug.h>
+#include <osmocom/msc/gsm_data.h>
+#include <osmocom/msc/a_iface_bssap.h>
+#include <osmocom/msc/a_iface.h>
+#include <osmocom/msc/osmo_msc.h>
 #include <osmocom/core/byteswap.h>
-#include <openbsc/a_reset.h>
+#include <osmocom/msc/a_reset.h>
 
 #define IP_V4_ADDR_LEN 4
 

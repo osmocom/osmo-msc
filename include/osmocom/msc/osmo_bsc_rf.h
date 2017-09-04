@@ -1,7 +1,7 @@
 #ifndef OSMO_BSC_RF
 #define OSMO_BSC_RF
 
-#include <openbsc/gsm_data.h>
+#include <osmocom/msc/gsm_data.h>
 #include <osmocom/core/write_queue.h>
 #include <osmocom/core/timer.h>
 

@@ -18,11 +18,11 @@
  *
  */
 
-#include <openbsc/debug.h>
-#include <openbsc/db.h>
-#include <openbsc/gsm_subscriber.h>
-#include <openbsc/gsm_04_11.h>
-#include <openbsc/mgcp.h>
+#include <osmocom/msc/debug.h>
+#include <osmocom/msc/db.h>
+#include <osmocom/msc/gsm_subscriber.h>
+#include <osmocom/msc/gsm_04_11.h>
+#include <osmocom/msc/mgcp.h>
 
 #include <osmocom/core/application.h>
 

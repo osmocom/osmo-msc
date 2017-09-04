@@ -30,15 +30,15 @@
 
 #include <limits.h>
 
-#include <openbsc/sms_queue.h>
-#include <openbsc/chan_alloc.h>
-#include <openbsc/db.h>
-#include <openbsc/debug.h>
-#include <openbsc/gsm_data.h>
-#include <openbsc/gsm_04_11.h>
-#include <openbsc/gsm_subscriber.h>
-#include <openbsc/signal.h>
-#include <openbsc/vlr.h>
+#include <osmocom/msc/sms_queue.h>
+#include <osmocom/msc/chan_alloc.h>
+#include <osmocom/msc/db.h>
+#include <osmocom/msc/debug.h>
+#include <osmocom/msc/gsm_data.h>
+#include <osmocom/msc/gsm_04_11.h>
+#include <osmocom/msc/gsm_subscriber.h>
+#include <osmocom/msc/signal.h>
+#include <osmocom/msc/vlr.h>
 
 #include <osmocom/core/talloc.h>
 
