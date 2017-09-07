@@ -127,7 +127,7 @@ static struct a_reset_ctx *get_reset_ctx_by_sccp_addr(const struct osmo_sccp_add
 	return NULL;
 }
 
-/* Send DTAP message via A-interface */
+/* Send DTAP message via A-interface, take ownership of msg */
 int a_iface_tx_dtap(struct msgb *msg)
 {
 	struct gsm_subscriber_connection *conn;
@@ -144,6 +144,11 @@ int a_iface_tx_dtap(struct msgb *msg)
 
 	msg->l3h = msg->data;
 	msg_resp = gsm0808_create_dtap(msg, link_id);
+
+	/* gsm0808_create_dtap() has copied the data to msg_resp,
+	 * so msg has served its purpose now */
+	msgb_free(msg);
+
 	if (!msg_resp) {
 		LOGP(DMSC, LOGL_ERROR, "Unable to generate BSSMAP DTAP message!\n");
 		return -EINVAL;
@@ -151,6 +156,7 @@ int a_iface_tx_dtap(struct msgb *msg)
 		LOGP(DMSC, LOGL_DEBUG, "Massage will be sent as BSSMAP DTAP message!\n");
 
 	LOGP(DMSC, LOGL_DEBUG, "N-DATA.req(%u, %s)\n", conn->a.conn_id, osmo_hexdump(msg_resp->data, msg_resp->len));
+	/* osmo_sccp_tx_data_msg() takes ownership of msg_resp */
 	return osmo_sccp_tx_data_msg(conn->a.scu, conn->a.conn_id, msg_resp);
 }
 

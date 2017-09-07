@@ -51,7 +51,7 @@ struct bsc_context {
 /* Initalize A interface connection between to MSC and BSC */
 int a_init(struct osmo_sccp_instance *sccp, struct gsm_network *network);
 
-/* Send DTAP message via A-interface */
+/* Send DTAP message via A-interface, take ownership of msg */
 int a_iface_tx_dtap(struct msgb *msg);
 
 /* Send Cipher mode command via A-interface */

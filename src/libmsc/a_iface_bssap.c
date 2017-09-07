@@ -150,6 +150,7 @@ static void bssmap_rcvmsg_udt(struct osmo_sccp_user *scu, const struct a_conn_in
 
 	if (msgb_l3len(msg) < 1) {
 		LOGP(DMSC, LOGL_NOTICE, "Error: No data received -- discarding message!\n");
+		msgb_free(msg);
 		return;
 	}
 
@@ -327,9 +328,9 @@ static int bssmap_rx_l3_compl(struct osmo_sccp_user *scu, const struct a_conn_in
 	conn = subscr_conn_allocate_a(a_conn_info, network, lac, scu, a_conn_info->conn_id);
 
 	/* Handover location update to the MSC code */
-	/* msc_compl_l3() takes ownership of dtap_msg
-	 * message buffer */
 	rc = msc_compl_l3(conn, msg, 0);
+	msgb_free(msg);
+
 	if (rc == MSC_CONN_ACCEPT) {
 		LOGP(DMSC, LOGL_NOTICE, "User has been accepted by MSC.\n");
 		return 0;
@@ -423,9 +424,9 @@ static int bssmap_rx_ciph_compl(const struct osmo_sccp_user *scu, const struct a
 		msg = NULL;
 	}
 
-	/* Hand over cipher mode complete message to the MSC,
-	 * msc_cipher_mode_compl() takes ownership for msg */
+	/* Hand over cipher mode complete message to the MSC */
 	msc_cipher_mode_compl(conn, msg, alg_id);
+	msgb_free(msg);
 
 	return 0;
 fail:
@@ -677,9 +678,9 @@ static int rx_dtap(const struct osmo_sccp_user *scu, const struct a_conn_info *a
 	/* msc_dtap expects the dtap payload in l3h */
 	msg->l3h = msg->l2h + 3;
 
-	/* Forward dtap payload into the msc,
-	 * msc_dtap() takes ownership for msg */
+	/* Forward dtap payload into the msc */
 	msc_dtap(conn, conn->a.conn_id, msg);
+	msgb_free(msg);
 
 	return 0;
 }
@@ -696,6 +697,7 @@ int sccp_rx_dt(struct osmo_sccp_user *scu, const struct a_conn_info *a_conn_info
 	if (msgb_l2len(msg) < sizeof(struct bssmap_header)) {
 		LOGP(DMSC, LOGL_NOTICE, "The header is too short -- discarding message!\n");
 		msgb_free(msg);
+		return -EINVAL;
 	}
 
 	switch (msg->l2h[0]) {

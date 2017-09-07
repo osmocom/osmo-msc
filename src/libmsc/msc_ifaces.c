@@ -44,10 +44,12 @@ extern struct msgb *ranap_new_msg_rab_assign_voice(uint8_t rab_id,
 
 static int msc_tx(struct gsm_subscriber_connection *conn, struct msgb *msg)
 {
-	if (!conn)
-		return -EINVAL;
 	if (!msg)
 		return -EINVAL;
+	if (!conn) {
+		msgb_free(msg);
+		return -EINVAL;
+	}
 
 	DEBUGP(DMSC, "msc_tx %u bytes to %s via %s\n",
 	       msg->len, vlr_subscr_name(conn->vsub),
@@ -65,6 +67,7 @@ static int msc_tx(struct gsm_subscriber_connection *conn, struct msgb *msg)
 		LOGP(DMSC, LOGL_ERROR,
 		     "msc_tx(): conn->via_ran invalid (%d)\n",
 		     conn->via_ran);
+		msgb_free(msg);
 		return -1;
 	}
 }
