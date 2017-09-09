@@ -68,6 +68,9 @@ static int get_subscriber_list(struct ctrl_cmd *cmd, void *d)
 	cmd->reply = talloc_strdup(cmd, "");
 
 	llist_for_each_entry(vsub, &msc_ctrl_net->vlr->subscribers, list) {
+		/* Do not list subscribers that aren't successfully attached. */
+		if (!vsub->lu_complete)
+			continue;
 		cmd->reply = talloc_asprintf_append(cmd->reply, "%s,%s\n",
 						    vsub->imsi, vsub->msisdn);
 	}
