@@ -153,7 +153,7 @@ int a_iface_tx_dtap(struct msgb *msg)
 		LOGP(DMSC, LOGL_ERROR, "Unable to generate BSSMAP DTAP message!\n");
 		return -EINVAL;
 	} else
-		LOGP(DMSC, LOGL_DEBUG, "Massage will be sent as BSSMAP DTAP message!\n");
+		LOGP(DMSC, LOGL_DEBUG, "Message will be sent as BSSMAP DTAP message!\n");
 
 	LOGP(DMSC, LOGL_DEBUG, "N-DATA.req(%u, %s)\n", conn->a.conn_id, osmo_hexdump(msg_resp->data, msg_resp->len));
 	/* osmo_sccp_tx_data_msg() takes ownership of msg_resp */
