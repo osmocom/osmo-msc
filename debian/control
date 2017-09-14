@@ -19,7 +19,7 @@ Build-Depends: debhelper (>=9),
                libosmocore-dev,
                libosmo-sccp-dev,
                libosmo-abis-dev,
-               libosmo-legacy-mgcp-dev,
+               libosmo-mgcp-client-dev,
                libosmo-netif-dev,
                libosmo-ranap-dev
 Standards-Version: 3.9.8
