@@ -682,9 +682,6 @@ void bts_depend_clear(struct gsm_bts *bts, int dep);
 int bts_depend_check(struct gsm_bts *bts);
 int bts_depend_is_depedency(struct gsm_bts *base, struct gsm_bts *other);
 
-int gsm_bts_get_radio_link_timeout(const struct gsm_bts *bts);
-void gsm_bts_set_radio_link_timeout(struct gsm_bts *bts, int value);
-
 bool classmark_is_r99(struct gsm_classmark *cm);
 
 #endif /* _GSM_DATA_H */

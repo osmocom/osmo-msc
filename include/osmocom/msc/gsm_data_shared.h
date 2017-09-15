@@ -26,13 +26,6 @@
 
 #include <osmocom/msc/common_cs.h>
 
-/* 16 is the max. number of SI2quater messages according to 3GPP TS 44.018 Table 10.5.2.33b.1:
-   4-bit index is used (2#1111 = 10#15) */
-#define SI2Q_MAX_NUM 16
-/* length in bits (for single SI2quater message) */
-#define SI2Q_MAX_LEN 160
-#define SI2Q_MIN_LEN 18
-
 struct osmo_bsc_data;
 
 struct osmo_bsc_sccp_con;
@@ -502,11 +495,6 @@ struct gsm_bts_trx {
 	struct gsm_bts_trx_ts ts[TRX_NR_TS];
 };
 
-#define GSM_BTS_SI2Q(bts, i)   (struct gsm48_system_information_type_2quater *)((bts)->si_buf[SYSINFO_TYPE_2quater][i])
-#define GSM_BTS_HAS_SI(bts, i) ((bts)->si_valid & (1 << i))
-#define GSM_BTS_SI(bts, i)     (void *)((bts)->si_buf[i][0])
-#define GSM_LCHAN_SI(lchan, i) (void *)((lchan)->si.buf[i][0])
-
 enum gsm_bts_type {
 	GSM_BTS_TYPE_UNKNOWN,
 	GSM_BTS_TYPE_BS11,
@@ -744,17 +732,6 @@ struct gsm_bts {
 		struct gsm_abis_mo mo;
 	} site_mgr;
 
-	/* bitmask of all SI that are present/valid in si_buf */
-	uint32_t si_valid;
-	/* 3GPP TS 44.018 Table 10.5.2.33b.1 INDEX and COUNT for SI2quater */
-	uint8_t si2q_index; /* distinguish individual SI2quater messages */
-	uint8_t si2q_count; /* si2q_index for the last (highest indexed) individual SI2quater message */
-	/* buffers where we put the pre-computed SI */
-	sysinfo_buf_t si_buf[_MAX_SYSINFO_TYPE][SI2Q_MAX_NUM];
-	/* offsets used while generating SI2quater */
-	size_t e_offset;
-	size_t u_offset;
-
 	/* ip.accesss Unit ID's have Site/BTS/TRX layout */
 	union {
 		struct {
@@ -855,30 +832,7 @@ struct gsm_bts {
 	int chan_alloc_reverse;
 
 	enum neigh_list_manual_mode neigh_list_manual_mode;
-	/* parameters from which we build SYSTEM INFORMATION */
-	struct {
-		struct gsm48_rach_control rach_control;
-		uint8_t ncc_permitted;
-		struct gsm48_cell_sel_par cell_sel_par;
-		struct gsm48_cell_options cell_options;
-		struct gsm48_control_channel_descr chan_desc;
-		struct bitvec neigh_list;
-		struct bitvec cell_alloc;
-		struct bitvec si5_neigh_list;
-		struct osmo_earfcn_si2q si2quater_neigh_list;
-		size_t uarfcn_length; /* index for uarfcn and scramble lists */
-		struct {
-			/* bitmask large enough for all possible ARFCN's */
-			uint8_t neigh_list[1024/8];
-			uint8_t cell_alloc[1024/8];
-			/* If the user wants a different neighbor list in SI5 than in SI2 */
-			uint8_t si5_neigh_list[1024/8];
-			uint8_t meas_bw_list[MAX_EARFCN_LIST];
-			uint16_t earfcn_list[MAX_EARFCN_LIST];
-			uint16_t uarfcn_list[MAX_EARFCN_LIST];
-			uint16_t scramble_list[MAX_EARFCN_LIST];
-		} data;
-	} si_common;
+
 	bool early_classmark_allowed;
 	/* for testing only: Have an infinitely long radio link timeout */
 	bool infinite_radio_link_timeout;

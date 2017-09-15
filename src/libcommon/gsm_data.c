@@ -268,31 +268,6 @@ struct gsm_bts *gsm_bts_alloc_register(struct gsm_network *net, enum gsm_bts_typ
 	bts->dtxd = false;
 	bts->gprs.ctrl_ack_type_use_block = true; /* use RLC/MAC control block */
 	bts->neigh_list_manual_mode = 0;
-	bts->si_common.cell_sel_par.cell_resel_hyst = 2; /* 4 dB */
-	bts->si_common.cell_sel_par.rxlev_acc_min = 0;
-	bts->si_common.si2quater_neigh_list.arfcn = bts->si_common.data.earfcn_list;
-	bts->si_common.si2quater_neigh_list.meas_bw = bts->si_common.data.meas_bw_list;
-	bts->si_common.si2quater_neigh_list.length = MAX_EARFCN_LIST;
-	bts->si_common.si2quater_neigh_list.thresh_hi = 0;
-	osmo_earfcn_init(&bts->si_common.si2quater_neigh_list);
-	bts->si_common.neigh_list.data = bts->si_common.data.neigh_list;
-	bts->si_common.neigh_list.data_len =
-				sizeof(bts->si_common.data.neigh_list);
-	bts->si_common.si5_neigh_list.data = bts->si_common.data.si5_neigh_list;
-	bts->si_common.si5_neigh_list.data_len =
-				sizeof(bts->si_common.data.si5_neigh_list);
-	bts->si_common.cell_alloc.data = bts->si_common.data.cell_alloc;
-	bts->si_common.cell_alloc.data_len =
-				sizeof(bts->si_common.data.cell_alloc);
-	bts->si_common.rach_control.re = 1; /* no re-establishment */
-	bts->si_common.rach_control.tx_integer = 9;  /* 12 slots spread - 217/115 slots delay */
-	bts->si_common.rach_control.max_trans = 3; /* 7 retransmissions */
-	bts->si_common.rach_control.t2 = 4; /* no emergency calls */
-	bts->si_common.chan_desc.att = 1; /* attachment required */
-	bts->si_common.chan_desc.bs_pa_mfrms = RSL_BS_PA_MFRMS_5; /* paging frames */
-	bts->si_common.chan_desc.bs_ag_blks_res = 1; /* reserved AGCH blocks */
-	bts->si_common.chan_desc.t3212 = net->t3212; /* Use network's current value */
-	gsm_bts_set_radio_link_timeout(bts, 32); /* Use RADIO LINK TIMEOUT of 32 */
 
 	llist_add_tail(&bts->list, &net->bts_list);
 
@@ -402,43 +377,6 @@ int bts_depend_check(struct gsm_bts *bts)
 		return 0;
 	}
 	return 1;
-}
-
-/* get the radio link timeout (based on SACCH decode errors, according
- * to algorithm specified in TS 05.08 section 5.2.  A value of -1
- * indicates we should use an infinitely long timeout, which only works
- * with OsmoBTS as the BTS implementation */
-int gsm_bts_get_radio_link_timeout(const struct gsm_bts *bts)
-{
-	const struct gsm48_cell_options *cell_options = &bts->si_common.cell_options;
-
-	if (bts->infinite_radio_link_timeout)
-		return -1;
-	else {
-		/* Encoding as per Table 10.5.21 of TS 04.08 */
-		return (cell_options->radio_link_timeout + 1) << 2;
-	}
-}
-
-/* set the radio link timeout (based on SACCH decode errors, according
- * to algorithm specified in TS 05.08 Section 5.2.  A value of -1
- * indicates we should use an infinitely long timeout, which only works
- * with OsmoBTS as the BTS implementation */
-void gsm_bts_set_radio_link_timeout(struct gsm_bts *bts, int value)
-{
-	struct gsm48_cell_options *cell_options = &bts->si_common.cell_options;
-
-	if (value < 0)
-		bts->infinite_radio_link_timeout = true;
-	else {
-		bts->infinite_radio_link_timeout = false;
-		/* Encoding as per Table 10.5.21 of TS 04.08 */
-		if (value < 4)
-			value = 4;
-		if (value > 64)
-			value = 64;
-		cell_options->radio_link_timeout = (value >> 2) - 1;
-	}
 }
 
 bool classmark_is_r99(struct gsm_classmark *cm)
