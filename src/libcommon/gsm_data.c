@@ -49,28 +49,6 @@ void set_ts_e1link(struct gsm_bts_trx_ts *ts, uint8_t e1_nr,
 	ts->e1_link.e1_ts_ss = e1_ts_ss;
 }
 
-static struct gsm_bts_model *bts_model_find(enum gsm_bts_type type)
-{
-	struct gsm_bts_model *model;
-
-	llist_for_each_entry(model, &bts_models, list) {
-		if (model->type == type)
-			return model;
-	}
-
-	return NULL;
-}
-
-int gsm_bts_model_register(struct gsm_bts_model *model)
-{
-	if (bts_model_find(model->type))
-		return -EEXIST;
-
-	tlv_def_patch(&model->nm_att_tlvdef, &abis_nm_att_tlvdef);
-	llist_add_tail(&model->list, &bts_models);
-	return 0;
-}
-
 const struct value_string bts_type_descs[_NUM_GSM_BTS_TYPE+1] = {
 	{ GSM_BTS_TYPE_UNKNOWN,		"Unknown BTS Type" },
 	{ GSM_BTS_TYPE_BS11,		"Siemens BTS (BS-11 or compatible)" },
@@ -177,107 +155,6 @@ const char *bts_gprs_mode_name(enum bts_gprs_mode mode)
 	return get_value_string(bts_gprs_mode_names, mode);
 }
 
-int bts_gprs_mode_is_compat(struct gsm_bts *bts, enum bts_gprs_mode mode)
-{
-	if (mode != BTS_GPRS_NONE &&
-	    !gsm_btsmodel_has_feature(bts->model, BTS_FEAT_GPRS)) {
-		return 0;
-	}
-	if (mode == BTS_GPRS_EGPRS &&
-	    !gsm_btsmodel_has_feature(bts->model, BTS_FEAT_EGPRS)) {
-		return 0;
-	}
-
-	return 1;
-}
-
-int gsm_btsmodel_set_feature(struct gsm_bts_model *model, enum gsm_bts_features feat)
-{
-	OSMO_ASSERT(_NUM_BTS_FEAT < MAX_BTS_FEATURES);
-	return bitvec_set_bit_pos(&model->features, feat, 1);
-}
-
-bool gsm_btsmodel_has_feature(struct gsm_bts_model *model, enum gsm_bts_features feat)
-{
-	OSMO_ASSERT(_NUM_BTS_FEAT < MAX_BTS_FEATURES);
-	return bitvec_get_bit_pos(&model->features, feat);
-}
-
-int gsm_set_bts_type(struct gsm_bts *bts, enum gsm_bts_type type)
-{
-	struct gsm_bts_model *model;
-
-	model = bts_model_find(type);
-	if (!model)
-		return -EINVAL;
-
-	bts->type = type;
-	bts->model = model;
-
-	if (model->start && !model->started) {
-		int ret = model->start(bts->network);
-		if (ret < 0)
-			return ret;
-
-		model->started = true;
-	}
-
-	switch (bts->type) {
-	case GSM_BTS_TYPE_NANOBTS:
-	case GSM_BTS_TYPE_OSMOBTS:
-		/* Set the default OML Stream ID to 0xff */
-		bts->oml_tei = 0xff;
-		bts->c0->nominal_power = 23;
-		break;
-	case GSM_BTS_TYPE_RBS2000:
-		INIT_LLIST_HEAD(&bts->rbs2000.is.conn_groups);
-		INIT_LLIST_HEAD(&bts->rbs2000.con.conn_groups);
-		break;
-	case GSM_BTS_TYPE_BS11:
-	case GSM_BTS_TYPE_UNKNOWN:
-	case GSM_BTS_TYPE_NOKIA_SITE:
-		/* Set default BTS reset timer */
-		bts->nokia.bts_reset_timer_cnf = 15;
-	case _NUM_GSM_BTS_TYPE:
-		break;
-	}
-
-	return 0;
-}
-
-struct gsm_bts *gsm_bts_alloc_register(struct gsm_network *net, enum gsm_bts_type type,
-					uint8_t bsic)
-{
-	struct gsm_bts_model *model = bts_model_find(type);
-	struct gsm_bts *bts;
-
-	if (!model && type != GSM_BTS_TYPE_UNKNOWN)
-		return NULL;
-
-	bts = gsm_bts_alloc(net, net->num_bts);
-	if (!bts)
-		return NULL;
-
-	net->num_bts++;
-
-	bts->network = net;
-	bts->type = type;
-	bts->model = model;
-	bts->bsic = bsic;
-	bts->dtxu = GSM48_DTX_SHALL_NOT_BE_USED;
-	bts->dtxd = false;
-	bts->gprs.ctrl_ack_type_use_block = true; /* use RLC/MAC control block */
-	bts->neigh_list_manual_mode = 0;
-
-	llist_add_tail(&bts->list, &net->bts_list);
-
-	INIT_LLIST_HEAD(&bts->abis_queue);
-
-	INIT_LLIST_HEAD(&bts->loc_list);
-
-	return bts;
-}
-
 void gprs_ra_id_by_bts(struct gprs_ra_id *raid, struct gsm_bts *bts)
 {
 	raid->mcc = bts->network->country_code;
@@ -322,62 +199,6 @@ int gsm_parse_reg(void *ctx, regex_t *reg, char **str, int argc, const char **ar
 
 /* Assume there are only 256 possible bts */
 osmo_static_assert(sizeof(((struct gsm_bts *) 0)->nr) == 1, _bts_nr_is_256);
-static void depends_calc_index_bit(int bts_nr, int *idx, int *bit)
-{
-	*idx = bts_nr / (8 * 4);
-	*bit = bts_nr % (8 * 4);
-}
-
-void bts_depend_mark(struct gsm_bts *bts, int dep)
-{
-	int idx, bit;
-	depends_calc_index_bit(dep, &idx, &bit);
-
-	bts->depends_on[idx] |= 1 << bit;
-}
-
-void bts_depend_clear(struct gsm_bts *bts, int dep)
-{
-	int idx, bit;
-	depends_calc_index_bit(dep, &idx, &bit);
-
-	bts->depends_on[idx] &= ~(1 << bit);
-}
-
-int bts_depend_is_depedency(struct gsm_bts *base, struct gsm_bts *other)
-{
-	int idx, bit;
-	depends_calc_index_bit(other->nr, &idx, &bit);
-
-	/* Check if there is a depends bit */
-	return (base->depends_on[idx] & (1 << bit)) > 0;
-}
-
-static int bts_is_online(struct gsm_bts *bts)
-{
-	/* TODO: support E1 BTS too */
-	if (!is_ipaccess_bts(bts))
-		return 1;
-
-	if (!bts->oml_link)
-		return 0;
-
-	return bts->mo.nm_state.operational == NM_OPSTATE_ENABLED;
-}
-
-int bts_depend_check(struct gsm_bts *bts)
-{
-	struct gsm_bts *other_bts;
-
-	llist_for_each_entry(other_bts, &bts->network->bts_list, list) {
-		if (!bts_depend_is_depedency(bts, other_bts))
-			continue;
-		if (bts_is_online(other_bts))
-			continue;
-		return 0;
-	}
-	return 1;
-}
 
 bool classmark_is_r99(struct gsm_classmark *cm)
 {

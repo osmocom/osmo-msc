@@ -53,7 +53,6 @@
 #include <osmocom/vty/ports.h>
 #include <osmocom/vty/logging.h>
 #include <osmocom/msc/vty.h>
-#include <osmocom/msc/bss.h>
 #include <osmocom/msc/mncc.h>
 #include <osmocom/msc/handover_decision.h>
 #include <osmocom/msc/rrlp.h>

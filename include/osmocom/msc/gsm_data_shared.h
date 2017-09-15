@@ -523,30 +523,6 @@ enum bts_attribute {
 
 struct vty;
 
-struct gsm_bts_model {
-	struct llist_head list;
-
-	enum gsm_bts_type type;
-	enum gsm_bts_type_variant variant;
-	const char *name;
-
-	bool started;
-	int (*start)(struct gsm_network *net);
-	int (*oml_rcvmsg)(struct msgb *msg);
-
-	void (*e1line_bind_ops)(struct e1inp_line *line);
-
-	void (*config_write_bts)(struct vty *vty, struct gsm_bts *bts);
-	void (*config_write_trx)(struct vty *vty, struct gsm_bts_trx *trx);
-	void (*config_write_ts)(struct vty *vty, struct gsm_bts_trx_ts *ts);
-
-	struct tlv_definition nm_att_tlvdef;
-
-	/* features of a given BTS model set via gsm_bts_model_register() locally */
-	struct bitvec features;
-	uint8_t _features_data[MAX_BTS_FEATURES/8];
-};
-
 /* N. B: always add new features to the end of the list (right before _NUM_BTS_FEAT) to avoid breaking compatibility
    with BTS compiled against earlier version of this header */
 enum gsm_bts_features {
@@ -690,7 +666,7 @@ struct gsm_bts {
 	/* type of BTS */
 	enum gsm_bts_type type;
 	enum gsm_bts_type_variant variant;
-	struct gsm_bts_model *model;
+
 	enum gsm_band band;
 	char version[MAX_VERSION_LENGTH];
 	char sub_model[MAX_VERSION_LENGTH];

@@ -559,8 +559,6 @@ struct gsm_sms {
 
 extern void talloc_ctx_init(void *ctx_root);
 
-int gsm_set_bts_type(struct gsm_bts *bts, enum gsm_bts_type type);
-
 enum gsm_bts_type parse_btstype(const char *arg);
 const char *btstype2str(enum gsm_bts_type type);
 struct gsm_bts *gsm_bts_by_lac(struct gsm_network *net, unsigned int lac,
@@ -568,68 +566,6 @@ struct gsm_bts *gsm_bts_by_lac(struct gsm_network *net, unsigned int lac,
 
 extern void *tall_bsc_ctx;
 extern int ipacc_rtp_direct;
-
-/* this actaully refers to the IPA transport, not the BTS model */
-static inline int is_ipaccess_bts(struct gsm_bts *bts)
-{
-	switch (bts->type) {
-	case GSM_BTS_TYPE_NANOBTS:
-	case GSM_BTS_TYPE_OSMOBTS:
-		return 1;
-	default:
-		break;
-	}
-	return 0;
-}
-
-static inline int is_sysmobts_v2(struct gsm_bts *bts)
-{
-	switch (bts->type) {
-	case GSM_BTS_TYPE_OSMOBTS:
-		return 1;
-	default:
-		break;
-	}
-	return 0;
-}
-
-static inline int is_siemens_bts(struct gsm_bts *bts)
-{
-	switch (bts->type) {
-	case GSM_BTS_TYPE_BS11:
-		return 1;
-	default:
-		break;
-	}
-
-	return 0;
-}
-
-static inline int is_nokia_bts(struct gsm_bts *bts)
-{
-	switch (bts->type) {
-	case GSM_BTS_TYPE_NOKIA_SITE:
-		return 1;
-	default:
-		break;
-	}
-
-	return 0;
-}
-
-static inline int is_e1_bts(struct gsm_bts *bts)
-{
-	switch (bts->type) {
-	case GSM_BTS_TYPE_BS11:
-	case GSM_BTS_TYPE_RBS2000:
-	case GSM_BTS_TYPE_NOKIA_SITE:
-		return 1;
-	default:
-		break;
-	}
-
-	return 0;
-}
 
 enum gsm_auth_policy gsm_auth_policy_parse(const char *arg);
 const char *gsm_auth_policy_name(enum gsm_auth_policy policy);
@@ -639,13 +575,9 @@ const char *rrlp_mode_name(enum rrlp_mode mode);
 
 enum bts_gprs_mode bts_gprs_mode_parse(const char *arg, int *valid);
 const char *bts_gprs_mode_name(enum bts_gprs_mode mode);
-int bts_gprs_mode_is_compat(struct gsm_bts *bts, enum bts_gprs_mode mode);
 
 int gsm48_ra_id_by_bts(uint8_t *buf, struct gsm_bts *bts);
 void gprs_ra_id_by_bts(struct gprs_ra_id *raid, struct gsm_bts *bts);
-
-int gsm_btsmodel_set_feature(struct gsm_bts_model *model, enum gsm_bts_features feat);
-int gsm_bts_model_register(struct gsm_bts_model *model);
 
 struct gsm_subscriber_connection *bsc_subscr_con_allocate(struct gsm_lchan *lchan);
 void bsc_subscr_con_free(struct gsm_subscriber_connection *conn);
@@ -653,15 +585,11 @@ void bsc_subscr_con_free(struct gsm_subscriber_connection *conn);
 struct gsm_subscriber_connection *msc_subscr_con_allocate(struct gsm_network *network);
 void msc_subscr_con_free(struct gsm_subscriber_connection *conn);
 
-struct gsm_bts *gsm_bts_alloc_register(struct gsm_network *net,
-					enum gsm_bts_type type,
-					uint8_t bsic);
-
 void set_ts_e1link(struct gsm_bts_trx_ts *ts, uint8_t e1_nr,
 		   uint8_t e1_ts, uint8_t e1_ts_ss);
 
 void gsm_trx_lock_rf(struct gsm_bts_trx *trx, int locked);
-bool gsm_btsmodel_has_feature(struct gsm_bts_model *model, enum gsm_bts_features feat);
+
 struct gsm_bts_trx *gsm_bts_trx_by_nr(struct gsm_bts *bts, int nr);
 int gsm_bts_trx_set_system_infos(struct gsm_bts_trx *trx);
 int gsm_bts_set_system_infos(struct gsm_bts *bts);
@@ -675,12 +603,6 @@ extern const struct value_string bts_type_descs[_NUM_GSM_BTS_TYPE+1];
 /* control interface handling */
 int bsc_base_ctrl_cmds_install(void);
 int msc_ctrl_cmds_install(struct gsm_network *net);
-
-/* dependency handling */
-void bts_depend_mark(struct gsm_bts *bts, int dep);
-void bts_depend_clear(struct gsm_bts *bts, int dep);
-int bts_depend_check(struct gsm_bts *bts);
-int bts_depend_is_depedency(struct gsm_bts *base, struct gsm_bts *other);
 
 bool classmark_is_r99(struct gsm_classmark *cm);
 
