@@ -24,6 +24,7 @@
 #include <osmocom/sigtran/sccp_helpers.h>
 #include <osmocom/sccp/sccp_types.h>
 #include <osmocom/gsm/gsm0808.h>
+#include <osmocom/gsm/gsm48.h>
 #include <osmocom/gsm/gsm0808_utils.h>
 #include <osmocom/msc/debug.h>
 #include <osmocom/msc/gsm_data.h>
@@ -32,6 +33,9 @@
 #include <osmocom/msc/osmo_msc.h>
 #include <osmocom/core/byteswap.h>
 #include <osmocom/msc/a_reset.h>
+#include <osmocom/msc/transaction.h>
+
+#include <errno.h>
 
 #define IP_V4_ADDR_LEN 4
 

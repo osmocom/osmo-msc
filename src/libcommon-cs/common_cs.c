@@ -29,6 +29,7 @@
 #include <osmocom/msc/gsm_subscriber.h>
 #include <osmocom/msc/gsm_data.h>
 #include <osmocom/msc/gsm_04_11.h>
+#include <osmocom/msc/gsm_04_08.h>
 
 /* Warning: if bsc_network_init() is not called, some of the members of
  * gsm_network are not initialized properly and must not be used! (In

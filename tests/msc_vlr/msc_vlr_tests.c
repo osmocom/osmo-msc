@@ -33,6 +33,7 @@
 #include <osmocom/msc/gsup_client.h>
 #include <osmocom/msc/gsm_04_11.h>
 #include <osmocom/msc/debug.h>
+#include <osmocom/msc/gsm_04_08.h>
 
 #if BUILD_IU
 #include <osmocom/msc/iucs_ranap.h>

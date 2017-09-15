@@ -25,6 +25,7 @@
 #include <osmocom/gsm/protocol/gsm_04_08_gprs.h>
 #include <osmocom/gsm/gsup.h>
 #include <osmocom/gsm/apn.h>
+#include <osmocom/gsm/gsm48.h>
 #include <osmocom/msc/gsm_subscriber.h>
 #include <osmocom/msc/gsup_client.h>
 #include <osmocom/msc/vlr.h>
@@ -35,6 +36,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <limits.h>
+#include <errno.h>
 
 #include "vlr_core.h"
 #include "vlr_auth_fsm.h"

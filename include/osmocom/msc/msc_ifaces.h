@@ -2,6 +2,7 @@
 
 #include <osmocom/core/msgb.h>
 #include <osmocom/msc/gsm_data.h>
+#include <osmocom/msc/transaction.h>
 
 /* These are the interfaces of the MSC layer towards (from?) the BSC and RNC,
  * i.e. in the direction towards the mobile device (MS aka UE).

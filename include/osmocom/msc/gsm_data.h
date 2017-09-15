@@ -10,12 +10,11 @@
 #include <osmocom/core/rate_ctr.h>
 #include <osmocom/core/select.h>
 #include <osmocom/core/stats.h>
-
+#include <osmocom/gsm/gsm48.h>
 #include <osmocom/crypt/auth.h>
 #include <osmocom/sigtran/sccp_sap.h>
 
 #include <osmocom/msc/common.h>
-#include <osmocom/msc/rest_octets.h>
 #include <osmocom/msc/common_cs.h>
 #include <osmocom/mgcp_client/mgcp_client.h>
 

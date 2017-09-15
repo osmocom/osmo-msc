@@ -40,6 +40,8 @@
 #include <osmocom/msc/a_reset.h>
 #include <osmocom/msc/osmo_msc.h>
 
+#include <errno.h>
+
 /* A pointer to the GSM network we work with. By the current paradigm,
  * there can only be one gsm_network per MSC. The pointer is set once
  * when calling a_init() */

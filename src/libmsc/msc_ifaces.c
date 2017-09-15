@@ -29,6 +29,7 @@
 #include <osmocom/mgcp_client/mgcp_client.h>
 #include <osmocom/msc/vlr.h>
 #include <osmocom/msc/a_iface.h>
+#include <osmocom/msc/gsm_04_08.h>
 
 #include "../../bscconfig.h"
 

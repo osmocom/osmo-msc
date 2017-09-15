@@ -29,6 +29,7 @@
 
 #include <osmocom/core/talloc.h>
 #include <osmocom/core/utils.h>
+#include <osmocom/gsm/gsm48.h>
 #include <osmocom/msc/gsm_subscriber.h>
 #include <osmocom/msc/debug.h>
 #include <osmocom/msc/vlr.h>

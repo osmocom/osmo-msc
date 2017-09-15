@@ -34,6 +34,7 @@
 #include <osmocom/msc/debug.h>
 #include <osmocom/msc/osmo_msc.h>
 #include <osmocom/msc/vlr.h>
+#include <osmocom/msc/gsm_04_08.h>
 
 /* Declarations of USSD strings to be recognised */
 const char USSD_TEXT_OWN_NUMBER[] = "*#100#";

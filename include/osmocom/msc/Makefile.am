@@ -52,7 +52,6 @@ noinst_HEADERS = \
 	bsc_msc_data.h \
 	osmux.h \
 	paging.h \
-	rest_octets.h \
 	rrlp.h \
 	rs232.h \
 	rtp_proxy.h \
