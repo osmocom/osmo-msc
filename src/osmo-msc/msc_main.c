@@ -60,7 +60,6 @@
 #include <osmocom/ctrl/control_vty.h>
 #include <osmocom/ctrl/ports.h>
 #include <osmocom/msc/ctrl.h>
-#include <osmocom/msc/osmo_bsc_rf.h>
 #include <osmocom/msc/smpp.h>
 #include <osmocom/sigtran/osmo_ss7.h>
 #include <osmocom/mgcp_client/mgcp_client.h>
