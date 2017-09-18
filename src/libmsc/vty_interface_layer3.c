@@ -971,6 +971,7 @@ int bsc_vty_init_extra(void)
 
 	install_element(CONFIG_NODE, &cfg_hlr_cmd);
 	install_node(&hlr_node, config_write_hlr);
+	vty_install_default(HLR_NODE);
 	install_element(HLR_NODE, &cfg_hlr_remote_ip_cmd);
 	install_element(HLR_NODE, &cfg_hlr_remote_port_cmd);
 
