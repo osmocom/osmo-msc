@@ -1,0 +1,31 @@
+[[control]]
+== Control interface
+
+The actual protocol is described in <<common-control-if>>, the variables common
+to all programs using it are described in <<ctrl_common_vars>>. This section
+describes the CTRL interface variables specific to OsmoMSC.
+
+.Variables available on OsmoMSC's Control interface
+[options="header",width="100%",cols="20%,5%,5%,50%,20%"]
+|===
+|Name|Access|Trap|Value|Comment
+|subscriber-list-active-v1|RO|No||Return list of active subscribers.
+|===
+
+=== subscriber-list-active-v1
+
+Return a list of subscribers that are successfully attached (including full
+successful authentication and ciphering if those are enabled).
+
+The reply comprises of one subscriber per line, of the format
+
+----
+<IMSI>,<MSISDN>\n[<IMSI>,<MSISDN>\n[...]]
+----
+
+For example:
+
+----
+901700000015252,22801
+901700000015253,22802
+----

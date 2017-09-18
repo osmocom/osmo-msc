@@ -1,0 +1,148 @@
+== Running OsmoMSC
+
+The OsmoMSC executable (`osmo-msc`) offers the following command-line
+arguments:
+
+=== SYNOPSIS
+
+*osmo-msc* [-h|-V] [-d 'DBGMASK'] [-D] [-c 'CONFIGFILE'] [-s] [-T] [-e 'LOGLEVEL'] [-l 'DATABASE'] [-M 'SOCKETPATH'] [-C]
+
+=== OPTIONS
+
+*-h, --help*::
+	Print a short help message about the supported options
+*-V, --version*::
+	Print the compile-time version number of the OsmoBTS program
+*-d, --debug 'DBGMASK','DBGLEVELS'*::
+	Set the log subsystems and levels for logging to stderr. This
+	has mostly been superseded by VTY-based logging configuration,
+	see <<logging>> for further information.
+*-D, --daemonize*::
+	Fork the process as a daemon into background.
+*-c, --config-file 'CONFIGFILE'*::
+	Specify the file and path name of the configuration file to be
+	used. If none is specified, use `openbsc.cfg` in the current
+	working directory.
+*-s, --disable-color*::
+	Disable colors for logging to stderr. This has mostly been
+	deprecated by VTY based logging configuration, see <<logging>>
+	for more information.
+*-T, --timestamp*::
+	Enable time-stamping of log messages to stderr. This has mostly
+	been deprecated by VTY based logging configuration, see
+	<<logging>> for more information.
+*-e, --log-level 'LOGLEVEL'*::
+	Set the global log level for logging to stderr. This has mostly
+	been deprecated by VTY based logging configuration, see
+	<<logging>> for more information.
+*-l, --database 'DATABASE'*::
+	Specify the file name of the SQLite3 database to use as SMS storage
+*-M, --mncc-sock-path*::
+	Enable the MNCC socket for an external MNCC handler. See
+	<<mncc>> for further information.
+*-m, --mncc-sock*::
+	Same as option -M (deprecated).
+*-C, --no-dbcounter*::
+	Disable the regular periodic synchronization of statistics
+	counters to the database.
+
+
+=== Multiple instances
+
+Running multiple instances of `osmo-msc` is possible if all interfaces (VTY,
+CTRL) are separated using the appropriate configuration options. The IP based
+interfaces are binding to local host by default. In order to separate the
+processes, the user has to bind those services to specific but different IP
+addresses.
+
+The VTY and the Control interface can be bound to IP addresses from the loopback
+address range, for example:
+
+----
+line vty
+ bind 127.0.0.2
+ctrl
+ bind 127.0.0.2
+----
+
+If external SMPP is enabled, you may bind it to a different interface using:
+
+----
+smpp
+ local-tcp-ip 10.23.42.1 2775
+----
+
+More on SMPP configuration in <<smpp-config-global>>.
+
+The external MNCC handler is configured by the `--mncc-sock` commandline
+argument. Choose a different such socket path for each OsmoMSC instance running
+on the same file system. See more in <<mncc-external>>.
+
+For the following links, OsmoMSC acts as a client and does not listen/bind to a
+specific interface, and will hence not encounter conflicts for multiple instances
+running on the same interface:
+
+- The SCCP/M3UA links are established by OsmoMSC contacting an STP.
+- The GSUP link is established by OsmoMSC contacting an HLR.
+
+
+=== Configure primary links
+
+==== Configure SCCP/M3UA to accept _A_ and _IuCS_ links
+
+OsmoMSC will contact an STP instance to establish an SCCP/M3UA link. BSC and
+HNBGW will then reach the MSC via this link. By default, an STP instance is
+assumed to listen on the default M3UA port (2905) on the local host.
+
+Establishing an SCCP/M3UA link towards an STP instance not on the local host
+can be configured as follows:
+
+----
+cs7 instance 0
+ asp my-OsmoMSC 2905 0 m3ua
+  ! IP address of the remote STP:
+  remote-ip 10.23.24.1
+----
+
+Note that _A_ and _IuCS_ may use different SCCP instances, if so desired:
+
+----
+cs7 instance 0
+ asp my-OsmoMSC-A 2905 0 m3ua
+  remote-ip 10.23.42.1
+cs7 instance 1
+ asp my-OsmoMSC-Iu 2905 0 m3ua
+  remote-ip 10.23.42.2
+msc
+ cs7-instance-a 0
+ cs7-instance-iu 1
+----
+
+A full configuration needs an `asp` on an `as` -- an Application Server Process
+running on an Application Server -- as well as a local point code and routing
+configuration. The SCCP VTY automatically creates those parts that are missing,
+by assuming sane defaults. A complete configuration would look like this:
+
+----
+cs7 instance 0
+ point-code 0.23.1
+ asp my-OsmoMSC-A-Iu 2905 0 m3ua
+  remote-ip 127.0.0.1
+ as my-as-for-OsmoMSC-A-Iu m3ua
+  asp my-OsmoMSC-A-Iu
+  routing-key 0 0.23.1
+----
+
+==== Configure GSUP to reach the HLR
+
+OsmoMSC will assume a GSUP server (OsmoHLR) to run on the local host and the
+default GSUP port (4222). Contacting an HLR at a different IP address can be
+configured as follows:
+
+----
+hlr
+ ! IP address of the remote HLR:
+ remote-ip 10.23.42.1
+ ! default port is 4222, optionally configurable by:
+ remote-port 1234
+----
