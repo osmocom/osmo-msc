@@ -115,19 +115,6 @@ static struct {
 
 static struct osmo_timer_list db_sync_timer;
 
-static void create_pcap_file(char *file)
-{
-	mode_t mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH;
-	int fd = open(file, O_WRONLY|O_TRUNC|O_CREAT, mode);
-
-	if (fd < 0) {
-		perror("Failed to open file for pcap");
-		return;
-	}
-
-	e1_set_pcap_fd(fd);
-}
-
 static void print_usage()
 {
 	printf("Usage: osmo-nitb\n");
@@ -144,13 +131,10 @@ static void print_help()
 	printf("  -l --database db-name      The database to use.\n");
 	printf("  -T --timestamp             Prefix every log line with a timestamp.\n");
 	printf("  -V --version               Print the version of OpenBSC.\n");
-	printf("  -P --rtp-proxy             Enable the RTP Proxy code inside OpenBSC.\n");
 	printf("  -e --log-level number      Set a global loglevel.\n");
 	printf("  -M --mncc-sock-path PATH   Disable built-in MNCC handler and offer socket.\n");
 	printf("  -m --mncc-sock             Same as `-M /tmp/bsc_mncc' (deprecated).\n");
 	printf("  -C --no-dbcounter          Disable regular syncing of counters to database.\n");
-	printf("  -r --rf-ctl PATH           A unix domain socket to listen for cmds.\n");
-	printf("  -p --pcap PATH             Write abis communication to pcap trace file.\n");
 }
 
 static void handle_options(int argc, char **argv)
@@ -164,10 +148,8 @@ static void handle_options(int argc, char **argv)
 			{"config-file", 1, 0, 'c'},
 			{"disable-color", 0, 0, 's'},
 			{"database", 1, 0, 'l'},
-			{"pcap", 1, 0, 'p'},
 			{"timestamp", 0, 0, 'T'},
 			{"version", 0, 0, 'V' },
-			{"rtp-proxy", 0, 0, 'P'},
 			{"log-level", 1, 0, 'e'},
 			{"mncc-sock", 0, 0, 'm'},
 			{"mncc-sock-path", 1, 0, 'M'},
@@ -175,7 +157,7 @@ static void handle_options(int argc, char **argv)
 			{0, 0, 0, 0}
 		};
 
-		c = getopt_long(argc, argv, "hd:Dsl:ap:TPVc:e:mCM:",
+		c = getopt_long(argc, argv, "hd:Dsl:TVc:e:mCM:",
 				long_options, &option_index);
 		if (c == -1)
 			break;
@@ -200,17 +182,9 @@ static void handle_options(int argc, char **argv)
 		case 'c':
 			msc_cmdline_config.config_file = optarg;
 			break;
-		case 'p':
-			create_pcap_file(optarg);
-			break;
 		case 'T':
 			log_set_print_timestamp(osmo_stderr_target, 1);
 			break;
-#if BEFORE_MSCSPLIT
-		case 'P':
-			ipacc_rtp_direct = 0;
-			break;
-#endif
 		case 'e':
 			log_set_log_level(osmo_stderr_target, atoi(optarg));
 			break;
