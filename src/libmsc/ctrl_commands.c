@@ -31,26 +31,6 @@
 
 static struct gsm_network *msc_ctrl_net = NULL;
 
-static int verify_subscriber_modify(struct ctrl_cmd *cmd, const char *value, void *d)
-{
-	return 0;
-}
-
-static int set_subscriber_modify(struct ctrl_cmd *cmd, void *data)
-{
-	cmd->reply = "Command moved to osmo-hlr, no longer available here";
-	return CTRL_CMD_ERROR;
-}
-
-CTRL_CMD_DEFINE_WO(subscriber_modify, "subscriber-modify-v1");
-
-static int set_subscriber_delete(struct ctrl_cmd *cmd, void *data)
-{
-	cmd->reply = "Command moved to osmo-hlr, no longer available here";
-	return CTRL_CMD_ERROR;
-}
-CTRL_CMD_DEFINE_WO_NOVRF(subscriber_delete, "subscriber-delete-v1");
-
 static int get_subscriber_list(struct ctrl_cmd *cmd, void *d)
 {
 	struct vlr_subscr *vsub;
@@ -84,8 +64,6 @@ int msc_ctrl_cmds_install(struct gsm_network *net)
 	int rc = 0;
 	msc_ctrl_net = net;
 
-	rc |= ctrl_cmd_install(CTRL_NODE_ROOT, &cmd_subscriber_modify);
-	rc |= ctrl_cmd_install(CTRL_NODE_ROOT, &cmd_subscriber_delete);
 	rc |= ctrl_cmd_install(CTRL_NODE_ROOT, &cmd_subscriber_list);
 	return rc;
 }
