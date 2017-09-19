@@ -3220,7 +3220,7 @@ int gsm0408_dispatch(struct gsm_subscriber_connection *conn, struct msgb *msg)
 	uint8_t pdisc;
 	int rc = 0;
 
-	OSMO_ASSERT(msg->l3h)
+	OSMO_ASSERT(msg->l3h);
 	OSMO_ASSERT(conn);
 	OSMO_ASSERT(msg);
 
