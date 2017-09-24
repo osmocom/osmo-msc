@@ -25,7 +25,6 @@
 #include <osmocom/msc/msc_ifaces.h>
 #include <osmocom/msc/gsm_subscriber.h>
 #include <osmocom/msc/transaction.h>
-#include <osmocom/legacy_mgcp/mgcp.h>
 #include <osmocom/mgcp_client/mgcp_client.h>
 #include <osmocom/msc/vlr.h>
 #include <osmocom/msc/a_iface.h>
