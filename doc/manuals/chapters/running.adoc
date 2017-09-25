@@ -49,11 +49,11 @@ arguments:
 
 === Multiple instances
 
-Running multiple instances of `osmo-msc` is possible if all interfaces (VTY,
-CTRL) are separated using the appropriate configuration options. The IP based
-interfaces are binding to local host by default. In order to separate the
-processes, the user has to bind those services to specific but different IP
-addresses.
+Running multiple instances of `osmo-msc` on the same computer is possible if all
+interfaces (VTY, CTRL) are separated using the appropriate configuration
+options. The IP based interfaces are binding to local host by default. In order
+to separate the processes, the user has to bind those services to specific but
+different IP addresses and/or ports.
 
 The VTY and the Control interface can be bound to IP addresses from the loopback
 address range, for example:
