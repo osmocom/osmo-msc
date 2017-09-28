@@ -2,6 +2,8 @@
 
 #include <osmocom/msc/vlr.h>
 
+struct osmo_gsup_message;
+
 #define LOGGSUPP(level, gsup, fmt, args...) \
 	LOGP(DVLR, level, "GSUP(%s) " fmt, \
 	     (gsup)->imsi, \

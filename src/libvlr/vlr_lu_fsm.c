@@ -21,7 +21,6 @@
 
 #include <osmocom/core/fsm.h>
 #include <osmocom/gsm/gsm48.h>
-#include <osmocom/gsm/gsup.h>
 #include <osmocom/msc/vlr.h>
 #include <osmocom/msc/debug.h>
 
