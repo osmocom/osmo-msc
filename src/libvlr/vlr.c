@@ -804,6 +804,7 @@ int vlr_gsupc_read_cb(struct gsup_client *gsupc, struct msgb *msg)
 	       osmo_hexdump_nospc(msgb_l2(msg), msgb_l2len(msg)));
 
 	rc = osmo_gsup_decode(msgb_l2(msg), msgb_l2len(msg), &gsup);
+	msgb_free(msg);
 	if (rc < 0) {
 		LOGP(DVLR, LOGL_ERROR,
 			"decoding GSUP message fails with error '%s' (%d)\n",

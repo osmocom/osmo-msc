@@ -130,12 +130,12 @@ void gsup_rx(const char *rx_hex, const char *expect_tx_hex)
 	label = osmo_gsup_message_type_name(msg->l2h[0]);
 	fprintf(stderr, "<-- GSUP rx %s: %s\n", label,
 		osmo_hexdump_nospc(msgb_l2(msg), msgb_l2len(msg)));
+	/* GSUP read cb takes ownership of msgb */
 	rc = vlr_gsupc_read_cb(net->vlr->gsup_client, msg);
 	fprintf(stderr, "<-- GSUP rx %s: vlr_gsupc_read_cb() returns %d\n",
 		label, rc);
 	if (expect_tx_hex)
 		OSMO_ASSERT(gsup_tx_confirmed);
-	talloc_free(msg);
 }
 
 bool conn_exists(struct gsm_subscriber_connection *conn)
