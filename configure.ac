@@ -59,11 +59,6 @@ fi
 AM_CONDITIONAL(BUILD_SMPP, test "x$osmo_ac_build_smpp" = "xyes")
 AC_SUBST(osmo_ac_build_smpp)
 
-# Enable/disable transcoding within osmo-bsc_mgcp?
-AC_ARG_ENABLE([mgcp-transcoding], [AS_HELP_STRING([--enable-mgcp-transcoding], [Build the MGCP gateway with internal transcoding enabled.])],
-    [osmo_ac_mgcp_transcoding="$enableval"],[osmo_ac_mgcp_transcoding="no"])
-AC_ARG_WITH([g729], [AS_HELP_STRING([--with-g729], [Enable G.729 encoding/decoding.])], [osmo_ac_with_g729="$withval"],[osmo_ac_with_g729="no"])
-
 # Enable/disable 3G aka IuPS + IuCS support?
 AC_ARG_ENABLE([iu], [AS_HELP_STRING([--enable-iu], [Build 3G support, aka IuPS and IuCS interfaces])],
     [osmo_ac_iu="$enableval"],[osmo_ac_iu="no"])
