@@ -6,6 +6,7 @@ noinst_HEADERS = \
 	a_iface_bssap.h \
 	arfcn_range_encode.h \
 	auth.h \
+	bsc_api.h \
 	bsc_msc.h \
 	bsc_msg_filter.h \
 	bsc_rll.h \
@@ -66,13 +67,3 @@ noinst_HEADERS = \
 	vlr.h \
 	vty.h \
 	$(NULL)
-
-openbsc_HEADERS = \
-	bsc_api.h \
-	gsm_04_08.h \
-	meas_rep.h \
-	$(NULL)
-
-# DO NOT add a newline and '$(NULL)' to this line. That would add a trailing
-# space to the directory installed: $prefix/include/'openbsc '
-openbscdir = $(includedir)/openbsc
