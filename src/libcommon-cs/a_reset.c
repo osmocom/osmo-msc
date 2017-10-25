@@ -124,7 +124,7 @@ static struct osmo_fsm_state fsm_states[] = {
 
 /* State machine definition */
 static struct osmo_fsm fsm = {
-	.name = "FSM RESET",
+	.name = "A-RESET",
 	.states = fsm_states,
 	.num_states = ARRAY_SIZE(fsm_states),
 	.log_subsys = DMSC,
@@ -149,7 +149,7 @@ struct a_reset_ctx *a_reset_alloc(const void *ctx, const char *name, void *cb, v
 	reset->cb = cb;
 	strncpy(reset->name, name, sizeof(reset->name));
 	reset->conn_loss_counter = 0;
-	reset->fsm = osmo_fsm_inst_alloc(&fsm, NULL, NULL, LOGL_DEBUG, "FSM RESET INST");
+	reset->fsm = osmo_fsm_inst_alloc(&fsm, NULL, NULL, LOGL_DEBUG, NULL);
 	OSMO_ASSERT(reset->fsm);
 	reset->fsm->priv = reset;
 	LOGP(DMSC, LOGL_NOTICE, "(%s) reset handler fsm created.\n", reset->name);
