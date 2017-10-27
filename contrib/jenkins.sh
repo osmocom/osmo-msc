@@ -14,8 +14,9 @@ deps="$base/deps"
 inst="$deps/install"
 export deps inst
 
+osmo-clean-workspace.sh
+
 mkdir "$deps" || true
-rm -rf "$inst"
 
 osmo-build-dep.sh libosmocore "" ac_cv_path_DOXYGEN=false
 
@@ -55,3 +56,5 @@ LD_LIBRARY_PATH="$inst/lib" \
   DISTCHECK_CONFIGURE_FLAGS="--enable-smpp $IU --enable-vty-tests --enable-external-tests" \
   $MAKE distcheck \
   || cat-testlogs.sh
+
+osmo-clean-workspace.sh
