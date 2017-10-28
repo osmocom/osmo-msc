@@ -1,3 +1,9 @@
+osmo-msc (1.1.1) unstable; urgency=medium
+
+  * Debian: Depend on libosmo-sigtran-dev, not libsomo-sccp-dev!
+
+ -- Harald Welte <laforge@gnumonks.org>  Sat, 28 Oct 2017 21:57:22 +0200
+
 osmo-msc (1.1.0) unstable; urgency=medium
 
   [ Alexander Couzens ]
