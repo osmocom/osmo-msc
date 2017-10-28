@@ -39,15 +39,15 @@ AC_SEARCH_LIBS([dlopen], [dl dld], [LIBRARY_DL="$LIBS";LIBS=""])
 AC_SUBST(LIBRARY_DL)
 
 
-PKG_CHECK_MODULES(LIBOSMOCORE, libosmocore >= 0.9.5)
-PKG_CHECK_MODULES(LIBOSMOVTY, libosmovty >= 0.3.0)
-PKG_CHECK_MODULES(LIBOSMOCTRL, libosmoctrl)
-PKG_CHECK_MODULES(LIBOSMOGSM, libosmogsm >= 0.9.5)
+PKG_CHECK_MODULES(LIBOSMOCORE, libosmocore >= 0.10.0)
+PKG_CHECK_MODULES(LIBOSMOVTY, libosmovty >= 0.10.0)
+PKG_CHECK_MODULES(LIBOSMOCTRL, libosmoctrl >= 0.10.0)
+PKG_CHECK_MODULES(LIBOSMOGSM, libosmogsm >= 0.10.0)
 PKG_CHECK_MODULES(LIBOSMOABIS, libosmoabis >= 0.2.0)
-PKG_CHECK_MODULES(LIBOSMONETIF, libosmo-netif >= 0.0.1)
-PKG_CHECK_MODULES(LIBOSMOSIGTRAN, libosmo-sigtran) # TODO version?
+PKG_CHECK_MODULES(LIBOSMONETIF, libosmo-netif >= 0.1.0)
+PKG_CHECK_MODULES(LIBOSMOSIGTRAN, libosmo-sigtran >= 0.8.0)
 PKG_CHECK_MODULES(LIBCRYPTO, libcrypto >= 0.9.5)
-PKG_CHECK_MODULES(LIBOSMOMGCPCLIENT, libosmo-mgcp-client >= 1.0.0)
+PKG_CHECK_MODULES(LIBOSMOMGCPCLIENT, libosmo-mgcp-client >= 1.1.0)
 
 # Enable/disable smpp support in the msc?
 AC_ARG_ENABLE([smpp], [AS_HELP_STRING([--enable-smpp], [Build the SMPP interface])],
@@ -63,8 +63,8 @@ AC_SUBST(osmo_ac_build_smpp)
 AC_ARG_ENABLE([iu], [AS_HELP_STRING([--enable-iu], [Build 3G support, aka IuPS and IuCS interfaces])],
     [osmo_ac_iu="$enableval"],[osmo_ac_iu="no"])
 if test "x$osmo_ac_iu" = "xyes" ; then
-    PKG_CHECK_MODULES(LIBASN1C, libasn1c) # TODO version?
-    PKG_CHECK_MODULES(LIBOSMORANAP, libosmo-ranap) # TODO version?
+    PKG_CHECK_MODULES(LIBASN1C, libasn1c >= 0.9.28)
+    PKG_CHECK_MODULES(LIBOSMORANAP, libosmo-ranap >= 0.2.0)
     AC_DEFINE(BUILD_IU, 1, [Define if we want to build IuPS and IuCS interfaces support])
 fi
 AM_CONDITIONAL(BUILD_IU, test "x$osmo_ac_iu" = "xyes")
