@@ -1,3 +1,58 @@
+osmo-msc (1.1.0) unstable; urgency=medium
+
+  [ Alexander Couzens ]
+  * Initial release.
+  * debian/rules: show testsuite.log when tests are failing
+
+  [ Neels Hofmeyr ]
+  * build: check for -lgsm
+  * am: msc_vlr_tests: use AM_LDFLAGS instead of COMMON vars
+  * jenkins: fix build: osmo-mgw from master, not pre_release
+  * jenkins: drop unused build matrix vars, always --enable-smpp
+  * configure.ac: fix to "AC_INIT[osmo-msc]"
+  * rewrite README
+  * rename openbsc.pc to osmo-msc.pc
+  * debian: fix web and VCS links, tweak osmo-msc.install
+  * drop files unrelated to osmo-msc
+  * rename include/openbsc to include/osmocom/msc
+  * doc/examples: add detailed cs7 config examples
+  * use separated libosmo-mgcp-client, apply rename to mgcp_client_*
+  * ctrl: subscriber-list-active: list only attached subscribers
+  * debian: fix dependency to mgcp library
+  * main: remove cmdline args no longer available for osmo-msc
+  * vty: fix: missing default cmds at hlr node
+  * ctrl: remove unimplemented cmds subscriber-{modify,delete}
+  * fix build: remove obsolete header legacy_mgcp/mgcp.h
+  * fix debian: fix erratic doc/examples install path
+  * fix memory leak: vlr: vlr_gsupc_read_cb() must msgb_free()
+  * fix vty tests: long timeout due to unreachable STP address
+  * cosmetic: vlr: declare a struct in .h; drop unused header
+  * add ';' after OSMO_ASSERT()
+
+  [ Philipp Maier ]
+  * a_iface: fix memory leaks
+  * a_iface: fix typo
+
+  [ Max ]
+  * Remove rest_octets.h
+  * Remove SI-related code
+  * Remove BTS-specific attributes
+  * Remove unused osmo_bsc_rf.h header
+  * Remove pkg-config file
+
+  [ Harald Welte ]
+  * Update .gitignore for post-nitb-split
+  * remove further files and autotest/autoconf bits irrelevant to osmo-msc
+  * Rename osmo_fsm to avoid illegal space in name + more meaningful name
+  * Debian: remove obsolete Dependencies
+  * configure.ac: Depend on latest tagged/released libosmo-* versions
+  * Debian: Build with enabled SMPP support
+  * osmo-msc: Don't link against libasn1c
+  * Debian: Include systemd.service in package
+  * Debian: include all (not just one) example config files
+
+ -- Harald Welte <laforge@gnumonks.org>  Sat, 28 Oct 2017 14:45:58 +0200
+
 osmo-msc (0.1.0) UNRELEASED; urgency=low
 
   * Initial release.
