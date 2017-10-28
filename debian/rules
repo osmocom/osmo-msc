@@ -46,7 +46,7 @@
 
 # debmake generated override targets
 # Set options for ./configure
-CONFIGURE_FLAGS += --enable-iu
+CONFIGURE_FLAGS += --enable-iu --enable-smpp
 override_dh_auto_configure:
 	dh_auto_configure -- $(CONFIGURE_FLAGS)
 #
