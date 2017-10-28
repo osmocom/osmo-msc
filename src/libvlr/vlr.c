@@ -995,6 +995,9 @@ struct vlr_instance *vlr_alloc(void *ctx, const struct vlr_ops *ops)
 	INIT_LLIST_HEAD(&vlr->operations);
 	memcpy(&vlr->ops, ops, sizeof(vlr->ops));
 
+	/* defaults */
+	vlr->cfg.assign_tmsi = true;
+
 	/* osmo_auth_fsm.c */
 	osmo_fsm_register(&vlr_auth_fsm);
 	/* osmo_lu_fsm.c */
