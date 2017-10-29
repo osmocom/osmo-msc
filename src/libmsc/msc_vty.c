@@ -88,6 +88,27 @@ DEFUN(cfg_msc_cs7_instance_iu,
 	return CMD_SUCCESS;
 }
 
+DEFUN(cfg_msc_auth_tuple_max_reuse_count, cfg_msc_auth_tuple_max_reuse_count_cmd,
+      "auth-tuple-max-reuse-count <-1-2147483647>",
+      "Configure authentication tuple re-use\n"
+      "0 to use each auth tuple at most once (default), >0 to limit re-use, -1 to re-use infinitely (vulnerable!).\n")
+{
+	struct gsm_network *gsmnet = gsmnet_from_vty(vty);
+	gsmnet->vlr->cfg.auth_tuple_max_reuse_count = atoi(argv[0]);
+	return CMD_SUCCESS;
+}
+
+DEFUN(cfg_msc_auth_tuple_reuse_on_error, cfg_msc_auth_tuple_reuse_on_error_cmd,
+      "auth-tuple-reuse-on-error (0|1)",
+      "Configure authentication tuple re-use when HLR is not responsive\n"
+      "0 = never re-use auth tuples beyond auth-tuple-max-reuse-count (default)\n"
+      "1 = if the HLR does not deliver new tuples, do re-use already available old ones.\n")
+{
+	struct gsm_network *gsmnet = gsmnet_from_vty(vty);
+	gsmnet->vlr->cfg.auth_reuse_old_sets_on_error = atoi(argv[0]) ? true : false;
+	return CMD_SUCCESS;
+}
+
 static int config_write_msc(struct vty *vty)
 {
 	struct gsm_network *gsmnet = gsmnet_from_vty(vty);
@@ -100,6 +121,14 @@ static int config_write_msc(struct vty *vty)
 		VTY_NEWLINE);
 	vty_out(vty, " cs7-instance-iu %u%s", gsmnet->iu.cs7_instance,
 		VTY_NEWLINE);
+
+	if (gsmnet->vlr->cfg.auth_tuple_max_reuse_count)
+		vty_out(vty, " auth-tuple-max-reuse-count %d%s",
+			OSMO_MAX(-1, gsmnet->vlr->cfg.auth_tuple_max_reuse_count),
+			VTY_NEWLINE);
+	if (gsmnet->vlr->cfg.auth_reuse_old_sets_on_error)
+		vty_out(vty, " auth-tuple-reuse-on-error 1%s",
+			VTY_NEWLINE);
 
 	mgcp_client_config_write(vty, " ");
 #ifdef BUILD_IU
@@ -152,6 +181,8 @@ void msc_vty_init(struct gsm_network *msc_network)
 	vty_install_default(MSC_NODE);
 	install_element(MSC_NODE, &cfg_msc_assign_tmsi_cmd);
 	install_element(MSC_NODE, &cfg_msc_no_assign_tmsi_cmd);
+	install_element(MSC_NODE, &cfg_msc_auth_tuple_max_reuse_count_cmd);
+	install_element(MSC_NODE, &cfg_msc_auth_tuple_reuse_on_error_cmd);
 	install_element(MSC_NODE, &cfg_msc_cs7_instance_a_cmd);
 	install_element(MSC_NODE, &cfg_msc_cs7_instance_iu_cmd);
 
