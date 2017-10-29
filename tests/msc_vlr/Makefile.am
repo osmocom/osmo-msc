@@ -31,6 +31,9 @@ AM_LDFLAGS = \
 	-Wl,--wrap=msc_stop_paging \
 	-Wl,--wrap=gsm340_gen_scts \
 	-Wl,--wrap=RAND_bytes \
+	$(NULL)
+
+LDADD = \
 	$(top_builddir)/src/libmsc/libmsc.a \
 	$(top_builddir)/src/libcommon-cs/libcommon-cs.a \
 	$(top_builddir)/src/libvlr/libvlr.a \
