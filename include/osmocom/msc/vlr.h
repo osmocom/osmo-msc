@@ -222,7 +222,7 @@ struct vlr_instance {
 		bool retrieve_imeisv_ciphered;
 		bool assign_tmsi;
 		bool check_imei_rqd;
-		int auth_tuple_max_use_count;
+		int auth_tuple_max_reuse_count;
 		bool auth_reuse_old_sets_on_error;
 		bool parq_retrieve_imsi;
 		bool is_ps;

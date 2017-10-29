@@ -59,7 +59,7 @@ struct auth_fsm_priv {
 	bool is_utran;
 	bool auth_requested;
 
-	int auth_tuple_max_use_count; /* see vlr->cfg instead */
+	int auth_tuple_max_reuse_count; /* see vlr->cfg instead */
 };
 
 /***********************************************************************
@@ -69,13 +69,13 @@ struct auth_fsm_priv {
 /* Always use either vlr_subscr_get_auth_tuple() or vlr_subscr_has_auth_tuple()
  * instead, to ensure proper use count.
  * Return an auth tuple with the lowest use_count among the auth tuples. If
- * max_use_count >= 0, return NULL if all available auth tuples have a use
- * count > max_use_count. If max_use_count is negative, return a currently
+ * max_reuse_count >= 0, return NULL if all available auth tuples have a use
+ * count > max_reuse_count. If max_reuse_count is negative, return a currently
  * least used auth tuple without enforcing a maximum use count.  If there are
  * no auth tuples, return NULL.
  */
 static struct gsm_auth_tuple *
-_vlr_subscr_next_auth_tuple(struct vlr_subscr *vsub, int max_use_count)
+_vlr_subscr_next_auth_tuple(struct vlr_subscr *vsub, int max_reuse_count)
 {
 	unsigned int count;
 	unsigned int idx;
@@ -104,7 +104,7 @@ _vlr_subscr_next_auth_tuple(struct vlr_subscr *vsub, int max_use_count)
 			at = &vsub->auth_tuples[idx];
 	}
 
-	if (!at || (max_use_count >= 0 && at->use_count > max_use_count))
+	if (!at || (max_reuse_count >= 0 && at->use_count > max_reuse_count))
 		return NULL;
 
 	return at;
@@ -112,21 +112,21 @@ _vlr_subscr_next_auth_tuple(struct vlr_subscr *vsub, int max_use_count)
 
 /* Return an auth tuple and increment its use count. */
 static struct gsm_auth_tuple *
-vlr_subscr_get_auth_tuple(struct vlr_subscr *vsub, int max_use_count)
+vlr_subscr_get_auth_tuple(struct vlr_subscr *vsub, int max_reuse_count)
 {
 	struct gsm_auth_tuple *at = _vlr_subscr_next_auth_tuple(vsub,
-							       max_use_count);
+							       max_reuse_count);
 	if (!at)
 		return NULL;
 	at->use_count++;
 	return at;
 }
 
-/* Return whether an auth tuple with the given max_use_count is available. */
+/* Return whether an auth tuple with a matching use_count is available. */
 static bool vlr_subscr_has_auth_tuple(struct vlr_subscr *vsub,
-				      int max_use_count)
+				      int max_reuse_count)
 {
-	return _vlr_subscr_next_auth_tuple(vsub, max_use_count) != NULL;
+	return _vlr_subscr_next_auth_tuple(vsub, max_reuse_count) != NULL;
 }
 
 static bool check_auth_resp(struct vlr_subscr *vsub, bool is_r99,
@@ -250,7 +250,7 @@ static int _vlr_subscr_authenticate(struct osmo_fsm_inst *fi)
 	struct gsm_auth_tuple *at;
 
 	/* Caller ensures we have vectors available */
-	at = vlr_subscr_get_auth_tuple(vsub, afp->auth_tuple_max_use_count);
+	at = vlr_subscr_get_auth_tuple(vsub, afp->auth_tuple_max_reuse_count);
 	if (!at) {
 		LOGPFSML(fi, LOGL_ERROR, "A previous check ensured that an"
 			 " auth tuple was available, but now there is in fact"
@@ -284,12 +284,12 @@ static void auth_fsm_needs_auth(struct osmo_fsm_inst *fi, uint32_t event, void *
 
 	OSMO_ASSERT(event == VLR_AUTH_E_START);
 
-	/* Start off with the default max_use_count, possibly change that if we
+	/* Start off with the default max_reuse_count, possibly change that if we
 	 * need to re-use an old tuple. */
-	afp->auth_tuple_max_use_count = vsub->vlr->cfg.auth_tuple_max_use_count;
+	afp->auth_tuple_max_reuse_count = vsub->vlr->cfg.auth_tuple_max_reuse_count;
 
 	/* Check if we have vectors available */
-	if (!vlr_subscr_has_auth_tuple(vsub, afp->auth_tuple_max_use_count)) {
+	if (!vlr_subscr_has_auth_tuple(vsub, afp->auth_tuple_max_reuse_count)) {
 		/* Obtain_Authentication_Sets_VLR */
 		vlr_subscr_req_sai(vsub, NULL, NULL);
 		osmo_fsm_inst_state_chg(fi, VLR_SUB_AS_NEEDS_AUTH_WAIT_AI,
@@ -323,9 +323,9 @@ static void auth_fsm_wait_ai(struct osmo_fsm_inst *fi, uint32_t event,
 	    || (event == VLR_AUTH_E_HLR_SAI_ABORT)) {
 		if (vsub->vlr->cfg.auth_reuse_old_sets_on_error
 		    && vlr_subscr_has_auth_tuple(vsub, -1)) {
-			/* To re-use an old tuple, disable the max_use_count
+			/* To re-use an old tuple, disable the max_reuse_count
 			 * constraint. */
-			afp->auth_tuple_max_use_count = -1;
+			afp->auth_tuple_max_reuse_count = -1;
 			goto pass;
 		}
 		/* result = procedure error */

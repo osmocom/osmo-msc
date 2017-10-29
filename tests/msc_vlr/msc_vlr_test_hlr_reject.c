@@ -84,7 +84,7 @@ void test_hlr_rej_auth_info_net_fail_no_reuse_tuples()
 
 	net->authentication_required = true;
 	net->vlr->cfg.auth_reuse_old_sets_on_error = false;
-	net->vlr->cfg.auth_tuple_max_use_count = 0;
+	net->vlr->cfg.auth_tuple_max_reuse_count = 0;
 
 	BTW("Submit a used auth tuple in the VLR");
 	btw("Location Update request causes a GSUP Send Auth Info request to HLR");
@@ -171,7 +171,7 @@ void test_hlr_rej_auth_info_unkown_imsi_no_reuse_tuples()
 
 	net->authentication_required = true;
 	net->vlr->cfg.auth_reuse_old_sets_on_error = true;
-	net->vlr->cfg.auth_tuple_max_use_count = 0;
+	net->vlr->cfg.auth_tuple_max_reuse_count = 0;
 
 	BTW("Submit a used auth tuple in the VLR");
 	btw("Location Update request causes a GSUP Send Auth Info request to HLR");
@@ -256,7 +256,7 @@ void test_hlr_acc_but_no_auth_tuples()
 
 	net->authentication_required = true;
 	net->vlr->cfg.auth_reuse_old_sets_on_error = true;
-	net->vlr->cfg.auth_tuple_max_use_count = 0;
+	net->vlr->cfg.auth_tuple_max_reuse_count = 0;
 
 	btw("Location Update request causes a GSUP Send Auth Info request to HLR");
 	lu_result_sent = RES_NONE;
@@ -291,7 +291,7 @@ void test_hlr_rej_auth_info_net_fail_reuse_tuples()
 
 	net->authentication_required = true;
 	net->vlr->cfg.auth_reuse_old_sets_on_error = true;
-	net->vlr->cfg.auth_tuple_max_use_count = 0;
+	net->vlr->cfg.auth_tuple_max_reuse_count = 0;
 
 	BTW("Submit a used auth tuple in the VLR");
 	btw("Location Update request causes a GSUP Send Auth Info request to HLR");
