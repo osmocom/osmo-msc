@@ -44,6 +44,13 @@ cat $abs_srcdir/msc_vlr/msc_vlr_test_umts_authen.err > experr
 AT_CHECK([$abs_top_builddir/tests/msc_vlr/msc_vlr_test_umts_authen], [], [expout], [experr])
 AT_CLEANUP
 
+AT_SETUP([msc_vlr_test_authen_reuse])
+AT_KEYWORDS([msc_vlr_test_authen_reuse])
+cat $abs_srcdir/msc_vlr/msc_vlr_test_authen_reuse.ok > expout
+cat $abs_srcdir/msc_vlr/msc_vlr_test_authen_reuse.err > experr
+AT_CHECK([$abs_top_builddir/tests/msc_vlr/msc_vlr_test_authen_reuse], [], [expout], [experr])
+AT_CLEANUP
+
 AT_SETUP([msc_vlr_test_hlr_reject])
 AT_KEYWORDS([msc_vlr_test_hlr_reject])
 cat $abs_srcdir/msc_vlr/msc_vlr_test_hlr_reject.ok > expout

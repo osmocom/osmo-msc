@@ -334,6 +334,8 @@ void clear_vlr()
 	net->vlr->cfg.assign_tmsi = false;
 	net->vlr->cfg.retrieve_imeisv_early = false;
 	net->vlr->cfg.retrieve_imeisv_ciphered = false;
+	net->vlr->cfg.auth_tuple_max_reuse_count = 0;
+	net->vlr->cfg.auth_reuse_old_sets_on_error = false;
 
 	rx_from_ran = RAN_GERAN_A;
 	auth_request_sent = false;

@@ -65,6 +65,8 @@ EXTRA_DIST = \
 	msc_vlr_test_gsm_ciph.err \
 	msc_vlr_test_umts_authen.ok \
 	msc_vlr_test_umts_authen.err \
+	msc_vlr_test_authen_reuse.ok \
+	msc_vlr_test_authen_reuse.err \
 	msc_vlr_test_hlr_reject.ok \
 	msc_vlr_test_hlr_reject.err \
 	msc_vlr_test_hlr_timeout.ok \
@@ -82,6 +84,7 @@ noinst_PROGRAMS = \
 	msc_vlr_test_gsm_authen \
 	msc_vlr_test_gsm_ciph \
 	msc_vlr_test_umts_authen \
+	msc_vlr_test_authen_reuse \
 	msc_vlr_test_hlr_reject \
 	msc_vlr_test_hlr_timeout \
 	msc_vlr_test_ms_timeout \
@@ -106,6 +109,11 @@ msc_vlr_test_gsm_ciph_SOURCES = \
 
 msc_vlr_test_umts_authen_SOURCES = \
 	msc_vlr_test_umts_authen.c \
+	msc_vlr_tests.c \
+	$(NULL)
+
+msc_vlr_test_authen_reuse_SOURCES = \
+	msc_vlr_test_authen_reuse.c \
 	msc_vlr_tests.c \
 	$(NULL)
 
@@ -140,6 +148,7 @@ update_exp:
 	$(builddir)/msc_vlr_test_gsm_authen >$(srcdir)/msc_vlr_test_gsm_authen.ok 2>$(srcdir)/msc_vlr_test_gsm_authen.err
 	$(builddir)/msc_vlr_test_gsm_ciph >$(srcdir)/msc_vlr_test_gsm_ciph.ok 2>$(srcdir)/msc_vlr_test_gsm_ciph.err
 	$(builddir)/msc_vlr_test_umts_authen >$(srcdir)/msc_vlr_test_umts_authen.ok 2>$(srcdir)/msc_vlr_test_umts_authen.err
+	$(builddir)/msc_vlr_test_authen_reuse >$(srcdir)/msc_vlr_test_authen_reuse.ok 2>$(srcdir)/msc_vlr_test_authen_reuse.err
 	$(builddir)/msc_vlr_test_hlr_reject >$(srcdir)/msc_vlr_test_hlr_reject.ok 2>$(srcdir)/msc_vlr_test_hlr_reject.err
 	$(builddir)/msc_vlr_test_hlr_timeout >$(srcdir)/msc_vlr_test_hlr_timeout.ok 2>$(srcdir)/msc_vlr_test_hlr_timeout.err
 	$(builddir)/msc_vlr_test_ms_timeout >$(srcdir)/msc_vlr_test_ms_timeout.ok 2>$(srcdir)/msc_vlr_test_ms_timeout.err
