@@ -1,3 +1,10 @@
+osmo-msc (1.1.2) unstable; urgency=medium
+
+  * Depend on both libosmo-sigtran-dev and libosmo-sccp-dev
+  * Debian: require minimum versions of packages we depend on
+
+ -- Harald Welte <laforge@gnumonks.org>  Sun, 29 Oct 2017 09:01:30 +0100
+
 osmo-msc (1.1.1) unstable; urgency=medium
 
   * Debian: Depend on libosmo-sigtran-dev, not libsomo-sccp-dev!
