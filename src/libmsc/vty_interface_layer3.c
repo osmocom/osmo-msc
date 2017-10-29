@@ -819,20 +819,6 @@ DEFUN(mnccint_def_codec_h,
 	return CMD_SUCCESS;
 }
 
-#define OBSOLETE_MSG "Obsolete\n"
-/* this is just for backwards compatibility as the sms code moved into
- * libosmocore and old config files no longer parse... */
-DEFUN_DEPRECATED(log_level_sms, log_level_sms_cmd,
-	"logging level sms (everything|debug|info|notice|error|fatal)",
-	".HIDDEN\n" OBSOLETE_MSG OBSOLETE_MSG OBSOLETE_MSG OBSOLETE_MSG
-	OBSOLETE_MSG OBSOLETE_MSG OBSOLETE_MSG OBSOLETE_MSG)
-{
-	vty_out(vty, "%% 'logging level sms' is now called 'logging level "
-		"lsms', please update your config %s", VTY_NEWLINE);
-
-	return CMD_SUCCESS;
-}
-
 #define MEAS_STR "Measurement export related\n"
 DEFUN(mnccint_meas_feed, mnccint_meas_feed_cmd,
 	"meas-feed destination ADDR <0-65535>",
@@ -966,7 +952,6 @@ int bsc_vty_init_extra(void)
 	install_element(MNCC_INT_NODE, &mnccint_meas_feed_cmd);
 	install_element(MNCC_INT_NODE, &meas_feed_scenario_cmd);
 
-	install_element(CFG_LOG_NODE, &log_level_sms_cmd);
 	install_element(CFG_LOG_NODE, &logging_fltr_imsi_cmd);
 
 	install_element(CONFIG_NODE, &cfg_hlr_cmd);
