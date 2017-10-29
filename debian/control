@@ -11,16 +11,16 @@ Build-Depends: debhelper (>=9),
                pkg-config,
                libdbi-dev,
                libtalloc-dev,
-               libssl-dev,
-               libsmpp34-dev,
-               libasn1c-dev,
-               libosmocore-dev,
+               libssl-dev (>= 0.9.5),
+               libsmpp34-dev (>= 1.12),
+               libasn1c-dev (>= 0.9.28),
+               libosmocore-dev (>= 0.10.0),
                libosmo-sccp-dev,
-               libosmo-sigtran-dev,
+               libosmo-sigtran-dev (>= 0.8.0),
                libosmo-abis-dev,
-               libosmo-mgcp-client-dev,
-               libosmo-netif-dev,
-               libosmo-ranap-dev
+               libosmo-mgcp-client-dev (>= 1.1.0),
+               libosmo-netif-dev (>= 0.1.0),
+               libosmo-ranap-dev (>= 0.2.0)
 Standards-Version: 3.9.8
 Vcs-Git: git://git.osmocom.org/osmo-msc.git
 Vcs-Browser: https://git.osmocom.org/osmo-msc/
