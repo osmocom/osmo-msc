@@ -178,7 +178,6 @@ void msc_vty_init(struct gsm_network *msc_network)
 
 	install_element(CONFIG_NODE, &cfg_msc_cmd);
 	install_node(&msc_node, config_write_msc);
-	vty_install_default(MSC_NODE);
 	install_element(MSC_NODE, &cfg_msc_assign_tmsi_cmd);
 	install_element(MSC_NODE, &cfg_msc_no_assign_tmsi_cmd);
 	install_element(MSC_NODE, &cfg_msc_auth_tuple_max_reuse_count_cmd);

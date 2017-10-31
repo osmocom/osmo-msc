@@ -946,7 +946,6 @@ int bsc_vty_init_extra(void)
 
 	install_element(CONFIG_NODE, &cfg_mncc_int_cmd);
 	install_node(&mncc_int_node, config_write_mncc_int);
-	vty_install_default(MNCC_INT_NODE);
 	install_element(MNCC_INT_NODE, &mnccint_def_codec_f_cmd);
 	install_element(MNCC_INT_NODE, &mnccint_def_codec_h_cmd);
 	install_element(MNCC_INT_NODE, &mnccint_meas_feed_cmd);
@@ -956,7 +955,6 @@ int bsc_vty_init_extra(void)
 
 	install_element(CONFIG_NODE, &cfg_hlr_cmd);
 	install_node(&hlr_node, config_write_hlr);
-	vty_install_default(HLR_NODE);
 	install_element(HLR_NODE, &cfg_hlr_remote_ip_cmd);
 	install_element(HLR_NODE, &cfg_hlr_remote_port_cmd);
 
