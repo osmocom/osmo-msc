@@ -388,7 +388,8 @@ try_local:
 		rc = GSM411_RP_CAUSE_MO_NUM_UNASSIGNED;
 		rate_ctr_inc(&conn->network->msc_ctrs->ctr[MSC_CTR_SMS_NO_RECEIVER]);
 #endif
-	}
+	} else
+		rc = 0;
 
 	return rc;
 }
