@@ -3004,14 +3004,14 @@ int mncc_tx_to_cc(struct gsm_network *net, int msg_type, void *arg)
 		trans->callref = 0;
 		trans_free(trans);
 		return rc;
+	} else {
+		DEBUGP(DCC, "(ti %02x sub %s) "
+		       "Received '%s' from MNCC in state %d (%s)\n",
+		       trans->transaction_id,
+		       vlr_subscr_msisdn_or_name(trans->conn->vsub),
+		       get_mncc_name(msg_type), trans->cc.state,
+		       gsm48_cc_state_name(trans->cc.state));
 	}
-
-	DEBUGP(DCC, "(ti %02x sub %s) "
-		"Received '%s' from MNCC in state %d (%s)\n",
-		trans->transaction_id,
-		vlr_subscr_msisdn_or_name(trans->conn->vsub),
-		get_mncc_name(msg_type), trans->cc.state,
-		gsm48_cc_state_name(trans->cc.state));
 
 	/* Find function for current state and message */
 	for (i = 0; i < DOWNSLLEN; i++)
