@@ -583,7 +583,10 @@ struct osmo_fsm_inst *auth_fsm_start(struct vlr_subscr *vsub,
 
 	fi = osmo_fsm_inst_alloc_child(&vlr_auth_fsm, parent,
 					parent_term_event);
-
+	if (!fi) {
+		osmo_fsm_inst_dispatch(parent, parent_term_event, 0);
+		return NULL;
+	}
 
 	afp = talloc_zero(fi, struct auth_fsm_priv);
 	if (!afp) {
