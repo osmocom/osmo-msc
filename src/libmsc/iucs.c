@@ -30,8 +30,22 @@
 
 #include <osmocom/msc/gsm_data.h>
 #include <osmocom/msc/gsm_subscriber.h>
+#include <osmocom/msc/transaction.h>
 #include <osmocom/msc/osmo_msc.h>
 #include <osmocom/msc/vlr.h>
+#include <osmocom/core/byteswap.h>
+
+#include "../../bscconfig.h"
+
+#ifdef BUILD_IU
+#include <osmocom/ranap/iu_client.h>
+extern struct msgb *ranap_new_msg_rab_assign_voice(uint8_t rab_id,
+						   uint32_t rtp_ip,
+						   uint16_t rtp_port,
+						   bool use_x213_nsap);
+#else
+#include <osmocom/msc/iu_dummy.h>
+#endif /* BUILD_IU */
 
 /* For A-interface see libbsc/bsc_api.c subscr_con_allocate() */
 static struct gsm_subscriber_connection *subscr_conn_allocate_iu(struct gsm_network *network,
@@ -187,3 +201,53 @@ int gsm0408_rcvmsg_iucs(struct gsm_network *network, struct msgb *msg,
 
 	return rc;
 }
+
+int iu_rab_act_cs(struct gsm_trans *trans)
+{
+	struct gsm_subscriber_connection *conn;
+	struct msgb *msg;
+	bool use_x213_nsap;
+	uint32_t conn_id;
+	struct ranap_ue_conn_ctx *uectx;
+	uint8_t rab_id;
+	uint32_t rtp_ip;
+	uint16_t rtp_port;
+
+	conn = trans->conn;
+	uectx = conn->iu.ue_ctx;
+	rab_id = conn->iu.rab_id;
+	rtp_ip = osmo_htonl(inet_addr(conn->rtp.local_addr_ran));
+	rtp_port = conn->rtp.local_port_ran;
+	conn_id = uectx->conn_id;
+
+	if (rtp_ip == INADDR_NONE) {
+		LOGP(DIUCS, LOGL_DEBUG,
+		     "Assigning RAB: conn_id=%u, rab_id=%d, invalid RTP IP-Address\n",
+		     conn_id, rab_id);
+		return -EINVAL;
+	}
+	if (rtp_port == 0) {
+		LOGP(DIUCS, LOGL_DEBUG,
+		     "Assigning RAB: conn_id=%u, rab_id=%d, invalid RTP Port\n",
+		     conn_id, rab_id);
+		return -EINVAL;
+	}
+
+	use_x213_nsap =
+	    (uectx->rab_assign_addr_enc == RANAP_NSAP_ADDR_ENC_X213);
+
+	LOGP(DIUCS, LOGL_DEBUG,
+	     "Assigning RAB: conn_id=%u, rab_id=%d, rtp=%x:%u, use_x213_nsap=%d\n",
+	     conn_id, rab_id, rtp_ip, rtp_port, use_x213_nsap);
+
+	msg = ranap_new_msg_rab_assign_voice(rab_id, rtp_ip, rtp_port,
+					     use_x213_nsap);
+	msg->l2h = msg->data;
+
+	if (ranap_iu_rab_act(uectx, msg))
+		LOGP(DIUCS, LOGL_ERROR,
+		     "Failed to send RAB Assignment: conn_id=%d rab_id=%d rtp=%x:%u\n",
+		     conn_id, rab_id, rtp_ip, rtp_port);
+	return 0;
+}
+

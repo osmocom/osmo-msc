@@ -70,6 +70,7 @@
 #include <osmocom/core/msgb.h>
 #include <osmocom/core/talloc.h>
 #include <osmocom/core/utils.h>
+#include <osmocom/core/byteswap.h>
 #include <osmocom/gsm/tlv.h>
 #include <osmocom/crypt/auth.h>
 #ifdef BUILD_IU
@@ -78,6 +79,7 @@
 
 #include <osmocom/msc/msc_ifaces.h>
 #include <osmocom/msc/a_iface.h>
+#include <osmocom/msc/msc_mgcp.h>
 
 #include <assert.h>
 
@@ -1332,8 +1334,8 @@ void _gsm48_cc_trans_free(struct gsm_trans *trans)
 {
 	gsm48_stop_cc_timer(trans);
 
-	/* Make sure call also gets released on the mgcp side */
-	msc_call_release(trans);
+	/* Initiate the teardown of the related connections on the MGW */
+	msc_mgcp_call_release(trans);
 
 	/* send release to L4, if callref still exists */
 	if (trans->callref) {
@@ -1394,6 +1396,7 @@ static int tch_bridge(struct gsm_network *net, struct gsm_mncc_bridge *bridge)
 {
 	struct gsm_trans *trans1 = trans_find_by_callref(net, bridge->callref[0]);
 	struct gsm_trans *trans2 = trans_find_by_callref(net, bridge->callref[1]);
+	int rc;
 
 	if (!trans1 || !trans2)
 		return -EIO;
@@ -1404,7 +1407,18 @@ static int tch_bridge(struct gsm_network *net, struct gsm_mncc_bridge *bridge)
 	/* Which subscriber do we want to track trans1 or trans2? */
 	log_set_context(LOG_CTX_VLR_SUBSCR, trans1->vsub);
 
-	return msc_call_bridge(trans1, trans2);
+	/* Bridge RTP streams */
+	rc = msc_mgcp_call_complete(trans1, trans2->conn->rtp.local_port_cn,
+				    trans2->conn->rtp.local_addr_cn);
+	if (rc)
+		return -EINVAL;
+
+	rc = msc_mgcp_call_complete(trans2, trans1->conn->rtp.local_port_cn,
+				    trans1->conn->rtp.local_addr_cn);
+	if (rc)
+		return -EINVAL;
+
+	return 0;
 }
 
 static int gsm48_cc_rx_status_enq(struct gsm_trans *trans, struct msgb *msg)
@@ -1747,7 +1761,7 @@ static int gsm48_cc_rx_call_conf(struct gsm_trans *trans, struct msgb *msg)
 
 	/* Assign call (if not done yet) */
 	if (trans->assignment_done == false) {
-		rc = msc_call_assignment(trans);
+		rc = msc_mgcp_call_assignment(trans);
 		trans->assignment_done = true;
 	}
 	else
@@ -1789,7 +1803,7 @@ static int gsm48_cc_tx_call_proc_and_assign(struct gsm_trans *trans, void *arg)
 
 	/* Assign call (if not done yet) */
 	if (trans->assignment_done == false) {
-		rc = msc_call_assignment(trans);
+		rc = msc_mgcp_call_assignment(trans);
 		trans->assignment_done = true;
 	}
 	else
@@ -2673,8 +2687,23 @@ static void mncc_recv_rtp_sock(struct gsm_network *net, struct gsm_trans *trans,
 	 * (0 if unknown) */
 	msg_type = GSM_TCHF_FRAME;
 
-	uint32_t addr = mgcp_client_remote_addr_n(net->mgw.client);
-	uint16_t port = trans->conn->rtp.port_cn;
+	uint32_t addr = inet_addr(trans->conn->rtp.local_addr_cn);
+	uint16_t port = trans->conn->rtp.local_port_cn;
+
+	LOGP(DMNCC, LOGL_ERROR, "RTP create for non-existing trans\n");
+
+	if (addr == INADDR_NONE) {
+		LOGP(DMNCC, LOGL_ERROR,
+		     "(subscriber:%s) external MNCC is signalling invalid IP-Address\n",
+		     vlr_subscr_name(trans->vsub));
+		return;
+	}
+	if (port == 0) {
+		LOGP(DMNCC, LOGL_ERROR,
+		     "(subscriber:%s) external MNCC is signalling invalid Port\n",
+		     vlr_subscr_name(trans->vsub));
+		return;
+	}
 
 	/* FIXME: This has to be set to some meaningful value,
 	 * before the MSC-Split, this value was pulled from
@@ -2714,15 +2743,15 @@ static int tch_rtp_create(struct gsm_network *net, uint32_t callref)
 
 	trans->conn->mncc_rtp_bridge = 1;
 
-	/* When we call msc_call_assignment() we will trigger, depending
+	/* When we call msc_mgcp_call_assignment() we will trigger, depending
 	 * on the RAN type the call assignment on the A or Iu interface.
-	 * msc_call_assignment() also takes care about sending the CRCX
+	 * msc_mgcp_call_assignment() also takes care about sending the CRCX
 	 * command to the MGCP-GW. The CRCX will return the port number,
 	 * where the PBX (e.g. Asterisk) will send its RTP stream to. We
 	 * have to return this port number back to the MNCC by sending
 	 * it back with the TCH_RTP_CREATE message. To make sure that
 	 * this message is sent AFTER the response to CRCX from the
-	 * MGCP-GW has arrived, we need will instruct msc_call_assignment()
+	 * MGCP-GW has arrived, we need will instruct msc_mgcp_call_assignment()
 	 * to take care of this by setting trans->tch_rtp_create to true.
 	 * This will make sure that gsm48_tch_rtp_create() (below) is
 	 * called as soon as the local port number has become known. */
@@ -2730,7 +2759,7 @@ static int tch_rtp_create(struct gsm_network *net, uint32_t callref)
 
 	/* Assign call (if not done yet) */
 	if (trans->assignment_done == false) {
-		rc = msc_call_assignment(trans);
+		rc = msc_mgcp_call_assignment(trans);
 		trans->assignment_done = true;
 	}
 	else
@@ -2757,6 +2786,7 @@ static int tch_rtp_connect(struct gsm_network *net, void *arg)
 {
 	struct gsm_trans *trans;
 	struct gsm_mncc_rtp *rtp = arg;
+	struct in_addr addr;
 
 	/* Find callref */
 	trans = trans_find_by_callref(net, rtp->callref);
@@ -2772,8 +2802,8 @@ static int tch_rtp_connect(struct gsm_network *net, void *arg)
 		return 0;
 	}
 
-	msc_call_connect(trans, rtp->port, rtp->ip);
-	return 0;
+	addr.s_addr = osmo_htonl(rtp->ip);
+	return msc_mgcp_call_complete(trans, rtp->port, inet_ntoa(addr));
 }
 
 static struct downstate {

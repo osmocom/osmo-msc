@@ -556,18 +556,18 @@ int __wrap_a_iface_tx_clear_cmd(struct gsm_subscriber_connection *conn)
 	return 0;
 }
 
-/* override, requires '-Wl,--wrap=msc_call_assignment' */
-int __real_msc_call_assignment(struct gsm_trans *trans);
-int __wrap_msc_call_assignment(struct gsm_trans *trans)
+/* override, requires '-Wl,--wrap=msc_mgcp_call_assignment' */
+int __real_msc_mgcp_call_assignment(struct gsm_trans *trans);
+int __wrap_msc_mgcp_call_assignment(struct gsm_trans *trans)
 {
 	log("MS <--Call Assignment-- MSC: subscr=%s callref=0x%x",
 	    vlr_subscr_name(trans->vsub), trans->callref);
 	return 0;
 }
 
-/* override, requires '-Wl,--wrap=msc_call_release' */
-void __real_msc_call_release(struct gsm_trans *trans);
-void __wrap_msc_call_release(struct gsm_trans *trans)
+/* override, requires '-Wl,--wrap=msc_mgcp_call_release' */
+void __real_msc_mgcp_call_release(struct gsm_trans *trans);
+void __wrap_msc_mgcp_call_release(struct gsm_trans *trans)
 {
 	log("MS <--Call Release-- MSC: subscr=%s callref=0x%x",
 	    vlr_subscr_name(trans->vsub), trans->callref);

@@ -31,8 +31,8 @@ AM_LDFLAGS = \
 	-Wl,--wrap=msc_stop_paging \
 	-Wl,--wrap=gsm340_gen_scts \
 	-Wl,--wrap=RAND_bytes \
-	-Wl,--wrap=msc_call_assignment \
-	-Wl,--wrap=msc_call_release \
+	-Wl,--wrap=msc_mgcp_call_release \
+	-Wl,--wrap=msc_mgcp_call_assignment \
 	$(NULL)
 
 LDADD = \

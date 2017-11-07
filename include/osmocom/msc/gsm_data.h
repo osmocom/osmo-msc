@@ -196,9 +196,17 @@ struct gsm_subscriber_connection {
 	struct gsm_encr encr;
 
 	struct {
+		struct mgcp_ctx *mgcp_ctx;
 		unsigned int mgcp_rtp_endpoint;
-		uint16_t port_subscr;
-		uint16_t port_cn;
+
+		uint16_t local_port_ran;
+		char local_addr_ran[INET_ADDRSTRLEN];
+		uint16_t remote_port_ran;
+		char remote_addr_ran[INET_ADDRSTRLEN];
+		uint16_t local_port_cn;
+		char local_addr_cn[INET_ADDRSTRLEN];
+		uint16_t remote_port_cn;
+		char remote_addr_cn[INET_ADDRSTRLEN];
 	} rtp;
 
 	/* which Iu-CS connection, if any. */

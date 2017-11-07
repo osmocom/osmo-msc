@@ -39,6 +39,7 @@ noinst_HEADERS = \
 	mncc.h \
 	mncc_int.h \
 	msc_ifaces.h \
+	msc_mgcp.h \
 	network_listen.h \
 	oap_client.h \
 	openbscdefines.h \
