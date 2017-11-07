@@ -396,8 +396,17 @@ int a_iface_tx_assignment(const struct gsm_trans *trans)
 	/* Package RTP-Address data */
 	memset(&rtp_addr_in, 0, sizeof(rtp_addr_in));
 	rtp_addr_in.sin_family = AF_INET;
-	rtp_addr_in.sin_port = osmo_htons(conn->rtp.port_subscr);
-	rtp_addr_in.sin_addr.s_addr = osmo_htonl(mgcp_client_remote_addr_n(gsm_network->mgw.client));
+	rtp_addr_in.sin_port = osmo_htons(conn->rtp.local_port_ran);
+	rtp_addr_in.sin_addr.s_addr = inet_addr(conn->rtp.local_addr_ran);
+
+	if (rtp_addr_in.sin_addr.s_addr == INADDR_NONE) {
+		LOGPCONN(conn, LOGL_ERROR, "Invalid RTP-Address -- assignment not sent!\n");
+		return -EINVAL;
+	}
+	if (rtp_addr_in.sin_port == 0) {
+		LOGPCONN(conn, LOGL_ERROR, "Invalid RTP-Port -- assignment not sent!\n");
+		return -EINVAL;
+	}
 
 	memset(&rtp_addr, 0, sizeof(rtp_addr));
 	memcpy(&rtp_addr, &rtp_addr_in, sizeof(rtp_addr_in));

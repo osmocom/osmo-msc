@@ -39,6 +39,7 @@ libmsc_a_SOURCES = \
 	mncc_builtin.c \
 	mncc_sock.c \
 	msc_ifaces.c \
+	msc_mgcp.c \
 	rrlp.c \
 	silent_call.c \
 	sms_queue.c \

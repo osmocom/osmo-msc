@@ -34,6 +34,7 @@
 #include <osmocom/core/byteswap.h>
 #include <osmocom/msc/a_reset.h>
 #include <osmocom/msc/transaction.h>
+#include <osmocom/msc/msc_mgcp.h>
 
 #include <errno.h>
 
@@ -596,11 +597,7 @@ static int bssmap_rx_ass_compl(const struct osmo_sccp_user *scu, const struct a_
 	 * transport address element */
 	if (rtp_addr.ss_family == AF_INET) {
 		rtp_addr_in = (struct sockaddr_in *)&rtp_addr;
-		conn->rtp.port_subscr = osmo_ntohs(rtp_addr_in->sin_port);
-		/* FIXME: We also get the IP-Address of the remote (e.g. BTS)
-		 * end with the response. Currently we just ignore that address.
-		 * Instead we expect that our local MGCP gateway and the code
-		 * controlling it, magically knows the IP of the remote end. */
+		msc_mgcp_ass_complete(conn, osmo_ntohs(rtp_addr_in->sin_port), inet_ntoa(rtp_addr_in->sin_addr));
 	} else {
 		LOGP(DMSC, LOGL_ERROR, "Unsopported addressing scheme. (supports only IPV4)\n");
 		goto fail;

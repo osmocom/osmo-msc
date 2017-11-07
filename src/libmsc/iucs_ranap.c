@@ -28,6 +28,8 @@
 
 #include <osmocom/ranap/ranap_ies_defs.h>
 #include <osmocom/ranap/iu_client.h>
+#include <osmocom/ranap/RANAP_IuTransportAssociation.h>
+#include <osmocom/ranap/iu_helpers.h>
 
 #include <osmocom/msc/debug.h>
 #include <osmocom/msc/gsm_data.h>
@@ -36,22 +38,54 @@
 #include <osmocom/msc/vlr.h>
 #include <osmocom/msc/iucs_ranap.h>
 #include <osmocom/msc/osmo_msc.h>
+#include <osmocom/msc/msc_mgcp.h>
+
+#include <asn1c/asn1helpers.h>
 
 /* To continue authorization after a Security Mode Complete */
 int gsm0408_authorize(struct gsm_subscriber_connection *conn);
 
-static int iucs_rx_rab_assign(struct gsm_subscriber_connection *conn,
-			      RANAP_RAB_SetupOrModifiedItemIEs_t *setup_ies)
+static int iucs_rx_rab_assign(struct gsm_subscriber_connection *conn, RANAP_RAB_SetupOrModifiedItemIEs_t * setup_ies)
 {
 	uint8_t rab_id;
 	RANAP_RAB_SetupOrModifiedItem_t *item = &setup_ies->raB_SetupOrModifiedItem;
+	RANAP_TransportLayerAddress_t *transp_layer_addr;
+	RANAP_IuTransportAssociation_t *transp_assoc;
+	uint16_t port = 0;
+	int rc;
+	char addr[INET_ADDRSTRLEN];
 
 	rab_id = item->rAB_ID.buf[0];
 
 	LOGP(DIUCS, LOGL_NOTICE,
-	     "Received RAB assignment event for %s rab_id=%hhd\n",
-	     vlr_subscr_name(conn->vsub), rab_id);
+	     "Received RAB assignment event for %s rab_id=%hhd\n", vlr_subscr_name(conn->vsub), rab_id);
 
+	if (item->iuTransportAssociation && item->transportLayerAddress) {
+		transp_layer_addr = item->transportLayerAddress;
+		transp_assoc = item->iuTransportAssociation;
+
+		rc = ranap_transp_assoc_decode(&port, transp_assoc);
+		if (rc != 0) {
+			LOGP(DIUCS, LOGL_ERROR,
+			     "Unable to decode RTP port in RAB assignment (%s rab_id=%hhd)\n",
+			     vlr_subscr_name(conn->vsub), rab_id);
+			return 0;
+		}
+
+		rc = ranap_transp_layer_addr_decode(addr, sizeof(addr), transp_layer_addr);
+		if (rc != 0) {
+			LOGP(DIUCS, LOGL_ERROR,
+			     "Unable to decode IP-Address in RAB assignment (%s rab_id=%hhd)\n",
+			     vlr_subscr_name(conn->vsub), rab_id);
+			return 0;
+		}
+
+		return msc_mgcp_ass_complete(conn, port, addr);
+	}
+
+	LOGP(DIUCS, LOGL_ERROR,
+	     "RAB assignment lacks RTP connection information. (%s rab_id=%hhd)\n",
+	     vlr_subscr_name(conn->vsub), rab_id);
 	return 0;
 }
 
