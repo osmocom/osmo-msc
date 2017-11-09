@@ -62,8 +62,9 @@ static void fsm_disc_cb(struct osmo_fsm_inst *fi, uint32_t event, void *data)
 {
 	struct a_reset_ctx *reset = (struct a_reset_ctx *)data;
 	OSMO_ASSERT(reset);
+	OSMO_ASSERT(reset->fsm);
 
-	LOGP(DMSC, LOGL_NOTICE, "(%s) fsm-state (msc-reset): %s, fsm-event: %s\n", reset->name,
+	LOGPFSML(reset->fsm, LOGL_NOTICE, "fsm-state (msc-reset): %s, fsm-event: %s\n",
 	     get_value_string(fsm_state_names, ST_CONN), get_value_string(fsm_evt_names, event));
 
 	reset->conn_loss_counter = 0;
@@ -76,13 +77,13 @@ static void fsm_conn_cb(struct osmo_fsm_inst *fi, uint32_t event, void *data)
 	struct a_reset_ctx *reset = (struct a_reset_ctx *)data;
 	OSMO_ASSERT(reset);
 
-	LOGP(DMSC, LOGL_NOTICE, "(%s) fsm-state (msc-reset): %s, fsm-event: %s\n", reset->name,
+	LOGPFSML(reset->fsm, LOGL_NOTICE, "fsm-state (msc-reset): %s, fsm-event: %s\n",
 	     get_value_string(fsm_state_names, ST_CONN), get_value_string(fsm_evt_names, event));
 
 	switch (event) {
 	case EV_N_DISCONNECT:
 		if (reset->conn_loss_counter >= BAD_CONNECTION_THRESOLD) {
-			LOGP(DMSC, LOGL_NOTICE, "(%s) SIGTRAN connection down, reconnecting...\n", reset->name);
+			LOGPFSML(reset->fsm, LOGL_NOTICE, "SIGTRAN connection down, reconnecting...\n");
 			osmo_fsm_inst_state_chg(fi, ST_DISC, RESET_RESEND_INTERVAL, RESET_RESEND_TIMER_NO);
 		} else
 			reset->conn_loss_counter++;
@@ -97,8 +98,9 @@ static void fsm_conn_cb(struct osmo_fsm_inst *fi, uint32_t event, void *data)
 static int fsm_reset_ack_timeout_cb(struct osmo_fsm_inst *fi)
 {
 	struct a_reset_ctx *reset = (struct a_reset_ctx *)fi->priv;
+	OSMO_ASSERT(reset->fsm);
 
-	LOGP(DMSC, LOGL_NOTICE, "(%s) reset-ack timeout (T%i) in state %s, resending...\n", reset->name, fi->T,
+	LOGPFSML(reset->fsm, LOGL_NOTICE, "reset-ack timeout (T%i) in state %s, resending...\n", fi->T,
 	     get_value_string(fsm_state_names, fi->state));
 
 	reset->cb(reset->priv);
@@ -147,12 +149,11 @@ struct a_reset_ctx *a_reset_alloc(const void *ctx, const char *name, void *cb, v
 	OSMO_ASSERT(reset);
 	reset->priv = priv;
 	reset->cb = cb;
-	strncpy(reset->name, name, sizeof(reset->name));
 	reset->conn_loss_counter = 0;
-	reset->fsm = osmo_fsm_inst_alloc(&fsm, NULL, NULL, LOGL_DEBUG, NULL);
+	reset->fsm = osmo_fsm_inst_alloc(&fsm, NULL, NULL, LOGL_DEBUG, name);
 	OSMO_ASSERT(reset->fsm);
 	reset->fsm->priv = reset;
-	LOGP(DMSC, LOGL_NOTICE, "(%s) reset handler fsm created.\n", reset->name);
+	LOGPFSML(reset->fsm, LOGL_NOTICE, "reset handler fsm created.\n");
 
 	/* kick off reset-ack sending mechanism */
 	osmo_fsm_inst_state_chg(reset->fsm, ST_DISC, RESET_RESEND_INTERVAL, RESET_RESEND_TIMER_NO);
@@ -172,7 +173,7 @@ void a_reset_free(struct a_reset_ctx *reset)
 	memset(reset, 0, sizeof(*reset));
 	talloc_free(reset);
 
-	LOGP(DMSC, LOGL_NOTICE, "(%s) reset handler fsm destroyed.\n", reset->name);
+	LOGPFSML(reset->fsm, LOGL_NOTICE, "reset handler fsm destroyed.\n");
 }
 
 /* Confirm that we sucessfully received a reset acknowlege message */

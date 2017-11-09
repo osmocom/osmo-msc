@@ -460,6 +460,7 @@ static void add_bsc(const struct osmo_sccp_addr *msc_addr, const struct osmo_scc
 {
 	struct bsc_context *bsc_ctx;
 	struct osmo_ss7_instance *ss7;
+	char bsc_name[32];
 
 	OSMO_ASSERT(bsc_addr);
 	OSMO_ASSERT(msc_addr);
@@ -482,7 +483,8 @@ static void add_bsc(const struct osmo_sccp_addr *msc_addr, const struct osmo_scc
 	llist_add_tail(&bsc_ctx->list, &gsm_network->a.bscs);
 
 	/* Start reset procedure to make the new connection active */
-	bsc_ctx->reset = a_reset_alloc(bsc_ctx, osmo_sccp_addr_name(ss7, bsc_addr), a_reset_cb, bsc_ctx);
+	snprintf(bsc_name, sizeof(bsc_name), "bsc-%i", bsc_addr->pc);
+	bsc_ctx->reset = a_reset_alloc(bsc_ctx, bsc_name, a_reset_cb, bsc_ctx);
 }
 
 /* Callback function, called by the SSCP stack when data arrives */
