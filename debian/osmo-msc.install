@@ -1,2 +1,4 @@
 usr/bin/osmo-msc
-usr/share/doc/osmo-msc/examples/osmo-msc
+usr/share/doc/osmo-msc/examples/osmo-msc/osmo-msc.cfg usr/share/doc/osmo-msc/examples
+usr/share/doc/osmo-msc/examples/osmo-msc/osmo-msc_custom-sccp.cfg usr/share/doc/osmo-msc/examples
+usr/share/doc/osmo-msc/examples/osmo-msc/osmo-msc_multi-cs7.cfg usr/share/doc/osmo-msc/examples
