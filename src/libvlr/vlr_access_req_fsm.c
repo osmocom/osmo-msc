@@ -241,8 +241,7 @@ static void _proc_arq_vlr_node2_post_vlr(struct osmo_fsm_inst *fi)
 	if (vsub->ms_not_reachable_flag) {
 		/* Start Subscriber_Present_VLR */
 		osmo_fsm_inst_state_chg(fi, PR_ARQ_S_WAIT_SUB_PRES, 0, 0);
-		par->sub_pres_vlr_fsm = sub_pres_vlr_fsm_start(fi, vsub,
-							PR_ARQ_E_PRES_RES);
+		sub_pres_vlr_fsm_start(&par->sub_pres_vlr_fsm, fi, vsub, PR_ARQ_E_PRES_RES);
 		return;
 	}
 	_proc_arq_vlr_post_pres(fi);

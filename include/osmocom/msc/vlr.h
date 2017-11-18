@@ -274,9 +274,10 @@ int vlr_start(const char *gsup_unit_name, struct vlr_instance *vlr,
 
 /* internal use only */
 
-struct osmo_fsm_inst *sub_pres_vlr_fsm_start(struct osmo_fsm_inst *parent,
-					     struct vlr_subscr *vsub,
-					     uint32_t term_event);
+void sub_pres_vlr_fsm_start(struct osmo_fsm_inst **fsm,
+			    struct osmo_fsm_inst *parent,
+			    struct vlr_subscr *vsub,
+			    uint32_t term_event);
 struct osmo_fsm_inst *
 upd_hlr_vlr_proc_start(struct osmo_fsm_inst *parent,
 		       struct vlr_subscr *vsub,

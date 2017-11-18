@@ -252,21 +252,29 @@ static struct osmo_fsm sub_pres_vlr_fsm = {
 	.event_names = sub_pres_vlr_event_names,
 };
 
-struct osmo_fsm_inst *sub_pres_vlr_fsm_start(struct osmo_fsm_inst *parent,
-					     struct vlr_subscr *vsub,
-					     uint32_t term_event)
+/* Note that the start event is dispatched right away, so in case the FSM immediately concludes from that
+ * event, the created FSM struct may no longer be valid as it already deallocated again, and it may
+ * furthermore already have invoked the parent FSM instance's deallocation as well. Hence, instead of
+ * returning, store the created FSM instance address in *fi_p before dispatching the event. It is thus
+ * possible to store the instance's pointer in a parent FSM instance without running danger of using
+ * already freed memory. */
+void sub_pres_vlr_fsm_start(struct osmo_fsm_inst **fi_p,
+			    struct osmo_fsm_inst *parent,
+			    struct vlr_subscr *vsub,
+			    uint32_t term_event)
 {
 	struct osmo_fsm_inst *fi;
 
+	OSMO_ASSERT(fi_p);
+
 	fi = osmo_fsm_inst_alloc_child(&sub_pres_vlr_fsm, parent,
 					term_event);
+	*fi_p = fi;
 	if (!fi)
-		return NULL;
+		return;
 
 	fi->priv = vsub;
 	osmo_fsm_inst_dispatch(fi, SUB_PRES_VLR_E_START, NULL);
-
-	return fi;
 }
 
 /***********************************************************************
@@ -384,9 +392,7 @@ static void lu_compl_vlr_init(struct osmo_fsm_inst *fi, uint32_t event,
 	osmo_fsm_inst_state_chg(fi, LU_COMPL_VLR_S_WAIT_SUB_PRES,
 				LU_TIMEOUT_LONG, 0);
 
-	lcvp->sub_pres_vlr_fsm = sub_pres_vlr_fsm_start(fi, vsub,
-						LU_COMPL_VLR_E_SUB_PRES_COMPL);
-
+	sub_pres_vlr_fsm_start(&lcvp->sub_pres_vlr_fsm, fi, vsub, LU_COMPL_VLR_E_SUB_PRES_COMPL);
 }
 
 static void lu_compl_vlr_new_tmsi(struct osmo_fsm_inst *fi)
