@@ -804,12 +804,11 @@ int vlr_gsupc_read_cb(struct gsup_client *gsupc, struct msgb *msg)
 	       osmo_hexdump_nospc(msgb_l2(msg), msgb_l2len(msg)));
 
 	rc = osmo_gsup_decode(msgb_l2(msg), msgb_l2len(msg), &gsup);
-	msgb_free(msg);
 	if (rc < 0) {
 		LOGP(DVLR, LOGL_ERROR,
 			"decoding GSUP message fails with error '%s' (%d)\n",
 			get_value_string(gsm48_gmm_cause_names, -rc), -rc);
-		return rc;
+		goto msgb_free_and_return;
 	}
 
 	if (!gsup.imsi[0]) {
@@ -817,7 +816,8 @@ int vlr_gsupc_read_cb(struct gsup_client *gsupc, struct msgb *msg)
 		if (OSMO_GSUP_IS_MSGT_REQUEST(gsup.message_type))
 			vlr_tx_gsup_error_reply(vlr, &gsup,
 						GMM_CAUSE_INV_MAND_INFO);
-		return -GMM_CAUSE_INV_MAND_INFO;
+		rc = -GMM_CAUSE_INV_MAND_INFO;
+		goto msgb_free_and_return;
 	}
 
 	vsub = vlr_subscr_find_by_imsi(vlr, gsup.imsi);
@@ -825,9 +825,11 @@ int vlr_gsupc_read_cb(struct gsup_client *gsupc, struct msgb *msg)
 		switch (gsup.message_type) {
 		case OSMO_GSUP_MSGT_PURGE_MS_RESULT:
 		case OSMO_GSUP_MSGT_PURGE_MS_ERROR:
-			return vlr_rx_gsup_purge_no_subscr(vlr, &gsup);
+			rc = vlr_rx_gsup_purge_no_subscr(vlr, &gsup);
+			goto msgb_free_and_return;
 		default:
-			return vlr_rx_gsup_unknown_imsi(vlr, &gsup);
+			rc = vlr_rx_gsup_unknown_imsi(vlr, &gsup);
+			goto msgb_free_and_return;
 		}
 	}
 
@@ -865,6 +867,9 @@ int vlr_gsupc_read_cb(struct gsup_client *gsupc, struct msgb *msg)
 	}
 
 	vlr_subscr_put(vsub);
+
+msgb_free_and_return:
+	msgb_free(msg);
 	return rc;
 }
 
