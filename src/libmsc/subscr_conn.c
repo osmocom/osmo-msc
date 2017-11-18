@@ -233,7 +233,8 @@ int subscr_conn_fsm_timeout(struct osmo_fsm_inst *fi)
 	struct gsm_subscriber_connection *conn = fi->priv;
 	if (conn)
 		vlr_subscr_conn_timeout(conn->vsub);
-	osmo_fsm_inst_dispatch(fi, SUBSCR_CONN_E_CN_CLOSE, NULL);
+	else
+		osmo_fsm_inst_dispatch(fi, SUBSCR_CONN_E_CN_CLOSE, NULL);
 	return 0;
 }
 

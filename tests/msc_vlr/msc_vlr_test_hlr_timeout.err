@@ -71,8 +71,6 @@ DREF VLR subscr IMSI:901700000004620 usage decreases to: 0
 DREF freeing VLR subscr IMSI:901700000004620
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Freeing instance
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Deallocated
-DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Received Event SUBSCR_CONN_E_CN_CLOSE
-DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Event SUBSCR_CONN_E_CN_CLOSE not permitted
 - SUBSCR_CONN_TIMEOUT has passed, conn is gone.
   bssap_clear_sent == 1
   llist_count(&net->subscr_conns) == 0
@@ -173,8 +171,6 @@ DREF VLR subscr MSISDN:46071 usage decreases to: 0
 DREF freeing VLR subscr MSISDN:46071
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Freeing instance
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Deallocated
-DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Received Event SUBSCR_CONN_E_CN_CLOSE
-DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Event SUBSCR_CONN_E_CN_CLOSE not permitted
 - SUBSCR_CONN_TIMEOUT has passed, conn is gone.
   bssap_clear_sent == 1
   llist_count(&net->subscr_conns) == 0
