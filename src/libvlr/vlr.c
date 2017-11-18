@@ -973,8 +973,12 @@ void vlr_subscr_conn_timeout(struct vlr_subscr *vsub)
 	if (!vsub)
 		return;
 
-	vlr_loc_update_conn_timeout(vsub->lu_fsm);
-	vlr_parq_conn_timeout(vsub->proc_arq_fsm);
+	vlr_subscr_get(vsub);
+	if (vsub->lu_fsm)
+		vlr_loc_update_conn_timeout(vsub->lu_fsm);
+	if (vsub->proc_arq_fsm)
+		vlr_parq_conn_timeout(vsub->proc_arq_fsm);
+	vlr_subscr_put(vsub);
 }
 
 struct vlr_instance *vlr_alloc(void *ctx, const struct vlr_ops *ops)
