@@ -197,8 +197,10 @@ static struct log_info info = {
 
 int main(int argc, char **argv)
 {
-	talloc_ctx = talloc_named_const(NULL, 1, "sms_queue_test");
-	msgb_talloc_ctx_init(talloc_ctx, 0);
+	void *msgb_ctx;
+
+	talloc_ctx = talloc_named_const(NULL, 0, "sms_queue_test");
+	msgb_ctx = msgb_talloc_ctx_init(NULL, 0);
 	osmo_init_logging(&info);
 
 	OSMO_ASSERT(osmo_stderr_target);
@@ -210,6 +212,24 @@ int main(int argc, char **argv)
 
 	test_next_sms();
 	printf("Done\n");
+
+	if (talloc_total_blocks(msgb_ctx) != 1
+	    || talloc_total_size(msgb_ctx) != 0) {
+		talloc_report_full(msgb_ctx, stderr);
+		fflush(stderr);
+	}
+
+	OSMO_ASSERT(talloc_total_blocks(msgb_ctx) == 1);
+	OSMO_ASSERT(talloc_total_size(msgb_ctx) == 0);
+	talloc_free(msgb_ctx);
+
+	if (talloc_total_blocks(talloc_ctx) != 1
+	    || talloc_total_size(talloc_ctx) != 0)
+		talloc_report_full(talloc_ctx, stderr);
+
+	OSMO_ASSERT(talloc_total_blocks(talloc_ctx) == 1);
+	OSMO_ASSERT(talloc_total_size(talloc_ctx) == 0);
+	talloc_free(talloc_ctx);
 
 	return 0;
 }
