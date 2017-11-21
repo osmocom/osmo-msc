@@ -659,14 +659,6 @@ DEFUN(show_stats,
 		net->msc_ctrs->ctr[MSC_CTR_LOC_UPDATE_COMPLETED].current,
 		net->msc_ctrs->ctr[MSC_CTR_LOC_UPDATE_FAILED].current,
 		VTY_NEWLINE);
-	vty_out(vty, "Handover                : %lu attempted, %lu no_channel, %lu timeout, "
-		"%lu completed, %lu failed%s",
-		net->bsc_ctrs->ctr[BSC_CTR_HANDOVER_ATTEMPTED].current,
-		net->bsc_ctrs->ctr[BSC_CTR_HANDOVER_NO_CHANNEL].current,
-		net->bsc_ctrs->ctr[BSC_CTR_HANDOVER_TIMEOUT].current,
-		net->bsc_ctrs->ctr[BSC_CTR_HANDOVER_COMPLETED].current,
-		net->bsc_ctrs->ctr[BSC_CTR_HANDOVER_FAILED].current,
-		VTY_NEWLINE);
 	vty_out(vty, "SMS MO                  : %lu submitted, %lu no receiver%s",
 		net->msc_ctrs->ctr[MSC_CTR_SMS_SUBMITTED].current,
 		net->msc_ctrs->ctr[MSC_CTR_SMS_NO_RECEIVER].current,
