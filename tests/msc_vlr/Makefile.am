@@ -31,6 +31,8 @@ AM_LDFLAGS = \
 	-Wl,--wrap=msc_stop_paging \
 	-Wl,--wrap=gsm340_gen_scts \
 	-Wl,--wrap=RAND_bytes \
+	-Wl,--wrap=msc_call_assignment \
+	-Wl,--wrap=msc_call_release \
 	$(NULL)
 
 LDADD = \
@@ -75,6 +77,8 @@ EXTRA_DIST = \
 	msc_vlr_test_ms_timeout.err \
 	msc_vlr_test_reject_concurrency.ok \
 	msc_vlr_test_reject_concurrency.err \
+	msc_vlr_test_call.ok \
+	msc_vlr_test_call.err \
 	msc_vlr_test_rest.ok \
 	msc_vlr_test_rest.err \
 	$(NULL)
@@ -89,6 +93,7 @@ noinst_PROGRAMS = \
 	msc_vlr_test_hlr_timeout \
 	msc_vlr_test_ms_timeout \
 	msc_vlr_test_reject_concurrency \
+	msc_vlr_test_call \
 	msc_vlr_test_rest \
 	$(NULL)
 
@@ -137,6 +142,11 @@ msc_vlr_test_reject_concurrency_SOURCES = \
 	msc_vlr_tests.c \
 	$(NULL)
 
+msc_vlr_test_call_SOURCES = \
+	msc_vlr_test_call.c \
+	msc_vlr_tests.c \
+	$(NULL)
+
 msc_vlr_test_rest_SOURCES = \
 	msc_vlr_test_rest.c \
 	msc_vlr_tests.c \
@@ -153,4 +163,5 @@ update_exp:
 	$(builddir)/msc_vlr_test_hlr_timeout >$(srcdir)/msc_vlr_test_hlr_timeout.ok 2>$(srcdir)/msc_vlr_test_hlr_timeout.err
 	$(builddir)/msc_vlr_test_ms_timeout >$(srcdir)/msc_vlr_test_ms_timeout.ok 2>$(srcdir)/msc_vlr_test_ms_timeout.err
 	$(builddir)/msc_vlr_test_reject_concurrency >$(srcdir)/msc_vlr_test_reject_concurrency.ok 2>$(srcdir)/msc_vlr_test_reject_concurrency.err
+	$(builddir)/msc_vlr_test_call >$(srcdir)/msc_vlr_test_call.ok 2>$(srcdir)/msc_vlr_test_call.err
 	$(builddir)/msc_vlr_test_rest >$(srcdir)/msc_vlr_test_rest.ok 2>$(srcdir)/msc_vlr_test_rest.err

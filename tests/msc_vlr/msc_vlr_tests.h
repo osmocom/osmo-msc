@@ -29,6 +29,7 @@
 #include <osmocom/msc/gsm_data.h>
 #include <osmocom/msc/osmo_msc.h>
 #include <osmocom/msc/vlr.h>
+#include <osmocom/msc/mncc.h>
 
 extern bool _log_lines;
 #define _log(fmt, args...) do { \
@@ -83,6 +84,11 @@ extern bool iu_release_expected;
 extern bool iu_release_sent;
 extern bool bssap_clear_expected;
 extern bool bssap_clear_sent;
+
+extern uint32_t cc_to_mncc_tx_expected_msg_type;
+extern const char *cc_to_mncc_tx_expected_imsi;
+extern bool cc_to_mncc_tx_confirmed;
+extern uint32_t cc_to_mncc_tx_got_callref;
 
 static inline void expect_iu_release()
 {
@@ -167,6 +173,17 @@ void check_talloc(void *msgb_ctx, void *tall_bsc_ctx, int expected_blocks);
 		break; \
 	gsup_tx_expected = hex; \
 	gsup_tx_confirmed = false; \
+} while (0)
+
+#define cc_to_mncc_expect_tx(imsi, msg_type) do \
+{ \
+	if (cc_to_mncc_tx_expected_msg_type) { \
+		log("Previous expected MNCC tx was not confirmed!"); \
+		OSMO_ASSERT(!cc_to_mncc_tx_expected_msg_type); \
+	} \
+	cc_to_mncc_tx_expected_imsi = imsi; \
+	cc_to_mncc_tx_expected_msg_type = msg_type; \
+	cc_to_mncc_tx_confirmed = false; \
 } while (0)
 
 void fake_time_start();

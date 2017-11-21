@@ -79,6 +79,13 @@ cat $abs_srcdir/msc_vlr/msc_vlr_test_reject_concurrency.err > experr
 AT_CHECK([$abs_top_builddir/tests/msc_vlr/msc_vlr_test_reject_concurrency], [], [expout], [experr])
 AT_CLEANUP
 
+AT_SETUP([msc_vlr_test_call])
+AT_KEYWORDS([msc_vlr_test_call])
+cat $abs_srcdir/msc_vlr/msc_vlr_test_call.ok > expout
+cat $abs_srcdir/msc_vlr/msc_vlr_test_call.err > experr
+AT_CHECK([$abs_top_builddir/tests/msc_vlr/msc_vlr_test_call], [], [expout], [experr])
+AT_CLEANUP
+
 AT_SETUP([msc_vlr_test_rest])
 AT_KEYWORDS([msc_vlr_test_rest])
 cat $abs_srcdir/msc_vlr/msc_vlr_test_rest.ok > expout

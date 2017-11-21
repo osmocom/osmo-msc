@@ -34,6 +34,7 @@
 #include <osmocom/msc/gsm_04_11.h>
 #include <osmocom/msc/debug.h>
 #include <osmocom/msc/gsm_04_08.h>
+#include <osmocom/msc/transaction.h>
 
 #if BUILD_IU
 #include <osmocom/msc/iucs_ranap.h>
@@ -68,6 +69,11 @@ bool iu_release_expected = false;
 bool iu_release_sent = false;
 bool bssap_clear_expected = false;
 bool bssap_clear_sent = false;
+
+uint32_t cc_to_mncc_tx_expected_msg_type = 0;
+const char *cc_to_mncc_tx_expected_imsi = NULL;
+bool cc_to_mncc_tx_confirmed = false;
+uint32_t cc_to_mncc_tx_got_callref = 0;
 
 struct msgb *msgb_from_hex(const char *label, uint16_t size, const char *hex)
 {
@@ -377,7 +383,7 @@ static struct log_info_cat test_categories[] = {
 	[DCC] = {
 		.name = "DCC",
 		.description = "Layer3 Call Control (CC)",
-		.enabled = 1, .loglevel = LOGL_NOTICE,
+		.enabled = 1, .loglevel = LOGL_INFO,
 	},
 	[DMM] = {
 		.name = "DMM",
@@ -404,6 +410,11 @@ static struct log_info_cat test_categories[] = {
 		.description = "Iu-CS Protocol",
 		.enabled = 1, .loglevel = LOGL_DEBUG,
 	},
+	[DMNCC] = {
+		.name = "DMNCC",
+		.description = "MNCC API for Call Control application",
+		.enabled = 1, .loglevel = LOGL_DEBUG,
+	},
 };
 
 static struct log_info info = {
@@ -413,9 +424,31 @@ static struct log_info info = {
 
 extern void *tall_bsc_ctx;
 
-int fake_mncc_recv(struct gsm_network *net, struct msgb *msg)
+int mncc_recv(struct gsm_network *net, struct msgb *msg)
 {
-	fprintf(stderr, "rx MNCC\n");
+	struct gsm_mncc *mncc = (void*)msg->data;
+	log("MSC --> MNCC: callref 0x%x: %s", mncc->callref,
+	    get_mncc_name(mncc->msg_type));
+
+	OSMO_ASSERT(cc_to_mncc_tx_expected_msg_type);
+	if (cc_to_mncc_tx_expected_msg_type != mncc->msg_type) {
+		log("Mismatch! Expected MNCC msg type: %s",
+		    get_mncc_name(cc_to_mncc_tx_expected_msg_type));
+		abort();
+	}
+
+	if (strcmp(cc_to_mncc_tx_expected_imsi, mncc->imsi)) {
+		log("Mismatch! Expected MNCC msg IMSI: '%s', got '%s'",
+		    cc_to_mncc_tx_expected_imsi,
+		    mncc->imsi);
+		abort();
+	}
+
+	cc_to_mncc_tx_confirmed = true;
+	cc_to_mncc_tx_got_callref = mncc->callref;
+	cc_to_mncc_tx_expected_imsi = NULL;
+	cc_to_mncc_tx_expected_msg_type = 0;
+	talloc_free(msg);
 	return 0;
 }
 
@@ -521,6 +554,23 @@ int __wrap_a_iface_tx_clear_cmd(struct gsm_subscriber_connection *conn)
 	bssap_clear_expected = false;
 	bssap_clear_sent = true;
 	return 0;
+}
+
+/* override, requires '-Wl,--wrap=msc_call_assignment' */
+int __real_msc_call_assignment(struct gsm_trans *trans);
+int __wrap_msc_call_assignment(struct gsm_trans *trans)
+{
+	log("MS <--Call Assignment-- MSC: subscr=%s callref=0x%x",
+	    vlr_subscr_name(trans->vsub), trans->callref);
+	return 0;
+}
+
+/* override, requires '-Wl,--wrap=msc_call_release' */
+void __real_msc_call_release(struct gsm_trans *trans);
+void __wrap_msc_call_release(struct gsm_trans *trans)
+{
+	log("MS <--Call Release-- MSC: subscr=%s callref=0x%x",
+	    vlr_subscr_name(trans->vsub), trans->callref);
 }
 
 static int fake_vlr_tx_lu_acc(void *msc_conn_ref, uint32_t send_tmsi)
@@ -774,7 +824,7 @@ int main(int argc, char **argv)
 	log_set_print_filename(osmo_stderr_target, _log_lines? 1 : 0);
 	log_set_print_category(osmo_stderr_target, 1);
 
-	net = gsm_network_init(tall_bsc_ctx, 1, 1, fake_mncc_recv);
+	net = gsm_network_init(tall_bsc_ctx, 1, 1, mncc_recv);
 	net->gsup_server_addr_str = talloc_strdup(net, "no_gsup_server");
 	net->gsup_server_port = 0;
 
