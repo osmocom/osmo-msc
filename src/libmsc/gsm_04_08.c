@@ -1213,9 +1213,11 @@ static void new_cc_state(struct gsm_trans *trans, int state)
 	if (state > 31 || state < 0)
 		return;
 
-	DEBUGP(DCC, "new state %s -> %s\n",
-		gsm48_cc_state_name(trans->cc.state),
-		gsm48_cc_state_name(state));
+	DEBUGP(DCC, "(ti %02x sub %s) new state %s -> %s\n",
+	       trans->transaction_id,
+	       vlr_subscr_name(trans->vsub),
+	       gsm48_cc_state_name(trans->cc.state),
+	       gsm48_cc_state_name(state));
 
 	count_statistics(trans, state);
 	trans->cc.state = state;
