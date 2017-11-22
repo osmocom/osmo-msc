@@ -156,6 +156,7 @@ struct gsm_subscriber_connection *conn_new(void)
 	conn = msc_subscr_con_allocate(net);
 	conn->bts = the_bts;
 	conn->via_ran = rx_from_ran;
+	conn->lac = 23;
 	if (conn->via_ran == RAN_UTRAN_IU) {
 		struct ranap_ue_conn_ctx *ue_ctx = talloc_zero(conn, struct ranap_ue_conn_ctx);
 		*ue_ctx = (struct ranap_ue_conn_ctx){

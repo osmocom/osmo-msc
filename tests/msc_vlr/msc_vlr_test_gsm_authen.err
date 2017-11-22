@@ -9,7 +9,7 @@ DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: Allocated
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: Received Event SUBSCR_CONN_E_START
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: state_chg to SUBSCR_CONN_S_NEW
 DMM LOCATION UPDATING REQUEST: MI(IMSI)=901700000004620 type=IMSI ATTACH
-DMM LU/new-LAC: 1/0
+DMM LU/new-LAC: 1/23
 DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_IDLE}: Allocated
 DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_IDLE}: is child of Subscr_Conn(901700000004620)
 DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_IDLE}: rev=GSM net=GERAN Auth (no Ciph)
@@ -280,7 +280,7 @@ DREF VLR subscr MSISDN:46071 usage increases to: 2
   llist_count(&vsub->cs.requests) == 0
 DREF VLR subscr MSISDN:46071 usage increases to: 3
 DMM Subscriber MSISDN:46071 not paged yet, start paging.
-  RAN_GERAN_A sends out paging request to IMSI 901700000004620, TMSI 0xffffffff, LAC 0
+  RAN_GERAN_A sends out paging request to IMSI 901700000004620, TMSI 0xffffffff, LAC 23
   strcmp(paging_expecting_imsi, imsi) == 0
 DREF VLR subscr MSISDN:46071 usage increases to: 4
   llist_count(&vsub->cs.requests) == 1
@@ -456,7 +456,7 @@ DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: Allocated
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: Received Event SUBSCR_CONN_E_START
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: state_chg to SUBSCR_CONN_S_NEW
 DMM LOCATION UPDATING REQUEST: MI(IMSI)=901700000004620 type=IMSI ATTACH
-DMM LU/new-LAC: 1/0
+DMM LU/new-LAC: 1/23
 DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_IDLE}: Allocated
 DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_IDLE}: is child of Subscr_Conn(901700000004620)
 DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_IDLE}: rev=GSM net=GERAN Auth (no Ciph)
@@ -763,7 +763,7 @@ DREF VLR subscr MSISDN:46071 usage increases to: 2
   llist_count(&vsub->cs.requests) == 0
 DREF VLR subscr MSISDN:46071 usage increases to: 3
 DMM Subscriber MSISDN:46071 not paged yet, start paging.
-  RAN_GERAN_A sends out paging request to IMSI 901700000004620, TMSI 0x03020100, LAC 0
+  RAN_GERAN_A sends out paging request to IMSI 901700000004620, TMSI 0x03020100, LAC 23
   paging_expecting_tmsi == 0x03020100
 DREF VLR subscr MSISDN:46071 usage increases to: 4
   llist_count(&vsub->cs.requests) == 1
@@ -917,7 +917,7 @@ DMM Subscr_Conn(50462976){SUBSCR_CONN_S_INIT}: Allocated
 DMM Subscr_Conn(50462976){SUBSCR_CONN_S_INIT}: Received Event SUBSCR_CONN_E_START
 DMM Subscr_Conn(50462976){SUBSCR_CONN_S_INIT}: state_chg to SUBSCR_CONN_S_NEW
 DMM LOCATION UPDATING REQUEST: MI(TMSI)=50462976 type=IMSI ATTACH
-DMM LU/new-LAC: 1/0
+DMM LU/new-LAC: 1/23
 DVLR vlr_lu_fsm(50462976){VLR_ULA_S_IDLE}: Allocated
 DVLR vlr_lu_fsm(50462976){VLR_ULA_S_IDLE}: is child of Subscr_Conn(50462976)
 DVLR vlr_lu_fsm(50462976){VLR_ULA_S_IDLE}: rev=GSM net=GERAN Auth (no Ciph)
@@ -1106,7 +1106,7 @@ DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: Allocated
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: Received Event SUBSCR_CONN_E_START
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: state_chg to SUBSCR_CONN_S_NEW
 DMM LOCATION UPDATING REQUEST: MI(IMSI)=901700000004620 type=IMSI ATTACH
-DMM LU/new-LAC: 1/0
+DMM LU/new-LAC: 1/23
 DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_IDLE}: Allocated
 DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_IDLE}: is child of Subscr_Conn(901700000004620)
 DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_IDLE}: rev=GSM net=GERAN Auth (no Ciph)
@@ -1325,7 +1325,7 @@ DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: Allocated
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: Received Event SUBSCR_CONN_E_START
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: state_chg to SUBSCR_CONN_S_NEW
 DMM LOCATION UPDATING REQUEST: MI(IMSI)=901700000004620 type=IMSI ATTACH
-DMM LU/new-LAC: 1/0
+DMM LU/new-LAC: 1/23
 DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_IDLE}: Allocated
 DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_IDLE}: is child of Subscr_Conn(901700000004620)
 DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_IDLE}: rev=GSM net=GERAN Auth (no Ciph)
@@ -1575,7 +1575,7 @@ DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_INIT}: Allocated
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_INIT}: Received Event SUBSCR_CONN_E_START
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_INIT}: state_chg to SUBSCR_CONN_S_NEW
 DMM LOCATION UPDATING REQUEST: MI(IMSI)=901700000010650 type=NORMAL
-DMM LU/new-LAC: 0/0
+DMM LU/new-LAC: 0/23
 DVLR vlr_lu_fsm(901700000010650){VLR_ULA_S_IDLE}: Allocated
 DVLR vlr_lu_fsm(901700000010650){VLR_ULA_S_IDLE}: is child of Subscr_Conn(901700000010650)
 DVLR vlr_lu_fsm(901700000010650){VLR_ULA_S_IDLE}: rev=GSM net=GERAN Auth (no Ciph)
@@ -1827,7 +1827,7 @@ DREF VLR subscr MSISDN:42342 usage increases to: 2
   llist_count(&vsub->cs.requests) == 0
 DREF VLR subscr MSISDN:42342 usage increases to: 3
 DMM Subscriber MSISDN:42342 not paged yet, start paging.
-  RAN_GERAN_A sends out paging request to IMSI 901700000010650, TMSI 0xffffffff, LAC 0
+  RAN_GERAN_A sends out paging request to IMSI 901700000010650, TMSI 0xffffffff, LAC 23
   strcmp(paging_expecting_imsi, imsi) == 0
 DREF VLR subscr MSISDN:42342 usage increases to: 4
   llist_count(&vsub->cs.requests) == 1
