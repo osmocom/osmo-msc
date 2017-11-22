@@ -2981,7 +2981,7 @@ int mncc_tx_to_cc(struct gsm_network *net, int msg_type, void *arg)
 		}
 
 		/* Assign conn */
-		trans->conn = msc_subscr_conn_get(conn);
+		trans->conn = msc_subscr_conn_get(conn, MSC_CONN_USE_TRANS_CC);
 		vlr_subscr_put(vsub);
 	} else {
 		/* update the subscriber we deal with */
@@ -3133,7 +3133,7 @@ static int gsm0408_rcv_cc(struct gsm_subscriber_connection *conn, struct msgb *m
 			return -ENOMEM;
 		}
 		/* Assign transaction */
-		trans->conn = msc_subscr_conn_get(conn);
+		trans->conn = msc_subscr_conn_get(conn, MSC_CONN_USE_TRANS_CC);
 		cm_service_request_concludes(conn, msg);
 	}
 

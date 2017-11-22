@@ -117,12 +117,16 @@ struct gsm_trans *trans_alloc(struct gsm_network *net,
  */
 void trans_free(struct gsm_trans *trans)
 {
+	enum msc_subscr_conn_use conn_usage_token = MSC_CONN_USE_UNTRACKED;
+
 	switch (trans->protocol) {
 	case GSM48_PDISC_CC:
 		_gsm48_cc_trans_free(trans);
+		conn_usage_token = MSC_CONN_USE_TRANS_CC;
 		break;
 	case GSM48_PDISC_SMS:
 		_gsm411_sms_trans_free(trans);
+		conn_usage_token = MSC_CONN_USE_TRANS_SMS;
 		break;
 	}
 
@@ -139,7 +143,7 @@ void trans_free(struct gsm_trans *trans)
 	llist_del(&trans->entry);
 
 	if (trans->conn)
-		msc_subscr_conn_put(trans->conn);
+		msc_subscr_conn_put(trans->conn, conn_usage_token);
 
 	trans->conn = NULL;
 	talloc_free(trans);

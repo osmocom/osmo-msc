@@ -139,6 +139,7 @@ struct gsm_subscriber_connection {
 	/* usage count. If this drops to zero, we start the release
 	 * towards A/Iu */
 	uint32_t use_count;
+	uint32_t use_tokens;
 
 	/* The MS has opened the conn with a CM Service Request, and we shall
 	 * keep it open for an actual request (or until timeout). */

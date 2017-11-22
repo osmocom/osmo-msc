@@ -59,7 +59,7 @@ static int paging_cb_silent(unsigned int hooknum, unsigned int event,
 			conn->lchan->ts->nr, conn->lchan->ts->trx->arfcn);
 #endif
 		conn->silent_call = 1;
-		msc_subscr_conn_get(conn);
+		msc_subscr_conn_get(conn, MSC_CONN_USE_SILENT_CALL);
 		/* increment lchan reference count */
 		osmo_signal_dispatch(SS_SCALL, S_SCALL_SUCCESS, &sigdata);
 		break;
@@ -159,7 +159,7 @@ int gsm_silent_call_stop(struct vlr_subscr *vsub)
 #endif
 
 	conn->silent_call = 0;
-	msc_subscr_conn_put(conn);
+	msc_subscr_conn_put(conn, MSC_CONN_USE_SILENT_CALL);
 
 	return 0;
 }

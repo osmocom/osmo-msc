@@ -225,7 +225,7 @@ static void subscr_conn_fsm_cleanup(struct osmo_fsm_inst *fi,
 		return;
 	conn->conn_fsm = NULL;
  	msc_subscr_conn_close(conn, cause);
-	msc_subscr_conn_put(conn);
+	msc_subscr_conn_put(conn, MSC_CONN_USE_FSM);
 }
 
 int subscr_conn_fsm_timeout(struct osmo_fsm_inst *fi)
@@ -320,7 +320,7 @@ int msc_create_conn_fsm(struct gsm_subscriber_connection *conn, const char *id)
 	 * connection, then in _osmo_fsm_inst_term() the osmo_fsm_inst_free()
 	 * that follows the cleanup() call would run into a double free. */
 	fi = osmo_fsm_inst_alloc(&subscr_conn_fsm, conn->network,
-				 msc_subscr_conn_get(conn),
+				 msc_subscr_conn_get(conn, MSC_CONN_USE_FSM),
 				 LOGL_DEBUG, id);
 
 	if (!fi) {

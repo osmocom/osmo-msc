@@ -69,14 +69,14 @@ static void subscr_conn_bump(struct gsm_subscriber_connection *conn)
 int msc_compl_l3(struct gsm_subscriber_connection *conn,
 		 struct msgb *msg, uint16_t chosen_channel)
 {
-	msc_subscr_conn_get(conn);
+	msc_subscr_conn_get(conn, MSC_CONN_USE_COMPL_L3);
 	gsm0408_dispatch(conn, msg);
 
 	/* Bump whether the conn wants to be closed */
 	subscr_conn_bump(conn);
 
 	/* If this should be kept, the conn->conn_fsm has placed a use_count */
-	msc_subscr_conn_put(conn);
+	msc_subscr_conn_put(conn, MSC_CONN_USE_COMPL_L3);
 
 	/* Always return acceptance, because even if the conn was not accepted,
 	 * we assumed ownership of it and the caller shall not interfere with
@@ -104,12 +104,12 @@ int msc_compl_l3(struct gsm_subscriber_connection *conn,
 /* Receive a DTAP message from BSC */
 void msc_dtap(struct gsm_subscriber_connection *conn, uint8_t link_id, struct msgb *msg)
 {
-	msc_subscr_conn_get(conn);
+	msc_subscr_conn_get(conn, MSC_CONN_USE_DTAP);
 	gsm0408_dispatch(conn, msg);
 
 	/* Bump whether the conn wants to be closed */
 	subscr_conn_bump(conn);
-	msc_subscr_conn_put(conn);
+	msc_subscr_conn_put(conn, MSC_CONN_USE_DTAP);
 }
 
 /* Receive an ASSIGNMENT COMPLETE from BSC */
@@ -343,6 +343,7 @@ void msc_subscr_conn_close(struct gsm_subscriber_connection *conn,
 /* increment the ref-count. Needs to be called by every user */
 struct gsm_subscriber_connection *
 _msc_subscr_conn_get(struct gsm_subscriber_connection *conn,
+		     enum msc_subscr_conn_use balance_token,
 		     const char *file, int line)
 {
 	OSMO_ASSERT(conn);
@@ -350,35 +351,73 @@ _msc_subscr_conn_get(struct gsm_subscriber_connection *conn,
 	if (conn->in_release)
 		return NULL;
 
+	if (balance_token != MSC_CONN_USE_UNTRACKED) {
+		uint32_t flag = 1 << balance_token;
+		OSMO_ASSERT(balance_token < 32);
+		if (conn->use_tokens & flag)
+			LOGPSRC(DREF, LOGL_ERROR, file, line,
+				"%s: MSC conn use error: using an already used token: %s\n",
+				vlr_subscr_name(conn->vsub),
+				msc_subscr_conn_use_name(balance_token));
+		conn->use_tokens |= flag;
+	}
+
 	conn->use_count++;
 	LOGPSRC(DREF, LOGL_DEBUG, file, line,
-		"%s: MSC conn use + 1 == %u\n",
-		vlr_subscr_name(conn->vsub), conn->use_count);
+		"%s: MSC conn use + %s == %u (0x%x)\n",
+		vlr_subscr_name(conn->vsub), msc_subscr_conn_use_name(balance_token),
+		conn->use_count, conn->use_tokens);
 
 	return conn;
 }
 
 /* decrement the ref-count. Once it reaches zero, we release */
 void _msc_subscr_conn_put(struct gsm_subscriber_connection *conn,
+			  enum msc_subscr_conn_use balance_token,
 			  const char *file, int line)
 {
 	OSMO_ASSERT(conn);
 
+	if (balance_token != MSC_CONN_USE_UNTRACKED) {
+		uint32_t flag = 1 << balance_token;
+		OSMO_ASSERT(balance_token < 32);
+		if (!(conn->use_tokens & flag))
+			LOGPSRC(DREF, LOGL_ERROR, file, line,
+				"%s: MSC conn use error: freeing an unused token: %s\n",
+				vlr_subscr_name(conn->vsub),
+				msc_subscr_conn_use_name(balance_token));
+		conn->use_tokens &= ~flag;
+	}
+
 	if (conn->use_count == 0) {
 		LOGPSRC(DREF, LOGL_ERROR, file, line,
-			"%s: MSC conn use - 1 failed: is already 0\n",
-			vlr_subscr_name(conn->vsub));
+			"%s: MSC conn use - %s failed: is already 0\n",
+			vlr_subscr_name(conn->vsub),
+			msc_subscr_conn_use_name(balance_token));
 		return;
 	}
 
 	conn->use_count--;
 	LOGPSRC(DREF, LOGL_DEBUG, file, line,
-		"%s: MSC conn use - 1 == %u\n",
-		vlr_subscr_name(conn->vsub), conn->use_count);
+		"%s: MSC conn use - %s == %u (0x%x)\n",
+		vlr_subscr_name(conn->vsub), msc_subscr_conn_use_name(balance_token),
+		conn->use_count, conn->use_tokens);
 
 	if (conn->use_count == 0)
 		msc_subscr_con_free(conn);
 }
+
+const struct value_string msc_subscr_conn_use_names[] = {
+	{MSC_CONN_USE_UNTRACKED,	"UNTRACKED"},
+	{MSC_CONN_USE_COMPL_L3,		"compl_l3"},
+	{MSC_CONN_USE_DTAP,		"dtap"},
+	{MSC_CONN_USE_FSM,		"fsm"},
+	{MSC_CONN_USE_TRANS_CC,		"trans_cc"},
+	{MSC_CONN_USE_TRANS_SMS,	"trans_sms"},
+	{MSC_CONN_USE_TRANS_USSD,	"trans_ussd"},
+	{MSC_CONN_USE_SILENT_CALL,	"silent_call"},
+	{0, NULL},
+};
 
 void msc_stop_paging(struct vlr_subscr *vsub)
 {

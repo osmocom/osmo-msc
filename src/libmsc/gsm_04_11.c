@@ -949,7 +949,7 @@ int gsm0411_rcv_sms(struct gsm_subscriber_connection *conn,
 		gsm411_smr_init(&trans->sms.smr_inst, 0, 1,
 			gsm411_rl_recv, gsm411_mn_send);
 
-		trans->conn = msc_subscr_conn_get(conn);
+		trans->conn = msc_subscr_conn_get(conn, MSC_CONN_USE_TRANS_SMS);
 
 		new_trans = 1;
 		cm_service_request_concludes(conn, msg);
@@ -1031,7 +1031,7 @@ int gsm411_send_sms(struct gsm_subscriber_connection *conn, struct gsm_sms *sms)
 		gsm411_rl_recv, gsm411_mn_send);
 	trans->sms.sms = sms;
 
-	trans->conn = msc_subscr_conn_get(conn);
+	trans->conn = msc_subscr_conn_get(conn, MSC_CONN_USE_TRANS_SMS);
 
 	/* Hardcode SMSC Originating Address for now */
 	data = (uint8_t *)msgb_put(msg, 8);

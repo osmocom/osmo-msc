@@ -84,14 +84,31 @@ void msc_subscr_conn_communicating(struct gsm_subscriber_connection *conn);
 void msc_subscr_conn_close(struct gsm_subscriber_connection *conn,
 			   uint32_t cause);
 
-#define msc_subscr_conn_get(conn) \
-	_msc_subscr_conn_get(conn, __BASE_FILE__, __LINE__)
-#define msc_subscr_conn_put(conn) \
-	_msc_subscr_conn_put(conn, __BASE_FILE__, __LINE__)
+enum msc_subscr_conn_use {
+	MSC_CONN_USE_UNTRACKED = -1,
+	MSC_CONN_USE_COMPL_L3,
+	MSC_CONN_USE_DTAP,
+	MSC_CONN_USE_FSM,
+	MSC_CONN_USE_TRANS_CC,
+	MSC_CONN_USE_TRANS_SMS,
+	MSC_CONN_USE_TRANS_USSD,
+	MSC_CONN_USE_SILENT_CALL,
+};
+
+extern const struct value_string msc_subscr_conn_use_names[];
+static inline const char *msc_subscr_conn_use_name(enum msc_subscr_conn_use val)
+{ return get_value_string(msc_subscr_conn_use_names, val); }
+
+#define msc_subscr_conn_get(conn, balance_token) \
+	_msc_subscr_conn_get(conn, balance_token, __BASE_FILE__, __LINE__)
+#define msc_subscr_conn_put(conn, balance_token) \
+	_msc_subscr_conn_put(conn, balance_token, __BASE_FILE__, __LINE__)
 struct gsm_subscriber_connection *
 _msc_subscr_conn_get(struct gsm_subscriber_connection *conn,
+		     enum msc_subscr_conn_use balance_token,
 		     const char *file, int line);
 void _msc_subscr_conn_put(struct gsm_subscriber_connection *conn,
+			  enum msc_subscr_conn_use balance_token,
 			  const char *file, int line);
 
 void msc_stop_paging(struct vlr_subscr *vsub);

@@ -2,9 +2,9 @@
 - Location Update request causes a GSUP Send Auth Info request to HLR
   MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
   new conn
-DREF unknown: MSC conn use + 1 == 1
+DREF unknown: MSC conn use + compl_l3 == 1 (0x1)
 DRLL Dispatching 04.08 message GSM48_MT_MM_LOC_UPD_REQUEST (0x5:0x8)
-DREF unknown: MSC conn use + 1 == 2
+DREF unknown: MSC conn use + fsm == 2 (0x5)
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: Allocated
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: Received Event SUBSCR_CONN_E_START
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: state_chg to SUBSCR_CONN_S_NEW
@@ -28,7 +28,7 @@ DVLR GSUP tx: 08010809710000004026f0
 GSUP --> HLR: OSMO_GSUP_MSGT_SEND_AUTH_INFO_REQUEST: 08010809710000004026f0
 DVLR VLR_Authenticate(901700000004620){VLR_SUB_AS_NEEDS_AUTH}: state_chg to VLR_SUB_AS_NEEDS_AUTH_WAIT_AI
 DMM IMSI:901700000004620: bump: conn still being established (SUBSCR_CONN_S_NEW)
-DREF IMSI:901700000004620: MSC conn use - 1 == 1
+DREF IMSI:901700000004620: MSC conn use - compl_l3 == 1 (0x4)
   lu_result_sent == 0
 - HLR sends _SEND_AUTH_INFO_ERROR = unknown IMSI
 <-- GSUP rx OSMO_GSUP_MSGT_SEND_AUTH_INFO_ERROR: 09010809710000004026f0020102
@@ -57,7 +57,7 @@ DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_DONE}: Freeing instance
 DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_DONE}: Deallocated
 DMM msc_subscr_conn_close(vsub=IMSI:901700000004620, cause=2): no conn fsm, releasing directly without release event.
 - BSSAP Clear --RAN_GERAN_A--> MS
-DREF IMSI:901700000004620: MSC conn use - 1 == 0
+DREF IMSI:901700000004620: MSC conn use - fsm == 0 (0x0)
 DRLL subscr IMSI:901700000004620: Freeing subscriber connection
 DREF VLR subscr IMSI:901700000004620 usage decreases to: 1
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Freeing instance
@@ -78,9 +78,9 @@ talloc_total_blocks(tall_bsc_ctx) == 9
 - Location Update request causes a GSUP Send Auth Info request to HLR
   MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
   new conn
-DREF unknown: MSC conn use + 1 == 1
+DREF unknown: MSC conn use + compl_l3 == 1 (0x1)
 DRLL Dispatching 04.08 message GSM48_MT_MM_LOC_UPD_REQUEST (0x5:0x8)
-DREF unknown: MSC conn use + 1 == 2
+DREF unknown: MSC conn use + fsm == 2 (0x5)
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: Allocated
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: Received Event SUBSCR_CONN_E_START
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: state_chg to SUBSCR_CONN_S_NEW
@@ -104,7 +104,7 @@ DVLR GSUP tx: 08010809710000004026f0
 GSUP --> HLR: OSMO_GSUP_MSGT_SEND_AUTH_INFO_REQUEST: 08010809710000004026f0
 DVLR VLR_Authenticate(901700000004620){VLR_SUB_AS_NEEDS_AUTH}: state_chg to VLR_SUB_AS_NEEDS_AUTH_WAIT_AI
 DMM IMSI:901700000004620: bump: conn still being established (SUBSCR_CONN_S_NEW)
-DREF IMSI:901700000004620: MSC conn use - 1 == 1
+DREF IMSI:901700000004620: MSC conn use - compl_l3 == 1 (0x4)
   lu_result_sent == 0
 - HLR sends _SEND_AUTH_INFO_ERROR = net fail
 <-- GSUP rx OSMO_GSUP_MSGT_SEND_AUTH_INFO_ERROR: 09010809710000004026f0020111
@@ -133,7 +133,7 @@ DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_DONE}: Freeing instance
 DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_DONE}: Deallocated
 DMM msc_subscr_conn_close(vsub=IMSI:901700000004620, cause=2): no conn fsm, releasing directly without release event.
 - BSSAP Clear --RAN_GERAN_A--> MS
-DREF IMSI:901700000004620: MSC conn use - 1 == 0
+DREF IMSI:901700000004620: MSC conn use - fsm == 0 (0x0)
 DRLL subscr IMSI:901700000004620: Freeing subscriber connection
 DREF VLR subscr IMSI:901700000004620 usage decreases to: 1
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Freeing instance
@@ -156,9 +156,9 @@ talloc_total_blocks(tall_bsc_ctx) == 9
 - Location Update request causes a GSUP Send Auth Info request to HLR
   MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
   new conn
-DREF unknown: MSC conn use + 1 == 1
+DREF unknown: MSC conn use + compl_l3 == 1 (0x1)
 DRLL Dispatching 04.08 message GSM48_MT_MM_LOC_UPD_REQUEST (0x5:0x8)
-DREF unknown: MSC conn use + 1 == 2
+DREF unknown: MSC conn use + fsm == 2 (0x5)
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: Allocated
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: Received Event SUBSCR_CONN_E_START
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: state_chg to SUBSCR_CONN_S_NEW
@@ -182,7 +182,7 @@ DVLR GSUP tx: 08010809710000004026f0
 GSUP --> HLR: OSMO_GSUP_MSGT_SEND_AUTH_INFO_REQUEST: 08010809710000004026f0
 DVLR VLR_Authenticate(901700000004620){VLR_SUB_AS_NEEDS_AUTH}: state_chg to VLR_SUB_AS_NEEDS_AUTH_WAIT_AI
 DMM IMSI:901700000004620: bump: conn still being established (SUBSCR_CONN_S_NEW)
-DREF IMSI:901700000004620: MSC conn use - 1 == 1
+DREF IMSI:901700000004620: MSC conn use - compl_l3 == 1 (0x4)
   lu_result_sent == 0
 - from HLR, rx _SEND_AUTH_INFO_RESULT; VLR sends Auth Req to MS
 <-- GSUP rx OSMO_GSUP_MSGT_SEND_AUTH_INFO_RESULT: 0a010809710000004026f003222010585df1ae287f6e273dce07090d61320b21042d8b2c3e220861855fb81fc2a800
@@ -201,7 +201,7 @@ DREF VLR subscr IMSI:901700000004620 usage decreases to: 1
   lu_result_sent == 0
 - MS sends Authen Response, VLR accepts and sends GSUP LU Req to HLR
   MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_AUTH_RESP
-DREF IMSI:901700000004620: MSC conn use + 1 == 2
+DREF IMSI:901700000004620: MSC conn use + dtap == 2 (0x6)
 DRLL Dispatching 04.08 message GSM48_MT_MM_AUTH_RESP (0x5:0x14)
 DMM IMSI:901700000004620: MM GSM AUTHENTICATION RESPONSE (sres = 2d8b2c3e)
 DVLR VLR_Authenticate(901700000004620){VLR_SUB_AS_WAIT_RESP}: Received Event VLR_AUTH_E_MS_AUTH_RESP
@@ -225,7 +225,7 @@ DVLR GSUP tx: 04010809710000004026f0
 GSUP --> HLR: OSMO_GSUP_MSGT_UPDATE_LOCATION_REQUEST: 04010809710000004026f0
 DVLR upd_hlr_vlr_fsm(901700000004620){UPD_HLR_VLR_S_INIT}: state_chg to UPD_HLR_VLR_S_WAIT_FOR_DATA
 DMM IMSI:901700000004620: bump: conn still being established (SUBSCR_CONN_S_NEW)
-DREF IMSI:901700000004620: MSC conn use - 1 == 1
+DREF IMSI:901700000004620: MSC conn use - dtap == 1 (0x4)
   lu_result_sent == 0
 - HLR sends _INSERT_DATA_REQUEST, VLR responds with _INSERT_DATA_RESULT
 <-- GSUP rx OSMO_GSUP_MSGT_INSERT_DATA_REQUEST: 10010809710000004026f00804036470f1
@@ -286,7 +286,7 @@ DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_DONE}: Freeing instance
 DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_DONE}: Deallocated
 DMM msc_subscr_conn_close(vsub=MSISDN:46071, cause=2): no conn fsm, releasing directly without release event.
 - BSSAP Clear --RAN_GERAN_A--> MS
-DREF MSISDN:46071: MSC conn use - 1 == 0
+DREF MSISDN:46071: MSC conn use - fsm == 0 (0x0)
 DRLL subscr MSISDN:46071: Freeing subscriber connection
 DREF VLR subscr MSISDN:46071 usage decreases to: 2
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Freeing instance
@@ -307,9 +307,9 @@ DREF VLR subscr MSISDN:46071 usage decreases to: 1
 - Location Update request causes a GSUP Send Auth Info request to HLR
   MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
   new conn
-DREF unknown: MSC conn use + 1 == 1
+DREF unknown: MSC conn use + compl_l3 == 1 (0x1)
 DRLL Dispatching 04.08 message GSM48_MT_MM_LOC_UPD_REQUEST (0x5:0x8)
-DREF unknown: MSC conn use + 1 == 2
+DREF unknown: MSC conn use + fsm == 2 (0x5)
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: Allocated
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: Received Event SUBSCR_CONN_E_START
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: state_chg to SUBSCR_CONN_S_NEW
@@ -331,7 +331,7 @@ DVLR GSUP tx: 08010809710000004026f0
 GSUP --> HLR: OSMO_GSUP_MSGT_SEND_AUTH_INFO_REQUEST: 08010809710000004026f0
 DVLR VLR_Authenticate(901700000004620){VLR_SUB_AS_NEEDS_AUTH}: state_chg to VLR_SUB_AS_NEEDS_AUTH_WAIT_AI
 DMM MSISDN:46071: bump: conn still being established (SUBSCR_CONN_S_NEW)
-DREF MSISDN:46071: MSC conn use - 1 == 1
+DREF MSISDN:46071: MSC conn use - compl_l3 == 1 (0x4)
   lu_result_sent == 0
 - HLR sends _SEND_AUTH_INFO_ERROR = net fail
 <-- GSUP rx OSMO_GSUP_MSGT_SEND_AUTH_INFO_ERROR: 09010809710000004026f0020111
@@ -350,7 +350,7 @@ DREF VLR subscr MSISDN:46071 usage decreases to: 2
   lu_result_sent == 0
 - MS sends Authen Response, VLR accepts and sends GSUP LU Req to HLR
   MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_AUTH_RESP
-DREF MSISDN:46071: MSC conn use + 1 == 2
+DREF MSISDN:46071: MSC conn use + dtap == 2 (0x6)
 DRLL Dispatching 04.08 message GSM48_MT_MM_AUTH_RESP (0x5:0x14)
 DMM MSISDN:46071: MM GSM AUTHENTICATION RESPONSE (sres = 2d8b2c3e)
 DVLR VLR_Authenticate(901700000004620){VLR_SUB_AS_WAIT_RESP}: Received Event VLR_AUTH_E_MS_AUTH_RESP
@@ -374,7 +374,7 @@ DVLR GSUP tx: 04010809710000004026f0
 GSUP --> HLR: OSMO_GSUP_MSGT_UPDATE_LOCATION_REQUEST: 04010809710000004026f0
 DVLR upd_hlr_vlr_fsm(901700000004620){UPD_HLR_VLR_S_INIT}: state_chg to UPD_HLR_VLR_S_WAIT_FOR_DATA
 DMM MSISDN:46071: bump: conn still being established (SUBSCR_CONN_S_NEW)
-DREF MSISDN:46071: MSC conn use - 1 == 1
+DREF MSISDN:46071: MSC conn use - dtap == 1 (0x4)
   lu_result_sent == 0
 - HLR sends _INSERT_DATA_REQUEST, VLR responds with _INSERT_DATA_RESULT
 <-- GSUP rx OSMO_GSUP_MSGT_INSERT_DATA_REQUEST: 10010809710000004026f00804036470f1
@@ -434,7 +434,7 @@ DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_DONE}: Freeing instance
 DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_DONE}: Deallocated
 DMM msc_subscr_conn_close(vsub=MSISDN:46071, cause=2): no conn fsm, releasing directly without release event.
 - BSSAP Clear --RAN_GERAN_A--> MS
-DREF MSISDN:46071: MSC conn use - 1 == 0
+DREF MSISDN:46071: MSC conn use - fsm == 0 (0x0)
 DRLL subscr MSISDN:46071: Freeing subscriber connection
 DREF VLR subscr MSISDN:46071 usage decreases to: 2
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Freeing instance
@@ -457,9 +457,9 @@ talloc_total_blocks(tall_bsc_ctx) == 9
 - Location Update request causes a GSUP Send Auth Info request to HLR
   MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
   new conn
-DREF unknown: MSC conn use + 1 == 1
+DREF unknown: MSC conn use + compl_l3 == 1 (0x1)
 DRLL Dispatching 04.08 message GSM48_MT_MM_LOC_UPD_REQUEST (0x5:0x8)
-DREF unknown: MSC conn use + 1 == 2
+DREF unknown: MSC conn use + fsm == 2 (0x5)
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: Allocated
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: Received Event SUBSCR_CONN_E_START
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: state_chg to SUBSCR_CONN_S_NEW
@@ -483,7 +483,7 @@ DVLR GSUP tx: 08010809710000004026f0
 GSUP --> HLR: OSMO_GSUP_MSGT_SEND_AUTH_INFO_REQUEST: 08010809710000004026f0
 DVLR VLR_Authenticate(901700000004620){VLR_SUB_AS_NEEDS_AUTH}: state_chg to VLR_SUB_AS_NEEDS_AUTH_WAIT_AI
 DMM IMSI:901700000004620: bump: conn still being established (SUBSCR_CONN_S_NEW)
-DREF IMSI:901700000004620: MSC conn use - 1 == 1
+DREF IMSI:901700000004620: MSC conn use - compl_l3 == 1 (0x4)
   lu_result_sent == 0
 - from HLR, rx _SEND_AUTH_INFO_RESULT; VLR sends Auth Req to MS
 <-- GSUP rx OSMO_GSUP_MSGT_SEND_AUTH_INFO_RESULT: 0a010809710000004026f003222010585df1ae287f6e273dce07090d61320b21042d8b2c3e220861855fb81fc2a800
@@ -502,7 +502,7 @@ DREF VLR subscr IMSI:901700000004620 usage decreases to: 1
   lu_result_sent == 0
 - MS sends Authen Response, VLR accepts and sends GSUP LU Req to HLR
   MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_AUTH_RESP
-DREF IMSI:901700000004620: MSC conn use + 1 == 2
+DREF IMSI:901700000004620: MSC conn use + dtap == 2 (0x6)
 DRLL Dispatching 04.08 message GSM48_MT_MM_AUTH_RESP (0x5:0x14)
 DMM IMSI:901700000004620: MM GSM AUTHENTICATION RESPONSE (sres = 2d8b2c3e)
 DVLR VLR_Authenticate(901700000004620){VLR_SUB_AS_WAIT_RESP}: Received Event VLR_AUTH_E_MS_AUTH_RESP
@@ -526,7 +526,7 @@ DVLR GSUP tx: 04010809710000004026f0
 GSUP --> HLR: OSMO_GSUP_MSGT_UPDATE_LOCATION_REQUEST: 04010809710000004026f0
 DVLR upd_hlr_vlr_fsm(901700000004620){UPD_HLR_VLR_S_INIT}: state_chg to UPD_HLR_VLR_S_WAIT_FOR_DATA
 DMM IMSI:901700000004620: bump: conn still being established (SUBSCR_CONN_S_NEW)
-DREF IMSI:901700000004620: MSC conn use - 1 == 1
+DREF IMSI:901700000004620: MSC conn use - dtap == 1 (0x4)
   lu_result_sent == 0
 - HLR sends _INSERT_DATA_REQUEST, VLR responds with _INSERT_DATA_RESULT
 <-- GSUP rx OSMO_GSUP_MSGT_INSERT_DATA_REQUEST: 10010809710000004026f00804036470f1
@@ -587,7 +587,7 @@ DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_DONE}: Freeing instance
 DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_DONE}: Deallocated
 DMM msc_subscr_conn_close(vsub=MSISDN:46071, cause=2): no conn fsm, releasing directly without release event.
 - BSSAP Clear --RAN_GERAN_A--> MS
-DREF MSISDN:46071: MSC conn use - 1 == 0
+DREF MSISDN:46071: MSC conn use - fsm == 0 (0x0)
 DRLL subscr MSISDN:46071: Freeing subscriber connection
 DREF VLR subscr MSISDN:46071 usage decreases to: 2
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Freeing instance
@@ -608,9 +608,9 @@ DREF VLR subscr MSISDN:46071 usage decreases to: 1
 - Location Update request causes a GSUP Send Auth Info request to HLR
   MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
   new conn
-DREF unknown: MSC conn use + 1 == 1
+DREF unknown: MSC conn use + compl_l3 == 1 (0x1)
 DRLL Dispatching 04.08 message GSM48_MT_MM_LOC_UPD_REQUEST (0x5:0x8)
-DREF unknown: MSC conn use + 1 == 2
+DREF unknown: MSC conn use + fsm == 2 (0x5)
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: Allocated
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: Received Event SUBSCR_CONN_E_START
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: state_chg to SUBSCR_CONN_S_NEW
@@ -632,7 +632,7 @@ DVLR GSUP tx: 08010809710000004026f0
 GSUP --> HLR: OSMO_GSUP_MSGT_SEND_AUTH_INFO_REQUEST: 08010809710000004026f0
 DVLR VLR_Authenticate(901700000004620){VLR_SUB_AS_NEEDS_AUTH}: state_chg to VLR_SUB_AS_NEEDS_AUTH_WAIT_AI
 DMM MSISDN:46071: bump: conn still being established (SUBSCR_CONN_S_NEW)
-DREF MSISDN:46071: MSC conn use - 1 == 1
+DREF MSISDN:46071: MSC conn use - compl_l3 == 1 (0x4)
   lu_result_sent == 0
 - HLR sends _SEND_AUTH_INFO_ERROR = net fail
 <-- GSUP rx OSMO_GSUP_MSGT_SEND_AUTH_INFO_ERROR: 09010809710000004026f0020111
@@ -661,7 +661,7 @@ DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_DONE}: Freeing instance
 DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_DONE}: Deallocated
 DMM msc_subscr_conn_close(vsub=MSISDN:46071, cause=2): no conn fsm, releasing directly without release event.
 - BSSAP Clear --RAN_GERAN_A--> MS
-DREF MSISDN:46071: MSC conn use - 1 == 0
+DREF MSISDN:46071: MSC conn use - fsm == 0 (0x0)
 DRLL subscr MSISDN:46071: Freeing subscriber connection
 DREF VLR subscr MSISDN:46071 usage decreases to: 2
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Freeing instance
@@ -684,9 +684,9 @@ talloc_total_blocks(tall_bsc_ctx) == 9
 - Location Update request causes a GSUP Send Auth Info request to HLR
   MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
   new conn
-DREF unknown: MSC conn use + 1 == 1
+DREF unknown: MSC conn use + compl_l3 == 1 (0x1)
 DRLL Dispatching 04.08 message GSM48_MT_MM_LOC_UPD_REQUEST (0x5:0x8)
-DREF unknown: MSC conn use + 1 == 2
+DREF unknown: MSC conn use + fsm == 2 (0x5)
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: Allocated
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: Received Event SUBSCR_CONN_E_START
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: state_chg to SUBSCR_CONN_S_NEW
@@ -710,7 +710,7 @@ DVLR GSUP tx: 08010809710000004026f0
 GSUP --> HLR: OSMO_GSUP_MSGT_SEND_AUTH_INFO_REQUEST: 08010809710000004026f0
 DVLR VLR_Authenticate(901700000004620){VLR_SUB_AS_NEEDS_AUTH}: state_chg to VLR_SUB_AS_NEEDS_AUTH_WAIT_AI
 DMM IMSI:901700000004620: bump: conn still being established (SUBSCR_CONN_S_NEW)
-DREF IMSI:901700000004620: MSC conn use - 1 == 1
+DREF IMSI:901700000004620: MSC conn use - compl_l3 == 1 (0x4)
   lu_result_sent == 0
 - from HLR, rx _SEND_AUTH_INFO_RESULT; VLR sends Auth Req to MS
 <-- GSUP rx OSMO_GSUP_MSGT_SEND_AUTH_INFO_RESULT: 0a010809710000004026f003222010585df1ae287f6e273dce07090d61320b21042d8b2c3e220861855fb81fc2a800
@@ -729,7 +729,7 @@ DREF VLR subscr IMSI:901700000004620 usage decreases to: 1
   lu_result_sent == 0
 - MS sends Authen Response, VLR accepts and sends GSUP LU Req to HLR
   MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_AUTH_RESP
-DREF IMSI:901700000004620: MSC conn use + 1 == 2
+DREF IMSI:901700000004620: MSC conn use + dtap == 2 (0x6)
 DRLL Dispatching 04.08 message GSM48_MT_MM_AUTH_RESP (0x5:0x14)
 DMM IMSI:901700000004620: MM GSM AUTHENTICATION RESPONSE (sres = 2d8b2c3e)
 DVLR VLR_Authenticate(901700000004620){VLR_SUB_AS_WAIT_RESP}: Received Event VLR_AUTH_E_MS_AUTH_RESP
@@ -753,7 +753,7 @@ DVLR GSUP tx: 04010809710000004026f0
 GSUP --> HLR: OSMO_GSUP_MSGT_UPDATE_LOCATION_REQUEST: 04010809710000004026f0
 DVLR upd_hlr_vlr_fsm(901700000004620){UPD_HLR_VLR_S_INIT}: state_chg to UPD_HLR_VLR_S_WAIT_FOR_DATA
 DMM IMSI:901700000004620: bump: conn still being established (SUBSCR_CONN_S_NEW)
-DREF IMSI:901700000004620: MSC conn use - 1 == 1
+DREF IMSI:901700000004620: MSC conn use - dtap == 1 (0x4)
   lu_result_sent == 0
 - HLR sends _INSERT_DATA_REQUEST, VLR responds with _INSERT_DATA_RESULT
 <-- GSUP rx OSMO_GSUP_MSGT_INSERT_DATA_REQUEST: 10010809710000004026f00804036470f1
@@ -814,7 +814,7 @@ DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_DONE}: Freeing instance
 DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_DONE}: Deallocated
 DMM msc_subscr_conn_close(vsub=MSISDN:46071, cause=2): no conn fsm, releasing directly without release event.
 - BSSAP Clear --RAN_GERAN_A--> MS
-DREF MSISDN:46071: MSC conn use - 1 == 0
+DREF MSISDN:46071: MSC conn use - fsm == 0 (0x0)
 DRLL subscr MSISDN:46071: Freeing subscriber connection
 DREF VLR subscr MSISDN:46071 usage decreases to: 2
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Freeing instance
@@ -836,9 +836,9 @@ DREF VLR subscr MSISDN:46071 usage decreases to: 1
 - Location Update request causes a GSUP Send Auth Info request to HLR
   MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
   new conn
-DREF unknown: MSC conn use + 1 == 1
+DREF unknown: MSC conn use + compl_l3 == 1 (0x1)
 DRLL Dispatching 04.08 message GSM48_MT_MM_LOC_UPD_REQUEST (0x5:0x8)
-DREF unknown: MSC conn use + 1 == 2
+DREF unknown: MSC conn use + fsm == 2 (0x5)
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: Allocated
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: Received Event SUBSCR_CONN_E_START
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: state_chg to SUBSCR_CONN_S_NEW
@@ -860,7 +860,7 @@ DVLR GSUP tx: 08010809710000004026f0
 GSUP --> HLR: OSMO_GSUP_MSGT_SEND_AUTH_INFO_REQUEST: 08010809710000004026f0
 DVLR VLR_Authenticate(901700000004620){VLR_SUB_AS_NEEDS_AUTH}: state_chg to VLR_SUB_AS_NEEDS_AUTH_WAIT_AI
 DMM MSISDN:46071: bump: conn still being established (SUBSCR_CONN_S_NEW)
-DREF MSISDN:46071: MSC conn use - 1 == 1
+DREF MSISDN:46071: MSC conn use - compl_l3 == 1 (0x4)
   lu_result_sent == 0
 - HLR sends _SEND_AUTH_INFO_ERROR = unknown IMSI
 <-- GSUP rx OSMO_GSUP_MSGT_SEND_AUTH_INFO_ERROR: 09010809710000004026f0020102
@@ -889,7 +889,7 @@ DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_DONE}: Freeing instance
 DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_DONE}: Deallocated
 DMM msc_subscr_conn_close(vsub=MSISDN:46071, cause=2): no conn fsm, releasing directly without release event.
 - BSSAP Clear --RAN_GERAN_A--> MS
-DREF MSISDN:46071: MSC conn use - 1 == 0
+DREF MSISDN:46071: MSC conn use - fsm == 0 (0x0)
 DRLL subscr MSISDN:46071: Freeing subscriber connection
 DREF VLR subscr MSISDN:46071 usage decreases to: 2
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Freeing instance
@@ -910,9 +910,9 @@ talloc_total_blocks(tall_bsc_ctx) == 9
 - Location Update request causes a GSUP Send Auth Info request to HLR
   MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
   new conn
-DREF unknown: MSC conn use + 1 == 1
+DREF unknown: MSC conn use + compl_l3 == 1 (0x1)
 DRLL Dispatching 04.08 message GSM48_MT_MM_LOC_UPD_REQUEST (0x5:0x8)
-DREF unknown: MSC conn use + 1 == 2
+DREF unknown: MSC conn use + fsm == 2 (0x5)
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: Allocated
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: Received Event SUBSCR_CONN_E_START
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: state_chg to SUBSCR_CONN_S_NEW
@@ -936,7 +936,7 @@ DVLR GSUP tx: 08010809710000004026f0
 GSUP --> HLR: OSMO_GSUP_MSGT_SEND_AUTH_INFO_REQUEST: 08010809710000004026f0
 DVLR VLR_Authenticate(901700000004620){VLR_SUB_AS_NEEDS_AUTH}: state_chg to VLR_SUB_AS_NEEDS_AUTH_WAIT_AI
 DMM IMSI:901700000004620: bump: conn still being established (SUBSCR_CONN_S_NEW)
-DREF IMSI:901700000004620: MSC conn use - 1 == 1
+DREF IMSI:901700000004620: MSC conn use - compl_l3 == 1 (0x4)
   lu_result_sent == 0
 - from HLR, rx _SEND_AUTH_INFO_RESULT but it lacks auth tuples
 <-- GSUP rx OSMO_GSUP_MSGT_SEND_AUTH_INFO_RESULT: 0a010809710000004026f0
@@ -964,7 +964,7 @@ DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_DONE}: Freeing instance
 DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_DONE}: Deallocated
 DMM msc_subscr_conn_close(vsub=IMSI:901700000004620, cause=2): no conn fsm, releasing directly without release event.
 - BSSAP Clear --RAN_GERAN_A--> MS
-DREF IMSI:901700000004620: MSC conn use - 1 == 0
+DREF IMSI:901700000004620: MSC conn use - fsm == 0 (0x0)
 DRLL subscr IMSI:901700000004620: Freeing subscriber connection
 DREF VLR subscr IMSI:901700000004620 usage decreases to: 1
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Freeing instance
@@ -985,9 +985,9 @@ talloc_total_blocks(tall_bsc_ctx) == 9
 - Location Update request causes a GSUP LU request to HLR
   MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
   new conn
-DREF unknown: MSC conn use + 1 == 1
+DREF unknown: MSC conn use + compl_l3 == 1 (0x1)
 DRLL Dispatching 04.08 message GSM48_MT_MM_LOC_UPD_REQUEST (0x5:0x8)
-DREF unknown: MSC conn use + 1 == 2
+DREF unknown: MSC conn use + fsm == 2 (0x5)
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: Allocated
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: Received Event SUBSCR_CONN_E_START
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: state_chg to SUBSCR_CONN_S_NEW
@@ -1014,7 +1014,7 @@ DVLR GSUP tx: 04010809710000004026f0
 GSUP --> HLR: OSMO_GSUP_MSGT_UPDATE_LOCATION_REQUEST: 04010809710000004026f0
 DVLR upd_hlr_vlr_fsm(901700000004620){UPD_HLR_VLR_S_INIT}: state_chg to UPD_HLR_VLR_S_WAIT_FOR_DATA
 DMM IMSI:901700000004620: bump: conn still being established (SUBSCR_CONN_S_NEW)
-DREF IMSI:901700000004620: MSC conn use - 1 == 1
+DREF IMSI:901700000004620: MSC conn use - compl_l3 == 1 (0x4)
   lu_result_sent == 0
 - HLR sends UPDATE_LOCATION_ERROR
 <-- GSUP rx OSMO_GSUP_MSGT_UPDATE_LOCATION_ERROR: 05010809710000004026f0020102
@@ -1043,7 +1043,7 @@ DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_DONE}: Freeing instance
 DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_DONE}: Deallocated
 DMM msc_subscr_conn_close(vsub=IMSI:901700000004620, cause=2): no conn fsm, releasing directly without release event.
 - BSSAP Clear --RAN_GERAN_A--> MS
-DREF IMSI:901700000004620: MSC conn use - 1 == 0
+DREF IMSI:901700000004620: MSC conn use - fsm == 0 (0x0)
 DRLL subscr IMSI:901700000004620: Freeing subscriber connection
 DREF VLR subscr IMSI:901700000004620 usage decreases to: 1
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Freeing instance
@@ -1063,9 +1063,9 @@ talloc_total_blocks(tall_bsc_ctx) == 9
 - Location Update request causes a GSUP LU request to HLR
   MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
   new conn
-DREF unknown: MSC conn use + 1 == 1
+DREF unknown: MSC conn use + compl_l3 == 1 (0x1)
 DRLL Dispatching 04.08 message GSM48_MT_MM_LOC_UPD_REQUEST (0x5:0x8)
-DREF unknown: MSC conn use + 1 == 2
+DREF unknown: MSC conn use + fsm == 2 (0x5)
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: Allocated
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: Received Event SUBSCR_CONN_E_START
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: state_chg to SUBSCR_CONN_S_NEW
@@ -1092,7 +1092,7 @@ DVLR GSUP tx: 04010809710000004026f0
 GSUP --> HLR: OSMO_GSUP_MSGT_UPDATE_LOCATION_REQUEST: 04010809710000004026f0
 DVLR upd_hlr_vlr_fsm(901700000004620){UPD_HLR_VLR_S_INIT}: state_chg to UPD_HLR_VLR_S_WAIT_FOR_DATA
 DMM IMSI:901700000004620: bump: conn still being established (SUBSCR_CONN_S_NEW)
-DREF IMSI:901700000004620: MSC conn use - 1 == 1
+DREF IMSI:901700000004620: MSC conn use - compl_l3 == 1 (0x4)
   lu_result_sent == 0
 - HLR sends only _UPDATE_LOCATION_RESULT, no INSERT DATA
 <-- GSUP rx OSMO_GSUP_MSGT_UPDATE_LOCATION_RESULT: 06010809710000004026f0
@@ -1143,7 +1143,7 @@ DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_DONE}: Freeing instance
 DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_DONE}: Deallocated
 DMM msc_subscr_conn_close(vsub=IMSI:901700000004620, cause=2): no conn fsm, releasing directly without release event.
 - BSSAP Clear --RAN_GERAN_A--> MS
-DREF IMSI:901700000004620: MSC conn use - 1 == 0
+DREF IMSI:901700000004620: MSC conn use - fsm == 0 (0x0)
 DRLL subscr IMSI:901700000004620: Freeing subscriber connection
 DREF VLR subscr IMSI:901700000004620 usage decreases to: 2
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Freeing instance

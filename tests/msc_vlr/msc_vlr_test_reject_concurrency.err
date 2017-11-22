@@ -2,9 +2,9 @@
 - Location Update Request on one connection
   MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
   new conn
-DREF unknown: MSC conn use + 1 == 1
+DREF unknown: MSC conn use + compl_l3 == 1 (0x1)
 DRLL Dispatching 04.08 message GSM48_MT_MM_LOC_UPD_REQUEST (0x5:0x8)
-DREF unknown: MSC conn use + 1 == 2
+DREF unknown: MSC conn use + fsm == 2 (0x5)
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: Allocated
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: Received Event SUBSCR_CONN_E_START
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: state_chg to SUBSCR_CONN_S_NEW
@@ -31,15 +31,15 @@ DVLR GSUP tx: 04010809710000004026f0
 GSUP --> HLR: OSMO_GSUP_MSGT_UPDATE_LOCATION_REQUEST: 04010809710000004026f0
 DVLR upd_hlr_vlr_fsm(901700000004620){UPD_HLR_VLR_S_INIT}: state_chg to UPD_HLR_VLR_S_WAIT_FOR_DATA
 DMM IMSI:901700000004620: bump: conn still being established (SUBSCR_CONN_S_NEW)
-DREF IMSI:901700000004620: MSC conn use - 1 == 1
+DREF IMSI:901700000004620: MSC conn use - compl_l3 == 1 (0x4)
   lu_result_sent == 0
   llist_count(&net->subscr_conns) == 1
 - Another Location Update Request from the same subscriber on another connection is rejected
   MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
   new conn
-DREF unknown: MSC conn use + 1 == 1
+DREF unknown: MSC conn use + compl_l3 == 1 (0x1)
 DRLL Dispatching 04.08 message GSM48_MT_MM_LOC_UPD_REQUEST (0x5:0x8)
-DREF unknown: MSC conn use + 1 == 2
+DREF unknown: MSC conn use + fsm == 2 (0x5)
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: Allocated
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: Received Event SUBSCR_CONN_E_START
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: state_chg to SUBSCR_CONN_S_NEW
@@ -65,12 +65,12 @@ DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_DONE}: Freeing instance
 DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_DONE}: Deallocated
 DMM msc_subscr_conn_close(vsub=unknown, cause=2): no conn fsm, releasing directly without release event.
 - BSSAP Clear --RAN_GERAN_A--> MS
-DREF unknown: MSC conn use - 1 == 1
+DREF unknown: MSC conn use - fsm == 1 (0x1)
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Freeing instance
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Deallocated
 DREF VLR subscr IMSI:901700000004620 usage decreases to: 1
 DRR 901700000004620: internal error during Location Updating attempt
-DREF unknown: MSC conn use - 1 == 0
+DREF unknown: MSC conn use - compl_l3 == 0 (0x0)
 DRLL Freeing subscriber connection with NULL subscriber
   bssap_clear_sent == 1
   lu_result_sent == 2
@@ -136,7 +136,7 @@ DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_DONE}: Freeing instance
 DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_DONE}: Deallocated
 DMM msc_subscr_conn_close(vsub=MSISDN:46071, cause=2): no conn fsm, releasing directly without release event.
 - BSSAP Clear --RAN_GERAN_A--> MS
-DREF MSISDN:46071: MSC conn use - 1 == 0
+DREF MSISDN:46071: MSC conn use - fsm == 0 (0x0)
 DRLL subscr MSISDN:46071: Freeing subscriber connection
 DREF VLR subscr MSISDN:46071 usage decreases to: 2
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Freeing instance
@@ -157,9 +157,9 @@ talloc_total_blocks(tall_bsc_ctx) == 9
 - Location Update Request
   MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
   new conn
-DREF unknown: MSC conn use + 1 == 1
+DREF unknown: MSC conn use + compl_l3 == 1 (0x1)
 DRLL Dispatching 04.08 message GSM48_MT_MM_LOC_UPD_REQUEST (0x5:0x8)
-DREF unknown: MSC conn use + 1 == 2
+DREF unknown: MSC conn use + fsm == 2 (0x5)
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: Allocated
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: Received Event SUBSCR_CONN_E_START
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: state_chg to SUBSCR_CONN_S_NEW
@@ -186,17 +186,17 @@ DVLR GSUP tx: 04010809710000004026f0
 GSUP --> HLR: OSMO_GSUP_MSGT_UPDATE_LOCATION_REQUEST: 04010809710000004026f0
 DVLR upd_hlr_vlr_fsm(901700000004620){UPD_HLR_VLR_S_INIT}: state_chg to UPD_HLR_VLR_S_WAIT_FOR_DATA
 DMM IMSI:901700000004620: bump: conn still being established (SUBSCR_CONN_S_NEW)
-DREF IMSI:901700000004620: MSC conn use - 1 == 1
+DREF IMSI:901700000004620: MSC conn use - compl_l3 == 1 (0x4)
   lu_result_sent == 0
   llist_count(&net->subscr_conns) == 1
 ---
 - Another Location Update Request from the same subscriber on the same conn is dropped silently
   MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
-DREF IMSI:901700000004620: MSC conn use + 1 == 2
+DREF IMSI:901700000004620: MSC conn use + dtap == 2 (0x6)
 DRLL Dispatching 04.08 message GSM48_MT_MM_LOC_UPD_REQUEST (0x5:0x8)
 DMM 901700000004620: Error: connection already in use
 DMM IMSI:901700000004620: bump: conn still being established (SUBSCR_CONN_S_NEW)
-DREF IMSI:901700000004620: MSC conn use - 1 == 1
+DREF IMSI:901700000004620: MSC conn use - dtap == 1 (0x4)
   lu_result_sent == 0
   llist_count(&net->subscr_conns) == 1
 ---
@@ -260,7 +260,7 @@ DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_DONE}: Freeing instance
 DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_DONE}: Deallocated
 DMM msc_subscr_conn_close(vsub=MSISDN:46071, cause=2): no conn fsm, releasing directly without release event.
 - BSSAP Clear --RAN_GERAN_A--> MS
-DREF MSISDN:46071: MSC conn use - 1 == 0
+DREF MSISDN:46071: MSC conn use - fsm == 0 (0x0)
 DRLL subscr MSISDN:46071: Freeing subscriber connection
 DREF VLR subscr MSISDN:46071 usage decreases to: 2
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Freeing instance
@@ -281,9 +281,9 @@ talloc_total_blocks(tall_bsc_ctx) == 9
 - Location Update Request
   MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
   new conn
-DREF unknown: MSC conn use + 1 == 1
+DREF unknown: MSC conn use + compl_l3 == 1 (0x1)
 DRLL Dispatching 04.08 message GSM48_MT_MM_LOC_UPD_REQUEST (0x5:0x8)
-DREF unknown: MSC conn use + 1 == 2
+DREF unknown: MSC conn use + fsm == 2 (0x5)
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: Allocated
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: Received Event SUBSCR_CONN_E_START
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: state_chg to SUBSCR_CONN_S_NEW
@@ -310,13 +310,13 @@ DVLR GSUP tx: 04010809710000004026f0
 GSUP --> HLR: OSMO_GSUP_MSGT_UPDATE_LOCATION_REQUEST: 04010809710000004026f0
 DVLR upd_hlr_vlr_fsm(901700000004620){UPD_HLR_VLR_S_INIT}: state_chg to UPD_HLR_VLR_S_WAIT_FOR_DATA
 DMM IMSI:901700000004620: bump: conn still being established (SUBSCR_CONN_S_NEW)
-DREF IMSI:901700000004620: MSC conn use - 1 == 1
+DREF IMSI:901700000004620: MSC conn use - compl_l3 == 1 (0x4)
   lu_result_sent == 0
   llist_count(&net->subscr_conns) == 1
 ---
 - A CM Service Request in the middle of a LU is rejected
   MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_CM_SERV_REQ
-DREF IMSI:901700000004620: MSC conn use + 1 == 2
+DREF IMSI:901700000004620: MSC conn use + dtap == 2 (0x6)
 DRLL Dispatching 04.08 message GSM48_MT_MM_CM_SERV_REQ (0x5:0x24)
 DMM <- CM SERVICE REQUEST serv_type=0x08 MI(IMSI)=901700000004620
 DMM IMSI:901700000004620: connection already in use
@@ -325,7 +325,7 @@ DMSC msc_tx 3 bytes to IMSI:901700000004620 via RAN_GERAN_A
 - DTAP --RAN_GERAN_A--> MS: GSM48_MT_MM_CM_SERV_REJ: 052211
 - DTAP matches expected message
 DMM IMSI:901700000004620: bump: conn still being established (SUBSCR_CONN_S_NEW)
-DREF IMSI:901700000004620: MSC conn use - 1 == 1
+DREF IMSI:901700000004620: MSC conn use - dtap == 1 (0x4)
   lu_result_sent == 0
   cm_service_result_sent == 0
   llist_count(&net->subscr_conns) == 1
@@ -390,7 +390,7 @@ DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_DONE}: Freeing instance
 DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_DONE}: Deallocated
 DMM msc_subscr_conn_close(vsub=MSISDN:46071, cause=2): no conn fsm, releasing directly without release event.
 - BSSAP Clear --RAN_GERAN_A--> MS
-DREF MSISDN:46071: MSC conn use - 1 == 0
+DREF MSISDN:46071: MSC conn use - fsm == 0 (0x0)
 DRLL subscr MSISDN:46071: Freeing subscriber connection
 DREF VLR subscr MSISDN:46071 usage decreases to: 2
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Freeing instance
@@ -411,9 +411,9 @@ talloc_total_blocks(tall_bsc_ctx) == 9
 - Location Update Request
   MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
   new conn
-DREF unknown: MSC conn use + 1 == 1
+DREF unknown: MSC conn use + compl_l3 == 1 (0x1)
 DRLL Dispatching 04.08 message GSM48_MT_MM_LOC_UPD_REQUEST (0x5:0x8)
-DREF unknown: MSC conn use + 1 == 2
+DREF unknown: MSC conn use + fsm == 2 (0x5)
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: Allocated
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: Received Event SUBSCR_CONN_E_START
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: state_chg to SUBSCR_CONN_S_NEW
@@ -440,18 +440,18 @@ DVLR GSUP tx: 04010809710000004026f0
 GSUP --> HLR: OSMO_GSUP_MSGT_UPDATE_LOCATION_REQUEST: 04010809710000004026f0
 DVLR upd_hlr_vlr_fsm(901700000004620){UPD_HLR_VLR_S_INIT}: state_chg to UPD_HLR_VLR_S_WAIT_FOR_DATA
 DMM IMSI:901700000004620: bump: conn still being established (SUBSCR_CONN_S_NEW)
-DREF IMSI:901700000004620: MSC conn use - 1 == 1
+DREF IMSI:901700000004620: MSC conn use - compl_l3 == 1 (0x4)
   lu_result_sent == 0
   llist_count(&net->subscr_conns) == 1
 ---
 - An erratic Paging Response is dropped silently
   MSC <--RAN_GERAN_A-- MS: GSM48_MT_RR_PAG_RESP
-DREF IMSI:901700000004620: MSC conn use + 1 == 2
+DREF IMSI:901700000004620: MSC conn use + dtap == 2 (0x6)
 DRLL Dispatching 04.08 message GSM48_MT_RR_PAG_RESP (0x6:0x27)
 DRR PAGING RESPONSE: MI(IMSI)=901700000004620
 DMM 901700000004620: Error: connection already in use
 DMM IMSI:901700000004620: bump: conn still being established (SUBSCR_CONN_S_NEW)
-DREF IMSI:901700000004620: MSC conn use - 1 == 1
+DREF IMSI:901700000004620: MSC conn use - dtap == 1 (0x4)
   lu_result_sent == 0
   llist_count(&net->subscr_conns) == 1
 ---
@@ -515,7 +515,7 @@ DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_DONE}: Freeing instance
 DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_DONE}: Deallocated
 DMM msc_subscr_conn_close(vsub=MSISDN:46071, cause=2): no conn fsm, releasing directly without release event.
 - BSSAP Clear --RAN_GERAN_A--> MS
-DREF MSISDN:46071: MSC conn use - 1 == 0
+DREF MSISDN:46071: MSC conn use - fsm == 0 (0x0)
 DRLL subscr MSISDN:46071: Freeing subscriber connection
 DREF VLR subscr MSISDN:46071 usage decreases to: 2
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Freeing instance
@@ -538,9 +538,9 @@ talloc_total_blocks(tall_bsc_ctx) == 9
 - Location Update Request
   MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
   new conn
-DREF unknown: MSC conn use + 1 == 1
+DREF unknown: MSC conn use + compl_l3 == 1 (0x1)
 DRLL Dispatching 04.08 message GSM48_MT_MM_LOC_UPD_REQUEST (0x5:0x8)
-DREF unknown: MSC conn use + 1 == 2
+DREF unknown: MSC conn use + fsm == 2 (0x5)
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: Allocated
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: Received Event SUBSCR_CONN_E_START
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: state_chg to SUBSCR_CONN_S_NEW
@@ -567,7 +567,7 @@ DVLR GSUP tx: 04010809710000004026f0
 GSUP --> HLR: OSMO_GSUP_MSGT_UPDATE_LOCATION_REQUEST: 04010809710000004026f0
 DVLR upd_hlr_vlr_fsm(901700000004620){UPD_HLR_VLR_S_INIT}: state_chg to UPD_HLR_VLR_S_WAIT_FOR_DATA
 DMM IMSI:901700000004620: bump: conn still being established (SUBSCR_CONN_S_NEW)
-DREF IMSI:901700000004620: MSC conn use - 1 == 1
+DREF IMSI:901700000004620: MSC conn use - compl_l3 == 1 (0x4)
   lu_result_sent == 0
   llist_count(&net->subscr_conns) == 1
 - HLR sends _INSERT_DATA_REQUEST, VLR responds with _INSERT_DATA_RESULT
@@ -629,7 +629,7 @@ DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_DONE}: Freeing instance
 DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_DONE}: Deallocated
 DMM msc_subscr_conn_close(vsub=MSISDN:46071, cause=2): no conn fsm, releasing directly without release event.
 - BSSAP Clear --RAN_GERAN_A--> MS
-DREF MSISDN:46071: MSC conn use - 1 == 0
+DREF MSISDN:46071: MSC conn use - fsm == 0 (0x0)
 DRLL subscr MSISDN:46071: Freeing subscriber connection
 DREF VLR subscr MSISDN:46071 usage decreases to: 2
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Freeing instance
@@ -644,10 +644,10 @@ DREF VLR subscr MSISDN:46071 usage decreases to: 1
 - Subscriber does a normal CM Service Request
   MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_CM_SERV_REQ
   new conn
-DREF unknown: MSC conn use + 1 == 1
+DREF unknown: MSC conn use + compl_l3 == 1 (0x1)
 DRLL Dispatching 04.08 message GSM48_MT_MM_CM_SERV_REQ (0x5:0x24)
 DMM <- CM SERVICE REQUEST serv_type=0x08 MI(IMSI)=901700000004620
-DREF unknown: MSC conn use + 1 == 2
+DREF unknown: MSC conn use + fsm == 2 (0x5)
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: Allocated
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: Received Event SUBSCR_CONN_E_START
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: state_chg to SUBSCR_CONN_S_NEW
@@ -677,23 +677,23 @@ DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_ACCEPTED}: bump: still awaiting f
 DREF VLR subscr MSISDN:46071 usage decreases to: 2
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_ACCEPTED}: Received Event SUBSCR_CONN_E_BUMP
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_ACCEPTED}: bump: still awaiting first request after a CM Service Request
-DREF MSISDN:46071: MSC conn use - 1 == 1
+DREF MSISDN:46071: MSC conn use - compl_l3 == 1 (0x4)
   cm_service_result_sent == 1
 msc_subscr_conn_is_accepted() == true
 - A LU request on an open conn is dropped silently
   MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
-DREF MSISDN:46071: MSC conn use + 1 == 2
+DREF MSISDN:46071: MSC conn use + dtap == 2 (0x6)
 DRLL Dispatching 04.08 message GSM48_MT_MM_LOC_UPD_REQUEST (0x5:0x8)
 DMM 901700000004620: Error: connection already in use
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_ACCEPTED}: Received Event SUBSCR_CONN_E_BUMP
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_ACCEPTED}: bump: still awaiting first request after a CM Service Request
-DREF MSISDN:46071: MSC conn use - 1 == 1
+DREF MSISDN:46071: MSC conn use - dtap == 1 (0x4)
   lu_result_sent == 0
   llist_count(&net->subscr_conns) == 1
 ---
 - subscriber detaches
   MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_IMSI_DETACH_IND
-DREF MSISDN:46071: MSC conn use + 1 == 2
+DREF MSISDN:46071: MSC conn use + dtap == 2 (0x6)
 DRLL Dispatching 04.08 message GSM48_MT_MM_IMSI_DETACH_IND (0x5:0x1)
 DMM IMSI DETACH INDICATION: MI(IMSI)=901700000004620
 DREF VLR subscr MSISDN:46071 usage increases to: 3
@@ -707,13 +707,13 @@ DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_ACCEPTED}: state_chg to SUBSCR_CO
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Terminating (cause = OSMO_FSM_TERM_REGULAR)
 DMM msc_subscr_conn_close(vsub=MSISDN:46071, cause=2): no conn fsm, releasing directly without release event.
 - BSSAP Clear --RAN_GERAN_A--> MS
-DREF MSISDN:46071: MSC conn use - 1 == 1
+DREF MSISDN:46071: MSC conn use - fsm == 1 (0x2)
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Freeing instance
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Deallocated
 DREF VLR subscr MSISDN:46071 usage decreases to: 2
 DREF VLR subscr MSISDN:46071 usage decreases to: 1
 DMM msc_subscr_conn_close(vsub=MSISDN:46071, cause=0): already dispatching release, ignore.
-DREF MSISDN:46071: MSC conn use - 1 == 0
+DREF MSISDN:46071: MSC conn use - dtap == 0 (0x0)
 DRLL subscr MSISDN:46071: Freeing subscriber connection
 DREF VLR subscr MSISDN:46071 usage decreases to: 0
 DREF freeing VLR subscr MSISDN:46071
@@ -730,9 +730,9 @@ talloc_total_blocks(tall_bsc_ctx) == 9
 - Location Update Request
   MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
   new conn
-DREF unknown: MSC conn use + 1 == 1
+DREF unknown: MSC conn use + compl_l3 == 1 (0x1)
 DRLL Dispatching 04.08 message GSM48_MT_MM_LOC_UPD_REQUEST (0x5:0x8)
-DREF unknown: MSC conn use + 1 == 2
+DREF unknown: MSC conn use + fsm == 2 (0x5)
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: Allocated
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: Received Event SUBSCR_CONN_E_START
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: state_chg to SUBSCR_CONN_S_NEW
@@ -759,7 +759,7 @@ DVLR GSUP tx: 04010809710000004026f0
 GSUP --> HLR: OSMO_GSUP_MSGT_UPDATE_LOCATION_REQUEST: 04010809710000004026f0
 DVLR upd_hlr_vlr_fsm(901700000004620){UPD_HLR_VLR_S_INIT}: state_chg to UPD_HLR_VLR_S_WAIT_FOR_DATA
 DMM IMSI:901700000004620: bump: conn still being established (SUBSCR_CONN_S_NEW)
-DREF IMSI:901700000004620: MSC conn use - 1 == 1
+DREF IMSI:901700000004620: MSC conn use - compl_l3 == 1 (0x4)
   lu_result_sent == 0
   llist_count(&net->subscr_conns) == 1
 - HLR sends _INSERT_DATA_REQUEST, VLR responds with _INSERT_DATA_RESULT
@@ -821,7 +821,7 @@ DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_DONE}: Freeing instance
 DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_DONE}: Deallocated
 DMM msc_subscr_conn_close(vsub=MSISDN:46071, cause=2): no conn fsm, releasing directly without release event.
 - BSSAP Clear --RAN_GERAN_A--> MS
-DREF MSISDN:46071: MSC conn use - 1 == 0
+DREF MSISDN:46071: MSC conn use - fsm == 0 (0x0)
 DRLL subscr MSISDN:46071: Freeing subscriber connection
 DREF VLR subscr MSISDN:46071 usage decreases to: 2
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Freeing instance
@@ -836,10 +836,10 @@ DREF VLR subscr MSISDN:46071 usage decreases to: 1
 - Subscriber does a normal CM Service Request
   MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_CM_SERV_REQ
   new conn
-DREF unknown: MSC conn use + 1 == 1
+DREF unknown: MSC conn use + compl_l3 == 1 (0x1)
 DRLL Dispatching 04.08 message GSM48_MT_MM_CM_SERV_REQ (0x5:0x24)
 DMM <- CM SERVICE REQUEST serv_type=0x08 MI(IMSI)=901700000004620
-DREF unknown: MSC conn use + 1 == 2
+DREF unknown: MSC conn use + fsm == 2 (0x5)
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: Allocated
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: Received Event SUBSCR_CONN_E_START
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: state_chg to SUBSCR_CONN_S_NEW
@@ -869,25 +869,25 @@ DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_ACCEPTED}: bump: still awaiting f
 DREF VLR subscr MSISDN:46071 usage decreases to: 2
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_ACCEPTED}: Received Event SUBSCR_CONN_E_BUMP
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_ACCEPTED}: bump: still awaiting first request after a CM Service Request
-DREF MSISDN:46071: MSC conn use - 1 == 1
+DREF MSISDN:46071: MSC conn use - compl_l3 == 1 (0x4)
   cm_service_result_sent == 1
 msc_subscr_conn_is_accepted() == true
 - A second CM Service Request on the same conn is accepted without another auth dance
   MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_CM_SERV_REQ
-DREF MSISDN:46071: MSC conn use + 1 == 2
+DREF MSISDN:46071: MSC conn use + dtap == 2 (0x6)
 DRLL Dispatching 04.08 message GSM48_MT_MM_CM_SERV_REQ (0x5:0x24)
 DMM <- CM SERVICE REQUEST serv_type=0x08 MI(IMSI)=901700000004620
 DMM MSISDN:46071: re-using already accepted connection
 - sending CM Service Accept for MSISDN:46071
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_ACCEPTED}: Received Event SUBSCR_CONN_E_BUMP
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_ACCEPTED}: bump: still awaiting first request after a CM Service Request
-DREF MSISDN:46071: MSC conn use - 1 == 1
+DREF MSISDN:46071: MSC conn use - dtap == 1 (0x4)
   cm_service_result_sent == 1
   llist_count(&net->subscr_conns) == 1
 ---
 - subscriber detaches
   MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_IMSI_DETACH_IND
-DREF MSISDN:46071: MSC conn use + 1 == 2
+DREF MSISDN:46071: MSC conn use + dtap == 2 (0x6)
 DRLL Dispatching 04.08 message GSM48_MT_MM_IMSI_DETACH_IND (0x5:0x1)
 DMM IMSI DETACH INDICATION: MI(IMSI)=901700000004620
 DREF VLR subscr MSISDN:46071 usage increases to: 3
@@ -901,13 +901,13 @@ DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_ACCEPTED}: state_chg to SUBSCR_CO
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Terminating (cause = OSMO_FSM_TERM_REGULAR)
 DMM msc_subscr_conn_close(vsub=MSISDN:46071, cause=2): no conn fsm, releasing directly without release event.
 - BSSAP Clear --RAN_GERAN_A--> MS
-DREF MSISDN:46071: MSC conn use - 1 == 1
+DREF MSISDN:46071: MSC conn use - fsm == 1 (0x2)
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Freeing instance
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Deallocated
 DREF VLR subscr MSISDN:46071 usage decreases to: 2
 DREF VLR subscr MSISDN:46071 usage decreases to: 1
 DMM msc_subscr_conn_close(vsub=MSISDN:46071, cause=0): already dispatching release, ignore.
-DREF MSISDN:46071: MSC conn use - 1 == 0
+DREF MSISDN:46071: MSC conn use - dtap == 0 (0x0)
 DRLL subscr MSISDN:46071: Freeing subscriber connection
 DREF VLR subscr MSISDN:46071 usage decreases to: 0
 DREF freeing VLR subscr MSISDN:46071
@@ -924,9 +924,9 @@ talloc_total_blocks(tall_bsc_ctx) == 9
 - Location Update Request
   MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
   new conn
-DREF unknown: MSC conn use + 1 == 1
+DREF unknown: MSC conn use + compl_l3 == 1 (0x1)
 DRLL Dispatching 04.08 message GSM48_MT_MM_LOC_UPD_REQUEST (0x5:0x8)
-DREF unknown: MSC conn use + 1 == 2
+DREF unknown: MSC conn use + fsm == 2 (0x5)
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: Allocated
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: Received Event SUBSCR_CONN_E_START
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: state_chg to SUBSCR_CONN_S_NEW
@@ -953,7 +953,7 @@ DVLR GSUP tx: 04010809710000004026f0
 GSUP --> HLR: OSMO_GSUP_MSGT_UPDATE_LOCATION_REQUEST: 04010809710000004026f0
 DVLR upd_hlr_vlr_fsm(901700000004620){UPD_HLR_VLR_S_INIT}: state_chg to UPD_HLR_VLR_S_WAIT_FOR_DATA
 DMM IMSI:901700000004620: bump: conn still being established (SUBSCR_CONN_S_NEW)
-DREF IMSI:901700000004620: MSC conn use - 1 == 1
+DREF IMSI:901700000004620: MSC conn use - compl_l3 == 1 (0x4)
   lu_result_sent == 0
   llist_count(&net->subscr_conns) == 1
 - HLR sends _INSERT_DATA_REQUEST, VLR responds with _INSERT_DATA_RESULT
@@ -1015,7 +1015,7 @@ DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_DONE}: Freeing instance
 DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_DONE}: Deallocated
 DMM msc_subscr_conn_close(vsub=MSISDN:46071, cause=2): no conn fsm, releasing directly without release event.
 - BSSAP Clear --RAN_GERAN_A--> MS
-DREF MSISDN:46071: MSC conn use - 1 == 0
+DREF MSISDN:46071: MSC conn use - fsm == 0 (0x0)
 DRLL subscr MSISDN:46071: Freeing subscriber connection
 DREF VLR subscr MSISDN:46071 usage decreases to: 2
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Freeing instance
@@ -1030,10 +1030,10 @@ DREF VLR subscr MSISDN:46071 usage decreases to: 1
 - Subscriber does a normal CM Service Request
   MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_CM_SERV_REQ
   new conn
-DREF unknown: MSC conn use + 1 == 1
+DREF unknown: MSC conn use + compl_l3 == 1 (0x1)
 DRLL Dispatching 04.08 message GSM48_MT_MM_CM_SERV_REQ (0x5:0x24)
 DMM <- CM SERVICE REQUEST serv_type=0x08 MI(IMSI)=901700000004620
-DREF unknown: MSC conn use + 1 == 2
+DREF unknown: MSC conn use + fsm == 2 (0x5)
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: Allocated
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: Received Event SUBSCR_CONN_E_START
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: state_chg to SUBSCR_CONN_S_NEW
@@ -1063,19 +1063,19 @@ DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_ACCEPTED}: bump: still awaiting f
 DREF VLR subscr MSISDN:46071 usage decreases to: 2
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_ACCEPTED}: Received Event SUBSCR_CONN_E_BUMP
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_ACCEPTED}: bump: still awaiting first request after a CM Service Request
-DREF MSISDN:46071: MSC conn use - 1 == 1
+DREF MSISDN:46071: MSC conn use - compl_l3 == 1 (0x4)
   cm_service_result_sent == 1
 msc_subscr_conn_is_accepted() == true
 ---
 - An erratic Paging Response on the same conn is dropped silently
   MSC <--RAN_GERAN_A-- MS: GSM48_MT_RR_PAG_RESP
-DREF MSISDN:46071: MSC conn use + 1 == 2
+DREF MSISDN:46071: MSC conn use + dtap == 2 (0x6)
 DRLL Dispatching 04.08 message GSM48_MT_RR_PAG_RESP (0x6:0x27)
 DRR PAGING RESPONSE: MI(IMSI)=901700000004620
 DMM 901700000004620: Error: connection already in use
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_ACCEPTED}: Received Event SUBSCR_CONN_E_BUMP
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_ACCEPTED}: bump: still awaiting first request after a CM Service Request
-DREF MSISDN:46071: MSC conn use - 1 == 1
+DREF MSISDN:46071: MSC conn use - dtap == 1 (0x4)
   llist_count(&net->subscr_conns) == 1
 ---
 - The original CM Service Request can conclude
@@ -1083,7 +1083,7 @@ DREF MSISDN:46071: MSC conn use - 1 == 1
   expecting USSD:
   Your extension is 46071
   MSC <--RAN_GERAN_A-- MS: GSM48_PDISC_NC_SS:0x3b
-DREF MSISDN:46071: MSC conn use + 1 == 2
+DREF MSISDN:46071: MSC conn use + dtap == 2 (0x6)
 DRLL Dispatching 04.08 message GSM48_PDISC_NC_SS:0x3b (0xb:0x3b)
 DMM MSISDN:46071: rx msg GSM48_PDISC_NC_SS:0x3b: received_cm_service_request changes to false
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_ACCEPTED}: Received Event SUBSCR_CONN_E_COMMUNICATING
@@ -1103,10 +1103,10 @@ DVLR Process_Access_Request_VLR(901700000004620){PR_ARQ_S_DONE}: Freeing instanc
 DVLR Process_Access_Request_VLR(901700000004620){PR_ARQ_S_DONE}: Deallocated
 DMM msc_subscr_conn_close(vsub=MSISDN:46071, cause=2): no conn fsm, releasing directly without release event.
 - BSSAP Clear --RAN_GERAN_A--> MS
-DREF MSISDN:46071: MSC conn use - 1 == 1
+DREF MSISDN:46071: MSC conn use - fsm == 1 (0x2)
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Freeing instance
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Deallocated
-DREF MSISDN:46071: MSC conn use - 1 == 0
+DREF MSISDN:46071: MSC conn use - dtap == 0 (0x0)
 DRLL subscr MSISDN:46071: Freeing subscriber connection
 DREF VLR subscr MSISDN:46071 usage decreases to: 1
   bssap_clear_sent == 1
@@ -1124,9 +1124,9 @@ talloc_total_blocks(tall_bsc_ctx) == 9
 - Location Update Request
   MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
   new conn
-DREF unknown: MSC conn use + 1 == 1
+DREF unknown: MSC conn use + compl_l3 == 1 (0x1)
 DRLL Dispatching 04.08 message GSM48_MT_MM_LOC_UPD_REQUEST (0x5:0x8)
-DREF unknown: MSC conn use + 1 == 2
+DREF unknown: MSC conn use + fsm == 2 (0x5)
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: Allocated
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: Received Event SUBSCR_CONN_E_START
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: state_chg to SUBSCR_CONN_S_NEW
@@ -1153,7 +1153,7 @@ DVLR GSUP tx: 04010809710000004026f0
 GSUP --> HLR: OSMO_GSUP_MSGT_UPDATE_LOCATION_REQUEST: 04010809710000004026f0
 DVLR upd_hlr_vlr_fsm(901700000004620){UPD_HLR_VLR_S_INIT}: state_chg to UPD_HLR_VLR_S_WAIT_FOR_DATA
 DMM IMSI:901700000004620: bump: conn still being established (SUBSCR_CONN_S_NEW)
-DREF IMSI:901700000004620: MSC conn use - 1 == 1
+DREF IMSI:901700000004620: MSC conn use - compl_l3 == 1 (0x4)
   lu_result_sent == 0
   llist_count(&net->subscr_conns) == 1
 - HLR sends _INSERT_DATA_REQUEST, VLR responds with _INSERT_DATA_RESULT
@@ -1215,7 +1215,7 @@ DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_DONE}: Freeing instance
 DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_DONE}: Deallocated
 DMM msc_subscr_conn_close(vsub=MSISDN:46071, cause=2): no conn fsm, releasing directly without release event.
 - BSSAP Clear --RAN_GERAN_A--> MS
-DREF MSISDN:46071: MSC conn use - 1 == 0
+DREF MSISDN:46071: MSC conn use - fsm == 0 (0x0)
 DRLL subscr MSISDN:46071: Freeing subscriber connection
 DREF VLR subscr MSISDN:46071 usage decreases to: 2
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Freeing instance
@@ -1242,10 +1242,10 @@ DREF VLR subscr MSISDN:46071 usage decreases to: 3
 - MS replies with Paging Response, we deliver the SMS
   MSC <--RAN_GERAN_A-- MS: GSM48_MT_RR_PAG_RESP
   new conn
-DREF unknown: MSC conn use + 1 == 1
+DREF unknown: MSC conn use + compl_l3 == 1 (0x1)
 DRLL Dispatching 04.08 message GSM48_MT_RR_PAG_RESP (0x6:0x27)
 DRR PAGING RESPONSE: MI(IMSI)=901700000004620
-DREF unknown: MSC conn use + 1 == 2
+DREF unknown: MSC conn use + fsm == 2 (0x5)
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: Allocated
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: Received Event SUBSCR_CONN_E_START
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: state_chg to SUBSCR_CONN_S_NEW
@@ -1271,7 +1271,7 @@ DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_NEW}: state_chg to SUBSCR_CONN_S_
 DPAG Paging success for MSISDN:46071 (event=0)
 DPAG Calling paging cbfn.
 DREF VLR subscr MSISDN:46071 usage increases to: 6
-DREF MSISDN:46071: MSC conn use + 1 == 3
+DREF MSISDN:46071: MSC conn use + trans_sms == 3 (0x15)
 DMSC msc_tx 91 bytes to MSISDN:46071 via RAN_GERAN_A
 - DTAP --RAN_GERAN_A--> MS: GSM48_PDISC_SMS:0x01: 09015801000791447758100650004c0005806470f1000007101000000000445079da1e1ee7416937485e9ea7c965373d1d6683c270383b3d0ed3d36ff71c949e83c22072799e9687c5ec32a81d96afcbf4b4fb0c7ac3e9e9b7db05
 - DTAP matches expected message
@@ -1281,7 +1281,7 @@ DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_ACCEPTED}: bump: connection still
 DREF VLR subscr MSISDN:46071 usage decreases to: 4
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_ACCEPTED}: Received Event SUBSCR_CONN_E_BUMP
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_ACCEPTED}: bump: connection still has active transaction: GSM48_PDISC_SMS
-DREF MSISDN:46071: MSC conn use - 1 == 2
+DREF MSISDN:46071: MSC conn use - compl_l3 == 2 (0x14)
   dtap_tx_confirmed == 1
   paging_stopped == 1
 - conn is still open to wait for SMS ack dance
@@ -1289,27 +1289,27 @@ DREF MSISDN:46071: MSC conn use - 1 == 2
 ---
 - MS sends erratic LU Request, which is dropped silently
   MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
-DREF MSISDN:46071: MSC conn use + 1 == 3
+DREF MSISDN:46071: MSC conn use + dtap == 3 (0x16)
 DRLL Dispatching 04.08 message GSM48_MT_MM_LOC_UPD_REQUEST (0x5:0x8)
 DMM 901700000004620: Error: connection already in use
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_ACCEPTED}: Received Event SUBSCR_CONN_E_BUMP
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_ACCEPTED}: bump: connection still has active transaction: GSM48_PDISC_SMS
-DREF MSISDN:46071: MSC conn use - 1 == 2
+DREF MSISDN:46071: MSC conn use - dtap == 2 (0x14)
   lu_result_sent == 0
   llist_count(&net->subscr_conns) == 1
 - MS replies with CP-ACK for received SMS
   MSC <--RAN_GERAN_A-- MS: GSM48_PDISC_SMS:0x04
-DREF MSISDN:46071: MSC conn use + 1 == 3
+DREF MSISDN:46071: MSC conn use + dtap == 3 (0x16)
 DRLL Dispatching 04.08 message GSM48_PDISC_SMS:0x04 (0x9:0x4)
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_ACCEPTED}: Received Event SUBSCR_CONN_E_COMMUNICATING
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_ACCEPTED}: state_chg to SUBSCR_CONN_S_COMMUNICATING
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_COMMUNICATING}: Received Event SUBSCR_CONN_E_BUMP
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_COMMUNICATING}: bump: connection still has active transaction: GSM48_PDISC_SMS
-DREF MSISDN:46071: MSC conn use - 1 == 2
+DREF MSISDN:46071: MSC conn use - dtap == 2 (0x14)
   llist_count(&net->subscr_conns) == 1
 - MS also sends RP-ACK, MSC in turn sends CP-ACK for that
   MSC <--RAN_GERAN_A-- MS: GSM48_PDISC_SMS:0x01
-DREF MSISDN:46071: MSC conn use + 1 == 3
+DREF MSISDN:46071: MSC conn use + dtap == 3 (0x16)
 DRLL Dispatching 04.08 message GSM48_PDISC_SMS:0x01 (0x9:0x1)
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_COMMUNICATING}: Received Event SUBSCR_CONN_E_COMMUNICATING
 DMSC msc_tx 2 bytes to MSISDN:46071 via RAN_GERAN_A
@@ -1317,7 +1317,7 @@ DMSC msc_tx 2 bytes to MSISDN:46071 via RAN_GERAN_A
 - DTAP matches expected message
 DREF VLR subscr MSISDN:46071 usage decreases to: 3
 DREF VLR subscr MSISDN:46071 usage decreases to: 2
-DREF MSISDN:46071: MSC conn use - 1 == 2
+DREF MSISDN:46071: MSC conn use - trans_sms == 2 (0x6)
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_COMMUNICATING}: Received Event SUBSCR_CONN_E_BUMP
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_COMMUNICATING}: bump: releasing conn
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_COMMUNICATING}: state_chg to SUBSCR_CONN_S_RELEASED
@@ -1328,10 +1328,10 @@ DVLR Process_Access_Request_VLR(901700000004620){PR_ARQ_S_DONE}: Freeing instanc
 DVLR Process_Access_Request_VLR(901700000004620){PR_ARQ_S_DONE}: Deallocated
 DMM msc_subscr_conn_close(vsub=MSISDN:46071, cause=2): no conn fsm, releasing directly without release event.
 - BSSAP Clear --RAN_GERAN_A--> MS
-DREF MSISDN:46071: MSC conn use - 1 == 1
+DREF MSISDN:46071: MSC conn use - fsm == 1 (0x2)
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Freeing instance
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Deallocated
-DREF MSISDN:46071: MSC conn use - 1 == 0
+DREF MSISDN:46071: MSC conn use - dtap == 0 (0x0)
 DRLL subscr MSISDN:46071: Freeing subscriber connection
 DREF VLR subscr MSISDN:46071 usage decreases to: 1
   dtap_tx_confirmed == 1
@@ -1350,9 +1350,9 @@ talloc_total_blocks(tall_bsc_ctx) == 9
 - Location Update Request
   MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
   new conn
-DREF unknown: MSC conn use + 1 == 1
+DREF unknown: MSC conn use + compl_l3 == 1 (0x1)
 DRLL Dispatching 04.08 message GSM48_MT_MM_LOC_UPD_REQUEST (0x5:0x8)
-DREF unknown: MSC conn use + 1 == 2
+DREF unknown: MSC conn use + fsm == 2 (0x5)
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: Allocated
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: Received Event SUBSCR_CONN_E_START
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: state_chg to SUBSCR_CONN_S_NEW
@@ -1379,7 +1379,7 @@ DVLR GSUP tx: 04010809710000004026f0
 GSUP --> HLR: OSMO_GSUP_MSGT_UPDATE_LOCATION_REQUEST: 04010809710000004026f0
 DVLR upd_hlr_vlr_fsm(901700000004620){UPD_HLR_VLR_S_INIT}: state_chg to UPD_HLR_VLR_S_WAIT_FOR_DATA
 DMM IMSI:901700000004620: bump: conn still being established (SUBSCR_CONN_S_NEW)
-DREF IMSI:901700000004620: MSC conn use - 1 == 1
+DREF IMSI:901700000004620: MSC conn use - compl_l3 == 1 (0x4)
   lu_result_sent == 0
   llist_count(&net->subscr_conns) == 1
 - HLR sends _INSERT_DATA_REQUEST, VLR responds with _INSERT_DATA_RESULT
@@ -1441,7 +1441,7 @@ DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_DONE}: Freeing instance
 DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_DONE}: Deallocated
 DMM msc_subscr_conn_close(vsub=MSISDN:46071, cause=2): no conn fsm, releasing directly without release event.
 - BSSAP Clear --RAN_GERAN_A--> MS
-DREF MSISDN:46071: MSC conn use - 1 == 0
+DREF MSISDN:46071: MSC conn use - fsm == 0 (0x0)
 DRLL subscr MSISDN:46071: Freeing subscriber connection
 DREF VLR subscr MSISDN:46071 usage decreases to: 2
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Freeing instance
@@ -1468,10 +1468,10 @@ DREF VLR subscr MSISDN:46071 usage decreases to: 3
 - MS replies with Paging Response, we deliver the SMS
   MSC <--RAN_GERAN_A-- MS: GSM48_MT_RR_PAG_RESP
   new conn
-DREF unknown: MSC conn use + 1 == 1
+DREF unknown: MSC conn use + compl_l3 == 1 (0x1)
 DRLL Dispatching 04.08 message GSM48_MT_RR_PAG_RESP (0x6:0x27)
 DRR PAGING RESPONSE: MI(IMSI)=901700000004620
-DREF unknown: MSC conn use + 1 == 2
+DREF unknown: MSC conn use + fsm == 2 (0x5)
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: Allocated
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: Received Event SUBSCR_CONN_E_START
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: state_chg to SUBSCR_CONN_S_NEW
@@ -1497,7 +1497,7 @@ DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_NEW}: state_chg to SUBSCR_CONN_S_
 DPAG Paging success for MSISDN:46071 (event=0)
 DPAG Calling paging cbfn.
 DREF VLR subscr MSISDN:46071 usage increases to: 6
-DREF MSISDN:46071: MSC conn use + 1 == 3
+DREF MSISDN:46071: MSC conn use + trans_sms == 3 (0x15)
 DMSC msc_tx 91 bytes to MSISDN:46071 via RAN_GERAN_A
 - DTAP --RAN_GERAN_A--> MS: GSM48_PDISC_SMS:0x01: 09015801000791447758100650004c0005806470f1000007101000000000445079da1e1ee7416937485e9ea7c965373d1d6683c270383b3d0ed3d36ff71c949e83c22072799e9687c5ec32a81d96afcbf4b4fb0c7ac3e9e9b7db05
 - DTAP matches expected message
@@ -1507,7 +1507,7 @@ DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_ACCEPTED}: bump: connection still
 DREF VLR subscr MSISDN:46071 usage decreases to: 4
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_ACCEPTED}: Received Event SUBSCR_CONN_E_BUMP
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_ACCEPTED}: bump: connection still has active transaction: GSM48_PDISC_SMS
-DREF MSISDN:46071: MSC conn use - 1 == 2
+DREF MSISDN:46071: MSC conn use - compl_l3 == 2 (0x14)
   dtap_tx_confirmed == 1
   paging_stopped == 1
 - conn is still open to wait for SMS ack dance
@@ -1515,30 +1515,30 @@ DREF MSISDN:46071: MSC conn use - 1 == 2
 ---
 - CM Service Request during open connection is accepted
   MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_CM_SERV_REQ
-DREF MSISDN:46071: MSC conn use + 1 == 3
+DREF MSISDN:46071: MSC conn use + dtap == 3 (0x16)
 DRLL Dispatching 04.08 message GSM48_MT_MM_CM_SERV_REQ (0x5:0x24)
 DMM <- CM SERVICE REQUEST serv_type=0x08 MI(IMSI)=901700000004620
 DMM MSISDN:46071: re-using already accepted connection
 - sending CM Service Accept for MSISDN:46071
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_ACCEPTED}: Received Event SUBSCR_CONN_E_BUMP
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_ACCEPTED}: bump: still awaiting first request after a CM Service Request
-DREF MSISDN:46071: MSC conn use - 1 == 2
+DREF MSISDN:46071: MSC conn use - dtap == 2 (0x14)
   cm_service_result_sent == 1
   llist_count(&net->subscr_conns) == 1
   g_conn->received_cm_service_request == 1
 - MS replies with CP-ACK for received SMS
   MSC <--RAN_GERAN_A-- MS: GSM48_PDISC_SMS:0x04
-DREF MSISDN:46071: MSC conn use + 1 == 3
+DREF MSISDN:46071: MSC conn use + dtap == 3 (0x16)
 DRLL Dispatching 04.08 message GSM48_PDISC_SMS:0x04 (0x9:0x4)
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_ACCEPTED}: Received Event SUBSCR_CONN_E_COMMUNICATING
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_ACCEPTED}: state_chg to SUBSCR_CONN_S_COMMUNICATING
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_COMMUNICATING}: Received Event SUBSCR_CONN_E_BUMP
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_COMMUNICATING}: bump: still awaiting first request after a CM Service Request
-DREF MSISDN:46071: MSC conn use - 1 == 2
+DREF MSISDN:46071: MSC conn use - dtap == 2 (0x14)
   llist_count(&net->subscr_conns) == 1
 - MS also sends RP-ACK, MSC in turn sends CP-ACK for that
   MSC <--RAN_GERAN_A-- MS: GSM48_PDISC_SMS:0x01
-DREF MSISDN:46071: MSC conn use + 1 == 3
+DREF MSISDN:46071: MSC conn use + dtap == 3 (0x16)
 DRLL Dispatching 04.08 message GSM48_PDISC_SMS:0x01 (0x9:0x1)
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_COMMUNICATING}: Received Event SUBSCR_CONN_E_COMMUNICATING
 DMSC msc_tx 2 bytes to MSISDN:46071 via RAN_GERAN_A
@@ -1546,17 +1546,17 @@ DMSC msc_tx 2 bytes to MSISDN:46071 via RAN_GERAN_A
 - DTAP matches expected message
 DREF VLR subscr MSISDN:46071 usage decreases to: 3
 DREF VLR subscr MSISDN:46071 usage decreases to: 2
-DREF MSISDN:46071: MSC conn use - 1 == 2
+DREF MSISDN:46071: MSC conn use - trans_sms == 2 (0x6)
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_COMMUNICATING}: Received Event SUBSCR_CONN_E_BUMP
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_COMMUNICATING}: bump: still awaiting first request after a CM Service Request
-DREF MSISDN:46071: MSC conn use - 1 == 1
+DREF MSISDN:46071: MSC conn use - dtap == 1 (0x4)
   dtap_tx_confirmed == 1
 - SMS is done
   llist_count(&net->subscr_conns) == 1
 ---
 - subscriber detaches
   MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_IMSI_DETACH_IND
-DREF MSISDN:46071: MSC conn use + 1 == 2
+DREF MSISDN:46071: MSC conn use + dtap == 2 (0x6)
 DRLL Dispatching 04.08 message GSM48_MT_MM_IMSI_DETACH_IND (0x5:0x1)
 DMM IMSI DETACH INDICATION: MI(IMSI)=901700000004620
 DREF VLR subscr MSISDN:46071 usage increases to: 3
@@ -1570,13 +1570,13 @@ DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_COMMUNICATING}: state_chg to SUBS
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Terminating (cause = OSMO_FSM_TERM_REGULAR)
 DMM msc_subscr_conn_close(vsub=MSISDN:46071, cause=2): no conn fsm, releasing directly without release event.
 - BSSAP Clear --RAN_GERAN_A--> MS
-DREF MSISDN:46071: MSC conn use - 1 == 1
+DREF MSISDN:46071: MSC conn use - fsm == 1 (0x2)
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Freeing instance
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Deallocated
 DREF VLR subscr MSISDN:46071 usage decreases to: 2
 DREF VLR subscr MSISDN:46071 usage decreases to: 1
 DMM msc_subscr_conn_close(vsub=MSISDN:46071, cause=0): already dispatching release, ignore.
-DREF MSISDN:46071: MSC conn use - 1 == 0
+DREF MSISDN:46071: MSC conn use - dtap == 0 (0x0)
 DRLL subscr MSISDN:46071: Freeing subscriber connection
 DREF VLR subscr MSISDN:46071 usage decreases to: 0
 DREF freeing VLR subscr MSISDN:46071
@@ -1593,9 +1593,9 @@ talloc_total_blocks(tall_bsc_ctx) == 9
 - Location Update Request
   MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
   new conn
-DREF unknown: MSC conn use + 1 == 1
+DREF unknown: MSC conn use + compl_l3 == 1 (0x1)
 DRLL Dispatching 04.08 message GSM48_MT_MM_LOC_UPD_REQUEST (0x5:0x8)
-DREF unknown: MSC conn use + 1 == 2
+DREF unknown: MSC conn use + fsm == 2 (0x5)
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: Allocated
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: Received Event SUBSCR_CONN_E_START
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: state_chg to SUBSCR_CONN_S_NEW
@@ -1622,7 +1622,7 @@ DVLR GSUP tx: 04010809710000004026f0
 GSUP --> HLR: OSMO_GSUP_MSGT_UPDATE_LOCATION_REQUEST: 04010809710000004026f0
 DVLR upd_hlr_vlr_fsm(901700000004620){UPD_HLR_VLR_S_INIT}: state_chg to UPD_HLR_VLR_S_WAIT_FOR_DATA
 DMM IMSI:901700000004620: bump: conn still being established (SUBSCR_CONN_S_NEW)
-DREF IMSI:901700000004620: MSC conn use - 1 == 1
+DREF IMSI:901700000004620: MSC conn use - compl_l3 == 1 (0x4)
   lu_result_sent == 0
   llist_count(&net->subscr_conns) == 1
 - HLR sends _INSERT_DATA_REQUEST, VLR responds with _INSERT_DATA_RESULT
@@ -1684,7 +1684,7 @@ DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_DONE}: Freeing instance
 DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_DONE}: Deallocated
 DMM msc_subscr_conn_close(vsub=MSISDN:46071, cause=2): no conn fsm, releasing directly without release event.
 - BSSAP Clear --RAN_GERAN_A--> MS
-DREF MSISDN:46071: MSC conn use - 1 == 0
+DREF MSISDN:46071: MSC conn use - fsm == 0 (0x0)
 DRLL subscr MSISDN:46071: Freeing subscriber connection
 DREF VLR subscr MSISDN:46071 usage decreases to: 2
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Freeing instance
@@ -1711,10 +1711,10 @@ DREF VLR subscr MSISDN:46071 usage decreases to: 3
 - MS replies with Paging Response, we deliver the SMS
   MSC <--RAN_GERAN_A-- MS: GSM48_MT_RR_PAG_RESP
   new conn
-DREF unknown: MSC conn use + 1 == 1
+DREF unknown: MSC conn use + compl_l3 == 1 (0x1)
 DRLL Dispatching 04.08 message GSM48_MT_RR_PAG_RESP (0x6:0x27)
 DRR PAGING RESPONSE: MI(IMSI)=901700000004620
-DREF unknown: MSC conn use + 1 == 2
+DREF unknown: MSC conn use + fsm == 2 (0x5)
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: Allocated
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: Received Event SUBSCR_CONN_E_START
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: state_chg to SUBSCR_CONN_S_NEW
@@ -1740,7 +1740,7 @@ DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_NEW}: state_chg to SUBSCR_CONN_S_
 DPAG Paging success for MSISDN:46071 (event=0)
 DPAG Calling paging cbfn.
 DREF VLR subscr MSISDN:46071 usage increases to: 6
-DREF MSISDN:46071: MSC conn use + 1 == 3
+DREF MSISDN:46071: MSC conn use + trans_sms == 3 (0x15)
 DMSC msc_tx 91 bytes to MSISDN:46071 via RAN_GERAN_A
 - DTAP --RAN_GERAN_A--> MS: GSM48_PDISC_SMS:0x01: 09015801000791447758100650004c0005806470f1000007101000000000445079da1e1ee7416937485e9ea7c965373d1d6683c270383b3d0ed3d36ff71c949e83c22072799e9687c5ec32a81d96afcbf4b4fb0c7ac3e9e9b7db05
 - DTAP matches expected message
@@ -1750,7 +1750,7 @@ DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_ACCEPTED}: bump: connection still
 DREF VLR subscr MSISDN:46071 usage decreases to: 4
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_ACCEPTED}: Received Event SUBSCR_CONN_E_BUMP
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_ACCEPTED}: bump: connection still has active transaction: GSM48_PDISC_SMS
-DREF MSISDN:46071: MSC conn use - 1 == 2
+DREF MSISDN:46071: MSC conn use - compl_l3 == 2 (0x14)
   dtap_tx_confirmed == 1
   paging_stopped == 1
 - conn is still open to wait for SMS ack dance
@@ -1758,26 +1758,26 @@ DREF MSISDN:46071: MSC conn use - 1 == 2
 ---
 - MS sends another erratic Paging Response which is dropped silently
   MSC <--RAN_GERAN_A-- MS: GSM48_MT_RR_PAG_RESP
-DREF MSISDN:46071: MSC conn use + 1 == 3
+DREF MSISDN:46071: MSC conn use + dtap == 3 (0x16)
 DRLL Dispatching 04.08 message GSM48_MT_RR_PAG_RESP (0x6:0x27)
 DRR PAGING RESPONSE: MI(IMSI)=901700000004620
 DMM 901700000004620: Error: connection already in use
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_ACCEPTED}: Received Event SUBSCR_CONN_E_BUMP
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_ACCEPTED}: bump: connection still has active transaction: GSM48_PDISC_SMS
-DREF MSISDN:46071: MSC conn use - 1 == 2
+DREF MSISDN:46071: MSC conn use - dtap == 2 (0x14)
 - MS replies with CP-ACK for received SMS
   MSC <--RAN_GERAN_A-- MS: GSM48_PDISC_SMS:0x04
-DREF MSISDN:46071: MSC conn use + 1 == 3
+DREF MSISDN:46071: MSC conn use + dtap == 3 (0x16)
 DRLL Dispatching 04.08 message GSM48_PDISC_SMS:0x04 (0x9:0x4)
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_ACCEPTED}: Received Event SUBSCR_CONN_E_COMMUNICATING
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_ACCEPTED}: state_chg to SUBSCR_CONN_S_COMMUNICATING
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_COMMUNICATING}: Received Event SUBSCR_CONN_E_BUMP
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_COMMUNICATING}: bump: connection still has active transaction: GSM48_PDISC_SMS
-DREF MSISDN:46071: MSC conn use - 1 == 2
+DREF MSISDN:46071: MSC conn use - dtap == 2 (0x14)
   llist_count(&net->subscr_conns) == 1
 - MS also sends RP-ACK, MSC in turn sends CP-ACK for that
   MSC <--RAN_GERAN_A-- MS: GSM48_PDISC_SMS:0x01
-DREF MSISDN:46071: MSC conn use + 1 == 3
+DREF MSISDN:46071: MSC conn use + dtap == 3 (0x16)
 DRLL Dispatching 04.08 message GSM48_PDISC_SMS:0x01 (0x9:0x1)
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_COMMUNICATING}: Received Event SUBSCR_CONN_E_COMMUNICATING
 DMSC msc_tx 2 bytes to MSISDN:46071 via RAN_GERAN_A
@@ -1785,7 +1785,7 @@ DMSC msc_tx 2 bytes to MSISDN:46071 via RAN_GERAN_A
 - DTAP matches expected message
 DREF VLR subscr MSISDN:46071 usage decreases to: 3
 DREF VLR subscr MSISDN:46071 usage decreases to: 2
-DREF MSISDN:46071: MSC conn use - 1 == 2
+DREF MSISDN:46071: MSC conn use - trans_sms == 2 (0x6)
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_COMMUNICATING}: Received Event SUBSCR_CONN_E_BUMP
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_COMMUNICATING}: bump: releasing conn
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_COMMUNICATING}: state_chg to SUBSCR_CONN_S_RELEASED
@@ -1796,10 +1796,10 @@ DVLR Process_Access_Request_VLR(901700000004620){PR_ARQ_S_DONE}: Freeing instanc
 DVLR Process_Access_Request_VLR(901700000004620){PR_ARQ_S_DONE}: Deallocated
 DMM msc_subscr_conn_close(vsub=MSISDN:46071, cause=2): no conn fsm, releasing directly without release event.
 - BSSAP Clear --RAN_GERAN_A--> MS
-DREF MSISDN:46071: MSC conn use - 1 == 1
+DREF MSISDN:46071: MSC conn use - fsm == 1 (0x2)
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Freeing instance
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Deallocated
-DREF MSISDN:46071: MSC conn use - 1 == 0
+DREF MSISDN:46071: MSC conn use - dtap == 0 (0x0)
 DRLL subscr MSISDN:46071: Freeing subscriber connection
 DREF VLR subscr MSISDN:46071 usage decreases to: 1
   dtap_tx_confirmed == 1
