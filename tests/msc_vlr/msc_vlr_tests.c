@@ -800,6 +800,7 @@ int main(int argc, char **argv)
 		int arg;
 		long int nr;
 		for (arg = optind; arg < argc; arg++) {
+			errno = 0;
 			nr = strtol(argv[arg], NULL, 10);
 			if (errno) {
 				fprintf(stderr, "Invalid argument: %s\n",
