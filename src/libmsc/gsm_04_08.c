@@ -2921,7 +2921,7 @@ int mncc_tx_to_cc(struct gsm_network *net, int msg_type, void *arg)
 			DEBUGP(DCC, "(bts - trx - ts - ti -- sub %s) "
 				"Received '%s' from MNCC with "
 				"detached subscriber %s\n", data->called.number,
-				get_mncc_name(msg_type), data->called.number);
+				get_mncc_name(msg_type), vlr_subscr_name(vsub));
 			vlr_subscr_put(vsub);
 			/* Temporarily out of order */
 			return mncc_release_ind(net, NULL, data->callref,
