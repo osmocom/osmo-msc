@@ -349,7 +349,10 @@ _msc_subscr_conn_get(struct gsm_subscriber_connection *conn,
 	OSMO_ASSERT(conn);
 
 	if (conn->in_release)
-		return NULL;
+		LOGPSRC(DREF, LOGL_ERROR, file, line,
+			"%s: MSC conn use error: using conn that is already in release (%s)\n",
+			vlr_subscr_name(conn->vsub),
+			msc_subscr_conn_use_name(balance_token));
 
 	if (balance_token != MSC_CONN_USE_UNTRACKED) {
 		uint32_t flag = 1 << balance_token;
