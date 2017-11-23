@@ -2768,7 +2768,7 @@ static int tch_rtp_connect(struct gsm_network *net, void *arg)
 		return 0;
 	}
 
-	msc_call_connect(trans,rtp->port,rtp->ip);
+	msc_call_connect(trans, rtp->port, rtp->ip);
 	return 0;
 }
 
