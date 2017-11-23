@@ -29,11 +29,7 @@ import struct
 
 import osmopy.obscvty as obscvty
 import osmopy.osmoutil as osmoutil
-
-# add $top_srcdir/contrib to find ipa.py
-sys.path.append(os.path.join(sys.path[0], '..', 'contrib'))
-
-from ipa import Ctrl, IPA
+from osmopy.osmo_ipa import Ctrl, IPA
 
 # to be able to find $top_srcdir/doc/...
 confpath = os.path.join(sys.path[0], '..')

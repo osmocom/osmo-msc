@@ -196,5 +196,4 @@ AC_OUTPUT(
     tests/msc_vlr/Makefile
     doc/Makefile
     doc/examples/Makefile
-    contrib/Makefile
     Makefile)

@@ -13,7 +13,6 @@ SUBDIRS = \
 	include \
 	src \
 	tests \
-	contrib \
 	$(NULL)
 
 BUILT_SOURCES = $(top_srcdir)/.version
