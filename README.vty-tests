@@ -4,7 +4,7 @@ To run the configuration parsing and output (VTY) test suite, first install
 
 and pass the following configure options here:
 
-  ./configure --enable-vty-tests --enable-external-tests
+  ./configure --enable-external-tests
 
 The VTY tests are then included in the standard check target:
 

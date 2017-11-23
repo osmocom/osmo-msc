@@ -48,12 +48,12 @@ set -x
 
 cd "$base"
 autoreconf --install --force
-./configure --enable-smpp $IU --enable-vty-tests --enable-external-tests
+./configure --enable-smpp $IU --enable-external-tests
 $MAKE $PARALLEL_MAKE
 LD_LIBRARY_PATH="$inst/lib" $MAKE check \
   || cat-testlogs.sh
 LD_LIBRARY_PATH="$inst/lib" \
-  DISTCHECK_CONFIGURE_FLAGS="--enable-smpp $IU --enable-vty-tests --enable-external-tests" \
+  DISTCHECK_CONFIGURE_FLAGS="--enable-smpp $IU --enable-external-tests" \
   $MAKE distcheck \
   || cat-testlogs.sh
 

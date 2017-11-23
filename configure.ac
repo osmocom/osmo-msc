@@ -160,11 +160,6 @@ AC_DEFUN([CHECK_TM_INCLUDES_TM_GMTOFF], [
 
 CHECK_TM_INCLUDES_TM_GMTOFF
 
-AC_ARG_ENABLE([vty_tests],
-		AC_HELP_STRING([--enable-vty-tests],
-				[Include the VTY/CTRL tests in make check (deprecated)
-				[default=no]]),
-		[enable_ext_tests="$enableval"],[enable_ext_tests="no"])
 AC_ARG_ENABLE([external_tests],
 		AC_HELP_STRING([--enable-external-tests],
 				[Include the VTY/CTRL tests in make check [default=no]]),
