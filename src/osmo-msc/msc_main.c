@@ -312,9 +312,7 @@ static int rx_iu_event(struct ranap_ue_conn_ctx *ctx, enum ranap_iu_event_type t
 #endif
 
 #define DEFAULT_M3UA_REMOTE_IP "127.0.0.1"
-#define DEFAULT_PC_A "0.23.1"
-#define DEFAULT_PC_IU "0.23.2"
-#define DEFAULT_PC_A_IU DEFAULT_PC_A
+#define DEFAULT_PC "0.23.1"
 
 static struct osmo_sccp_instance *sccp_setup(void *ctx, uint32_t cs7_instance,
 					     const char *label, const char *default_pc_str)
@@ -344,7 +342,7 @@ static int ss7_setup(void *ctx)
 		 * Iu and A at the same time, under the same point-code */
 		LOGP(DMSC, LOGL_NOTICE, "CS7 Instance identifiers: A = Iu = %u\n", cs7_instance_a);
 
-		msc_network->a.sccp = sccp_setup(ctx, cs7_instance_a, "OsmoMSC-A-Iu", DEFAULT_PC_A_IU);
+		msc_network->a.sccp = sccp_setup(ctx, cs7_instance_a, "OsmoMSC-A-Iu", DEFAULT_PC);
 		if (!msc_network->a.sccp)
 			return -EINVAL;
 
@@ -355,17 +353,17 @@ static int ss7_setup(void *ctx)
 		LOGP(DMSC, LOGL_NOTICE, "CS7 Instance identifiers: A = %u, Iu = %u\n",
 		     cs7_instance_a, cs7_instance_iu);
 
-		msc_network->a.sccp = sccp_setup(ctx, cs7_instance_a, "OsmoMSC-A", DEFAULT_PC_A);
+		msc_network->a.sccp = sccp_setup(ctx, cs7_instance_a, "OsmoMSC-A", DEFAULT_PC);
 		if (!msc_network->a.sccp)
 			return -EINVAL;
 
-		msc_network->iu.sccp = sccp_setup(ctx, cs7_instance_iu, "OsmoMSC-Iu", DEFAULT_PC_IU);
+		msc_network->iu.sccp = sccp_setup(ctx, cs7_instance_iu, "OsmoMSC-Iu", DEFAULT_PC);
 		if (!msc_network->iu.sccp)
 			return -EINVAL;
 	}
 #else
 	/* No Iu support, just open up an A instance */
-	msc_network->a.sccp = sccp_setup(ctx, cs7_instance_a, "OsmoMSC-A", DEFAULT_PC_A);
+	msc_network->a.sccp = sccp_setup(ctx, cs7_instance_a, "OsmoMSC-A", DEFAULT_PC);
 	if (!msc_network->a.sccp)
 		return -EINVAL;
 #endif
