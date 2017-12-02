@@ -1,6 +1,14 @@
 AM_CPPFLAGS = $(all_includes) -I$(top_srcdir)/include -I$(top_builddir)
-AM_CFLAGS=-Wall $(LIBOSMOCORE_CFLAGS) $(LIBOSMOVTY_CFLAGS) \
-	$(COVERAGE_CFLAGS) $(LIBCRYPTO_CFLAGS)
+AM_CFLAGS= \
+	   -Wall \
+	   $(LIBOSMOCORE_CFLAGS) \
+	   $(LIBOSMOVTY_CFLAGS) \
+	   $(LIBOSMOSCCP_CFLAGS) \
+	   $(LIBOSMOMGCPCLIENT_CFLAGS) \
+	   $(LIBOSMOABIS_CFLAGS) \
+	   $(COVERAGE_CFLAGS) \
+	   $(LIBCRYPTO_CFLAGS) \
+	   $(NULL)
 
 noinst_HEADERS = \
 	vlr_access_req_fsm.h \
