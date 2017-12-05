@@ -840,6 +840,10 @@ struct gsm_sms *db_sms_get_unsent_for_subscr(struct vlr_subscr *vsub,
 	if (!vsub->lu_complete)
 		return NULL;
 
+	/* A subscriber having no phone number cannot possibly receive SMS. */
+	if (*vsub->msisdn == '\0')
+		return NULL;
+
 	result = dbi_conn_queryf(conn,
 		"SELECT * FROM SMS"
 		" WHERE sent IS NULL"
