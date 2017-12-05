@@ -133,7 +133,6 @@ static void print_help()
 	printf("  -V --version               Print the version of OpenBSC.\n");
 	printf("  -e --log-level number      Set a global loglevel.\n");
 	printf("  -M --mncc-sock-path PATH   Disable built-in MNCC handler and offer socket.\n");
-	printf("  -m --mncc-sock             Same as `-M /tmp/bsc_mncc' (deprecated).\n");
 	printf("  -C --no-dbcounter          Disable regular syncing of counters to database.\n");
 }
 
@@ -151,13 +150,12 @@ static void handle_options(int argc, char **argv)
 			{"timestamp", 0, 0, 'T'},
 			{"version", 0, 0, 'V' },
 			{"log-level", 1, 0, 'e'},
-			{"mncc-sock", 0, 0, 'm'},
 			{"mncc-sock-path", 1, 0, 'M'},
 			{"no-dbcounter", 0, 0, 'C'},
 			{0, 0, 0, 0}
 		};
 
-		c = getopt_long(argc, argv, "hd:Dsl:TVc:e:mCM:",
+		c = getopt_long(argc, argv, "hd:Dsl:TVc:e:CM:",
 				long_options, &option_index);
 		if (c == -1)
 			break;
@@ -190,9 +188,6 @@ static void handle_options(int argc, char **argv)
 			break;
 		case 'M':
 			msc_cmdline_config.mncc_sock_path = optarg;
-			break;
-		case 'm':
-			msc_cmdline_config.mncc_sock_path = "/tmp/bsc_mncc";
 			break;
 		case 'C':
 			msc_cmdline_config.use_db_counter = 0;
