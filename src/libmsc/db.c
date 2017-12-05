@@ -836,6 +836,7 @@ struct gsm_sms *db_sms_get_unsent_for_subscr(struct vlr_subscr *vsub,
 	struct gsm_network *net = vsub->vlr->user_ctx;
 	dbi_result result;
 	struct gsm_sms *sms;
+	char *q_msisdn;
 
 	if (!vsub->lu_complete)
 		return NULL;
@@ -844,13 +845,16 @@ struct gsm_sms *db_sms_get_unsent_for_subscr(struct vlr_subscr *vsub,
 	if (*vsub->msisdn == '\0')
 		return NULL;
 
+	dbi_conn_quote_string_copy(conn, vsub->msisdn, &q_msisdn);
 	result = dbi_conn_queryf(conn,
 		"SELECT * FROM SMS"
 		" WHERE sent IS NULL"
-		" AND dest_addr=%s"
+		" AND dest_addr = %s"
 		" AND deliver_attempts <= %u"
 		" ORDER BY id LIMIT 1",
-		vsub->msisdn, max_failed);
+		q_msisdn, max_failed);
+	free(q_msisdn);
+
 	if (!result)
 		return NULL;
 
@@ -872,14 +876,18 @@ struct gsm_sms *db_sms_get_next_unsent_rr_msisdn(struct gsm_network *net,
 {
 	dbi_result result;
 	struct gsm_sms *sms;
+	char *q_last_msisdn;
 
+	dbi_conn_quote_string_copy(conn, last_msisdn, &q_last_msisdn);
 	result = dbi_conn_queryf(conn,
 		"SELECT * FROM SMS"
 		" WHERE sent IS NULL"
-		" AND dest_addr > '%s'"
+		" AND dest_addr > %s"
 		" AND deliver_attempts <= %u"
 		" ORDER BY dest_addr, id LIMIT 1",
-		last_msisdn, max_failed);
+		q_last_msisdn, max_failed);
+	free(q_last_msisdn);
+
 	if (!result)
 		return NULL;
 
@@ -936,11 +944,16 @@ int db_sms_inc_deliver_attempts(struct gsm_sms *sms)
 int db_sms_delete_by_msisdn(const char *msisdn)
 {
 	dbi_result result;
+	char *q_msisdn;
 	if (!msisdn || !*msisdn)
 		return 0;
+
+	dbi_conn_quote_string_copy(conn, msisdn, &q_msisdn);
 	result = dbi_conn_queryf(conn,
 		    "DELETE FROM SMS WHERE src_addr=%s OR dest_addr=%s",
-		    msisdn, msisdn);
+		    q_msisdn, q_msisdn);
+	free(q_msisdn);
+
 	if (!result) {
 		LOGP(DDB, LOGL_ERROR,
 		     "Failed to delete SMS for %s\n", msisdn);
