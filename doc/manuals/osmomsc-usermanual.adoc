@@ -14,6 +14,8 @@ include::chapters/running.adoc[]
 
 include::chapters/control.adoc[]
 
+include::chapters/counters.adoc[]
+
 include::../common/chapters/vty.adoc[]
 
 include::../common/chapters/logging.adoc[]
