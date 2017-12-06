@@ -181,6 +181,36 @@ static const char *create_stmts[] = {
 		")",
 };
 
+dbi_result query(dbi_conn conn, const char *sql)
+{
+	dbi_result result;
+
+	LOGP(DDB, LOGL_DEBUG, "Running query: %s\n", sql);
+	result = dbi_conn_query(conn, sql);
+
+	if (!result)
+		LOGP(DDB, LOGL_ERROR, "Failed to query: %s\n", sql);
+
+	return result;
+}
+
+dbi_result queryf(dbi_conn conn, const char *format, ...)
+{
+	va_list args;
+	char *sql;
+	dbi_result result;
+
+	va_start(args, format);
+	sql = talloc_vasprintf(NULL, format, args);
+	va_end(args);
+
+	result = query(conn, sql);
+
+	talloc_free(sql);
+
+	return result;
+}
+
 void db_error_func(dbi_conn conn, void *data)
 {
 	const char *msg;
@@ -193,7 +223,7 @@ static int update_db_revision_2(void)
 {
 	dbi_result result;
 
-	result = dbi_conn_query(conn,
+	result = query(conn,
 				"ALTER TABLE Subscriber "
 				"ADD COLUMN expire_lu "
 				"TIMESTAMP DEFAULT NULL");
@@ -204,7 +234,7 @@ static int update_db_revision_2(void)
 	}
 	dbi_result_free(result);
 
-	result = dbi_conn_query(conn,
+	result = query(conn,
 				"UPDATE Meta "
 				"SET value = '3' "
 				"WHERE key = 'revision'");
@@ -245,7 +275,7 @@ static struct gsm_sms *sms_from_result_v3(dbi_result result)
 	snprintf(buf, sizeof(buf), "%llu", sender_id);
 
 	dbi_conn_quote_string_copy(conn, buf, &quoted);
-	result2 = dbi_conn_queryf(conn,
+	result2 = queryf(conn,
 				  "SELECT extension FROM Subscriber "
 				  "WHERE id = %s ", quoted);
 	free(quoted);
@@ -285,7 +315,7 @@ static int update_db_revision_3(void)
 
 	LOGP(DDB, LOGL_NOTICE, "Going to migrate from revision 3\n");
 
-	result = dbi_conn_query(conn, "BEGIN EXCLUSIVE TRANSACTION");
+	result = query(conn, "BEGIN EXCLUSIVE TRANSACTION");
 	if (!result) {
 		LOGP(DDB, LOGL_ERROR,
 			"Failed to begin transaction (upgrade from rev 3)\n");
@@ -294,7 +324,7 @@ static int update_db_revision_3(void)
 	dbi_result_free(result);
 
 	/* Rename old SMS table to be able create a new one */
-	result = dbi_conn_query(conn, "ALTER TABLE SMS RENAME TO SMS_3");
+	result = query(conn, "ALTER TABLE SMS RENAME TO SMS_3");
 	if (!result) {
 		LOGP(DDB, LOGL_ERROR,
 		     "Failed to rename the old SMS table (upgrade from rev 3).\n");
@@ -303,7 +333,7 @@ static int update_db_revision_3(void)
 	dbi_result_free(result);
 
 	/* Create new SMS table with all the bells and whistles! */
-	result = dbi_conn_query(conn, create_stmts[SCHEMA_SMS]);
+	result = query(conn, create_stmts[SCHEMA_SMS]);
 	if (!result) {
 		LOGP(DDB, LOGL_ERROR,
 		     "Failed to create a new SMS table (upgrade from rev 3).\n");
@@ -312,7 +342,7 @@ static int update_db_revision_3(void)
 	dbi_result_free(result);
 
 	/* Cycle through old messages and convert them to the new format */
-	result = dbi_conn_query(conn, "SELECT * FROM SMS_3");
+	result = query(conn, "SELECT * FROM SMS_3");
 	if (!result) {
 		LOGP(DDB, LOGL_ERROR,
 		     "Failed fetch messages from the old SMS table (upgrade from rev 3).\n");
@@ -331,7 +361,7 @@ static int update_db_revision_3(void)
 	dbi_result_free(result);
 
 	/* Remove the temporary table */
-	result = dbi_conn_query(conn, "DROP TABLE SMS_3");
+	result = query(conn, "DROP TABLE SMS_3");
 	if (!result) {
 		LOGP(DDB, LOGL_ERROR,
 		     "Failed to drop the old SMS table (upgrade from rev 3).\n");
@@ -340,7 +370,7 @@ static int update_db_revision_3(void)
 	dbi_result_free(result);
 
 	/* We're done. Bump DB Meta revision to 4 */
-	result = dbi_conn_query(conn,
+	result = query(conn,
 				"UPDATE Meta "
 				"SET value = '4' "
 				"WHERE key = 'revision'");
@@ -351,7 +381,7 @@ static int update_db_revision_3(void)
 	}
 	dbi_result_free(result);
 
-	result = dbi_conn_query(conn, "COMMIT TRANSACTION");
+	result = query(conn, "COMMIT TRANSACTION");
 	if (!result) {
 		LOGP(DDB, LOGL_ERROR,
 			"Failed to commit the transaction (upgrade from rev 3)\n");
@@ -361,7 +391,7 @@ static int update_db_revision_3(void)
 	}
 
 	/* Shrink DB file size by actually wiping out SMS_3 table data */
-	result = dbi_conn_query(conn, "VACUUM");
+	result = query(conn, "VACUUM");
 	if (!result)
 		LOGP(DDB, LOGL_ERROR,
 			"VACUUM failed. Ignoring it (upgrade from rev 3).\n");
@@ -371,7 +401,7 @@ static int update_db_revision_3(void)
 	return 0;
 
 rollback:
-	result = dbi_conn_query(conn, "ROLLBACK TRANSACTION");
+	result = query(conn, "ROLLBACK TRANSACTION");
 	if (!result)
 		LOGP(DDB, LOGL_ERROR,
 			"Rollback failed (upgrade from rev 3).\n");
@@ -431,7 +461,7 @@ static int update_db_revision_4(void)
 
 	LOGP(DDB, LOGL_NOTICE, "Going to migrate from revision 4\n");
 
-	result = dbi_conn_query(conn, "BEGIN EXCLUSIVE TRANSACTION");
+	result = query(conn, "BEGIN EXCLUSIVE TRANSACTION");
 	if (!result) {
 		LOGP(DDB, LOGL_ERROR,
 			"Failed to begin transaction (upgrade from rev 4)\n");
@@ -440,7 +470,7 @@ static int update_db_revision_4(void)
 	dbi_result_free(result);
 
 	/* Rename old SMS table to be able create a new one */
-	result = dbi_conn_query(conn, "ALTER TABLE SMS RENAME TO SMS_4");
+	result = query(conn, "ALTER TABLE SMS RENAME TO SMS_4");
 	if (!result) {
 		LOGP(DDB, LOGL_ERROR,
 		     "Failed to rename the old SMS table (upgrade from rev 4).\n");
@@ -449,7 +479,7 @@ static int update_db_revision_4(void)
 	dbi_result_free(result);
 
 	/* Create new SMS table with all the bells and whistles! */
-	result = dbi_conn_query(conn, create_stmts[SCHEMA_SMS]);
+	result = query(conn, create_stmts[SCHEMA_SMS]);
 	if (!result) {
 		LOGP(DDB, LOGL_ERROR,
 		     "Failed to create a new SMS table (upgrade from rev 4).\n");
@@ -458,7 +488,7 @@ static int update_db_revision_4(void)
 	dbi_result_free(result);
 
 	/* Cycle through old messages and convert them to the new format */
-	result = dbi_conn_query(conn, "SELECT * FROM SMS_4");
+	result = query(conn, "SELECT * FROM SMS_4");
 	if (!result) {
 		LOGP(DDB, LOGL_ERROR,
 		     "Failed fetch messages from the old SMS table (upgrade from rev 4).\n");
@@ -477,7 +507,7 @@ static int update_db_revision_4(void)
 	dbi_result_free(result);
 
 	/* Remove the temporary table */
-	result = dbi_conn_query(conn, "DROP TABLE SMS_4");
+	result = query(conn, "DROP TABLE SMS_4");
 	if (!result) {
 		LOGP(DDB, LOGL_ERROR,
 		     "Failed to drop the old SMS table (upgrade from rev 4).\n");
@@ -486,7 +516,7 @@ static int update_db_revision_4(void)
 	dbi_result_free(result);
 
 	/* We're done. Bump DB Meta revision to 4 */
-	result = dbi_conn_query(conn,
+	result = query(conn,
 				"UPDATE Meta "
 				"SET value = '5' "
 				"WHERE key = 'revision'");
@@ -497,7 +527,7 @@ static int update_db_revision_4(void)
 	}
 	dbi_result_free(result);
 
-	result = dbi_conn_query(conn, "COMMIT TRANSACTION");
+	result = query(conn, "COMMIT TRANSACTION");
 	if (!result) {
 		LOGP(DDB, LOGL_ERROR,
 			"Failed to commit the transaction (upgrade from rev 4)\n");
@@ -507,7 +537,7 @@ static int update_db_revision_4(void)
 	}
 
 	/* Shrink DB file size by actually wiping out SMS_4 table data */
-	result = dbi_conn_query(conn, "VACUUM");
+	result = query(conn, "VACUUM");
 	if (!result)
 		LOGP(DDB, LOGL_ERROR,
 			"VACUUM failed. Ignoring it (upgrade from rev 4).\n");
@@ -517,7 +547,7 @@ static int update_db_revision_4(void)
 	return 0;
 
 rollback:
-	result = dbi_conn_query(conn, "ROLLBACK TRANSACTION");
+	result = query(conn, "ROLLBACK TRANSACTION");
 	if (!result)
 		LOGP(DDB, LOGL_ERROR,
 			"Rollback failed (upgrade from rev 4).\n");
@@ -533,7 +563,7 @@ static int check_db_revision(void)
 	int db_rev = 0;
 
 	/* Make a query */
-	result = dbi_conn_query(conn,
+	result = query(conn,
 		"SELECT value FROM Meta "
 		"WHERE key = 'revision'");
 
@@ -593,7 +623,7 @@ static int db_configure(void)
 {
 	dbi_result result;
 
-	result = dbi_conn_query(conn,
+	result = query(conn,
 				"PRAGMA synchronous = FULL");
 	if (!result)
 		return -EINVAL;
@@ -647,7 +677,7 @@ int db_prepare(void)
 	int i;
 
 	for (i = 0; i < ARRAY_SIZE(create_stmts); i++) {
-		result = dbi_conn_query(conn, create_stmts[i]);
+		result = query(conn, create_stmts[i]);
 		if (!result) {
 			LOGP(DDB, LOGL_ERROR,
 			     "Failed to create some table.\n");
@@ -694,7 +724,7 @@ int db_sms_store(struct gsm_sms *sms)
 				   &q_udata);
 
 	/* FIXME: correct validity period */
-	result = dbi_conn_queryf(conn,
+	result = queryf(conn,
 		"INSERT INTO SMS "
 		"(created, valid_until, "
 		 "reply_path_req, status_rep_req, is_report, "
@@ -782,7 +812,7 @@ struct gsm_sms *db_sms_get(struct gsm_network *net, unsigned long long id)
 	dbi_result result;
 	struct gsm_sms *sms;
 
-	result = dbi_conn_queryf(conn,
+	result = queryf(conn,
 		"SELECT * FROM SMS WHERE SMS.id = %llu", id);
 	if (!result)
 		return NULL;
@@ -806,7 +836,7 @@ struct gsm_sms *db_sms_get_next_unsent(struct gsm_network *net,
 	dbi_result result;
 	struct gsm_sms *sms;
 
-	result = dbi_conn_queryf(conn,
+	result = queryf(conn,
 		"SELECT * FROM SMS"
 		" WHERE sent IS NULL"
 		" AND id >= %llu"
@@ -840,7 +870,7 @@ struct gsm_sms *db_sms_get_unsent_for_subscr(struct vlr_subscr *vsub,
 	if (!vsub->lu_complete)
 		return NULL;
 
-	result = dbi_conn_queryf(conn,
+	result = queryf(conn,
 		"SELECT * FROM SMS"
 		" WHERE sent IS NULL"
 		" AND dest_addr=%s"
@@ -869,7 +899,7 @@ struct gsm_sms *db_sms_get_next_unsent_rr_msisdn(struct gsm_network *net,
 	dbi_result result;
 	struct gsm_sms *sms;
 
-	result = dbi_conn_queryf(conn,
+	result = queryf(conn,
 		"SELECT * FROM SMS"
 		" WHERE sent IS NULL"
 		" AND dest_addr > '%s'"
@@ -896,7 +926,7 @@ int db_sms_mark_delivered(struct gsm_sms *sms)
 {
 	dbi_result result;
 
-	result = dbi_conn_queryf(conn,
+	result = queryf(conn,
 		"UPDATE SMS "
 		"SET sent = datetime('now') "
 		"WHERE id = %llu", sms->id);
@@ -914,7 +944,7 @@ int db_sms_inc_deliver_attempts(struct gsm_sms *sms)
 {
 	dbi_result result;
 
-	result = dbi_conn_queryf(conn,
+	result = queryf(conn,
 		"UPDATE SMS "
 		"SET deliver_attempts = deliver_attempts + 1 "
 		"WHERE id = %llu", sms->id);
@@ -934,7 +964,7 @@ int db_sms_delete_by_msisdn(const char *msisdn)
 	dbi_result result;
 	if (!msisdn || !*msisdn)
 		return 0;
-	result = dbi_conn_queryf(conn,
+	result = queryf(conn,
 		    "DELETE FROM SMS WHERE src_addr=%s OR dest_addr=%s",
 		    msisdn, msisdn);
 	if (!result) {
@@ -953,7 +983,7 @@ int db_store_counter(struct osmo_counter *ctr)
 
 	dbi_conn_quote_string_copy(conn, ctr->name, &q_name);
 
-	result = dbi_conn_queryf(conn,
+	result = queryf(conn,
 		"INSERT INTO Counters "
 		"(timestamp,name,value) VALUES "
 		"(datetime('now'),%s,%lu)", q_name, ctr->value);
@@ -976,7 +1006,7 @@ static int db_store_rate_ctr(struct rate_ctr_group *ctrg, unsigned int num,
 	dbi_conn_quote_string_copy(conn, ctrg->desc->ctr_desc[num].name,
 				   &q_name);
 
-	result = dbi_conn_queryf(conn,
+	result = queryf(conn,
 		"Insert INTO RateCounters "
 		"(timestamp,name,idx,value) VALUES "
 		"(datetime('now'),%s.%s,%u,%"PRIu64")",
