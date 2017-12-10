@@ -181,6 +181,13 @@ static const char *create_stmts[] = {
 		")",
 };
 
+static inline int next_row(dbi_result result)
+{
+	if (!dbi_result_has_next_row(result))
+		return 0;
+	return dbi_result_next_row(result);
+}
+
 void db_error_func(dbi_conn conn, void *data)
 {
 	const char *msg;
@@ -318,7 +325,7 @@ static int update_db_revision_3(void)
 		     "Failed fetch messages from the old SMS table (upgrade from rev 3).\n");
 		goto rollback;
 	}
-	while (dbi_result_next_row(result)) {
+	while (next_row(result)) {
 		sms = sms_from_result_v3(result);
 		if (db_sms_store(sms) != 0) {
 			LOGP(DDB, LOGL_ERROR, "Failed to store message to the new SMS table(upgrade from rev 3).\n");
@@ -464,7 +471,7 @@ static int update_db_revision_4(void)
 		     "Failed fetch messages from the old SMS table (upgrade from rev 4).\n");
 		goto rollback;
 	}
-	while (dbi_result_next_row(result)) {
+	while (next_row(result)) {
 		sms = sms_from_result_v4(result);
 		if (db_sms_store(sms) != 0) {
 			LOGP(DDB, LOGL_ERROR, "Failed to store message to the new SMS table(upgrade from rev 4).\n");
@@ -540,7 +547,7 @@ static int check_db_revision(void)
 	if (!result)
 		return -EINVAL;
 
-	if (!dbi_result_next_row(result)) {
+	if (!next_row(result)) {
 		dbi_result_free(result);
 		return -EINVAL;
 	}
@@ -787,7 +794,7 @@ struct gsm_sms *db_sms_get(struct gsm_network *net, unsigned long long id)
 	if (!result)
 		return NULL;
 
-	if (!dbi_result_next_row(result)) {
+	if (!next_row(result)) {
 		dbi_result_free(result);
 		return NULL;
 	}
@@ -817,7 +824,7 @@ struct gsm_sms *db_sms_get_next_unsent(struct gsm_network *net,
 	if (!result)
 		return NULL;
 
-	if (!dbi_result_next_row(result)) {
+	if (!next_row(result)) {
 		dbi_result_free(result);
 		return NULL;
 	}
@@ -858,7 +865,7 @@ struct gsm_sms *db_sms_get_unsent_for_subscr(struct vlr_subscr *vsub,
 	if (!result)
 		return NULL;
 
-	if (!dbi_result_next_row(result)) {
+	if (!next_row(result)) {
 		dbi_result_free(result);
 		return NULL;
 	}
@@ -891,7 +898,7 @@ struct gsm_sms *db_sms_get_next_unsent_rr_msisdn(struct gsm_network *net,
 	if (!result)
 		return NULL;
 
-	if (!dbi_result_next_row(result)) {
+	if (!next_row(result)) {
 		dbi_result_free(result);
 		return NULL;
 	}
