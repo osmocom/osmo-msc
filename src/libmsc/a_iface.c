@@ -193,7 +193,7 @@ int a_iface_tx_cipher_mode(const struct gsm_subscriber_connection *conn,
 	if (include_imeisv)
 		crm_ptr = &crm;
 
-	ei.perm_algo[0] = (uint8_t) (1 << cipher);
+	ei.perm_algo[0] = vlr_ciph_to_gsm0808_alg_id(cipher);
 	ei.perm_algo_len = 1;
 
 	msg_resp = gsm0808_create_cipher(&ei, crm_ptr);
