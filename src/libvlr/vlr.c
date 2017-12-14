@@ -1104,6 +1104,8 @@ int vlr_set_ciph_mode(struct vlr_instance *vlr,
 
 	case VLR_CIPH_A5_1:
 	case VLR_CIPH_A5_3:
+		LOGPFSML(fi, LOGL_DEBUG, "Set Ciphering Mode %d = %s\n",
+			 ciph_mode, vlr_ciph_name(ciph_mode));
 		return vlr->ops.set_ciph_mode(msc_conn_ref,
 					      ciph_mode,
 					      retrieve_imeisv);
