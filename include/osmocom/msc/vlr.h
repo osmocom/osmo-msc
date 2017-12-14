@@ -7,6 +7,7 @@
 #include <osmocom/gsm/protocol/gsm_23_003.h>
 #include <osmocom/gsm/protocol/gsm_04_08_gprs.h>
 #include <osmocom/gsm/gsm23003.h>
+#include <osmocom/gsm/gsm0808.h>
 #include <osmocom/msc/gsm_data.h>
 // for GSM_NAME_LENGTH
 #include <osmocom/msc/gsm_subscriber.h>
@@ -171,6 +172,21 @@ enum vlr_ciph {
 	VLR_CIPH_A5_2, /*< A5/2, deprecated export-grade encryption */
 	VLR_CIPH_A5_3, /*< A5/3, 'new secure' encryption */
 };
+
+static inline uint8_t vlr_ciph_to_gsm0808_alg_id(enum vlr_ciph ciph)
+{
+	switch (ciph) {
+	default:
+	case VLR_CIPH_NONE:
+		return GSM0808_ALG_ID_A5_0;
+	case VLR_CIPH_A5_1:
+		return GSM0808_ALG_ID_A5_1;
+	case VLR_CIPH_A5_2:
+		return GSM0808_ALG_ID_A5_2;
+	case VLR_CIPH_A5_3:
+		return GSM0808_ALG_ID_A5_3;
+	}
+}
 
 struct vlr_ops {
 	/* encode + transmit an AUTH REQ towards the MS.
