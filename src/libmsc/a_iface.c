@@ -164,7 +164,7 @@ int a_iface_tx_dtap(struct msgb *msg)
 
 /* Send Cipher mode command via A-interface */
 int a_iface_tx_cipher_mode(const struct gsm_subscriber_connection *conn,
-			   int cipher, const const uint8_t *key, int len, int include_imeisv)
+			   int cipher, const uint8_t *key, int len, int include_imeisv)
 {
 	/* TODO generalize for A- and Iu interfaces, don't name after 08.08 */
 	struct msgb *msg_resp;
