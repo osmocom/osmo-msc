@@ -39,6 +39,7 @@
 #include <osmocom/sccp/sccp_types.h>
 #include <osmocom/msc/a_reset.h>
 #include <osmocom/msc/osmo_msc.h>
+#include <osmocom/msc/vlr.h>
 
 #include <errno.h>
 
@@ -172,7 +173,9 @@ int a_iface_tx_cipher_mode(const struct gsm_subscriber_connection *conn,
 
 	OSMO_ASSERT(conn);
 
-	LOGP(DMSC, LOGL_DEBUG, "Passing Cipher mode command message from MSC to BSC (conn_id=%i)\n", conn->a.conn_id);
+	LOGP(DMSC, LOGL_DEBUG, "(subscr %s, conn_id %d) Cipher Mode Command to BSC,"
+	     " cipher=%d key=%s\n",
+	     vlr_subscr_name(conn->vsub), conn->a.conn_id, cipher, osmo_hexdump_nospc(key, len));
 	uint8_t crm = 0x01;
 	uint8_t *crm_ptr = NULL;
 
