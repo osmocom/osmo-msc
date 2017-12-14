@@ -3410,8 +3410,18 @@ static int msc_vlr_set_ciph_mode(void *msc_conn_ref,
 	case RAN_GERAN_A:
 		DEBUGP(DMM, "-> CIPHER MODE COMMAND %s\n",
 		       vlr_subscr_name(conn->vsub));
-		return a_iface_tx_cipher_mode(conn, ciph, tuple->vec.kc, 8,
-					      retrieve_imeisv);
+		{
+			struct gsm0808_encrypt_info ei;
+
+			ei.perm_algo[0] = vlr_ciph_to_gsm0808_alg_id(ciph);
+			ei.perm_algo_len = 1;
+
+			OSMO_ASSERT(sizeof(ei.key) >= sizeof(tuple->vec.kc));
+			memcpy(ei.key, tuple->vec.kc, sizeof(tuple->vec.kc));
+			ei.key_len = sizeof(tuple->vec.kc);
+
+			return a_iface_tx_cipher_mode(conn, &ei, retrieve_imeisv);
+		}
 	case RAN_UTRAN_IU:
 #ifdef BUILD_IU
 		DEBUGP(DMM, "-> SECURITY MODE CONTROL %s\n",

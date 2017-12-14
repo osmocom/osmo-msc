@@ -165,38 +165,20 @@ int a_iface_tx_dtap(struct msgb *msg)
 
 /* Send Cipher mode command via A-interface */
 int a_iface_tx_cipher_mode(const struct gsm_subscriber_connection *conn,
-			   int cipher, const uint8_t *key, int len, int include_imeisv)
+			   struct gsm0808_encrypt_info *ei, int include_imeisv)
 {
 	/* TODO generalize for A- and Iu interfaces, don't name after 08.08 */
 	struct msgb *msg_resp;
-	struct gsm0808_encrypt_info ei;
+	uint8_t crm = 0x01;
 
 	OSMO_ASSERT(conn);
 
-	LOGP(DMSC, LOGL_DEBUG, "(subscr %s, conn_id %d) Cipher Mode Command to BSC,"
-	     " cipher=%d key=%s\n",
-	     vlr_subscr_name(conn->vsub), conn->a.conn_id, cipher, osmo_hexdump_nospc(key, len));
-	uint8_t crm = 0x01;
-	uint8_t *crm_ptr = NULL;
+	LOGP(DMSC, LOGL_DEBUG, "(subscr %s, conn_id %d) Cipher Mode Command to BSC, %u ciphers (%s)",
+	     vlr_subscr_name(conn->vsub), conn->a.conn_id, ei->perm_algo_len,
+	     osmo_hexdump_nospc(ei->perm_algo, ei->perm_algo_len));
+	LOGPC(DMSC, LOGL_DEBUG, " key %s\n", osmo_hexdump_nospc(ei->key, ei->key_len));
 
-	/* Setup encryption information */
-	if (len > ENCRY_INFO_KEY_MAXLEN || !key) {
-		LOGP(DMSC, LOGL_ERROR,
-		     "Cipher mode command message could not be generated due to invalid key! (conn_id=%i)\n",
-		     conn->a.conn_id);
-		return -EINVAL;
-	} else {
-		memcpy(&ei.key, key, len);
-		ei.key_len = len;
-	}
-
-	if (include_imeisv)
-		crm_ptr = &crm;
-
-	ei.perm_algo[0] = vlr_ciph_to_gsm0808_alg_id(cipher);
-	ei.perm_algo_len = 1;
-
-	msg_resp = gsm0808_create_cipher(&ei, crm_ptr);
+	msg_resp = gsm0808_create_cipher(ei, include_imeisv ? &crm : NULL);
 	LOGP(DMSC, LOGL_DEBUG, "N-DATA.req(%u, %s)\n", conn->a.conn_id, osmo_hexdump(msg_resp->data, msg_resp->len));
 
 	return osmo_sccp_tx_data_msg(conn->a.scu, conn->a.conn_id, msg_resp);
