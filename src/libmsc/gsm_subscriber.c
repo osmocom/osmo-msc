@@ -52,6 +52,11 @@
 #include <osmocom/msc/msc_ifaces.h>
 #include <osmocom/msc/a_iface.h>
 
+void subscr_paging_cancel(struct vlr_subscr *vsub, enum gsm_paging_event event)
+{
+	subscr_paging_dispatch(GSM_HOOK_RR_PAGING, event, NULL, NULL, vsub);
+}
+
 int subscr_paging_dispatch(unsigned int hooknum, unsigned int event,
 			   struct msgb *msg, void *data, void *param)
 {
@@ -132,7 +137,7 @@ int msc_paging_request(struct vlr_subscr *vsub)
 static void paging_response_timer_cb(void *data)
 {
 	struct vlr_subscr *vsub = data;
-	subscr_paging_dispatch(GSM_HOOK_RR_PAGING, GSM_PAGING_EXPIRED, NULL, NULL, vsub);
+	subscr_paging_cancel(vsub, GSM_PAGING_EXPIRED);
 }
 
 /*! \brief Start a paging request for vsub, call cbfn(param) when done.

@@ -258,13 +258,26 @@ void test_ms_timeout_paging()
 	OSMO_ASSERT(vsub);
 	VERBOSE_ASSERT(vsub->cs.is_paging, == false, "%d");
 	VERBOSE_ASSERT(llist_count(&vsub->cs.requests), == 0, "%d");
+
+	BTW("Now that the timeout has expired, another Paging is sent on request");
+	paging_expect_imsi(imsi);
+	paging_sent = false;
+
+	send_sms(vsub, vsub,
+		 "Privacy in residential applications is a desirable"
+		 " marketing option.");
+
+	VERBOSE_ASSERT(llist_count(&vsub->cs.requests), == 1, "%d");
 	vlr_subscr_put(vsub);
 	vsub = NULL;
+	VERBOSE_ASSERT(paging_sent, == true, "%d");
+	VERBOSE_ASSERT(paging_stopped, == false, "%d");
 
-	BTW("subscriber detaches");
+	BTW("subscriber detaches, pagings are canceled");
 	expect_bssap_clear();
 	ms_sends_msg("050130089910070000006402");
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
+	VERBOSE_ASSERT(paging_stopped, == true, "%d");
 
 	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi);
 	OSMO_ASSERT(!vsub);

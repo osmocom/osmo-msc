@@ -62,6 +62,7 @@ void subscr_remove_request(struct subscr_request *req);
 int subscr_rx_paging_response(struct msgb *msg,
 			      struct gsm_subscriber_connection *conn);
 
+void subscr_paging_cancel(struct vlr_subscr *vsub, enum gsm_paging_event event);
 int subscr_paging_dispatch(unsigned int hooknum, unsigned int event,
 			   struct msgb *msg, void *data, void *param);
 
