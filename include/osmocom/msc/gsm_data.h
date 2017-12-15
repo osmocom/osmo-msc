@@ -344,18 +344,6 @@ enum gsm_auth_policy {
 	GSM_AUTH_POLICY_REGEXP, /* accept IMSIs matching given regexp */
 };
 
-#define GSM_T3101_DEFAULT 10	/* s */
-#define GSM_T3103_DEFAULT 5	/* s */
-#define GSM_T3105_DEFAULT 100	/* ms */
-#define GSM_T3107_DEFAULT 5	/* s */
-#define GSM_T3109_DEFAULT 19	/* s, must be 2s + radio_link_timeout*0.48 */
-#define GSM_T3111_DEFAULT 2	/* s */
-#define GSM_T3113_DEFAULT 60
-#define GSM_T3115_DEFAULT 10
-#define GSM_T3117_DEFAULT 10
-#define GSM_T3119_DEFAULT 10
-#define GSM_T3122_DEFAULT 10
-#define GSM_T3141_DEFAULT 10
 
 struct gsm_tz {
 	int override; /* if 0, use system's time zone instead. */
@@ -420,19 +408,6 @@ struct gsm_network {
 	unsigned int num_bts;
 	struct llist_head bts_list;
 
-	/* timer values */
-	int T3101;
-	int T3103;
-	int T3105;
-	int T3107;
-	int T3109;
-	int T3111;
-	int T3113;
-	int T3115;
-	int T3117;
-	int T3119;
-	int T3122;
-	int T3141;
 
 	/* timer to expire old location updates */
 	struct osmo_timer_list subscr_expire_timer;
