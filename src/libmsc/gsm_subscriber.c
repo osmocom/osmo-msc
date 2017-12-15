@@ -109,8 +109,6 @@ int msc_paging_request(struct vlr_subscr *vsub)
 	/* The subscriber was last seen in subscr->lac. Find out which
 	 * BSCs/RNCs are responsible and send them a paging request via open
 	 * SCCP connections (if any). */
-	/* TODO Implementing only RNC paging, since this is code on the iu branch.
-	 * Need to add BSC paging at some point. */
 	switch (vsub->cs.attached_via_ran) {
 	case RAN_GERAN_A:
 		return a_iface_tx_paging(vsub->imsi, vsub->tmsi, vsub->lac);
