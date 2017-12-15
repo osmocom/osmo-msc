@@ -344,6 +344,7 @@ enum gsm_auth_policy {
 	GSM_AUTH_POLICY_REGEXP, /* accept IMSIs matching given regexp */
 };
 
+#define MSC_PAGING_RESPONSE_TIMER_DEFAULT 10
 
 struct gsm_tz {
 	int override; /* if 0, use system's time zone instead. */
@@ -408,6 +409,7 @@ struct gsm_network {
 	unsigned int num_bts;
 	struct llist_head bts_list;
 
+	unsigned int paging_response_timer;
 
 	/* timer to expire old location updates */
 	struct osmo_timer_list subscr_expire_timer;

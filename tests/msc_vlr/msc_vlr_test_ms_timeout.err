@@ -337,6 +337,173 @@ DREF freeing VLR subscr MSISDN:46071
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
 talloc_total_blocks(tall_bsc_ctx) == 9
 
+===== test_ms_timeout_paging
+- Total time passed: 0.000000 s
+- Location Update request causes a GSUP LU request to HLR
+  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
+  new conn
+DREF unknown: MSC conn use + compl_l3 == 1 (0x1)
+DRLL Dispatching 04.08 message GSM48_MT_MM_LOC_UPD_REQUEST (0x5:0x8)
+DREF unknown: MSC conn use + fsm == 2 (0x5)
+DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: Allocated
+DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: Received Event SUBSCR_CONN_E_START
+DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_INIT}: state_chg to SUBSCR_CONN_S_NEW
+DMM LOCATION UPDATING REQUEST: MI(IMSI)=901700000004620 type=IMSI ATTACH
+DMM LU/new-LAC: 1/23
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_IDLE}: Allocated
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_IDLE}: is child of Subscr_Conn(901700000004620)
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_IDLE}: rev=GSM net=GERAN (no Auth)
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_IDLE}: Received Event VLR_ULA_E_UPDATE_LA
+DREF VLR subscr unknown usage increases to: 1
+DVLR set IMSI on subscriber; IMSI=901700000004620 id=901700000004620
+DVLR New subscr, IMSI: 901700000004620
+DREF VLR subscr IMSI:901700000004620 usage increases to: 2
+DREF VLR subscr IMSI:901700000004620 usage decreases to: 1
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_IDLE}: vlr_loc_upd_node1()
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_IDLE}: vlr_loc_upd_post_auth()
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_IDLE}: vlr_loc_upd_post_ciph()
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_IDLE}: vlr_loc_upd_node_4()
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_IDLE}: state_chg to VLR_ULA_S_WAIT_HLR_UPD
+DVLR upd_hlr_vlr_fsm(901700000004620){UPD_HLR_VLR_S_INIT}: Allocated
+DVLR upd_hlr_vlr_fsm(901700000004620){UPD_HLR_VLR_S_INIT}: is child of vlr_lu_fsm(901700000004620)
+DVLR upd_hlr_vlr_fsm(901700000004620){UPD_HLR_VLR_S_INIT}: Received Event UPD_HLR_VLR_E_START
+DVLR GSUP tx: 04010809710000004026f0
+GSUP --> HLR: OSMO_GSUP_MSGT_UPDATE_LOCATION_REQUEST: 04010809710000004026f0
+DVLR upd_hlr_vlr_fsm(901700000004620){UPD_HLR_VLR_S_INIT}: state_chg to UPD_HLR_VLR_S_WAIT_FOR_DATA
+DMM IMSI:901700000004620: bump: conn still being established (SUBSCR_CONN_S_NEW)
+DREF IMSI:901700000004620: MSC conn use - compl_l3 == 1 (0x4)
+  lu_result_sent == 0
+- HLR sends _INSERT_DATA_REQUEST, VLR responds with _INSERT_DATA_RESULT
+<-- GSUP rx OSMO_GSUP_MSGT_INSERT_DATA_REQUEST: 10010809710000004026f00804036470f1
+DVLR GSUP rx 17: 10010809710000004026f00804036470f1
+DREF VLR subscr IMSI:901700000004620 usage increases to: 2
+DVLR IMSI:901700000004620 has MSISDN:46071
+DVLR GSUP tx: 12010809710000004026f0
+GSUP --> HLR: OSMO_GSUP_MSGT_INSERT_DATA_RESULT: 12010809710000004026f0
+DREF VLR subscr MSISDN:46071 usage decreases to: 1
+<-- GSUP rx OSMO_GSUP_MSGT_INSERT_DATA_REQUEST: vlr_gsupc_read_cb() returns 0
+  lu_result_sent == 0
+- HLR also sends GSUP _UPDATE_LOCATION_RESULT
+<-- GSUP rx OSMO_GSUP_MSGT_UPDATE_LOCATION_RESULT: 06010809710000004026f0
+DVLR GSUP rx 11: 06010809710000004026f0
+DREF VLR subscr MSISDN:46071 usage increases to: 2
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_WAIT_HLR_UPD}: Received Event VLR_ULA_E_HLR_LU_RES
+DVLR upd_hlr_vlr_fsm(901700000004620){UPD_HLR_VLR_S_WAIT_FOR_DATA}: Received Event UPD_HLR_VLR_E_UPD_LOC_ACK
+DVLR upd_hlr_vlr_fsm(901700000004620){UPD_HLR_VLR_S_WAIT_FOR_DATA}: state_chg to UPD_HLR_VLR_S_DONE
+DVLR upd_hlr_vlr_fsm(901700000004620){UPD_HLR_VLR_S_DONE}: Terminating (cause = OSMO_FSM_TERM_REGULAR)
+DVLR upd_hlr_vlr_fsm(901700000004620){UPD_HLR_VLR_S_DONE}: Removing from parent vlr_lu_fsm(901700000004620)
+DVLR upd_hlr_vlr_fsm(901700000004620){UPD_HLR_VLR_S_DONE}: Freeing instance
+DVLR upd_hlr_vlr_fsm(901700000004620){UPD_HLR_VLR_S_DONE}: Deallocated
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_WAIT_HLR_UPD}: Received Event VLR_ULA_E_UPD_HLR_COMPL
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_WAIT_HLR_UPD}: state_chg to VLR_ULA_S_WAIT_LU_COMPL
+DVLR lu_compl_vlr_fsm(901700000004620){LU_COMPL_VLR_S_INIT}: Allocated
+DVLR lu_compl_vlr_fsm(901700000004620){LU_COMPL_VLR_S_INIT}: is child of vlr_lu_fsm(901700000004620)
+DVLR lu_compl_vlr_fsm(901700000004620){LU_COMPL_VLR_S_INIT}: Received Event LU_COMPL_VLR_E_START
+DVLR lu_compl_vlr_fsm(901700000004620){LU_COMPL_VLR_S_INIT}: state_chg to LU_COMPL_VLR_S_WAIT_SUB_PRES
+DVLR sub_pres_vlr_fsm(901700000004620){SUB_PRES_VLR_S_INIT}: Allocated
+DVLR sub_pres_vlr_fsm(901700000004620){SUB_PRES_VLR_S_INIT}: is child of lu_compl_vlr_fsm(901700000004620)
+DVLR sub_pres_vlr_fsm(901700000004620){SUB_PRES_VLR_S_INIT}: Received Event SUB_PRES_VLR_E_START
+DVLR sub_pres_vlr_fsm(901700000004620){SUB_PRES_VLR_S_INIT}: state_chg to SUB_PRES_VLR_S_DONE
+DVLR sub_pres_vlr_fsm(901700000004620){SUB_PRES_VLR_S_DONE}: Terminating (cause = OSMO_FSM_TERM_REGULAR)
+DVLR sub_pres_vlr_fsm(901700000004620){SUB_PRES_VLR_S_DONE}: Removing from parent lu_compl_vlr_fsm(901700000004620)
+DVLR sub_pres_vlr_fsm(901700000004620){SUB_PRES_VLR_S_DONE}: Freeing instance
+DVLR sub_pres_vlr_fsm(901700000004620){SUB_PRES_VLR_S_DONE}: Deallocated
+DVLR lu_compl_vlr_fsm(901700000004620){LU_COMPL_VLR_S_WAIT_SUB_PRES}: Received Event LU_COMPL_VLR_E_SUB_PRES_COMPL
+- sending LU Accept for MSISDN:46071
+DREF VLR subscr MSISDN:46071 usage increases to: 3
+DVLR lu_compl_vlr_fsm(901700000004620){LU_COMPL_VLR_S_WAIT_SUB_PRES}: state_chg to LU_COMPL_VLR_S_DONE
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_WAIT_LU_COMPL}: Received Event VLR_ULA_E_LU_COMPL_SUCCESS
+DVLR lu_compl_vlr_fsm(901700000004620){LU_COMPL_VLR_S_DONE}: Terminating (cause = OSMO_FSM_TERM_PARENT)
+DVLR lu_compl_vlr_fsm(901700000004620){LU_COMPL_VLR_S_DONE}: Removing from parent vlr_lu_fsm(901700000004620)
+DVLR lu_compl_vlr_fsm(901700000004620){LU_COMPL_VLR_S_DONE}: Freeing instance
+DVLR lu_compl_vlr_fsm(901700000004620){LU_COMPL_VLR_S_DONE}: Deallocated
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_WAIT_LU_COMPL}: state_chg to VLR_ULA_S_DONE
+DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_NEW}: Received Event SUBSCR_CONN_E_ACCEPTED
+DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_NEW}: SUBSCR_CONN_FROM_LU
+DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_NEW}: state_chg to SUBSCR_CONN_S_ACCEPTED
+DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_ACCEPTED}: Received Event SUBSCR_CONN_E_BUMP
+DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_ACCEPTED}: bump: releasing conn
+DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_ACCEPTED}: state_chg to SUBSCR_CONN_S_RELEASED
+DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Terminating (cause = OSMO_FSM_TERM_REGULAR)
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_DONE}: Terminating (cause = OSMO_FSM_TERM_PARENT)
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_DONE}: Removing from parent Subscr_Conn(901700000004620)
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_DONE}: fsm_lu_cleanup called with cause OSMO_FSM_TERM_PARENT
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_DONE}: Freeing instance
+DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_DONE}: Deallocated
+DMM msc_subscr_conn_close(vsub=MSISDN:46071, cause=2): no conn fsm, releasing directly without release event.
+- BSSAP Clear --RAN_GERAN_A--> MS
+DREF MSISDN:46071: MSC conn use - fsm == 0 (0x0)
+DRLL subscr MSISDN:46071: Freeing subscriber connection
+DREF VLR subscr MSISDN:46071 usage decreases to: 2
+DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Freeing instance
+DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Deallocated
+DREF VLR subscr MSISDN:46071 usage decreases to: 1
+<-- GSUP rx OSMO_GSUP_MSGT_UPDATE_LOCATION_RESULT: vlr_gsupc_read_cb() returns 0
+- LU was successful, and the conn has already been closed
+  lu_result_sent == 1
+  bssap_clear_sent == 1
+  llist_count(&net->subscr_conns) == 0
+---
+- an SMS is sent, MS is paged
+DREF VLR subscr MSISDN:46071 usage increases to: 2
+  llist_count(&vsub->cs.requests) == 0
+DREF VLR subscr MSISDN:46071 usage increases to: 3
+DMM Subscriber MSISDN:46071 not paged yet, start paging.
+  RAN_GERAN_A sends out paging request to IMSI 901700000004620, TMSI 0xffffffff, LAC 23
+  strcmp(paging_expecting_imsi, imsi) == 0
+DREF VLR subscr MSISDN:46071 usage increases to: 4
+  llist_count(&vsub->cs.requests) == 1
+DREF VLR subscr MSISDN:46071 usage decreases to: 3
+  paging_sent == 1
+  paging_stopped == 0
+- time passes and no paging result is received
+- Total time passed: 9.000000 s
+- the paging timeout has not yet expired
+  paging_stopped == 0
+DREF VLR subscr MSISDN:46071 usage increases to: 4
+  vsub->cs.is_paging == 1
+- another request is added to the list but does not cause another paging
+DREF VLR subscr MSISDN:46071 usage increases to: 5
+DMM Subscriber MSISDN:46071 already paged.
+  llist_count(&vsub->cs.requests) == 2
+DREF VLR subscr MSISDN:46071 usage decreases to: 4
+  paging_sent == 0
+- the paging timeout expires, the paging as well as the requests are canceled
+- Total time passed: 11.000000 s
+DPAG Paging failure for MSISDN:46071 (event=1)
+DPAG Calling paging cbfn.
+DREF VLR subscr MSISDN:46071 usage decreases to: 3
+DPAG Calling paging cbfn.
+DREF VLR subscr MSISDN:46071 usage decreases to: 2
+DREF VLR subscr MSISDN:46071 usage decreases to: 1
+  paging_stopped == 1
+DREF VLR subscr MSISDN:46071 usage increases to: 2
+  vsub->cs.is_paging == 0
+  llist_count(&vsub->cs.requests) == 0
+DREF VLR subscr MSISDN:46071 usage decreases to: 1
+---
+- subscriber detaches
+  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_IMSI_DETACH_IND
+  new conn
+DREF unknown: MSC conn use + compl_l3 == 1 (0x1)
+DRLL Dispatching 04.08 message GSM48_MT_MM_IMSI_DETACH_IND (0x5:0x1)
+DMM IMSI DETACH INDICATION: MI(IMSI)=901700000004620
+DREF VLR subscr MSISDN:46071 usage increases to: 2
+DMM IMSI DETACH for MSISDN:46071
+DREF VLR subscr MSISDN:46071 usage decreases to: 1
+DREF VLR subscr MSISDN:46071 usage decreases to: 0
+DREF freeing VLR subscr MSISDN:46071
+DMM msc_subscr_conn_close(vsub=unknown, cause=0): no conn fsm, releasing directly without release event.
+- BSSAP Clear --RAN_GERAN_A--> MS
+DREF unknown: MSC conn use - compl_l3 == 0 (0x0)
+DRLL Freeing subscriber connection with NULL subscriber
+  bssap_clear_sent == 1
+  llist_count(&net->subscr_conns) == 0
+===== test_ms_timeout_paging: SUCCESS
+
+full talloc report on 'msgb' (total      0 bytes in   1 blocks)
+talloc_total_blocks(tall_bsc_ctx) == 9
+
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
 talloc_total_blocks(tall_bsc_ctx) == 9
 

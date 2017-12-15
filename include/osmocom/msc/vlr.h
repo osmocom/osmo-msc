@@ -157,6 +157,7 @@ struct vlr_subscr {
 	struct {
 		/* pending requests */
 		bool is_paging;
+		struct osmo_timer_list paging_response_timer;
 		/* list of struct subscr_request */
 		struct llist_head requests;
 		uint8_t lac;

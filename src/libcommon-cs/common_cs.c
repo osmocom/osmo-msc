@@ -60,6 +60,8 @@ struct gsm_network *gsm_network_init(void *ctx,
 	/* Use 30 min periodic update interval as sane default */
 	net->t3212 = 5;
 
+	net->paging_response_timer = MSC_PAGING_RESPONSE_TIMER_DEFAULT;
+
 	INIT_LLIST_HEAD(&net->trans_list);
 	INIT_LLIST_HEAD(&net->upqueue);
 	INIT_LLIST_HEAD(&net->subscr_conns);

@@ -109,6 +109,22 @@ DEFUN(cfg_msc_auth_tuple_reuse_on_error, cfg_msc_auth_tuple_reuse_on_error_cmd,
 	return CMD_SUCCESS;
 }
 
+DEFUN(cfg_msc_paging_response_timer, cfg_msc_paging_response_timer_cmd,
+      "paging response-timer (default|<1-65535>)",
+      "Configure Paging\n"
+      "Set Paging timeout, the minimum time to pass between (unsuccessful) Pagings sent towards"
+      " BSS or RNC\n"
+      "Set to default timeout (" OSMO_STRINGIFY_VAL(MSC_PAGING_RESPONSE_TIMER_DEFAULT) " seconds)\n"
+      "Set paging timeout in seconds\n")
+{
+	struct gsm_network *gsmnet = gsmnet_from_vty(vty);
+	if (!strcmp(argv[1], "default"))
+		gsmnet->paging_response_timer = MSC_PAGING_RESPONSE_TIMER_DEFAULT;
+	else
+		gsmnet->paging_response_timer = atoi(argv[0]);
+	return CMD_SUCCESS;
+}
+
 static int config_write_msc(struct vty *vty)
 {
 	struct gsm_network *gsmnet = gsmnet_from_vty(vty);
@@ -129,6 +145,9 @@ static int config_write_msc(struct vty *vty)
 	if (gsmnet->vlr->cfg.auth_reuse_old_sets_on_error)
 		vty_out(vty, " auth-tuple-reuse-on-error 1%s",
 			VTY_NEWLINE);
+
+	if (gsmnet->paging_response_timer != MSC_PAGING_RESPONSE_TIMER_DEFAULT)
+		vty_out(vty, " paging response-timer %u%s", gsmnet->paging_response_timer, VTY_NEWLINE);
 
 	mgcp_client_config_write(vty, " ");
 #ifdef BUILD_IU
@@ -186,6 +205,7 @@ void msc_vty_init(struct gsm_network *msc_network)
 	install_element(MSC_NODE, &cfg_msc_auth_tuple_reuse_on_error_cmd);
 	install_element(MSC_NODE, &cfg_msc_cs7_instance_a_cmd);
 	install_element(MSC_NODE, &cfg_msc_cs7_instance_iu_cmd);
+	install_element(MSC_NODE, &cfg_msc_paging_response_timer_cmd);
 
 	mgcp_client_vty_init(msc_network, MSC_NODE, &msc_network->mgw.conf);
 #ifdef BUILD_IU

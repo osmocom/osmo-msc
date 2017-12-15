@@ -182,8 +182,101 @@ void test_ms_timeout_cm_auth_resp()
 	comment_end();
 }
 
+void test_ms_timeout_paging()
+{
+	struct vlr_subscr *vsub;
+	const char *imsi = "901700000004620";
+
+	rx_from_ran = RAN_GERAN_A;
+
+	comment_start();
+
+	fake_time_start();
+
+	btw("Location Update request causes a GSUP LU request to HLR");
+	lu_result_sent = RES_NONE;
+	gsup_expect_tx("04010809710000004026f0");
+	ms_sends_msg("050802008168000130089910070000006402");
+	OSMO_ASSERT(gsup_tx_confirmed);
+	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
+
+	btw("HLR sends _INSERT_DATA_REQUEST, VLR responds with _INSERT_DATA_RESULT");
+	gsup_rx("10010809710000004026f00804036470f1",
+		"12010809710000004026f0");
+	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
+
+	btw("HLR also sends GSUP _UPDATE_LOCATION_RESULT");
+	expect_bssap_clear();
+	gsup_rx("06010809710000004026f0", NULL);
+
+	btw("LU was successful, and the conn has already been closed");
+	VERBOSE_ASSERT(lu_result_sent, == RES_ACCEPT, "%d");
+	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
+	EXPECT_CONN_COUNT(0);
+
+	BTW("an SMS is sent, MS is paged");
+	paging_expect_imsi(imsi);
+	paging_sent = false;
+	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi);
+	OSMO_ASSERT(vsub);
+	VERBOSE_ASSERT(llist_count(&vsub->cs.requests), == 0, "%d");
+
+	send_sms(vsub, vsub,
+		 "Privacy in residential applications is a desirable"
+		 " marketing option.");
+
+	VERBOSE_ASSERT(llist_count(&vsub->cs.requests), == 1, "%d");
+	vlr_subscr_put(vsub);
+	vsub = NULL;
+	VERBOSE_ASSERT(paging_sent, == true, "%d");
+	VERBOSE_ASSERT(paging_stopped, == false, "%d");
+
+	btw("time passes and no paging result is received");
+
+	fake_time_passes(MSC_PAGING_RESPONSE_TIMER_DEFAULT - 1, 0);
+
+	btw("the paging timeout has not yet expired");
+	VERBOSE_ASSERT(paging_stopped, == false, "%d");
+	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi);
+	OSMO_ASSERT(vsub);
+	VERBOSE_ASSERT(vsub->cs.is_paging, == true, "%d");
+	btw("another request is added to the list but does not cause another paging");
+	paging_sent = false;
+	paging_expect_imsi(NULL);
+	send_sms(vsub, vsub,
+		 "One paging ought to be enough for anyone.");
+	VERBOSE_ASSERT(llist_count(&vsub->cs.requests), == 2, "%d");
+	vlr_subscr_put(vsub);
+	vsub = NULL;
+	VERBOSE_ASSERT(paging_sent, == false, "%d");
+
+	btw("the paging timeout expires, the paging as well as the requests are canceled");
+	fake_time_passes(2, 0);
+	VERBOSE_ASSERT(paging_stopped, == true, "%d");
+
+	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi);
+	OSMO_ASSERT(vsub);
+	VERBOSE_ASSERT(vsub->cs.is_paging, == false, "%d");
+	VERBOSE_ASSERT(llist_count(&vsub->cs.requests), == 0, "%d");
+	vlr_subscr_put(vsub);
+	vsub = NULL;
+
+	BTW("subscriber detaches");
+	expect_bssap_clear();
+	ms_sends_msg("050130089910070000006402");
+	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
+
+	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi);
+	OSMO_ASSERT(!vsub);
+
+	EXPECT_CONN_COUNT(0);
+	clear_vlr();
+	comment_end();
+}
+
 msc_vlr_test_func_t msc_vlr_tests[] = {
 	test_ms_timeout_lu_auth_resp,
 	test_ms_timeout_cm_auth_resp,
+	test_ms_timeout_paging,
 	NULL
 };

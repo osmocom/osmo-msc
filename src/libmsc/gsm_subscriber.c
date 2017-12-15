@@ -76,7 +76,10 @@ int subscr_paging_dispatch(unsigned int hooknum, unsigned int event,
 		return -EINVAL;
 	}
 
-	if (event == GSM_PAGING_SUCCEEDED)
+	osmo_timer_del(&vsub->cs.paging_response_timer);
+
+	if (event == GSM_PAGING_SUCCEEDED
+	    || event == GSM_PAGING_EXPIRED)
 		msc_stop_paging(vsub);
 
 	/* Inform parts of the system we don't know */
@@ -126,6 +129,12 @@ int msc_paging_request(struct vlr_subscr *vsub)
 	return -EINVAL;
 }
 
+static void paging_response_timer_cb(void *data)
+{
+	struct vlr_subscr *vsub = data;
+	subscr_paging_dispatch(GSM_HOOK_RR_PAGING, GSM_PAGING_EXPIRED, NULL, NULL, vsub);
+}
+
 /*! \brief Start a paging request for vsub, call cbfn(param) when done.
  * \param vsub  subscriber to page.
  * \param cbfn  function to call when the conn is established.
@@ -138,6 +147,7 @@ struct subscr_request *subscr_request_conn(struct vlr_subscr *vsub,
 {
 	int rc;
 	struct subscr_request *request;
+	struct gsm_network *net = vsub->vlr->user_ctx;
 
 	/* Start paging.. we know it is async so we can do it before */
 	if (!vsub->cs.is_paging) {
@@ -152,6 +162,8 @@ struct subscr_request *subscr_request_conn(struct vlr_subscr *vsub,
 		/* reduced on the first paging callback */
 		vlr_subscr_get(vsub);
 		vsub->cs.is_paging = true;
+		osmo_timer_setup(&vsub->cs.paging_response_timer, paging_response_timer_cb, vsub);
+		osmo_timer_schedule(&vsub->cs.paging_response_timer, net->paging_response_timer, 0);
 	} else {
 		LOGP(DMM, LOGL_DEBUG, "Subscriber %s already paged.\n",
 			vlr_subscr_name(vsub));
