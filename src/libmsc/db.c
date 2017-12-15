@@ -47,6 +47,7 @@
 static char *db_basename = NULL;
 static char *db_dirname = NULL;
 static dbi_conn conn;
+static dbi_inst inst;
 
 #define SCHEMA_REVISION "5"
 
@@ -611,9 +612,9 @@ static int db_configure(void)
 
 int db_init(const char *name)
 {
-	dbi_initialize(NULL);
+	dbi_initialize_r(NULL, &inst);
 
-	conn = dbi_conn_new("sqlite3");
+	conn = dbi_conn_new_r("sqlite3", inst);
 	if (conn == NULL) {
 		LOGP(DDB, LOGL_FATAL, "Failed to create connection.\n");
 		return 1;
@@ -677,7 +678,7 @@ int db_prepare(void)
 int db_fini(void)
 {
 	dbi_conn_close(conn);
-	dbi_shutdown();
+	dbi_shutdown_r(inst);
 
 	free(db_dirname);
 	free(db_basename);
