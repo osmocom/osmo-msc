@@ -824,6 +824,9 @@ int main(int argc, char **argv)
 	log_set_print_filename(osmo_stderr_target, _log_lines? 1 : 0);
 	log_set_print_category(osmo_stderr_target, 1);
 
+	if (cmdline_opts.verbose)
+		log_set_category_filter(osmo_stderr_target, DLSMS, 1, LOGL_DEBUG);
+
 	net = gsm_network_init(tall_bsc_ctx, 1, 1, mncc_recv);
 	net->gsup_server_addr_str = talloc_strdup(net, "no_gsup_server");
 	net->gsup_server_port = 0;
