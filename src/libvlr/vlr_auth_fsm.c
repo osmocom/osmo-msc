@@ -211,16 +211,6 @@ static void auth_fsm_onenter_failed(struct osmo_fsm_inst *fi, uint32_t prev_stat
 		vlr_subscr_tx_auth_fail_rep(vsub);
 }
 
-static bool is_umts_auth(struct auth_fsm_priv *afp,
-			 uint32_t auth_types)
-{
-	if (!afp->is_r99)
-		return false;
-	if (!(auth_types & OSMO_AUTH_TYPE_UMTS))
-		return false;
-	return true;
-}
-
 /* Terminate the Auth FSM Instance and notify parent */
 static void auth_fsm_term(struct osmo_fsm_inst *fi, enum vlr_auth_fsm_result res)
 {
@@ -268,7 +258,7 @@ static int _vlr_subscr_authenticate(struct osmo_fsm_inst *fi)
 	afp->auth_requested = true;
 	vsub->last_tuple = at;
 	vsub->vlr->ops.tx_auth_req(vsub->msc_conn_ref, at,
-				   is_umts_auth(afp, at->vec.auth_types));
+				   vlr_use_umts_aka(&at->vec, afp->is_r99));
 	return 0;
 }
 

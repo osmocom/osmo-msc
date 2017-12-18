@@ -1122,6 +1122,23 @@ int vlr_set_ciph_mode(struct vlr_instance *vlr,
 	}
 }
 
+/* Decide whether UMTS AKA should be used.
+ * UTRAN networks are by definition R99 capable, and the auth vector is required to contain UMTS AKA
+ * tokens. This is expected to be verified by the caller. On GERAN, UMTS AKA must be used iff MS and
+ * GERAN are R99 capable and UMTS AKA tokens are available.
+ * \param[in] vec  Auth tokens (received from the HLR).
+ * \param[in] is_r99  True when BTS and GERAN are R99 capable.
+ * \returns true to use UMTS AKA, false to use pre-R99 GSM AKA.
+ */
+bool vlr_use_umts_aka(struct osmo_auth_vector *vec, bool is_r99)
+{
+	if (!is_r99)
+		return false;
+	if (!(vec->auth_types & OSMO_AUTH_TYPE_UMTS))
+		return false;
+	return true;
+}
+
 void log_set_filter_vlr_subscr(struct log_target *target,
 			       struct vlr_subscr *vlr_subscr)
 {

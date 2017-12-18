@@ -435,5 +435,7 @@ int vlr_set_ciph_mode(struct vlr_instance *vlr,
 		      enum vlr_ciph ciph_mode,
 		      bool retrieve_imeisv);
 
+bool vlr_use_umts_aka(struct osmo_auth_vector *vec, bool is_r99);
+
 void log_set_filter_vlr_subscr(struct log_target *target,
 			       struct vlr_subscr *vlr_subscr);
