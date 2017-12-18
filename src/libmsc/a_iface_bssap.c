@@ -175,7 +175,7 @@ static void bssmap_rcvmsg_udt(struct osmo_sccp_user *scu, const struct a_conn_in
 }
 
 /* Receive incoming connection less data messages via sccp */
-void sccp_rx_udt(struct osmo_sccp_user *scu, const struct a_conn_info *a_conn_info, struct msgb *msg)
+void a_sccp_rx_udt(struct osmo_sccp_user *scu, const struct a_conn_info *a_conn_info, struct msgb *msg)
 {
 	/* Note: The only valid message type that can be received
 	 * via UNITDATA are BSS Management messages */
@@ -690,7 +690,7 @@ static int rx_dtap(const struct osmo_sccp_user *scu, const struct a_conn_info *a
 }
 
 /* Handle incoming connection oriented messages */
-int sccp_rx_dt(struct osmo_sccp_user *scu, const struct a_conn_info *a_conn_info, struct msgb *msg)
+int a_sccp_rx_dt(struct osmo_sccp_user *scu, const struct a_conn_info *a_conn_info, struct msgb *msg)
 {
 	OSMO_ASSERT(scu);
 	OSMO_ASSERT(a_conn_info);
