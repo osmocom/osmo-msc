@@ -509,8 +509,7 @@ static int smpp_handle_bind_tx(struct osmo_esme *esme, struct msgb *msg)
 	bind_r.command_status = rc;
 
 	/* build response */
-	snprintf((char *)bind_r.system_id, sizeof(bind_r.system_id), "%s",
-		 esme->smsc->system_id);
+	osmo_strlcpy((char*)bind_r.system_id, esme->smsc->system_id, sizeof(bind_r.system_id));
 
 	/* add interface version TLV */
 	tlv.tag = TLVID_sc_interface_version;
