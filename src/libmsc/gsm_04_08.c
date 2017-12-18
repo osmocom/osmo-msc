@@ -3421,7 +3421,13 @@ static int msc_vlr_set_ciph_mode(void *msc_conn_ref,
 			ei.perm_algo[0] = vlr_ciph_to_gsm0808_alg_id(ciph);
 			ei.perm_algo_len = 1;
 
-			memcpy(ei.key, tuple->vec.kc, sizeof(tuple->vec.kc));
+			/* In case of UMTS AKA, the Kc for ciphering must be derived from the 3G auth
+			 * tokens.  tuple->vec.kc was calculated from the GSM algorithm and is not
+			 * necessarily a match for the UMTS AKA tokens. */
+			if (umts_aka)
+				osmo_auth_c3(ei.key, tuple->vec.ck, tuple->vec.ik);
+			else
+				memcpy(ei.key, tuple->vec.kc, sizeof(tuple->vec.kc));
 			ei.key_len = sizeof(tuple->vec.kc);
 
 			return a_iface_tx_cipher_mode(conn, &ei, retrieve_imeisv);
