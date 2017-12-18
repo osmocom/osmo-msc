@@ -207,7 +207,7 @@ struct vlr_ops {
 	int (*tx_cm_serv_rej)(void *msc_conn_ref, enum vlr_proc_arq_result result);
 
 	int (*set_ciph_mode)(void *msc_conn_ref, enum vlr_ciph ciph_mode,
-			     bool retrieve_imeisv);
+			     bool umts_aka, bool retrieve_imeisv);
 
 	/* UTRAN: send Common Id (when auth+ciph are complete) */
 	int (*tx_common_id)(void *msc_conn_ref);
@@ -433,6 +433,7 @@ int vlr_set_ciph_mode(struct vlr_instance *vlr,
 		      struct osmo_fsm_inst *fi,
 		      void *msc_conn_ref,
 		      enum vlr_ciph ciph_mode,
+		      bool umts_aka,
 		      bool retrieve_imeisv);
 
 bool vlr_use_umts_aka(struct osmo_auth_vector *vec, bool is_r99);

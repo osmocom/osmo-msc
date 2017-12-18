@@ -1096,6 +1096,7 @@ int vlr_set_ciph_mode(struct vlr_instance *vlr,
 		      struct osmo_fsm_inst *fi,
 		      void *msc_conn_ref,
 		      enum vlr_ciph ciph_mode,
+		      bool umts_aka,
 		      bool retrieve_imeisv)
 {
 	switch (ciph_mode) {
@@ -1108,6 +1109,7 @@ int vlr_set_ciph_mode(struct vlr_instance *vlr,
 			 ciph_mode, vlr_ciph_name(ciph_mode));
 		return vlr->ops.set_ciph_mode(msc_conn_ref,
 					      ciph_mode,
+					      umts_aka,
 					      retrieve_imeisv);
 
 	case VLR_CIPH_A5_2:

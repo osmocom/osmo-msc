@@ -3388,6 +3388,7 @@ osmo_static_assert(sizeof(((struct gsm0808_encrypt_info*)0)->key) >= sizeof(((st
 /* VLR asks us to start using ciphering */
 static int msc_vlr_set_ciph_mode(void *msc_conn_ref,
 				 enum vlr_ciph ciph,
+				 bool umts_aka,
 				 bool retrieve_imeisv)
 {
 	struct gsm_subscriber_connection *conn = msc_conn_ref;

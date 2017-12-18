@@ -665,7 +665,7 @@ static int fake_vlr_tx_auth_rej(void *msc_conn_ref)
 }
 
 static int fake_vlr_tx_ciph_mode_cmd(void *msc_conn_ref, enum vlr_ciph ciph,
-				     bool retrieve_imeisv)
+				     bool umts_aka, bool retrieve_imeisv)
 {
 	/* FIXME: we actually would like to see the message bytes checked here,
 	 * not possible while msc_vlr_set_ciph_mode() calls
