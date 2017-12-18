@@ -325,7 +325,7 @@ static int bssmap_rx_l3_compl(struct osmo_sccp_user *scu, const struct a_conn_in
 
 	/* Parse Layer 3 Information element */
 	/* FIXME: This is probably to hackish, compiler also complains "assignment discards ‘const’ qualifier..." */
-	msg->l3h = TLVP_VAL(&tp, GSM0808_IE_LAYER_3_INFORMATION);
+	msg->l3h = (uint8_t*)TLVP_VAL(&tp, GSM0808_IE_LAYER_3_INFORMATION);
 	msg->tail = msg->l3h + TLVP_LEN(&tp, GSM0808_IE_LAYER_3_INFORMATION);
 
 	/* Create new subscriber context */
@@ -421,7 +421,7 @@ static int bssmap_rx_ciph_compl(const struct osmo_sccp_user *scu, const struct a
 	}
 
 	if (TLVP_PRESENT(&tp, GSM0808_IE_LAYER_3_MESSAGE_CONTENTS)) {
-		msg->l3h = TLVP_VAL(&tp, GSM0808_IE_LAYER_3_MESSAGE_CONTENTS);
+		msg->l3h = (uint8_t*)TLVP_VAL(&tp, GSM0808_IE_LAYER_3_MESSAGE_CONTENTS);
 		msg->tail = msg->l3h + TLVP_LEN(&tp, GSM0808_IE_LAYER_3_MESSAGE_CONTENTS);
 	} else {
 		msgb_free(msg);
