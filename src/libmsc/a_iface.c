@@ -48,6 +48,9 @@
 	     vlr_subscr_name(conn ? conn->vsub : NULL), conn ? conn->a.conn_id : -1, \
 	     ## args)
 
+#define LOGPBSCCONN(conn, level, fmt, args...) \
+	LOGP(DMSC, level, "(conn_id %u) " fmt, conn ? conn->conn_id : (uint32_t)(-1), ## args)
+
 /* A pointer to the GSM network we work with. By the current paradigm,
  * there can only be one gsm_network per MSC. The pointer is set once
  * when calling a_init() */
@@ -87,12 +90,9 @@ void a_delete_bsc_con(uint32_t conn_id)
 	struct bsc_conn *conn;
 	struct bsc_conn *conn_temp;
 
-	LOGP(DMSC, LOGL_DEBUG,
-	     "Removing connection from active sccp-connection list (conn_id=%i)\n",
-	     conn_id);
-
 	llist_for_each_entry_safe(conn, conn_temp, &active_connections, list) {
 		if (conn->conn_id == conn_id) {
+			LOGPBSCCONN(conn, LOGL_DEBUG, "Removing A-interface conn\n");
 			llist_del(&conn->list);
 			talloc_free(conn);
 		}
@@ -148,7 +148,7 @@ int a_iface_tx_dtap(struct msgb *msg)
 	OSMO_ASSERT(conn);
 	OSMO_ASSERT(conn->a.scu);
 
-	LOGP(DMSC, LOGL_DEBUG, "Passing DTAP message from MSC to BSC (conn_id=%i)\n", conn->a.conn_id);
+	LOGPCONN(conn, LOGL_DEBUG, "Passing DTAP message from MSC to BSC\n");
 
 	msg->l3h = msg->data;
 	msg_resp = gsm0808_create_dtap(msg, link_id);
@@ -158,12 +158,11 @@ int a_iface_tx_dtap(struct msgb *msg)
 	msgb_free(msg);
 
 	if (!msg_resp) {
-		LOGP(DMSC, LOGL_ERROR, "Unable to generate BSSMAP DTAP message!\n");
+		LOGPCONN(conn, LOGL_ERROR, "Unable to generate BSSMAP DTAP message!\n");
 		return -EINVAL;
-	} else
-		LOGP(DMSC, LOGL_DEBUG, "Message will be sent as BSSMAP DTAP message!\n");
+	}
 
-	LOGP(DMSC, LOGL_DEBUG, "N-DATA.req(%u, %s)\n", conn->a.conn_id, osmo_hexdump(msg_resp->data, msg_resp->len));
+	LOGPCONN(conn, LOGL_DEBUG, "N-DATA.req(%s)\n", osmo_hexdump(msg_resp->data, msg_resp->len));
 	/* osmo_sccp_tx_data_msg() takes ownership of msg_resp */
 	return osmo_sccp_tx_data_msg(conn->a.scu, conn->a.conn_id, msg_resp);
 }
@@ -182,7 +181,7 @@ int a_iface_tx_cipher_mode(const struct gsm_subscriber_connection *conn,
 	LOGPC(DMSC, LOGL_DEBUG, " key %s\n", osmo_hexdump_nospc(ei->key, ei->key_len));
 
 	msg_resp = gsm0808_create_cipher(ei, include_imeisv ? &crm : NULL);
-	LOGP(DMSC, LOGL_DEBUG, "N-DATA.req(%u, %s)\n", conn->a.conn_id, osmo_hexdump(msg_resp->data, msg_resp->len));
+	LOGPCONN(conn, LOGL_DEBUG, "N-DATA.req(%s)\n", osmo_hexdump(msg_resp->data, msg_resp->len));
 
 	return osmo_sccp_tx_data_msg(conn->a.scu, conn->a.conn_id, msg_resp);
 }
@@ -271,7 +270,7 @@ static uint8_t convert_Abis_sv_to_A_sv(int speech_ver)
 	}
 
 	/* If nothing matches, tag the result as invalid */
-	LOGP(DMSC, LOGL_ERROR, "Invalid permitted speech version / rate detected, discarding.\n");
+	LOGP(DMSC, LOGL_ERROR, "Invalid permitted speech version: %d\n", speech_ver);
 	return 0xFF;
 }
 
@@ -294,7 +293,8 @@ static uint8_t convert_Abis_prev_to_A_pref(int radio)
 		return GSM0808_SPEECH_HALF_PREF;
 	}
 
-	LOGP(DMSC, LOGL_ERROR, "Invalid speech version / rate combination preference, defaulting to full rate.\n");
+	LOGP(DMSC, LOGL_ERROR, "Invalid radio channel preference: %d; defaulting to full rate.\n",
+	     radio);
 	return GSM0808_SPEECH_FULL_BM;
 }
 
@@ -377,19 +377,19 @@ int a_iface_tx_assignment(const struct gsm_trans *trans)
 	conn = trans->conn;
 	OSMO_ASSERT(conn);
 
-	LOGP(DMSC, LOGL_ERROR, "Sending assignment command to BSC (conn_id %u)\n", conn->a.conn_id);
+	LOGPCONN(conn, LOGL_ERROR, "Sending Assignment Command to BSC\n");
 
 	/* Channel type */
 	rc = enc_channel_type(&ct, &trans->bearer_cap);
 	if (rc < 0) {
-		LOGP(DMSC, LOGL_ERROR, "Faild to generate channel type -- assignment not sent!\n");
+		LOGPCONN(conn, LOGL_ERROR, "Not sending Assignment to BSC: failed to generate channel type\n");
 		return -EINVAL;
 	}
 
 	/* Speech codec list */
 	rc = enc_speech_codec_list(&scl, &ct);
 	if (rc < 0) {
-		LOGP(DMSC, LOGL_ERROR, "Faild to generate Speech codec list -- assignment not sent!\n");
+		LOGPCONN(conn, LOGL_ERROR, "Not sending Assignment to BSC: failed to generate speech codec list\n");
 		return -EINVAL;
 	}
 
@@ -404,7 +404,7 @@ int a_iface_tx_assignment(const struct gsm_trans *trans)
 
 	msg = gsm0808_create_ass(&ct, NULL, &rtp_addr, &scl, ci_ptr);
 
-	LOGP(DMSC, LOGL_DEBUG, "N-DATA.req(%u, %s)\n", conn->a.conn_id, osmo_hexdump(msg->data, msg->len));
+	LOGPCONN(conn, LOGL_DEBUG, "N-DATA.req(%s)\n", osmo_hexdump(msg->data, msg->len));
 	return osmo_sccp_tx_data_msg(conn->a.scu, conn->a.conn_id, msg);
 }
 
@@ -413,7 +413,7 @@ int a_iface_tx_clear_cmd(struct gsm_subscriber_connection *conn)
 {
 	struct msgb *msg;
 
-	LOGP(DMSC, LOGL_NOTICE, "Sending clear command to BSC (conn_id=%u)\n", conn->a.conn_id);
+	LOGPCONN(conn, LOGL_NOTICE, "Sending Clear command to BSC\n");
 
 	msg = gsm0808_create_clear_command(GSM0808_CAUSE_CALL_CONTROL);
 	return osmo_sccp_tx_data_msg(conn->a.scu, conn->a.conn_id, msg);
@@ -552,8 +552,7 @@ void a_clear_all(struct osmo_sccp_user *scu, const struct osmo_sccp_addr *bsc_ad
 		/* Clear only A connections and connections that actually
 		 * belong to the specified BSC */
 		if (conn->via_ran == RAN_GERAN_A && memcmp(bsc_addr, &conn->a.bsc_addr, sizeof(conn->a.bsc_addr)) == 0) {
-			LOGP(DMSC, LOGL_NOTICE, "Dropping orphaned subscriber connection (conn_id %i)\n",
-			     conn->a.conn_id);
+			LOGPCONN(conn, LOGL_NOTICE, "Dropping orphaned subscriber connection\n");
 			msc_clear_request(conn, GSM48_CC_CAUSE_SWITCH_CONG);
 
 			/* If there is still an SCCP connection active, remove it now */
