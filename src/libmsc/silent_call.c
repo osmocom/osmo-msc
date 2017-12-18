@@ -85,7 +85,6 @@ int silent_call_rx(struct gsm_subscriber_connection *conn, struct msgb *msg)
 	LOGP(DLSMS, LOGL_NOTICE, "Discarding L3 message from a silent call.\n");
 	return 0;
 }
-#endif
 
 struct msg_match {
 	uint8_t pdisc;
@@ -98,7 +97,6 @@ static const struct msg_match silent_call_accept[] = {
 	{ GSM48_PDISC_MM, GSM48_MT_MM_CM_SERV_REQ },
 };
 
-#if 0
 /* decide if we need to reroute a message as part of a silent call */
 int silent_call_reroute(struct gsm_subscriber_connection *conn, struct msgb *msg)
 {
