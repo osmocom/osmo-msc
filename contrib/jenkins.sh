@@ -48,7 +48,7 @@ set -x
 
 cd "$base"
 autoreconf --install --force
-./configure --enable-smpp $IU --enable-external-tests
+./configure --enable-sanitize --enable-smpp $IU --enable-external-tests
 $MAKE $PARALLEL_MAKE
 LD_LIBRARY_PATH="$inst/lib" $MAKE check \
   || cat-testlogs.sh
