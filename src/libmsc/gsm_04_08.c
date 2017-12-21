@@ -31,7 +31,6 @@
 #include <netinet/in.h>
 #include <regex.h>
 #include <sys/types.h>
-#include <openssl/rand.h>
 
 #include "bscconfig.h"
 

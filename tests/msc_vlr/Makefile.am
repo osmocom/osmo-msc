@@ -9,7 +9,6 @@ AM_CFLAGS = \
 	$(LIBOSMOCORE_CFLAGS) \
 	$(LIBOSMOGSM_CFLAGS) \
 	$(LIBSMPP34_CFLAGS) \
-	$(LIBCRYPTO_CFLAGS) \
 	$(LIBOSMOVTY_CFLAGS) \
 	$(LIBOSMOABIS_CFLAGS) \
 	$(LIBOSMOSIGTRAN_CFLAGS) \
@@ -30,7 +29,7 @@ AM_LDFLAGS = \
 	-Wl,--wrap=ranap_iu_page_cs \
 	-Wl,--wrap=msc_stop_paging \
 	-Wl,--wrap=gsm340_gen_scts \
-	-Wl,--wrap=RAND_bytes \
+	-Wl,--wrap=osmo_get_rand_id \
 	-Wl,--wrap=msc_call_assignment \
 	-Wl,--wrap=msc_call_release \
 	$(NULL)
@@ -43,7 +42,6 @@ LDADD = \
 	$(LIBSMPP34_LIBS) \
 	$(LIBOSMOCORE_LIBS) \
 	$(LIBOSMOGSM_LIBS) \
-	$(LIBCRYPTO_LIBS) \
 	$(LIBOSMOVTY_LIBS) \
 	$(LIBOSMOABIS_LIBS) \
 	$(LIBOSMOSIGTRAN_LIBS) \

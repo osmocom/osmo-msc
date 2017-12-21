@@ -257,11 +257,11 @@ void send_sms(struct vlr_subscr *receiver,
 }
 
 unsigned char next_rand_byte = 0;
-/* override, requires '-Wl,--wrap=RAND_bytes' */
-int __real_RAND_bytes(unsigned char *buf, int num);
-int __wrap_RAND_bytes(unsigned char *buf, int num)
+/* override, requires '-Wl,--wrap=osmo_get_rand_id' */
+int __real_osmo_get_rand_id(uint8_t *buf, size_t num);
+int __wrap_osmo_get_rand_id(uint8_t *buf, size_t num)
 {
-	int i;
+	size_t i;
 	for (i = 0; i < num; i++)
 		buf[i] = next_rand_byte++;
 	return 1;

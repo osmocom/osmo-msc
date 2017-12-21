@@ -31,8 +31,6 @@
 #include <osmocom/msc/vlr.h>
 #include <osmocom/msc/debug.h>
 
-#include <openssl/rand.h>
-
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <limits.h>
@@ -275,12 +273,13 @@ int vlr_subscr_alloc_tmsi(struct vlr_subscr *vsub)
 {
 	struct vlr_instance *vlr = vsub->vlr;
 	uint32_t tmsi;
-	int tried;
+	int tried, rc;
 
 	for (tried = 0; tried < 100; tried++) {
-		if (RAND_bytes((uint8_t *) &tmsi, sizeof(tmsi)) != 1) {
-			LOGP(DVLR, LOGL_ERROR, "RAND_bytes failed\n");
-			return -1;
+		rc = osmo_get_rand_id((uint8_t *) &tmsi, sizeof(tmsi));
+		if (rc < 0) {
+			LOGP(DDB, LOGL_ERROR, "osmo_get_rand_id() failed: %s\n", strerror(-rc));
+			return rc;
 		}
 		/* throw the dice again, if the TSMI doesn't fit */
 		if (tmsi == GSM_RESERVED_TMSI)

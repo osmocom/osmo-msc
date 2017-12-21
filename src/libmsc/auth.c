@@ -28,8 +28,6 @@
 #include <osmocom/gsm/comp128.h>
 #include <osmocom/core/utils.h>
 
-#include <openssl/rand.h>
-
 #include <stdlib.h>
 
 const struct value_string auth_action_names[] = {

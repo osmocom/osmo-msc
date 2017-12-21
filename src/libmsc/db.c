@@ -42,8 +42,6 @@
 #include <osmocom/core/rate_ctr.h>
 #include <osmocom/core/utils.h>
 
-#include <openssl/rand.h>
-
 static char *db_basename = NULL;
 static char *db_dirname = NULL;
 static dbi_conn conn;
