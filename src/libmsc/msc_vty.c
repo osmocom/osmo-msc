@@ -1,7 +1,7 @@
 /* MSC interface to quagga VTY */
 /* (C) 2016 by sysmocom s.m.f.c. GmbH <info@sysmocom.de>
  * Based on OpenBSC interface to quagga VTY (libmsc/vty_interface_layer3.c)
- * (C) 2009 by Harald Welte <laforge@gnumonks.org>
+ * (C) 2009-2017 by Harald Welte <laforge@gnumonks.org>
  * (C) 2009-2011 by Holger Hans Peter Freyther
  * All Rights Reserved
  *
@@ -160,6 +160,7 @@ static int config_write_msc(struct vty *vty)
 static int config_write_net(struct vty *vty)
 {
 	struct gsm_network *gsmnet = gsmnet_from_vty(vty);
+	int i;
 
 	vty_out(vty, "network%s", VTY_NEWLINE);
 	vty_out(vty, " network country code %u%s", gsmnet->country_code, VTY_NEWLINE);
@@ -169,7 +170,12 @@ static int config_write_net(struct vty *vty)
 	vty_out(vty, " auth policy %s%s", gsm_auth_policy_name(gsmnet->auth_policy), VTY_NEWLINE);
 	vty_out(vty, " location updating reject cause %u%s",
 		gsmnet->reject_cause, VTY_NEWLINE);
-	vty_out(vty, " encryption a5 %u%s", gsmnet->a5_encryption, VTY_NEWLINE);
+	vty_out(vty, " encryption a5");
+	for (i = 0; i < 8; i++) {
+		if (gsmnet->a5_encryption_mask & (1 << i))
+			vty_out(vty, " %u", i);
+	}
+	vty_out(vty, "%s", VTY_NEWLINE);
 	vty_out(vty, " authentication %s%s",
 		gsmnet->authentication_required ? "required" : "optional", VTY_NEWLINE);
 	vty_out(vty, " rrlp mode %s%s", rrlp_mode_name(gsmnet->rrlp.mode),

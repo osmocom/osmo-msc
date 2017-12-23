@@ -56,6 +56,8 @@ struct gsm_network *gsm_network_init(void *ctx,
 
 	net->country_code = country_code;
 	net->network_code = network_code;
+	/* Permit a compile-time default of A5/3 and A5/1 */
+	net->a5_encryption_mask = (1 << 3) | (1 << 1);
 
 	/* Use 30 min periodic update interval as sane default */
 	net->t3212 = 5;

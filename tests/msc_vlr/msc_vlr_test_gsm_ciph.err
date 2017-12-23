@@ -62,7 +62,7 @@ DVLR VLR_Authenticate(901700000004620){VLR_SUB_AS_AUTHENTICATED}: Deallocated
 DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_WAIT_AUTH}: Received Event VLR_ULA_E_AUTH_RES
 DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_WAIT_AUTH}: vlr_loc_upd_post_auth()
 DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_WAIT_AUTH}: Set Ciphering Mode
-- sending Ciphering Mode Command for IMSI:901700000004620: cipher=VLR_CIPH_A5_1 kc=61855fb81fc2a800 retrieve_imeisv=0
+- sending Ciphering Mode Command for IMSI:901700000004620: ciphers=0x02 kc=61855fb81fc2a800 retrieve_imeisv=0
 DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_WAIT_AUTH}: state_chg to VLR_ULA_S_WAIT_CIPH
 DMM IMSI:901700000004620: bump: conn still being established (SUBSCR_CONN_S_NEW)
 DREF IMSI:901700000004620: MSC conn use - dtap == 1 (0x4)
@@ -225,7 +225,7 @@ DVLR Process_Access_Request_VLR(901700000004620){PR_ARQ_S_WAIT_AUTH}: Received E
 DVLR Process_Access_Request_VLR(901700000004620){PR_ARQ_S_WAIT_AUTH}: got VLR_AUTH_RES_PASSED
 DVLR Process_Access_Request_VLR(901700000004620){PR_ARQ_S_WAIT_AUTH}: _proc_arq_vlr_node2()
 DVLR Process_Access_Request_VLR(901700000004620){PR_ARQ_S_WAIT_AUTH}: Set Ciphering Mode
-- sending Ciphering Mode Command for MSISDN:46071: cipher=VLR_CIPH_A5_1 kc=07fa7502e07e1c00 retrieve_imeisv=0
+- sending Ciphering Mode Command for MSISDN:46071: ciphers=0x02 kc=07fa7502e07e1c00 retrieve_imeisv=0
 DVLR Process_Access_Request_VLR(901700000004620){PR_ARQ_S_WAIT_AUTH}: state_chg to PR_ARQ_S_WAIT_CIPH
 DMM MSISDN:46071: bump: conn still being established (SUBSCR_CONN_S_NEW)
 DREF MSISDN:46071: MSC conn use - dtap == 1 (0x4)
@@ -370,7 +370,7 @@ DVLR Process_Access_Request_VLR(901700000004620){PR_ARQ_S_WAIT_AUTH}: Received E
 DVLR Process_Access_Request_VLR(901700000004620){PR_ARQ_S_WAIT_AUTH}: got VLR_AUTH_RES_PASSED
 DVLR Process_Access_Request_VLR(901700000004620){PR_ARQ_S_WAIT_AUTH}: _proc_arq_vlr_node2()
 DVLR Process_Access_Request_VLR(901700000004620){PR_ARQ_S_WAIT_AUTH}: Set Ciphering Mode
-- sending Ciphering Mode Command for MSISDN:46071: cipher=VLR_CIPH_A5_1 kc=e2b234f807886400 retrieve_imeisv=0
+- sending Ciphering Mode Command for MSISDN:46071: ciphers=0x02 kc=e2b234f807886400 retrieve_imeisv=0
 DVLR Process_Access_Request_VLR(901700000004620){PR_ARQ_S_WAIT_AUTH}: state_chg to PR_ARQ_S_WAIT_CIPH
 DMM MSISDN:46071: bump: conn still being established (SUBSCR_CONN_S_NEW)
 DREF MSISDN:46071: MSC conn use - dtap == 1 (0x4)
@@ -547,7 +547,7 @@ DVLR VLR_Authenticate(901700000004620){VLR_SUB_AS_AUTHENTICATED}: Deallocated
 DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_WAIT_AUTH}: Received Event VLR_ULA_E_AUTH_RES
 DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_WAIT_AUTH}: vlr_loc_upd_post_auth()
 DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_WAIT_AUTH}: Set Ciphering Mode
-- sending Ciphering Mode Command for IMSI:901700000004620: cipher=VLR_CIPH_A5_1 kc=61855fb81fc2a800 retrieve_imeisv=0
+- sending Ciphering Mode Command for IMSI:901700000004620: ciphers=0x02 kc=61855fb81fc2a800 retrieve_imeisv=0
 DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_WAIT_AUTH}: state_chg to VLR_ULA_S_WAIT_CIPH
 DMM IMSI:901700000004620: bump: conn still being established (SUBSCR_CONN_S_NEW)
 DREF IMSI:901700000004620: MSC conn use - dtap == 1 (0x4)
@@ -747,7 +747,7 @@ DVLR Process_Access_Request_VLR(50462976){PR_ARQ_S_WAIT_AUTH}: Received Event PR
 DVLR Process_Access_Request_VLR(50462976){PR_ARQ_S_WAIT_AUTH}: got VLR_AUTH_RES_PASSED
 DVLR Process_Access_Request_VLR(50462976){PR_ARQ_S_WAIT_AUTH}: _proc_arq_vlr_node2()
 DVLR Process_Access_Request_VLR(50462976){PR_ARQ_S_WAIT_AUTH}: Set Ciphering Mode
-- sending Ciphering Mode Command for MSISDN:46071: cipher=VLR_CIPH_A5_1 kc=07fa7502e07e1c00 retrieve_imeisv=0
+- sending Ciphering Mode Command for MSISDN:46071: ciphers=0x02 kc=07fa7502e07e1c00 retrieve_imeisv=0
 DVLR Process_Access_Request_VLR(50462976){PR_ARQ_S_WAIT_AUTH}: state_chg to PR_ARQ_S_WAIT_CIPH
 DMM MSISDN:46071: bump: conn still being established (SUBSCR_CONN_S_NEW)
 DREF MSISDN:46071: MSC conn use - dtap == 1 (0x4)
@@ -892,7 +892,7 @@ DVLR Process_Access_Request_VLR(50462976){PR_ARQ_S_WAIT_AUTH}: Received Event PR
 DVLR Process_Access_Request_VLR(50462976){PR_ARQ_S_WAIT_AUTH}: got VLR_AUTH_RES_PASSED
 DVLR Process_Access_Request_VLR(50462976){PR_ARQ_S_WAIT_AUTH}: _proc_arq_vlr_node2()
 DVLR Process_Access_Request_VLR(50462976){PR_ARQ_S_WAIT_AUTH}: Set Ciphering Mode
-- sending Ciphering Mode Command for MSISDN:46071: cipher=VLR_CIPH_A5_1 kc=e2b234f807886400 retrieve_imeisv=0
+- sending Ciphering Mode Command for MSISDN:46071: ciphers=0x02 kc=e2b234f807886400 retrieve_imeisv=0
 DVLR Process_Access_Request_VLR(50462976){PR_ARQ_S_WAIT_AUTH}: state_chg to PR_ARQ_S_WAIT_CIPH
 DMM MSISDN:46071: bump: conn still being established (SUBSCR_CONN_S_NEW)
 DREF MSISDN:46071: MSC conn use - dtap == 1 (0x4)
@@ -1069,7 +1069,7 @@ DVLR VLR_Authenticate(901700000004620){VLR_SUB_AS_AUTHENTICATED}: Deallocated
 DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_WAIT_AUTH}: Received Event VLR_ULA_E_AUTH_RES
 DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_WAIT_AUTH}: vlr_loc_upd_post_auth()
 DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_WAIT_AUTH}: Set Ciphering Mode
-- sending Ciphering Mode Command for IMSI:901700000004620: cipher=VLR_CIPH_A5_1 kc=61855fb81fc2a800 retrieve_imeisv=0
+- sending Ciphering Mode Command for IMSI:901700000004620: ciphers=0x02 kc=61855fb81fc2a800 retrieve_imeisv=0
 DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_WAIT_AUTH}: state_chg to VLR_ULA_S_WAIT_CIPH
 DMM IMSI:901700000004620: bump: conn still being established (SUBSCR_CONN_S_NEW)
 DREF IMSI:901700000004620: MSC conn use - dtap == 1 (0x4)
@@ -1290,7 +1290,7 @@ DVLR VLR_Authenticate(901700000004620){VLR_SUB_AS_AUTHENTICATED}: Deallocated
 DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_WAIT_AUTH}: Received Event VLR_ULA_E_AUTH_RES
 DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_WAIT_AUTH}: vlr_loc_upd_post_auth()
 DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_WAIT_AUTH}: Set Ciphering Mode
-- sending Ciphering Mode Command for IMSI:901700000004620: cipher=VLR_CIPH_A5_1 kc=61855fb81fc2a800 retrieve_imeisv=1
+- sending Ciphering Mode Command for IMSI:901700000004620: ciphers=0x02 kc=61855fb81fc2a800 retrieve_imeisv=1
 DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_WAIT_AUTH}: state_chg to VLR_ULA_S_WAIT_CIPH
 DMM IMSI:901700000004620: bump: conn still being established (SUBSCR_CONN_S_NEW)
 DREF IMSI:901700000004620: MSC conn use - dtap == 1 (0x4)
@@ -1500,7 +1500,7 @@ DVLR VLR_Authenticate(901700000004620){VLR_SUB_AS_AUTHENTICATED}: Deallocated
 DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_WAIT_AUTH}: Received Event VLR_ULA_E_AUTH_RES
 DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_WAIT_AUTH}: vlr_loc_upd_post_auth()
 DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_WAIT_AUTH}: Set Ciphering Mode
-- sending Ciphering Mode Command for IMSI:901700000004620: cipher=VLR_CIPH_A5_1 kc=61855fb81fc2a800 retrieve_imeisv=0
+- sending Ciphering Mode Command for IMSI:901700000004620: ciphers=0x02 kc=61855fb81fc2a800 retrieve_imeisv=0
 DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_WAIT_AUTH}: state_chg to VLR_ULA_S_WAIT_CIPH
 DMM IMSI:901700000004620: bump: conn still being established (SUBSCR_CONN_S_NEW)
 DREF IMSI:901700000004620: MSC conn use - dtap == 1 (0x4)

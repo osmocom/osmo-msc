@@ -333,7 +333,7 @@ void clear_vlr()
 	}
 
 	net->authentication_required = false;
-	net->a5_encryption = VLR_CIPH_NONE;
+	net->a5_encryption_mask = (1 << 0);
 	net->vlr->cfg.check_imei_rqd = false;
 	net->vlr->cfg.assign_tmsi = false;
 	net->vlr->cfg.retrieve_imeisv_early = false;
@@ -670,10 +670,10 @@ static int fake_vlr_tx_ciph_mode_cmd(void *msc_conn_ref, bool umts_aka, bool ret
 	struct gsm_subscriber_connection *conn = msc_conn_ref;
 	switch (conn->via_ran) {
 	case RAN_GERAN_A:
-		btw("sending Ciphering Mode Command for %s: cipher=%s kc=%s"
+		btw("sending Ciphering Mode Command for %s: ciphers=0x%02x kc=%s"
 		    " retrieve_imeisv=%d",
 		    vlr_subscr_name(conn->vsub),
-		    vlr_ciph_name(conn->network->a5_encryption),
+		    conn->network->a5_encryption_mask,
 		    osmo_hexdump_nospc(conn->vsub->last_tuple->vec.kc, 8),
 		    retrieve_imeisv);
 		break;

@@ -155,15 +155,20 @@ DEFUN(cfg_net_reject_cause,
 
 DEFUN(cfg_net_encryption,
       cfg_net_encryption_cmd,
-      "encryption a5 (0|1|2|3)",
+      "encryption a5 <0-3> [<0-3>] [<0-3>] [<0-3>]",
 	"Encryption options\n"
-	"A5 encryption\n" "A5/0: No encryption\n"
-	"A5/1: Encryption\n" "A5/2: Export-grade Encryption\n"
-	"A5/3: 'New' Secure Encryption\n")
+	"GSM A5 Air Interface Encryption\n"
+	"A5/n Algorithm Number\n"
+	"A5/n Algorithm Number\n"
+	"A5/n Algorithm Number\n"
+	"A5/n Algorithm Number\n")
 {
 	struct gsm_network *gsmnet = gsmnet_from_vty(vty);
+	unsigned int i;
 
-	gsmnet->a5_encryption = atoi(argv[0]);
+	gsmnet->a5_encryption_mask = 0;
+	for (i = 0; i < argc; i++)
+		gsmnet->a5_encryption_mask |= (1 << atoi(argv[i]));
 
 	return CMD_SUCCESS;
 }

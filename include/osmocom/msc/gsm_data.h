@@ -299,7 +299,8 @@ struct gsm_network {
 	regex_t authorized_regexp;
 	char *authorized_reg_str;
 	enum gsm48_reject_value reject_cause;
-	int a5_encryption;
+	/* bit-mask of permitted encryption algorithms. LSB=A5/0, MSB=A5/7 */
+	uint8_t a5_encryption_mask;
 	bool authentication_required;
 	int neci;
 	int send_mm_info;

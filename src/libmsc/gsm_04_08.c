@@ -339,7 +339,7 @@ int mm_rx_loc_upd_req(struct gsm_subscriber_connection *conn, struct msgb *msg)
 				net->vlr, conn, vlr_lu_type, tmsi, imsi,
 				&old_lai, &new_lai,
 				is_utran || conn->network->authentication_required,
-				is_utran || conn->network->a5_encryption,
+				is_utran || conn->network->a5_encryption_mask > 0x01,
 				classmark_is_r99(&conn->classmark),
 				is_utran,
 				net->vlr->cfg.assign_tmsi);
@@ -723,7 +723,7 @@ int gsm48_rx_mm_serv_req(struct gsm_subscriber_connection *conn, struct msgb *ms
 			 net->vlr, conn,
 			 VLR_PR_ARQ_T_CM_SERV_REQ, mi-1, &lai,
 			 is_utran || conn->network->authentication_required,
-			 is_utran || conn->network->a5_encryption,
+			 is_utran || conn->network->a5_encryption_mask > 0x01,
 			 classmark_is_r99(&conn->classmark),
 			 is_utran);
 
@@ -1127,7 +1127,7 @@ static int gsm48_rx_rr_pag_resp(struct gsm_subscriber_connection *conn, struct m
 			 net->vlr, conn,
 			 VLR_PR_ARQ_T_PAGING_RESP, mi_lv, &lai,
 			 is_utran || conn->network->authentication_required,
-			 is_utran || conn->network->a5_encryption,
+			 is_utran || conn->network->a5_encryption_mask > 0x01,
 			 classmark_is_r99(&conn->classmark),
 			 is_utran);
 
@@ -3447,10 +3447,15 @@ static int msc_vlr_set_ciph_mode(void *msc_conn_ref,
 		DEBUGP(DMM, "-> CIPHER MODE COMMAND %s\n",
 		       vlr_subscr_name(conn->vsub));
 		{
+			struct gsm_network *net = conn->network;
 			struct gsm0808_encrypt_info ei;
+			int i, j = 0;
 
-			ei.perm_algo[0] = vlr_ciph_to_gsm0808_alg_id(conn->network->a5_encryption);
-			ei.perm_algo_len = 1;
+			for (i = 0; i < 8; i++) {
+				if (net->a5_encryption_mask & (1 << i))
+					ei.perm_algo[j++] = vlr_ciph_to_gsm0808_alg_id(i);
+			}
+			ei.perm_algo_len = j;
 
 			/* In case of UMTS AKA, the Kc for ciphering must be derived from the 3G auth
 			 * tokens.  tuple->vec.kc was calculated from the GSM algorithm and is not
