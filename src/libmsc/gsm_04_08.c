@@ -89,6 +89,62 @@ struct gsm_lai {
 
 static uint32_t new_callref = 0x80000001;
 
+/* Determine if the given CLASSMARK (1/2/3) value permits a given A5/n cipher */
+static bool classmark_supports_a5(const struct gsm_classmark *cm, uint8_t a5)
+{
+	switch (a5) {
+	case 0:
+		/* all phones must implement A5/0, see 3GPP TS 43.020 4.9 */
+		return true;
+	case 1:
+		/* 3GPP TS 43.020 4.9 requires A5/1 to be suppored by all phones and actually states:
+		 * "The network shall not provide service to an MS which indicates that it does not
+		 *  support the ciphering algorithm A5/1.".  However, let's be more tolerant based
+		 * on policy here */
+		/* See 3GPP TS 24.008 10.5.1.7 */
+		if (!cm->classmark1_set) {
+			DEBUGP(DMSC, "CLASSMARK 1 unknown, assuming MS supports A5/1\n");
+			return true;
+		} else {
+			if (cm->classmark1.a5_1)
+				return false;	/* Inverted logic for this bit! */
+			else
+				return true;
+		}
+		break;
+	case 2:
+	case 3:
+		/* See 3GPP TS 24.008 10.5.1.6 */
+		if (cm->classmark2_len < 3) {
+			DEBUGP(DMSC, "CLASSMARK 2 unknown, assuming MS doesn't support A5/%u\n", a5);
+			return false;
+		} else {
+			if (cm->classmark2[2] & (1 << (a5-2)))
+				return true;
+			else
+				return false;
+		}
+		break;
+	case 4:
+	case 5:
+	case 6:
+	case 7:
+		/* See 3GPP TS 24.008 10.5.1.7 */
+		if (cm->classmark3_len < 1) {
+			DEBUGP(DMSC, "CLASSMARK 3 unknown, assuming MS doesn't support A5/%u\n", a5);
+			return false;
+		} else {
+			if (cm->classmark3[0] & (1 << (a5-4)))
+				return true;
+			else
+				return false;
+		}
+		break;
+	default:
+		return false;
+	}
+}
+
 void cc_tx_to_mncc(struct gsm_network *net, struct msgb *msg)
 {
 	net->mncc_recv(net, msg);
@@ -3452,10 +3508,18 @@ static int msc_vlr_set_ciph_mode(void *msc_conn_ref,
 			int i, j = 0;
 
 			for (i = 0; i < 8; i++) {
-				if (net->a5_encryption_mask & (1 << i))
+				if (net->a5_encryption_mask & (1 << i) &&
+				    classmark_supports_a5(&conn->classmark, i))
 					ei.perm_algo[j++] = vlr_ciph_to_gsm0808_alg_id(i);
 			}
 			ei.perm_algo_len = j;
+
+			if (ei.perm_algo_len == 0) {
+				LOGP(DMM, LOGL_ERROR, "%s: cannot start ciphering, no intersection "
+					"between MSC-configured and MS-supported A5 algorithms\n",
+					vlr_subscr_name(conn->vsub));
+				return -ENOTSUP;
+			}
 
 			/* In case of UMTS AKA, the Kc for ciphering must be derived from the 3G auth
 			 * tokens.  tuple->vec.kc was calculated from the GSM algorithm and is not
