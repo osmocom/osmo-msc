@@ -339,8 +339,7 @@ int mm_rx_loc_upd_req(struct gsm_subscriber_connection *conn, struct msgb *msg)
 				net->vlr, conn, vlr_lu_type, tmsi, imsi,
 				&old_lai, &new_lai,
 				is_utran || conn->network->authentication_required,
-				is_utran? VLR_CIPH_A5_3
-					: conn->network->a5_encryption,
+				is_utran || conn->network->a5_encryption,
 				classmark_is_r99(&conn->classmark),
 				is_utran,
 				net->vlr->cfg.assign_tmsi);
@@ -724,8 +723,7 @@ int gsm48_rx_mm_serv_req(struct gsm_subscriber_connection *conn, struct msgb *ms
 			 net->vlr, conn,
 			 VLR_PR_ARQ_T_CM_SERV_REQ, mi-1, &lai,
 			 is_utran || conn->network->authentication_required,
-			 is_utran? VLR_CIPH_A5_3
-				 : conn->network->a5_encryption,
+			 is_utran || conn->network->a5_encryption,
 			 classmark_is_r99(&conn->classmark),
 			 is_utran);
 
@@ -1129,8 +1127,7 @@ static int gsm48_rx_rr_pag_resp(struct gsm_subscriber_connection *conn, struct m
 			 net->vlr, conn,
 			 VLR_PR_ARQ_T_PAGING_RESP, mi_lv, &lai,
 			 is_utran || conn->network->authentication_required,
-			 is_utran? VLR_CIPH_A5_3
-				 : conn->network->a5_encryption,
+			 is_utran || conn->network->a5_encryption,
 			 classmark_is_r99(&conn->classmark),
 			 is_utran);
 
@@ -3422,7 +3419,6 @@ osmo_static_assert(sizeof(((struct gsm0808_encrypt_info*)0)->key) >= sizeof(((st
 
 /* VLR asks us to start using ciphering */
 static int msc_vlr_set_ciph_mode(void *msc_conn_ref,
-				 enum vlr_ciph ciph,
 				 bool umts_aka,
 				 bool retrieve_imeisv)
 {
@@ -3453,7 +3449,7 @@ static int msc_vlr_set_ciph_mode(void *msc_conn_ref,
 		{
 			struct gsm0808_encrypt_info ei;
 
-			ei.perm_algo[0] = vlr_ciph_to_gsm0808_alg_id(ciph);
+			ei.perm_algo[0] = vlr_ciph_to_gsm0808_alg_id(conn->network->a5_encryption);
 			ei.perm_algo_len = 1;
 
 			/* In case of UMTS AKA, the Kc for ciphering must be derived from the 3G auth

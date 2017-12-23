@@ -79,7 +79,7 @@ struct proc_arq_priv {
 	uint32_t tmsi;
 	struct osmo_location_area_id lai;
 	bool authentication_required;
-	enum vlr_ciph ciphering_required;
+	bool ciphering_required;
 	bool is_r99;
 	bool is_utran;
 	bool implicitly_accepted_parq_by_ciphering_cmd;
@@ -277,7 +277,7 @@ static void _proc_arq_vlr_node2_post_ciph(struct osmo_fsm_inst *fi)
 
 static bool is_ciph_required(struct proc_arq_priv *par)
 {
-	return par->ciphering_required != VLR_CIPH_NONE;
+	return par->ciphering_required;
 }
 
 static void _proc_arq_vlr_node2(struct osmo_fsm_inst *fi)
@@ -311,8 +311,7 @@ static bool is_auth_required(struct proc_arq_priv *par)
 	/* The cases where the authentication procedure should be used
 	 * are defined in 3GPP TS 33.102 */
 	/* For now we use a default value passed in to vlr_lu_fsm(). */
-	return par->authentication_required
-	       || (par->ciphering_required != VLR_CIPH_NONE);
+	return par->authentication_required || par->ciphering_required;
 }
 
 /* after the IMSI is known */
@@ -654,7 +653,7 @@ vlr_proc_acc_req(struct osmo_fsm_inst *parent,
 		 enum vlr_parq_type type, const uint8_t *mi_lv,
 		 const struct osmo_location_area_id *lai,
 		 bool authentication_required,
-		 enum vlr_ciph ciphering_required,
+		 bool ciphering_required,
 		 bool is_r99, bool is_utran)
 {
 	struct osmo_fsm_inst *fi;

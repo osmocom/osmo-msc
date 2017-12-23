@@ -212,8 +212,7 @@ struct vlr_ops {
 	int (*tx_cm_serv_acc)(void *msc_conn_ref);
 	int (*tx_cm_serv_rej)(void *msc_conn_ref, enum vlr_proc_arq_result result);
 
-	int (*set_ciph_mode)(void *msc_conn_ref, enum vlr_ciph ciph_mode,
-			     bool umts_aka, bool retrieve_imeisv);
+	int (*set_ciph_mode)(void *msc_conn_ref, bool umts_aka, bool retrieve_imeisv);
 
 	/* UTRAN: send Common Id (when auth+ciph are complete) */
 	int (*tx_common_id)(void *msc_conn_ref);
@@ -271,7 +270,7 @@ vlr_loc_update(struct osmo_fsm_inst *parent,
 	       const struct osmo_location_area_id *old_lai,
 	       const struct osmo_location_area_id *new_lai,
 	       bool authentication_required,
-	       enum vlr_ciph ciphering_required,
+	       bool ciphering_required,
 	       bool is_r99, bool is_utran,
 	       bool assign_tmsi);
 
@@ -428,7 +427,7 @@ vlr_proc_acc_req(struct osmo_fsm_inst *parent,
 		 enum vlr_parq_type type, const uint8_t *mi_lv,
 		 const struct osmo_location_area_id *lai,
 		 bool authentication_required,
-		 enum vlr_ciph ciphering_required,
+		 bool ciphering_required,
 		 bool is_r99, bool is_utran);
 
 void vlr_parq_conn_timeout(struct osmo_fsm_inst *fi);
@@ -438,7 +437,7 @@ void vlr_parq_fsm_init(void);
 int vlr_set_ciph_mode(struct vlr_instance *vlr,
 		      struct osmo_fsm_inst *fi,
 		      void *msc_conn_ref,
-		      enum vlr_ciph ciph_mode,
+		      bool ciph_required,
 		      bool umts_aka,
 		      bool retrieve_imeisv);
 

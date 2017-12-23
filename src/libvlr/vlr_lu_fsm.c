@@ -644,7 +644,7 @@ struct lu_fsm_priv {
 	struct osmo_location_area_id old_lai;
 	struct osmo_location_area_id new_lai;
 	bool authentication_required;
-	enum vlr_ciph ciphering_required;
+	bool ciphering_required;
 	bool is_r99;
 	bool is_utran;
 	bool assign_tmsi;
@@ -665,14 +665,13 @@ static bool is_auth_required(struct lu_fsm_priv *lfp)
 	/* The cases where the authentication procedure should be used
 	 * are defined in 3GPP TS 33.102 */
 	/* For now we use a default value passed in to vlr_lu_fsm(). */
-	return lfp->authentication_required
-	       || (lfp->ciphering_required != VLR_CIPH_NONE);
+	return lfp->authentication_required || lfp->ciphering_required;
 }
 
 /* Determine if ciphering is required */
 static bool is_ciph_required(struct lu_fsm_priv *lfp)
 {
-	return lfp->ciphering_required != VLR_CIPH_NONE;
+	return lfp->ciphering_required;
 }
 
 /* Determine if a HLR Update is required */
@@ -1391,7 +1390,7 @@ vlr_loc_update(struct osmo_fsm_inst *parent,
 	       const struct osmo_location_area_id *old_lai,
 	       const struct osmo_location_area_id *new_lai,
 	       bool authentication_required,
-	       enum vlr_ciph ciphering_required,
+	       bool ciphering_required,
 	       bool is_r99, bool is_utran,
 	       bool assign_tmsi)
 {

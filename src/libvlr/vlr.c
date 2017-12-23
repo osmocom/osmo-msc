@@ -1105,33 +1105,15 @@ void vlr_subscr_rx_ciph_res(struct vlr_subscr *vsub, struct vlr_ciph_result *res
 int vlr_set_ciph_mode(struct vlr_instance *vlr,
 		      struct osmo_fsm_inst *fi,
 		      void *msc_conn_ref,
-		      enum vlr_ciph ciph_mode,
+		      bool ciph_required,
 		      bool umts_aka,
 		      bool retrieve_imeisv)
 {
-	switch (ciph_mode) {
-	case VLR_CIPH_NONE:
+	if (!ciph_required)
 		return 0;
 
-	case VLR_CIPH_A5_1:
-	case VLR_CIPH_A5_3:
-		LOGPFSML(fi, LOGL_DEBUG, "Set Ciphering Mode: %d=%s\n",
-			 ciph_mode, vlr_ciph_name(ciph_mode));
-		return vlr->ops.set_ciph_mode(msc_conn_ref,
-					      ciph_mode,
-					      umts_aka,
-					      retrieve_imeisv);
-
-	case VLR_CIPH_A5_2:
-		/* TODO policy by user config? */
-		LOGPFSML(fi, LOGL_ERROR, "A5/2 ciphering is not allowed\n");
-		return -EINVAL;
-
-	default:
-		LOGPFSML(fi, LOGL_ERROR, "unknown ciphering value: %d\n",
-			 ciph_mode);
-		return -EINVAL;
-	}
+	LOGPFSML(fi, LOGL_DEBUG, "Set Ciphering Mode\n");
+	return vlr->ops.set_ciph_mode(msc_conn_ref, umts_aka, retrieve_imeisv);
 }
 
 /* Decide whether UMTS AKA should be used.
