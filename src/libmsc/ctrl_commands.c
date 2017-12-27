@@ -59,11 +59,49 @@ static int get_subscriber_list(struct ctrl_cmd *cmd, void *d)
 }
 CTRL_CMD_DEFINE_RO(subscriber_list, "subscriber-list-active-v1");
 
+CTRL_CMD_DEFINE_WO_NOVRF(sub_expire, "subscriber-expire");
+static int set_sub_expire(struct ctrl_cmd *cmd, void *data)
+{
+	struct vlr_subscr *vsub;
+
+	if (!msc_ctrl_net) {
+		cmd->reply = "MSC CTRL commands not initialized";
+		return CTRL_CMD_ERROR;
+	}
+
+	if (!msc_ctrl_net->vlr) {
+		cmd->reply = "VLR not initialized";
+		return CTRL_CMD_ERROR;
+	}
+
+	vsub = vlr_subscr_find_by_imsi(msc_ctrl_net->vlr, cmd->value);
+	if (!vsub) {
+		LOGP(DCTRL, LOGL_ERROR, "Attempt to expire unknown subscriber IMSI=%s\n", cmd->value);
+		cmd->reply = "IMSI unknown";
+		return CTRL_CMD_ERROR;
+	}
+
+	LOGP(DCTRL, LOGL_NOTICE, "Expiring subscriber IMSI=%s\n", cmd->value);
+
+	if (vlr_subscr_expire(vsub))
+		LOGP(DCTRL, LOGL_NOTICE, "VLR released subscriber %s\n", vlr_subscr_name(vsub));
+
+	if (vsub->use_count > 1)
+		LOGP(DCTRL, LOGL_NOTICE, "Subscriber %s is still in use, should be released soon\n",
+		     vlr_subscr_name(vsub));
+
+	vlr_subscr_put(vsub);
+
+	return CTRL_CMD_REPLY;
+}
+
 int msc_ctrl_cmds_install(struct gsm_network *net)
 {
 	int rc = 0;
 	msc_ctrl_net = net;
 
 	rc |= ctrl_cmd_install(CTRL_NODE_ROOT, &cmd_subscriber_list);
+	rc |= ctrl_cmd_install(CTRL_NODE_ROOT, &cmd_sub_expire);
+
 	return rc;
 }

@@ -572,12 +572,9 @@ DEFUN(ena_subscr_expire,
 		return CMD_WARNING;
 	}
 
-	if (vsub->lu_complete) {
-		vsub->lu_complete = false;
-		vlr_subscr_put(vsub);
+	if (vlr_subscr_expire(vsub))
 		vty_out(vty, "%% VLR released subscriber %s%s",
 			vlr_subscr_name(vsub), VTY_NEWLINE);
-	}
 
 	if (vsub->use_count > 1)
 		vty_out(vty, "%% Subscriber %s is still in use,"

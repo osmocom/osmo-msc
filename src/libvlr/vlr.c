@@ -948,17 +948,28 @@ int vlr_subscr_rx_tmsi_reall_compl(struct vlr_subscr *vsub)
 	}
 }
 
+bool vlr_subscr_expire(struct vlr_subscr *vsub)
+{
+	if (vsub->lu_complete) {
+		vsub->lu_complete = false;
+		vlr_subscr_put(vsub);
+
+		return true;
+	}
+
+	return false;
+}
+
 int vlr_subscr_rx_imsi_detach(struct vlr_subscr *vsub)
 {
 	/* paranoia: should any LU or PARQ FSMs still be running, stop them. */
 	vlr_subscr_cancel(vsub, GMM_CAUSE_IMPL_DETACHED);
 
 	vsub->imsi_detached_flag = true;
-	if (vsub->lu_complete) {
-		vsub->lu_complete = false;
-		/* balancing the get from vlr_lu_compl_fsm_success() */
-		vlr_subscr_put(vsub);
-	}
+
+	/* balancing the get from vlr_lu_compl_fsm_success() */
+	vlr_subscr_expire(vsub);
+
 	return 0;
 }
 
