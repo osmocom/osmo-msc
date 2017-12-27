@@ -3476,7 +3476,8 @@ void msc_rx_sec_mode_compl(struct gsm_subscriber_connection *conn)
 /* VLR informs us that the subscriber data has somehow been modified */
 static void msc_vlr_subscr_update(struct vlr_subscr *subscr)
 {
-	/* FIXME */
+	LOGVSUBP(LOGL_NOTICE, subscr, "VLR: update for IMSI=%s (MSISDN=%s, used=%d)\n",
+		 subscr->imsi, subscr->msisdn, subscr->use_count);
 }
 
 /* VLR informs us that the subscriber has been associated with a conn */

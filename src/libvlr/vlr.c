@@ -651,7 +651,7 @@ static void vlr_subscr_gsup_insert_data(struct vlr_subscr *vsub,
 	unsigned idx;
 	int rc;
 
-	if (gsup_msg->msisdn_enc) {
+	if (gsup_msg->msisdn_enc) {//FIXME: vlr_subscr_set_msisdn()?
 		decode_bcd_number_safe(vsub->msisdn, sizeof(vsub->msisdn),
 				       gsup_msg->msisdn_enc,
 				       gsup_msg->msisdn_enc_len, 0);

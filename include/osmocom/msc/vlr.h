@@ -12,6 +12,12 @@
 // for GSM_NAME_LENGTH
 #include <osmocom/msc/gsm_subscriber.h>
 
+#define LOGGSUPP(level, gsup, fmt, args...)				\
+	LOGP(DVLR, level, "GSUP(%s) " fmt, (gsup)->imsi, ## args)
+
+#define LOGVSUBP(level, vsub, fmt, args...)				\
+	LOGP(DVLR, level, "SUBSCR(%s) " fmt, vlr_subscr_name(vsub), ## args)
+
 struct log_target;
 
 /* from 3s to 10s */

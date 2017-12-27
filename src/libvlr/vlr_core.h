@@ -4,16 +4,6 @@
 
 struct osmo_gsup_message;
 
-#define LOGGSUPP(level, gsup, fmt, args...) \
-	LOGP(DVLR, level, "GSUP(%s) " fmt, \
-	     (gsup)->imsi, \
-	     ## args)
-
-#define LOGVSUBP(level, vsub, fmt, args...) \
-	LOGP(DVLR, level, "SUBSCR(%s) " fmt, \
-		vlr_subscr_name(vsub), ## args)
-
-
 const char *vlr_subscr_name(struct vlr_subscr *vsub);
 int vlr_subscr_req_lu(struct vlr_subscr *vsub, bool is_ps);
 int vlr_subscr_req_sai(struct vlr_subscr *vsub, const uint8_t *auts,
