@@ -956,6 +956,9 @@ int msc_mgcp_ass_complete(struct gsm_subscriber_connection *conn, uint16_t port,
 	conn->rtp.remote_port_ran = port;
 	osmo_strlcpy(conn->rtp.remote_addr_ran, addr, sizeof(conn->rtp.remote_addr_ran));
 
+	LOGP(DMGCP, LOGL_ERROR, "(subscriber:%s) INFO rtp %s / %d.\n",
+			vlr_subscr_name(conn->vsub), conn->rtp.remote_addr_ran, port);
+
 	/* Note: We only dispatch the event if we are really waiting for the
 	 * assignment, if we are not yet waiting, there is no need to loudly
 	 * broadcast an event that the all other states do not understand anyway */
