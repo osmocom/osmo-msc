@@ -928,6 +928,11 @@ int msc_mgcp_ass_complete(struct gsm_subscriber_connection *conn, uint16_t port,
 {
 	struct mgcp_ctx *mgcp_ctx;
 
+	if (!conn) {
+		LOGP(DMGCP, LOGL_ERROR, "invalid conn, assignment completion failed\n");
+		return -EINVAL;
+	}
+
 	if (port == 0) {
 		LOGP(DMGCP, LOGL_ERROR, "(subscriber:%s) invalid remote call leg port, call completion failed\n",
 		     vlr_subscr_name(conn->vsub));
@@ -935,11 +940,6 @@ int msc_mgcp_ass_complete(struct gsm_subscriber_connection *conn, uint16_t port,
 	}
 	if (!addr || strlen(addr) <= 0) {
 		LOGP(DMGCP, LOGL_ERROR, "(subscriber:%s) missing remote call leg address, call completion failed\n",
-		     vlr_subscr_name(conn->vsub));
-		return -EINVAL;
-	}
-	if (!conn) {
-		LOGP(DMGCP, LOGL_ERROR, "(subscriber:%s) invalid conn, assignment completion failed\n",
 		     vlr_subscr_name(conn->vsub));
 		return -EINVAL;
 	}
