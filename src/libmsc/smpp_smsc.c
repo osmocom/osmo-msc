@@ -974,7 +974,7 @@ int smpp_smsc_conf(struct smsc *smsc, const char *bind_addr, uint16_t port)
 	talloc_free((void*)smsc->bind_addr);
 	smsc->bind_addr = NULL;
 	if (bind_addr) {
-		smsc->bind_addr = talloc_strdup(smsc, bind_addr);
+		smsc->bind_addr = bind_addr ? talloc_strdup(smsc, bind_addr) : NULL;
 		if (!smsc->bind_addr)
 			return -ENOMEM;
 	}
