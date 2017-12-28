@@ -377,7 +377,7 @@ int a_iface_tx_assignment(const struct gsm_trans *trans)
 	conn = trans->conn;
 	OSMO_ASSERT(conn);
 
-	LOGPCONN(conn, LOGL_ERROR, "Sending Assignment Command to BSC\n");
+	LOGPCONN(conn, LOGL_DEBUG, "Sending Assignment Command to BSC\n");
 
 	/* Channel type */
 	rc = enc_channel_type(&ct, &trans->bearer_cap);
