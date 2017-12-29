@@ -64,7 +64,6 @@ static void subscr_dump_full_vty(struct vty *vty, struct vlr_subscr *vsub)
 {
 	int reqs;
 	struct llist_head *entry;
-	char expire_time[200];
 
 	if (strlen(vsub->name))
 		vty_out(vty, "    Name: '%s'%s", vsub->name, VTY_NEWLINE);
@@ -109,12 +108,6 @@ static void subscr_dump_full_vty(struct vty *vty, struct vlr_subscr *vsub)
 			osmo_hexdump(t->vec.kc, sizeof(t->vec.kc)),
 			VTY_NEWLINE);
 	}
-
-	/* print the expiration time of a subscriber */
-	strftime(expire_time, sizeof(expire_time),
-			"%a, %d %b %Y %T %z", localtime(&vsub->expire_lu));
-	expire_time[sizeof(expire_time) - 1] = '\0';
-	vty_out(vty, "    Expiration Time: %s%s", expire_time, VTY_NEWLINE);
 
 	reqs = 0;
 	llist_for_each(entry, &vsub->cs.requests)

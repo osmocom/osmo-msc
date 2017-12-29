@@ -136,7 +136,6 @@ struct vlr_subscr {
 	bool la_allowed;
 
 	int use_count;
-	time_t expire_lu;	/* FIXME: overlap with periodic_lu_timer/age_indicator */
 
 	struct osmo_fsm_inst *lu_fsm;
 	struct osmo_fsm_inst *auth_fsm;
