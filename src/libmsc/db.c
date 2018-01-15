@@ -614,7 +614,8 @@ int db_init(const char *name)
 
 	conn = dbi_conn_new_r("sqlite3", inst);
 	if (conn == NULL) {
-		LOGP(DDB, LOGL_FATAL, "Failed to create connection.\n");
+		LOGP(DDB, LOGL_FATAL, "Failed to create database connection to sqlite3 db '%s'; "
+		    "Is the sqlite3 database driver for libdbi installed on this system?\n", name);
 		return 1;
 	}
 
