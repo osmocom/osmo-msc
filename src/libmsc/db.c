@@ -27,6 +27,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
+#include <time.h>
 #include <dbi/dbi.h>
 
 #include <osmocom/msc/gsm_data.h>
@@ -690,9 +691,7 @@ int db_sms_store(struct gsm_sms *sms)
 	dbi_result result;
 	char *q_text, *q_daddr, *q_saddr;
 	unsigned char *q_udata;
-	char *validity_timestamp = "2222-2-2";
-
-	/* FIXME: generate validity timestamp based on validity_minutes */
+	time_t now, validity_timestamp;
 
 	dbi_conn_quote_string_copy(conn, (char *)sms->text, &q_text);
 	dbi_conn_quote_string_copy(conn, (char *)sms->dst.addr, &q_daddr);
@@ -700,7 +699,9 @@ int db_sms_store(struct gsm_sms *sms)
 	dbi_conn_quote_binary_copy(conn, sms->user_data, sms->user_data_len,
 				   &q_udata);
 
-	/* FIXME: correct validity period */
+	now = time(NULL);
+	validity_timestamp = now + sms->validity_minutes * 60;
+
 	result = dbi_conn_queryf(conn,
 		"INSERT INTO SMS "
 		"(created, valid_until, "
@@ -710,14 +711,14 @@ int db_sms_store(struct gsm_sms *sms)
 		 "user_data, text, "
 		 "dest_addr, dest_ton, dest_npi, "
 		 "src_addr, src_ton, src_npi) VALUES "
-		"(datetime('now'), %u, "
+		"(datetime('%lld', 'unixepoch'), datetime(%lld, 'unixepoch'), "
 		"%u, %u, %u, "
 		"%u, %u, %u, "
 		"%u, "
 		"%s, %s, "
 		"%s, %u, %u, "
 		"%s, %u, %u)",
-		validity_timestamp,
+		(int64_t)now, (int64_t)validity_timestamp,
 		sms->reply_path_req, sms->status_rep_req, sms->is_report,
 		sms->msg_ref, sms->protocol_id, sms->data_coding_scheme,
 		sms->ud_hdr_ind,
@@ -741,15 +742,17 @@ static struct gsm_sms *sms_from_result(struct gsm_network *net, dbi_result resul
 	struct gsm_sms *sms = sms_alloc();
 	const char *text, *daddr, *saddr;
 	const unsigned char *user_data;
+	time_t validity_timestamp;
 
 	if (!sms)
 		return NULL;
 
 	sms->id = dbi_result_get_ulonglong(result, "id");
 
-	/* FIXME: validity */
-	/* FIXME: those should all be get_uchar, but sqlite3 is braindead */
 	sms->created = dbi_result_get_datetime(result, "created");
+	validity_timestamp = dbi_result_get_datetime(result, "valid_until");
+	sms->validity_minutes = (validity_timestamp - sms->created) / 60;
+	/* FIXME: those should all be get_uchar, but sqlite3 is braindead */
 	sms->reply_path_req = dbi_result_get_ulonglong(result, "reply_path_req");
 	sms->status_rep_req = dbi_result_get_ulonglong(result, "status_rep_req");
 	sms->is_report = dbi_result_get_ulonglong(result, "is_report");
