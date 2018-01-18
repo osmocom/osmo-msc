@@ -49,6 +49,7 @@ struct gsm_sms *db_sms_get_unsent_for_subscr(struct vlr_subscr *vsub,
 int db_sms_mark_delivered(struct gsm_sms *sms);
 int db_sms_inc_deliver_attempts(struct gsm_sms *sms);
 int db_sms_delete_by_msisdn(const char *msisdn);
+int db_sms_delete_sent_message_by_id(unsigned long long sms_id);
 
 /* Statistics counter storage */
 struct osmo_counter;

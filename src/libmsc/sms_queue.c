@@ -483,6 +483,7 @@ static int sms_sms_cb(unsigned int subsys, unsigned int signal,
 		network->sms_queue->pending -= 1;
 		vsub = vlr_subscr_get(pending->vsub);
 		sms_pending_free(pending);
+		db_sms_delete_sent_message_by_id(pending->sms_id);
 		/* Attempt to send another SMS to this subscriber */
 		sms_send_next(vsub);
 		vlr_subscr_put(vsub);
