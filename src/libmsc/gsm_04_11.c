@@ -517,9 +517,10 @@ static int gsm340_rx_tpdu(struct gsm_trans *trans, struct msgb *msg,
 
 	rc = sms_route_mt_sms(conn, gsms);
 
-	/* This SMS got routed through SMPP or no receiver exists. */
-	if (!gsms->receiver)
-		return rc;
+	/*
+	 * This SMS got routed through SMPP or no receiver exists.
+	 * In any case, we store it in the database for further processing.
+	 */
 
 	switch (sms_mti) {
 	case GSM340_SMS_SUBMIT_MS2SC:
