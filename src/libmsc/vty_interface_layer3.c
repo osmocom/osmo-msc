@@ -161,6 +161,44 @@ DEFUN(sms_send_pend,
 	return CMD_SUCCESS;
 }
 
+
+DEFUN(sms_delete_expired,
+      sms_delete_expired_cmd,
+      "sms delete expired",
+      "SMS related commands\n" "SMS Database related commands\n"
+      "Delete all expired SMS")
+{
+	struct gsm_network *gsmnet = gsmnet_from_vty(vty);
+	struct gsm_sms *sms;
+	unsigned long long sms_id = 0;
+	long long num_deleted = 0;
+
+	while (1) {
+		sms = db_sms_get_next_unsent(gsmnet, sms_id, UINT_MAX);
+		if (!sms)
+			break;
+
+		/* Skip SMS which are currently queued for sending. */
+		if (sms_queue_sms_is_pending(gsmnet->sms_queue, sms->id))
+			continue;
+
+		/* Expiration check is performed by the DB layer. */
+		if (db_sms_delete_expired_message_by_id(sms->id) == 0)
+			num_deleted++;
+
+		sms_id = sms->id + 1;
+	}
+
+	if (num_deleted == 0) {
+		vty_out(vty, "No expired SMS in database%s", VTY_NEWLINE);
+		return CMD_WARNING;
+	}
+
+	vty_out(vty, "Deleted %llu expired SMS from database%s", num_deleted, VTY_NEWLINE);
+	return CMD_SUCCESS;
+}
+
+
 static int _send_sms_str(struct vlr_subscr *receiver,
 			 struct vlr_subscr *sender,
 			 char *str, uint8_t tp_pid)
@@ -861,6 +899,7 @@ int bsc_vty_init_extra(void)
 	install_element_ve(&show_subscr_cache_cmd);
 
 	install_element_ve(&sms_send_pend_cmd);
+	install_element_ve(&sms_delete_expired_cmd);
 
 	install_element_ve(&subscriber_create_cmd);
 	install_element_ve(&subscriber_send_sms_cmd);

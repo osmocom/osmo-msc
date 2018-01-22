@@ -72,21 +72,21 @@ static int sms_subscr_cb(unsigned int, unsigned int, void *, void *);
 static int sms_sms_cb(unsigned int, unsigned int, void *, void *);
 
 static struct gsm_sms_pending *sms_find_pending(struct gsm_sms_queue *smsq,
-						struct gsm_sms *sms)
+						unsigned long long sms_id)
 {
 	struct gsm_sms_pending *pending;
 
 	llist_for_each_entry(pending, &smsq->pending_sms, entry) {
-		if (pending->sms_id == sms->id)
+		if (pending->sms_id == sms_id)
 			return pending;
 	}
 
 	return NULL;
 }
 
-static int sms_is_in_pending(struct gsm_sms_queue *smsq, struct gsm_sms *sms)
+int sms_queue_sms_is_pending(struct gsm_sms_queue *smsq, unsigned long long sms_id)
 {
-	return sms_find_pending(smsq, sms) != NULL;
+	return sms_find_pending(smsq, sms_id) != NULL;
 }
 
 static struct gsm_sms_pending *sms_subscriber_find_pending(
@@ -286,7 +286,7 @@ static void sms_submit_pending(void *_data)
 		}
 
 		/* no need to send a pending sms */
-		if (sms_is_in_pending(smsq, sms)) {
+		if (sms_queue_sms_is_pending(smsq, sms->id)) {
 			LOGP(DLSMS, LOGL_DEBUG,
 			     "SMSqueue with pending sms: %llu. Skipping\n", sms->id);
 			sms_free(sms);
@@ -337,7 +337,7 @@ static void sms_send_next(struct vlr_subscr *vsub)
 		goto no_pending_sms;
 
 	/* The sms should not be scheduled right now */
-	OSMO_ASSERT(!sms_is_in_pending(smsq, sms));
+	OSMO_ASSERT(!sms_queue_sms_is_pending(smsq, sms->id));
 
 	/* Remember that we deliver this SMS and send it */
 	pending = sms_pending_from(smsq, sms);
@@ -472,7 +472,7 @@ static int sms_sms_cb(unsigned int subsys, unsigned int signal,
 	 * sms that are not in our control as we just have a channel
 	 * open anyway.
 	 */
-	pending = sms_find_pending(network->sms_queue, sig_sms->sms);
+	pending = sms_find_pending(network->sms_queue, sig_sms->sms->id);
 	if (!pending)
 		return 0;
 
