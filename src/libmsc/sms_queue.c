@@ -529,6 +529,9 @@ static int sms_sms_cb(unsigned int subsys, unsigned int signal,
 		     sig_sms->paging_result);
 	}
 
+	/* While here, attempt to remove an expired SMS from the DB. */
+	db_sms_delete_oldest_expired_message();
+
 	return 0;
 }
 

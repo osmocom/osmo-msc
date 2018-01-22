@@ -989,22 +989,11 @@ int db_sms_delete_sent_message_by_id(unsigned long long sms_id)
 	return 0;
 }
 
-int db_sms_delete_expired_message_by_id(unsigned long long sms_id)
+
+static int delete_expired_sms(unsigned long long sms_id, time_t created, time_t validity_timestamp)
 {
 	dbi_result result;
-	time_t created, validity_timestamp, now, min_created;
-
-	result = dbi_conn_queryf(conn, "SELECT created,valid_until FROM SMS WHERE id = %llu", sms_id);
-	if (!result)
-		return -1;
-	if (!next_row(result)) {
-		dbi_result_free(result);
-		return -1;
-	}
-
-	created = dbi_result_get_datetime(result, "created");
-	validity_timestamp = dbi_result_get_datetime(result, "valid_until");
-	dbi_result_free(result);
+	time_t now, min_created;
 
 	now = time(NULL);
 	if (validity_timestamp > now)
@@ -1024,6 +1013,47 @@ int db_sms_delete_expired_message_by_id(unsigned long long sms_id)
 	}
 	dbi_result_free(result);
 	return 0;
+}
+
+int db_sms_delete_expired_message_by_id(unsigned long long sms_id)
+{
+	dbi_result result;
+	time_t created, validity_timestamp;
+
+	result = dbi_conn_queryf(conn, "SELECT created,valid_until FROM SMS WHERE id = %llu", sms_id);
+	if (!result)
+		return -1;
+	if (!next_row(result)) {
+		dbi_result_free(result);
+		return -1;
+	}
+
+	created = dbi_result_get_datetime(result, "created");
+	validity_timestamp = dbi_result_get_datetime(result, "valid_until");
+
+	dbi_result_free(result);
+	return delete_expired_sms(sms_id, created, validity_timestamp);
+}
+
+void db_sms_delete_oldest_expired_message(void)
+{
+	dbi_result result;
+
+	result = dbi_conn_queryf(conn, "SELECT id,created,valid_until FROM SMS ORDER BY created LIMIT 1");
+	if (!result)
+		return;
+
+	if (next_row(result)) {
+		unsigned long long sms_id;
+		time_t created, validity_timestamp;
+
+		sms_id = dbi_result_get_ulonglong(result, "id");
+		created = dbi_result_get_datetime(result, "created");
+		validity_timestamp = dbi_result_get_datetime(result, "valid_until");
+		delete_expired_sms(sms_id, created, validity_timestamp);
+	}
+
+	dbi_result_free(result);
 }
 
 int db_store_counter(struct osmo_counter *ctr)

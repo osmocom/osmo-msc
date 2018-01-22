@@ -51,6 +51,7 @@ int db_sms_inc_deliver_attempts(struct gsm_sms *sms);
 int db_sms_delete_by_msisdn(const char *msisdn);
 int db_sms_delete_sent_message_by_id(unsigned long long sms_id);
 int db_sms_delete_expired_message_by_id(unsigned long long sms_id);
+void db_sms_delete_oldest_expired_message(void);
 
 /* Statistics counter storage */
 struct osmo_counter;
