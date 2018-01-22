@@ -215,5 +215,6 @@ int mncc_sock_init(struct gsm_network *net, const char *sock_path);
 		|| msg_type == GSM_TCH_FRAME_AMR \
 		|| msg_type == GSM_BAD_FRAME)
 
+int mncc_prim_check(const struct gsm_mncc *mncc_prim, unsigned int len);
 
 #endif

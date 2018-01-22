@@ -1,7 +1,7 @@
 /* mncc.c - utility routines for the MNCC API between the 04.08
  *	    message parsing and the actual Call Control logic */
 
-/* (C) 2008-2009 by Harald Welte <laforge@gnumonks.org>
+/* (C) 2008-2018 by Harald Welte <laforge@gnumonks.org>
  * (C) 2009 by Andreas Eversberg <Andreas.Eversberg@versatel.de>
  * All Rights Reserved
  *
@@ -105,3 +105,185 @@ void mncc_set_cause(struct gsm_mncc *data, int loc, int val)
 	data->cause.value = val;
 }
 
+
+/***********************************************************************
+ * MNCC validation code. Move to libosmocore once headers are merged
+ ************************************************************************/
+
+#define MNCC_F_ALL 0x3fff
+
+static int check_string_terminated(const char *str, unsigned int size)
+{
+	int i;
+	for (i = 0; i < size; i++) {
+		if (str[i] == 0)
+			return 0;
+	}
+	return -EINVAL;
+}
+
+static int mncc_check_number(const struct gsm_mncc_number *num, const char *str)
+{
+	int rc;
+	rc = check_string_terminated(num->number, ARRAY_SIZE(num->number));
+	if (rc < 0)
+		LOGP(DMNCC, LOGL_ERROR, "MNCC %s number not terminated\n", str);
+	return rc;
+}
+
+static int mncc_check_cause(const struct gsm_mncc_cause *cause)
+{
+	if (cause->diag_len > sizeof(cause->diag))
+		return -EINVAL;
+	return 0;
+}
+
+static int mncc_check_useruser(const struct gsm_mncc_useruser *uu)
+{
+	return check_string_terminated(uu->info, ARRAY_SIZE(uu->info));
+}
+
+static int mncc_check_facility(const struct gsm_mncc_facility *fac)
+{
+	return check_string_terminated(fac->info, ARRAY_SIZE(fac->info));
+}
+
+static int mncc_check_ssversion(const struct gsm_mncc_ssversion *ssv)
+{
+	return check_string_terminated(ssv->info, ARRAY_SIZE(ssv->info));
+}
+
+static int mncc_prim_check_sign(const struct gsm_mncc *mncc_prim)
+{
+	int rc;
+
+	if (mncc_prim->fields & ~ MNCC_F_ALL) {
+		LOGP(DMNCC, LOGL_ERROR, "Unknown MNCC field mask 0x%x\n", mncc_prim->fields);
+		return -EINVAL;
+	}
+
+	rc = check_string_terminated(mncc_prim->imsi, sizeof(mncc_prim->imsi));
+	if (rc < 0) {
+		LOGP(DMNCC, LOGL_ERROR, "MNCC IMSI not terminated\n");
+		return rc;
+	}
+
+	if (mncc_prim->fields & MNCC_F_CALLED) {
+		rc = mncc_check_number(&mncc_prim->called, "called");
+		if (rc < 0)
+			return rc;
+	}
+
+	if (mncc_prim->fields & MNCC_F_CALLING) {
+		rc = mncc_check_number(&mncc_prim->calling, "calling");
+		if (rc < 0)
+			return rc;
+	}
+
+	if (mncc_prim->fields & MNCC_F_REDIRECTING) {
+		rc = mncc_check_number(&mncc_prim->redirecting, "redirecting");
+		if (rc < 0)
+			return rc;
+	}
+
+	if (mncc_prim->fields & MNCC_F_CONNECTED) {
+		rc = mncc_check_number(&mncc_prim->connected, "connected");
+		if (rc < 0)
+			return rc;
+	}
+
+	if (mncc_prim->fields & MNCC_F_CAUSE) {
+		rc = mncc_check_cause(&mncc_prim->cause);
+		if (rc < 0)
+			return rc;
+	}
+
+	if (mncc_prim->fields & MNCC_F_USERUSER) {
+		rc = mncc_check_useruser(&mncc_prim->useruser);
+		if (rc < 0)
+			return rc;
+	}
+
+	if (mncc_prim->fields & MNCC_F_FACILITY) {
+		rc = mncc_check_facility(&mncc_prim->facility);
+		if (rc < 0)
+			return rc;
+	}
+
+	if (mncc_prim->fields & MNCC_F_SSVERSION) {
+		rc = mncc_check_ssversion(&mncc_prim->ssversion);
+		if (rc < 0)
+			return rc;
+	}
+
+	if (mncc_prim->fields & MNCC_F_BEARER_CAP) {
+		bool m1_found = false;
+		int i;
+
+		for (i = 0; i < ARRAY_SIZE(mncc_prim->bearer_cap.speech_ver); i++) {
+			if (mncc_prim->bearer_cap.speech_ver[i] == -1) {
+				m1_found = true;
+				break;
+			}
+		}
+		if (!m1_found) {
+			LOGP(DMNCC, LOGL_ERROR, "Unterminated MNCC bearer capability\n");
+			return -EINVAL;
+		}
+	}
+
+	return 0;
+}
+
+int mncc_prim_check(const struct gsm_mncc *mncc_prim, unsigned int len)
+{
+	if (len < sizeof(mncc_prim->msg_type)) {
+		LOGP(DMNCC, LOGL_ERROR, "Short MNCC Header\n");
+		return -EINVAL;
+	}
+
+	switch (mncc_prim->msg_type) {
+	case MNCC_SOCKET_HELLO:
+		if (len < sizeof(struct gsm_mncc_hello)) {
+			LOGP(DMNCC, LOGL_ERROR, "Short MNCC Hello\n");
+			return -EINVAL;
+		}
+		break;
+	case GSM_BAD_FRAME:
+	case GSM_TCH_FRAME_AMR:
+	case GSM_TCHH_FRAME:
+	case GSM_TCHF_FRAME_EFR:
+	case GSM_TCHF_FRAME:
+		if (len < sizeof(struct gsm_data_frame)) {
+			LOGP(DMNCC, LOGL_ERROR, "Short MNCC TCH\n");
+			return -EINVAL;
+		}
+		break;
+	case MNCC_RTP_FREE:
+	case MNCC_RTP_CONNECT:
+	case MNCC_RTP_CREATE:
+		if (len < sizeof(struct gsm_mncc_rtp)) {
+			LOGP(DMNCC, LOGL_ERROR, "Short MNCC RTP\n");
+			return -EINVAL;
+		}
+		break;
+	case MNCC_LCHAN_MODIFY:
+	case MNCC_FRAME_DROP:
+	case MNCC_FRAME_RECV:
+		/* FIXME */
+		break;
+	case MNCC_BRIDGE:
+		if (len < sizeof(struct gsm_mncc_bridge)) {
+			LOGP(DMNCC, LOGL_ERROR, "Short MNCC BRIDGE\n");
+			return -EINVAL;
+		}
+		break;
+	default:
+		if (len < sizeof(struct gsm_mncc)) {
+			LOGP(DMNCC, LOGL_ERROR, "Short MNCC Signalling\n");
+			return -EINVAL;
+		}
+		return mncc_prim_check_sign(mncc_prim);
+	}
+	return 0;
+}
