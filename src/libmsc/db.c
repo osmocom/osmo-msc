@@ -711,7 +711,7 @@ int db_sms_store(struct gsm_sms *sms)
 		 "user_data, text, "
 		 "dest_addr, dest_ton, dest_npi, "
 		 "src_addr, src_ton, src_npi) VALUES "
-		"(datetime('%lld', 'unixepoch'), datetime(%lld, 'unixepoch'), "
+		"(datetime('%lld', 'unixepoch'), datetime('%lld', 'unixepoch'), "
 		"%u, %u, %u, "
 		"%u, %u, %u, "
 		"%u, "
