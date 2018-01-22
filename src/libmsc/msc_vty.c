@@ -209,6 +209,6 @@ void msc_vty_init(struct gsm_network *msc_network)
 
 	mgcp_client_vty_init(msc_network, MSC_NODE, &msc_network->mgw.conf);
 #ifdef BUILD_IU
-	ranap_iu_vty_init(MSC_NODE, &msc_network->iu.rab_assign_addr_enc);
+	ranap_iu_vty_init(MSC_NODE, (enum ranap_nsap_addr_enc*)&msc_network->iu.rab_assign_addr_enc);
 #endif
 }
