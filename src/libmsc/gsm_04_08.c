@@ -740,6 +740,26 @@ int gsm48_rx_mm_serv_req(struct gsm_subscriber_connection *conn, struct msgb *ms
 	return 0;
 }
 
+/* Receive a CM Re-establish Request */
+static int gsm48_rx_cm_reest_req(struct gsm_subscriber_connection *conn, struct msgb *msg)
+{
+	uint8_t mi_type;
+	char mi_string[GSM48_MI_SIZE];
+	struct gsm48_hdr *gh = msgb_l3(msg);
+
+	uint8_t classmark2_len = gh->data[1];
+	uint8_t *classmark2 = gh->data+2;
+	uint8_t mi_len = *(classmark2 + classmark2_len);
+	uint8_t *mi = (classmark2 + classmark2_len + 1);
+
+	gsm48_mi_to_string(mi_string, sizeof(mi_string), mi, mi_len);
+	mi_type = mi[0] & GSM_MI_TYPE_MASK;
+	DEBUGP(DMM, "<- CM RE-ESTABLISH REQUEST MI(%s)=%s\n", gsm48_mi_type_name(mi_type), mi_string);
+
+	/* we don't support CM call re-establishment */
+	return msc_gsm48_tx_mm_serv_rej(conn, GSM48_REJECT_SRV_OPT_NOT_SUPPORTED);
+}
+
 static int gsm48_rx_mm_imsi_detach_ind(struct gsm_subscriber_connection *conn, struct msgb *msg)
 {
 	struct gsm_network *network = conn->network;
@@ -1039,7 +1059,7 @@ static int gsm0408_rcv_mm(struct gsm_subscriber_connection *conn, struct msgb *m
 		rc = gsm48_rx_mm_imsi_detach_ind(conn, msg);
 		break;
 	case GSM48_MT_MM_CM_REEST_REQ:
-		DEBUGP(DMM, "CM REESTABLISH REQUEST: Not implemented\n");
+		rc = gsm48_rx_cm_reest_req(conn, msg);
 		break;
 	case GSM48_MT_MM_AUTH_RESP:
 		rc = gsm48_rx_mm_auth_resp(conn, msg);
@@ -3187,6 +3207,7 @@ static bool msg_is_initially_permitted(const struct gsm48_hdr *hdr)
 		switch (msg_type) {
 		case GSM48_MT_MM_LOC_UPD_REQUEST:
 		case GSM48_MT_MM_CM_SERV_REQ:
+		case GSM48_MT_MM_CM_REEST_REQ:
 		case GSM48_MT_MM_AUTH_RESP:
 		case GSM48_MT_MM_AUTH_FAIL:
 		case GSM48_MT_MM_ID_RESP:
