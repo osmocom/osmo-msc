@@ -2,8 +2,6 @@ noinst_HEADERS = \
 	a_iface.h \
 	a_iface_bssap.h \
 	bsc_api.h \
-	bsc_msc.h \
-	bsc_rll.h \
 	common.h \
 	common_cs.h \
 	ctrl.h \
@@ -27,7 +25,6 @@ noinst_HEADERS = \
 	openbscdefines.h \
 	a_reset.h \
 	osmo_msc.h \
-	bsc_msc_data.h \
 	rrlp.h \
 	signal.h \
 	silent_call.h \

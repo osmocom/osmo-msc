@@ -47,7 +47,6 @@
 #include <osmocom/core/talloc.h>
 #include <osmocom/msc/signal.h>
 #include <osmocom/msc/osmo_msc.h>
-#include <osmocom/msc/bsc_msc_data.h>
 #include <osmocom/msc/sms_queue.h>
 #include <osmocom/vty/telnet_interface.h>
 #include <osmocom/vty/ports.h>
