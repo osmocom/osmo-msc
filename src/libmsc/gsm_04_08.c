@@ -672,16 +672,22 @@ int gsm48_rx_mm_serv_req(struct gsm_subscriber_connection *conn, struct msgb *ms
 
 	gsm48_mi_to_string(mi_string, sizeof(mi_string), mi, mi_len);
 	mi_type = mi[0] & GSM_MI_TYPE_MASK;
+	DEBUGPC(DMM, "serv_type=0x%02x MI(%s)=%s\n",
+		req->cm_service_type, gsm48_mi_type_name(mi_type), mi_string);
 
-	if (mi_type == GSM_MI_TYPE_IMSI) {
-		DEBUGPC(DMM, "serv_type=0x%02x MI(%s)=%s\n",
-			req->cm_service_type, gsm48_mi_type_name(mi_type),
-			mi_string);
-	} else if (mi_type == GSM_MI_TYPE_TMSI) {
-		DEBUGPC(DMM, "serv_type=0x%02x MI(%s)=%s\n",
-			req->cm_service_type, gsm48_mi_type_name(mi_type),
-			mi_string);
-	} else {
+	switch (mi_type) {
+	case GSM_MI_TYPE_IMSI:
+	case GSM_MI_TYPE_TMSI:
+		/* continue below */
+		break;
+	case GSM_MI_TYPE_IMEI:
+		if (req->cm_service_type == GSM48_CMSERV_EMERGENCY) {
+			/* We don't do emergency calls by IMEI */
+			LOGP(DMM, LOGL_NOTICE, "<- CM SERVICE REQUEST(IMEI=%s) rejected\n", mi_string);
+			return msc_gsm48_tx_mm_serv_rej(conn, GSM48_REJECT_IMEI_NOT_ACCEPTED);
+		}
+		/* fall-through for non-emergency setup */
+	default:
 		DEBUGPC(DMM, "mi_type is not expected: %d\n", mi_type);
 		return msc_gsm48_tx_mm_serv_rej(conn,
 						GSM48_REJECT_INCORRECT_MESSAGE);
