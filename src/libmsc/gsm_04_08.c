@@ -1546,8 +1546,10 @@ static int gsm48_cc_rx_setup(struct gsm_trans *trans, struct msgb *msg)
 
 	tlv_parse(&tp, &gsm48_att_tlvdef, gh->data, payload_len, 0, 0);
 	/* emergency setup is identified by msg_type */
-	if (msg_type == GSM48_MT_CC_EMERG_SETUP)
+	if (msg_type == GSM48_MT_CC_EMERG_SETUP) {
+		setup.fields |= MNCC_F_EMERGENCY;
 		setup.emergency = 1;
+	}
 
 	/* use subscriber as calling party number */
 	setup.fields |= MNCC_F_CALLING;
