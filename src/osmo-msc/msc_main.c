@@ -118,7 +118,7 @@ static void print_help()
 {
 	printf("  Some useful help...\n");
 	printf("  -h --help                  This text.\n");
-	printf("  -d option --debug=DRLL:DCC:DMM:DRR:DRSL:DNM  Enable debugging.\n");
+	printf("  -d option --debug=DCC:DMM:DRR:  Enable debugging.\n");
 	printf("  -D --daemonize             Fork the process into a background daemon.\n");
 	printf("  -c --config-file filename  The config file to use.\n");
 	printf("  -s --disable-color\n");
@@ -420,7 +420,7 @@ int main(int argc, char **argv)
 
 	rc = vty_read_config_file(msc_cmdline_config.config_file, NULL);
 	if (rc < 0) {
-		LOGP(DNM, LOGL_FATAL, "Failed to parse the config file: '%s'\n",
+		LOGP(DMSC, LOGL_FATAL, "Failed to parse the config file: '%s'\n",
 		     msc_cmdline_config.config_file);
 		return 1;
 	}

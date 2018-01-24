@@ -331,7 +331,7 @@ void gsup_client_destroy(struct gsup_client *gsupc)
 int gsup_client_send(struct gsup_client *gsupc, struct msgb *msg)
 {
 	if (!gsupc || !gsupc->is_connected) {
-		LOGP(DGPRS, LOGL_ERROR, "GSUP not connected, unable to send %s\n", msgb_hexdump(msg));
+		LOGP(DLGSUP, LOGL_ERROR, "GSUP not connected, unable to send %s\n", msgb_hexdump(msg));
 		msgb_free(msg);
 		return -ENOTCONN;
 	}

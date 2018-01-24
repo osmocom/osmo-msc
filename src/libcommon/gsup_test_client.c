@@ -201,7 +201,7 @@ static int gsupc_read_cb(struct gsup_client *gsupc, struct msgb *msg)
 	struct imsi_op *io;
 	int rc;
 
-	DEBUGP(DGPRS, "Rx GSUP %s\n", osmo_hexdump(msgb_l2(msg), msgb_l2len(msg)));
+	DEBUGP(DLGSUP, "Rx GSUP %s\n", osmo_hexdump(msgb_l2(msg), msgb_l2len(msg)));
 
 	rc = osmo_gsup_decode(msgb_l2(msg), msgb_l2len(msg), &gsup_msg);
 	if (rc < 0)

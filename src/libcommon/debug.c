@@ -60,18 +60,6 @@ static const struct log_info_cat default_categories[] = {
 		.color = "\033[1;34m",
 		.enabled = 1, .loglevel = LOGL_NOTICE,
 	},
-	[DRSL] = {
-		.name = "DRSL",
-		.description = "A-bis Radio Siganlling Link (RSL)",
-		.color = "\033[1;35m",
-		.enabled = 1, .loglevel = LOGL_NOTICE,
-	},
-	[DNM] =	{
-		.name = "DNM",
-		.description = "A-bis Network Management / O&M (NM/OML)",
-		.color = "\033[1;36m",
-		.enabled = 1, .loglevel = LOGL_INFO,
-	},
 	[DMNCC] = {
 		.name = "DMNCC",
 		.description = "MNCC API for Call Control application",
@@ -82,16 +70,6 @@ static const struct log_info_cat default_categories[] = {
 		.name = "DPAG",
 		.description = "Paging Subsystem",
 		.color = "\033[1;38m",
-		.enabled = 1, .loglevel = LOGL_NOTICE,
-	},
-	[DMEAS] = {
-		.name = "DMEAS",
-		.description = "Radio Measurement Processing",
-		.enabled = 0, .loglevel = LOGL_NOTICE,
-	},
-	[DSCCP] = {
-		.name = "DSCCP",
-		.description = "SCCP Protocol",
 		.enabled = 1, .loglevel = LOGL_NOTICE,
 	},
 	[DMSC] = {
@@ -119,36 +97,6 @@ static const struct log_info_cat default_categories[] = {
 		.description = "Reference Counting",
 		.enabled = 0, .loglevel = LOGL_NOTICE,
 	},
-	[DGPRS] = {
-		.name = "DGPRS",
-		.description = "GPRS Packet Service",
-		.enabled = 1, .loglevel = LOGL_DEBUG,
-	},
-	[DNS] = {
-		.name = "DNS",
-		.description = "GPRS Network Service (NS)",
-		.enabled = 1, .loglevel = LOGL_INFO,
-	},
-	[DBSSGP] = {
-		.name = "DBSSGP",
-		.description = "GPRS BSS Gateway Protocol (BSSGP)",
-		.enabled = 1, .loglevel = LOGL_DEBUG,
-	},
-	[DLLC] = {
-		.name = "DLLC",
-		.description = "GPRS Logical Link Control Protocol (LLC)",
-		.enabled = 1, .loglevel = LOGL_DEBUG,
-	},
-	[DSNDCP] = {
-		.name = "DSNDCP",
-		.description = "GPRS Sub-Network Dependent Control Protocol (SNDCP)",
-		.enabled = 1, .loglevel = LOGL_DEBUG,
-	},
-	[DNAT] = {
-		.name = "DNAT",
-		.description = "GSM 08.08 NAT/Multiplexer",
-		.enabled = 1, .loglevel = LOGL_NOTICE,
-	},
 	[DCTRL] = {
 		.name = "DCTRL",
 		.description = "Control interface",
@@ -159,24 +107,9 @@ static const struct log_info_cat default_categories[] = {
 		.description = "SMPP interface for external SMS apps",
 		.enabled = 1, .loglevel = LOGL_DEBUG,
 	},
-	[DFILTER] = {
-		.name = "DFILTER",
-		.description = "BSC/NAT IMSI based filtering",
-		.enabled = 1, .loglevel = LOGL_DEBUG,
-	},
 	[DRANAP] = {
 		.name = "DRANAP",
 		.description = "Radio Access Network Application Part Protocol",
-		.enabled = 1, .loglevel = LOGL_DEBUG,
-	},
-	[DSUA] = {
-		.name = "DSUA",
-		.description = "SCCP User Adaptation Protocol",
-		.enabled = 1, .loglevel = LOGL_DEBUG,
-	},
-	[DPCU] = {
-		.name = "DPCU",
-		.description = "PCU Interface",
 		.enabled = 1, .loglevel = LOGL_DEBUG,
 	},
 	[DVLR] = {
@@ -187,12 +120,6 @@ static const struct log_info_cat default_categories[] = {
 	[DIUCS] = {
 		.name = "DIUCS",
 		.description = "Iu-CS Protocol",
-		.enabled = 1, .loglevel = LOGL_DEBUG,
-	},
-	[DSIGTRAN] = {
-		.name = "DSIGTRAN",
-		.description = "SIGTRAN Signalling Transport",
-		.color = "\033[1;29m",
 		.enabled = 1, .loglevel = LOGL_DEBUG,
 	},
 };
