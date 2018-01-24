@@ -101,44 +101,59 @@ static void imsi_op_timer_cb(void *data)
 }
 
 /* allocate + generate + send Send-Auth-Info */
-int req_auth_info(const char *imsi)
+static int req_auth_info(const char *imsi)
 {
 	struct imsi_op *io = imsi_op_alloc(g_gc, imsi, IMSI_OP_SAI);
 	struct osmo_gsup_message gsup = {0};
 	struct msgb *msg = msgb_alloc_headroom(1200, 200, __func__);
+	int rc;
 
 	OSMO_STRLCPY_ARRAY(gsup.imsi, io->imsi);
 	gsup.message_type = OSMO_GSUP_MSGT_SEND_AUTH_INFO_REQUEST;
 
-	osmo_gsup_encode(msg, &gsup);
+	rc = osmo_gsup_encode(msg, &gsup);
+	if (rc < 0) {
+		printf("%s: encoding failure (%s)\n", imsi, strerror(-rc));
+		return rc;
+	}
 
 	return gsup_client_send(g_gc, msg);
 }
 
 /* allocate + generate + send Send-Auth-Info */
-int req_loc_upd(const char *imsi)
+static int req_loc_upd(const char *imsi)
 {
 	struct imsi_op *io = imsi_op_alloc(g_gc, imsi, IMSI_OP_LU);
 	struct osmo_gsup_message gsup = {0};
 	struct msgb *msg = msgb_alloc_headroom(1200, 200, __func__);
+	int rc;
 
 	OSMO_STRLCPY_ARRAY(gsup.imsi, io->imsi);
 	gsup.message_type = OSMO_GSUP_MSGT_UPDATE_LOCATION_REQUEST;
 
-	osmo_gsup_encode(msg, &gsup);
+	rc = osmo_gsup_encode(msg, &gsup);
+	if (rc < 0) {
+		printf("%s: encoding failure (%s)\n", imsi, strerror(-rc));
+		return rc;
+	}
 
 	return gsup_client_send(g_gc, msg);
 }
 
-int resp_isd(struct imsi_op *io)
+static int resp_isd(struct imsi_op *io)
 {
 	struct osmo_gsup_message gsup = {0};
 	struct msgb *msg = msgb_alloc_headroom(1200, 200, __func__);
+	int rc;
 
 	OSMO_STRLCPY_ARRAY(gsup.imsi, io->imsi);
 	gsup.message_type = OSMO_GSUP_MSGT_INSERT_DATA_RESULT;
 
-	osmo_gsup_encode(msg, &gsup);
+	rc = osmo_gsup_encode(msg, &gsup);
+	if (rc < 0) {
+		printf("%s: encoding failure (%s)\n", io->imsi, strerror(-rc));
+		return rc;
+	}
 
 	imsi_op_release(io);
 
@@ -148,7 +163,7 @@ int resp_isd(struct imsi_op *io)
 /* receive an incoming GSUP message */
 static void imsi_op_rx_gsup(struct imsi_op *io, const struct osmo_gsup_message *gsup)
 {
-	int is_error = 0;
+	int is_error = 0, rc;
 
 	if (OSMO_GSUP_IS_MSGT_ERROR(gsup->message_type)) {
 		imsi_op_stats[io->type].num_rx_error++;
@@ -160,7 +175,9 @@ static void imsi_op_rx_gsup(struct imsi_op *io, const struct osmo_gsup_message *
 	case IMSI_OP_SAI:
 		printf("%s; SAI Response%s\n", io->imsi, is_error ? ": ERROR" : "");
 		/* now that we have auth tuples, request LU */
-		req_loc_upd(io->imsi);
+		rc = req_loc_upd(io->imsi);
+		if (rc < 0)
+			printf("Failed to request Location Update for %s\n", io->imsi);
 		imsi_op_release(io);
 		break;
 	case IMSI_OP_LU:
@@ -169,7 +186,9 @@ static void imsi_op_rx_gsup(struct imsi_op *io, const struct osmo_gsup_message *
 		break;
 	case IMSI_OP_ISD:
 		printf("%s; ISD Request%s\n", io->imsi, is_error ? ": ERROR" : "");
-		resp_isd(io);
+		rc = resp_isd(io);
+		if (rc < 0)
+			printf("Failed to insert subscriber data for %s\n", io->imsi);
 		break;
 	default:
 		printf("%s: Unknown\n", io->imsi);
@@ -283,9 +302,14 @@ int main(int argc, char **argv)
 
 	for (i = 0; i < 10000; i++) {
 		unsigned long long imsi = 901790000000000 + i;
-		char imsi_buf[17];
+		char imsi_buf[17] = { 0 };
+		int rc;
+
 		snprintf(imsi_buf, sizeof(imsi_buf), "%015llu", imsi);
-		req_auth_info(imsi_buf);
+		rc = req_auth_info(imsi_buf);
+		if (rc < 0)
+			printf("Failed to request Auth Info for %s\n", imsi_buf);
+
 		osmo_select_main(0);
 	}
 

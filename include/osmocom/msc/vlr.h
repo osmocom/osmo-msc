@@ -283,7 +283,7 @@ int vlr_subscr_rx_id_resp(struct vlr_subscr *vsub, const uint8_t *mi, size_t mi_
 int vlr_subscr_rx_auth_resp(struct vlr_subscr *vsub, bool is_r99, bool is_utran,
 			    const uint8_t *res, uint8_t res_len);
 int vlr_subscr_rx_auth_fail(struct vlr_subscr *vsub, const uint8_t *auts);
-int vlr_subscr_tx_auth_fail_rep(const struct vlr_subscr *vsub);
+int vlr_subscr_tx_auth_fail_rep(const struct vlr_subscr *vsub) __attribute__((warn_unused_result));
 void vlr_subscr_rx_ciph_res(struct vlr_subscr *vsub, struct vlr_ciph_result *res);
 int vlr_subscr_rx_tmsi_reall_compl(struct vlr_subscr *vsub);
 int vlr_subscr_rx_imsi_detach(struct vlr_subscr *vsub);
@@ -374,7 +374,7 @@ bool vlr_subscr_matches_imei(struct vlr_subscr *vsub, const char *imei);
 uint32_t vlr_timer(struct vlr_instance *vlr, uint32_t timer);
 
 int vlr_subscr_changed(struct vlr_subscr *vsub);
-int vlr_subscr_purge(struct vlr_subscr *vsub);
+int vlr_subscr_purge(struct vlr_subscr *vsub) __attribute__((warn_unused_result));
 void vlr_subscr_cancel(struct vlr_subscr *vsub, enum gsm48_gmm_cause cause);
 
 

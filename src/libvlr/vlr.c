@@ -130,7 +130,11 @@ static int vlr_tx_gsup_message(const struct vlr_instance *vlr,
 {
 	struct msgb *msg = gsup_client_msgb_alloc();
 
-	osmo_gsup_encode(msg, gsup_msg);
+	int rc = osmo_gsup_encode(msg, gsup_msg);
+	if (rc < 0) {
+		LOGP(DVLR, LOGL_ERROR, "GSUP encoding failure: %s\n", strerror(-rc));
+		return rc;
+	}
 
 	if (!vlr->gsup_client) {
 		LOGP(DVLR, LOGL_NOTICE, "GSUP link is down, cannot "
@@ -498,8 +502,10 @@ static int vlr_rx_gsup_unknown_imsi(struct vlr_instance *vlr,
 				   struct osmo_gsup_message *gsup_msg)
 {
 	if (OSMO_GSUP_IS_MSGT_REQUEST(gsup_msg->message_type)) {
-		vlr_tx_gsup_error_reply(vlr, gsup_msg,
-					GMM_CAUSE_IMSI_UNKNOWN);
+		int rc = vlr_tx_gsup_error_reply(vlr, gsup_msg, GMM_CAUSE_IMSI_UNKNOWN);
+		if (rc < 0)
+			LOGP(DVLR, LOGL_ERROR, "Failed to send error reply for IMSI %s\n", gsup_msg->imsi);
+
 		LOGP(DVLR, LOGL_NOTICE,
 		     "Unknown IMSI %s, discarding GSUP request "
 		     "of type 0x%02x\n",
@@ -775,7 +781,7 @@ static int vlr_subscr_handle_cancel_req(struct vlr_subscr *vsub,
 					struct osmo_gsup_message *gsup_msg)
 {
 	struct osmo_gsup_message gsup_reply = {0};
-	int is_update_procedure = !gsup_msg->cancel_type ||
+	int rc, is_update_procedure = !gsup_msg->cancel_type ||
 		gsup_msg->cancel_type == OSMO_GSUP_CANCEL_TYPE_UPDATE;
 
 	LOGVSUBP(LOGL_INFO, vsub, "Cancelling MS subscriber (%s)\n",
@@ -783,11 +789,11 @@ static int vlr_subscr_handle_cancel_req(struct vlr_subscr *vsub,
 		 "update procedure" : "subscription withdraw");
 
 	gsup_reply.message_type = OSMO_GSUP_MSGT_LOCATION_CANCEL_RESULT;
-	vlr_subscr_tx_gsup_message(vsub, &gsup_reply);
+	rc = vlr_subscr_tx_gsup_message(vsub, &gsup_reply);
 
 	vlr_subscr_cancel(vsub, gsup_msg->cause);
 
-	return 0;
+	return rc;
 }
 
 /* Incoming handler for GSUP from HLR.
@@ -812,9 +818,11 @@ int vlr_gsupc_read_cb(struct gsup_client *gsupc, struct msgb *msg)
 
 	if (!gsup.imsi[0]) {
 		LOGP(DVLR, LOGL_ERROR, "Missing IMSI in GSUP message\n");
-		if (OSMO_GSUP_IS_MSGT_REQUEST(gsup.message_type))
-			vlr_tx_gsup_error_reply(vlr, &gsup,
-						GMM_CAUSE_INV_MAND_INFO);
+		if (OSMO_GSUP_IS_MSGT_REQUEST(gsup.message_type)) {
+			rc = vlr_tx_gsup_error_reply(vlr, &gsup, GMM_CAUSE_INV_MAND_INFO);
+			if (rc < 0)
+				LOGP(DVLR, LOGL_ERROR, "Failed to send error reply for IMSI %s\n", gsup.imsi);
+		}
 		rc = -GMM_CAUSE_INV_MAND_INFO;
 		goto msgb_free_and_return;
 	}

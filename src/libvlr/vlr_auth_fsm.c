@@ -207,8 +207,11 @@ static void auth_fsm_onenter_failed(struct osmo_fsm_inst *fi, uint32_t prev_stat
 	/* If authentication hasn't even started, e.g. the HLR sent no auth
 	 * info, then we also don't need to tell the HLR about an auth failure.
 	 */
-	if (afp->auth_requested)
-		vlr_subscr_tx_auth_fail_rep(vsub);
+	if (afp->auth_requested) {
+		int rc = vlr_subscr_tx_auth_fail_rep(vsub);
+		if (rc < 0)
+			LOGVSUBP(LOGL_ERROR, vsub, "Failed to communicate AUTH failure to HLR\n");
+	}
 }
 
 /* Terminate the Auth FSM Instance and notify parent */
@@ -281,7 +284,9 @@ static void auth_fsm_needs_auth(struct osmo_fsm_inst *fi, uint32_t event, void *
 	/* Check if we have vectors available */
 	if (!vlr_subscr_has_auth_tuple(vsub, afp->auth_tuple_max_reuse_count)) {
 		/* Obtain_Authentication_Sets_VLR */
-		vlr_subscr_req_sai(vsub, NULL, NULL);
+		int rc = vlr_subscr_req_sai(vsub, NULL, NULL);
+		if (rc < 0)
+			LOGPFSM(fi, "Failed to request Authentication Sets from VLR\n");
 		osmo_fsm_inst_state_chg(fi, VLR_SUB_AS_NEEDS_AUTH_WAIT_AI,
 					GSM_29002_TIMER_M, 0);
 	} else {
@@ -374,7 +379,7 @@ static void auth_fsm_wait_auth_resp(struct osmo_fsm_inst *fi, uint32_t event,
 	case VLR_AUTH_E_MS_AUTH_FAIL:
 		if (par->auts) {
 			/* First failure, start re-sync attempt */
-			vlr_subscr_req_sai(vsub, par->auts,
+			rc = vlr_subscr_req_sai(vsub, par->auts,
 					   vsub->last_tuple->vec.rand);
 			osmo_fsm_inst_state_chg(fi,
 					VLR_SUB_AS_NEEDS_AUTH_WAIT_SAI_RESYNC,
