@@ -27,7 +27,6 @@
 #include <osmocom/core/msgb.h>
 #include <osmocom/msc/signal.h>
 #include <osmocom/msc/debug.h>
-#include <osmocom/msc/paging.h>
 #include <osmocom/msc/gsm_data.h>
 #include <osmocom/msc/gsm_subscriber.h>
 #include <osmocom/msc/abis_rsl.h>

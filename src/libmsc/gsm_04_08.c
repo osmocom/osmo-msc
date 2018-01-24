@@ -45,7 +45,6 @@
 #include <osmocom/msc/gsm_04_14.h>
 #include <osmocom/msc/abis_rsl.h>
 #include <osmocom/msc/chan_alloc.h>
-#include <osmocom/msc/paging.h>
 #include <osmocom/msc/signal.h>
 #include <osmocom/abis/trau_frame.h>
 #include <osmocom/msc/trau_mux.h>

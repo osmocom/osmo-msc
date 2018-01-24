@@ -42,13 +42,11 @@ noinst_HEADERS = \
 	oap_client.h \
 	openbscdefines.h \
 	osmo_bsc.h \
-	osmo_bsc_grace.h \
 	a_reset.h \
 	osmo_msc.h \
 	osmo_bsc_sigtran.h \
 	bsc_msc_data.h \
 	osmux.h \
-	paging.h \
 	rrlp.h \
 	rs232.h \
 	rtp_proxy.h \

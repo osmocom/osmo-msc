@@ -52,7 +52,6 @@
 #include <osmocom/msc/signal.h>
 #include <osmocom/msc/db.h>
 #include <osmocom/msc/transaction.h>
-#include <osmocom/msc/paging.h>
 #include <osmocom/msc/bsc_rll.h>
 #include <osmocom/msc/chan_alloc.h>
 #include <osmocom/msc/msc_ifaces.h>

@@ -43,7 +43,6 @@
 #include <osmocom/msc/gsm_subscriber.h>
 #include <osmocom/msc/gsm_04_08.h>
 #include <osmocom/msc/debug.h>
-#include <osmocom/msc/paging.h>
 #include <osmocom/msc/signal.h>
 #include <osmocom/msc/db.h>
 #include <osmocom/msc/chan_alloc.h>

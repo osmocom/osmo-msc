@@ -25,7 +25,6 @@
 #include <osmocom/core/talloc.h>
 #include <osmocom/msc/gsm_04_08.h>
 #include <osmocom/msc/mncc.h>
-#include <osmocom/msc/paging.h>
 #include <osmocom/msc/osmo_msc.h>
 #include <osmocom/msc/vlr.h>
 
