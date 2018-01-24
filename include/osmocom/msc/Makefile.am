@@ -1,7 +1,6 @@
 noinst_HEADERS = \
 	a_iface.h \
 	a_iface_bssap.h \
-	auth.h \
 	bsc_api.h \
 	bsc_msc.h \
 	bsc_rll.h \

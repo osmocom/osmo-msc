@@ -34,7 +34,6 @@
 
 #include "bscconfig.h"
 
-#include <osmocom/msc/auth.h>
 #include <osmocom/msc/db.h>
 #include <osmocom/msc/debug.h>
 #include <osmocom/msc/gsm_data.h>
