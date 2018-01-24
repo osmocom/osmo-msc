@@ -481,7 +481,7 @@ DRLL Freeing subscriber connection with NULL subscriber
 ===== test_ciph: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 9
+talloc_total_blocks(tall_bsc_ctx) == 8
 
 ===== test_ciph_tmsi
 - Location Update request causes a GSUP Send Auth Info request to HLR
@@ -1003,7 +1003,7 @@ DRLL Freeing subscriber connection with NULL subscriber
 ===== test_ciph_tmsi: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 9
+talloc_total_blocks(tall_bsc_ctx) == 8
 
 ===== test_ciph_imei
 - Location Update request causes a GSUP Send Auth Info request to HLR
@@ -1224,7 +1224,7 @@ DRLL Freeing subscriber connection with NULL subscriber
 ===== test_ciph_imei: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 9
+talloc_total_blocks(tall_bsc_ctx) == 8
 
 ===== test_ciph_imeisv
 - Location Update request causes a GSUP Send Auth Info request to HLR
@@ -1434,7 +1434,7 @@ DRLL Freeing subscriber connection with NULL subscriber
 ===== test_ciph_imeisv: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 9
+talloc_total_blocks(tall_bsc_ctx) == 8
 
 ===== test_ciph_tmsi_imei
 - Location Update request causes a GSUP Send Auth Info request to HLR
@@ -1686,8 +1686,8 @@ DRLL Freeing subscriber connection with NULL subscriber
 ===== test_ciph_tmsi_imei: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 9
+talloc_total_blocks(tall_bsc_ctx) == 8
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 9
+talloc_total_blocks(tall_bsc_ctx) == 8
 

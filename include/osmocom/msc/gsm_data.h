@@ -26,7 +26,6 @@
 
 struct mncc_sock_state;
 struct gsm_subscriber_group;
-struct bsc_subscr;
 struct vlr_instance;
 struct vlr_subscr;
 struct ranap_ue_conn_ctx;
@@ -144,9 +143,6 @@ struct gsm_subscriber_connection {
 	/* The MS has opened the conn with a CM Service Request, and we shall
 	 * keep it open for an actual request (or until timeout). */
 	bool received_cm_service_request;
-
-	/* libbsc subscriber information (if available) */
-	struct bsc_subscr *bsub;
 
 	/* libmsc/libvlr subscriber information (if available) */
 	struct vlr_subscr *vsub;
@@ -445,14 +441,6 @@ struct gsm_network {
 	 * OsmoMSC, this should be tied to the location area code (LAC). */
 	struct gsm_tz tz;
 
-	/* List of all struct bsc_subscr used in libbsc. This llist_head is
-	 * allocated so that the llist_head pointer itself can serve as a
-	 * talloc context (useful to not have to pass the entire gsm_network
-	 * struct to the bsc_subscr_* API, and for bsc_susbscr unit tests to
-	 * not require gsm_data.h). In an MSC-without-BSC environment, this
-	 * pointer is NULL to indicate absence of a bsc_subscribers list. */
-	struct llist_head *bsc_subscribers;
-
 	/* MSC: GSUP server address of the HLR */
 	const char *gsup_server_addr_str;
 	uint16_t gsup_server_port;
@@ -556,9 +544,6 @@ const char *bts_gprs_mode_name(enum bts_gprs_mode mode);
 
 int gsm48_ra_id_by_bts(uint8_t *buf, struct gsm_bts *bts);
 void gprs_ra_id_by_bts(struct gprs_ra_id *raid, struct gsm_bts *bts);
-
-struct gsm_subscriber_connection *bsc_subscr_con_allocate(struct gsm_lchan *lchan);
-void bsc_subscr_con_free(struct gsm_subscriber_connection *conn);
 
 struct gsm_subscriber_connection *msc_subscr_con_allocate(struct gsm_network *network);
 void msc_subscr_con_free(struct gsm_subscriber_connection *conn);

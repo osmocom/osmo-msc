@@ -424,7 +424,7 @@ DRLL Freeing subscriber connection with NULL subscriber
 ===== test_auth_use_twice_geran: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 9
+talloc_total_blocks(tall_bsc_ctx) == 8
 
 ===== test_auth_use_twice_utran
 - Location Update request causes a GSUP Send Auth Info request to HLR
@@ -878,7 +878,7 @@ DRLL Freeing subscriber connection with NULL subscriber
 ===== test_auth_use_twice_utran: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 9
+talloc_total_blocks(tall_bsc_ctx) == 8
 
 ===== test_auth_use_infinitely_geran
 - Location Update request causes a GSUP Send Auth Info request to HLR
@@ -1399,7 +1399,7 @@ DRLL Freeing subscriber connection with NULL subscriber
 ===== test_auth_use_infinitely_geran: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 9
+talloc_total_blocks(tall_bsc_ctx) == 8
 
 ===== test_auth_use_infinitely_utran
 - Location Update request causes a GSUP Send Auth Info request to HLR
@@ -1954,7 +1954,7 @@ DRLL Freeing subscriber connection with NULL subscriber
 ===== test_auth_use_infinitely_utran: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 9
+talloc_total_blocks(tall_bsc_ctx) == 8
 
 ===== test_no_auth_reuse_geran
 - Location Update request causes a GSUP Send Auth Info request to HLR
@@ -2275,7 +2275,7 @@ DRLL Freeing subscriber connection with NULL subscriber
 ===== test_no_auth_reuse_geran: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 9
+talloc_total_blocks(tall_bsc_ctx) == 8
 
 ===== test_no_auth_reuse_utran
 - Location Update request causes a GSUP Send Auth Info request to HLR
@@ -2614,8 +2614,8 @@ DRLL Freeing subscriber connection with NULL subscriber
 ===== test_no_auth_reuse_utran: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 9
+talloc_total_blocks(tall_bsc_ctx) == 8
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 9
+talloc_total_blocks(tall_bsc_ctx) == 8
 
