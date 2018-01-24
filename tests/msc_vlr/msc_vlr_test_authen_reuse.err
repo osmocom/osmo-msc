@@ -128,8 +128,8 @@ DRLL Dispatching 04.08 message unknown 0x33 (0x5:0x33)
 DRLL subscr MSISDN:42342: Message not permitted for initial conn: unknown 0x33
 DRLL Dispatching 04.08 message GSM48_MT_RR_SYSINFO_1 (0x6:0x19)
 DRLL subscr MSISDN:42342: Message not permitted for initial conn: GSM48_MT_RR_SYSINFO_1
-DRLL Dispatching 04.08 message GSM48_PDISC_SMS:0x01 (0x9:0x1)
-DRLL subscr MSISDN:42342: Message not permitted for initial conn: GSM48_PDISC_SMS:0x01
+DRLL Dispatching 04.08 message SMS:0x01 (0x9:0x1)
+DRLL subscr MSISDN:42342: Message not permitted for initial conn: SMS:0x01
 - even though the TMSI is not acked, we can already find the subscr with it
 DREF VLR subscr MSISDN:42342 usage increases to: 2
   vsub != NULL == 1
@@ -252,16 +252,16 @@ DREF MSISDN:42342: MSC conn use - dtap == 1 (0x4)
 - a USSD request is serviced
   expecting USSD:
   Your extension is 42342
-  MSC <--RAN_GERAN_A-- MS: GSM48_PDISC_NC_SS:0x3b
+  MSC <--RAN_GERAN_A-- MS: NCSS:0x3b
 DREF MSISDN:42342: MSC conn use + dtap == 2 (0x6)
-DRLL Dispatching 04.08 message GSM48_PDISC_NC_SS:0x3b (0xb:0x3b)
-DMM MSISDN:42342: rx msg GSM48_PDISC_NC_SS:0x3b: received_cm_service_request changes to false
+DRLL Dispatching 04.08 message NCSS:0x3b (0xb:0x3b)
+DMM MSISDN:42342: rx msg NCSS:0x3b: received_cm_service_request changes to false
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_ACCEPTED}: Received Event SUBSCR_CONN_E_COMMUNICATING
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_ACCEPTED}: state_chg to SUBSCR_CONN_S_COMMUNICATING
 DMM USSD: Own number requested
 DMM MSISDN:42342: MSISDN = 42342
 DMSC msc_tx 43 bytes to MSISDN:42342 via RAN_GERAN_A
-- DTAP --RAN_GERAN_A--> MS: GSM48_PDISC_NC_SS:0x2a: 8b2a1c27a225020100302002013b301b04010f0416d9775d0e2ae3e965f73cfd7683d273104d36a3c91a0d
+- DTAP --RAN_GERAN_A--> MS: NCSS:0x2a: 8b2a1c27a225020100302002013b301b04010f0416d9775d0e2ae3e965f73cfd7683d273104d36a3c91a0d
 - DTAP matches expected message
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: Received Event SUBSCR_CONN_E_BUMP
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: bump: releasing conn
@@ -373,16 +373,16 @@ DREF MSISDN:42342: MSC conn use - dtap == 1 (0x4)
 - a USSD request is serviced
   expecting USSD:
   Your extension is 42342
-  MSC <--RAN_GERAN_A-- MS: GSM48_PDISC_NC_SS:0x3b
+  MSC <--RAN_GERAN_A-- MS: NCSS:0x3b
 DREF MSISDN:42342: MSC conn use + dtap == 2 (0x6)
-DRLL Dispatching 04.08 message GSM48_PDISC_NC_SS:0x3b (0xb:0x3b)
-DMM MSISDN:42342: rx msg GSM48_PDISC_NC_SS:0x3b: received_cm_service_request changes to false
+DRLL Dispatching 04.08 message NCSS:0x3b (0xb:0x3b)
+DMM MSISDN:42342: rx msg NCSS:0x3b: received_cm_service_request changes to false
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_ACCEPTED}: Received Event SUBSCR_CONN_E_COMMUNICATING
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_ACCEPTED}: state_chg to SUBSCR_CONN_S_COMMUNICATING
 DMM USSD: Own number requested
 DMM MSISDN:42342: MSISDN = 42342
 DMSC msc_tx 43 bytes to MSISDN:42342 via RAN_GERAN_A
-- DTAP --RAN_GERAN_A--> MS: GSM48_PDISC_NC_SS:0x2a: 8b2a1c27a225020100302002013b301b04010f0416d9775d0e2ae3e965f73cfd7683d273104d36a3c91a0d
+- DTAP --RAN_GERAN_A--> MS: NCSS:0x2a: 8b2a1c27a225020100302002013b301b04010f0416d9775d0e2ae3e965f73cfd7683d273104d36a3c91a0d
 - DTAP matches expected message
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: Received Event SUBSCR_CONN_E_BUMP
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: bump: releasing conn
@@ -566,8 +566,8 @@ DRLL Dispatching 04.08 message unknown 0x33 (0x5:0x33)
 DRLL subscr MSISDN:42342: Message not permitted for initial conn: unknown 0x33
 DRLL Dispatching 04.08 message GSM48_MT_RR_SYSINFO_1 (0x6:0x19)
 DRLL subscr MSISDN:42342: Message not permitted for initial conn: GSM48_MT_RR_SYSINFO_1
-DRLL Dispatching 04.08 message GSM48_PDISC_SMS:0x01 (0x9:0x1)
-DRLL subscr MSISDN:42342: Message not permitted for initial conn: GSM48_PDISC_SMS:0x01
+DRLL Dispatching 04.08 message SMS:0x01 (0x9:0x1)
+DRLL subscr MSISDN:42342: Message not permitted for initial conn: SMS:0x01
 - even though the TMSI is not acked, we can already find the subscr with it
 DREF VLR subscr MSISDN:42342 usage increases to: 2
   vsub != NULL == 1
@@ -698,16 +698,16 @@ DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_ACCEPTED}: bump: still awaiting f
 - a USSD request is serviced
   expecting USSD:
   Your extension is 42342
-  MSC <--RAN_UTRAN_IU-- MS: GSM48_PDISC_NC_SS:0x3b
+  MSC <--RAN_UTRAN_IU-- MS: NCSS:0x3b
 DREF MSISDN:42342: MSC conn use + dtap == 2 (0x6)
-DRLL Dispatching 04.08 message GSM48_PDISC_NC_SS:0x3b (0xb:0x3b)
-DMM MSISDN:42342: rx msg GSM48_PDISC_NC_SS:0x3b: received_cm_service_request changes to false
+DRLL Dispatching 04.08 message NCSS:0x3b (0xb:0x3b)
+DMM MSISDN:42342: rx msg NCSS:0x3b: received_cm_service_request changes to false
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_ACCEPTED}: Received Event SUBSCR_CONN_E_COMMUNICATING
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_ACCEPTED}: state_chg to SUBSCR_CONN_S_COMMUNICATING
 DMM USSD: Own number requested
 DMM MSISDN:42342: MSISDN = 42342
 DMSC msc_tx 43 bytes to MSISDN:42342 via RAN_UTRAN_IU
-- DTAP --RAN_UTRAN_IU--> MS: GSM48_PDISC_NC_SS:0x2a: 8b2a1c27a225020100302002013b301b04010f0416d9775d0e2ae3e965f73cfd7683d273104d36a3c91a0d
+- DTAP --RAN_UTRAN_IU--> MS: NCSS:0x2a: 8b2a1c27a225020100302002013b301b04010f0416d9775d0e2ae3e965f73cfd7683d273104d36a3c91a0d
 - DTAP matches expected message
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: Received Event SUBSCR_CONN_E_BUMP
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: bump: releasing conn
@@ -827,16 +827,16 @@ DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_ACCEPTED}: bump: still awaiting f
 - a USSD request is serviced
   expecting USSD:
   Your extension is 42342
-  MSC <--RAN_UTRAN_IU-- MS: GSM48_PDISC_NC_SS:0x3b
+  MSC <--RAN_UTRAN_IU-- MS: NCSS:0x3b
 DREF MSISDN:42342: MSC conn use + dtap == 2 (0x6)
-DRLL Dispatching 04.08 message GSM48_PDISC_NC_SS:0x3b (0xb:0x3b)
-DMM MSISDN:42342: rx msg GSM48_PDISC_NC_SS:0x3b: received_cm_service_request changes to false
+DRLL Dispatching 04.08 message NCSS:0x3b (0xb:0x3b)
+DMM MSISDN:42342: rx msg NCSS:0x3b: received_cm_service_request changes to false
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_ACCEPTED}: Received Event SUBSCR_CONN_E_COMMUNICATING
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_ACCEPTED}: state_chg to SUBSCR_CONN_S_COMMUNICATING
 DMM USSD: Own number requested
 DMM MSISDN:42342: MSISDN = 42342
 DMSC msc_tx 43 bytes to MSISDN:42342 via RAN_UTRAN_IU
-- DTAP --RAN_UTRAN_IU--> MS: GSM48_PDISC_NC_SS:0x2a: 8b2a1c27a225020100302002013b301b04010f0416d9775d0e2ae3e965f73cfd7683d273104d36a3c91a0d
+- DTAP --RAN_UTRAN_IU--> MS: NCSS:0x2a: 8b2a1c27a225020100302002013b301b04010f0416d9775d0e2ae3e965f73cfd7683d273104d36a3c91a0d
 - DTAP matches expected message
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: Received Event SUBSCR_CONN_E_BUMP
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: bump: releasing conn
@@ -1010,8 +1010,8 @@ DRLL Dispatching 04.08 message unknown 0x33 (0x5:0x33)
 DRLL subscr MSISDN:42342: Message not permitted for initial conn: unknown 0x33
 DRLL Dispatching 04.08 message GSM48_MT_RR_SYSINFO_1 (0x6:0x19)
 DRLL subscr MSISDN:42342: Message not permitted for initial conn: GSM48_MT_RR_SYSINFO_1
-DRLL Dispatching 04.08 message GSM48_PDISC_SMS:0x01 (0x9:0x1)
-DRLL subscr MSISDN:42342: Message not permitted for initial conn: GSM48_PDISC_SMS:0x01
+DRLL Dispatching 04.08 message SMS:0x01 (0x9:0x1)
+DRLL subscr MSISDN:42342: Message not permitted for initial conn: SMS:0x01
 - even though the TMSI is not acked, we can already find the subscr with it
 DREF VLR subscr MSISDN:42342 usage increases to: 2
   vsub != NULL == 1
@@ -1134,16 +1134,16 @@ DREF MSISDN:42342: MSC conn use - dtap == 1 (0x4)
 - a USSD request is serviced
   expecting USSD:
   Your extension is 42342
-  MSC <--RAN_GERAN_A-- MS: GSM48_PDISC_NC_SS:0x3b
+  MSC <--RAN_GERAN_A-- MS: NCSS:0x3b
 DREF MSISDN:42342: MSC conn use + dtap == 2 (0x6)
-DRLL Dispatching 04.08 message GSM48_PDISC_NC_SS:0x3b (0xb:0x3b)
-DMM MSISDN:42342: rx msg GSM48_PDISC_NC_SS:0x3b: received_cm_service_request changes to false
+DRLL Dispatching 04.08 message NCSS:0x3b (0xb:0x3b)
+DMM MSISDN:42342: rx msg NCSS:0x3b: received_cm_service_request changes to false
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_ACCEPTED}: Received Event SUBSCR_CONN_E_COMMUNICATING
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_ACCEPTED}: state_chg to SUBSCR_CONN_S_COMMUNICATING
 DMM USSD: Own number requested
 DMM MSISDN:42342: MSISDN = 42342
 DMSC msc_tx 43 bytes to MSISDN:42342 via RAN_GERAN_A
-- DTAP --RAN_GERAN_A--> MS: GSM48_PDISC_NC_SS:0x2a: 8b2a1c27a225020100302002013b301b04010f0416d9775d0e2ae3e965f73cfd7683d273104d36a3c91a0d
+- DTAP --RAN_GERAN_A--> MS: NCSS:0x2a: 8b2a1c27a225020100302002013b301b04010f0416d9775d0e2ae3e965f73cfd7683d273104d36a3c91a0d
 - DTAP matches expected message
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: Received Event SUBSCR_CONN_E_BUMP
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: bump: releasing conn
@@ -1241,16 +1241,16 @@ DREF MSISDN:42342: MSC conn use - dtap == 1 (0x4)
 - a USSD request is serviced
   expecting USSD:
   Your extension is 42342
-  MSC <--RAN_GERAN_A-- MS: GSM48_PDISC_NC_SS:0x3b
+  MSC <--RAN_GERAN_A-- MS: NCSS:0x3b
 DREF MSISDN:42342: MSC conn use + dtap == 2 (0x6)
-DRLL Dispatching 04.08 message GSM48_PDISC_NC_SS:0x3b (0xb:0x3b)
-DMM MSISDN:42342: rx msg GSM48_PDISC_NC_SS:0x3b: received_cm_service_request changes to false
+DRLL Dispatching 04.08 message NCSS:0x3b (0xb:0x3b)
+DMM MSISDN:42342: rx msg NCSS:0x3b: received_cm_service_request changes to false
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_ACCEPTED}: Received Event SUBSCR_CONN_E_COMMUNICATING
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_ACCEPTED}: state_chg to SUBSCR_CONN_S_COMMUNICATING
 DMM USSD: Own number requested
 DMM MSISDN:42342: MSISDN = 42342
 DMSC msc_tx 43 bytes to MSISDN:42342 via RAN_GERAN_A
-- DTAP --RAN_GERAN_A--> MS: GSM48_PDISC_NC_SS:0x2a: 8b2a1c27a225020100302002013b301b04010f0416d9775d0e2ae3e965f73cfd7683d273104d36a3c91a0d
+- DTAP --RAN_GERAN_A--> MS: NCSS:0x2a: 8b2a1c27a225020100302002013b301b04010f0416d9775d0e2ae3e965f73cfd7683d273104d36a3c91a0d
 - DTAP matches expected message
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: Received Event SUBSCR_CONN_E_BUMP
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: bump: releasing conn
@@ -1348,16 +1348,16 @@ DREF MSISDN:42342: MSC conn use - dtap == 1 (0x4)
 - a USSD request is serviced
   expecting USSD:
   Your extension is 42342
-  MSC <--RAN_GERAN_A-- MS: GSM48_PDISC_NC_SS:0x3b
+  MSC <--RAN_GERAN_A-- MS: NCSS:0x3b
 DREF MSISDN:42342: MSC conn use + dtap == 2 (0x6)
-DRLL Dispatching 04.08 message GSM48_PDISC_NC_SS:0x3b (0xb:0x3b)
-DMM MSISDN:42342: rx msg GSM48_PDISC_NC_SS:0x3b: received_cm_service_request changes to false
+DRLL Dispatching 04.08 message NCSS:0x3b (0xb:0x3b)
+DMM MSISDN:42342: rx msg NCSS:0x3b: received_cm_service_request changes to false
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_ACCEPTED}: Received Event SUBSCR_CONN_E_COMMUNICATING
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_ACCEPTED}: state_chg to SUBSCR_CONN_S_COMMUNICATING
 DMM USSD: Own number requested
 DMM MSISDN:42342: MSISDN = 42342
 DMSC msc_tx 43 bytes to MSISDN:42342 via RAN_GERAN_A
-- DTAP --RAN_GERAN_A--> MS: GSM48_PDISC_NC_SS:0x2a: 8b2a1c27a225020100302002013b301b04010f0416d9775d0e2ae3e965f73cfd7683d273104d36a3c91a0d
+- DTAP --RAN_GERAN_A--> MS: NCSS:0x2a: 8b2a1c27a225020100302002013b301b04010f0416d9775d0e2ae3e965f73cfd7683d273104d36a3c91a0d
 - DTAP matches expected message
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: Received Event SUBSCR_CONN_E_BUMP
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: bump: releasing conn
@@ -1541,8 +1541,8 @@ DRLL Dispatching 04.08 message unknown 0x33 (0x5:0x33)
 DRLL subscr MSISDN:42342: Message not permitted for initial conn: unknown 0x33
 DRLL Dispatching 04.08 message GSM48_MT_RR_SYSINFO_1 (0x6:0x19)
 DRLL subscr MSISDN:42342: Message not permitted for initial conn: GSM48_MT_RR_SYSINFO_1
-DRLL Dispatching 04.08 message GSM48_PDISC_SMS:0x01 (0x9:0x1)
-DRLL subscr MSISDN:42342: Message not permitted for initial conn: GSM48_PDISC_SMS:0x01
+DRLL Dispatching 04.08 message SMS:0x01 (0x9:0x1)
+DRLL subscr MSISDN:42342: Message not permitted for initial conn: SMS:0x01
 - even though the TMSI is not acked, we can already find the subscr with it
 DREF VLR subscr MSISDN:42342 usage increases to: 2
   vsub != NULL == 1
@@ -1673,16 +1673,16 @@ DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_ACCEPTED}: bump: still awaiting f
 - a USSD request is serviced
   expecting USSD:
   Your extension is 42342
-  MSC <--RAN_UTRAN_IU-- MS: GSM48_PDISC_NC_SS:0x3b
+  MSC <--RAN_UTRAN_IU-- MS: NCSS:0x3b
 DREF MSISDN:42342: MSC conn use + dtap == 2 (0x6)
-DRLL Dispatching 04.08 message GSM48_PDISC_NC_SS:0x3b (0xb:0x3b)
-DMM MSISDN:42342: rx msg GSM48_PDISC_NC_SS:0x3b: received_cm_service_request changes to false
+DRLL Dispatching 04.08 message NCSS:0x3b (0xb:0x3b)
+DMM MSISDN:42342: rx msg NCSS:0x3b: received_cm_service_request changes to false
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_ACCEPTED}: Received Event SUBSCR_CONN_E_COMMUNICATING
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_ACCEPTED}: state_chg to SUBSCR_CONN_S_COMMUNICATING
 DMM USSD: Own number requested
 DMM MSISDN:42342: MSISDN = 42342
 DMSC msc_tx 43 bytes to MSISDN:42342 via RAN_UTRAN_IU
-- DTAP --RAN_UTRAN_IU--> MS: GSM48_PDISC_NC_SS:0x2a: 8b2a1c27a225020100302002013b301b04010f0416d9775d0e2ae3e965f73cfd7683d273104d36a3c91a0d
+- DTAP --RAN_UTRAN_IU--> MS: NCSS:0x2a: 8b2a1c27a225020100302002013b301b04010f0416d9775d0e2ae3e965f73cfd7683d273104d36a3c91a0d
 - DTAP matches expected message
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: Received Event SUBSCR_CONN_E_BUMP
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: bump: releasing conn
@@ -1788,16 +1788,16 @@ DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_ACCEPTED}: bump: still awaiting f
 - a USSD request is serviced
   expecting USSD:
   Your extension is 42342
-  MSC <--RAN_UTRAN_IU-- MS: GSM48_PDISC_NC_SS:0x3b
+  MSC <--RAN_UTRAN_IU-- MS: NCSS:0x3b
 DREF MSISDN:42342: MSC conn use + dtap == 2 (0x6)
-DRLL Dispatching 04.08 message GSM48_PDISC_NC_SS:0x3b (0xb:0x3b)
-DMM MSISDN:42342: rx msg GSM48_PDISC_NC_SS:0x3b: received_cm_service_request changes to false
+DRLL Dispatching 04.08 message NCSS:0x3b (0xb:0x3b)
+DMM MSISDN:42342: rx msg NCSS:0x3b: received_cm_service_request changes to false
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_ACCEPTED}: Received Event SUBSCR_CONN_E_COMMUNICATING
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_ACCEPTED}: state_chg to SUBSCR_CONN_S_COMMUNICATING
 DMM USSD: Own number requested
 DMM MSISDN:42342: MSISDN = 42342
 DMSC msc_tx 43 bytes to MSISDN:42342 via RAN_UTRAN_IU
-- DTAP --RAN_UTRAN_IU--> MS: GSM48_PDISC_NC_SS:0x2a: 8b2a1c27a225020100302002013b301b04010f0416d9775d0e2ae3e965f73cfd7683d273104d36a3c91a0d
+- DTAP --RAN_UTRAN_IU--> MS: NCSS:0x2a: 8b2a1c27a225020100302002013b301b04010f0416d9775d0e2ae3e965f73cfd7683d273104d36a3c91a0d
 - DTAP matches expected message
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: Received Event SUBSCR_CONN_E_BUMP
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: bump: releasing conn
@@ -1903,16 +1903,16 @@ DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_ACCEPTED}: bump: still awaiting f
 - a USSD request is serviced
   expecting USSD:
   Your extension is 42342
-  MSC <--RAN_UTRAN_IU-- MS: GSM48_PDISC_NC_SS:0x3b
+  MSC <--RAN_UTRAN_IU-- MS: NCSS:0x3b
 DREF MSISDN:42342: MSC conn use + dtap == 2 (0x6)
-DRLL Dispatching 04.08 message GSM48_PDISC_NC_SS:0x3b (0xb:0x3b)
-DMM MSISDN:42342: rx msg GSM48_PDISC_NC_SS:0x3b: received_cm_service_request changes to false
+DRLL Dispatching 04.08 message NCSS:0x3b (0xb:0x3b)
+DMM MSISDN:42342: rx msg NCSS:0x3b: received_cm_service_request changes to false
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_ACCEPTED}: Received Event SUBSCR_CONN_E_COMMUNICATING
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_ACCEPTED}: state_chg to SUBSCR_CONN_S_COMMUNICATING
 DMM USSD: Own number requested
 DMM MSISDN:42342: MSISDN = 42342
 DMSC msc_tx 43 bytes to MSISDN:42342 via RAN_UTRAN_IU
-- DTAP --RAN_UTRAN_IU--> MS: GSM48_PDISC_NC_SS:0x2a: 8b2a1c27a225020100302002013b301b04010f0416d9775d0e2ae3e965f73cfd7683d273104d36a3c91a0d
+- DTAP --RAN_UTRAN_IU--> MS: NCSS:0x2a: 8b2a1c27a225020100302002013b301b04010f0416d9775d0e2ae3e965f73cfd7683d273104d36a3c91a0d
 - DTAP matches expected message
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: Received Event SUBSCR_CONN_E_BUMP
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: bump: releasing conn
@@ -2086,8 +2086,8 @@ DRLL Dispatching 04.08 message unknown 0x33 (0x5:0x33)
 DRLL subscr MSISDN:42342: Message not permitted for initial conn: unknown 0x33
 DRLL Dispatching 04.08 message GSM48_MT_RR_SYSINFO_1 (0x6:0x19)
 DRLL subscr MSISDN:42342: Message not permitted for initial conn: GSM48_MT_RR_SYSINFO_1
-DRLL Dispatching 04.08 message GSM48_PDISC_SMS:0x01 (0x9:0x1)
-DRLL subscr MSISDN:42342: Message not permitted for initial conn: GSM48_PDISC_SMS:0x01
+DRLL Dispatching 04.08 message SMS:0x01 (0x9:0x1)
+DRLL subscr MSISDN:42342: Message not permitted for initial conn: SMS:0x01
 - even though the TMSI is not acked, we can already find the subscr with it
 DREF VLR subscr MSISDN:42342 usage increases to: 2
   vsub != NULL == 1
@@ -2224,16 +2224,16 @@ DREF MSISDN:42342: MSC conn use - dtap == 1 (0x4)
 - a USSD request is serviced
   expecting USSD:
   Your extension is 42342
-  MSC <--RAN_GERAN_A-- MS: GSM48_PDISC_NC_SS:0x3b
+  MSC <--RAN_GERAN_A-- MS: NCSS:0x3b
 DREF MSISDN:42342: MSC conn use + dtap == 2 (0x6)
-DRLL Dispatching 04.08 message GSM48_PDISC_NC_SS:0x3b (0xb:0x3b)
-DMM MSISDN:42342: rx msg GSM48_PDISC_NC_SS:0x3b: received_cm_service_request changes to false
+DRLL Dispatching 04.08 message NCSS:0x3b (0xb:0x3b)
+DMM MSISDN:42342: rx msg NCSS:0x3b: received_cm_service_request changes to false
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_ACCEPTED}: Received Event SUBSCR_CONN_E_COMMUNICATING
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_ACCEPTED}: state_chg to SUBSCR_CONN_S_COMMUNICATING
 DMM USSD: Own number requested
 DMM MSISDN:42342: MSISDN = 42342
 DMSC msc_tx 43 bytes to MSISDN:42342 via RAN_GERAN_A
-- DTAP --RAN_GERAN_A--> MS: GSM48_PDISC_NC_SS:0x2a: 8b2a1c27a225020100302002013b301b04010f0416d9775d0e2ae3e965f73cfd7683d273104d36a3c91a0d
+- DTAP --RAN_GERAN_A--> MS: NCSS:0x2a: 8b2a1c27a225020100302002013b301b04010f0416d9775d0e2ae3e965f73cfd7683d273104d36a3c91a0d
 - DTAP matches expected message
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: Received Event SUBSCR_CONN_E_BUMP
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: bump: releasing conn
@@ -2417,8 +2417,8 @@ DRLL Dispatching 04.08 message unknown 0x33 (0x5:0x33)
 DRLL subscr MSISDN:42342: Message not permitted for initial conn: unknown 0x33
 DRLL Dispatching 04.08 message GSM48_MT_RR_SYSINFO_1 (0x6:0x19)
 DRLL subscr MSISDN:42342: Message not permitted for initial conn: GSM48_MT_RR_SYSINFO_1
-DRLL Dispatching 04.08 message GSM48_PDISC_SMS:0x01 (0x9:0x1)
-DRLL subscr MSISDN:42342: Message not permitted for initial conn: GSM48_PDISC_SMS:0x01
+DRLL Dispatching 04.08 message SMS:0x01 (0x9:0x1)
+DRLL subscr MSISDN:42342: Message not permitted for initial conn: SMS:0x01
 - even though the TMSI is not acked, we can already find the subscr with it
 DREF VLR subscr MSISDN:42342 usage increases to: 2
   vsub != NULL == 1
@@ -2563,16 +2563,16 @@ DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_ACCEPTED}: bump: still awaiting f
 - a USSD request is serviced
   expecting USSD:
   Your extension is 42342
-  MSC <--RAN_UTRAN_IU-- MS: GSM48_PDISC_NC_SS:0x3b
+  MSC <--RAN_UTRAN_IU-- MS: NCSS:0x3b
 DREF MSISDN:42342: MSC conn use + dtap == 2 (0x6)
-DRLL Dispatching 04.08 message GSM48_PDISC_NC_SS:0x3b (0xb:0x3b)
-DMM MSISDN:42342: rx msg GSM48_PDISC_NC_SS:0x3b: received_cm_service_request changes to false
+DRLL Dispatching 04.08 message NCSS:0x3b (0xb:0x3b)
+DMM MSISDN:42342: rx msg NCSS:0x3b: received_cm_service_request changes to false
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_ACCEPTED}: Received Event SUBSCR_CONN_E_COMMUNICATING
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_ACCEPTED}: state_chg to SUBSCR_CONN_S_COMMUNICATING
 DMM USSD: Own number requested
 DMM MSISDN:42342: MSISDN = 42342
 DMSC msc_tx 43 bytes to MSISDN:42342 via RAN_UTRAN_IU
-- DTAP --RAN_UTRAN_IU--> MS: GSM48_PDISC_NC_SS:0x2a: 8b2a1c27a225020100302002013b301b04010f0416d9775d0e2ae3e965f73cfd7683d273104d36a3c91a0d
+- DTAP --RAN_UTRAN_IU--> MS: NCSS:0x2a: 8b2a1c27a225020100302002013b301b04010f0416d9775d0e2ae3e965f73cfd7683d273104d36a3c91a0d
 - DTAP matches expected message
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: Received Event SUBSCR_CONN_E_BUMP
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: bump: releasing conn

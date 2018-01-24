@@ -16,8 +16,8 @@ DRLL Dispatching 04.08 message unknown 0x33 (0x5:0x33)
 DRLL subscr unknown: Message not permitted for initial conn: unknown 0x33
 DRLL Dispatching 04.08 message GSM48_MT_RR_SYSINFO_1 (0x6:0x19)
 DRLL subscr unknown: Message not permitted for initial conn: GSM48_MT_RR_SYSINFO_1
-DRLL Dispatching 04.08 message GSM48_PDISC_SMS:0x01 (0x9:0x1)
-DRLL subscr unknown: Message not permitted for initial conn: GSM48_PDISC_SMS:0x01
+DRLL Dispatching 04.08 message SMS:0x01 (0x9:0x1)
+DRLL subscr unknown: Message not permitted for initial conn: SMS:0x01
 - fake: acceptance
 DREF VLR subscr unknown usage increases to: 1
 DMM Subscr_Conn(test){SUBSCR_CONN_S_NEW}: state_chg to SUBSCR_CONN_S_ACCEPTED
@@ -140,8 +140,8 @@ DRLL Dispatching 04.08 message unknown 0x33 (0x5:0x33)
 DRLL subscr MSISDN:46071: Message not permitted for initial conn: unknown 0x33
 DRLL Dispatching 04.08 message GSM48_MT_RR_SYSINFO_1 (0x6:0x19)
 DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_MT_RR_SYSINFO_1
-DRLL Dispatching 04.08 message GSM48_PDISC_SMS:0x01 (0x9:0x1)
-DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_PDISC_SMS:0x01
+DRLL Dispatching 04.08 message SMS:0x01 (0x9:0x1)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: SMS:0x01
   lu_result_sent == 0
 - HLR also sends GSUP _UPDATE_LOCATION_RESULT
 <-- GSUP rx OSMO_GSUP_MSGT_UPDATE_LOCATION_RESULT: 06010809710000004026f0
@@ -257,8 +257,8 @@ DRLL Dispatching 04.08 message unknown 0x33 (0x5:0x33)
 DRLL subscr MSISDN:46071: Message not permitted for initial conn: unknown 0x33
 DRLL Dispatching 04.08 message GSM48_MT_RR_SYSINFO_1 (0x6:0x19)
 DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_MT_RR_SYSINFO_1
-DRLL Dispatching 04.08 message GSM48_PDISC_SMS:0x01 (0x9:0x1)
-DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_PDISC_SMS:0x01
+DRLL Dispatching 04.08 message SMS:0x01 (0x9:0x1)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: SMS:0x01
   lu_result_sent == 0
 - HLR also sends GSUP _UPDATE_LOCATION_RESULT
 <-- GSUP rx OSMO_GSUP_MSGT_UPDATE_LOCATION_RESULT: 06010809710000004026f0
@@ -378,8 +378,8 @@ DRLL Dispatching 04.08 message unknown 0x33 (0x5:0x33)
 DRLL subscr TMSI:0x23422342: Message not permitted for initial conn: unknown 0x33
 DRLL Dispatching 04.08 message GSM48_MT_RR_SYSINFO_1 (0x6:0x19)
 DRLL subscr TMSI:0x23422342: Message not permitted for initial conn: GSM48_MT_RR_SYSINFO_1
-DRLL Dispatching 04.08 message GSM48_PDISC_SMS:0x01 (0x9:0x1)
-DRLL subscr TMSI:0x23422342: Message not permitted for initial conn: GSM48_PDISC_SMS:0x01
+DRLL Dispatching 04.08 message SMS:0x01 (0x9:0x1)
+DRLL subscr TMSI:0x23422342: Message not permitted for initial conn: SMS:0x01
 - MS tells us the IMSI, causes a GSUP LU request to HLR
   MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_ID_RESP
 DREF TMSI:0x23422342: MSC conn use + dtap == 2 (0x6)
@@ -422,8 +422,8 @@ DRLL Dispatching 04.08 message unknown 0x33 (0x5:0x33)
 DRLL subscr MSISDN:46071: Message not permitted for initial conn: unknown 0x33
 DRLL Dispatching 04.08 message GSM48_MT_RR_SYSINFO_1 (0x6:0x19)
 DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_MT_RR_SYSINFO_1
-DRLL Dispatching 04.08 message GSM48_PDISC_SMS:0x01 (0x9:0x1)
-DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_PDISC_SMS:0x01
+DRLL Dispatching 04.08 message SMS:0x01 (0x9:0x1)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: SMS:0x01
   lu_result_sent == 0
 - HLR also sends GSUP _UPDATE_LOCATION_RESULT
 <-- GSUP rx OSMO_GSUP_MSGT_UPDATE_LOCATION_RESULT: 06010809710000004026f0

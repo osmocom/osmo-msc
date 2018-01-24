@@ -269,7 +269,7 @@ DMNCC transmit message MNCC_SETUP_IND
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_ACCEPTED}: Received Event SUBSCR_CONN_E_COMMUNICATING
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_ACCEPTED}: state_chg to SUBSCR_CONN_S_COMMUNICATING
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: Received Event SUBSCR_CONN_E_BUMP
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: bump: connection still has active transaction: GSM48_PDISC_CC
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: bump: connection still has active transaction: CC
 DREF MSISDN:42342: MSC conn use - dtap == 2 (0xc)
 - MNCC says that's fine
 DMNCC receive message MNCC_CALL_PROC_REQ
@@ -295,7 +295,7 @@ DMNCC transmit message MNCC_SETUP_COMPL_IND
   MSC --> MNCC: callref 0x80000001: MNCC_SETUP_COMPL_IND
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: Received Event SUBSCR_CONN_E_COMMUNICATING
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: Received Event SUBSCR_CONN_E_BUMP
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: bump: connection still has active transaction: GSM48_PDISC_CC
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: bump: connection still has active transaction: CC
 DREF MSISDN:42342: MSC conn use - dtap == 2 (0xc)
 ---
 - RTP stream goes ahead, not shown here.
@@ -309,7 +309,7 @@ DMNCC transmit message MNCC_DISC_IND
   MSC --> MNCC: callref 0x80000001: MNCC_DISC_IND
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: Received Event SUBSCR_CONN_E_COMMUNICATING
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: Received Event SUBSCR_CONN_E_BUMP
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: bump: connection still has active transaction: GSM48_PDISC_CC
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: bump: connection still has active transaction: CC
 DREF MSISDN:42342: MSC conn use - dtap == 2 (0xc)
 DMNCC receive message MNCC_REL_REQ
 DMSC msc_tx 2 bytes to MSISDN:42342 via RAN_UTRAN_IU
@@ -614,7 +614,7 @@ DMSC msc_tx 2 bytes to MSISDN:42342 via RAN_UTRAN_IU
 - DTAP matches expected message
 DREF VLR subscr MSISDN:42342 usage decreases to: 3
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_ACCEPTED}: Received Event SUBSCR_CONN_E_BUMP
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_ACCEPTED}: bump: connection still has active transaction: GSM48_PDISC_CC
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_ACCEPTED}: bump: connection still has active transaction: CC
   paging_stopped == 1
   MSC <--RAN_UTRAN_IU-- MS: GSM48_MT_CC_CALL_CONF
 DREF MSISDN:42342: MSC conn use + dtap == 3 (0xe)
@@ -625,7 +625,7 @@ DMNCC transmit message MNCC_CALL_CONF_IND
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_ACCEPTED}: Received Event SUBSCR_CONN_E_COMMUNICATING
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_ACCEPTED}: state_chg to SUBSCR_CONN_S_COMMUNICATING
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: Received Event SUBSCR_CONN_E_BUMP
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: bump: connection still has active transaction: GSM48_PDISC_CC
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: bump: connection still has active transaction: CC
 DREF MSISDN:42342: MSC conn use - dtap == 2 (0xc)
 - Total time passed: 1.000023 s
   MSC <--RAN_UTRAN_IU-- MS: GSM48_MT_CC_ALERTING
@@ -635,7 +635,7 @@ DMNCC transmit message MNCC_ALERT_IND
   MSC --> MNCC: callref 0x423: MNCC_ALERT_IND
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: Received Event SUBSCR_CONN_E_COMMUNICATING
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: Received Event SUBSCR_CONN_E_BUMP
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: bump: connection still has active transaction: GSM48_PDISC_CC
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: bump: connection still has active transaction: CC
 DREF MSISDN:42342: MSC conn use - dtap == 2 (0xc)
 - Total time passed: 2.000046 s
   MSC <--RAN_UTRAN_IU-- MS: GSM48_MT_CC_CONNECT
@@ -645,7 +645,7 @@ DMNCC transmit message MNCC_SETUP_CNF
   MSC --> MNCC: callref 0x423: MNCC_SETUP_CNF
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: Received Event SUBSCR_CONN_E_COMMUNICATING
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: Received Event SUBSCR_CONN_E_BUMP
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: bump: connection still has active transaction: GSM48_PDISC_CC
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: bump: connection still has active transaction: CC
 DREF MSISDN:42342: MSC conn use - dtap == 2 (0xc)
 DMNCC receive message MNCC_SETUP_COMPL_REQ
 DMSC msc_tx 2 bytes to MSISDN:42342 via RAN_UTRAN_IU
@@ -663,7 +663,7 @@ DMNCC transmit message MNCC_DISC_IND
   MSC --> MNCC: callref 0x423: MNCC_DISC_IND
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: Received Event SUBSCR_CONN_E_COMMUNICATING
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: Received Event SUBSCR_CONN_E_BUMP
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: bump: connection still has active transaction: GSM48_PDISC_CC
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: bump: connection still has active transaction: CC
 DREF MSISDN:42342: MSC conn use - dtap == 2 (0xc)
 DMNCC receive message MNCC_REL_REQ
 DMSC msc_tx 2 bytes to MSISDN:42342 via RAN_UTRAN_IU

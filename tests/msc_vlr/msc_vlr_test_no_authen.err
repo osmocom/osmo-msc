@@ -53,8 +53,8 @@ DRLL Dispatching 04.08 message unknown 0x33 (0x5:0x33)
 DRLL subscr MSISDN:46071: Message not permitted for initial conn: unknown 0x33
 DRLL Dispatching 04.08 message GSM48_MT_RR_SYSINFO_1 (0x6:0x19)
 DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_MT_RR_SYSINFO_1
-DRLL Dispatching 04.08 message GSM48_PDISC_SMS:0x01 (0x9:0x1)
-DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_PDISC_SMS:0x01
+DRLL Dispatching 04.08 message SMS:0x01 (0x9:0x1)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: SMS:0x01
   lu_result_sent == 0
 - HLR also sends GSUP _UPDATE_LOCATION_RESULT
 <-- GSUP rx OSMO_GSUP_MSGT_UPDATE_LOCATION_RESULT: 06010809710000004026f0
@@ -159,16 +159,16 @@ msc_subscr_conn_is_accepted() == true
 - a USSD request is serviced
   expecting USSD:
   Your extension is 46071
-  MSC <--RAN_GERAN_A-- MS: GSM48_PDISC_NC_SS:0x3b
+  MSC <--RAN_GERAN_A-- MS: NCSS:0x3b
 DREF MSISDN:46071: MSC conn use + dtap == 2 (0x6)
-DRLL Dispatching 04.08 message GSM48_PDISC_NC_SS:0x3b (0xb:0x3b)
-DMM MSISDN:46071: rx msg GSM48_PDISC_NC_SS:0x3b: received_cm_service_request changes to false
+DRLL Dispatching 04.08 message NCSS:0x3b (0xb:0x3b)
+DMM MSISDN:46071: rx msg NCSS:0x3b: received_cm_service_request changes to false
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_ACCEPTED}: Received Event SUBSCR_CONN_E_COMMUNICATING
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_ACCEPTED}: state_chg to SUBSCR_CONN_S_COMMUNICATING
 DMM USSD: Own number requested
 DMM MSISDN:46071: MSISDN = 46071
 DMSC msc_tx 43 bytes to MSISDN:46071 via RAN_GERAN_A
-- DTAP --RAN_GERAN_A--> MS: GSM48_PDISC_NC_SS:0x2a: 8b2a1c27a225020100302002013b301b04010f0416d9775d0e2ae3e965f73cfd7683d27310cd06bbc51a0d
+- DTAP --RAN_GERAN_A--> MS: NCSS:0x2a: 8b2a1c27a225020100302002013b301b04010f0416d9775d0e2ae3e965f73cfd7683d27310cd06bbc51a0d
 - DTAP matches expected message
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_COMMUNICATING}: Received Event SUBSCR_CONN_E_BUMP
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_COMMUNICATING}: bump: releasing conn
@@ -241,14 +241,14 @@ DPAG Calling paging cbfn.
 DREF VLR subscr MSISDN:46071 usage increases to: 6
 DREF MSISDN:46071: MSC conn use + trans_sms == 3 (0x15)
 DMSC msc_tx 91 bytes to MSISDN:46071 via RAN_GERAN_A
-- DTAP --RAN_GERAN_A--> MS: GSM48_PDISC_SMS:0x01: 09015801000791447758100650004c0005806470f1000007101000000000445079da1e1ee7416937485e9ea7c965373d1d6683c270383b3d0ed3d36ff71c949e83c22072799e9687c5ec32a81d96afcbf4b4fb0c7ac3e9e9b7db05
+- DTAP --RAN_GERAN_A--> MS: SMS:0x01: 09015801000791447758100650004c0005806470f1000007101000000000445079da1e1ee7416937485e9ea7c965373d1d6683c270383b3d0ed3d36ff71c949e83c22072799e9687c5ec32a81d96afcbf4b4fb0c7ac3e9e9b7db05
 - DTAP matches expected message
 DREF VLR subscr MSISDN:46071 usage decreases to: 5
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_ACCEPTED}: Received Event SUBSCR_CONN_E_BUMP
-DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_ACCEPTED}: bump: connection still has active transaction: GSM48_PDISC_SMS
+DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_ACCEPTED}: bump: connection still has active transaction: SMS
 DREF VLR subscr MSISDN:46071 usage decreases to: 4
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_ACCEPTED}: Received Event SUBSCR_CONN_E_BUMP
-DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_ACCEPTED}: bump: connection still has active transaction: GSM48_PDISC_SMS
+DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_ACCEPTED}: bump: connection still has active transaction: SMS
 DREF MSISDN:46071: MSC conn use - compl_l3 == 2 (0x14)
   dtap_tx_confirmed == 1
   paging_stopped == 1
@@ -259,22 +259,22 @@ DREF VLR subscr MSISDN:46071 usage decreases to: 4
 - conn is still open to wait for SMS ack dance
   llist_count(&net->subscr_conns) == 1
 - MS replies with CP-ACK for received SMS
-  MSC <--RAN_GERAN_A-- MS: GSM48_PDISC_SMS:0x04
+  MSC <--RAN_GERAN_A-- MS: SMS:0x04
 DREF MSISDN:46071: MSC conn use + dtap == 3 (0x16)
-DRLL Dispatching 04.08 message GSM48_PDISC_SMS:0x04 (0x9:0x4)
+DRLL Dispatching 04.08 message SMS:0x04 (0x9:0x4)
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_ACCEPTED}: Received Event SUBSCR_CONN_E_COMMUNICATING
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_ACCEPTED}: state_chg to SUBSCR_CONN_S_COMMUNICATING
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_COMMUNICATING}: Received Event SUBSCR_CONN_E_BUMP
-DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_COMMUNICATING}: bump: connection still has active transaction: GSM48_PDISC_SMS
+DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_COMMUNICATING}: bump: connection still has active transaction: SMS
 DREF MSISDN:46071: MSC conn use - dtap == 2 (0x14)
   llist_count(&net->subscr_conns) == 1
 - MS also sends RP-ACK, MSC in turn sends CP-ACK for that
-  MSC <--RAN_GERAN_A-- MS: GSM48_PDISC_SMS:0x01
+  MSC <--RAN_GERAN_A-- MS: SMS:0x01
 DREF MSISDN:46071: MSC conn use + dtap == 3 (0x16)
-DRLL Dispatching 04.08 message GSM48_PDISC_SMS:0x01 (0x9:0x1)
+DRLL Dispatching 04.08 message SMS:0x01 (0x9:0x1)
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_COMMUNICATING}: Received Event SUBSCR_CONN_E_COMMUNICATING
 DMSC msc_tx 2 bytes to MSISDN:46071 via RAN_GERAN_A
-- DTAP --RAN_GERAN_A--> MS: GSM48_PDISC_SMS:0x04: 0904
+- DTAP --RAN_GERAN_A--> MS: SMS:0x04: 0904
 - DTAP matches expected message
 DREF VLR subscr MSISDN:46071 usage decreases to: 3
 DREF VLR subscr MSISDN:46071 usage decreases to: 2
@@ -377,8 +377,8 @@ DRLL Dispatching 04.08 message unknown 0x33 (0x5:0x33)
 DRLL subscr MSISDN:46071: Message not permitted for initial conn: unknown 0x33
 DRLL Dispatching 04.08 message GSM48_MT_RR_SYSINFO_1 (0x6:0x19)
 DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_MT_RR_SYSINFO_1
-DRLL Dispatching 04.08 message GSM48_PDISC_SMS:0x01 (0x9:0x1)
-DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_PDISC_SMS:0x01
+DRLL Dispatching 04.08 message SMS:0x01 (0x9:0x1)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: SMS:0x01
   lu_result_sent == 0
 - HLR also sends GSUP _UPDATE_LOCATION_RESULT
 <-- GSUP rx OSMO_GSUP_MSGT_UPDATE_LOCATION_RESULT: 06010809710000004026f0
@@ -422,8 +422,8 @@ DRLL Dispatching 04.08 message unknown 0x33 (0x5:0x33)
 DRLL subscr MSISDN:46071: Message not permitted for initial conn: unknown 0x33
 DRLL Dispatching 04.08 message GSM48_MT_RR_SYSINFO_1 (0x6:0x19)
 DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_MT_RR_SYSINFO_1
-DRLL Dispatching 04.08 message GSM48_PDISC_SMS:0x01 (0x9:0x1)
-DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_PDISC_SMS:0x01
+DRLL Dispatching 04.08 message SMS:0x01 (0x9:0x1)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: SMS:0x01
 - even though the TMSI is not acked, we can already find the subscr with it
 DREF VLR subscr MSISDN:46071 usage increases to: 2
   vsub != NULL == 1
@@ -519,16 +519,16 @@ msc_subscr_conn_is_accepted() == true
 - a USSD request is serviced
   expecting USSD:
   Your extension is 46071
-  MSC <--RAN_GERAN_A-- MS: GSM48_PDISC_NC_SS:0x3b
+  MSC <--RAN_GERAN_A-- MS: NCSS:0x3b
 DREF MSISDN:46071: MSC conn use + dtap == 2 (0x6)
-DRLL Dispatching 04.08 message GSM48_PDISC_NC_SS:0x3b (0xb:0x3b)
-DMM MSISDN:46071: rx msg GSM48_PDISC_NC_SS:0x3b: received_cm_service_request changes to false
+DRLL Dispatching 04.08 message NCSS:0x3b (0xb:0x3b)
+DMM MSISDN:46071: rx msg NCSS:0x3b: received_cm_service_request changes to false
 DMM Subscr_Conn(50462976){SUBSCR_CONN_S_ACCEPTED}: Received Event SUBSCR_CONN_E_COMMUNICATING
 DMM Subscr_Conn(50462976){SUBSCR_CONN_S_ACCEPTED}: state_chg to SUBSCR_CONN_S_COMMUNICATING
 DMM USSD: Own number requested
 DMM MSISDN:46071: MSISDN = 46071
 DMSC msc_tx 43 bytes to MSISDN:46071 via RAN_GERAN_A
-- DTAP --RAN_GERAN_A--> MS: GSM48_PDISC_NC_SS:0x2a: 8b2a1c27a225020100302002013b301b04010f0416d9775d0e2ae3e965f73cfd7683d27310cd06bbc51a0d
+- DTAP --RAN_GERAN_A--> MS: NCSS:0x2a: 8b2a1c27a225020100302002013b301b04010f0416d9775d0e2ae3e965f73cfd7683d27310cd06bbc51a0d
 - DTAP matches expected message
 DMM Subscr_Conn(50462976){SUBSCR_CONN_S_COMMUNICATING}: Received Event SUBSCR_CONN_E_BUMP
 DMM Subscr_Conn(50462976){SUBSCR_CONN_S_COMMUNICATING}: bump: releasing conn
@@ -600,14 +600,14 @@ DPAG Calling paging cbfn.
 DREF VLR subscr MSISDN:46071 usage increases to: 6
 DREF MSISDN:46071: MSC conn use + trans_sms == 3 (0x15)
 DMSC msc_tx 91 bytes to MSISDN:46071 via RAN_GERAN_A
-- DTAP --RAN_GERAN_A--> MS: GSM48_PDISC_SMS:0x01: 09015801000791447758100650004c0005806470f1000007101000000000445079da1e1ee7416937485e9ea7c965373d1d6683c270383b3d0ed3d36ff71c949e83c22072799e9687c5ec32a81d96afcbf4b4fb0c7ac3e9e9b7db05
+- DTAP --RAN_GERAN_A--> MS: SMS:0x01: 09015801000791447758100650004c0005806470f1000007101000000000445079da1e1ee7416937485e9ea7c965373d1d6683c270383b3d0ed3d36ff71c949e83c22072799e9687c5ec32a81d96afcbf4b4fb0c7ac3e9e9b7db05
 - DTAP matches expected message
 DREF VLR subscr MSISDN:46071 usage decreases to: 5
 DMM Subscr_Conn(50462976){SUBSCR_CONN_S_ACCEPTED}: Received Event SUBSCR_CONN_E_BUMP
-DMM Subscr_Conn(50462976){SUBSCR_CONN_S_ACCEPTED}: bump: connection still has active transaction: GSM48_PDISC_SMS
+DMM Subscr_Conn(50462976){SUBSCR_CONN_S_ACCEPTED}: bump: connection still has active transaction: SMS
 DREF VLR subscr MSISDN:46071 usage decreases to: 4
 DMM Subscr_Conn(50462976){SUBSCR_CONN_S_ACCEPTED}: Received Event SUBSCR_CONN_E_BUMP
-DMM Subscr_Conn(50462976){SUBSCR_CONN_S_ACCEPTED}: bump: connection still has active transaction: GSM48_PDISC_SMS
+DMM Subscr_Conn(50462976){SUBSCR_CONN_S_ACCEPTED}: bump: connection still has active transaction: SMS
 DREF MSISDN:46071: MSC conn use - compl_l3 == 2 (0x14)
   dtap_tx_confirmed == 1
   paging_stopped == 1
@@ -618,22 +618,22 @@ DREF VLR subscr MSISDN:46071 usage decreases to: 4
 - conn is still open to wait for SMS ack dance
   llist_count(&net->subscr_conns) == 1
 - MS replies with CP-ACK for received SMS
-  MSC <--RAN_GERAN_A-- MS: GSM48_PDISC_SMS:0x04
+  MSC <--RAN_GERAN_A-- MS: SMS:0x04
 DREF MSISDN:46071: MSC conn use + dtap == 3 (0x16)
-DRLL Dispatching 04.08 message GSM48_PDISC_SMS:0x04 (0x9:0x4)
+DRLL Dispatching 04.08 message SMS:0x04 (0x9:0x4)
 DMM Subscr_Conn(50462976){SUBSCR_CONN_S_ACCEPTED}: Received Event SUBSCR_CONN_E_COMMUNICATING
 DMM Subscr_Conn(50462976){SUBSCR_CONN_S_ACCEPTED}: state_chg to SUBSCR_CONN_S_COMMUNICATING
 DMM Subscr_Conn(50462976){SUBSCR_CONN_S_COMMUNICATING}: Received Event SUBSCR_CONN_E_BUMP
-DMM Subscr_Conn(50462976){SUBSCR_CONN_S_COMMUNICATING}: bump: connection still has active transaction: GSM48_PDISC_SMS
+DMM Subscr_Conn(50462976){SUBSCR_CONN_S_COMMUNICATING}: bump: connection still has active transaction: SMS
 DREF MSISDN:46071: MSC conn use - dtap == 2 (0x14)
   llist_count(&net->subscr_conns) == 1
 - MS also sends RP-ACK, MSC in turn sends CP-ACK for that
-  MSC <--RAN_GERAN_A-- MS: GSM48_PDISC_SMS:0x01
+  MSC <--RAN_GERAN_A-- MS: SMS:0x01
 DREF MSISDN:46071: MSC conn use + dtap == 3 (0x16)
-DRLL Dispatching 04.08 message GSM48_PDISC_SMS:0x01 (0x9:0x1)
+DRLL Dispatching 04.08 message SMS:0x01 (0x9:0x1)
 DMM Subscr_Conn(50462976){SUBSCR_CONN_S_COMMUNICATING}: Received Event SUBSCR_CONN_E_COMMUNICATING
 DMSC msc_tx 2 bytes to MSISDN:46071 via RAN_GERAN_A
-- DTAP --RAN_GERAN_A--> MS: GSM48_PDISC_SMS:0x04: 0904
+- DTAP --RAN_GERAN_A--> MS: SMS:0x04: 0904
 - DTAP matches expected message
 DREF VLR subscr MSISDN:46071 usage decreases to: 3
 DREF VLR subscr MSISDN:46071 usage decreases to: 2
@@ -712,8 +712,8 @@ DRLL Dispatching 04.08 message unknown 0x33 (0x5:0x33)
 DRLL subscr MSISDN:46071: Message not permitted for initial conn: unknown 0x33
 DRLL Dispatching 04.08 message GSM48_MT_RR_SYSINFO_1 (0x6:0x19)
 DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_MT_RR_SYSINFO_1
-DRLL Dispatching 04.08 message GSM48_PDISC_SMS:0x01 (0x9:0x1)
-DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_PDISC_SMS:0x01
+DRLL Dispatching 04.08 message SMS:0x01 (0x9:0x1)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: SMS:0x01
   lu_result_sent == 0
 - HLR also sends GSUP _UPDATE_LOCATION_RESULT
 <-- GSUP rx OSMO_GSUP_MSGT_UPDATE_LOCATION_RESULT: 06010809710000004026f0
@@ -757,8 +757,8 @@ DRLL Dispatching 04.08 message unknown 0x33 (0x5:0x33)
 DRLL subscr MSISDN:46071: Message not permitted for initial conn: unknown 0x33
 DRLL Dispatching 04.08 message GSM48_MT_RR_SYSINFO_1 (0x6:0x19)
 DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_MT_RR_SYSINFO_1
-DRLL Dispatching 04.08 message GSM48_PDISC_SMS:0x01 (0x9:0x1)
-DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_PDISC_SMS:0x01
+DRLL Dispatching 04.08 message SMS:0x01 (0x9:0x1)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: SMS:0x01
 - even though the TMSI is not acked, we can already find the subscr with it
 DREF VLR subscr MSISDN:46071 usage increases to: 3
   vsub != NULL == 1
@@ -888,8 +888,8 @@ DRLL Dispatching 04.08 message unknown 0x33 (0x5:0x33)
 DRLL subscr MSISDN:46071: Message not permitted for initial conn: unknown 0x33
 DRLL Dispatching 04.08 message GSM48_MT_RR_SYSINFO_1 (0x6:0x19)
 DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_MT_RR_SYSINFO_1
-DRLL Dispatching 04.08 message GSM48_PDISC_SMS:0x01 (0x9:0x1)
-DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_PDISC_SMS:0x01
+DRLL Dispatching 04.08 message SMS:0x01 (0x9:0x1)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: SMS:0x01
   lu_result_sent == 0
 - HLR also sends GSUP _UPDATE_LOCATION_RESULT, and we send an ID Request for the IMEI to the MS
 <-- GSUP rx OSMO_GSUP_MSGT_UPDATE_LOCATION_RESULT: 06010809710000004026f0
@@ -936,8 +936,8 @@ DRLL Dispatching 04.08 message unknown 0x33 (0x5:0x33)
 DRLL subscr MSISDN:46071: Message not permitted for initial conn: unknown 0x33
 DRLL Dispatching 04.08 message GSM48_MT_RR_SYSINFO_1 (0x6:0x19)
 DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_MT_RR_SYSINFO_1
-DRLL Dispatching 04.08 message GSM48_PDISC_SMS:0x01 (0x9:0x1)
-DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_PDISC_SMS:0x01
+DRLL Dispatching 04.08 message SMS:0x01 (0x9:0x1)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: SMS:0x01
 - MS replies with an Identity Response
   MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_ID_RESP
 DREF MSISDN:46071: MSC conn use + dtap == 2 (0x6)
@@ -1061,8 +1061,8 @@ DRLL Dispatching 04.08 message unknown 0x33 (0x5:0x33)
 DRLL subscr MSISDN:46071: Message not permitted for initial conn: unknown 0x33
 DRLL Dispatching 04.08 message GSM48_MT_RR_SYSINFO_1 (0x6:0x19)
 DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_MT_RR_SYSINFO_1
-DRLL Dispatching 04.08 message GSM48_PDISC_SMS:0x01 (0x9:0x1)
-DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_PDISC_SMS:0x01
+DRLL Dispatching 04.08 message SMS:0x01 (0x9:0x1)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: SMS:0x01
   lu_result_sent == 0
 - HLR also sends GSUP _UPDATE_LOCATION_RESULT, and we send an ID Request for the IMEI to the MS
 <-- GSUP rx OSMO_GSUP_MSGT_UPDATE_LOCATION_RESULT: 06010809710000004026f0
@@ -1109,8 +1109,8 @@ DRLL Dispatching 04.08 message unknown 0x33 (0x5:0x33)
 DRLL subscr MSISDN:46071: Message not permitted for initial conn: unknown 0x33
 DRLL Dispatching 04.08 message GSM48_MT_RR_SYSINFO_1 (0x6:0x19)
 DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_MT_RR_SYSINFO_1
-DRLL Dispatching 04.08 message GSM48_PDISC_SMS:0x01 (0x9:0x1)
-DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_PDISC_SMS:0x01
+DRLL Dispatching 04.08 message SMS:0x01 (0x9:0x1)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: SMS:0x01
 - MS replies with an Identity Response
   MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_ID_RESP
 DREF MSISDN:46071: MSC conn use + dtap == 2 (0x6)
@@ -1135,8 +1135,8 @@ DRLL Dispatching 04.08 message unknown 0x33 (0x5:0x33)
 DRLL subscr MSISDN:46071: Message not permitted for initial conn: unknown 0x33
 DRLL Dispatching 04.08 message GSM48_MT_RR_SYSINFO_1 (0x6:0x19)
 DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_MT_RR_SYSINFO_1
-DRLL Dispatching 04.08 message GSM48_PDISC_SMS:0x01 (0x9:0x1)
-DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_PDISC_SMS:0x01
+DRLL Dispatching 04.08 message SMS:0x01 (0x9:0x1)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: SMS:0x01
 - MS sends TMSI Realloc Complete
   MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_TMSI_REALL_COMPL
 DREF MSISDN:46071: MSC conn use + dtap == 2 (0x6)
@@ -1276,8 +1276,8 @@ DRLL Dispatching 04.08 message unknown 0x33 (0x5:0x33)
 DRLL subscr MSISDN:46071: Message not permitted for initial conn: unknown 0x33
 DRLL Dispatching 04.08 message GSM48_MT_RR_SYSINFO_1 (0x6:0x19)
 DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_MT_RR_SYSINFO_1
-DRLL Dispatching 04.08 message GSM48_PDISC_SMS:0x01 (0x9:0x1)
-DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_PDISC_SMS:0x01
+DRLL Dispatching 04.08 message SMS:0x01 (0x9:0x1)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: SMS:0x01
   lu_result_sent == 0
 - HLR also sends GSUP _UPDATE_LOCATION_RESULT
 <-- GSUP rx OSMO_GSUP_MSGT_UPDATE_LOCATION_RESULT: 06010809710000004026f0
@@ -1434,8 +1434,8 @@ DRLL Dispatching 04.08 message unknown 0x33 (0x5:0x33)
 DRLL subscr MSISDN:46071: Message not permitted for initial conn: unknown 0x33
 DRLL Dispatching 04.08 message GSM48_MT_RR_SYSINFO_1 (0x6:0x19)
 DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_MT_RR_SYSINFO_1
-DRLL Dispatching 04.08 message GSM48_PDISC_SMS:0x01 (0x9:0x1)
-DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_PDISC_SMS:0x01
+DRLL Dispatching 04.08 message SMS:0x01 (0x9:0x1)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: SMS:0x01
   lu_result_sent == 0
 - HLR also sends GSUP _UPDATE_LOCATION_RESULT, and we send an ID Request for the IMEI to the MS
 <-- GSUP rx OSMO_GSUP_MSGT_UPDATE_LOCATION_RESULT: 06010809710000004026f0
@@ -1482,8 +1482,8 @@ DRLL Dispatching 04.08 message unknown 0x33 (0x5:0x33)
 DRLL subscr MSISDN:46071: Message not permitted for initial conn: unknown 0x33
 DRLL Dispatching 04.08 message GSM48_MT_RR_SYSINFO_1 (0x6:0x19)
 DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_MT_RR_SYSINFO_1
-DRLL Dispatching 04.08 message GSM48_PDISC_SMS:0x01 (0x9:0x1)
-DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_PDISC_SMS:0x01
+DRLL Dispatching 04.08 message SMS:0x01 (0x9:0x1)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: SMS:0x01
 - MS replies with an Identity Response
   MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_ID_RESP
 DREF MSISDN:46071: MSC conn use + dtap == 2 (0x6)
@@ -1624,8 +1624,8 @@ DRLL Dispatching 04.08 message unknown 0x33 (0x5:0x33)
 DRLL subscr MSISDN:46071: Message not permitted for initial conn: unknown 0x33
 DRLL Dispatching 04.08 message GSM48_MT_RR_SYSINFO_1 (0x6:0x19)
 DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_MT_RR_SYSINFO_1
-DRLL Dispatching 04.08 message GSM48_PDISC_SMS:0x01 (0x9:0x1)
-DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_PDISC_SMS:0x01
+DRLL Dispatching 04.08 message SMS:0x01 (0x9:0x1)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: SMS:0x01
   lu_result_sent == 0
 - HLR also sends GSUP _UPDATE_LOCATION_RESULT
 <-- GSUP rx OSMO_GSUP_MSGT_UPDATE_LOCATION_RESULT: 06010809710000004026f0
@@ -1669,8 +1669,8 @@ DRLL Dispatching 04.08 message unknown 0x33 (0x5:0x33)
 DRLL subscr MSISDN:46071: Message not permitted for initial conn: unknown 0x33
 DRLL Dispatching 04.08 message GSM48_MT_RR_SYSINFO_1 (0x6:0x19)
 DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_MT_RR_SYSINFO_1
-DRLL Dispatching 04.08 message GSM48_PDISC_SMS:0x01 (0x9:0x1)
-DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_PDISC_SMS:0x01
+DRLL Dispatching 04.08 message SMS:0x01 (0x9:0x1)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: SMS:0x01
 - even though the TMSI is not acked, we can already find the subscr with it
 DREF VLR subscr MSISDN:46071 usage increases to: 2
   vsub != NULL == 1
@@ -1787,8 +1787,8 @@ DRLL Dispatching 04.08 message unknown 0x33 (0x5:0x33)
 DRLL subscr MSISDN:46071: Message not permitted for initial conn: unknown 0x33
 DRLL Dispatching 04.08 message GSM48_MT_RR_SYSINFO_1 (0x6:0x19)
 DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_MT_RR_SYSINFO_1
-DRLL Dispatching 04.08 message GSM48_PDISC_SMS:0x01 (0x9:0x1)
-DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_PDISC_SMS:0x01
+DRLL Dispatching 04.08 message SMS:0x01 (0x9:0x1)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: SMS:0x01
   lu_result_sent == 0
 - HLR also sends GSUP _UPDATE_LOCATION_RESULT
 <-- GSUP rx OSMO_GSUP_MSGT_UPDATE_LOCATION_RESULT: 06010809710000004026f0
@@ -1832,8 +1832,8 @@ DRLL Dispatching 04.08 message unknown 0x33 (0x5:0x33)
 DRLL subscr MSISDN:46071: Message not permitted for initial conn: unknown 0x33
 DRLL Dispatching 04.08 message GSM48_MT_RR_SYSINFO_1 (0x6:0x19)
 DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_MT_RR_SYSINFO_1
-DRLL Dispatching 04.08 message GSM48_PDISC_SMS:0x01 (0x9:0x1)
-DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_PDISC_SMS:0x01
+DRLL Dispatching 04.08 message SMS:0x01 (0x9:0x1)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: SMS:0x01
 - even though the TMSI is not acked, we can already find the subscr with it
 DREF VLR subscr MSISDN:46071 usage increases to: 3
   vsub != NULL == 1
@@ -1980,8 +1980,8 @@ DRLL Dispatching 04.08 message unknown 0x33 (0x5:0x33)
 DRLL subscr MSISDN:46071: Message not permitted for initial conn: unknown 0x33
 DRLL Dispatching 04.08 message GSM48_MT_RR_SYSINFO_1 (0x6:0x19)
 DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_MT_RR_SYSINFO_1
-DRLL Dispatching 04.08 message GSM48_PDISC_SMS:0x01 (0x9:0x1)
-DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_PDISC_SMS:0x01
+DRLL Dispatching 04.08 message SMS:0x01 (0x9:0x1)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: SMS:0x01
   lu_result_sent == 0
 - HLR also sends GSUP _UPDATE_LOCATION_RESULT, and we send an ID Request for the IMEI to the MS
 <-- GSUP rx OSMO_GSUP_MSGT_UPDATE_LOCATION_RESULT: 06010809710000004026f0
@@ -2028,8 +2028,8 @@ DRLL Dispatching 04.08 message unknown 0x33 (0x5:0x33)
 DRLL subscr MSISDN:46071: Message not permitted for initial conn: unknown 0x33
 DRLL Dispatching 04.08 message GSM48_MT_RR_SYSINFO_1 (0x6:0x19)
 DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_MT_RR_SYSINFO_1
-DRLL Dispatching 04.08 message GSM48_PDISC_SMS:0x01 (0x9:0x1)
-DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_PDISC_SMS:0x01
+DRLL Dispatching 04.08 message SMS:0x01 (0x9:0x1)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: SMS:0x01
 - MS replies with an Identity Response
   MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_ID_RESP
 DREF MSISDN:46071: MSC conn use + dtap == 2 (0x6)
@@ -2054,8 +2054,8 @@ DRLL Dispatching 04.08 message unknown 0x33 (0x5:0x33)
 DRLL subscr MSISDN:46071: Message not permitted for initial conn: unknown 0x33
 DRLL Dispatching 04.08 message GSM48_MT_RR_SYSINFO_1 (0x6:0x19)
 DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_MT_RR_SYSINFO_1
-DRLL Dispatching 04.08 message GSM48_PDISC_SMS:0x01 (0x9:0x1)
-DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_PDISC_SMS:0x01
+DRLL Dispatching 04.08 message SMS:0x01 (0x9:0x1)
+DRLL subscr MSISDN:46071: Message not permitted for initial conn: SMS:0x01
 - MS sends TMSI Realloc Complete
   MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_TMSI_REALL_COMPL
 DREF MSISDN:46071: MSC conn use + dtap == 2 (0x6)
