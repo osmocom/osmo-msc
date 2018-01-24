@@ -4,7 +4,6 @@ noinst_HEADERS = \
 	bsc_api.h \
 	common.h \
 	common_cs.h \
-	ctrl.h \
 	db.h \
 	debug.h \
 	gsm_04_08.h \
