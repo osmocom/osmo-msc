@@ -18,7 +18,6 @@ noinst_HEADERS = \
 	gsm_data_shared.h \
 	gsm_subscriber.h \
 	gsup_client.h \
-	ipaccess.h \
 	iucs.h \
 	iucs_ranap.h \
 	iu_dummy.h \
