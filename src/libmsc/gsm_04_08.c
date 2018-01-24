@@ -693,6 +693,17 @@ int gsm48_rx_mm_serv_req(struct gsm_subscriber_connection *conn, struct msgb *ms
 						GSM48_REJECT_INCORRECT_MESSAGE);
 	}
 
+	switch (req->cm_service_type) {
+	case GSM48_CMSERV_MO_CALL_PACKET:
+	case GSM48_CMSERV_EMERGENCY:
+	case GSM48_CMSERV_SMS:
+	case GSM48_CMSERV_SUP_SERV:
+		/* continue below */
+		break;
+	default:
+		return msc_gsm48_tx_mm_serv_rej(conn, GSM48_REJECT_SRV_OPT_NOT_SUPPORTED);
+	}
+
 	osmo_signal_dispatch(SS_SUBSCR, S_SUBSCR_IDENTITY, (classmark2 + classmark2_len));
 	memcpy(conn->classmark.classmark2, classmark2, classmark2_len);
 	conn->classmark.classmark2_len = classmark2_len;
