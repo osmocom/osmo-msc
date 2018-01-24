@@ -1605,8 +1605,8 @@ static int gsm48_cc_rx_setup(struct gsm_trans *trans, struct msgb *msg)
 
 	new_cc_state(trans, GSM_CSTATE_INITIATED);
 
-	LOGP(DCC, LOGL_INFO, "Subscriber %s (%s) sends SETUP to %s\n",
-	     vlr_subscr_name(trans->vsub), trans->vsub->msisdn,
+	LOGP(DCC, setup.emergency ? LOGL_NOTICE : LOGL_INFO, "Subscriber %s (%s) sends %sSETUP to %s\n",
+	     vlr_subscr_name(trans->vsub), trans->vsub->msisdn, setup.emergency ? "EMERGENCY_" : "",
 	     setup.called.number);
 
 	rate_ctr_inc(&trans->net->msc_ctrs->ctr[MSC_CTR_CALL_MO_SETUP]);
