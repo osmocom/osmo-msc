@@ -125,8 +125,8 @@ struct vlr_subscr *_vlr_subscr_find_by_msisdn(struct vlr_instance *vlr,
 }
 
 /* Transmit GSUP message to HLR */
-static int vlr_tx_gsup_message(struct vlr_instance *vlr,
-			       struct osmo_gsup_message *gsup_msg)
+static int vlr_tx_gsup_message(const struct vlr_instance *vlr,
+			       const struct osmo_gsup_message *gsup_msg)
 {
 	struct msgb *msg = gsup_client_msgb_alloc();
 
@@ -146,7 +146,7 @@ static int vlr_tx_gsup_message(struct vlr_instance *vlr,
 }
 
 /* Transmit GSUP message for subscriber to HLR, using IMSI from subscriber */
-static int vlr_subscr_tx_gsup_message(struct vlr_subscr *vsub,
+static int vlr_subscr_tx_gsup_message(const struct vlr_subscr *vsub,
 				      struct osmo_gsup_message *gsup_msg)
 {
 	struct vlr_instance *vlr = vsub->vlr;
@@ -158,7 +158,7 @@ static int vlr_subscr_tx_gsup_message(struct vlr_subscr *vsub,
 }
 
 /* Transmit GSUP error in response to original message */
-static int vlr_tx_gsup_error_reply(struct vlr_instance *vlr,
+static int vlr_tx_gsup_error_reply(const struct vlr_instance *vlr,
 				   struct osmo_gsup_message *gsup_orig,
 				   enum gsm48_gmm_cause cause)
 {
@@ -561,7 +561,7 @@ int vlr_subscr_req_sai(struct vlr_subscr *vsub,
 }
 
 /* Tell HLR that authentication failure occurred */
-int vlr_subscr_tx_auth_fail_rep(struct vlr_subscr *vsub)
+int vlr_subscr_tx_auth_fail_rep(const struct vlr_subscr *vsub)
 {
 	struct osmo_gsup_message gsup_msg = {0};
 
