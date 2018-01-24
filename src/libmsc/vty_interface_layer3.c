@@ -56,8 +56,6 @@
 
 #include <osmocom/msc/osmo_msc.h>
 
-#include "meas_feed.h"
-
 extern struct gsm_network *gsmnet_from_vty(struct vty *v);
 
 static void subscr_dump_full_vty(struct vty *vty, struct vlr_subscr *vsub)
@@ -754,13 +752,6 @@ static const struct value_string tchh_codec_names[] = {
 
 static int config_write_mncc_int(struct vty *vty)
 {
-	uint16_t meas_port;
-	char *meas_host;
-	const char *meas_scenario;
-
-	meas_feed_cfg_get(&meas_host, &meas_port);
-	meas_scenario = meas_feed_scenario_get();
-
 	vty_out(vty, "mncc-int%s", VTY_NEWLINE);
 	vty_out(vty, " default-codec tch-f %s%s",
 		get_value_string(tchf_codec_names, mncc_int.def_codec[0]),
@@ -768,13 +759,6 @@ static int config_write_mncc_int(struct vty *vty)
 	vty_out(vty, " default-codec tch-h %s%s",
 		get_value_string(tchh_codec_names, mncc_int.def_codec[1]),
 		VTY_NEWLINE);
-	if (meas_port)
-		vty_out(vty, " meas-feed destination %s %u%s",
-			meas_host, meas_port, VTY_NEWLINE);
-	if (strlen(meas_scenario) > 0)
-		vty_out(vty, " meas-feed scenario %s%s",
-			meas_scenario, VTY_NEWLINE);
-
 
 	return CMD_SUCCESS;
 }
@@ -797,29 +781,6 @@ DEFUN(mnccint_def_codec_h,
       "Half-Rate\n" "Adaptive Multi-Rate\n")
 {
 	mncc_int.def_codec[1] = get_string_value(tchh_codec_names, argv[0]);
-
-	return CMD_SUCCESS;
-}
-
-#define MEAS_STR "Measurement export related\n"
-DEFUN(mnccint_meas_feed, mnccint_meas_feed_cmd,
-	"meas-feed destination ADDR <0-65535>",
-	MEAS_STR "destination\n" "address or hostname\n" "port number\n")
-{
-	int rc;
-
-	rc = meas_feed_cfg_set(argv[0], atoi(argv[1]));
-	if (rc < 0)
-		return CMD_WARNING;
-
-	return CMD_SUCCESS;
-}
-
-DEFUN(meas_feed_scenario, meas_feed_scenario_cmd,
-	"meas-feed scenario NAME",
-	MEAS_STR "scenario\n" "Name up to 31 characters included in report\n")
-{
-	meas_feed_scenario_set(argv[0]);
 
 	return CMD_SUCCESS;
 }
@@ -924,14 +885,11 @@ int bsc_vty_init_extra(void)
 	install_element(ENABLE_NODE, &smsqueue_clear_cmd);
 	install_element(ENABLE_NODE, &smsqueue_fail_cmd);
 	install_element(ENABLE_NODE, &subscriber_send_pending_sms_cmd);
-	install_element(ENABLE_NODE, &meas_feed_scenario_cmd);
 
 	install_element(CONFIG_NODE, &cfg_mncc_int_cmd);
 	install_node(&mncc_int_node, config_write_mncc_int);
 	install_element(MNCC_INT_NODE, &mnccint_def_codec_f_cmd);
 	install_element(MNCC_INT_NODE, &mnccint_def_codec_h_cmd);
-	install_element(MNCC_INT_NODE, &mnccint_meas_feed_cmd);
-	install_element(MNCC_INT_NODE, &meas_feed_scenario_cmd);
 
 	install_element(CFG_LOG_NODE, &logging_fltr_imsi_cmd);
 

@@ -40,10 +40,6 @@ m4/*.m4
 # apps and app data
 src/osmo-msc/osmo-msc
 src/libcommon/gsup_test_client
-src/utils/meas_vis
-src/utils/meas_json
-src/utils/osmo-meas-pcap2db
-src/utils/osmo-meas-udp2db
 src/utils/smpp_mirror
 sms.db
 src/osmo-msc/*.cfg*

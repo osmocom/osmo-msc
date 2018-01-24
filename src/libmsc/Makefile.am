@@ -19,7 +19,6 @@ AM_CFLAGS = \
 	$(NULL)
 
 noinst_HEADERS = \
-	meas_feed.h \
 	$(NULL)
 
 noinst_LIBRARIES = \
@@ -49,7 +48,6 @@ libmsc_a_SOURCES = \
 	transaction.c \
 	osmo_msc.c \
 	ctrl_commands.c \
-	meas_feed.c \
 	subscr_conn.c \
 	$(NULL)
 if BUILD_IU

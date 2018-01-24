@@ -33,7 +33,6 @@ noinst_HEADERS = \
 	iucs.h \
 	iucs_ranap.h \
 	iu_dummy.h \
-	meas_feed.h \
 	meas_rep.h \
 	misdn.h \
 	mncc.h \
