@@ -156,43 +156,43 @@ void msc_classmark_chg(struct gsm_subscriber_connection *conn,
 void msc_cipher_mode_compl(struct gsm_subscriber_connection *conn,
 			   struct msgb *msg, uint8_t alg_id)
 {
-	struct gsm48_hdr *gh = msgb_l3(msg);
-	unsigned int payload_len = msgb_l3len(msg) - sizeof(*gh);
-	struct tlv_parsed tp;
-	uint8_t mi_type;
-	char imeisv[GSM48_MI_SIZE] = "";
 	struct vlr_ciph_result ciph_res = { .cause = VLR_CIPH_REJECT };
 
-	if (!gh) {
-		LOGP(DRR, LOGL_ERROR, "invalid: msgb without l3 header\n");
-		return;
-	}
-
 	if (!conn) {
-		LOGP(DRR, LOGL_ERROR,
-		     "invalid: rx Ciphering Mode Complete on NULL conn\n");
+		LOGP(DRR, LOGL_ERROR, "invalid: rx Ciphering Mode Complete on NULL conn\n");
 		return;
 	}
 	if (!conn->vsub) {
-		LOGP(DRR, LOGL_ERROR,
-		     "invalid: rx Ciphering Mode Complete for NULL subscr\n");
+		LOGP(DRR, LOGL_ERROR, "invalid: rx Ciphering Mode Complete for NULL subscr\n");
 		return;
 	}
 
-	DEBUGP(DRR, "%s: CIPHERING MODE COMPLETE\n",
-	       vlr_subscr_name(conn->vsub));
+	DEBUGP(DRR, "%s: CIPHERING MODE COMPLETE\n", vlr_subscr_name(conn->vsub));
 
-	tlv_parse(&tp, &gsm48_att_tlvdef, gh->data, payload_len, 0, 0);
+	if (msg) {
+		struct gsm48_hdr *gh = msgb_l3(msg);
+		unsigned int payload_len = msgb_l3len(msg) - sizeof(*gh);
+		struct tlv_parsed tp;
+		uint8_t mi_type;
+		char imeisv[GSM48_MI_SIZE] = "";
 
-	/* bearer capability */
-	if (TLVP_PRESENT(&tp, GSM48_IE_MOBILE_ID)) {
-		mi_type = TLVP_VAL(&tp, GSM48_IE_MOBILE_ID)[0] & GSM_MI_TYPE_MASK;
-		if (mi_type == GSM_MI_TYPE_IMEISV
-		    && TLVP_LEN(&tp, GSM48_IE_MOBILE_ID) > 0) {
-			gsm48_mi_to_string(imeisv, sizeof(imeisv),
-					   TLVP_VAL(&tp, GSM48_IE_MOBILE_ID),
-					   TLVP_LEN(&tp, GSM48_IE_MOBILE_ID));
-			ciph_res.imeisv = imeisv;
+		if (!gh) {
+			LOGP(DRR, LOGL_ERROR, "invalid: msgb without l3 header\n");
+			return;
+		}
+
+		tlv_parse(&tp, &gsm48_att_tlvdef, gh->data, payload_len, 0, 0);
+
+		/* bearer capability */
+		if (TLVP_PRESENT(&tp, GSM48_IE_MOBILE_ID)) {
+			mi_type = TLVP_VAL(&tp, GSM48_IE_MOBILE_ID)[0] & GSM_MI_TYPE_MASK;
+			if (mi_type == GSM_MI_TYPE_IMEISV
+			    && TLVP_LEN(&tp, GSM48_IE_MOBILE_ID) > 0) {
+				gsm48_mi_to_string(imeisv, sizeof(imeisv),
+						   TLVP_VAL(&tp, GSM48_IE_MOBILE_ID),
+						   TLVP_LEN(&tp, GSM48_IE_MOBILE_ID));
+				ciph_res.imeisv = imeisv;
+			}
 		}
 	}
 
