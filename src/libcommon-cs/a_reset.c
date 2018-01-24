@@ -27,7 +27,6 @@
 #include <string.h>
 #include <osmocom/msc/debug.h>
 #include <osmocom/msc/bsc_msc_data.h>
-#include <osmocom/msc/osmo_bsc_sigtran.h>
 
 #define RESET_RESEND_INTERVAL 2	/* sec */
 #define RESET_RESEND_TIMER_NO 1234	/* FIXME: dig out the real timer number */

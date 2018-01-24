@@ -49,8 +49,6 @@ bool _log_lines = false;
 
 struct gsm_network *net = NULL;
 
-struct gsm_bts *the_bts;
-
 const char *gsup_tx_expected = NULL;
 bool gsup_tx_confirmed;
 
@@ -160,7 +158,6 @@ struct gsm_subscriber_connection *conn_new(void)
 {
 	struct gsm_subscriber_connection *conn;
 	conn = msc_subscr_con_allocate(net);
-	conn->bts = the_bts;
 	conn->via_ran = rx_from_ran;
 	conn->lac = 23;
 	if (conn->via_ran == RAN_UTRAN_IU) {
@@ -866,8 +863,6 @@ int main(int argc, char **argv)
 	}
 
 	printf("Done\n");
-
-	talloc_free(the_bts);
 
 	check_talloc(msgb_ctx, tall_bsc_ctx, 8);
 	return 0;

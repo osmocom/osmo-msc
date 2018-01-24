@@ -34,7 +34,6 @@
 #include <osmocom/core/talloc.h>
 #include <osmocom/msc/gsm_data.h>
 #include <osmocom/msc/transaction.h>
-#include <osmocom/msc/rtp_proxy.h>
 
 void *tall_call_ctx;
 

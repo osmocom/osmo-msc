@@ -31,7 +31,6 @@
 #include <limits.h>
 
 #include <osmocom/msc/sms_queue.h>
-#include <osmocom/msc/chan_alloc.h>
 #include <osmocom/msc/db.h>
 #include <osmocom/msc/debug.h>
 #include <osmocom/msc/gsm_data.h>

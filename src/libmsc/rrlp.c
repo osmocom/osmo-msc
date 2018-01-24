@@ -24,7 +24,6 @@
 #include <osmocom/msc/gsm_04_08.h>
 #include <osmocom/msc/signal.h>
 #include <osmocom/msc/gsm_subscriber.h>
-#include <osmocom/msc/chan_alloc.h>
 
 /* RRLP msPositionReq, nsBased,
  *	Accuracy=60, Method=gps, ResponseTime=2, oneSet */

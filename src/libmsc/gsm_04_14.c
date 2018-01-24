@@ -75,7 +75,6 @@ int gsm0414_tx_close_tch_loop_cmd(struct gsm_subscriber_connection *conn,
 	subch = (loop_mode << 1);
 	msgb_put_u8(msg, subch);
 
-	msg->lchan = conn->lchan;
 	return gsm0414_conn_sendmsg(conn, msg);
 }
 

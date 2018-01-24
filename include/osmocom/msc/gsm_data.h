@@ -18,6 +18,9 @@
 #include <osmocom/msc/common_cs.h>
 #include <osmocom/mgcp_client/mgcp_client.h>
 
+#include "gsm_data_shared.h"
+
+
 
 /** annotations for msgb ownership */
 #define __uses
@@ -168,20 +171,10 @@ struct gsm_subscriber_connection {
 	int mncc_rtp_create_pending;
 	int mncc_rtp_connect_pending;
 
-	/* bsc structures */
-	struct osmo_bsc_sccp_con *sccp_con; /* BSC */
-
 	/* back pointers */
 	struct gsm_network *network;
 
 	bool in_release;
-	struct gsm_lchan *lchan; /* BSC */
-	struct gsm_lchan *ho_lchan; /* BSC */
-	struct gsm_bts *bts; /* BSC */
-
-	/* for assignment handling */
-	struct osmo_timer_list T10; /* BSC */
-	struct gsm_lchan *secondary_lchan; /* BSC */
 
 	/* connected via 2G or 3G? */
 	enum ran_type via_ran;
@@ -220,56 +213,6 @@ struct gsm_subscriber_connection {
 	} a;
 };
 
-
-#define ROLE_BSC
-#include "gsm_data_shared.h"
-
-
-enum {
-	BSC_CTR_CHREQ_TOTAL,
-	BSC_CTR_CHREQ_NO_CHANNEL,
-	BSC_CTR_HANDOVER_ATTEMPTED,
-	BSC_CTR_HANDOVER_NO_CHANNEL,
-	BSC_CTR_HANDOVER_TIMEOUT,
-	BSC_CTR_HANDOVER_COMPLETED,
-	BSC_CTR_HANDOVER_FAILED,
-	BSC_CTR_PAGING_ATTEMPTED,
-	BSC_CTR_PAGING_DETACHED,
-	BSC_CTR_PAGING_COMPLETED,
-	BSC_CTR_PAGING_EXPIRED,
-	BSC_CTR_CHAN_RF_FAIL,
-	BSC_CTR_CHAN_RLL_ERR,
-	BSC_CTR_BTS_OML_FAIL,
-	BSC_CTR_BTS_RSL_FAIL,
-	BSC_CTR_CODEC_AMR_F,
-	BSC_CTR_CODEC_AMR_H,
-	BSC_CTR_CODEC_EFR,
-	BSC_CTR_CODEC_V1_FR,
-	BSC_CTR_CODEC_V1_HR,
-};
-
-static const struct rate_ctr_desc bsc_ctr_description[] = {
-	[BSC_CTR_CHREQ_TOTAL] = 		{"chreq.total", "Received channel requests."},
-	[BSC_CTR_CHREQ_NO_CHANNEL] = 		{"chreq.no_channel", "Sent to MS no channel available."},
-	[BSC_CTR_HANDOVER_ATTEMPTED] = 		{"handover.attempted", "Received handover attempts."},
-	[BSC_CTR_HANDOVER_NO_CHANNEL] = 		{"handover.no_channel", "Sent no channel available responses."},
-	[BSC_CTR_HANDOVER_TIMEOUT] = 		{"handover.timeout", "Count the amount of timeouts of timer T3103."},
-	[BSC_CTR_HANDOVER_COMPLETED] = 		{"handover.completed", "Received handover completed."},
-	[BSC_CTR_HANDOVER_FAILED] = 		{"handover.failed", "Receive HO FAIL messages."},
-	[BSC_CTR_PAGING_ATTEMPTED] = 		{"paging.attempted", "Paging attempts for a MS."},
-	[BSC_CTR_PAGING_DETACHED] = 		{"paging.detached", "Counts the amount of paging attempts which couldn't sent out any paging request because no responsible bts found."},
-	[BSC_CTR_PAGING_COMPLETED] = 		{"paging.completed", "Paging successful completed."},
-	[BSC_CTR_PAGING_EXPIRED] = 		{"paging.expired", "Paging Request expired because of timeout T3113."},
-	[BSC_CTR_CHAN_RF_FAIL] = 		{"chan.rf_fail", "Received a RF failure indication from BTS."},
-	[BSC_CTR_CHAN_RLL_ERR] = 		{"chan.rll_err", "Received a RLL failure with T200 cause from BTS."},
-	[BSC_CTR_BTS_OML_FAIL] = 		{"bts.oml_fail", "Received a TEI down on a OML link."},
-	[BSC_CTR_BTS_RSL_FAIL] = 		{"bts.rsl_fail", "Received a TEI down on a OML link."},
-	[BSC_CTR_CODEC_AMR_F] =			{"bts.codec_amr_f", "Count the usage of AMR/F codec by channel mode requested."},
-	[BSC_CTR_CODEC_AMR_H] =			{"bts.codec_amr_h", "Count the usage of AMR/H codec by channel mode requested."},
-	[BSC_CTR_CODEC_EFR] = 			{"bts.codec_efr", "Count the usage of EFR codec by channel mode requested."},
-	[BSC_CTR_CODEC_V1_FR] =			{"bts.codec_fr", "Count the usage of FR codec by channel mode requested."},
-	[BSC_CTR_CODEC_V1_HR] =			{"bts.codec_hr", "Count the usage of HR codec by channel mode requested."},
-};
 
 enum {
 	MSC_CTR_LOC_UPDATE_TYPE_ATTACH,
@@ -314,15 +257,6 @@ static const struct rate_ctr_desc msc_ctr_description[] = {
 	[MSC_CTR_CALL_ACTIVE] =			{"call:active", "Count total amount of calls that ever reached active state."},
 	[MSC_CTR_CALL_COMPLETE] = 		{"call:complete", "Count total amount of calls which got terminated by disconnect req or ind after reaching active state."},
 	[MSC_CTR_CALL_INCOMPLETE] = 		{"call:incomplete", "Count total amount of call which got terminated by any other reason after reaching active state."},
-};
-
-
-static const struct rate_ctr_group_desc bsc_ctrg_desc = {
-	"bsc",
-	"base station controller",
-	OSMO_STATS_CLASS_GLOBAL,
-	ARRAY_SIZE(bsc_ctr_description),
-	bsc_ctr_description,
 };
 
 static const struct rate_ctr_group_desc msc_ctrg_desc = {
@@ -401,9 +335,6 @@ struct gsm_network {
 	 */
 	struct llist_head trans_list;
 	struct bsc_api *bsc_api;
-
-	unsigned int num_bts;
-	struct llist_head bts_list;
 
 	unsigned int paging_response_timer;
 
@@ -525,11 +456,6 @@ struct gsm_sms {
 
 extern void talloc_ctx_init(void *ctx_root);
 
-enum gsm_bts_type parse_btstype(const char *arg);
-const char *btstype2str(enum gsm_bts_type type);
-struct gsm_bts *gsm_bts_by_lac(struct gsm_network *net, unsigned int lac,
-				struct gsm_bts *start_bts);
-
 extern void *tall_bsc_ctx;
 extern int ipacc_rtp_direct;
 
@@ -539,29 +465,8 @@ const char *gsm_auth_policy_name(enum gsm_auth_policy policy);
 enum rrlp_mode rrlp_mode_parse(const char *arg);
 const char *rrlp_mode_name(enum rrlp_mode mode);
 
-enum bts_gprs_mode bts_gprs_mode_parse(const char *arg, int *valid);
-const char *bts_gprs_mode_name(enum bts_gprs_mode mode);
-
-int gsm48_ra_id_by_bts(uint8_t *buf, struct gsm_bts *bts);
-void gprs_ra_id_by_bts(struct gprs_ra_id *raid, struct gsm_bts *bts);
-
 struct gsm_subscriber_connection *msc_subscr_con_allocate(struct gsm_network *network);
 void msc_subscr_con_free(struct gsm_subscriber_connection *conn);
-
-void set_ts_e1link(struct gsm_bts_trx_ts *ts, uint8_t e1_nr,
-		   uint8_t e1_ts, uint8_t e1_ts_ss);
-
-void gsm_trx_lock_rf(struct gsm_bts_trx *trx, int locked);
-
-struct gsm_bts_trx *gsm_bts_trx_by_nr(struct gsm_bts *bts, int nr);
-int gsm_bts_trx_set_system_infos(struct gsm_bts_trx *trx);
-int gsm_bts_set_system_infos(struct gsm_bts *bts);
-
-/* generic E1 line operations for all ISDN-based BTS. */
-extern struct e1inp_line_ops bts_isdn_e1inp_line_ops;
-
-extern const struct value_string bts_type_names[_NUM_GSM_BTS_TYPE+1];
-extern const struct value_string bts_type_descs[_NUM_GSM_BTS_TYPE+1];
 
 /* control interface handling */
 int bsc_base_ctrl_cmds_install(void);

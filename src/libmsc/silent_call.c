@@ -29,8 +29,6 @@
 #include <osmocom/msc/debug.h>
 #include <osmocom/msc/gsm_data.h>
 #include <osmocom/msc/gsm_subscriber.h>
-#include <osmocom/msc/abis_rsl.h>
-#include <osmocom/msc/chan_alloc.h>
 #include <osmocom/msc/osmo_msc.h>
 
 /* paging of the requested subscriber has completed */

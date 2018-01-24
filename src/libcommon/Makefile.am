@@ -24,7 +24,6 @@ libcommon_a_SOURCES = \
 	common_vty.c \
 	debug.c \
 	gsm_data.c \
-	gsm_data_shared.c \
 	gsup_client.c \
 	oap_client.c \
 	socket.c \

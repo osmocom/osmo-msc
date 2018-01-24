@@ -54,7 +54,6 @@
 #include <osmocom/vty/logging.h>
 #include <osmocom/msc/vty.h>
 #include <osmocom/msc/mncc.h>
-#include <osmocom/msc/handover_decision.h>
 #include <osmocom/msc/rrlp.h>
 #include <osmocom/ctrl/control_if.h>
 #include <osmocom/ctrl/control_vty.h>
@@ -89,10 +88,7 @@ void *tall_msc_ctx = NULL;
 
 /* satisfy deps from libbsc legacy.
    TODO double check these */
-void *tall_fle_ctx = NULL;
-void *tall_paging_ctx = NULL;
 void *tall_map_ctx = NULL;
-void *tall_upq_ctx = NULL;
 /* end deps from libbsc legacy. */
 
 static struct {

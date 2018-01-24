@@ -35,8 +35,6 @@
 #include <osmocom/msc/gsm_subscriber.h>
 #include <osmocom/msc/silent_call.h>
 #include <osmocom/msc/gsm_04_11.h>
-#include <osmocom/abis/e1_input.h>
-#include <osmocom/msc/abis_nm.h>
 #include <osmocom/gsm/gsm_utils.h>
 #include <osmocom/core/utils.h>
 #include <osmocom/msc/db.h>
@@ -46,10 +44,9 @@
 #include <osmocom/msc/vty.h>
 #include <osmocom/msc/gsm_04_80.h>
 #include <osmocom/msc/gsm_04_14.h>
-#include <osmocom/msc/chan_alloc.h>
+#include <osmocom/gsm/protocol/gsm_08_58.h>
 #include <osmocom/msc/sms_queue.h>
 #include <osmocom/msc/mncc_int.h>
-#include <osmocom/msc/handover.h>
 #include <osmocom/msc/vlr.h>
 
 #include <osmocom/vty/logging.h>

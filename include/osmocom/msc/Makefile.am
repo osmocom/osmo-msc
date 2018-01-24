@@ -1,24 +1,15 @@
 noinst_HEADERS = \
-	abis_nm.h \
-	abis_om2000.h \
-	abis_rsl.h \
 	a_iface.h \
 	a_iface_bssap.h \
-	arfcn_range_encode.h \
 	auth.h \
 	bsc_api.h \
 	bsc_msc.h \
-	bsc_msg_filter.h \
 	bsc_rll.h \
-	chan_alloc.h \
 	common.h \
-	common_bsc.h \
 	common_cs.h \
-	crc24.h \
 	ctrl.h \
 	db.h \
 	debug.h \
-	e1_config.h \
 	gsm_04_08.h \
 	gsm_04_11.h \
 	gsm_04_14.h \
@@ -27,39 +18,25 @@ noinst_HEADERS = \
 	gsm_data_shared.h \
 	gsm_subscriber.h \
 	gsup_client.h \
-	handover.h \
-	handover_decision.h \
 	ipaccess.h \
 	iucs.h \
 	iucs_ranap.h \
 	iu_dummy.h \
-	meas_rep.h \
-	misdn.h \
 	mncc.h \
 	mncc_int.h \
 	msc_ifaces.h \
-	network_listen.h \
 	oap_client.h \
 	openbscdefines.h \
-	osmo_bsc.h \
 	a_reset.h \
 	osmo_msc.h \
-	osmo_bsc_sigtran.h \
 	bsc_msc_data.h \
-	osmux.h \
 	rrlp.h \
-	rs232.h \
-	rtp_proxy.h \
 	signal.h \
 	silent_call.h \
-	slhc.h \
 	smpp.h \
 	sms_queue.h \
 	socket.h \
-	system_information.h \
 	transaction.h \
-	trau_mux.h \
-	trau_upqueue.h \
 	ussd.h \
 	vlr.h \
 	vty.h \

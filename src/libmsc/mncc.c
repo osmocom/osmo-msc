@@ -34,7 +34,6 @@
 #include <osmocom/msc/mncc.h>
 #include <osmocom/msc/gsm_data.h>
 #include <osmocom/msc/transaction.h>
-#include <osmocom/msc/rtp_proxy.h>
 
 
 static const struct value_string mncc_names[] = {

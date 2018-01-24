@@ -48,12 +48,10 @@
 #include <osmocom/msc/db.h>
 #include <osmocom/msc/gsm_subscriber.h>
 #include <osmocom/msc/gsm_04_08.h>
-#include <osmocom/msc/abis_rsl.h>
 #include <osmocom/msc/signal.h>
 #include <osmocom/msc/db.h>
 #include <osmocom/msc/transaction.h>
 #include <osmocom/msc/bsc_rll.h>
-#include <osmocom/msc/chan_alloc.h>
 #include <osmocom/msc/msc_ifaces.h>
 #include <osmocom/msc/osmo_msc.h>
 #include <osmocom/msc/vlr.h>
@@ -352,7 +350,7 @@ static int sms_route_mt_sms(struct gsm_subscriber_connection *conn,
 			     vlr_subscr_name(conn->vsub), rc);
 	 		rc = GSM411_RP_CAUSE_MO_TEMP_FAIL;
 			/* rc will be logged by gsm411_send_rp_error() */
-	 		rate_ctr_inc(&conn->bts->network->msc_ctrs->ctr[
+			rate_ctr_inc(&conn->network->msc_ctrs->ctr[
 					MSC_CTR_SMS_DELIVER_UNKNOWN_ERROR]);
 		}
 		return rc;
@@ -380,7 +378,7 @@ try_local:
 			     vlr_subscr_name(conn->vsub), rc);
 	 		rc = GSM411_RP_CAUSE_MO_TEMP_FAIL;
 			/* rc will be logged by gsm411_send_rp_error() */
-	 		rate_ctr_inc(&conn->bts->network->msc_ctrs->ctr[
+			rate_ctr_inc(&conn->network->msc_ctrs->ctr[
 					MSC_CTR_SMS_DELIVER_UNKNOWN_ERROR]);
 		}
 #else

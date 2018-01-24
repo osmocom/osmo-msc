@@ -42,25 +42,11 @@ int bsc_vty_go_parent(struct vty *vty)
 		vty->node = CONFIG_NODE;
 		vty->index = NULL;
 		break;
-	case TS_NODE:
-		vty->node = TRX_NODE;
-		{
-			/* set vty->index correctly ! */
-			struct gsm_bts_trx_ts *ts = vty->index;
-			vty->index = ts->trx;
-			vty->index_sub = &ts->trx->description;
-		}
-		break;
-	case TRUNK_NODE:
-		vty->node = MGCP_NODE;
-		vty->index = NULL;
-		break;
 	case SMPP_ESME_NODE:
 		vty->node = SMPP_NODE;
 		vty->index = NULL;
 		break;
 	case SMPP_NODE:
-	case MGCP_NODE:
 	case MSC_NODE:
 	case MNCC_INT_NODE:
 		vty->node = CONFIG_NODE;

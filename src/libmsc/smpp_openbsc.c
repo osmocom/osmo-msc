@@ -44,7 +44,6 @@
 #include <osmocom/msc/signal.h>
 #include <osmocom/msc/transaction.h>
 #include <osmocom/msc/gsm_subscriber.h>
-#include <osmocom/msc/chan_alloc.h>
 #include <osmocom/msc/vlr.h>
 
 #include "smpp_smsc.h"

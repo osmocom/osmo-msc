@@ -32,7 +32,6 @@ void test_early_stage()
 
 	btw("freshly allocated conn");
 	g_conn = msc_subscr_con_allocate(net);
-	g_conn->bts = the_bts;
 	EXPECT_ACCEPTED(false);
 
 	btw("conn_fsm present, in state NEW");
