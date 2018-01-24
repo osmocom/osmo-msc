@@ -14,7 +14,6 @@ struct gsm_trans;
 struct gsm_subscriber_connection;
 struct amr_multirate_conf;
 struct amr_mode;
-struct bsc_subscr;
 
 #define GSM48_ALLOC_SIZE	2048
 #define GSM48_ALLOC_HEADROOM	256

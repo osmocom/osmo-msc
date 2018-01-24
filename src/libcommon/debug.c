@@ -200,26 +200,9 @@ static const struct log_info_cat default_categories[] = {
 static int filter_fn(const struct log_context *ctx, struct log_target *tar)
 {
 	const struct vlr_subscr *vsub = ctx->ctx[LOG_CTX_VLR_SUBSCR];
-	const struct bsc_subscr *bsub = ctx->ctx[LOG_CTX_BSC_SUBSCR];
-	const struct gprs_nsvc *nsvc = ctx->ctx[LOG_CTX_GB_NSVC];
-	const struct gprs_nsvc *bvc = ctx->ctx[LOG_CTX_GB_BVC];
 
 	if ((tar->filter_map & (1 << LOG_FLT_VLR_SUBSCR)) != 0
 	    && vsub && vsub == tar->filter_data[LOG_FLT_VLR_SUBSCR])
-		return 1;
-
-	if ((tar->filter_map & (1 << LOG_FLT_BSC_SUBSCR)) != 0
-	    && bsub && bsub == tar->filter_data[LOG_FLT_BSC_SUBSCR])
-		return 1;
-
-	/* Filter on the NS Virtual Connection */
-	if ((tar->filter_map & (1 << LOG_FLT_GB_NSVC)) != 0
-	    && nsvc && (nsvc == tar->filter_data[LOG_FLT_GB_NSVC]))
-		return 1;
-
-	/* Filter on the NS Virtual Connection */
-	if ((tar->filter_map & (1 << LOG_FLT_GB_BVC)) != 0
-	    && bvc && (bvc == tar->filter_data[LOG_FLT_GB_BVC]))
 		return 1;
 
 	return 0;
