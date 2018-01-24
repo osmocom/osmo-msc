@@ -37,8 +37,6 @@ enum signal_subsystems {
 	SS_SMS,
 	SS_SUBSCR,
 	SS_SCALL,
-	SS_MSC,
-	SS_CCCH,
 };
 
 /* SS_PAGING signals */
@@ -100,18 +98,6 @@ struct sms_signal_data {
 	struct gsm_sms *sms;
 	/* int paging result. Only the ones with > 0 */
 	int paging_result;
-};
-
-/* MSC signals */
-enum signal_msc {
-	S_MSC_LOST,
-	S_MSC_CONNECTED,
-	S_MSC_AUTHENTICATED,
-};
-
-struct bsc_msc_data;
-struct msc_signal_data {
-	struct bsc_msc_data *data;
 };
 
 #endif
