@@ -48,6 +48,7 @@
 #include <osmocom/msc/sms_queue.h>
 #include <osmocom/msc/mncc_int.h>
 #include <osmocom/msc/vlr.h>
+#include <osmocom/msc/transaction.h>
 
 #include <osmocom/vty/logging.h>
 
@@ -55,8 +56,102 @@
 
 extern struct gsm_network *gsmnet_from_vty(struct vty *v);
 
+static void vty_conn_hdr(struct vty *vty)
+{
+	vty_out(vty, "--ConnId ------------Subscriber RAN --LAC Use --Tokens CSA A5 State%s",
+		VTY_NEWLINE);
+}
+
+static void vty_dump_one_conn(struct vty *vty, const struct gsm_subscriber_connection *conn)
+{
+	vty_out(vty, "%08x %22s %3s %5u %3u %08x %c%c%c /%1u %27s %s",
+		conn->a.conn_id,
+		conn->vsub ? vlr_subscr_name(conn->vsub) : "-",
+		conn->via_ran == RAN_UTRAN_IU ? "Iu" : "A",
+		conn->lac,
+		conn->use_count,
+		conn->use_tokens,
+		conn->received_cm_service_request ? 'C' : '-',
+		conn->sec_operation ? 'S' : '-',
+		conn->anch_operation ? 'A' : '-',
+		conn->encr.alg_id,
+		conn->conn_fsm ? osmo_fsm_inst_state_name(conn->conn_fsm) : "-",
+		VTY_NEWLINE);
+}
+
+DEFUN(show_msc_conn, show_msc_conn_cmd,
+	"show connection", SHOW_STR "Subscriber Connections\n")
+{
+	struct gsm_network *gsmnet = gsmnet_from_vty(vty);
+	struct gsm_subscriber_connection *conn;
+
+	vty_conn_hdr(vty);
+	llist_for_each_entry(conn, &gsmnet->subscr_conns, entry)
+		vty_dump_one_conn(vty, conn);
+
+	return CMD_SUCCESS;
+}
+
+static void vty_trans_hdr(struct vty *vty)
+{
+	vty_out(vty, "------------Subscriber --ConnId -P TI -CallRef Proto%s",
+		VTY_NEWLINE);
+}
+
+static const char *get_trans_proto_str(const struct gsm_trans *trans)
+{
+	static char buf[256];
+
+	switch (trans->protocol) {
+	case GSM48_PDISC_CC:
+		snprintf(buf, sizeof(buf), "%s %4u %4u",
+			 gsm48_cc_state_name(trans->cc.state),
+			 trans->cc.Tcurrent,
+			 trans->cc.T308_second);
+		break;
+	case GSM48_PDISC_SMS:
+		snprintf(buf, sizeof(buf), "%s %s",
+			gsm411_cp_state_name(trans->sms.smc_inst.cp_state),
+			gsm411_rp_state_name(trans->sms.smr_inst.rp_state));
+		break;
+	default:
+		buf[0] = '\0';
+		break;
+	}
+
+	return buf;
+}
+
+static void vty_dump_one_trans(struct vty *vty, const struct gsm_trans *trans)
+{
+	vty_out(vty, "%22s %08x %s %02u %08x %s%s",
+		trans->vsub ? vlr_subscr_name(trans->vsub) : "-",
+		trans->conn ? trans->conn->a.conn_id : 0,
+		gsm48_pdisc_name(trans->protocol),
+		trans->transaction_id,
+		trans->callref,
+		get_trans_proto_str(trans), VTY_NEWLINE);
+}
+
+DEFUN(show_msc_transaction, show_msc_transaction_cmd,
+	"show transaction", SHOW_STR "Transactions\n")
+{
+	struct gsm_network *gsmnet = gsmnet_from_vty(vty);
+	struct gsm_trans *trans;
+
+	vty_trans_hdr(vty);
+	llist_for_each_entry(trans, &gsmnet->trans_list, entry)
+		vty_dump_one_trans(vty, trans);
+
+	return CMD_SUCCESS;
+}
+
+
+
 static void subscr_dump_full_vty(struct vty *vty, struct vlr_subscr *vsub)
 {
+	struct gsm_network *gsmnet = gsmnet_from_vty(vty);
+	struct gsm_trans *trans;
 	int reqs;
 	struct llist_head *entry;
 
@@ -110,6 +205,21 @@ static void subscr_dump_full_vty(struct vty *vty, struct vlr_subscr *vsub)
 	vty_out(vty, "    Paging: %s paging for %d requests%s",
 		vsub->cs.is_paging ? "is" : "not", reqs, VTY_NEWLINE);
 	vty_out(vty, "    Use count: %u%s", vsub->use_count, VTY_NEWLINE);
+
+	/* Connection */
+	if (vsub->msc_conn_ref) {
+		struct gsm_subscriber_connection *conn = vsub->msc_conn_ref;
+		vty_conn_hdr(vty);
+		vty_dump_one_conn(vty, conn);
+	}
+
+	/* Transactions */
+	vty_trans_hdr(vty);
+	llist_for_each_entry(trans, &gsmnet->trans_list, entry) {
+		if (trans->vsub != vsub)
+			continue;
+		vty_dump_one_trans(vty, trans);
+	}
 }
 
 
@@ -897,6 +1007,8 @@ int bsc_vty_init_extra(void)
 
 	install_element_ve(&show_subscr_cmd);
 	install_element_ve(&show_subscr_cache_cmd);
+	install_element_ve(&show_msc_conn_cmd);
+	install_element_ve(&show_msc_transaction_cmd);
 
 	install_element_ve(&sms_send_pend_cmd);
 	install_element_ve(&sms_delete_expired_cmd);
