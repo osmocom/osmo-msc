@@ -25,7 +25,10 @@
 
 #include <osmocom/msc/oap_client.h>
 
-#define GSUP_CLIENT_RECONNECT_INTERVAL 10
+/* a loss of GSUP between MSC and HLR is considered quite serious, let's try to recover as quickly as
+ * possible.  Even one new connection attempt per second should be quite acceptable until the link is
+ * re-established */
+#define GSUP_CLIENT_RECONNECT_INTERVAL 1
 #define GSUP_CLIENT_PING_INTERVAL 20
 
 struct msgb;
