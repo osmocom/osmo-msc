@@ -29,7 +29,6 @@ noinst_HEADERS = \
 	silent_call.h \
 	smpp.h \
 	sms_queue.h \
-	socket.h \
 	transaction.h \
 	ussd.h \
 	vlr.h \

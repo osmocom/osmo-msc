@@ -26,7 +26,6 @@ libcommon_a_SOURCES = \
 	gsm_data.c \
 	gsup_client.c \
 	oap_client.c \
-	socket.c \
 	talloc_ctx.c \
 	gsm_subscriber_base.c \
 	$(NULL)
