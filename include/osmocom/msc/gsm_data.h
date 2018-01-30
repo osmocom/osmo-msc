@@ -212,7 +212,7 @@ struct gsm_subscriber_connection {
 		/* The connection identifier that is used
 		 * to reference the SCCP connection that is
 		 * associated with this subscriber connection */
-		int conn_id;
+		uint32_t conn_id;
 	} a;
 };
 
