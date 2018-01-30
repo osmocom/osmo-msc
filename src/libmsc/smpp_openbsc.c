@@ -99,11 +99,12 @@ static int submit_to_sms(struct gsm_sms **psms, struct gsm_network *net,
 	struct gsm_sms *sms;
 	struct tlv_t *t;
 	int mode;
+	int can_store_sms = ((submit->esm_class & SMPP34_MSG_MODE_MASK) != 2); /* != forward mode */
 
 	dest = subscr_by_dst(net, submit->dest_addr_npi,
 			     submit->dest_addr_ton,
 			     (const char *)submit->destination_addr);
-	if (!dest) {
+	if (!dest && !can_store_sms) {
 		LOGP(DLSMS, LOGL_NOTICE, "SMPP SUBMIT-SM for unknown subscriber: "
 		     "%s (NPI=%u)\n", submit->destination_addr,
 		     submit->dest_addr_npi);
@@ -115,7 +116,8 @@ static int submit_to_sms(struct gsm_sms **psms, struct gsm_network *net,
 		case TLVID_message_payload:
 			if (smpp34_submit_tlv_msg_payload(t, submit, &sms_msg,
 							  &sms_msg_len) < 0) {
-				vlr_subscr_put(dest);
+				if (dest)
+					vlr_subscr_put(dest);
 				return ESME_ROPTPARNOTALLWD;
 			}
 			break;
@@ -149,7 +151,11 @@ static int submit_to_sms(struct gsm_sms **psms, struct gsm_network *net,
 	sms->receiver = dest;
 	sms->dst.ton = submit->dest_addr_ton;
 	sms->dst.npi = submit->dest_addr_npi;
-	osmo_strlcpy(sms->dst.addr, dest->msisdn, sizeof(sms->dst.addr));
+	if (dest)
+		osmo_strlcpy(sms->dst.addr, dest->msisdn, sizeof(sms->dst.addr));
+	else
+		osmo_strlcpy(sms->dst.addr, (const char *)submit->destination_addr,
+			     sizeof(sms->dst.addr));
 
 	/* fill in the source address */
 	sms->src.ton = submit->source_addr_ton;
