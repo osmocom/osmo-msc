@@ -184,6 +184,9 @@ struct gsm_subscriber_connection {
 	uint16_t lac;
 	struct gsm_encr encr;
 
+	/* N(SD) expected in the received frame, per flow (TS 24.007 11.2.3.2.3.2.2) */
+	uint8_t n_sd_next[4];
+
 	struct {
 		unsigned int mgcp_rtp_endpoint;
 		uint16_t port_subscr;

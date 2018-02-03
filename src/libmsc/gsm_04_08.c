@@ -3302,6 +3302,94 @@ void cm_service_request_concludes(struct gsm_subscriber_connection *conn,
 	conn->received_cm_service_request = false;
 }
 
+/* TS 24.007 11.2.3.2.3 Message Type Octet / Duplicate Detection */
+int gsm0407_pdisc_ctr_bin(uint8_t pdisc)
+{
+	switch (pdisc) {
+	case GSM48_PDISC_MM:
+	case GSM48_PDISC_CC:
+	case GSM48_PDISC_NC_SS:
+		return 0;
+	case GSM48_PDISC_GROUP_CC:
+		return 1;
+	case GSM48_PDISC_BCAST_CC:
+		return 2;
+	case GSM48_PDISC_LOC:
+		return 3;
+	default:
+		return -1;
+	}
+}
+
+/* extract the N(SD) and return the modulo value for a R98 message */
+static uint8_t gsm0407_determine_nsd_ret_modulo_r99(uint8_t pdisc, uint8_t msg_type, uint8_t *n_sd)
+{
+	switch (pdisc) {
+	case GSM48_PDISC_MM:
+	case GSM48_PDISC_CC:
+	case GSM48_PDISC_NC_SS:
+		*n_sd = (msg_type >> 6) & 0x3;
+		return 4;
+	case GSM48_PDISC_GROUP_CC:
+	case GSM48_PDISC_BCAST_CC:
+	case GSM48_PDISC_LOC:
+		*n_sd = (msg_type >> 6) & 0x1;
+		return 2;
+	default:
+		/* no sequence number, we cannot detect dups */
+		return 0;
+	}
+}
+
+/* extract the N(SD) and return the modulo value for a R99 message */
+static uint8_t gsm0407_determine_nsd_ret_modulo_r98(uint8_t pdisc, uint8_t msg_type, uint8_t *n_sd)
+{
+	switch (pdisc) {
+	case GSM48_PDISC_MM:
+	case GSM48_PDISC_CC:
+	case GSM48_PDISC_NC_SS:
+	case GSM48_PDISC_GROUP_CC:
+	case GSM48_PDISC_BCAST_CC:
+	case GSM48_PDISC_LOC:
+		*n_sd = (msg_type >> 6) & 0x1;
+		return 2;
+	default:
+		/* no sequence number, we cannot detect dups */
+		return 0;
+	}
+}
+
+/* TS 24.007 11.2.3.2 Message Type Octet / Duplicate Detection */
+static bool gsm0407_is_duplicate(struct gsm_subscriber_connection *conn, struct msgb *msg)
+{
+	struct gsm48_hdr *gh;
+	uint8_t pdisc;
+	uint8_t n_sd, modulo, bin;
+
+	gh = msgb_l3(msg);
+	pdisc = gsm48_hdr_pdisc(gh);
+
+	if (conn->classmark.classmark1_set && conn->classmark.classmark1.rev_lev < 2) {
+		modulo = gsm0407_determine_nsd_ret_modulo_r98(pdisc, gh->msg_type, &n_sd);
+	} else { /* R99 */
+		modulo = gsm0407_determine_nsd_ret_modulo_r99(pdisc, gh->msg_type, &n_sd);
+	}
+	if (modulo == 0)
+		return false;
+	bin = gsm0407_pdisc_ctr_bin(pdisc);
+	if (bin < 0)
+		return false;
+
+	OSMO_ASSERT(bin < ARRAY_SIZE(conn->n_sd_next));
+	if (n_sd != conn->n_sd_next[bin]) {
+		/* not what we expected: duplicate */
+		return true;
+	} else {
+		/* as expected: no dup; update expected counter for next message */
+		conn->n_sd_next[bin] = (n_sd + 1) % modulo;
+		return false;
+	}
+}
 
 /* Main entry point for GSM 04.08/44.008 Layer 3 data (e.g. from the BSC). */
 int gsm0408_dispatch(struct gsm_subscriber_connection *conn, struct msgb *msg)
@@ -3316,6 +3404,12 @@ int gsm0408_dispatch(struct gsm_subscriber_connection *conn, struct msgb *msg)
 
 	gh = msgb_l3(msg);
 	pdisc = gsm48_hdr_pdisc(gh);
+
+	if (gsm0407_is_duplicate(conn, msg)) {
+		LOGP(DRLL, LOGL_NOTICE, "%s: Discarding duplicate L3 message\n",
+			(conn && conn->vsub) ? vlr_subscr_name(conn->vsub) : "UNKNOWN");
+		return 0;
+	}
 
 	LOGP(DRLL, LOGL_DEBUG, "Dispatching 04.08 message %s (0x%x:0x%x)\n",
 	     gsm48_pdisc_msgtype_name(pdisc, gsm48_hdr_msg_type(gh)),

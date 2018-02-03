@@ -73,6 +73,36 @@ const char *cc_to_mncc_tx_expected_imsi = NULL;
 bool cc_to_mncc_tx_confirmed = false;
 uint32_t cc_to_mncc_tx_got_callref = 0;
 
+extern int gsm0407_pdisc_ctr_bin(uint8_t pdisc);
+
+/* static state variables for the L3 send sequence numbers */
+static uint8_t n_sd[4];
+
+/* patch a correct send sequence number into the given message */
+static void patch_l3_seq_nr(struct msgb *msg)
+{
+	struct gsm48_hdr *gh = msgb_l3(msg);
+	uint8_t pdisc = gsm48_hdr_pdisc(gh);
+	uint8_t *msg_type_oct = &msg->l3h[1];
+	int bin = gsm0407_pdisc_ctr_bin(pdisc);
+
+	if (bin >= 0 && bin < ARRAY_SIZE(n_sd)) {
+		/* patch in n_sd into the msg_type octet */
+		*msg_type_oct = (*msg_type_oct & 0x3f) | ((n_sd[bin] & 0x3) << 6);
+		//fprintf(stderr, "pdisc=0x%02x bin=%d, patched n_sd=%u\n\n", pdisc, bin, n_sd[bin] & 3);
+		/* increment N(SD) */
+		n_sd[bin] = (n_sd[bin] + 1) % 4;
+	} else {
+		//fprintf(stderr, "pdisc=0x%02x NO SEQ\n\n", pdisc);
+	}
+}
+
+/* reset L3 sequence numbers (e.g. new RR connection) */
+static void reset_l3_seq_nr()
+{
+	memset(n_sd, 0, sizeof(n_sd));
+}
+
 struct msgb *msgb_from_hex(const char *label, uint16_t size, const char *hex)
 {
 	struct msgb *msg = msgb_alloc(size, label);
@@ -101,6 +131,9 @@ void dtap_expect_tx(const char *hex)
 	if (!hex)
 		return;
 	dtap_tx_expected = msgb_from_hex("dtap_tx_expected", 1024, hex);
+	/* Mask the sequence number out */
+	if (msgb_length(dtap_tx_expected) >= 2)
+		dtap_tx_expected->data[1] &= 0x3f;
 	dtap_tx_confirmed = false;
 }
 
@@ -188,12 +221,15 @@ void rx_from_ms(struct msgb *msg)
 	if (!g_conn) {
 		log("new conn");
 		g_conn = conn_new();
+		reset_l3_seq_nr();
+		patch_l3_seq_nr(msg);
 		rc = msc_compl_l3(g_conn, msg, 23);
 		if (rc == BSC_API_CONN_POL_REJECT) {
 			msc_subscr_con_free(g_conn);
 			g_conn = NULL;
 		}
 	} else {
+		patch_l3_seq_nr(msg);
 		if ((gsm48_hdr_pdisc(gh) == GSM48_PDISC_RR)
 		    && (gsm48_hdr_msg_type(gh) == GSM48_MT_RR_CIPH_M_COMPL))
 			msc_cipher_mode_compl(g_conn, msg, 0);
@@ -230,6 +266,7 @@ int ms_sends_msg_fake(uint8_t pdisc, uint8_t msg_type)
 	/* some amount of data, whatever */
 	msgb_put(msg, 123);
 
+	patch_l3_seq_nr(msg);
 	rc = gsm0408_dispatch(g_conn, msg);
 
 	talloc_free(msg);
@@ -492,6 +529,9 @@ int _validate_dtap(struct msgb *msg, enum ran_type to_ran)
 	    osmo_hexdump_nospc(msg->data, msg->len));
 
 	OSMO_ASSERT(dtap_tx_expected);
+
+	/* Mask the sequence number out before comparing */
+	msg->data[1] &= 0x3f;
 	if (msg->len != dtap_tx_expected->len
 	    || memcmp(msg->data, dtap_tx_expected->data, msg->len)) {
 		fprintf(stderr, "Mismatch! Expected:\n%s\n",
