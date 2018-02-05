@@ -205,8 +205,7 @@ struct gsm_sms *smsq_take_next_sms(struct gsm_network *net,
 	int sanity = 100;
 	char started_with_msisdn[last_msisdn_buflen];
 
-	osmo_strlcpy(started_with_msisdn, last_msisdn,
-		     sizeof(started_with_msisdn));
+	OSMO_STRLCPY_ARRAY(started_with_msisdn, last_msisdn);
 
 	while (wrapped < 2 && (--sanity)) {
 		/* If we wrapped around and passed the first msisdn, we're

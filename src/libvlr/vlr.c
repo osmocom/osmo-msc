@@ -152,7 +152,7 @@ static int vlr_subscr_tx_gsup_message(const struct vlr_subscr *vsub,
 	struct vlr_instance *vlr = vsub->vlr;
 
 	if (strlen(gsup_msg->imsi) == 0)
-		osmo_strlcpy(gsup_msg->imsi, vsub->imsi, sizeof(gsup_msg->imsi));
+		OSMO_STRLCPY_ARRAY(gsup_msg->imsi, vsub->imsi);
 
 	return vlr_tx_gsup_message(vlr, gsup_msg);
 }
@@ -164,7 +164,7 @@ static int vlr_tx_gsup_error_reply(const struct vlr_instance *vlr,
 {
 	struct osmo_gsup_message gsup_reply = {0};
 
-	osmo_strlcpy(gsup_reply.imsi, gsup_orig->imsi, sizeof(gsup_reply.imsi));
+	OSMO_STRLCPY_ARRAY(gsup_reply.imsi, gsup_orig->imsi);
 	gsup_reply.cause = cause;
 	gsup_reply.message_type =
 		OSMO_GSUP_TO_MSGT_ERROR(gsup_orig->message_type);
@@ -368,7 +368,7 @@ void vlr_subscr_set_imsi(struct vlr_subscr *vsub, const char *imsi)
 {
 	if (!vsub)
 		return;
-	osmo_strlcpy(vsub->imsi, imsi, sizeof(vsub->imsi));
+	OSMO_STRLCPY_ARRAY(vsub->imsi, imsi);
 	vsub->id = atoll(vsub->imsi);
 	DEBUGP(DVLR, "set IMSI on subscriber; IMSI=%s id=%llu\n",
 	       vsub->imsi, vsub->id);
@@ -378,7 +378,7 @@ void vlr_subscr_set_imei(struct vlr_subscr *vsub, const char *imei)
 {
 	if (!vsub)
 		return;
-	osmo_strlcpy(vsub->imei, imei, sizeof(vsub->imei));
+	OSMO_STRLCPY_ARRAY(vsub->imei, imei);
 	DEBUGP(DVLR, "set IMEI on subscriber; IMSI=%s IMEI=%s\n",
 	       vsub->imsi, vsub->imei);
 }
@@ -387,7 +387,7 @@ void vlr_subscr_set_imeisv(struct vlr_subscr *vsub, const char *imeisv)
 {
 	if (!vsub)
 		return;
-	osmo_strlcpy(vsub->imeisv, imeisv, sizeof(vsub->imeisv));
+	OSMO_STRLCPY_ARRAY(vsub->imeisv, imeisv);
 	DEBUGP(DVLR, "set IMEISV on subscriber; IMSI=%s IMEISV=%s\n",
 	       vsub->imsi, vsub->imeisv);
 }
@@ -397,7 +397,7 @@ void vlr_subscr_set_msisdn(struct vlr_subscr *vsub, const char *msisdn)
 {
 	if (!vsub)
 		return;
-	osmo_strlcpy(vsub->msisdn, msisdn, sizeof(vsub->msisdn));
+	OSMO_STRLCPY_ARRAY(vsub->msisdn, msisdn);
 	DEBUGP(DVLR, "set MSISDN on subscriber; IMSI=%s MSISDN=%s\n",
 	       vsub->imsi, vsub->msisdn);
 }
@@ -566,7 +566,7 @@ int vlr_subscr_tx_auth_fail_rep(const struct vlr_subscr *vsub)
 	struct osmo_gsup_message gsup_msg = {0};
 
 	gsup_msg.message_type = OSMO_GSUP_MSGT_AUTH_FAIL_REPORT;
-	osmo_strlcpy(gsup_msg.imsi, vsub->imsi, sizeof(gsup_msg.imsi));
+	OSMO_STRLCPY_ARRAY(gsup_msg.imsi, vsub->imsi);
 	return vlr_tx_gsup_message(vsub->vlr, &gsup_msg);
 }
 

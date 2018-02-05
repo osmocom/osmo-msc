@@ -91,15 +91,15 @@ struct gsm_sms *sms_from_text(struct vlr_subscr *receiver,
 		return NULL;
 
 	sms->receiver = vlr_subscr_get(receiver);
-	osmo_strlcpy(sms->text, text, sizeof(sms->text));
+	OSMO_STRLCPY_ARRAY(sms->text, text);
 
-	osmo_strlcpy(sms->src.addr, sender->msisdn, sizeof(sms->src.addr));
+	OSMO_STRLCPY_ARRAY(sms->src.addr, sender->msisdn);
 	sms->reply_path_req = 0;
 	sms->status_rep_req = 0;
 	sms->ud_hdr_ind = 0;
 	sms->protocol_id = 0; /* implicit */
 	sms->data_coding_scheme = dcs;
-	osmo_strlcpy(sms->dst.addr, receiver->msisdn, sizeof(sms->dst.addr));
+	OSMO_STRLCPY_ARRAY(sms->dst.addr, receiver->msisdn);
 	/* Generate user_data */
 	sms->user_data_len = gsm_7bit_encode_n(sms->user_data, sizeof(sms->user_data),
 						sms->text, NULL);
@@ -499,7 +499,7 @@ static int gsm340_rx_tpdu(struct gsm_trans *trans, struct msgb *msg,
 		}
 	}
 
-	osmo_strlcpy(gsms->src.addr, conn->vsub->msisdn, sizeof(gsms->src.addr));
+	OSMO_STRLCPY_ARRAY(gsms->src.addr, conn->vsub->msisdn);
 
 	LOGP(DLSMS, LOGL_INFO, "RX SMS: Sender: %s, MTI: 0x%02x, VPF: 0x%02x, "
 	     "MR: 0x%02x PID: 0x%02x, DCS: 0x%02x, DA: %s, "

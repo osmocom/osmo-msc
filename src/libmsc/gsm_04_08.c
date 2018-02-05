@@ -1635,8 +1635,8 @@ static int gsm48_cc_rx_setup(struct gsm_trans *trans, struct msgb *msg)
 
 	/* use subscriber as calling party number */
 	setup.fields |= MNCC_F_CALLING;
-	osmo_strlcpy(setup.calling.number, trans->vsub->msisdn, sizeof(setup.calling.number));
-	osmo_strlcpy(setup.imsi, trans->vsub->imsi, sizeof(setup.imsi));
+	OSMO_STRLCPY_ARRAY(setup.calling.number, trans->vsub->msisdn);
+	OSMO_STRLCPY_ARRAY(setup.imsi, trans->vsub->imsi);
 
 	/* bearer capability */
 	if (TLVP_PRESENT(&tp, GSM48_IE_BEARER_CAP)) {
@@ -1824,7 +1824,7 @@ static int gsm48_cc_rx_call_conf(struct gsm_trans *trans, struct msgb *msg)
 	}
 
 	/* IMSI of called subscriber */
-	osmo_strlcpy(call_conf.imsi, trans->vsub->imsi, sizeof(call_conf.imsi));
+	OSMO_STRLCPY_ARRAY(call_conf.imsi, trans->vsub->imsi);
 
 	new_cc_state(trans, GSM_CSTATE_MO_TERM_CALL_CONF);
 
@@ -2003,8 +2003,8 @@ static int gsm48_cc_rx_connect(struct gsm_trans *trans, struct msgb *msg)
 	tlv_parse(&tp, &gsm48_att_tlvdef, gh->data, payload_len, 0, 0);
 	/* use subscriber as connected party number */
 	connect.fields |= MNCC_F_CONNECTED;
-	osmo_strlcpy(connect.connected.number, trans->vsub->msisdn, sizeof(connect.connected.number));
-	osmo_strlcpy(connect.imsi, trans->vsub->imsi, sizeof(connect.imsi));
+	OSMO_STRLCPY_ARRAY(connect.connected.number, trans->vsub->msisdn);
+	OSMO_STRLCPY_ARRAY(connect.imsi, trans->vsub->imsi);
 
 	/* facility */
 	if (TLVP_PRESENT(&tp, GSM48_IE_FACILITY)) {

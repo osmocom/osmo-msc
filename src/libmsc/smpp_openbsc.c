@@ -152,16 +152,15 @@ static int submit_to_sms(struct gsm_sms **psms, struct gsm_network *net,
 	sms->dst.ton = submit->dest_addr_ton;
 	sms->dst.npi = submit->dest_addr_npi;
 	if (dest)
-		osmo_strlcpy(sms->dst.addr, dest->msisdn, sizeof(sms->dst.addr));
+		OSMO_STRLCPY_ARRAY(sms->dst.addr, dest->msisdn);
 	else
-		osmo_strlcpy(sms->dst.addr, (const char *)submit->destination_addr,
-			     sizeof(sms->dst.addr));
+		OSMO_STRLCPY_ARRAY(sms->dst.addr,
+				   (const char *)submit->destination_addr);
 
 	/* fill in the source address */
 	sms->src.ton = submit->source_addr_ton;
 	sms->src.npi = submit->source_addr_npi;
-	osmo_strlcpy(sms->src.addr, (char *)submit->source_addr,
-		     sizeof(sms->src.addr));
+	OSMO_STRLCPY_ARRAY(sms->src.addr, (char *)submit->source_addr);
 
 	if (submit->esm_class == SMPP34_DELIVERY_ACK)
 		sms->is_report = true;

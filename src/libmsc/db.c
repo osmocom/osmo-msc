@@ -258,7 +258,7 @@ static struct gsm_sms *sms_from_result_v3(dbi_result result)
 	free(quoted);
 	extension = dbi_result_get_string(result2, "extension");
 	if (extension)
-		osmo_strlcpy(sms->src.addr, extension, sizeof(sms->src.addr));
+		OSMO_STRLCPY_ARRAY(sms->src.addr, extension);
 	dbi_result_free(result2);
 	/* got the extension */
 
@@ -271,7 +271,7 @@ static struct gsm_sms *sms_from_result_v3(dbi_result result)
 
 	daddr = dbi_result_get_string(result, "dest_addr");
 	if (daddr)
-		osmo_strlcpy(sms->dst.addr, daddr, sizeof(sms->dst.addr));
+		OSMO_STRLCPY_ARRAY(sms->dst.addr, daddr);
 
 	sms->user_data_len = dbi_result_get_field_length(result, "user_data");
 	user_data = dbi_result_get_binary(result, "user_data");
@@ -281,7 +281,7 @@ static struct gsm_sms *sms_from_result_v3(dbi_result result)
 
 	text = dbi_result_get_string(result, "text");
 	if (text)
-		osmo_strlcpy(sms->text, text, sizeof(sms->text));
+		OSMO_STRLCPY_ARRAY(sms->text, text);
 	return sms;
 }
 
@@ -410,12 +410,12 @@ static struct gsm_sms *sms_from_result_v4(dbi_result result)
 						  "data_coding_scheme");
 
 	addr = dbi_result_get_string(result, "src_addr");
-	osmo_strlcpy(sms->src.addr, addr, sizeof(sms->src.addr));
+	OSMO_STRLCPY_ARRAY(sms->src.addr, addr);
 	sms->src.ton = dbi_result_get_ulonglong(result, "src_ton");
 	sms->src.npi = dbi_result_get_ulonglong(result, "src_npi");
 
 	addr = dbi_result_get_string(result, "dest_addr");
-	osmo_strlcpy(sms->dst.addr, addr, sizeof(sms->dst.addr));
+	OSMO_STRLCPY_ARRAY(sms->dst.addr, addr);
 	sms->dst.ton = dbi_result_get_ulonglong(result, "dest_ton");
 	sms->dst.npi = dbi_result_get_ulonglong(result, "dest_npi");
 
@@ -427,7 +427,7 @@ static struct gsm_sms *sms_from_result_v4(dbi_result result)
 
 	text = dbi_result_get_string(result, "text");
 	if (text)
-		osmo_strlcpy(sms->text, text, sizeof(sms->text));
+		OSMO_STRLCPY_ARRAY(sms->text, text);
 	return sms;
 }
 
@@ -766,14 +766,14 @@ static struct gsm_sms *sms_from_result(struct gsm_network *net, dbi_result resul
 	sms->dst.ton = dbi_result_get_ulonglong(result, "dest_ton");
 	daddr = dbi_result_get_string(result, "dest_addr");
 	if (daddr)
-		osmo_strlcpy(sms->dst.addr, daddr, sizeof(sms->dst.addr));
+		OSMO_STRLCPY_ARRAY(sms->dst.addr, daddr);
 	sms->receiver = vlr_subscr_find_by_msisdn(net->vlr, sms->dst.addr);
 
 	sms->src.npi = dbi_result_get_ulonglong(result, "src_npi");
 	sms->src.ton = dbi_result_get_ulonglong(result, "src_ton");
 	saddr = dbi_result_get_string(result, "src_addr");
 	if (saddr)
-		osmo_strlcpy(sms->src.addr, saddr, sizeof(sms->src.addr));
+		OSMO_STRLCPY_ARRAY(sms->src.addr, saddr);
 
 	sms->user_data_len = dbi_result_get_field_length(result, "user_data");
 	user_data = dbi_result_get_binary(result, "user_data");
@@ -783,7 +783,7 @@ static struct gsm_sms *sms_from_result(struct gsm_network *net, dbi_result resul
 
 	text = dbi_result_get_string(result, "text");
 	if (text)
-		osmo_strlcpy(sms->text, text, sizeof(sms->text));
+		OSMO_STRLCPY_ARRAY(sms->text, text);
 	return sms;
 }
 
