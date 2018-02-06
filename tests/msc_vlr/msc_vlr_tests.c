@@ -847,7 +847,7 @@ static void run_tests(int nr, const char *imsi)
 			fprintf(stderr, "(test nr %d)\n", test_nr + 1);
 
 		check_talloc(msgb_ctx, tall_bsc_ctx, 8);
-	} while(0);
+	}
 }
 
 int main(int argc, char **argv)
