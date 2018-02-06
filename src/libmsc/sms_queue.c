@@ -216,7 +216,7 @@ struct gsm_sms *smsq_take_next_sms(struct gsm_network *net,
 		sms = db_sms_get_next_unsent_rr_msisdn(net, last_msisdn, 9);
 		if (!sms) {
 			last_msisdn[0] = '\0';
-			wrapped ++;
+			wrapped++;
 			continue;
 		}
 

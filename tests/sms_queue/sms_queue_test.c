@@ -107,7 +107,7 @@ struct gsm_sms *__wrap_db_sms_get_next_unsent_rr_msisdn(struct gsm_network *net,
 		fake_sms.receiver = fake_sms_db[i].vsub_attached? &arbitrary_vsub : NULL;
 		osmo_strlcpy(fake_sms.text, fake_sms_db[i].msisdn, sizeof(fake_sms.text));
 		if (fake_sms_db[i].vsub_attached)
-			fake_sms_db[i].nr_of_sms --;
+			fake_sms_db[i].nr_of_sms--;
 		return &fake_sms;
 	}
 	return NULL;

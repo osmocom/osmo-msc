@@ -595,7 +595,7 @@ void vlr_subscr_update_tuples(struct vlr_subscr *vsub,
 		}
 		vsub->auth_tuples[i].vec = gsup->auth_vectors[i];
 		vsub->auth_tuples[i].key_seq = key_seq;
-		got_tuples ++;
+		got_tuples++;
 	}
 
 	LOGVSUBP(LOGL_DEBUG, vsub, "Received %u auth tuples\n", got_tuples);

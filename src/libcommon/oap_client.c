@@ -257,7 +257,7 @@ int oap_client_handle(struct oap_client_state *state,
 		     "OAP registration failed\n");
 		state->state = OAP_INITIALIZED;
 		if (state->registration_failures < 3) {
-			state->registration_failures ++;
+			state->registration_failures++;
 			return oap_client_register(state, msg_tx);
 		}
 		return -11;

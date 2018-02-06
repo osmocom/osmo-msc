@@ -826,8 +826,8 @@ void *msgb_ctx = NULL;
 void run_tests(int nr)
 {
 	int test_nr;
-	nr --; /* arg's first test is 1, in here it's 0 */
-	for (test_nr = 0; msc_vlr_tests[test_nr]; test_nr ++) {
+	nr--; /* arg's first test is 1, in here it's 0 */
+	for (test_nr = 0; msc_vlr_tests[test_nr]; test_nr++) {
 		if (nr >= 0 && test_nr != nr)
 			continue;
 
