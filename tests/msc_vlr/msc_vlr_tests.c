@@ -113,15 +113,10 @@ struct msgb *msgb_from_hex(const char *label, uint16_t size, const char *hex)
 	return msg;
 }
 
-const char *gh_type_name(struct gsm48_hdr *gh)
+static const char *gh_type_name(struct gsm48_hdr *gh)
 {
 	return gsm48_pdisc_msgtype_name(gsm48_hdr_pdisc(gh),
 					gsm48_hdr_msg_type(gh));
-}
-
-const char *msg_type_name(struct msgb *msg)
-{
-	return gh_type_name((void*)msg->data);
 }
 
 void dtap_expect_tx(const char *hex)
@@ -251,7 +246,7 @@ void ms_sends_msg(const char *hex)
 	talloc_free(msg);
 }
 
-int ms_sends_msg_fake(uint8_t pdisc, uint8_t msg_type)
+static int ms_sends_msg_fake(uint8_t pdisc, uint8_t msg_type)
 {
 	int rc;
 	struct msgb *msg;
@@ -326,7 +321,7 @@ void paging_expect_tmsi(uint32_t tmsi)
 	paging_expecting_imsi = NULL;
 }
 
-int _paging_sent(enum ran_type via_ran, const char *imsi, uint32_t tmsi, uint32_t lac)
+static int _paging_sent(enum ran_type via_ran, const char *imsi, uint32_t tmsi, uint32_t lac)
 {
 	log("%s sends out paging request to IMSI %s, TMSI 0x%08x, LAC %u",
 	    ran_type_name(via_ran), imsi, tmsi, lac);
@@ -522,10 +517,10 @@ int __wrap_gsup_client_send(struct gsup_client *gsupc, struct msgb *msg)
 	return 0;
 }
 
-int _validate_dtap(struct msgb *msg, enum ran_type to_ran)
+static int _validate_dtap(struct msgb *msg, enum ran_type to_ran)
 {
 	btw("DTAP --%s--> MS: %s: %s",
-	    ran_type_name(to_ran), msg_type_name(msg),
+	    ran_type_name(to_ran), gh_type_name((void*)msg->data),
 	    osmo_hexdump_nospc(msg->data, msg->len));
 
 	OSMO_ASSERT(dtap_tx_expected);
@@ -748,7 +743,7 @@ void fake_time_start()
 	fake_time_passes(0, 0);
 }
 
-void check_talloc(void *msgb_ctx, void *tall_bsc_ctx, int expected_blocks)
+static void check_talloc(void *msgb_ctx, void *tall_bsc_ctx, int expected_blocks)
 {
 	talloc_report_full(msgb_ctx, stderr);
 	/* Expecting these to stick around in tall_bsc_ctx:
@@ -823,7 +818,7 @@ static void handle_options(int argc, char **argv)
 
 void *msgb_ctx = NULL;
 
-void run_tests(int nr)
+static void run_tests(int nr)
 {
 	int test_nr;
 	const char *imsi = "901700000004620";

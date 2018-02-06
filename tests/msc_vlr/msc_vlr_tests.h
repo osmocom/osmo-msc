@@ -144,8 +144,6 @@ void send_sms(struct vlr_subscr *receiver,
 
 void thwart_rx_non_initial_requests();
 
-void check_talloc(void *msgb_ctx, void *tall_bsc_ctx, int expected_blocks);
-
 #define EXPECT_ACCEPTED(expect_accepted) do { \
 		if (g_conn) \
 			OSMO_ASSERT(conn_exists(g_conn)); \
