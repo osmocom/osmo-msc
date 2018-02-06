@@ -79,7 +79,7 @@ void msc_assign_fail(struct gsm_subscriber_connection *conn,
 		     uint8_t cause, uint8_t *rr_cause);
 
 void msc_subscr_conn_init(void);
-bool msc_subscr_conn_is_accepted(struct gsm_subscriber_connection *conn);
+bool msc_subscr_conn_is_accepted(const struct gsm_subscriber_connection *conn);
 void msc_subscr_conn_communicating(struct gsm_subscriber_connection *conn);
 void msc_subscr_conn_close(struct gsm_subscriber_connection *conn,
 			   uint32_t cause);

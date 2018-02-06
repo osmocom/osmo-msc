@@ -333,7 +333,7 @@ int msc_create_conn_fsm(struct gsm_subscriber_connection *conn, const char *id)
 	return 0;
 }
 
-bool msc_subscr_conn_is_accepted(struct gsm_subscriber_connection *conn)
+bool msc_subscr_conn_is_accepted(const struct gsm_subscriber_connection *conn)
 {
 	if (!conn)
 		return false;
