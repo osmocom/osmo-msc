@@ -268,13 +268,22 @@ static int ms_sends_msg_fake(uint8_t pdisc, uint8_t msg_type)
 	return rc;
 }
 
+static inline void ms_msg_log_err(uint8_t val, uint8_t msgtype)
+{
+	int rc = ms_sends_msg_fake(val, msgtype);
+	if (rc != -EACCES)
+		log("Unexpected return value %u != %u for %s/%s",
+		    -rc, -EACCES, gsm48_pdisc_name(val), gsm48_cc_msg_name(msgtype));
+}
+
 void thwart_rx_non_initial_requests()
 {
 	log("requests shall be thwarted");
-	OSMO_ASSERT(ms_sends_msg_fake(GSM48_PDISC_CC, GSM48_MT_CC_SETUP) == -EACCES);
-	OSMO_ASSERT(ms_sends_msg_fake(GSM48_PDISC_MM, 0x33 /* nonexistent */) == -EACCES);
-	OSMO_ASSERT(ms_sends_msg_fake(GSM48_PDISC_RR, GSM48_MT_RR_SYSINFO_1) == -EACCES);
-	OSMO_ASSERT(ms_sends_msg_fake(GSM48_PDISC_SMS, GSM411_MT_CP_DATA) == -EACCES);
+
+	ms_msg_log_err(GSM48_PDISC_CC, GSM48_MT_CC_SETUP);
+	ms_msg_log_err(GSM48_PDISC_MM, 0x33); /* nonexistent */
+	ms_msg_log_err(GSM48_PDISC_RR, GSM48_MT_RR_SYSINFO_1);
+	ms_msg_log_err(GSM48_PDISC_SMS, GSM411_MT_CP_DATA);
 }
 
 void send_sms(struct vlr_subscr *receiver,
