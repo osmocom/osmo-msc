@@ -818,10 +818,11 @@ static void handle_options(int argc, char **argv)
 
 void *msgb_ctx = NULL;
 
-static void run_tests(int nr)
+static void run_tests(int nr, const char *imsi)
 {
 	int test_nr;
-	const char *imsi = "901700000004620";
+
+	printf("Testing for IMSI %s\n", imsi);
 
 	nr--; /* arg's first test is 1, in here it's 0 */
 	for (test_nr = 0; msc_vlr_tests[test_nr]; test_nr++) {
@@ -880,9 +881,9 @@ int main(int argc, char **argv)
 
 	clear_vlr();
 
-	if (optind >= argc)
-		run_tests(-1);
-	else {
+	if (optind >= argc) {
+		run_tests(-1, "901700000004620");
+	} else {
 		int arg;
 		long int nr;
 		for (arg = optind; arg < argc; arg++) {
@@ -894,7 +895,7 @@ int main(int argc, char **argv)
 				exit(1);
 			}
 
-			run_tests(nr);
+			run_tests(nr, "901700000004620");
 		}
 	}
 
