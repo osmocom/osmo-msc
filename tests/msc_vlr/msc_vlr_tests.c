@@ -829,7 +829,7 @@ void *msgb_ctx = NULL;
 
 static void run_tests(int nr, const char *imsi)
 {
-	int test_nr;
+	uint8_t test_nr;
 
 	printf("Testing for IMSI %s\n", imsi);
 
@@ -838,13 +838,7 @@ static void run_tests(int nr, const char *imsi)
 		if (nr >= 0 && test_nr != nr)
 			continue;
 
-		if (cmdline_opts.verbose)
-			fprintf(stderr, "(test nr %d)\n", test_nr + 1);
-
-		msc_vlr_tests[test_nr](imsi);
-
-		if (cmdline_opts.verbose)
-			fprintf(stderr, "(test nr %d)\n", test_nr + 1);
+		msc_vlr_tests[test_nr](test_nr + 1, imsi);
 
 		check_talloc(msgb_ctx, tall_bsc_ctx, 8);
 	}

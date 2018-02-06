@@ -1,4 +1,4 @@
-===== test_auth_use_twice_geran
+===== [1] test_auth_use_twice_geran(901700000004620)...
 - Location Update request causes a GSUP Send Auth Info request to HLR
   MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
   new conn
@@ -421,12 +421,12 @@ DREF unknown: MSC conn use - compl_l3 == 0 (0x0)
 DRLL Freeing subscriber connection with NULL subscriber
   bssap_clear_sent == 1
   llist_count(&net->subscr_conns) == 0
-===== test_auth_use_twice_geran: SUCCESS
+===== [1] test_auth_use_twice_geran(901700000004620): SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
 talloc_total_blocks(tall_bsc_ctx) == 8
 
-===== test_auth_use_twice_utran
+===== [2] test_auth_use_twice_utran(901700000004620)...
 - Location Update request causes a GSUP Send Auth Info request to HLR
   MSC <--RAN_UTRAN_IU-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
   new conn
@@ -875,12 +875,12 @@ DREF unknown: MSC conn use - compl_l3 == 0 (0x0)
 DRLL Freeing subscriber connection with NULL subscriber
   iu_release_sent == 1
   llist_count(&net->subscr_conns) == 0
-===== test_auth_use_twice_utran: SUCCESS
+===== [2] test_auth_use_twice_utran(901700000004620): SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
 talloc_total_blocks(tall_bsc_ctx) == 8
 
-===== test_auth_use_infinitely_geran
+===== [3] test_auth_use_infinitely_geran(901700000004620)...
 - Location Update request causes a GSUP Send Auth Info request to HLR
   MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
   new conn
@@ -1396,12 +1396,12 @@ DREF unknown: MSC conn use - compl_l3 == 0 (0x0)
 DRLL Freeing subscriber connection with NULL subscriber
   bssap_clear_sent == 1
   llist_count(&net->subscr_conns) == 0
-===== test_auth_use_infinitely_geran: SUCCESS
+===== [3] test_auth_use_infinitely_geran(901700000004620): SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
 talloc_total_blocks(tall_bsc_ctx) == 8
 
-===== test_auth_use_infinitely_utran
+===== [4] test_auth_use_infinitely_utran(901700000004620)...
 - Location Update request causes a GSUP Send Auth Info request to HLR
   MSC <--RAN_UTRAN_IU-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
   new conn
@@ -1951,12 +1951,12 @@ DREF unknown: MSC conn use - compl_l3 == 0 (0x0)
 DRLL Freeing subscriber connection with NULL subscriber
   iu_release_sent == 1
   llist_count(&net->subscr_conns) == 0
-===== test_auth_use_infinitely_utran: SUCCESS
+===== [4] test_auth_use_infinitely_utran(901700000004620): SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
 talloc_total_blocks(tall_bsc_ctx) == 8
 
-===== test_no_auth_reuse_geran
+===== [5] test_no_auth_reuse_geran(901700000004620)...
 - Location Update request causes a GSUP Send Auth Info request to HLR
   MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
   new conn
@@ -2272,12 +2272,12 @@ DREF unknown: MSC conn use - compl_l3 == 0 (0x0)
 DRLL Freeing subscriber connection with NULL subscriber
   bssap_clear_sent == 1
   llist_count(&net->subscr_conns) == 0
-===== test_no_auth_reuse_geran: SUCCESS
+===== [5] test_no_auth_reuse_geran(901700000004620): SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
 talloc_total_blocks(tall_bsc_ctx) == 8
 
-===== test_no_auth_reuse_utran
+===== [6] test_no_auth_reuse_utran(901700000004620)...
 - Location Update request causes a GSUP Send Auth Info request to HLR
   MSC <--RAN_UTRAN_IU-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
   new conn
@@ -2611,7 +2611,7 @@ DREF unknown: MSC conn use - compl_l3 == 0 (0x0)
 DRLL Freeing subscriber connection with NULL subscriber
   iu_release_sent == 1
   llist_count(&net->subscr_conns) == 0
-===== test_no_auth_reuse_utran: SUCCESS
+===== [6] test_no_auth_reuse_utran(901700000004620): SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
 talloc_total_blocks(tall_bsc_ctx) == 8

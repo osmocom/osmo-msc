@@ -1,4 +1,4 @@
-===== test_reject_2nd_conn
+===== [1] test_reject_2nd_conn(901700000004620)...
 - Location Update Request on one connection
   MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
   new conn
@@ -149,12 +149,12 @@ DREF VLR subscr MSISDN:46071 usage decreases to: 1
   lu_result_sent == 1
   llist_count(&net->subscr_conns) == 0
 DREF freeing VLR subscr MSISDN:46071
-===== test_reject_2nd_conn: SUCCESS
+===== [1] test_reject_2nd_conn(901700000004620): SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
 talloc_total_blocks(tall_bsc_ctx) == 8
 
-===== test_reject_lu_during_lu
+===== [2] test_reject_lu_during_lu(901700000004620)...
 - Location Update Request
   MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
   new conn
@@ -274,12 +274,12 @@ DREF VLR subscr MSISDN:46071 usage decreases to: 1
   lu_result_sent == 1
   llist_count(&net->subscr_conns) == 0
 DREF freeing VLR subscr MSISDN:46071
-===== test_reject_lu_during_lu: SUCCESS
+===== [2] test_reject_lu_during_lu(901700000004620): SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
 talloc_total_blocks(tall_bsc_ctx) == 8
 
-===== test_reject_cm_during_lu
+===== [3] test_reject_cm_during_lu(901700000004620)...
 - Location Update Request
   MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
   new conn
@@ -405,12 +405,12 @@ DREF VLR subscr MSISDN:46071 usage decreases to: 1
   lu_result_sent == 1
   llist_count(&net->subscr_conns) == 0
 DREF freeing VLR subscr MSISDN:46071
-===== test_reject_cm_during_lu: SUCCESS
+===== [3] test_reject_cm_during_lu(901700000004620): SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
 talloc_total_blocks(tall_bsc_ctx) == 8
 
-===== test_reject_paging_resp_during_lu
+===== [4] test_reject_paging_resp_during_lu(901700000004620)...
 - Location Update Request
   MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
   new conn
@@ -531,12 +531,12 @@ DREF VLR subscr MSISDN:46071 usage decreases to: 1
   lu_result_sent == 1
   llist_count(&net->subscr_conns) == 0
 DREF freeing VLR subscr MSISDN:46071
-===== test_reject_paging_resp_during_lu: SUCCESS
+===== [4] test_reject_paging_resp_during_lu(901700000004620): SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
 talloc_total_blocks(tall_bsc_ctx) == 8
 
-===== test_reject_lu_during_cm
+===== [5] test_reject_lu_during_cm(901700000004620)...
 ---
 - Subscriber does a normal LU
 - Location Update Request
@@ -724,12 +724,12 @@ DREF VLR subscr MSISDN:46071 usage decreases to: 0
 DREF freeing VLR subscr MSISDN:46071
   bssap_clear_sent == 1
   llist_count(&net->subscr_conns) == 0
-===== test_reject_lu_during_cm: SUCCESS
+===== [5] test_reject_lu_during_cm(901700000004620): SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
 talloc_total_blocks(tall_bsc_ctx) == 8
 
-===== test_reject_cm_during_cm
+===== [6] test_reject_cm_during_cm(901700000004620)...
 ---
 - Subscriber does a normal LU
 - Location Update Request
@@ -919,12 +919,12 @@ DREF VLR subscr MSISDN:46071 usage decreases to: 0
 DREF freeing VLR subscr MSISDN:46071
   bssap_clear_sent == 1
   llist_count(&net->subscr_conns) == 0
-===== test_reject_cm_during_cm: SUCCESS
+===== [6] test_reject_cm_during_cm(901700000004620): SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
 talloc_total_blocks(tall_bsc_ctx) == 8
 
-===== test_reject_paging_resp_during_cm
+===== [7] test_reject_paging_resp_during_cm(901700000004620)...
 ---
 - Subscriber does a normal LU
 - Location Update Request
@@ -1120,12 +1120,12 @@ DREF VLR subscr MSISDN:46071 usage decreases to: 1
 - all requests serviced, conn has been released
   llist_count(&net->subscr_conns) == 0
 DREF freeing VLR subscr MSISDN:46071
-===== test_reject_paging_resp_during_cm: SUCCESS
+===== [7] test_reject_paging_resp_during_cm(901700000004620): SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
 talloc_total_blocks(tall_bsc_ctx) == 8
 
-===== test_reject_lu_during_paging_resp
+===== [8] test_reject_lu_during_paging_resp(901700000004620)...
 ---
 - Subscriber does a normal LU
 - Location Update Request
@@ -1347,12 +1347,12 @@ DREF VLR subscr MSISDN:46071 usage decreases to: 1
 - SMS is done
   llist_count(&net->subscr_conns) == 0
 DREF freeing VLR subscr MSISDN:46071
-===== test_reject_lu_during_paging_resp: SUCCESS
+===== [8] test_reject_lu_during_paging_resp(901700000004620): SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
 talloc_total_blocks(tall_bsc_ctx) == 8
 
-===== test_accept_cm_during_paging_resp
+===== [9] test_accept_cm_during_paging_resp(901700000004620)...
 ---
 - Subscriber does a normal LU
 - Location Update Request
@@ -1591,12 +1591,12 @@ DREF VLR subscr MSISDN:46071 usage decreases to: 0
 DREF freeing VLR subscr MSISDN:46071
   bssap_clear_sent == 1
   llist_count(&net->subscr_conns) == 0
-===== test_accept_cm_during_paging_resp: SUCCESS
+===== [9] test_accept_cm_during_paging_resp(901700000004620): SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
 talloc_total_blocks(tall_bsc_ctx) == 8
 
-===== test_reject_paging_resp_during_paging_resp
+===== [10] test_reject_paging_resp_during_paging_resp(901700000004620)...
 ---
 - Subscriber does a normal LU
 - Location Update Request
@@ -1817,7 +1817,7 @@ DREF VLR subscr MSISDN:46071 usage decreases to: 1
 - SMS is done
   llist_count(&net->subscr_conns) == 0
 DREF freeing VLR subscr MSISDN:46071
-===== test_reject_paging_resp_during_paging_resp: SUCCESS
+===== [10] test_reject_paging_resp_during_paging_resp(901700000004620): SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
 talloc_total_blocks(tall_bsc_ctx) == 8

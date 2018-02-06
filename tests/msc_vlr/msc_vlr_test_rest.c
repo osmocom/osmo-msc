@@ -23,9 +23,9 @@
 
 #include "msc_vlr_tests.h"
 
-void test_early_stage()
+void test_early_stage(uint8_t nr, const char *imsi)
 {
-	comment_start();
+	comment_start(nr, imsi);
 
 	btw("NULL conn");
 	EXPECT_ACCEPTED(false);
@@ -59,12 +59,12 @@ void test_early_stage()
 	EXPECT_CONN_COUNT(0);
 
 	clear_vlr();
-	comment_end();
+	comment_end(nr, imsi);
 }
 
-void test_cm_service_without_lu()
+void test_cm_service_without_lu(uint8_t nr, const char *imsi)
 {
-	comment_start();
+	comment_start(nr, imsi);
 
 	btw("CM Service Request without a prior Location Updating");
 	expect_bssap_clear();
@@ -75,12 +75,12 @@ void test_cm_service_without_lu()
 	EXPECT_CONN_COUNT(0);
 
 	clear_vlr();
-	comment_end();
+	comment_end(nr, imsi);
 }
 
-void test_two_lu()
+void test_two_lu(uint8_t nr, const char *imsi)
 {
-	comment_start();
+	comment_start(nr, imsi);
 
 	btw("Location Update request causes a GSUP LU request to HLR");
 	lu_result_sent = RES_NONE;
@@ -147,12 +147,12 @@ void test_two_lu()
 
 	EXPECT_CONN_COUNT(0);
 	clear_vlr();
-	comment_end();
+	comment_end(nr, imsi);
 }
 
-void test_lu_unknown_tmsi()
+void test_lu_unknown_tmsi(uint8_t nr, const char *imsi)
 {
-	comment_start();
+	comment_start(nr, imsi);
 
 	btw("Location Update request with unknown TMSI sends ID Request for IMSI");
 	lu_result_sent = RES_NONE;
@@ -188,7 +188,7 @@ void test_lu_unknown_tmsi()
 	VERBOSE_ASSERT(lu_result_sent, == RES_ACCEPT, "%d");
 	EXPECT_CONN_COUNT(0);
 	clear_vlr();
-	comment_end();
+	comment_end(nr, imsi);
 }
 
 msc_vlr_test_func_t msc_vlr_tests[] = {

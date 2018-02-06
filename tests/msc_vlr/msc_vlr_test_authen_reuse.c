@@ -284,46 +284,46 @@ void _test_auth_reuse(enum ran_type via_ran,
 	clear_vlr();
 }
 
-void test_auth_use_twice_geran()
+void test_auth_use_twice_geran(uint8_t nr, const char *imsi)
 {
-	comment_start();
+	comment_start(nr, imsi);
 	_test_auth_reuse(RAN_GERAN_A, 1, 1, true);
-	comment_end();
+	comment_end(nr, imsi);
 }
 
-void test_auth_use_twice_utran()
+void test_auth_use_twice_utran(uint8_t nr, const char *imsi)
 {
-	comment_start();
+	comment_start(nr, imsi);
 	_test_auth_reuse(RAN_UTRAN_IU, 1, 1, true);
-	comment_end();
+	comment_end(nr, imsi);
 }
 
-void test_auth_use_infinitely_geran()
+void test_auth_use_infinitely_geran(uint8_t nr, const char *imsi)
 {
-	comment_start();
+	comment_start(nr, imsi);
 	_test_auth_reuse(RAN_GERAN_A, -1, 3, false);
-	comment_end();
+	comment_end(nr, imsi);
 }
 
-void test_auth_use_infinitely_utran()
+void test_auth_use_infinitely_utran(uint8_t nr, const char *imsi)
 {
-	comment_start();
+	comment_start(nr, imsi);
 	_test_auth_reuse(RAN_UTRAN_IU, -1, 3, false);
-	comment_end();
+	comment_end(nr, imsi);
 }
 
-void test_no_auth_reuse_geran()
+void test_no_auth_reuse_geran(uint8_t nr, const char *imsi)
 {
-	comment_start();
+	comment_start(nr, imsi);
 	_test_auth_reuse(RAN_GERAN_A, 0, 0, true);
-	comment_end();
+	comment_end(nr, imsi);
 }
 
-void test_no_auth_reuse_utran()
+void test_no_auth_reuse_utran(uint8_t nr, const char *imsi)
 {
-	comment_start();
+	comment_start(nr, imsi);
 	_test_auth_reuse(RAN_UTRAN_IU, 0, 0, true);
-	comment_end();
+	comment_end(nr, imsi);
 }
 
 msc_vlr_test_func_t msc_vlr_tests[] = {

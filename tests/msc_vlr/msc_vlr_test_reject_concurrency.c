@@ -23,10 +23,10 @@
 
 #include "msc_vlr_tests.h"
 
-void test_reject_2nd_conn()
+void test_reject_2nd_conn(uint8_t nr, const char *imsi)
 {
 	struct gsm_subscriber_connection *conn1;
-	comment_start();
+	comment_start(nr, imsi);
 
 	btw("Location Update Request on one connection");
 	lu_result_sent = RES_NONE;
@@ -64,7 +64,7 @@ void test_reject_2nd_conn()
 	EXPECT_CONN_COUNT(0);
 
 	clear_vlr();
-	comment_end();
+	comment_end(nr, imsi);
 }
 
 void _normal_lu_part1()
@@ -188,9 +188,9 @@ void _paging_resp_part2(int expect_conn_count, bool expect_clear)
 	EXPECT_CONN_COUNT(expect_conn_count);
 }
 
-void test_reject_lu_during_lu()
+void test_reject_lu_during_lu(uint8_t nr, const char *imsi)
 {
-	comment_start();
+	comment_start(nr, imsi);
 
 	_normal_lu_part1();
 
@@ -203,12 +203,12 @@ void test_reject_lu_during_lu()
 	_normal_lu_part2();
 
 	clear_vlr();
-	comment_end();
+	comment_end(nr, imsi);
 }
 
-void test_reject_cm_during_lu()
+void test_reject_cm_during_lu(uint8_t nr, const char *imsi)
 {
-	comment_start();
+	comment_start(nr, imsi);
 
 	_normal_lu_part1();
 
@@ -224,12 +224,12 @@ void test_reject_cm_during_lu()
 	_normal_lu_part2();
 
 	clear_vlr();
-	comment_end();
+	comment_end(nr, imsi);
 }
 
-void test_reject_paging_resp_during_lu()
+void test_reject_paging_resp_during_lu(uint8_t nr, const char *imsi)
 {
-	comment_start();
+	comment_start(nr, imsi);
 
 	_normal_lu_part1();
 
@@ -242,12 +242,12 @@ void test_reject_paging_resp_during_lu()
 	_normal_lu_part2();
 
 	clear_vlr();
-	comment_end();
+	comment_end(nr, imsi);
 }
 
-void test_reject_lu_during_cm()
+void test_reject_lu_during_cm(uint8_t nr, const char *imsi)
 {
-	comment_start();
+	comment_start(nr, imsi);
 
 	_normal_lu();
 	_normal_cm_service_req();
@@ -266,12 +266,12 @@ void test_reject_lu_during_cm()
 	EXPECT_CONN_COUNT(0);
 
 	clear_vlr();
-	comment_end();
+	comment_end(nr, imsi);
 }
 
-void test_reject_cm_during_cm()
+void test_reject_cm_during_cm(uint8_t nr, const char *imsi)
 {
-	comment_start();
+	comment_start(nr, imsi);
 
 	_normal_lu();
 	_normal_cm_service_req();
@@ -289,12 +289,12 @@ void test_reject_cm_during_cm()
 	EXPECT_CONN_COUNT(0);
 
 	clear_vlr();
-	comment_end();
+	comment_end(nr, imsi);
 }
 
-void test_reject_paging_resp_during_cm()
+void test_reject_paging_resp_during_cm(uint8_t nr, const char *imsi)
 {
-	comment_start();
+	comment_start(nr, imsi);
 
 	_normal_lu();
 	_normal_cm_service_req();
@@ -314,12 +314,12 @@ void test_reject_paging_resp_during_cm()
 	EXPECT_CONN_COUNT(0);
 
 	clear_vlr();
-	comment_end();
+	comment_end(nr, imsi);
 }
 
-void test_reject_paging_resp_during_paging_resp(const char *imsi)
+void test_reject_paging_resp_during_paging_resp(uint8_t nr, const char *imsi)
 {
-	comment_start();
+	comment_start(nr, imsi);
 
 	_normal_lu();
 	_page(imsi);
@@ -331,12 +331,12 @@ void test_reject_paging_resp_during_paging_resp(const char *imsi)
 	_paging_resp_part2(0, true);
 
 	clear_vlr();
-	comment_end();
+	comment_end(nr, imsi);
 }
 
-void test_reject_lu_during_paging_resp(const char *imsi)
+void test_reject_lu_during_paging_resp(uint8_t nr, const char *imsi)
 {
-	comment_start();
+	comment_start(nr, imsi);
 
 	_normal_lu();
 	_page(imsi);
@@ -351,12 +351,12 @@ void test_reject_lu_during_paging_resp(const char *imsi)
 	_paging_resp_part2(0, true);
 
 	clear_vlr();
-	comment_end();
+	comment_end(nr, imsi);
 }
 
-void test_accept_cm_during_paging_resp(const char *imsi)
+void test_accept_cm_during_paging_resp(uint8_t nr, const char *imsi)
 {
-	comment_start();
+	comment_start(nr, imsi);
 
 	_normal_lu();
 	_page(imsi);
@@ -378,7 +378,7 @@ void test_accept_cm_during_paging_resp(const char *imsi)
 	EXPECT_CONN_COUNT(0);
 
 	clear_vlr();
-	comment_end();
+	comment_end(nr, imsi);
 }
 
 msc_vlr_test_func_t msc_vlr_tests[] = {

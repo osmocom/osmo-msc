@@ -23,14 +23,14 @@
 
 #include "msc_vlr_tests.h"
 
-void test_no_authen(const char *imsi)
+void test_no_authen(uint8_t nr, const char *imsi)
 {
 	struct vlr_subscr *vsub;
 	
 	/* No auth only works on GERAN */
 	rx_from_ran = RAN_GERAN_A;
 
-	comment_start();
+	comment_start(nr, imsi);
 
 	btw("Location Update request causes a GSUP LU request to HLR");
 	lu_result_sent = RES_NONE;
@@ -158,16 +158,16 @@ void test_no_authen(const char *imsi)
 
 	EXPECT_CONN_COUNT(0);
 	clear_vlr();
-	comment_end();
+	comment_end(nr, imsi);
 }
 
-void test_no_authen_tmsi(const char *imsi)
+void test_no_authen_tmsi(uint8_t nr, const char *imsi)
 {
 	struct vlr_subscr *vsub;
 
 	rx_from_ran = RAN_GERAN_A;
 
-	comment_start();
+	comment_start(nr, imsi);
 
 	net->vlr->cfg.assign_tmsi = true;
 
@@ -377,16 +377,16 @@ void test_no_authen_tmsi(const char *imsi)
 
 	EXPECT_CONN_COUNT(0);
 	clear_vlr();
-	comment_end();
+	comment_end(nr, imsi);
 }
 
-void test_no_authen_imei(const char *imsi)
+void test_no_authen_imei(uint8_t nr, const char *imsi)
 {
 	struct vlr_subscr *vsub;
 
 	rx_from_ran = RAN_GERAN_A;
 
-	comment_start();
+	comment_start(nr, imsi);
 
 	net->vlr->cfg.check_imei_rqd = true;
 
@@ -444,16 +444,16 @@ void test_no_authen_imei(const char *imsi)
 
 	EXPECT_CONN_COUNT(0);
 	clear_vlr();
-	comment_end();
+	comment_end(nr, imsi);
 }
 
-void test_no_authen_tmsi_imei(const char *imsi)
+void test_no_authen_tmsi_imei(uint8_t nr, const char *imsi)
 {
 	struct vlr_subscr *vsub;
 
 	rx_from_ran = RAN_GERAN_A;
 
-	comment_start();
+	comment_start(nr, imsi);
 
 	net->vlr->cfg.assign_tmsi = true;
 	net->vlr->cfg.check_imei_rqd = true;
@@ -520,17 +520,17 @@ void test_no_authen_tmsi_imei(const char *imsi)
 
 	EXPECT_CONN_COUNT(0);
 	clear_vlr();
-	comment_end();
+	comment_end(nr, imsi);
 }
 
-void test_no_authen_imeisv(const char *imsi)
+void test_no_authen_imeisv(uint8_t nr, const char *imsi)
 {
 	struct vlr_subscr *vsub;
 	
 	/* No auth only works on GERAN */
 	rx_from_ran = RAN_GERAN_A;
 
-	comment_start();
+	comment_start(nr, imsi);
 
 	net->vlr->cfg.retrieve_imeisv_early = true;
 
@@ -580,16 +580,16 @@ void test_no_authen_imeisv(const char *imsi)
 
 	EXPECT_CONN_COUNT(0);
 	clear_vlr();
-	comment_end();
+	comment_end(nr, imsi);
 }
 
-void test_no_authen_imeisv_imei(const char *imsi)
+void test_no_authen_imeisv_imei(uint8_t nr, const char *imsi)
 {
 	struct vlr_subscr *vsub;
 
 	rx_from_ran = RAN_GERAN_A;
 
-	comment_start();
+	comment_start(nr, imsi);
 
 	net->vlr->cfg.retrieve_imeisv_early = true;
 	net->vlr->cfg.check_imei_rqd = true;
@@ -657,16 +657,16 @@ void test_no_authen_imeisv_imei(const char *imsi)
 
 	EXPECT_CONN_COUNT(0);
 	clear_vlr();
-	comment_end();
+	comment_end(nr, imsi);
 }
 
-void test_no_authen_imeisv_tmsi(const char *imsi)
+void test_no_authen_imeisv_tmsi(uint8_t nr, const char *imsi)
 {
 	struct vlr_subscr *vsub;
 
 	rx_from_ran = RAN_GERAN_A;
 
-	comment_start();
+	comment_start(nr, imsi);
 
 	net->vlr->cfg.retrieve_imeisv_early = true;
 	net->vlr->cfg.assign_tmsi = true;
@@ -794,16 +794,16 @@ void test_no_authen_imeisv_tmsi(const char *imsi)
 
 	EXPECT_CONN_COUNT(0);
 	clear_vlr();
-	comment_end();
+	comment_end(nr, imsi);
 }
 
-void test_no_authen_imeisv_tmsi_imei(const char *imsi)
+void test_no_authen_imeisv_tmsi_imei(uint8_t nr, const char *imsi)
 {
 	struct vlr_subscr *vsub;
 
 	rx_from_ran = RAN_GERAN_A;
 
-	comment_start();
+	comment_start(nr, imsi);
 
 	net->vlr->cfg.retrieve_imeisv_early = true;
 	net->vlr->cfg.assign_tmsi = true;
@@ -883,7 +883,7 @@ void test_no_authen_imeisv_tmsi_imei(const char *imsi)
 
 	EXPECT_CONN_COUNT(0);
 	clear_vlr();
-	comment_end();
+	comment_end(nr, imsi);
 }
 
 

@@ -46,8 +46,8 @@ extern bool _log_lines;
 #define btw(fmt, args...) _log("- " fmt, ## args )
 #define log(fmt, args...) _log("  " fmt, ## args )
 
-#define comment_start() fprintf(stderr, "===== %s\n", __func__);
-#define comment_end() fprintf(stderr, "===== %s: SUCCESS\n\n", __func__);
+#define comment_start(nr, imsi) fprintf(stderr, "===== [%u] %s(%s)...\n", nr, __func__, imsi);
+#define comment_end(nr, imsi) fprintf(stderr, "===== [%u] %s(%s): SUCCESS\n\n", nr, __func__, imsi);
 
 extern struct gsm_subscriber_connection *g_conn;
 extern struct gsm_network *net;
@@ -122,7 +122,7 @@ struct msc_vlr_test_cmdline_opts {
 	int run_test_nr;
 };
 
-typedef void (* msc_vlr_test_func_t )(const char *);
+typedef void (* msc_vlr_test_func_t )(uint8_t, const char *);
 extern msc_vlr_test_func_t msc_vlr_tests[];
 
 struct msgb *msgb_from_hex(const char *label, uint16_t size, const char *hex);

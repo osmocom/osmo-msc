@@ -23,11 +23,11 @@
 
 #include "msc_vlr_tests.h"
 
-void test_gsm_authen(const char *imsi)
+void test_gsm_authen(uint8_t nr, const char *imsi)
 {
 	struct vlr_subscr *vsub;
 
-	comment_start();
+	comment_start(nr, imsi);
 
 	net->authentication_required = true;
 
@@ -209,14 +209,14 @@ void test_gsm_authen(const char *imsi)
 
 	EXPECT_CONN_COUNT(0);
 	clear_vlr();
-	comment_end();
+	comment_end(nr, imsi);
 }
 
-void test_gsm_authen_tmsi(const char *imsi)
+void test_gsm_authen_tmsi(uint8_t nr, const char *imsi)
 {
 	struct vlr_subscr *vsub;
 
-	comment_start();
+	comment_start(nr, imsi);
 
 	net->authentication_required = true;
 	net->vlr->cfg.assign_tmsi = true;
@@ -485,14 +485,14 @@ void test_gsm_authen_tmsi(const char *imsi)
 
 	EXPECT_CONN_COUNT(0);
 	clear_vlr();
-	comment_end();
+	comment_end(nr, imsi);
 }
 
-void test_gsm_authen_imei(const char *imsi)
+void test_gsm_authen_imei(uint8_t nr, const char *imsi)
 {
 	struct vlr_subscr *vsub;
 
-	comment_start();
+	comment_start(nr, imsi);
 
 	net->authentication_required = true;
 	net->vlr->cfg.check_imei_rqd = true;
@@ -580,14 +580,14 @@ void test_gsm_authen_imei(const char *imsi)
 
 	EXPECT_CONN_COUNT(0);
 	clear_vlr();
-	comment_end();
+	comment_end(nr, imsi);
 }
 
-void test_gsm_authen_tmsi_imei(const char *imsi)
+void test_gsm_authen_tmsi_imei(uint8_t nr, const char *imsi)
 {
 	struct vlr_subscr *vsub;
 
-	comment_start();
+	comment_start(nr, imsi);
 
 	net->authentication_required = true;
 	net->vlr->cfg.assign_tmsi = true;
@@ -695,15 +695,15 @@ void test_gsm_authen_tmsi_imei(const char *imsi)
 
 	EXPECT_CONN_COUNT(0);
 	clear_vlr();
-	comment_end();
+	comment_end(nr, imsi);
 }
 
-void test_gsm_milenage_authen()
+void test_gsm_milenage_authen(uint8_t nr, const char *ignored)
 {
 	struct vlr_subscr *vsub;
 	const char *imsi = "901700000010650";
 
-	comment_start();
+	comment_start(nr, imsi);
 
 	net->authentication_required = true;
 	rx_from_ran = RAN_GERAN_A;
@@ -907,7 +907,7 @@ void test_gsm_milenage_authen()
 
 	EXPECT_CONN_COUNT(0);
 	clear_vlr();
-	comment_end();
+	comment_end(nr, imsi);
 }
 
 msc_vlr_test_func_t msc_vlr_tests[] = {

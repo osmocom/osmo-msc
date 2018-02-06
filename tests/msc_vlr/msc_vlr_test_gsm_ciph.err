@@ -1,4 +1,4 @@
-===== test_ciph
+===== [1] test_ciph(901700000004620)...
 - Location Update request causes a GSUP Send Auth Info request to HLR
   MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
   new conn
@@ -478,12 +478,12 @@ DREF unknown: MSC conn use - compl_l3 == 0 (0x0)
 DRLL Freeing subscriber connection with NULL subscriber
   bssap_clear_sent == 1
   llist_count(&net->subscr_conns) == 0
-===== test_ciph: SUCCESS
+===== [1] test_ciph(901700000004620): SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
 talloc_total_blocks(tall_bsc_ctx) == 8
 
-===== test_ciph_tmsi
+===== [2] test_ciph_tmsi(901700000004620)...
 - Location Update request causes a GSUP Send Auth Info request to HLR
   MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
   new conn
@@ -1000,12 +1000,12 @@ DREF unknown: MSC conn use - compl_l3 == 0 (0x0)
 DRLL Freeing subscriber connection with NULL subscriber
   bssap_clear_sent == 1
   llist_count(&net->subscr_conns) == 0
-===== test_ciph_tmsi: SUCCESS
+===== [2] test_ciph_tmsi(901700000004620): SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
 talloc_total_blocks(tall_bsc_ctx) == 8
 
-===== test_ciph_imei
+===== [3] test_ciph_imei(901700000004620)...
 - Location Update request causes a GSUP Send Auth Info request to HLR
   MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
   new conn
@@ -1221,12 +1221,12 @@ DREF unknown: MSC conn use - compl_l3 == 0 (0x0)
 DRLL Freeing subscriber connection with NULL subscriber
   bssap_clear_sent == 1
   llist_count(&net->subscr_conns) == 0
-===== test_ciph_imei: SUCCESS
+===== [3] test_ciph_imei(901700000004620): SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
 talloc_total_blocks(tall_bsc_ctx) == 8
 
-===== test_ciph_imeisv
+===== [4] test_ciph_imeisv(901700000004620)...
 - Location Update request causes a GSUP Send Auth Info request to HLR
   MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
   new conn
@@ -1431,12 +1431,12 @@ DREF unknown: MSC conn use - compl_l3 == 0 (0x0)
 DRLL Freeing subscriber connection with NULL subscriber
   bssap_clear_sent == 1
   llist_count(&net->subscr_conns) == 0
-===== test_ciph_imeisv: SUCCESS
+===== [4] test_ciph_imeisv(901700000004620): SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
 talloc_total_blocks(tall_bsc_ctx) == 8
 
-===== test_ciph_tmsi_imei
+===== [5] test_ciph_tmsi_imei(901700000004620)...
 - Location Update request causes a GSUP Send Auth Info request to HLR
   MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
   new conn
@@ -1683,7 +1683,7 @@ DREF unknown: MSC conn use - compl_l3 == 0 (0x0)
 DRLL Freeing subscriber connection with NULL subscriber
   bssap_clear_sent == 1
   llist_count(&net->subscr_conns) == 0
-===== test_ciph_tmsi_imei: SUCCESS
+===== [5] test_ciph_tmsi_imei(901700000004620): SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
 talloc_total_blocks(tall_bsc_ctx) == 8

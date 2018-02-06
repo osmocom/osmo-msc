@@ -151,13 +151,13 @@ static void standard_lu()
 	vlr_subscr_put(vsub);
 }
 
-void test_call_mo()
+void test_call_mo(uint8_t nr, const char *imsi)
 {
 	struct gsm_mncc mncc = {
 		.imsi = IMSI,
 	};
 
-	comment_start();
+	comment_start(nr, imsi);
 
 	fake_time_start();
 
@@ -248,17 +248,17 @@ void test_call_mo()
 
 	EXPECT_CONN_COUNT(0);
 	clear_vlr();
-	comment_end();
+	comment_end(nr, imsi);
 }
 
-void test_call_mt()
+void test_call_mt(uint8_t nr, const char *imsi)
 {
 	struct gsm_mncc mncc = {
 		.imsi = IMSI,
 		.callref = 0x423,
 	};
 
-	comment_start();
+	comment_start(nr, imsi);
 
 	fake_time_start();
 
@@ -331,7 +331,7 @@ void test_call_mt()
 
 	EXPECT_CONN_COUNT(0);
 	clear_vlr();
-	comment_end();
+	comment_end(nr, imsi);
 }
 
 msc_vlr_test_func_t msc_vlr_tests[] = {

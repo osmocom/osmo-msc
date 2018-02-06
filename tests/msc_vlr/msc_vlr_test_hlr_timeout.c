@@ -25,9 +25,9 @@
 
 #include <osmocom/core/logging.h>
 
-void test_hlr_timeout_lu_auth_info()
+void test_hlr_timeout_lu_auth_info(uint8_t nr, const char *imsi)
 {
-	comment_start();
+	comment_start(nr, imsi);
 
 	fake_time_start();
 
@@ -61,12 +61,12 @@ void test_hlr_timeout_lu_auth_info()
 	VERBOSE_ASSERT(lu_result_sent, == RES_REJECT, "%d");
 
 	clear_vlr();
-	comment_end();
+	comment_end(nr, imsi);
 }
 
-void test_hlr_timeout_lu_upd_loc_result()
+void test_hlr_timeout_lu_upd_loc_result(uint8_t nr, const char *imsi)
 {
-	comment_start();
+	comment_start(nr, imsi);
 
 	fake_time_start();
 
@@ -108,7 +108,7 @@ void test_hlr_timeout_lu_upd_loc_result()
 	VERBOSE_ASSERT(lu_result_sent, == RES_REJECT, "%d");
 
 	clear_vlr();
-	comment_end();
+	comment_end(nr, imsi);
 }
 
 msc_vlr_test_func_t msc_vlr_tests[] = {
