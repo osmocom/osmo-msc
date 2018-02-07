@@ -182,10 +182,9 @@ void test_ms_timeout_cm_auth_resp()
 	comment_end();
 }
 
-void test_ms_timeout_paging()
+void test_ms_timeout_paging(const char *imsi)
 {
 	struct vlr_subscr *vsub;
-	const char *imsi = "901700000004620";
 
 	rx_from_ran = RAN_GERAN_A;
 

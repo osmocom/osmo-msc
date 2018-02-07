@@ -115,9 +115,8 @@ void _normal_cm_service_req()
 	EXPECT_ACCEPTED(true);
 }
 
-void _page()
+void _page(const char *imsi)
 {
-	const char *imsi = "901700000004620";
 	struct vlr_subscr *vsub;
 
 	BTW("an SMS is sent, MS is paged");
@@ -318,12 +317,12 @@ void test_reject_paging_resp_during_cm()
 	comment_end();
 }
 
-void test_reject_paging_resp_during_paging_resp()
+void test_reject_paging_resp_during_paging_resp(const char *imsi)
 {
 	comment_start();
 
 	_normal_lu();
-	_page();
+	_page(imsi);
 	_paging_resp_part1();
 
 	BTW("MS sends another erratic Paging Response which is dropped silently");
@@ -335,12 +334,12 @@ void test_reject_paging_resp_during_paging_resp()
 	comment_end();
 }
 
-void test_reject_lu_during_paging_resp()
+void test_reject_lu_during_paging_resp(const char *imsi)
 {
 	comment_start();
 
 	_normal_lu();
-	_page();
+	_page(imsi);
 	_paging_resp_part1();
 
 	BTW("MS sends erratic LU Request, which is dropped silently");
@@ -355,12 +354,12 @@ void test_reject_lu_during_paging_resp()
 	comment_end();
 }
 
-void test_accept_cm_during_paging_resp()
+void test_accept_cm_during_paging_resp(const char *imsi)
 {
 	comment_start();
 
 	_normal_lu();
-	_page();
+	_page(imsi);
 	_paging_resp_part1();
 
 	BTW("CM Service Request during open connection is accepted");

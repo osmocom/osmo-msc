@@ -826,6 +826,8 @@ void *msgb_ctx = NULL;
 void run_tests(int nr)
 {
 	int test_nr;
+	const char *imsi = "901700000004620";
+
 	nr--; /* arg's first test is 1, in here it's 0 */
 	for (test_nr = 0; msc_vlr_tests[test_nr]; test_nr++) {
 		if (nr >= 0 && test_nr != nr)
@@ -834,7 +836,7 @@ void run_tests(int nr)
 		if (cmdline_opts.verbose)
 			fprintf(stderr, "(test nr %d)\n", test_nr + 1);
 
-		msc_vlr_tests[test_nr]();
+		msc_vlr_tests[test_nr](imsi);
 
 		if (cmdline_opts.verbose)
 			fprintf(stderr, "(test nr %d)\n", test_nr + 1);

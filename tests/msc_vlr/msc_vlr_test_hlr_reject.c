@@ -75,10 +75,9 @@ void test_hlr_rej_auth_info_net_fail()
 	comment_end();
 }
 
-void test_hlr_rej_auth_info_net_fail_no_reuse_tuples()
+void test_hlr_rej_auth_info_net_fail_no_reuse_tuples(const char *imsi)
 {
 	struct vlr_subscr *vsub;
-	const char *imsi = "901700000004620";
 
 	comment_start();
 
@@ -162,10 +161,9 @@ void test_hlr_rej_auth_info_net_fail_no_reuse_tuples()
 	comment_end();
 }
 
-void test_hlr_rej_auth_info_unkown_imsi_no_reuse_tuples()
+void test_hlr_rej_auth_info_unkown_imsi_no_reuse_tuples(const char *imsi)
 {
 	struct vlr_subscr *vsub;
-	const char *imsi = "901700000004620";
 
 	comment_start();
 
@@ -282,10 +280,9 @@ void test_hlr_acc_but_no_auth_tuples()
 	comment_end();
 }
 
-void test_hlr_rej_auth_info_net_fail_reuse_tuples()
+void test_hlr_rej_auth_info_net_fail_reuse_tuples(const char *imsi)
 {
 	struct vlr_subscr *vsub;
-	const char *imsi = "901700000004620";
 
 	comment_start();
 

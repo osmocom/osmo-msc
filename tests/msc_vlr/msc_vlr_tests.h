@@ -122,7 +122,7 @@ struct msc_vlr_test_cmdline_opts {
 	int run_test_nr;
 };
 
-typedef void (* msc_vlr_test_func_t )(void);
+typedef void (* msc_vlr_test_func_t )(const char *);
 extern msc_vlr_test_func_t msc_vlr_tests[];
 
 struct msgb *msgb_from_hex(const char *label, uint16_t size, const char *hex);
