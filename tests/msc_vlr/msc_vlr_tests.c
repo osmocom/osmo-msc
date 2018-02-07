@@ -844,6 +844,29 @@ static void run_tests(int nr, const char *imsi)
 	}
 }
 
+struct gsm_network *test_net(void *ctx)
+{
+	struct gsm_network *net = gsm_network_init(ctx, 1, 1, mncc_recv);
+
+	net->gsup_server_addr_str = talloc_strdup(net, "no_gsup_server");
+	net->gsup_server_port = 0;
+
+	OSMO_ASSERT(msc_vlr_alloc(net) == 0);
+	OSMO_ASSERT(msc_vlr_start(net) == 0);
+	OSMO_ASSERT(net->vlr);
+	OSMO_ASSERT(net->vlr->gsup_client);
+
+	net->vlr->ops.tx_lu_acc = fake_vlr_tx_lu_acc;
+	net->vlr->ops.tx_lu_rej = fake_vlr_tx_lu_rej;
+	net->vlr->ops.tx_cm_serv_acc = fake_vlr_tx_cm_serv_acc;
+	net->vlr->ops.tx_cm_serv_rej = fake_vlr_tx_cm_serv_rej;
+	net->vlr->ops.tx_auth_req = fake_vlr_tx_auth_req;
+	net->vlr->ops.tx_auth_rej = fake_vlr_tx_auth_rej;
+	net->vlr->ops.set_ciph_mode = fake_vlr_tx_ciph_mode_cmd;
+
+	return net;
+}
+
 int main(int argc, char **argv)
 {
 	handle_options(argc, argv);
@@ -863,24 +886,11 @@ int main(int argc, char **argv)
 	if (cmdline_opts.verbose)
 		log_set_category_filter(osmo_stderr_target, DLSMS, 1, LOGL_DEBUG);
 
-	net = gsm_network_init(tall_bsc_ctx, 1, 1, mncc_recv);
-	net->gsup_server_addr_str = talloc_strdup(net, "no_gsup_server");
-	net->gsup_server_port = 0;
+	net = test_net(tall_bsc_ctx);
 
 	osmo_fsm_log_addr(false);
-	OSMO_ASSERT(msc_vlr_alloc(net) == 0);
-	OSMO_ASSERT(msc_vlr_start(net) == 0);
-	OSMO_ASSERT(net->vlr);
-	OSMO_ASSERT(net->vlr->gsup_client);
-	msc_subscr_conn_init();
 
-	net->vlr->ops.tx_lu_acc = fake_vlr_tx_lu_acc;
-	net->vlr->ops.tx_lu_rej = fake_vlr_tx_lu_rej;
-	net->vlr->ops.tx_cm_serv_acc = fake_vlr_tx_cm_serv_acc;
-	net->vlr->ops.tx_cm_serv_rej = fake_vlr_tx_cm_serv_rej;
-	net->vlr->ops.tx_auth_req = fake_vlr_tx_auth_req;
-	net->vlr->ops.tx_auth_rej = fake_vlr_tx_auth_rej;
-	net->vlr->ops.set_ciph_mode = fake_vlr_tx_ciph_mode_cmd;
+	msc_subscr_conn_init();
 
 	clear_vlr();
 
