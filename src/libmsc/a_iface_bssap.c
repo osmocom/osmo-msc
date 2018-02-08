@@ -698,8 +698,6 @@ int a_sccp_rx_dt(struct osmo_sccp_user *scu, const struct a_conn_info *a_conn_in
 	OSMO_ASSERT(a_conn_info);
 	OSMO_ASSERT(msg);
 
-	LOGP(DMSC, LOGL_DEBUG, "Rx BSC DT: %s\n", msgb_hexdump(msg));
-
 	if (msgb_l2len(msg) < sizeof(struct bssmap_header)) {
 		LOGP(DMSC, LOGL_NOTICE, "The header is too short -- discarding message!\n");
 		msgb_free(msg);
