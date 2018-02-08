@@ -31,10 +31,15 @@ struct mgcp_ctx {
 	/* FSM instance, which handles the connection switching procedure */
 	struct osmo_fsm_inst *fsm;
 
-	/* RTP endpoint number. This number identifies the endpoint
+	/* RTP endpoint string. This string identifies the endpoint
 	 * on the MGW on which the RAN and CN connection is created. This
-	 * endpoint number is assigned and released automatically. */
-	uint16_t rtp_endpoint;
+	 * endpoint number is assigned by the MGW. */
+	char rtp_endpoint[MGCP_ENDPOINT_MAXLEN];
+
+	/* Call id of the current call. Will be derived from the callref
+	 * of the transaction that is valid during the first CRCX. (The
+	 * callref may change throughout the call) */
+	unsigned int call_id;
 
 	/* Set to true, when the context information is no longer needed */
 	bool free_ctx;

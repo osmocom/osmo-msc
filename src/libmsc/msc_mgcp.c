@@ -51,7 +51,7 @@
 #define MGCP_ASS_TIMEOUT 10	/* in seconds */
 #define MGCP_ASS_TIMEOUT_TIMER_NR 4
 
-#define MGCP_ENDPOINT_FORMAT "%x@mgw"
+#define ENDPOINT_ID "rtpbridge/*@mgw"
 
 /* Some internal cause codes to indicate fault condition inside the FSM */
 enum msc_mgcp_cause_code {
@@ -218,9 +218,6 @@ static int fsm_timeout_cb(struct osmo_fsm_inst *fi)
 		 * there is no meaningful action we can take now other than
 		 * giving up. */
 
-		/* At least release the occupied endpoint ID */
-		mgcp_client_release_endpoint(mgcp_ctx->rtp_endpoint, mgcp);
-
 		/* Cancel the transaction that timed out */
 		mgcp_client_cancel(mgcp, mgcp_ctx->mgw_pending_trans);
 
@@ -271,8 +268,6 @@ static void fsm_crcx_ran_cb(struct osmo_fsm_inst *fi, uint32_t event, void *data
 	mgcp = mgcp_ctx->mgcp;
 	OSMO_ASSERT(mgcp);
 
-	mgcp_ctx->rtp_endpoint = mgcp_client_next_endpoint(mgcp);
-
 	LOGPFSML(fi, LOGL_DEBUG,
 		 "CRCX/RAN: creating connection for the RAN side on MGW endpoint:0x%x...\n", mgcp_ctx->rtp_endpoint);
 
@@ -280,14 +275,15 @@ static void fsm_crcx_ran_cb(struct osmo_fsm_inst *fi, uint32_t event, void *data
 	mgcp_msg = (struct mgcp_msg) {
 		.verb = MGCP_VERB_CRCX,
 		.presence = (MGCP_MSG_PRESENCE_ENDPOINT | MGCP_MSG_PRESENCE_CALL_ID | MGCP_MSG_PRESENCE_CONN_MODE),
-		.call_id = mgcp_ctx->rtp_endpoint,
+		.call_id = mgcp_ctx->call_id,
 		.conn_mode = MGCP_CONN_LOOPBACK
 	};
-	if (snprintf(mgcp_msg.endpoint, MGCP_ENDPOINT_MAXLEN, MGCP_ENDPOINT_FORMAT, mgcp_ctx->rtp_endpoint) >=
+	if (osmo_strlcpy(mgcp_msg.endpoint, mgcp_ctx->rtp_endpoint, sizeof(mgcp_msg.endpoint)) >=
 	    MGCP_ENDPOINT_MAXLEN) {
 		handle_error(mgcp_ctx, MGCP_ERR_TOOLONG, true);
 		return;
 	}
+
 	msg = mgcp_msg_gen(mgcp, &mgcp_msg);
 	OSMO_ASSERT(msg);
 
@@ -323,9 +319,11 @@ static void mgw_crcx_ran_resp_cb(struct mgcp_response *r, void *priv)
 		return;
 	}
 
-	/* memorize connection identifier */
+	/* memorize connection identifier and specific endpoint id */
 	osmo_strlcpy(mgcp_ctx->conn_id_ran, r->head.conn_id, sizeof(mgcp_ctx->conn_id_ran));
 	LOGPFSML(mgcp_ctx->fsm, LOGL_DEBUG, "CRCX/RAN: MGW responded with CI: %s\n", mgcp_ctx->conn_id_ran);
+	osmo_strlcpy(mgcp_ctx->rtp_endpoint, r->head.endpoint, sizeof(mgcp_ctx->rtp_endpoint));
+	LOGPFSML(mgcp_ctx->fsm, LOGL_DEBUG, "CRCX/RAN: MGW assigned endpoint: %s\n", mgcp_ctx->rtp_endpoint);
 
 	rc = mgcp_response_parse_params(r);
 	if (rc) {
@@ -373,14 +371,15 @@ static void fsm_crcx_cn_cb(struct osmo_fsm_inst *fi, uint32_t event, void *data)
 	mgcp_msg = (struct mgcp_msg) {
 		.verb = MGCP_VERB_CRCX,
 		.presence = (MGCP_MSG_PRESENCE_ENDPOINT | MGCP_MSG_PRESENCE_CALL_ID | MGCP_MSG_PRESENCE_CONN_MODE),
-		.call_id = mgcp_ctx->rtp_endpoint,
+		.call_id = mgcp_ctx->call_id,
 		.conn_mode = MGCP_CONN_LOOPBACK
 	};
-	if (snprintf(mgcp_msg.endpoint, MGCP_ENDPOINT_MAXLEN, MGCP_ENDPOINT_FORMAT, mgcp_ctx->rtp_endpoint) >=
+	if (osmo_strlcpy(mgcp_msg.endpoint, mgcp_ctx->rtp_endpoint, sizeof(mgcp_msg.endpoint)) >=
 	    MGCP_ENDPOINT_MAXLEN) {
 		handle_error(mgcp_ctx, MGCP_ERR_TOOLONG, true);
 		return;
 	}
+
 	msg = mgcp_msg_gen(mgcp, &mgcp_msg);
 	OSMO_ASSERT(msg);
 
@@ -533,17 +532,18 @@ static void fsm_mdcx_cn_cb(struct osmo_fsm_inst *fi, uint32_t event, void *data)
 		.presence = (MGCP_MSG_PRESENCE_ENDPOINT | MGCP_MSG_PRESENCE_CALL_ID | MGCP_MSG_PRESENCE_CONN_ID |
 			     MGCP_MSG_PRESENCE_CONN_MODE | MGCP_MSG_PRESENCE_AUDIO_IP |
 			     MGCP_MSG_PRESENCE_AUDIO_PORT),
-		.call_id = mgcp_ctx->rtp_endpoint,
+		.call_id = mgcp_ctx->call_id,
 		.conn_id = mgcp_ctx->conn_id_cn,
 		.conn_mode = MGCP_CONN_RECV_SEND,
 		.audio_ip = conn->rtp.remote_addr_cn,
 		.audio_port = conn->rtp.remote_port_cn
 	};
-	if (snprintf(mgcp_msg.endpoint, MGCP_ENDPOINT_MAXLEN, MGCP_ENDPOINT_FORMAT, mgcp_ctx->rtp_endpoint) >=
+	if (osmo_strlcpy(mgcp_msg.endpoint, mgcp_ctx->rtp_endpoint, sizeof(mgcp_msg.endpoint)) >=
 	    MGCP_ENDPOINT_MAXLEN) {
 		handle_error(mgcp_ctx, MGCP_ERR_TOOLONG, true);
 		return;
 	}
+
 	msg = mgcp_msg_gen(mgcp, &mgcp_msg);
 	OSMO_ASSERT(msg);
 
@@ -649,17 +649,18 @@ static void fsm_mdcx_ran_cb(struct osmo_fsm_inst *fi, uint32_t event, void *data
 		.presence = (MGCP_MSG_PRESENCE_ENDPOINT | MGCP_MSG_PRESENCE_CALL_ID | MGCP_MSG_PRESENCE_CONN_ID |
 			     MGCP_MSG_PRESENCE_CONN_MODE | MGCP_MSG_PRESENCE_AUDIO_IP |
 			     MGCP_MSG_PRESENCE_AUDIO_PORT),
-		.call_id = mgcp_ctx->rtp_endpoint,
+		.call_id = mgcp_ctx->call_id,
 		.conn_id = mgcp_ctx->conn_id_ran,
 		.conn_mode = MGCP_CONN_RECV_SEND,
 		.audio_ip = conn->rtp.remote_addr_ran,
 		.audio_port = conn->rtp.remote_port_ran
 	};
-	if (snprintf(mgcp_msg.endpoint, MGCP_ENDPOINT_MAXLEN, MGCP_ENDPOINT_FORMAT, mgcp_ctx->rtp_endpoint) >=
+	if (osmo_strlcpy(mgcp_msg.endpoint, mgcp_ctx->rtp_endpoint, sizeof(mgcp_msg.endpoint)) >=
 	    MGCP_ENDPOINT_MAXLEN) {
 		handle_error(mgcp_ctx, MGCP_ERR_TOOLONG, true);
 		return;
 	}
+
 	msg = mgcp_msg_gen(mgcp, &mgcp_msg);
 	OSMO_ASSERT(msg);
 
@@ -729,21 +730,18 @@ static void fsm_call_cb(struct osmo_fsm_inst *fi, uint32_t event, void *data)
 	LOGPFSML(fi, LOGL_DEBUG,
 		 "DLCX: removing connection for the RAN and CN side on MGW endpoint:0x%x...\n", mgcp_ctx->rtp_endpoint);
 
-	/* We now relase the endpoint back to the pool in order to allow
-	 * other connections to use this endpoint */
-	mgcp_client_release_endpoint(mgcp_ctx->rtp_endpoint, mgcp);
-
 	/* Generate MGCP message string */
 	mgcp_msg = (struct mgcp_msg) {
 		.verb = MGCP_VERB_DLCX,
 		.presence = (MGCP_MSG_PRESENCE_ENDPOINT | MGCP_MSG_PRESENCE_CALL_ID),
-		.call_id = mgcp_ctx->rtp_endpoint
+		.call_id = mgcp_ctx->call_id
 	};
-	if (snprintf(mgcp_msg.endpoint, MGCP_ENDPOINT_MAXLEN, MGCP_ENDPOINT_FORMAT, mgcp_ctx->rtp_endpoint) >=
+	if (osmo_strlcpy(mgcp_msg.endpoint, mgcp_ctx->rtp_endpoint, sizeof(mgcp_msg.endpoint)) >=
 	    MGCP_ENDPOINT_MAXLEN) {
 		handle_error(mgcp_ctx, MGCP_ERR_TOOLONG, true);
 		return;
 	}
+
 	msg = mgcp_msg_gen(mgcp, &mgcp_msg);
 	OSMO_ASSERT(msg);
 
@@ -950,12 +948,19 @@ int msc_mgcp_call_assignment(struct gsm_trans *trans)
 	/* Allocate and configure a new fsm instance */
 	mgcp_ctx = talloc_zero(NULL, struct mgcp_ctx);
 	OSMO_ASSERT(mgcp_ctx);
-
+	if (osmo_strlcpy(mgcp_ctx->rtp_endpoint, ENDPOINT_ID, sizeof(mgcp_ctx->rtp_endpoint)) >=
+	    MGCP_ENDPOINT_MAXLEN) {
+		talloc_free(mgcp_ctx);
+		LOGP(DMGCP, LOGL_ERROR, "(subscriber:%s) endpoint identifier (%s) exceeds maximum length...\n",
+		     vlr_subscr_name(trans->vsub), ENDPOINT_ID);
+		return -EINVAL;
+	}
 	mgcp_ctx->fsm = osmo_fsm_inst_alloc(&fsm_msc_mgcp, NULL, NULL, LOGL_DEBUG, name);
 	OSMO_ASSERT(mgcp_ctx->fsm);
 	mgcp_ctx->fsm->priv = mgcp_ctx;
 	mgcp_ctx->mgcp = mgcp;
 	mgcp_ctx->trans = trans;
+	mgcp_ctx->call_id = trans->callref;
 
 	/* start state machine */
 	OSMO_ASSERT(mgcp_ctx->fsm->state == ST_CRCX_RAN);
