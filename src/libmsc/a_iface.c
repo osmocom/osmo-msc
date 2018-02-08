@@ -65,6 +65,7 @@ static struct gsm_network *gsm_network = NULL;
 struct bsc_conn {
 	struct llist_head list;
 	uint32_t conn_id;			/* Connection identifier */
+	struct bsc_context *bsc;
 };
 
 /* Internal list with connections we currently maintain. This
@@ -72,7 +73,7 @@ struct bsc_conn {
 static LLIST_HEAD(active_connections);
 
 /* Record info of a new active connection in the active connection list */
-static void record_bsc_con(const void *ctx, uint32_t conn_id)
+static void record_bsc_con(const void *ctx, struct bsc_context *bsc, uint32_t conn_id)
 {
 	struct bsc_conn *conn;
 
@@ -80,6 +81,7 @@ static void record_bsc_con(const void *ctx, uint32_t conn_id)
 	OSMO_ASSERT(conn);
 
 	conn->conn_id = conn_id;
+	conn->bsc = bsc;
 
 	llist_add_tail(&conn->list, &active_connections);
 }
@@ -99,23 +101,32 @@ void a_delete_bsc_con(uint32_t conn_id)
 	}
 }
 
-/* Check if a specified connection id has an active SCCP connection */
-static bool check_connection_active(uint32_t conn_id)
+/* Find a specified connection id */
+static struct bsc_conn *find_bsc_con(uint32_t conn_id)
 {
 	struct bsc_conn *conn;
 
 	/* Find the address for the current connection id */
 	llist_for_each_entry(conn, &active_connections, list) {
 		if (conn->conn_id == conn_id) {
-			return true;
+			return conn;
 		}
 	}
 
-	return false;
+	return NULL;
 }
 
-/* Get the reset context for a specifiec calling (BSC) address */
-static struct a_reset_ctx *get_reset_ctx_by_sccp_addr(const struct osmo_sccp_addr *addr)
+/* Check if a specified connection id has an active SCCP connection */
+static bool check_connection_active(uint32_t conn_id)
+{
+	if (find_bsc_con(conn_id))
+		return true;
+	else
+		return false;
+}
+
+/* Get the context for a specific calling (BSC) address */
+static struct bsc_context *get_bsc_context_by_sccp_addr(const struct osmo_sccp_addr *addr)
 {
 	struct bsc_context *bsc_ctx;
 	struct osmo_ss7_instance *ss7;
@@ -125,7 +136,7 @@ static struct a_reset_ctx *get_reset_ctx_by_sccp_addr(const struct osmo_sccp_add
 
 	llist_for_each_entry(bsc_ctx, &gsm_network->a.bscs, list) {
 		if (memcmp(&bsc_ctx->bsc_addr, addr, sizeof(*addr)) == 0)
-			return bsc_ctx->reset;
+			return bsc_ctx;
 	}
 
 	ss7 = osmo_ss7_instance_find(gsm_network->a.cs7_instance);
@@ -452,20 +463,11 @@ static void a_reset_cb(const void *priv)
 }
 
 /* Add a new BSC connection to our internal list with known BSCs */
-static void add_bsc(const struct osmo_sccp_addr *msc_addr, const struct osmo_sccp_addr *bsc_addr,
-		    struct osmo_sccp_user *scu)
+static struct bsc_context *add_bsc(const struct osmo_sccp_addr *msc_addr,
+				   const struct osmo_sccp_addr *bsc_addr, struct osmo_sccp_user *scu)
 {
 	struct bsc_context *bsc_ctx;
 	struct osmo_ss7_instance *ss7;
-	char bsc_name[32];
-
-	OSMO_ASSERT(bsc_addr);
-	OSMO_ASSERT(msc_addr);
-	OSMO_ASSERT(scu);
-
-	/* Check if we already know this BSC, if yes, skip adding it. */
-	if (get_reset_ctx_by_sccp_addr(bsc_addr))
-		return;
 
 	ss7 = osmo_ss7_instance_find(gsm_network->a.cs7_instance);
 	OSMO_ASSERT(ss7);
@@ -479,9 +481,34 @@ static void add_bsc(const struct osmo_sccp_addr *msc_addr, const struct osmo_scc
 	bsc_ctx->sccp_user = scu;
 	llist_add_tail(&bsc_ctx->list, &gsm_network->a.bscs);
 
+	return bsc_ctx;
+}
+
+/* start the BSSMAP RESET fsm */
+void a_start_reset(struct bsc_context *bsc_ctx, bool already_connected)
+{
+	char bsc_name[32];
+	OSMO_ASSERT(bsc_ctx->reset == NULL);
 	/* Start reset procedure to make the new connection active */
-	snprintf(bsc_name, sizeof(bsc_name), "bsc-%i", bsc_addr->pc);
-	bsc_ctx->reset = a_reset_alloc(bsc_ctx, bsc_name, a_reset_cb, bsc_ctx, false);
+	snprintf(bsc_name, sizeof(bsc_name), "bsc-%i", bsc_ctx->bsc_addr.pc);
+	bsc_ctx->reset = a_reset_alloc(bsc_ctx, bsc_name, a_reset_cb, bsc_ctx, already_connected);
+}
+
+/* determine if given msg is a BSSMAP RESET (true) or not (false) */
+static bool bssmap_is_reset(struct msgb *msg)
+{
+	struct bssmap_header *bs = (struct bssmap_header *)msgb_l2(msg);
+
+	if (msgb_l2len(msg) < sizeof(*bs))
+		return false;
+
+	if (bs->type != BSSAP_MSG_BSS_MANAGEMENT)
+		return false;
+
+	if (msg->l2h[sizeof(*bs)] == BSS_MAP_MSG_RESET)
+		return true;
+
+	return false;
 }
 
 /* Callback function, called by the SSCP stack when data arrives */
@@ -491,39 +518,53 @@ static int sccp_sap_up(struct osmo_prim_hdr *oph, void *_scu)
 	struct osmo_scu_prim *scu_prim = (struct osmo_scu_prim *)oph;
 	int rc = 0;
 	struct a_conn_info a_conn_info;
+	struct bsc_conn *bsc_con;
+
 	memset(&a_conn_info, 0, sizeof(a_conn_info));
 	a_conn_info.network = gsm_network;
-	a_conn_info.reset = NULL;
 
 	switch (OSMO_PRIM_HDR(&scu_prim->oph)) {
 	case OSMO_PRIM(OSMO_SCU_PRIM_N_CONNECT, PRIM_OP_INDICATION):
 		/* Handle inbound connection indication */
-		add_bsc(&scu_prim->u.connect.called_addr, &scu_prim->u.connect.calling_addr, scu);
 		a_conn_info.conn_id = scu_prim->u.connect.conn_id;
-		a_conn_info.msc_addr = &scu_prim->u.connect.called_addr;
-		a_conn_info.bsc_addr = &scu_prim->u.connect.calling_addr;
-		a_conn_info.reset = get_reset_ctx_by_sccp_addr(&scu_prim->u.unitdata.calling_addr);
+		a_conn_info.bsc = get_bsc_context_by_sccp_addr(&scu_prim->u.unitdata.calling_addr);
+		if (!a_conn_info.bsc) {
+			/* We haven't heard from this BSC before, allocate it */
+			a_conn_info.bsc = add_bsc(&scu_prim->u.connect.called_addr,
+						  &scu_prim->u.connect.calling_addr, scu);
+			a_start_reset(a_conn_info.bsc, false);
+		} else {
+			/* This BSC is already known to us, check if we have been through reset yet */
+			if (a_reset_conn_ready(a_conn_info.bsc->reset) == false) {
+				LOGP(DMSC, LOGL_NOTICE, "Refusing N-CONNECT.ind(%u, %s), BSC not reset yet\n",
+				     scu_prim->u.connect.conn_id, osmo_hexdump(msgb_l2(oph->msg), msgb_l2len(oph->msg)));
+				rc = osmo_sccp_tx_disconn(scu, a_conn_info.conn_id, &a_conn_info.bsc->msc_addr,
+							  SCCP_RETURN_CAUSE_UNQUALIFIED);
+				break;
+			}
 
-		if (a_reset_conn_ready(a_conn_info.reset) == false) {
-			rc = osmo_sccp_tx_disconn(scu, a_conn_info.conn_id, a_conn_info.msc_addr,
-						  SCCP_RETURN_CAUSE_UNQUALIFIED);
-			break;
+			osmo_sccp_tx_conn_resp(scu, scu_prim->u.connect.conn_id, &scu_prim->u.connect.called_addr, NULL, 0);
+			if (msgb_l2len(oph->msg) > 0) {
+				LOGP(DMSC, LOGL_DEBUG, "N-CONNECT.ind(%u, %s)\n",
+				     scu_prim->u.connect.conn_id, osmo_hexdump(msgb_l2(oph->msg), msgb_l2len(oph->msg)));
+				rc = a_sccp_rx_dt(scu, &a_conn_info, oph->msg);
+			} else
+				LOGP(DMSC, LOGL_DEBUG, "N-CONNECT.ind(%u)\n", scu_prim->u.connect.conn_id);
+
+			record_bsc_con(scu, a_conn_info.bsc, scu_prim->u.connect.conn_id);
 		}
-
-		osmo_sccp_tx_conn_resp(scu, scu_prim->u.connect.conn_id, &scu_prim->u.connect.called_addr, NULL, 0);
-		if (msgb_l2len(oph->msg) > 0) {
-			LOGP(DMSC, LOGL_DEBUG, "N-CONNECT.ind(%u, %s)\n",
-			     scu_prim->u.connect.conn_id, osmo_hexdump(msgb_l2(oph->msg), msgb_l2len(oph->msg)));
-			rc = a_sccp_rx_dt(scu, &a_conn_info, oph->msg);
-		} else
-			LOGP(DMSC, LOGL_DEBUG, "N-CONNECT.ind(%u)\n", scu_prim->u.connect.conn_id);
-
-		record_bsc_con(scu, scu_prim->u.connect.conn_id);
 		break;
 
 	case OSMO_PRIM(OSMO_SCU_PRIM_N_DATA, PRIM_OP_INDICATION):
 		/* Handle incoming connection oriented data */
+		bsc_con = find_bsc_con(scu_prim->u.data.conn_id);
+		if (!bsc_con) {
+			LOGP(DMSC, LOGL_ERROR, "N-DATA.ind(%u, %s) for unknown conn_id\n",
+				scu_prim->u.data.conn_id, osmo_hexdump(msgb_l2(oph->msg), msgb_l2len(oph->msg)));
+			break;
+		}
 		a_conn_info.conn_id = scu_prim->u.data.conn_id;
+		a_conn_info.bsc = bsc_con->bsc;
 		LOGP(DMSC, LOGL_DEBUG, "N-DATA.ind(%u, %s)\n",
 		     scu_prim->u.data.conn_id, osmo_hexdump(msgb_l2(oph->msg), msgb_l2len(oph->msg)));
 		a_sccp_rx_dt(scu, &a_conn_info, oph->msg);
@@ -531,10 +572,26 @@ static int sccp_sap_up(struct osmo_prim_hdr *oph, void *_scu)
 
 	case OSMO_PRIM(OSMO_SCU_PRIM_N_UNITDATA, PRIM_OP_INDICATION):
 		/* Handle inbound UNITDATA */
-		add_bsc(&scu_prim->u.unitdata.called_addr, &scu_prim->u.unitdata.calling_addr, scu);
-		a_conn_info.msc_addr = &scu_prim->u.unitdata.called_addr;
-		a_conn_info.bsc_addr = &scu_prim->u.unitdata.calling_addr;
-		a_conn_info.reset = get_reset_ctx_by_sccp_addr(&scu_prim->u.unitdata.calling_addr);
+		a_conn_info.bsc = get_bsc_context_by_sccp_addr(&scu_prim->u.unitdata.calling_addr);
+		if (!a_conn_info.bsc) {
+			/* We haven't heard from this BSC before, allocate it */
+			a_conn_info.bsc = add_bsc(&scu_prim->u.unitdata.called_addr,
+						&scu_prim->u.unitdata.calling_addr, scu);
+			/* if this not an inbound RESET, trigger an outbound RESET */
+			if (!bssmap_is_reset(oph->msg)) {
+				LOGP(DMSC, LOGL_NOTICE, "Ignoring N-UNITDATA.ind(%s), BSC not reset yet\n",
+					osmo_hexdump(msgb_l2(oph->msg), msgb_l2len(oph->msg)));
+				a_start_reset(a_conn_info.bsc, false);
+				break;
+			}
+		} else {
+			/* This BSC is already known to us, check if we have been through reset yet */
+			if (a_reset_conn_ready(a_conn_info.bsc->reset) == false) {
+				LOGP(DMSC, LOGL_NOTICE, "Ignoring N-UNITDATA.ind(%s), BSC not reset yet\n",
+					osmo_hexdump(msgb_l2(oph->msg), msgb_l2len(oph->msg)));
+				break;
+			}
+		}
 		DEBUGP(DMSC, "N-UNITDATA.ind(%s)\n", osmo_hexdump(msgb_l2(oph->msg), msgb_l2len(oph->msg)));
 		a_sccp_rx_udt(scu, &a_conn_info, oph->msg);
 		break;

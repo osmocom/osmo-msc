@@ -20,17 +20,17 @@
 
 #pragma once
 
+#include <osmocom/msc/a_iface.h>
+
 /* Note: The structs and functions presented in this header file are intended
  * to be used only by a_iface.c. */
 
 /* A structure to hold tha most basic information about a sigtran connection
  * we use this struct internally here to pass connection data around */
 struct a_conn_info {
-	struct osmo_sccp_addr *msc_addr;
-	struct osmo_sccp_addr *bsc_addr;
+	struct bsc_context *bsc;
 	uint32_t conn_id;
 	struct gsm_network *network;
-	struct a_reset_ctx *reset;
 };
 
 /* Receive incoming connection less data messages via sccp */

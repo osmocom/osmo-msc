@@ -66,7 +66,7 @@ static struct gsm_subscriber_connection *subscr_conn_allocate_a(const struct a_c
 
 	/* Also backup the calling address of the BSC, this allows us to
 	 * identify later which BSC is responsible for this subscriber connection */
-	memcpy(&conn->a.bsc_addr, a_conn_info->bsc_addr, sizeof(conn->a.bsc_addr));
+	memcpy(&conn->a.bsc_addr, &a_conn_info->bsc->bsc_addr, sizeof(conn->a.bsc_addr));
 
 	llist_add_tail(&conn->entry, &network->subscr_conns);
 	LOGP(DMSC, LOGL_NOTICE, "A-Interface subscriber connection successfully allocated!\n");
@@ -111,11 +111,15 @@ static void bssmap_rx_reset(struct osmo_sccp_user *scu, const struct a_conn_info
 	OSMO_ASSERT(ss7);
 
 	LOGP(DMSC, LOGL_NOTICE, "Rx RESET from BSC %s, sending RESET ACK\n",
-	     osmo_sccp_addr_name(ss7, a_conn_info->bsc_addr));
-	osmo_sccp_tx_unitdata_msg(scu, a_conn_info->msc_addr, a_conn_info->bsc_addr, gsm0808_create_reset_ack());
+	     osmo_sccp_addr_name(ss7, &a_conn_info->bsc->bsc_addr));
+	osmo_sccp_tx_unitdata_msg(scu, &a_conn_info->bsc->msc_addr, &a_conn_info->bsc->bsc_addr,
+				  gsm0808_create_reset_ack());
 
 	/* Make sure all orphand subscriber connections will be cleard */
-	a_clear_all(scu, a_conn_info->bsc_addr);
+	a_clear_all(scu, &a_conn_info->bsc->bsc_addr);
+
+	if (!a_conn_info->bsc->reset)
+		a_start_reset(a_conn_info->bsc, true);
 
 	msgb_free(msg);
 }
@@ -131,17 +135,18 @@ static void bssmap_rx_reset_ack(const struct osmo_sccp_user *scu, const struct a
 	ss7 = osmo_ss7_instance_find(network->a.cs7_instance);
 	OSMO_ASSERT(ss7);
 
-	if (a_conn_info->reset == NULL) {
+	if (a_conn_info->bsc->reset == NULL) {
 		LOGP(DMSC, LOGL_ERROR, "Received RESET ACK from an unknown BSC %s, ignoring...\n",
-		     osmo_sccp_addr_name(ss7, a_conn_info->bsc_addr));
+		     osmo_sccp_addr_name(ss7, &a_conn_info->bsc->bsc_addr));
 		goto fail;
 	}
 
-	LOGP(DMSC, LOGL_NOTICE, "Received RESET ACK from BSC %s\n", osmo_sccp_addr_name(ss7, a_conn_info->bsc_addr));
+	LOGP(DMSC, LOGL_NOTICE, "Received RESET ACK from BSC %s\n",
+		osmo_sccp_addr_name(ss7, &a_conn_info->bsc->bsc_addr));
 
 	/* Confirm that we managed to get the reset ack message
 	 * towards the connection reset logic */
-	a_reset_ack_confirm(a_conn_info->reset);
+	a_reset_ack_confirm(a_conn_info->bsc->reset);
 
 fail:
 	msgb_free(msg);
@@ -261,7 +266,7 @@ static int bssmap_rx_clear_complete(struct osmo_sccp_user *scu, const struct a_c
 
 	LOGP(DMSC, LOGL_NOTICE, "Releasing connection (conn_id=%i)\n", a_conn_info->conn_id);
 	rc = osmo_sccp_tx_disconn(scu, a_conn_info->conn_id,
-				  a_conn_info->msc_addr, SCCP_RELEASE_CAUSE_END_USER_ORIGINATED);
+				  NULL, SCCP_RELEASE_CAUSE_END_USER_ORIGINATED);
 
 	/* Remove the record from the list with active connections. */
 	a_delete_bsc_con(a_conn_info->conn_id);

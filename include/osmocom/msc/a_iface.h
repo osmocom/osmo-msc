@@ -73,6 +73,8 @@ int a_iface_tx_clear_cmd(struct gsm_subscriber_connection *conn);
  * (Helper function for a_iface_bssap.c) */
 void a_clear_all(struct osmo_sccp_user *scu, const struct osmo_sccp_addr *bsc_addr);
 
+void a_start_reset(struct bsc_context *bsc_ctx, bool already_connected);
+
 /* Delete info of a closed connection from the active connection list
  * (Helper function for a_iface_bssap.c) */
 void a_delete_bsc_con(uint32_t conn_id);
