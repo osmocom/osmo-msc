@@ -44,7 +44,7 @@
 
 #define MGCP_MGW_TIMEOUT 4	/* in seconds */
 #define MGCP_MGW_TIMEOUT_TIMER_NR 1
-#define MGCP_RAN_TIMEOUT 10	/* in seconds */
+#define MGCP_RAN_TIMEOUT 120	/* in seconds */
 #define MGCP_RAN_TIMEOUT_TIMER_NR 2
 #define MGCP_REL_TIMEOUT 60	/* in seconds */
 #define MGCP_REL_TIMEOUT_TIMER_NR 3
@@ -445,8 +445,7 @@ static void fsm_crcx_compl(struct osmo_fsm_inst *fi, uint32_t event, void *data)
 	/* Note: When we reach this point then the situation is basically that
 	 * we have two sides connected, both are in loopback. The local ports
 	 * of the side pointing towards the BSS should be already communicated
-	 * and we are waiting now for the BSS to return with the assignment
-	 * complete command. */
+	 * and we are waiting now the other end to pick up. */
 	osmo_fsm_inst_state_chg(fi, ST_MDCX_CN, MGCP_RAN_TIMEOUT, MGCP_RAN_TIMEOUT_TIMER_NR);
 	return;
 
