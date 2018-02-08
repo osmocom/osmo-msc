@@ -122,7 +122,7 @@ static void send_signal(int sig_no,
 
 static int gsm411_sendmsg(struct gsm_subscriber_connection *conn, struct msgb *msg)
 {
-	DEBUGP(DLSMS, "GSM4.11 TX %s\n", osmo_hexdump(msg->data, msg->len));
+	DEBUGP(DLSMS, "GSM4.11 TX %s\n", msgb_hexdump(msg));
 	msg->l3h = msg->data;
 	return msc_tx_dtap(conn, msg);
 }

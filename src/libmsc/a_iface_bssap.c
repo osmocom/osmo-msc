@@ -191,7 +191,7 @@ void a_sccp_rx_udt(struct osmo_sccp_user *scu, const struct a_conn_info *a_conn_
 	OSMO_ASSERT(a_conn_info);
 	OSMO_ASSERT(msg);
 
-	LOGP(DMSC, LOGL_NOTICE, "Rx BSC UDT: %s\n", osmo_hexdump(msgb_l2(msg), msgb_l2len(msg)));
+	LOGP(DMSC, LOGL_NOTICE, "Rx BSSMAP UDT: %s\n", msgb_hexdump_l2(msg));
 
 	if (msgb_l2len(msg) < sizeof(*bs)) {
 		LOGP(DMSC, LOGL_ERROR, "Error: Header is too short -- discarding message!\n");
@@ -698,7 +698,7 @@ int a_sccp_rx_dt(struct osmo_sccp_user *scu, const struct a_conn_info *a_conn_in
 	OSMO_ASSERT(a_conn_info);
 	OSMO_ASSERT(msg);
 
-	LOGP(DMSC, LOGL_NOTICE, "Rx BSC DT: %s\n", osmo_hexdump(msgb_l2(msg), msgb_l2len(msg)));
+	LOGP(DMSC, LOGL_NOTICE, "Rx BSC DT: %s\n", msgb_hexdump(msg));
 
 	if (msgb_l2len(msg) < sizeof(struct bssmap_header)) {
 		LOGP(DMSC, LOGL_NOTICE, "The header is too short -- discarding message!\n");

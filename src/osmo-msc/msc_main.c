@@ -278,9 +278,7 @@ static struct vty_app_info msc_vty_info = {
 #ifdef BUILD_IU
 static int rcvmsg_iu_cs(struct msgb *msg, struct gprs_ra_id *ra_id, uint16_t *sai)
 {
-	DEBUGP(DIUCS, "got IuCS message"
-	       " %d bytes: %s\n",
-	       msg->len, osmo_hexdump(msg->data, msg->len));
+	DEBUGP(DIUCS, "got IuCS message %d bytes: %s\n", msg->len, msgb_hexdump(msg));
 	if (ra_id) {
 		DEBUGP(DIUCS, "got IuCS message on"
 		       " MNC %d MCC %d LAC %d RAC %d\n",

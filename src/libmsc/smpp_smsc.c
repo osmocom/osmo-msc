@@ -742,7 +742,7 @@ static int smpp_pdu_rx(struct osmo_esme *esme, struct msgb *msg __uses)
 	int rc = 0;
 
 	LOGP(DSMPP, LOGL_DEBUG, "[%s] smpp_pdu_rx(%s)\n", esme->system_id,
-	     osmo_hexdump(msgb_data(msg), msgb_length(msg)));
+	     msgb_hexdump(msg));
 
 	switch (cmd_id) {
 	case GENERIC_NACK:

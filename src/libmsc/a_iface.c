@@ -173,7 +173,7 @@ int a_iface_tx_dtap(struct msgb *msg)
 		return -EINVAL;
 	}
 
-	LOGPCONN(conn, LOGL_DEBUG, "N-DATA.req(%s)\n", osmo_hexdump(msg_resp->data, msg_resp->len));
+	LOGPCONN(conn, LOGL_DEBUG, "N-DATA.req(%s)\n", msgb_hexdump_l2(msg_resp));
 	/* osmo_sccp_tx_data_msg() takes ownership of msg_resp */
 	return osmo_sccp_tx_data_msg(conn->a.scu, conn->a.conn_id, msg_resp);
 }
@@ -192,7 +192,7 @@ int a_iface_tx_cipher_mode(const struct gsm_subscriber_connection *conn,
 	LOGPC(DMSC, LOGL_DEBUG, " key %s\n", osmo_hexdump_nospc(ei->key, ei->key_len));
 
 	msg_resp = gsm0808_create_cipher(ei, include_imeisv ? &crm : NULL);
-	LOGPCONN(conn, LOGL_DEBUG, "N-DATA.req(%s)\n", osmo_hexdump(msg_resp->data, msg_resp->len));
+	LOGPCONN(conn, LOGL_DEBUG, "N-DATA.req(%s)\n", msgb_hexdump_l2(msg_resp));
 
 	return osmo_sccp_tx_data_msg(conn->a.scu, conn->a.conn_id, msg_resp);
 }
@@ -424,7 +424,7 @@ int a_iface_tx_assignment(const struct gsm_trans *trans)
 
 	msg = gsm0808_create_ass(&ct, NULL, &rtp_addr, &scl, ci_ptr);
 
-	LOGPCONN(conn, LOGL_DEBUG, "N-DATA.req(%s)\n", osmo_hexdump(msg->data, msg->len));
+	LOGPCONN(conn, LOGL_DEBUG, "N-DATA.req(%s)\n", msgb_hexdump_l2(msg));
 	return osmo_sccp_tx_data_msg(conn->a.scu, conn->a.conn_id, msg);
 }
 
@@ -537,7 +537,7 @@ static int sccp_sap_up(struct osmo_prim_hdr *oph, void *_scu)
 			/* This BSC is already known to us, check if we have been through reset yet */
 			if (a_reset_conn_ready(a_conn_info.bsc->reset) == false) {
 				LOGP(DMSC, LOGL_NOTICE, "Refusing N-CONNECT.ind(%u, %s), BSC not reset yet\n",
-				     scu_prim->u.connect.conn_id, osmo_hexdump(msgb_l2(oph->msg), msgb_l2len(oph->msg)));
+				     scu_prim->u.connect.conn_id, msgb_hexdump_l2(oph->msg));
 				rc = osmo_sccp_tx_disconn(scu, a_conn_info.conn_id, &a_conn_info.bsc->msc_addr,
 							  SCCP_RETURN_CAUSE_UNQUALIFIED);
 				break;
@@ -546,7 +546,7 @@ static int sccp_sap_up(struct osmo_prim_hdr *oph, void *_scu)
 			osmo_sccp_tx_conn_resp(scu, scu_prim->u.connect.conn_id, &scu_prim->u.connect.called_addr, NULL, 0);
 			if (msgb_l2len(oph->msg) > 0) {
 				LOGP(DMSC, LOGL_DEBUG, "N-CONNECT.ind(%u, %s)\n",
-				     scu_prim->u.connect.conn_id, osmo_hexdump(msgb_l2(oph->msg), msgb_l2len(oph->msg)));
+				     scu_prim->u.connect.conn_id, msgb_hexdump_l2(oph->msg));
 				rc = a_sccp_rx_dt(scu, &a_conn_info, oph->msg);
 			} else
 				LOGP(DMSC, LOGL_DEBUG, "N-CONNECT.ind(%u)\n", scu_prim->u.connect.conn_id);
@@ -560,13 +560,13 @@ static int sccp_sap_up(struct osmo_prim_hdr *oph, void *_scu)
 		bsc_con = find_bsc_con(scu_prim->u.data.conn_id);
 		if (!bsc_con) {
 			LOGP(DMSC, LOGL_ERROR, "N-DATA.ind(%u, %s) for unknown conn_id\n",
-				scu_prim->u.data.conn_id, osmo_hexdump(msgb_l2(oph->msg), msgb_l2len(oph->msg)));
+				scu_prim->u.data.conn_id, msgb_hexdump_l2(oph->msg));
 			break;
 		}
 		a_conn_info.conn_id = scu_prim->u.data.conn_id;
 		a_conn_info.bsc = bsc_con->bsc;
 		LOGP(DMSC, LOGL_DEBUG, "N-DATA.ind(%u, %s)\n",
-		     scu_prim->u.data.conn_id, osmo_hexdump(msgb_l2(oph->msg), msgb_l2len(oph->msg)));
+		     scu_prim->u.data.conn_id, msgb_hexdump_l2(oph->msg));
 		a_sccp_rx_dt(scu, &a_conn_info, oph->msg);
 		break;
 
@@ -580,7 +580,7 @@ static int sccp_sap_up(struct osmo_prim_hdr *oph, void *_scu)
 			/* if this not an inbound RESET, trigger an outbound RESET */
 			if (!bssmap_is_reset(oph->msg)) {
 				LOGP(DMSC, LOGL_NOTICE, "Ignoring N-UNITDATA.ind(%s), BSC not reset yet\n",
-					osmo_hexdump(msgb_l2(oph->msg), msgb_l2len(oph->msg)));
+					msgb_hexdump_l2(oph->msg));
 				a_start_reset(a_conn_info.bsc, false);
 				break;
 			}
@@ -588,11 +588,11 @@ static int sccp_sap_up(struct osmo_prim_hdr *oph, void *_scu)
 			/* This BSC is already known to us, check if we have been through reset yet */
 			if (a_reset_conn_ready(a_conn_info.bsc->reset) == false) {
 				LOGP(DMSC, LOGL_NOTICE, "Ignoring N-UNITDATA.ind(%s), BSC not reset yet\n",
-					osmo_hexdump(msgb_l2(oph->msg), msgb_l2len(oph->msg)));
+					msgb_hexdump_l2(oph->msg));
 				break;
 			}
 		}
-		DEBUGP(DMSC, "N-UNITDATA.ind(%s)\n", osmo_hexdump(msgb_l2(oph->msg), msgb_l2len(oph->msg)));
+		DEBUGP(DMSC, "N-UNITDATA.ind(%s)\n", msgb_hexdump_l2(oph->msg));
 		a_sccp_rx_udt(scu, &a_conn_info, oph->msg);
 		break;
 
