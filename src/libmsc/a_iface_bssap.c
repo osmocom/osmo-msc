@@ -51,7 +51,7 @@ static struct gsm_subscriber_connection *subscr_conn_allocate_a(const struct a_c
 {
 	struct gsm_subscriber_connection *conn;
 
-	LOGP(DMSC, LOGL_NOTICE, "Allocating A-Interface subscriber conn: lac %i, conn_id %i\n", lac, conn_id);
+	LOGP(DMSC, LOGL_DEBUG, "Allocating A-Interface subscriber conn: lac %i, conn_id %i\n", lac, conn_id);
 
 	conn = talloc_zero(network, struct gsm_subscriber_connection);
 	if (!conn)
@@ -69,7 +69,7 @@ static struct gsm_subscriber_connection *subscr_conn_allocate_a(const struct a_c
 	memcpy(&conn->a.bsc_addr, &a_conn_info->bsc->bsc_addr, sizeof(conn->a.bsc_addr));
 
 	llist_add_tail(&conn->entry, &network->subscr_conns);
-	LOGP(DMSC, LOGL_NOTICE, "A-Interface subscriber connection successfully allocated!\n");
+	LOGP(DMSC, LOGL_DEBUG, "A-Interface subscriber connection successfully allocated!\n");
 	return conn;
 }
 
@@ -164,7 +164,7 @@ static void bssmap_rcvmsg_udt(struct osmo_sccp_user *scu, const struct a_conn_in
 		return;
 	}
 
-	LOGP(DMSC, LOGL_NOTICE, "Rx BSC UDT BSSMAP %s\n", gsm0808_bssmap_name(msg->l3h[0]));
+	LOGP(DMSC, LOGL_DEBUG, "Rx BSC UDT BSSMAP %s\n", gsm0808_bssmap_name(msg->l3h[0]));
 
 	switch (msg->l3h[0]) {
 	case BSS_MAP_MSG_RESET:
@@ -191,7 +191,7 @@ void a_sccp_rx_udt(struct osmo_sccp_user *scu, const struct a_conn_info *a_conn_
 	OSMO_ASSERT(a_conn_info);
 	OSMO_ASSERT(msg);
 
-	LOGP(DMSC, LOGL_NOTICE, "Rx BSSMAP UDT: %s\n", msgb_hexdump_l2(msg));
+	LOGP(DMSC, LOGL_DEBUG, "Rx BSSMAP UDT: %s\n", msgb_hexdump_l2(msg));
 
 	if (msgb_l2len(msg) < sizeof(*bs)) {
 		LOGP(DMSC, LOGL_ERROR, "Error: Header is too short -- discarding message!\n");
@@ -232,7 +232,7 @@ static int bssmap_rx_clear_rqst(struct osmo_sccp_user *scu, const struct a_conn_
 	uint8_t cause;
 	struct gsm_subscriber_connection *conn;
 
-	LOGP(DMSC, LOGL_NOTICE, "BSC requested to clear connection (conn_id=%i)\n", a_conn_info->conn_id);
+	LOGP(DMSC, LOGL_INFO, "BSC requested to clear connection (conn_id=%i)\n", a_conn_info->conn_id);
 
 	tlv_parse(&tp, gsm0808_att_tlvdef(), msg->l3h + 1, msgb_l3len(msg) - 1, 0, 0);
 	if (!TLVP_PRESENT(&tp, GSM0808_IE_CAUSE)) {
@@ -264,7 +264,7 @@ static int bssmap_rx_clear_complete(struct osmo_sccp_user *scu, const struct a_c
 {
 	int rc;
 
-	LOGP(DMSC, LOGL_NOTICE, "Releasing connection (conn_id=%i)\n", a_conn_info->conn_id);
+	LOGP(DMSC, LOGL_INFO, "Releasing connection (conn_id=%i)\n", a_conn_info->conn_id);
 	rc = osmo_sccp_tx_disconn(scu, a_conn_info->conn_id,
 				  NULL, SCCP_RELEASE_CAUSE_END_USER_ORIGINATED);
 
@@ -294,7 +294,7 @@ static int bssmap_rx_l3_compl(struct osmo_sccp_user *scu, const struct a_conn_in
 	struct gsm_network *network = a_conn_info->network;
 	struct gsm_subscriber_connection *conn;
 
-	LOGP(DMSC, LOGL_NOTICE, "BSC has completed layer 3 connection (conn_id=%i)\n", a_conn_info->conn_id);
+	LOGP(DMSC, LOGL_INFO, "BSC has completed layer 3 connection (conn_id=%i)\n", a_conn_info->conn_id);
 
 	tlv_parse(&tp, gsm0808_att_tlvdef(), msg->l3h + 1, msgb_l3len(msg) - 1, 0, 0);
 	if (!TLVP_PRESENT(&tp, GSM0808_IE_CELL_IDENTIFIER)) {
@@ -342,12 +342,12 @@ static int bssmap_rx_l3_compl(struct osmo_sccp_user *scu, const struct a_conn_in
 	msgb_free(msg);
 
 	if (rc == MSC_CONN_ACCEPT) {
-		LOGP(DMSC, LOGL_NOTICE, "User has been accepted by MSC.\n");
+		LOGP(DMSC, LOGL_INFO, "User has been accepted by MSC.\n");
 		return 0;
 	} else if (rc == MSC_CONN_REJECT)
-		LOGP(DMSC, LOGL_NOTICE, "User has been rejected by MSC.\n");
+		LOGP(DMSC, LOGL_INFO, "User has been rejected by MSC.\n");
 	else
-		LOGP(DMSC, LOGL_NOTICE, "User has been rejected by MSC (unknown error)\n");
+		LOGP(DMSC, LOGL_INFO, "User has been rejected by MSC (unknown error)\n");
 
 	return -EINVAL;
 
@@ -371,7 +371,7 @@ static int bssmap_rx_classmark_upd(struct osmo_sccp_user *scu, const struct a_co
 	if (!conn)
 		goto fail;
 
-	LOGP(DMSC, LOGL_NOTICE, "BSC sends clasmark update (conn_id=%i)\n", conn->a.conn_id);
+	LOGP(DMSC, LOGL_DEBUG, "BSC sends clasmark update (conn_id=%i)\n", conn->a.conn_id);
 
 	tlv_parse(&tp, gsm0808_att_tlvdef(), msg->l3h + 1, msgb_l3len(msg) - 1, 0, 0);
 	if (!TLVP_PRESENT(&tp, GSM0808_IE_CLASSMARK_INFORMATION_T2)) {
@@ -418,7 +418,7 @@ static int bssmap_rx_ciph_compl(const struct osmo_sccp_user *scu, const struct a
 	if (!conn)
 		goto fail;
 
-	LOGP(DMSC, LOGL_NOTICE, "BSC sends cipher mode complete (conn_id=%i)\n", conn->a.conn_id);
+	LOGP(DMSC, LOGL_DEBUG, "BSC sends cipher mode complete (conn_id=%i)\n", conn->a.conn_id);
 
 	tlv_parse(&tp, gsm0808_att_tlvdef(), msg->l3h + 1, msgb_l3len(msg) - 1, 0, 0);
 
@@ -581,7 +581,7 @@ static int bssmap_rx_ass_compl(const struct osmo_sccp_user *scu, const struct a_
 	mgcp = conn->network->mgw.client;
 	OSMO_ASSERT(mgcp);
 
-	LOGP(DMSC, LOGL_NOTICE, "BSC sends assignment complete message (conn_id=%i)\n", conn->a.conn_id);
+	LOGP(DMSC, LOGL_INFO, "BSC sends assignment complete message (conn_id=%i)\n", conn->a.conn_id);
 
 	tlv_parse(&tp, gsm0808_att_tlvdef(), msg->l3h + 1, msgb_l3len(msg) - 1, 0, 0);
 
@@ -628,7 +628,7 @@ static int rx_bssmap(struct osmo_sccp_user *scu, const struct a_conn_info *a_con
 		return -1;
 	}
 
-	LOGP(DMSC, LOGL_NOTICE, "Rx MSC DT1 BSSMAP %s\n", gsm0808_bssmap_name(msg->l3h[0]));
+	LOGP(DMSC, LOGL_DEBUG, "Rx MSC DT1 BSSMAP %s\n", gsm0808_bssmap_name(msg->l3h[0]));
 
 	switch (msg->l3h[0]) {
 	case BSS_MAP_MSG_CLEAR_RQST:
@@ -679,7 +679,7 @@ static int rx_dtap(const struct osmo_sccp_user *scu, const struct a_conn_info *a
 		return -EINVAL;
 	}
 
-	LOGP(DMSC, LOGL_NOTICE, "BSC sends layer 3 dtap (conn_id=%i)\n", conn->a.conn_id);
+	LOGP(DMSC, LOGL_DEBUG, "BSC sends layer 3 dtap (conn_id=%i)\n", conn->a.conn_id);
 
 	/* msc_dtap expects the dtap payload in l3h */
 	msg->l3h = msg->l2h + 3;
@@ -698,7 +698,7 @@ int a_sccp_rx_dt(struct osmo_sccp_user *scu, const struct a_conn_info *a_conn_in
 	OSMO_ASSERT(a_conn_info);
 	OSMO_ASSERT(msg);
 
-	LOGP(DMSC, LOGL_NOTICE, "Rx BSC DT: %s\n", msgb_hexdump(msg));
+	LOGP(DMSC, LOGL_DEBUG, "Rx BSC DT: %s\n", msgb_hexdump(msg));
 
 	if (msgb_l2len(msg) < sizeof(struct bssmap_header)) {
 		LOGP(DMSC, LOGL_NOTICE, "The header is too short -- discarding message!\n");

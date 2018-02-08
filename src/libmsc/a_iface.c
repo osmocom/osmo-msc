@@ -141,7 +141,7 @@ static struct bsc_context *get_bsc_context_by_sccp_addr(const struct osmo_sccp_a
 
 	ss7 = osmo_ss7_instance_find(gsm_network->a.cs7_instance);
 	OSMO_ASSERT(ss7);
-	LOGP(DMSC, LOGL_ERROR, "The calling BSC (%s) is unknown to this MSC ...\n",
+	LOGP(DMSC, LOGL_NOTICE, "The calling BSC (%s) is unknown to this MSC ...\n",
 	     osmo_sccp_addr_name(ss7, addr));
 	return NULL;
 }
@@ -433,7 +433,7 @@ int a_iface_tx_clear_cmd(struct gsm_subscriber_connection *conn)
 {
 	struct msgb *msg;
 
-	LOGPCONN(conn, LOGL_NOTICE, "Sending Clear command to BSC\n");
+	LOGPCONN(conn, LOGL_INFO, "Sending Clear command to BSC\n");
 
 	msg = gsm0808_create_clear_command(GSM0808_CAUSE_CALL_CONTROL);
 	return osmo_sccp_tx_data_msg(conn->a.scu, conn->a.conn_id, msg);
