@@ -114,7 +114,8 @@ static struct osmo_fsm fsm = {
 };
 
 /* Create and start state machine which handles the reset/reset-ack procedure */
-struct a_reset_ctx *a_reset_alloc(const void *ctx, const char *name, void *cb, void *priv)
+struct a_reset_ctx *a_reset_alloc(const void *ctx, const char *name, void *cb, void *priv,
+				  bool already_connected)
 {
 	OSMO_ASSERT(name);
 
@@ -134,8 +135,13 @@ struct a_reset_ctx *a_reset_alloc(const void *ctx, const char *name, void *cb, v
 	OSMO_ASSERT(reset->fsm);
 	reset->fsm->priv = reset;
 
-	/* kick off reset-ack sending mechanism */
-	osmo_fsm_inst_state_chg(reset->fsm, ST_DISC, RESET_RESEND_INTERVAL, RESET_RESEND_TIMER_NO);
+	if (already_connected)
+		osmo_fsm_inst_state_chg(reset->fsm, ST_CONN, 0, 0);
+	else {
+		/* kick off reset-ack sending mechanism */
+		osmo_fsm_inst_state_chg(reset->fsm, ST_DISC, RESET_RESEND_INTERVAL,
+					RESET_RESEND_TIMER_NO);
+	}
 
 	return reset;
 }

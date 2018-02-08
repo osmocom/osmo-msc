@@ -481,7 +481,7 @@ static void add_bsc(const struct osmo_sccp_addr *msc_addr, const struct osmo_scc
 
 	/* Start reset procedure to make the new connection active */
 	snprintf(bsc_name, sizeof(bsc_name), "bsc-%i", bsc_addr->pc);
-	bsc_ctx->reset = a_reset_alloc(bsc_ctx, bsc_name, a_reset_cb, bsc_ctx);
+	bsc_ctx->reset = a_reset_alloc(bsc_ctx, bsc_name, a_reset_cb, bsc_ctx, false);
 }
 
 /* Callback function, called by the SSCP stack when data arrives */
