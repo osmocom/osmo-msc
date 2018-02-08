@@ -69,7 +69,7 @@ static struct gsm_subscriber_connection *subscr_conn_allocate_a(const struct a_c
 	memcpy(&conn->a.bsc_addr, &a_conn_info->bsc->bsc_addr, sizeof(conn->a.bsc_addr));
 
 	llist_add_tail(&conn->entry, &network->subscr_conns);
-	LOGP(DMSC, LOGL_DEBUG, "A-Interface subscriber connection successfully allocated!\n");
+	LOGPCONN(conn, LOGL_DEBUG, "A-Interface subscriber connection successfully allocated!\n");
 	return conn;
 }
 
@@ -89,7 +89,7 @@ static struct gsm_subscriber_connection *subscr_conn_lookup_a(const struct gsm_n
 
 	llist_for_each_entry(conn, &network->subscr_conns, entry) {
 		if (conn->via_ran == RAN_GERAN_A && conn->a.conn_id == conn_id) {
-			DEBUGP(DIUCS, "Found A subscriber for conn_id %i\n", conn_id);
+			LOGPCONN(conn, LOGL_DEBUG, "Found A subscriber for conn_id %i\n", conn_id);
 			return conn;
 		}
 	}
@@ -371,11 +371,11 @@ static int bssmap_rx_classmark_upd(struct osmo_sccp_user *scu, const struct a_co
 	if (!conn)
 		goto fail;
 
-	LOGP(DMSC, LOGL_DEBUG, "BSC sends clasmark update (conn_id=%i)\n", conn->a.conn_id);
+	LOGPCONN(conn, LOGL_DEBUG, "BSC sends clasmark update\n");
 
 	tlv_parse(&tp, gsm0808_att_tlvdef(), msg->l3h + 1, msgb_l3len(msg) - 1, 0, 0);
 	if (!TLVP_PRESENT(&tp, GSM0808_IE_CLASSMARK_INFORMATION_T2)) {
-		LOGP(DMSC, LOGL_ERROR, "Mandatory Classmark Information Type 2 not present -- discarding message!\n");
+		LOGPCONN(conn, LOGL_ERROR, "Mandatory Classmark Information Type 2 not present -- discarding message!\n");
 		goto fail;
 	}
 
@@ -418,7 +418,7 @@ static int bssmap_rx_ciph_compl(const struct osmo_sccp_user *scu, const struct a
 	if (!conn)
 		goto fail;
 
-	LOGP(DMSC, LOGL_DEBUG, "BSC sends cipher mode complete (conn_id=%i)\n", conn->a.conn_id);
+	LOGPCONN(conn, LOGL_DEBUG, "BSC sends cipher mode complete\n");
 
 	tlv_parse(&tp, gsm0808_att_tlvdef(), msg->l3h + 1, msgb_l3len(msg) - 1, 0, 0);
 
@@ -456,16 +456,16 @@ static int bssmap_rx_ciph_rej(const struct osmo_sccp_user *scu, const struct a_c
 	if (!conn)
 		goto fail;
 
-	LOGP(DMSC, LOGL_NOTICE, "BSC sends cipher mode reject (conn_id=%i)\n", conn->a.conn_id);
+	LOGPCONN(conn, LOGL_NOTICE, "BSC sends cipher mode reject\n");
 
 	tlv_parse(&tp, gsm0808_att_tlvdef(), msg->l3h + 1, msgb_l3len(msg) - 1, 0, 0);
 	if (!TLVP_PRESENT(&tp, BSS_MAP_MSG_CIPHER_MODE_REJECT)) {
-		LOGP(DMSC, LOGL_ERROR, "Cause code is missing -- discarding message!\n");
+		LOGPCONN(conn, LOGL_ERROR, "Cause code is missing -- discarding message!\n");
 		goto fail;
 	}
 
 	cause = TLVP_VAL(&tp, BSS_MAP_MSG_CIPHER_MODE_REJECT)[0];
-	LOGP(DMSC, LOGL_NOTICE, "Cipher mode rejection cause: %i\n", cause);
+	LOGPCONN(conn, LOGL_NOTICE, "Cipher mode rejection cause: %i\n", cause);
 
 	/* FIXME: Can we do something meaningful here? e.g. report to the
 	 * msc code somehow that the cipher mode command has failed. */
@@ -491,11 +491,11 @@ static int bssmap_rx_ass_fail(const struct osmo_sccp_user *scu, const struct a_c
 	if (!conn)
 		goto fail;
 
-	LOGP(DMSC, LOGL_NOTICE, "BSC sends assignment failure message (conn_id=%i)\n", conn->a.conn_id);
+	LOGPCONN(conn, LOGL_NOTICE, "BSC sends assignment failure message\n");
 
 	tlv_parse(&tp, gsm0808_att_tlvdef(), msg->l3h + 1, msgb_l3len(msg) - 1, 0, 0);
 	if (!TLVP_PRESENT(&tp, GSM0808_IE_CAUSE)) {
-		LOGP(DMSC, LOGL_ERROR, "Cause code is missing -- discarding message!\n");
+		LOGPCONN(conn, LOGL_ERROR, "Cause code is missing -- discarding message!\n");
 		goto fail;
 	}
 	cause = TLVP_VAL(&tp, GSM0808_IE_CAUSE)[0];
@@ -534,20 +534,20 @@ static int bssmap_rx_sapi_n_rej(const struct osmo_sccp_user *scu, const struct a
 	if (!conn)
 		goto fail;
 
-	LOGP(DMSC, LOGL_NOTICE, "BSC sends sapi \"n\" reject message (conn_id=%i)\n", conn->a.conn_id);
+	LOGPCONN(conn, LOGL_NOTICE, "BSC sends sapi \"n\" reject message\n");
 
 	/* Note: The MSC code seems not to care about the cause code, but by
 	 * the specification it is mandatory, so we check its presence. See
 	 * also 3GPP TS 48.008 3.2.1.34 SAPI "n" REJECT */
 	tlv_parse(&tp, gsm0808_att_tlvdef(), msg->l3h + 1, msgb_l3len(msg) - 1, 0, 0);
 	if (!TLVP_PRESENT(&tp, GSM0808_IE_CAUSE)) {
-		LOGP(DMSC, LOGL_ERROR, "Cause code is missing -- discarding message!\n");
+		LOGPCONN(conn, LOGL_ERROR, "Cause code is missing -- discarding message!\n");
 		goto fail;
 	}
 
 	tlv_parse(&tp, gsm0808_att_tlvdef(), msg->l3h + 1, msgb_l3len(msg) - 1, 0, 0);
 	if (!TLVP_PRESENT(&tp, GSM0808_IE_DLCI)) {
-		LOGP(DMSC, LOGL_ERROR, "DLCI is missing -- discarding message!\n");
+		LOGPCONN(conn, LOGL_ERROR, "DLCI is missing -- discarding message!\n");
 		goto fail;
 	}
 	dlci = TLVP_VAL(&tp, GSM0808_IE_DLCI)[0];
@@ -581,12 +581,12 @@ static int bssmap_rx_ass_compl(const struct osmo_sccp_user *scu, const struct a_
 	mgcp = conn->network->mgw.client;
 	OSMO_ASSERT(mgcp);
 
-	LOGP(DMSC, LOGL_INFO, "BSC sends assignment complete message (conn_id=%i)\n", conn->a.conn_id);
+	LOGPCONN(conn, LOGL_INFO, "BSC sends assignment complete message\n");
 
 	tlv_parse(&tp, gsm0808_att_tlvdef(), msg->l3h + 1, msgb_l3len(msg) - 1, 0, 0);
 
 	if (!TLVP_PRESENT(&tp, GSM0808_IE_AOIP_TRASP_ADDR)) {
-		LOGP(DMSC, LOGL_ERROR, "AoIP transport identifier missing -- discarding message!\n");
+		LOGPCONN(conn, LOGL_ERROR, "AoIP transport identifier missing -- discarding message!\n");
 		goto fail;
 	}
 
@@ -594,7 +594,7 @@ static int bssmap_rx_ass_compl(const struct osmo_sccp_user *scu, const struct a_
 	rc = gsm0808_dec_aoip_trasp_addr(&rtp_addr, TLVP_VAL(&tp, GSM0808_IE_AOIP_TRASP_ADDR),
 					 TLVP_LEN(&tp, GSM0808_IE_AOIP_TRASP_ADDR));
 	if (rc < 0) {
-		LOGP(DMSC, LOGL_ERROR, "Unable to decode aoip transport address.\n");
+		LOGPCONN(conn, LOGL_ERROR, "Unable to decode aoip transport address.\n");
 		goto fail;
 	}
 
@@ -604,7 +604,7 @@ static int bssmap_rx_ass_compl(const struct osmo_sccp_user *scu, const struct a_
 		rtp_addr_in = (struct sockaddr_in *)&rtp_addr;
 		msc_mgcp_ass_complete(conn, osmo_ntohs(rtp_addr_in->sin_port), inet_ntoa(rtp_addr_in->sin_addr));
 	} else {
-		LOGP(DMSC, LOGL_ERROR, "Unsopported addressing scheme. (supports only IPV4)\n");
+		LOGPCONN(conn, LOGL_ERROR, "Unsopported addressing scheme. (supports only IPV4)\n");
 		goto fail;
 	}
 
@@ -679,7 +679,7 @@ static int rx_dtap(const struct osmo_sccp_user *scu, const struct a_conn_info *a
 		return -EINVAL;
 	}
 
-	LOGP(DMSC, LOGL_DEBUG, "BSC sends layer 3 dtap (conn_id=%i)\n", conn->a.conn_id);
+	LOGPCONN(conn, LOGL_DEBUG, "BSC sends layer 3 dtap\n");
 
 	/* msc_dtap expects the dtap payload in l3h */
 	msg->l3h = msg->l2h + 3;

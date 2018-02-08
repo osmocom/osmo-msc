@@ -43,14 +43,6 @@
 
 #include <errno.h>
 
-#define LOGPCONN(conn, level, fmt, args...) \
-	LOGP(DMSC, level, "(subscr %s, conn_id %d) " fmt, \
-	     vlr_subscr_name(conn ? conn->vsub : NULL), conn ? conn->a.conn_id : -1, \
-	     ## args)
-
-#define LOGPBSCCONN(conn, level, fmt, args...) \
-	LOGP(DMSC, level, "(conn_id %u) " fmt, conn ? conn->conn_id : (uint32_t)(-1), ## args)
-
 /* A pointer to the GSM network we work with. By the current paradigm,
  * there can only be one gsm_network per MSC. The pointer is set once
  * when calling a_init() */
