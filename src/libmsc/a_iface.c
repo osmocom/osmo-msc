@@ -534,7 +534,6 @@ static int sccp_sap_up(struct osmo_prim_hdr *oph, void *_scu)
 				rc = a_sccp_rx_dt(scu, &a_conn_info, oph->msg);
 			} else
 				LOGP(DBSSAP, LOGL_DEBUG, "N-CONNECT.ind(%u)\n", scu_prim->u.connect.conn_id);
-
 			record_bsc_con(scu, a_conn_info.bsc, scu_prim->u.connect.conn_id);
 		}
 		break;
@@ -586,6 +585,9 @@ static int sccp_sap_up(struct osmo_prim_hdr *oph, void *_scu)
 		break;
 	}
 
+	/* We didn't transfer msgb ownership to any downstream functions so we rely on
+	 * this single/central location to free() the msgb wrapping the primitive */
+	msgb_free(oph->msg);
 	return rc;
 }
 
