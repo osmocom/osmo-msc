@@ -230,7 +230,7 @@ static int bssmap_rx_clear_rqst(struct gsm_subscriber_connection *conn, struct m
 	struct msgb *msg_resp;
 	uint8_t cause;
 
-	LOGPCONN(conn, LOGL_INFO, "BSC requested to clear connection\n");
+	LOGPCONN(conn, LOGL_INFO, "Rx BSSMAP CLEAR REQUEST\n");
 
 	tlv_parse(&tp, gsm0808_att_tlvdef(), msg->l3h + 1, msgb_l3len(msg) - 1, 0, 0);
 	if (!TLVP_PRESENT(&tp, GSM0808_IE_CAUSE)) {
@@ -288,7 +288,7 @@ static int bssmap_rx_l3_compl(struct osmo_sccp_user *scu, const struct a_conn_in
 	struct gsm_network *network = a_conn_info->network;
 	struct gsm_subscriber_connection *conn;
 
-	LOGP(DMSC, LOGL_INFO, "BSC has completed layer 3 connection (conn_id=%i)\n", a_conn_info->conn_id);
+	LOGP(DMSC, LOGL_INFO, "Rx BSSMAP COMPLETE L3 INFO (conn_id=%i)\n", a_conn_info->conn_id);
 
 	tlv_parse(&tp, gsm0808_att_tlvdef(), msg->l3h + 1, msgb_l3len(msg) - 1, 0, 0);
 	if (!TLVP_PRESENT(&tp, GSM0808_IE_CELL_IDENTIFIER)) {
@@ -494,7 +494,7 @@ static int bssmap_rx_sapi_n_rej(struct gsm_subscriber_connection *conn, struct m
 	struct tlv_parsed tp;
 	uint8_t dlci;
 
-	LOGPCONN(conn, LOGL_NOTICE, "BSC sends sapi \"n\" reject message\n");
+	LOGPCONN(conn, LOGL_NOTICE, "Rx BSSMAP SAPI-N-REJECT message\n");
 
 	/* Note: The MSC code seems not to care about the cause code, but by
 	 * the specification it is mandatory, so we check its presence. See
@@ -535,7 +535,7 @@ static int bssmap_rx_ass_compl(struct gsm_subscriber_connection *conn, struct ms
 	mgcp = conn->network->mgw.client;
 	OSMO_ASSERT(mgcp);
 
-	LOGPCONN(conn, LOGL_INFO, "BSC sends assignment complete message\n");
+	LOGPCONN(conn, LOGL_INFO, "Rx BSSMAP ASSIGNMENT COMPLETE message\n");
 
 	tlv_parse(&tp, gsm0808_att_tlvdef(), msg->l3h + 1, msgb_l3len(msg) - 1, 0, 0);
 
