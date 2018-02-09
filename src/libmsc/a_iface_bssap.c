@@ -111,7 +111,7 @@ static void bssmap_rx_reset(struct osmo_sccp_user *scu, const struct a_conn_info
 	ss7 = osmo_ss7_instance_find(network->a.cs7_instance);
 	OSMO_ASSERT(ss7);
 
-	LOGP(DMSC, LOGL_NOTICE, "Rx BSSMAP RESET from BSC %s, sending RESET ACK\n",
+	LOGP(DBSSAP, LOGL_NOTICE, "Rx BSSMAP RESET from BSC %s, sending RESET ACK\n",
 	     osmo_sccp_addr_name(ss7, &a_conn_info->bsc->bsc_addr));
 	osmo_sccp_tx_unitdata_msg(scu, &a_conn_info->bsc->msc_addr, &a_conn_info->bsc->bsc_addr,
 				  gsm0808_create_reset_ack());
@@ -137,12 +137,12 @@ static void bssmap_rx_reset_ack(const struct osmo_sccp_user *scu, const struct a
 	OSMO_ASSERT(ss7);
 
 	if (a_conn_info->bsc->reset == NULL) {
-		LOGP(DMSC, LOGL_ERROR, "Received RESET ACK from an unknown BSC %s, ignoring...\n",
+		LOGP(DBSSAP, LOGL_ERROR, "Received RESET ACK from an unknown BSC %s, ignoring...\n",
 		     osmo_sccp_addr_name(ss7, &a_conn_info->bsc->bsc_addr));
 		goto fail;
 	}
 
-	LOGP(DMSC, LOGL_NOTICE, "Received RESET ACK from BSC %s\n",
+	LOGP(DBSSAP, LOGL_NOTICE, "Received RESET ACK from BSC %s\n",
 		osmo_sccp_addr_name(ss7, &a_conn_info->bsc->bsc_addr));
 
 	/* Confirm that we managed to get the reset ack message
@@ -160,12 +160,12 @@ static void bssmap_rcvmsg_udt(struct osmo_sccp_user *scu, const struct a_conn_in
 	 * can be received via UNITDATA */
 
 	if (msgb_l3len(msg) < 1) {
-		LOGP(DMSC, LOGL_NOTICE, "Error: No data received -- discarding message!\n");
+		LOGP(DBSSAP, LOGL_NOTICE, "Error: No data received -- discarding message!\n");
 		msgb_free(msg);
 		return;
 	}
 
-	LOGP(DMSC, LOGL_DEBUG, "Rx BSSMAP UDT %s\n", gsm0808_bssmap_name(msg->l3h[0]));
+	LOGP(DBSSAP, LOGL_DEBUG, "Rx BSSMAP UDT %s\n", gsm0808_bssmap_name(msg->l3h[0]));
 
 	switch (msg->l3h[0]) {
 	case BSS_MAP_MSG_RESET:
@@ -175,7 +175,7 @@ static void bssmap_rcvmsg_udt(struct osmo_sccp_user *scu, const struct a_conn_in
 		bssmap_rx_reset_ack(scu, a_conn_info, msg);
 		break;
 	default:
-		LOGP(DMSC, LOGL_NOTICE, "Unimplemented message format: %s -- message discarded!\n",
+		LOGP(DBSSAP, LOGL_NOTICE, "Unimplemented message format: %s -- message discarded!\n",
 		     gsm0808_bssmap_name(msg->l3h[0]));
 		msgb_free(msg);
 	}
@@ -192,17 +192,17 @@ void a_sccp_rx_udt(struct osmo_sccp_user *scu, const struct a_conn_info *a_conn_
 	OSMO_ASSERT(a_conn_info);
 	OSMO_ASSERT(msg);
 
-	LOGP(DMSC, LOGL_DEBUG, "Rx BSSMAP UDT: %s\n", msgb_hexdump_l2(msg));
+	LOGP(DBSSAP, LOGL_DEBUG, "Rx BSSMAP UDT: %s\n", msgb_hexdump_l2(msg));
 
 	if (msgb_l2len(msg) < sizeof(*bs)) {
-		LOGP(DMSC, LOGL_ERROR, "Error: Header is too short -- discarding message!\n");
+		LOGP(DBSSAP, LOGL_ERROR, "Error: Header is too short -- discarding message!\n");
 		msgb_free(msg);
 		return;
 	}
 
 	bs = (struct bssmap_header *)msgb_l2(msg);
 	if (bs->length < msgb_l2len(msg) - sizeof(*bs)) {
-		LOGP(DMSC, LOGL_ERROR, "Error: Message is too short -- discarding message!\n");
+		LOGP(DBSSAP, LOGL_ERROR, "Error: Message is too short -- discarding message!\n");
 		msgb_free(msg);
 		return;
 	}
@@ -213,7 +213,7 @@ void a_sccp_rx_udt(struct osmo_sccp_user *scu, const struct a_conn_info *a_conn_
 		bssmap_rcvmsg_udt(scu, a_conn_info, msg);
 		break;
 	default:
-		LOGP(DMSC, LOGL_ERROR,
+		LOGP(DBSSAP, LOGL_ERROR,
 		     "Error: Unimplemented message type: %s -- message discarded!\n", gsm0808_bssmap_name(bs->type));
 		msgb_free(msg);
 	}
@@ -235,7 +235,7 @@ static int bssmap_rx_clear_rqst(struct gsm_subscriber_connection *conn, struct m
 
 	tlv_parse(&tp, gsm0808_att_tlvdef(), msg->l3h + 1, msgb_l3len(msg) - 1, 0, 0);
 	if (!TLVP_PRESENT(&tp, GSM0808_IE_CAUSE)) {
-		LOGP(DMSC, LOGL_ERROR, "Cause code is missing -- discarding message!\n");
+		LOGP(DBSSAP, LOGL_ERROR, "Cause code is missing -- discarding message!\n");
 		goto fail;
 	}
 	cause = TLVP_VAL(&tp, GSM0808_IE_CAUSE)[0];
@@ -289,15 +289,15 @@ static int bssmap_rx_l3_compl(struct osmo_sccp_user *scu, const struct a_conn_in
 	struct gsm_network *network = a_conn_info->network;
 	struct gsm_subscriber_connection *conn;
 
-	LOGP(DMSC, LOGL_INFO, "Rx BSSMAP COMPLETE L3 INFO (conn_id=%i)\n", a_conn_info->conn_id);
+	LOGP(DBSSAP, LOGL_INFO, "Rx BSSMAP COMPLETE L3 INFO (conn_id=%i)\n", a_conn_info->conn_id);
 
 	tlv_parse(&tp, gsm0808_att_tlvdef(), msg->l3h + 1, msgb_l3len(msg) - 1, 0, 0);
 	if (!TLVP_PRESENT(&tp, GSM0808_IE_CELL_IDENTIFIER)) {
-		LOGP(DMSC, LOGL_ERROR, "Mandatory CELL IDENTIFIER not present -- discarding message!\n");
+		LOGP(DBSSAP, LOGL_ERROR, "Mandatory CELL IDENTIFIER not present -- discarding message!\n");
 		goto fail;
 	}
 	if (!TLVP_PRESENT(&tp, GSM0808_IE_LAYER_3_INFORMATION)) {
-		LOGP(DMSC, LOGL_ERROR, "Mandatory LAYER 3 INFORMATION not present -- discarding message!\n");
+		LOGP(DBSSAP, LOGL_ERROR, "Mandatory LAYER 3 INFORMATION not present -- discarding message!\n");
 		goto fail;
 	}
 
@@ -308,18 +308,18 @@ static int bssmap_rx_l3_compl(struct osmo_sccp_user *scu, const struct a_conn_in
 	data_length = TLVP_LEN(&tp, GSM0808_IE_CELL_IDENTIFIER);
 	data = TLVP_VAL(&tp, GSM0808_IE_CELL_IDENTIFIER);
 	if (sizeof(lai_ci) != data_length) {
-		LOGP(DMSC, LOGL_ERROR,
+		LOGP(DBSSAP, LOGL_ERROR,
 		     "Unable to parse element CELL IDENTIFIER (wrong field length) -- discarding message!\n");
 		goto fail;
 	}
 	memcpy(&lai_ci, data, sizeof(lai_ci));
 	if (lai_ci.ident != CELL_IDENT_WHOLE_GLOBAL) {
-		LOGP(DMSC, LOGL_ERROR,
+		LOGP(DBSSAP, LOGL_ERROR,
 		     "Unable to parse element CELL IDENTIFIER (wrong cell identification discriminator) -- discarding message!\n");
 		goto fail;
 	}
 	if (gsm48_decode_lai(&lai_ci.lai, &mcc, &mnc, &lac) != 0) {
-		LOGP(DMSC, LOGL_ERROR,
+		LOGP(DBSSAP, LOGL_ERROR,
 		     "Unable to parse element CELL IDENTIFIER (lai decoding failed) -- discarding message!\n");
 		goto fail;
 	}
@@ -580,7 +580,7 @@ static int rx_bssmap(struct osmo_sccp_user *scu, const struct a_conn_info *a_con
 	struct gsm_subscriber_connection *conn;
 
 	if (msgb_l3len(msg) < 1) {
-		LOGP(DMSC, LOGL_NOTICE, "Error: No data received -- discarding message!\n");
+		LOGP(DBSSAP, LOGL_NOTICE, "Error: No data received -- discarding message!\n");
 		msgb_free(msg);
 		return -1;
 	}
@@ -597,7 +597,7 @@ static int rx_bssmap(struct osmo_sccp_user *scu, const struct a_conn_info *a_con
 
 	conn = subscr_conn_lookup_a(a_conn_info->network, a_conn_info->conn_id);
 	if (!conn) {
-		LOGP(DMSC, LOGL_ERROR, "Couldn't find subscr_conn for conn_id=%d\n", a_conn_info->conn_id);
+		LOGP(DBSSAP, LOGL_ERROR, "Couldn't find subscr_conn for conn_id=%d\n", a_conn_info->conn_id);
 		msgb_free(msg);
 		return -EINVAL;
 	}
@@ -660,7 +660,7 @@ int a_sccp_rx_dt(struct osmo_sccp_user *scu, const struct a_conn_info *a_conn_in
 	OSMO_ASSERT(msg);
 
 	if (msgb_l2len(msg) < sizeof(struct bssmap_header)) {
-		LOGP(DMSC, LOGL_NOTICE, "The header is too short -- discarding message!\n");
+		LOGP(DBSSAP, LOGL_NOTICE, "The header is too short -- discarding message!\n");
 		msgb_free(msg);
 		return -EINVAL;
 	}
@@ -672,7 +672,7 @@ int a_sccp_rx_dt(struct osmo_sccp_user *scu, const struct a_conn_info *a_conn_in
 	case BSSAP_MSG_DTAP:
 		return rx_dtap(scu, a_conn_info, msg);
 	default:
-		LOGP(DMSC, LOGL_ERROR, "Unimplemented BSSAP msg type: %s\n", gsm0808_bssap_name(msg->l2h[0]));
+		LOGP(DBSSAP, LOGL_ERROR, "Unimplemented BSSAP msg type: %s\n", gsm0808_bssap_name(msg->l2h[0]));
 		msgb_free(msg);
 		return -EINVAL;
 	}

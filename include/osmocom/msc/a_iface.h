@@ -26,12 +26,12 @@
 #include <osmocom/gsm/protocol/gsm_08_08.h>
 
 #define LOGPCONN(conn, level, fmt, args...) \
-	LOGP(DMSC, level, "(subscr %s, conn_id %d) " fmt, \
+	LOGP(DBSSAP, level, "(subscr %s, conn_id %d) " fmt, \
 	     vlr_subscr_name(conn ? conn->vsub : NULL), conn ? conn->a.conn_id : -1, \
 	     ## args)
 
 #define LOGPBSCCONN(conn, level, fmt, args...) \
-	LOGP(DMSC, level, "(conn_id %u) " fmt, conn ? conn->conn_id : (uint32_t)(-1), ## args)
+	LOGP(DBSSAP, level, "(conn_id %u) " fmt, conn ? conn->conn_id : (uint32_t)(-1), ## args)
 
 /* A struct to keep a context information about the BSCs we are associated with */
 struct bsc_context {

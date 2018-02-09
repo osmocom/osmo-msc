@@ -24,6 +24,7 @@ enum {
 	DRANAP,
 	DVLR,
 	DIUCS,
+	DBSSAP,
 	Debug_LastEntry,
 };
 

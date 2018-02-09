@@ -134,7 +134,7 @@ static struct bsc_context *get_bsc_context_by_sccp_addr(const struct osmo_sccp_a
 
 	ss7 = osmo_ss7_instance_find(gsm_network->a.cs7_instance);
 	OSMO_ASSERT(ss7);
-	LOGP(DMSC, LOGL_NOTICE, "The calling BSC (%s) is unknown to this MSC ...\n",
+	LOGP(DBSSAP, LOGL_NOTICE, "The calling BSC (%s) is unknown to this MSC ...\n",
 	     osmo_sccp_addr_name(ss7, addr));
 	return NULL;
 }
@@ -182,7 +182,7 @@ int a_iface_tx_cipher_mode(const struct gsm_subscriber_connection *conn,
 	OSMO_ASSERT(conn);
 	LOGPCONN(conn, LOGL_DEBUG, "Tx BSSMAP CIPHER MODE COMMAND to BSC, %u ciphers (%s)",
 		 ei->perm_algo_len, osmo_hexdump_nospc(ei->perm_algo, ei->perm_algo_len));
-	LOGPC(DMSC, LOGL_DEBUG, " key %s\n", osmo_hexdump_nospc(ei->key, ei->key_len));
+	LOGPC(DBSSAP, LOGL_DEBUG, " key %s\n", osmo_hexdump_nospc(ei->key, ei->key_len));
 
 	msg_resp = gsm0808_create_cipher(ei, include_imeisv ? &crm : NULL);
 	LOGPCONN(conn, LOGL_DEBUG, "N-DATA.req(%s)\n", msgb_hexdump_l2(msg_resp));
@@ -211,7 +211,7 @@ int a_iface_tx_paging(const char *imsi, uint32_t tmsi, uint16_t lac)
 	/* Deliver paging request to all known BSCs */
 	llist_for_each_entry(bsc_ctx, &gsm_network->a.bscs, list) {
 		if (a_reset_conn_ready(bsc_ctx->reset)) {
-			LOGP(DMSC, LOGL_DEBUG,
+			LOGP(DBSSAP, LOGL_DEBUG,
 			     "Tx BSSMAP paging message from MSC %s to BSC %s (imsi=%s, tmsi=0x%08x, lac=%u)\n",
 			     osmo_sccp_addr_name(ss7, &bsc_ctx->msc_addr),
 			     osmo_sccp_addr_name(ss7, &bsc_ctx->bsc_addr), imsi, tmsi, lac);
@@ -220,7 +220,7 @@ int a_iface_tx_paging(const char *imsi, uint32_t tmsi, uint16_t lac)
 						  &bsc_ctx->msc_addr, &bsc_ctx->bsc_addr, msg);
 			page_count++;
 		} else {
-			LOGP(DMSC, LOGL_DEBUG,
+			LOGP(DBSSAP, LOGL_DEBUG,
 			     "Connection down, dropping paging from MSC %s to BSC %s (imsi=%s, tmsi=0x%08x, lac=%u)\n",
 			     osmo_sccp_addr_name(ss7, &bsc_ctx->msc_addr),
 			     osmo_sccp_addr_name(ss7, &bsc_ctx->bsc_addr), imsi, tmsi, lac);
@@ -228,7 +228,7 @@ int a_iface_tx_paging(const char *imsi, uint32_t tmsi, uint16_t lac)
 	}
 
 	if (page_count <= 0)
-		LOGP(DMSC, LOGL_ERROR, "Could not deliver paging because none of the associated BSCs is available!\n");
+		LOGP(DBSSAP, LOGL_ERROR, "Could not deliver paging because none of the associated BSCs is available!\n");
 
 	return page_count;
 }
@@ -265,7 +265,7 @@ static uint8_t convert_Abis_sv_to_A_sv(int speech_ver)
 	}
 
 	/* If nothing matches, tag the result as invalid */
-	LOGP(DMSC, LOGL_ERROR, "Invalid permitted speech version: %d\n", speech_ver);
+	LOGP(DBSSAP, LOGL_ERROR, "Invalid permitted speech version: %d\n", speech_ver);
 	return 0xFF;
 }
 
@@ -288,7 +288,7 @@ static uint8_t convert_Abis_prev_to_A_pref(int radio)
 		return GSM0808_SPEECH_HALF_PREF;
 	}
 
-	LOGP(DMSC, LOGL_ERROR, "Invalid radio channel preference: %d; defaulting to full rate.\n",
+	LOGP(DBSSAP, LOGL_ERROR, "Invalid radio channel preference: %d; defaulting to full rate.\n",
 	     radio);
 	return GSM0808_SPEECH_FULL_BM;
 }
@@ -440,7 +440,7 @@ static void a_reset_cb(const void *priv)
 	/* Send reset to the remote BSC */
 	ss7 = osmo_ss7_instance_find(gsm_network->a.cs7_instance);
 	OSMO_ASSERT(ss7);
-	LOGP(DMSC, LOGL_NOTICE, "Tx BSSMAP RESET to BSC %s\n", osmo_sccp_addr_name(ss7, &bsc_ctx->bsc_addr));
+	LOGP(DBSSAP, LOGL_NOTICE, "Tx BSSMAP RESET to BSC %s\n", osmo_sccp_addr_name(ss7, &bsc_ctx->bsc_addr));
 	msg = gsm0808_create_reset();
 	osmo_sccp_tx_unitdata_msg(bsc_ctx->sccp_user, &bsc_ctx->msc_addr,
 				  &bsc_ctx->bsc_addr, msg);
@@ -455,7 +455,7 @@ static struct bsc_context *add_bsc(const struct osmo_sccp_addr *msc_addr,
 
 	ss7 = osmo_ss7_instance_find(gsm_network->a.cs7_instance);
 	OSMO_ASSERT(ss7);
-	LOGP(DMSC, LOGL_NOTICE, "Adding new BSC connection for BSC %s...\n", osmo_sccp_addr_name(ss7, bsc_addr));
+	LOGP(DBSSAP, LOGL_NOTICE, "Adding new BSC connection for BSC %s...\n", osmo_sccp_addr_name(ss7, bsc_addr));
 
 	/* Generate and fill up a new bsc context */
 	bsc_ctx = talloc_zero(gsm_network, struct bsc_context);
@@ -520,7 +520,7 @@ static int sccp_sap_up(struct osmo_prim_hdr *oph, void *_scu)
 		} else {
 			/* This BSC is already known to us, check if we have been through reset yet */
 			if (a_reset_conn_ready(a_conn_info.bsc->reset) == false) {
-				LOGP(DMSC, LOGL_NOTICE, "Refusing N-CONNECT.ind(%u, %s), BSC not reset yet\n",
+				LOGP(DBSSAP, LOGL_NOTICE, "Refusing N-CONNECT.ind(%u, %s), BSC not reset yet\n",
 				     scu_prim->u.connect.conn_id, msgb_hexdump_l2(oph->msg));
 				rc = osmo_sccp_tx_disconn(scu, a_conn_info.conn_id, &a_conn_info.bsc->msc_addr,
 							  SCCP_RETURN_CAUSE_UNQUALIFIED);
@@ -529,11 +529,11 @@ static int sccp_sap_up(struct osmo_prim_hdr *oph, void *_scu)
 
 			osmo_sccp_tx_conn_resp(scu, scu_prim->u.connect.conn_id, &scu_prim->u.connect.called_addr, NULL, 0);
 			if (msgb_l2len(oph->msg) > 0) {
-				LOGP(DMSC, LOGL_DEBUG, "N-CONNECT.ind(%u, %s)\n",
+				LOGP(DBSSAP, LOGL_DEBUG, "N-CONNECT.ind(%u, %s)\n",
 				     scu_prim->u.connect.conn_id, msgb_hexdump_l2(oph->msg));
 				rc = a_sccp_rx_dt(scu, &a_conn_info, oph->msg);
 			} else
-				LOGP(DMSC, LOGL_DEBUG, "N-CONNECT.ind(%u)\n", scu_prim->u.connect.conn_id);
+				LOGP(DBSSAP, LOGL_DEBUG, "N-CONNECT.ind(%u)\n", scu_prim->u.connect.conn_id);
 
 			record_bsc_con(scu, a_conn_info.bsc, scu_prim->u.connect.conn_id);
 		}
@@ -543,13 +543,13 @@ static int sccp_sap_up(struct osmo_prim_hdr *oph, void *_scu)
 		/* Handle incoming connection oriented data */
 		bsc_con = find_bsc_con(scu_prim->u.data.conn_id);
 		if (!bsc_con) {
-			LOGP(DMSC, LOGL_ERROR, "N-DATA.ind(%u, %s) for unknown conn_id\n",
+			LOGP(DBSSAP, LOGL_ERROR, "N-DATA.ind(%u, %s) for unknown conn_id\n",
 				scu_prim->u.data.conn_id, msgb_hexdump_l2(oph->msg));
 			break;
 		}
 		a_conn_info.conn_id = scu_prim->u.data.conn_id;
 		a_conn_info.bsc = bsc_con->bsc;
-		LOGP(DMSC, LOGL_DEBUG, "N-DATA.ind(%u, %s)\n",
+		LOGP(DBSSAP, LOGL_DEBUG, "N-DATA.ind(%u, %s)\n",
 		     scu_prim->u.data.conn_id, msgb_hexdump_l2(oph->msg));
 		a_sccp_rx_dt(scu, &a_conn_info, oph->msg);
 		break;
@@ -563,7 +563,7 @@ static int sccp_sap_up(struct osmo_prim_hdr *oph, void *_scu)
 						&scu_prim->u.unitdata.calling_addr, scu);
 			/* if this not an inbound RESET, trigger an outbound RESET */
 			if (!bssmap_is_reset(oph->msg)) {
-				LOGP(DMSC, LOGL_NOTICE, "Ignoring N-UNITDATA.ind(%s), BSC not reset yet\n",
+				LOGP(DBSSAP, LOGL_NOTICE, "Ignoring N-UNITDATA.ind(%s), BSC not reset yet\n",
 					msgb_hexdump_l2(oph->msg));
 				a_start_reset(a_conn_info.bsc, false);
 				break;
@@ -571,17 +571,17 @@ static int sccp_sap_up(struct osmo_prim_hdr *oph, void *_scu)
 		} else {
 			/* This BSC is already known to us, check if we have been through reset yet */
 			if (a_reset_conn_ready(a_conn_info.bsc->reset) == false) {
-				LOGP(DMSC, LOGL_NOTICE, "Ignoring N-UNITDATA.ind(%s), BSC not reset yet\n",
+				LOGP(DBSSAP, LOGL_NOTICE, "Ignoring N-UNITDATA.ind(%s), BSC not reset yet\n",
 					msgb_hexdump_l2(oph->msg));
 				break;
 			}
 		}
-		DEBUGP(DMSC, "N-UNITDATA.ind(%s)\n", msgb_hexdump_l2(oph->msg));
+		DEBUGP(DBSSAP, "N-UNITDATA.ind(%s)\n", msgb_hexdump_l2(oph->msg));
 		a_sccp_rx_udt(scu, &a_conn_info, oph->msg);
 		break;
 
 	default:
-		LOGP(DMSC, LOGL_ERROR, "Unhandled SIGTRAN operation %s on primitive %u\n",
+		LOGP(DBSSAP, LOGL_ERROR, "Unhandled SIGTRAN operation %s on primitive %u\n",
 		     get_value_string(osmo_prim_op_names, oph->operation), oph->primitive);
 		break;
 	}
@@ -623,7 +623,7 @@ int a_init(struct osmo_sccp_instance *sccp, struct gsm_network *network)
 	OSMO_ASSERT(network);
 
 	/* FIXME: Remove hardcoded parameters, use parameters in parameter list */
-	LOGP(DMSC, LOGL_NOTICE, "Initalizing SCCP connection to stp...\n");
+	LOGP(DBSSAP, LOGL_NOTICE, "Initalizing SCCP connection to stp...\n");
 
 	/* Set GSM network variable, there can only be
 	 * one network by design */
