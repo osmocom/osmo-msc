@@ -223,16 +223,14 @@ void a_sccp_rx_udt(struct osmo_sccp_user *scu, const struct a_conn_info *a_conn_
  */
 
 /* Endpoint to handle BSSMAP clear request */
-static int bssmap_rx_clear_rqst(struct osmo_sccp_user *scu, const struct a_conn_info *a_conn_info, struct msgb *msg)
+static int bssmap_rx_clear_rqst(struct gsm_subscriber_connection *conn, struct msgb *msg)
 {
-	struct gsm_network *network = a_conn_info->network;
 	struct tlv_parsed tp;
 	int rc;
 	struct msgb *msg_resp;
 	uint8_t cause;
-	struct gsm_subscriber_connection *conn;
 
-	LOGP(DMSC, LOGL_INFO, "BSC requested to clear connection (conn_id=%i)\n", a_conn_info->conn_id);
+	LOGPCONN(conn, LOGL_INFO, "BSC requested to clear connection\n");
 
 	tlv_parse(&tp, gsm0808_att_tlvdef(), msg->l3h + 1, msgb_l3len(msg) - 1, 0, 0);
 	if (!TLVP_PRESENT(&tp, GSM0808_IE_CAUSE)) {
@@ -243,28 +241,24 @@ static int bssmap_rx_clear_rqst(struct osmo_sccp_user *scu, const struct a_conn_
 
 	/* Respond with clear command */
 	msg_resp = gsm0808_create_clear_command(GSM0808_CAUSE_CALL_CONTROL);
-	rc = osmo_sccp_tx_data_msg(scu, a_conn_info->conn_id, msg_resp);
+	rc = osmo_sccp_tx_data_msg(conn->a.scu, conn->a.conn_id, msg_resp);
 
-	/* If possible, inform the MSC about the clear request */
-	conn = subscr_conn_lookup_a(network, a_conn_info->conn_id);
-	if (!conn)
-		goto fail;
 	msc_clear_request(conn, cause);
 
 	msgb_free(msg);
 	return rc;
-
 fail:
 	msgb_free(msg);
 	return -EINVAL;
 }
 
 /* Endpoint to handle BSSMAP clear complete */
-static int bssmap_rx_clear_complete(struct osmo_sccp_user *scu, const struct a_conn_info *a_conn_info, struct msgb *msg)
+static int bssmap_rx_clear_complete(struct osmo_sccp_user *scu,
+				    const struct a_conn_info *a_conn_info, struct msgb *msg)
 {
 	int rc;
 
-	LOGP(DMSC, LOGL_INFO, "Releasing connection (conn_id=%i)\n", a_conn_info->conn_id);
+	LOGP(DMSC, LOGL_INFO, "Rx BSSMAP CLEAR COMPPLETE, releasing SCCP connection\n");
 	rc = osmo_sccp_tx_disconn(scu, a_conn_info->conn_id,
 				  NULL, SCCP_RELEASE_CAUSE_END_USER_ORIGINATED);
 
@@ -357,19 +351,13 @@ fail:
 }
 
 /* Endpoint to handle BSSMAP classmark update */
-static int bssmap_rx_classmark_upd(struct osmo_sccp_user *scu, const struct a_conn_info *a_conn_info, struct msgb *msg)
+static int bssmap_rx_classmark_upd(struct gsm_subscriber_connection *conn, struct msgb *msg)
 {
-	struct gsm_network *network = a_conn_info->network;
-	struct gsm_subscriber_connection *conn;
 	struct tlv_parsed tp;
 	const uint8_t *cm2 = NULL;
 	const uint8_t *cm3 = NULL;
 	uint8_t cm2_len = 0;
 	uint8_t cm3_len = 0;
-
-	conn = subscr_conn_lookup_a(network, a_conn_info->conn_id);
-	if (!conn)
-		goto fail;
 
 	LOGPCONN(conn, LOGL_DEBUG, "Rx BSSMAP CLASSMARK UPDATE\n");
 
@@ -399,8 +387,7 @@ fail:
 }
 
 /* Endpoint to handle BSSMAP cipher mode complete */
-static int bssmap_rx_ciph_compl(const struct osmo_sccp_user *scu, const struct a_conn_info *a_conn_info,
-				struct msgb *msg)
+static int bssmap_rx_ciph_compl(struct gsm_subscriber_connection *conn, struct msgb *msg)
 {
 	/* FIXME: The field GSM0808_IE_LAYER_3_MESSAGE_CONTENTS is optional by
 	 * means of the specification. So there can be messages without L3 info.
@@ -409,14 +396,8 @@ static int bssmap_rx_ciph_compl(const struct osmo_sccp_user *scu, const struct a
 	 * msc_cipher_mode_compl() was never meant to be used without L3 data.
 	 * This needs to be discussed further! */
 
-	struct gsm_network *network = a_conn_info->network;
-	struct gsm_subscriber_connection *conn;
 	struct tlv_parsed tp;
 	uint8_t alg_id = 1;
-
-	conn = subscr_conn_lookup_a(network, a_conn_info->conn_id);
-	if (!conn)
-		goto fail;
 
 	LOGPCONN(conn, LOGL_DEBUG, "Rx BSSMAP CIPHER MODE COMPLETE\n");
 
@@ -439,22 +420,13 @@ static int bssmap_rx_ciph_compl(const struct osmo_sccp_user *scu, const struct a
 	msgb_free(msg);
 
 	return 0;
-fail:
-	msgb_free(msg);
-	return -EINVAL;
 }
 
 /* Endpoint to handle BSSMAP cipher mode reject */
-static int bssmap_rx_ciph_rej(const struct osmo_sccp_user *scu, const struct a_conn_info *a_conn_info, struct msgb *msg)
+static int bssmap_rx_ciph_rej(struct gsm_subscriber_connection *conn, struct msgb *msg)
 {
-	struct gsm_network *network = a_conn_info->network;
-	struct gsm_subscriber_connection *conn;
 	struct tlv_parsed tp;
 	uint8_t cause;
-
-	conn = subscr_conn_lookup_a(network, a_conn_info->conn_id);
-	if (!conn)
-		goto fail;
 
 	LOGPCONN(conn, LOGL_NOTICE, "RX BSSMAP CIPHER MODE REJECT\n");
 
@@ -478,18 +450,12 @@ fail:
 }
 
 /* Endpoint to handle BSSMAP assignment failure */
-static int bssmap_rx_ass_fail(const struct osmo_sccp_user *scu, const struct a_conn_info *a_conn_info, struct msgb *msg)
+static int bssmap_rx_ass_fail(struct gsm_subscriber_connection *conn, struct msgb *msg)
 {
-	struct gsm_network *network = a_conn_info->network;
-	struct gsm_subscriber_connection *conn;
 	struct tlv_parsed tp;
 	uint8_t cause;
 	uint8_t *rr_cause_ptr = NULL;
 	uint8_t rr_cause;
-
-	conn = subscr_conn_lookup_a(network, a_conn_info->conn_id);
-	if (!conn)
-		goto fail;
 
 	LOGPCONN(conn, LOGL_NOTICE, "Rx BSSMAP ASSIGNMENT FAILURE message\n");
 
@@ -516,23 +482,17 @@ static int bssmap_rx_ass_fail(const struct osmo_sccp_user *scu, const struct a_c
 
 	msgb_free(msg);
 	return 0;
+
 fail:
 	msgb_free(msg);
 	return -EINVAL;
 }
 
 /* Endpoint to handle sapi "n" reject */
-static int bssmap_rx_sapi_n_rej(const struct osmo_sccp_user *scu, const struct a_conn_info *a_conn_info,
-				struct msgb *msg)
+static int bssmap_rx_sapi_n_rej(struct gsm_subscriber_connection *conn, struct msgb *msg)
 {
-	struct gsm_network *network = a_conn_info->network;
-	struct gsm_subscriber_connection *conn;
 	struct tlv_parsed tp;
 	uint8_t dlci;
-
-	conn = subscr_conn_lookup_a(network, a_conn_info->conn_id);
-	if (!conn)
-		goto fail;
 
 	LOGPCONN(conn, LOGL_NOTICE, "BSC sends sapi \"n\" reject message\n");
 
@@ -557,26 +517,20 @@ static int bssmap_rx_sapi_n_rej(const struct osmo_sccp_user *scu, const struct a
 
 	msgb_free(msg);
 	return 0;
+
 fail:
 	msgb_free(msg);
 	return -EINVAL;
 }
 
 /* Endpoint to handle assignment complete */
-static int bssmap_rx_ass_compl(const struct osmo_sccp_user *scu, const struct a_conn_info *a_conn_info,
-			       struct msgb *msg)
+static int bssmap_rx_ass_compl(struct gsm_subscriber_connection *conn, struct msgb *msg)
 {
-	struct gsm_network *network = a_conn_info->network;
-	struct gsm_subscriber_connection *conn;
 	struct mgcp_client *mgcp;
 	struct tlv_parsed tp;
 	struct sockaddr_storage rtp_addr;
 	struct sockaddr_in *rtp_addr_in;
 	int rc;
-
-	conn = subscr_conn_lookup_a(network, a_conn_info->conn_id);
-	if (!conn)
-		goto fail;
 
 	mgcp = conn->network->mgw.client;
 	OSMO_ASSERT(mgcp);
@@ -622,35 +576,50 @@ fail:
 /* Handle incoming connection oriented BSSMAP messages */
 static int rx_bssmap(struct osmo_sccp_user *scu, const struct a_conn_info *a_conn_info, struct msgb *msg)
 {
+	struct gsm_subscriber_connection *conn;
+
 	if (msgb_l3len(msg) < 1) {
 		LOGP(DMSC, LOGL_NOTICE, "Error: No data received -- discarding message!\n");
 		msgb_free(msg);
 		return -1;
 	}
 
-	LOGP(DMSC, LOGL_DEBUG, "Rx BSSMAP DT1 %s\n", gsm0808_bssmap_name(msg->l3h[0]));
+	/* Only message types allowed without a 'conn' */
+	switch (msg->l3h[0]) {
+	case BSS_MAP_MSG_COMPLETE_LAYER_3:
+		return bssmap_rx_l3_compl(scu, a_conn_info, msg);
+	case BSS_MAP_MSG_CLEAR_COMPLETE:
+		return bssmap_rx_clear_complete(scu, a_conn_info, msg);
+	default:
+		break;
+	}
+
+	conn = subscr_conn_lookup_a(a_conn_info->network, a_conn_info->conn_id);
+	if (!conn) {
+		LOGP(DMSC, LOGL_ERROR, "Couldn't find subscr_conn for conn_id=%d\n", a_conn_info->conn_id);
+		msgb_free(msg);
+		return -EINVAL;
+	}
+
+	LOGPCONN(conn, LOGL_DEBUG, "Rx BSSMAP DT1 %s\n", gsm0808_bssmap_name(msg->l3h[0]));
 
 	switch (msg->l3h[0]) {
 	case BSS_MAP_MSG_CLEAR_RQST:
-		return bssmap_rx_clear_rqst(scu, a_conn_info, msg);
-	case BSS_MAP_MSG_CLEAR_COMPLETE:
-		return bssmap_rx_clear_complete(scu, a_conn_info, msg);
-	case BSS_MAP_MSG_COMPLETE_LAYER_3:
-		return bssmap_rx_l3_compl(scu, a_conn_info, msg);
+		return bssmap_rx_clear_rqst(conn, msg);
 	case BSS_MAP_MSG_CLASSMARK_UPDATE:
-		return bssmap_rx_classmark_upd(scu, a_conn_info, msg);
+		return bssmap_rx_classmark_upd(conn, msg);
 	case BSS_MAP_MSG_CIPHER_MODE_COMPLETE:
-		return bssmap_rx_ciph_compl(scu, a_conn_info, msg);
+		return bssmap_rx_ciph_compl(conn, msg);
 	case BSS_MAP_MSG_CIPHER_MODE_REJECT:
-		return bssmap_rx_ciph_rej(scu, a_conn_info, msg);
+		return bssmap_rx_ciph_rej(conn, msg);
 	case BSS_MAP_MSG_ASSIGMENT_FAILURE:
-		return bssmap_rx_ass_fail(scu, a_conn_info, msg);
+		return bssmap_rx_ass_fail(conn, msg);
 	case BSS_MAP_MSG_SAPI_N_REJECT:
-		return bssmap_rx_sapi_n_rej(scu, a_conn_info, msg);
+		return bssmap_rx_sapi_n_rej(conn, msg);
 	case BSS_MAP_MSG_ASSIGMENT_COMPLETE:
-		return bssmap_rx_ass_compl(scu, a_conn_info, msg);
+		return bssmap_rx_ass_compl(conn, msg);
 	default:
-		LOGP(DMSC, LOGL_ERROR, "Unimplemented msg type: %s\n", gsm0808_bssmap_name(msg->l3h[0]));
+		LOGPCONN(conn, LOGL_ERROR, "Unimplemented msg type: %s\n", gsm0808_bssmap_name(msg->l3h[0]));
 		msgb_free(msg);
 		return -EINVAL;
 	}
