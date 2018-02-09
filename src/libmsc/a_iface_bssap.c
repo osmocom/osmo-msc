@@ -110,7 +110,7 @@ static void bssmap_rx_reset(struct osmo_sccp_user *scu, const struct a_conn_info
 	ss7 = osmo_ss7_instance_find(network->a.cs7_instance);
 	OSMO_ASSERT(ss7);
 
-	LOGP(DMSC, LOGL_NOTICE, "Rx RESET from BSC %s, sending RESET ACK\n",
+	LOGP(DMSC, LOGL_NOTICE, "Rx BSSMAP RESET from BSC %s, sending RESET ACK\n",
 	     osmo_sccp_addr_name(ss7, &a_conn_info->bsc->bsc_addr));
 	osmo_sccp_tx_unitdata_msg(scu, &a_conn_info->bsc->msc_addr, &a_conn_info->bsc->bsc_addr,
 				  gsm0808_create_reset_ack());
@@ -164,7 +164,7 @@ static void bssmap_rcvmsg_udt(struct osmo_sccp_user *scu, const struct a_conn_in
 		return;
 	}
 
-	LOGP(DMSC, LOGL_DEBUG, "Rx BSC UDT BSSMAP %s\n", gsm0808_bssmap_name(msg->l3h[0]));
+	LOGP(DMSC, LOGL_DEBUG, "Rx BSSMAP UDT %s\n", gsm0808_bssmap_name(msg->l3h[0]));
 
 	switch (msg->l3h[0]) {
 	case BSS_MAP_MSG_RESET:
@@ -371,7 +371,7 @@ static int bssmap_rx_classmark_upd(struct osmo_sccp_user *scu, const struct a_co
 	if (!conn)
 		goto fail;
 
-	LOGPCONN(conn, LOGL_DEBUG, "BSC sends clasmark update\n");
+	LOGPCONN(conn, LOGL_DEBUG, "Rx BSSMAP CLASSMARK UPDATE\n");
 
 	tlv_parse(&tp, gsm0808_att_tlvdef(), msg->l3h + 1, msgb_l3len(msg) - 1, 0, 0);
 	if (!TLVP_PRESENT(&tp, GSM0808_IE_CLASSMARK_INFORMATION_T2)) {
@@ -418,7 +418,7 @@ static int bssmap_rx_ciph_compl(const struct osmo_sccp_user *scu, const struct a
 	if (!conn)
 		goto fail;
 
-	LOGPCONN(conn, LOGL_DEBUG, "BSC sends cipher mode complete\n");
+	LOGPCONN(conn, LOGL_DEBUG, "Rx BSSMAP CIPHER MODE COMPLETE\n");
 
 	tlv_parse(&tp, gsm0808_att_tlvdef(), msg->l3h + 1, msgb_l3len(msg) - 1, 0, 0);
 
@@ -456,7 +456,7 @@ static int bssmap_rx_ciph_rej(const struct osmo_sccp_user *scu, const struct a_c
 	if (!conn)
 		goto fail;
 
-	LOGPCONN(conn, LOGL_NOTICE, "BSC sends cipher mode reject\n");
+	LOGPCONN(conn, LOGL_NOTICE, "RX BSSMAP CIPHER MODE REJECT\n");
 
 	tlv_parse(&tp, gsm0808_att_tlvdef(), msg->l3h + 1, msgb_l3len(msg) - 1, 0, 0);
 	if (!TLVP_PRESENT(&tp, BSS_MAP_MSG_CIPHER_MODE_REJECT)) {
@@ -491,7 +491,7 @@ static int bssmap_rx_ass_fail(const struct osmo_sccp_user *scu, const struct a_c
 	if (!conn)
 		goto fail;
 
-	LOGPCONN(conn, LOGL_NOTICE, "BSC sends assignment failure message\n");
+	LOGPCONN(conn, LOGL_NOTICE, "Rx BSSMAP ASSIGNMENT FAILURE message\n");
 
 	tlv_parse(&tp, gsm0808_att_tlvdef(), msg->l3h + 1, msgb_l3len(msg) - 1, 0, 0);
 	if (!TLVP_PRESENT(&tp, GSM0808_IE_CAUSE)) {
@@ -628,7 +628,7 @@ static int rx_bssmap(struct osmo_sccp_user *scu, const struct a_conn_info *a_con
 		return -1;
 	}
 
-	LOGP(DMSC, LOGL_DEBUG, "Rx MSC DT1 BSSMAP %s\n", gsm0808_bssmap_name(msg->l3h[0]));
+	LOGP(DMSC, LOGL_DEBUG, "Rx BSSMAP DT1 %s\n", gsm0808_bssmap_name(msg->l3h[0]));
 
 	switch (msg->l3h[0]) {
 	case BSS_MAP_MSG_CLEAR_RQST:
@@ -679,7 +679,7 @@ static int rx_dtap(const struct osmo_sccp_user *scu, const struct a_conn_info *a
 		return -EINVAL;
 	}
 
-	LOGPCONN(conn, LOGL_DEBUG, "BSC sends layer 3 dtap\n");
+	LOGPCONN(conn, LOGL_DEBUG, "Rx DTAP %s\n", msgb_hexdump_l2(msg));
 
 	/* msc_dtap expects the dtap payload in l3h */
 	msg->l3h = msg->l2h + 3;

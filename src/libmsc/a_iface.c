@@ -179,7 +179,7 @@ int a_iface_tx_cipher_mode(const struct gsm_subscriber_connection *conn,
 	uint8_t crm = 0x01;
 
 	OSMO_ASSERT(conn);
-	LOGPCONN(conn, LOGL_DEBUG, "Cipher Mode Command to BSC, %u ciphers (%s)",
+	LOGPCONN(conn, LOGL_DEBUG, "Tx BSSMAP CIPHER MODE COMMAND to BSC, %u ciphers (%s)",
 		 ei->perm_algo_len, osmo_hexdump_nospc(ei->perm_algo, ei->perm_algo_len));
 	LOGPC(DMSC, LOGL_DEBUG, " key %s\n", osmo_hexdump_nospc(ei->key, ei->key_len));
 
@@ -211,7 +211,7 @@ int a_iface_tx_paging(const char *imsi, uint32_t tmsi, uint16_t lac)
 	llist_for_each_entry(bsc_ctx, &gsm_network->a.bscs, list) {
 		if (a_reset_conn_ready(bsc_ctx->reset)) {
 			LOGP(DMSC, LOGL_DEBUG,
-			     "Passing paging message from MSC %s to BSC %s (imsi=%s, tmsi=0x%08x, lac=%u)\n",
+			     "Tx BSSMAP paging message from MSC %s to BSC %s (imsi=%s, tmsi=0x%08x, lac=%u)\n",
 			     osmo_sccp_addr_name(ss7, &bsc_ctx->msc_addr),
 			     osmo_sccp_addr_name(ss7, &bsc_ctx->bsc_addr), imsi, tmsi, lac);
 			msg = gsm0808_create_paging(imsi, &tmsi, &cil, NULL);
@@ -380,7 +380,7 @@ int a_iface_tx_assignment(const struct gsm_trans *trans)
 	conn = trans->conn;
 	OSMO_ASSERT(conn);
 
-	LOGPCONN(conn, LOGL_DEBUG, "Sending Assignment Command to BSC\n");
+	LOGPCONN(conn, LOGL_DEBUG, "Tx BSSMAP ASSIGNMENT COMMAND to BSC\n");
 
 	/* Channel type */
 	rc = enc_channel_type(&ct, &trans->bearer_cap);
@@ -425,7 +425,7 @@ int a_iface_tx_clear_cmd(struct gsm_subscriber_connection *conn)
 {
 	struct msgb *msg;
 
-	LOGPCONN(conn, LOGL_INFO, "Sending Clear command to BSC\n");
+	LOGPCONN(conn, LOGL_INFO, "Tx BSSMAP CLEAR COMMAND to BSC\n");
 
 	msg = gsm0808_create_clear_command(GSM0808_CAUSE_CALL_CONTROL);
 	return osmo_sccp_tx_data_msg(conn->a.scu, conn->a.conn_id, msg);
@@ -448,7 +448,7 @@ static void a_reset_cb(const void *priv)
 	/* Send reset to the remote BSC */
 	ss7 = osmo_ss7_instance_find(gsm_network->a.cs7_instance);
 	OSMO_ASSERT(ss7);
-	LOGP(DMSC, LOGL_NOTICE, "Sending RESET to BSC %s\n", osmo_sccp_addr_name(ss7, &bsc_ctx->bsc_addr));
+	LOGP(DMSC, LOGL_NOTICE, "Tx BSSMAP RESET to BSC %s\n", osmo_sccp_addr_name(ss7, &bsc_ctx->bsc_addr));
 	msg = gsm0808_create_reset();
 	osmo_sccp_tx_unitdata_msg(bsc_ctx->sccp_user, &bsc_ctx->msc_addr,
 				  &bsc_ctx->bsc_addr, msg);
