@@ -125,6 +125,20 @@ DEFUN(cfg_msc_paging_response_timer, cfg_msc_paging_response_timer_cmd,
 	return CMD_SUCCESS;
 }
 
+DEFUN(cfg_msc_emergency_msisdn, cfg_msc_emergency_msisdn_cmd,
+      "emergency-call route-to-msisdn MSISDN",
+      "Configure Emergency Call Behaviour\n"
+      "MSISDN to which Emergency Calls are Dispatched\n"
+      "MSISDN (E.164 Phone Number)\n")
+{
+	struct gsm_network *gsmnet = gsmnet_from_vty(vty);
+
+	osmo_talloc_replace_string(gsmnet, &gsmnet->emergency.route_to_msisdn, argv[0]);
+
+	return CMD_SUCCESS;
+}
+
+
 static int config_write_msc(struct vty *vty)
 {
 	struct gsm_network *gsmnet = gsmnet_from_vty(vty);
@@ -148,6 +162,11 @@ static int config_write_msc(struct vty *vty)
 
 	if (gsmnet->paging_response_timer != MSC_PAGING_RESPONSE_TIMER_DEFAULT)
 		vty_out(vty, " paging response-timer %u%s", gsmnet->paging_response_timer, VTY_NEWLINE);
+
+	if (gsmnet->emergency.route_to_msisdn) {
+		vty_out(vty, " emergency-call route-to-msisdn %s%s",
+			gsmnet->emergency.route_to_msisdn, VTY_NEWLINE);
+	}
 
 	mgcp_client_config_write(vty, " ");
 #ifdef BUILD_IU
@@ -196,6 +215,11 @@ static int config_write_net(struct vty *vty)
 		vty_out(vty, " periodic location update %u%s",
 			gsmnet->t3212 * 6, VTY_NEWLINE);
 
+	if (gsmnet->emergency.route_to_msisdn) {
+		vty_out(vty, " emergency-call route-to-msisdn %s%s",
+			gsmnet->emergency.route_to_msisdn, VTY_NEWLINE);
+	}
+
 	return CMD_SUCCESS;
 }
 
@@ -212,6 +236,7 @@ void msc_vty_init(struct gsm_network *msc_network)
 	install_element(MSC_NODE, &cfg_msc_cs7_instance_a_cmd);
 	install_element(MSC_NODE, &cfg_msc_cs7_instance_iu_cmd);
 	install_element(MSC_NODE, &cfg_msc_paging_response_timer_cmd);
+	install_element(MSC_NODE, &cfg_msc_emergency_msisdn_cmd);
 
 	mgcp_client_vty_init(msc_network, MSC_NODE, &msc_network->mgw.conf);
 #ifdef BUILD_IU

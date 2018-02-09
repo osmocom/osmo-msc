@@ -1645,6 +1645,14 @@ static int gsm48_cc_rx_setup(struct gsm_trans *trans, struct msgb *msg)
 	if (msg_type == GSM48_MT_CC_EMERG_SETUP) {
 		setup.fields |= MNCC_F_EMERGENCY;
 		setup.emergency = 1;
+		/* use destination number as configured by user (if any) */
+		if (trans->net->emergency.route_to_msisdn) {
+			setup.fields |= MNCC_F_CALLED;
+			setup.called.type = 0; /* unknown */
+			setup.called.plan = 0; /* unknown */
+			OSMO_STRLCPY_ARRAY(setup.called.number,
+					   trans->net->emergency.route_to_msisdn);
+		}
 	}
 
 	/* use subscriber as calling party number */

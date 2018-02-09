@@ -413,6 +413,11 @@ struct gsm_network {
 		struct llist_head bscs;
 		struct osmo_sccp_instance *sccp;
 	} a;
+
+	struct {
+		/* MSISDN to which to route MO emergency calls */
+		char *route_to_msisdn;
+	} emergency;
 };
 
 struct osmo_esme;
