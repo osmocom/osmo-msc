@@ -1,4 +1,5 @@
 /* (C) 2017 by sysmocom s.f.m.c. GmbH
+ * (C) 2018 by Harald Welte <laforge@gnumonks.org>
  * All Rights Reserved
  *
  * Author: Philipp Maier
