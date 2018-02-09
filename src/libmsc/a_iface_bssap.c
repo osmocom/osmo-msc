@@ -633,31 +633,22 @@ static int rx_bssmap(struct osmo_sccp_user *scu, const struct a_conn_info *a_con
 	switch (msg->l3h[0]) {
 	case BSS_MAP_MSG_CLEAR_RQST:
 		return bssmap_rx_clear_rqst(scu, a_conn_info, msg);
-		break;
 	case BSS_MAP_MSG_CLEAR_COMPLETE:
 		return bssmap_rx_clear_complete(scu, a_conn_info, msg);
-		break;
 	case BSS_MAP_MSG_COMPLETE_LAYER_3:
 		return bssmap_rx_l3_compl(scu, a_conn_info, msg);
-		break;
 	case BSS_MAP_MSG_CLASSMARK_UPDATE:
 		return bssmap_rx_classmark_upd(scu, a_conn_info, msg);
-		break;
 	case BSS_MAP_MSG_CIPHER_MODE_COMPLETE:
 		return bssmap_rx_ciph_compl(scu, a_conn_info, msg);
-		break;
 	case BSS_MAP_MSG_CIPHER_MODE_REJECT:
 		return bssmap_rx_ciph_rej(scu, a_conn_info, msg);
-		break;
 	case BSS_MAP_MSG_ASSIGMENT_FAILURE:
 		return bssmap_rx_ass_fail(scu, a_conn_info, msg);
-		break;
 	case BSS_MAP_MSG_SAPI_N_REJECT:
 		return bssmap_rx_sapi_n_rej(scu, a_conn_info, msg);
-		break;
 	case BSS_MAP_MSG_ASSIGMENT_COMPLETE:
 		return bssmap_rx_ass_compl(scu, a_conn_info, msg);
-		break;
 	default:
 		LOGP(DMSC, LOGL_ERROR, "Unimplemented msg type: %s\n", gsm0808_bssmap_name(msg->l3h[0]));
 		msgb_free(msg);
@@ -708,10 +699,8 @@ int a_sccp_rx_dt(struct osmo_sccp_user *scu, const struct a_conn_info *a_conn_in
 	case BSSAP_MSG_BSS_MANAGEMENT:
 		msg->l3h = &msg->l2h[sizeof(struct bssmap_header)];
 		return rx_bssmap(scu, a_conn_info, msg);
-		break;
 	case BSSAP_MSG_DTAP:
 		return rx_dtap(scu, a_conn_info, msg);
-		break;
 	default:
 		LOGP(DMSC, LOGL_ERROR, "Unimplemented BSSAP msg type: %s\n", gsm0808_bssap_name(msg->l2h[0]));
 		msgb_free(msg);

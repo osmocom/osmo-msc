@@ -245,31 +245,22 @@ static uint8_t convert_Abis_sv_to_A_sv(int speech_ver)
 	switch (speech_ver) {
 	case GSM48_BCAP_SV_FR:
 		return GSM0808_PERM_FR1;
-		break;
 	case GSM48_BCAP_SV_HR:
 		return GSM0808_PERM_HR1;
-		break;
 	case GSM48_BCAP_SV_EFR:
 		return GSM0808_PERM_FR2;
-		break;
 	case GSM48_BCAP_SV_AMR_F:
 		return GSM0808_PERM_FR3;
-		break;
 	case GSM48_BCAP_SV_AMR_H:
 		return GSM0808_PERM_HR3;
-		break;
 	case GSM48_BCAP_SV_AMR_OFW:
 		return GSM0808_PERM_FR4;
-		break;
 	case GSM48_BCAP_SV_AMR_OHW:
 		return GSM0808_PERM_HR4;
-		break;
 	case GSM48_BCAP_SV_AMR_FW:
 		return GSM0808_PERM_FR5;
-		break;
 	case GSM48_BCAP_SV_AMR_OH:
 		return GSM0808_PERM_HR6;
-		break;
 	}
 
 	/* If nothing matches, tag the result as invalid */
