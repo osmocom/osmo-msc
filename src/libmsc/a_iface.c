@@ -605,14 +605,16 @@ void a_clear_all(struct osmo_sccp_user *scu, const struct osmo_sccp_addr *bsc_ad
 		/* Clear only A connections and connections that actually
 		 * belong to the specified BSC */
 		if (conn->via_ran == RAN_GERAN_A && memcmp(bsc_addr, &conn->a.bsc_addr, sizeof(conn->a.bsc_addr)) == 0) {
+			uint32_t conn_id = conn->a.conn_id;
 			LOGPCONN(conn, LOGL_NOTICE, "Dropping orphaned subscriber connection\n");
+			/* This call will/may talloc_free(conn), so we must save conn_id above */
 			msc_clear_request(conn, GSM48_CC_CAUSE_SWITCH_CONG);
 
 			/* If there is still an SCCP connection active, remove it now */
-			if (check_connection_active(conn->a.conn_id)) {
-				osmo_sccp_tx_disconn(scu, conn->a.conn_id, bsc_addr,
+			if (check_connection_active(conn_id)) {
+				osmo_sccp_tx_disconn(scu, conn_id, bsc_addr,
 						     SCCP_RELEASE_CAUSE_END_USER_ORIGINATED);
-				a_delete_bsc_con(conn->a.conn_id);
+				a_delete_bsc_con(conn_id);
 			}
 		}
 	}
