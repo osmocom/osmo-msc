@@ -724,7 +724,8 @@ static void mgw_dlcx_all_resp_cb(struct mgcp_response *r, void *priv)
 
 	OSMO_ASSERT(mgcp_ctx);
 
-	if (r->head.response_code != 200) {
+	/* DLCX is the only command where 250 is permitted as positive result */
+	if (r->head.response_code != 200 && r->head.response_code != 250) {
 		LOGPFSML(mgcp_ctx->fsm, LOGL_ERROR,
 			 "DLCX: response yields error: %d %s\n", r->head.response_code, r->head.comment);
 		handle_error(mgcp_ctx, MGCP_ERR_MGW_FAIL);
