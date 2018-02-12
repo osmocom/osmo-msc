@@ -234,10 +234,10 @@ int a_iface_tx_paging(const char *imsi, uint32_t tmsi, uint16_t lac)
 }
 
 /* Convert speech version field */
-static uint8_t convert_Abis_sv_to_A_sv(int speech_ver)
+static uint8_t convert_l3_sv_to_A_sv(int speech_ver)
 {
 	/* The speech versions that are transmitted in the Bearer capability
-	 * information element, that is transmitted on the Abis interfece
+	 * information element, that is transmitted on the Layer 3 (CC)
 	 * use a different encoding than the permitted speech version
 	 * identifier, that is signalled in the channel type element on the A
 	 * interface. (See also 3GPP TS 48.008, 3.2.2.1 and 3GPP TS 24.008,
@@ -270,11 +270,11 @@ static uint8_t convert_Abis_sv_to_A_sv(int speech_ver)
 }
 
 /* Convert speech preference field */
-static uint8_t convert_Abis_prev_to_A_pref(int radio)
+static uint8_t convert_l3_prev_to_A_pref(int radio)
 {
 	/* The Radio channel requirement field that is transmitted in the
 	 * Bearer capability information element, that is transmitted on the
-	 * Abis interfece uses a different encoding than the Channel rate and
+	 * Layer 3 (CC) uses a different encoding than the Channel rate and
 	 * type field that is signalled in the channel type element on the A
 	 * interface. (See also 3GPP TS 48.008, 3.2.2.1 and 3GPP TS 24.008,
 	 * 10.5.102 */
@@ -309,7 +309,7 @@ static int enc_channel_type(struct gsm0808_channel_type *ct, const struct gsm_mn
 	for (i = 0; i < ARRAY_SIZE(bc->speech_ver); i++) {
 		if (bc->speech_ver[i] == -1)
 			break;
-		sv = convert_Abis_sv_to_A_sv(bc->speech_ver[i]);
+		sv = convert_l3_sv_to_A_sv(bc->speech_ver[i]);
 		if (sv != 0xFF) {
 			/* Detect if something else than
 			 * GSM HR V1 is supported */
@@ -331,7 +331,7 @@ static int enc_channel_type(struct gsm0808_channel_type *ct, const struct gsm_mn
 		 * preference and assume a preference for full rate. */
 		ct->ch_rate_type = GSM0808_SPEECH_FULL_BM;
 	else
-		ct->ch_rate_type = convert_Abis_prev_to_A_pref(bc->radio);
+		ct->ch_rate_type = convert_l3_prev_to_A_pref(bc->radio);
 
 	if (count)
 		return 0;
