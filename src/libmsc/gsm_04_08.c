@@ -1883,8 +1883,10 @@ static int gsm48_cc_tx_call_proc_and_assign(struct gsm_trans *trans, void *arg)
 	new_cc_state(trans, GSM_CSTATE_MO_CALL_PROC);
 
 	/* bearer capability */
-	if (proceeding->fields & MNCC_F_BEARER_CAP)
+	if (proceeding->fields & MNCC_F_BEARER_CAP) {
 		gsm48_encode_bearer_cap(msg, 0, &proceeding->bearer_cap);
+		memcpy(&trans->bearer_cap, &proceeding->bearer_cap, sizeof(trans->bearer_cap));
+	}
 	/* facility */
 	if (proceeding->fields & MNCC_F_FACILITY)
 		gsm48_encode_facility(msg, 0, &proceeding->facility);
@@ -2575,6 +2577,7 @@ static int gsm48_cc_tx_modify(struct gsm_trans *trans, void *arg)
 
 	/* bearer capability */
 	gsm48_encode_bearer_cap(msg, 1, &modify->bearer_cap);
+	memcpy(&trans->bearer_cap, &modify->bearer_cap, sizeof(trans->bearer_cap));
 
 	new_cc_state(trans, GSM_CSTATE_MO_TERM_MODIFY);
 
@@ -2621,6 +2624,7 @@ static int gsm48_cc_tx_modify_complete(struct gsm_trans *trans, void *arg)
 
 	/* bearer capability */
 	gsm48_encode_bearer_cap(msg, 1, &modify->bearer_cap);
+	memcpy(&trans->bearer_cap, &modify->bearer_cap, sizeof(trans->bearer_cap));
 
 	new_cc_state(trans, GSM_CSTATE_ACTIVE);
 
@@ -2673,6 +2677,7 @@ static int gsm48_cc_tx_modify_reject(struct gsm_trans *trans, void *arg)
 
 	/* bearer capability */
 	gsm48_encode_bearer_cap(msg, 1, &modify->bearer_cap);
+	memcpy(&trans->bearer_cap, &modify->bearer_cap, sizeof(trans->bearer_cap));
 	/* cause */
 	gsm48_encode_cause(msg, 1, &modify->cause);
 
