@@ -1767,8 +1767,12 @@ static int gsm48_cc_tx_setup(struct gsm_trans *trans, void *arg)
 	gsm48_start_cc_timer(trans, 0x303, GSM48_T303);
 
 	/* bearer capability */
-	if (setup->fields & MNCC_F_BEARER_CAP)
+	if (setup->fields & MNCC_F_BEARER_CAP) {
+		/* Create a copy of the bearer capability in the transaction struct, so we
+		 * can use this information later */
+		memcpy(&trans->bearer_cap, &setup->bearer_cap, sizeof(trans->bearer_cap));
 		gsm48_encode_bearer_cap(msg, 0, &setup->bearer_cap);
+	}
 	/* facility */
 	if (setup->fields & MNCC_F_FACILITY)
 		gsm48_encode_facility(msg, 0, &setup->facility);
