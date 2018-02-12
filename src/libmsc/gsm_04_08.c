@@ -3721,8 +3721,10 @@ static void msc_vlr_subscr_assoc(void *msc_conn_ref,
 				 struct vlr_subscr *vsub)
 {
 	struct gsm_subscriber_connection *conn = msc_conn_ref;
+	OSMO_ASSERT(vsub);
 	OSMO_ASSERT(!conn->vsub);
 	conn->vsub = vlr_subscr_get(vsub);
+	OSMO_ASSERT(conn->vsub);
 	conn->vsub->cs.attached_via_ran = conn->via_ran;
 }
 
