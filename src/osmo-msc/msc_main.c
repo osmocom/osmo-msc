@@ -51,6 +51,7 @@
 #include <osmocom/vty/telnet_interface.h>
 #include <osmocom/vty/ports.h>
 #include <osmocom/vty/logging.h>
+#include <osmocom/vty/misc.h>
 #include <osmocom/msc/vty.h>
 #include <osmocom/msc/mncc.h>
 #include <osmocom/msc/rrlp.h>
@@ -366,6 +367,7 @@ int main(int argc, char **argv)
 
 	tall_msc_ctx = talloc_named_const(NULL, 1, "osmo_msc");
 	talloc_ctx_init(tall_msc_ctx);
+	msc_vty_info.tall_ctx = tall_msc_ctx;
 
 	osmo_init_logging(&log_info);
 	osmo_stats_init(tall_msc_ctx);
@@ -394,6 +396,7 @@ int main(int argc, char **argv)
 
 	ctrl_vty_init(tall_msc_ctx);
 	logging_vty_add_cmds(&log_info);
+	osmo_talloc_vty_add_cmds();
 	msc_vty_init(msc_network);
 	bsc_vty_init_extra();
 
