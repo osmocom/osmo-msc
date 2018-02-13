@@ -41,10 +41,6 @@ enum gsm_paging_event {
 	GSM_PAGING_BUSY,
 };
 
-struct gsm_mncc;
-struct osmo_rtp_socket;
-struct rtp_socket;
-
 /*
  * help with parsing regexps
  */

@@ -25,31 +25,12 @@
 /** annotations for msgb ownership */
 #define __uses
 
-#define OBSC_NM_W_ACK_CB(__msgb) (__msgb)->cb[3]
-
 struct mncc_sock_state;
-struct gsm_subscriber_group;
 struct vlr_instance;
 struct vlr_subscr;
 struct ranap_ue_conn_ctx;
 
-#define OBSC_LINKID_CB(__msgb)	(__msgb)->cb[3]
-
 #define tmsi_from_string(str) strtoul(str, NULL, 10)
-
-/* 3-bit long values */
-#define EARFCN_PRIO_INVALID 8
-#define EARFCN_MEAS_BW_INVALID 8
-/* 5-bit long values */
-#define EARFCN_QRXLV_INVALID 32
-#define EARFCN_THRESH_LOW_INVALID 32
-
-enum gsm_security_event {
-	GSM_SECURITY_NOAVAIL,
-	GSM_SECURITY_AUTH_FAILED,
-	GSM_SECURITY_SUCCEEDED,
-	GSM_SECURITY_ALREADY,
-};
 
 struct msgb;
 typedef int gsm_cbfn(unsigned int hooknum,
@@ -57,56 +38,12 @@ typedef int gsm_cbfn(unsigned int hooknum,
 		     struct msgb *msg,
 		     void *data, void *param);
 
-/* Real authentication information containing Ki */
-enum gsm_auth_algo {
-	AUTH_ALGO_NONE,
-	AUTH_ALGO_XOR,
-	AUTH_ALGO_COMP128v1,
-};
-
-struct gsm_auth_info {
-	enum gsm_auth_algo auth_algo;
-	unsigned int a3a8_ki_len;
-	uint8_t a3a8_ki[16];
-};
-
 struct gsm_auth_tuple {
 	int use_count;
 	int key_seq;
 	struct osmo_auth_vector vec;
 };
 #define GSM_KEY_SEQ_INVAL	7	/* GSM 04.08 - 10.5.1.2 */
-
-/*
- * AUTHENTICATION/CIPHERING state
- */
-struct gsm_security_operation {
-	struct gsm_auth_tuple atuple;
-	gsm_cbfn *cb;
-	void *cb_data;
-};
-
-/*
- * A dummy to keep a connection up for at least
- * a couple of seconds to work around MSC issues.
- */
-struct gsm_anchor_operation {
-	struct osmo_timer_list timeout;
-};
-
-/* Maximum number of neighbor cells whose average we track */
-#define MAX_NEIGH_MEAS		10
-/* Maximum size of the averaging window for neighbor cells */
-#define MAX_WIN_NEIGH_AVG	10
-
-/* processed neighbor measurements for one cell */
-struct neigh_meas_proc {
-	uint16_t arfcn;
-	uint8_t bsic;
-	uint8_t rxlev[MAX_WIN_NEIGH_AVG];
-	unsigned int rxlev_cnt;
-	uint8_t last_seen_nr;
-};
 
 enum ran_type {
        RAN_UNKNOWN,
@@ -154,12 +91,6 @@ struct gsm_subscriber_connection {
 	uint8_t expire_timer_stopped;
 	/* SMS helpers for libmsc */
 	uint8_t next_rp_ref;
-
-	/*
-	 * Operations that have a state and might be pending
-	 */
-	struct gsm_security_operation *sec_operation;
-	struct gsm_anchor_operation *anch_operation;
 
 	struct osmo_fsm_inst *conn_fsm;
 
@@ -311,26 +242,11 @@ struct gsm_network {
 	/* bit-mask of permitted encryption algorithms. LSB=A5/0, MSB=A5/7 */
 	uint8_t a5_encryption_mask;
 	bool authentication_required;
-	int neci;
 	int send_mm_info;
 	struct {
 		int active;
-		/* Window RXLEV averaging */
-		unsigned int win_rxlev_avg;	/* number of SACCH frames */
-		/* Window RXQUAL averaging */
-		unsigned int win_rxqual_avg;	/* number of SACCH frames */
-		/* Window RXLEV neighbouring cells averaging */
-		unsigned int win_rxlev_avg_neigh; /* number of SACCH frames */
-
-		/* how often should we check for power budget HO */
-		unsigned int pwr_interval;	/* SACCH frames */
-		/* how much better does a neighbor cell have to be ? */
-		unsigned int pwr_hysteresis;	/* dBm */
-		/* maximum distacne before we try a handover */
-		unsigned int max_distance;	/* TA values */
 	} handover;
 
-	struct rate_ctr_group *bsc_ctrs;
 	struct rate_ctr_group *msc_ctrs;
 	struct osmo_counter *active_calls;
 
@@ -347,21 +263,10 @@ struct gsm_network {
 
 	unsigned int paging_response_timer;
 
-	/* timer to expire old location updates */
-	struct osmo_timer_list subscr_expire_timer;
-
 	/* Radio Resource Location Protocol (TS 04.31) */
 	struct {
 		enum rrlp_mode mode;
 	} rrlp;
-
-	enum gsm_chan_t ctype_by_chreq[18];
-
-	/* Use a TCH for handling requests of type paging any */
-	int pag_any_tch;
-
-	/* MSC data in case we are a true BSC */
-	struct osmo_bsc_data *bsc_data;
 
 	struct gsm_sms_queue *sms_queue;
 

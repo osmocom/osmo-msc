@@ -58,13 +58,13 @@ extern struct gsm_network *gsmnet_from_vty(struct vty *v);
 
 static void vty_conn_hdr(struct vty *vty)
 {
-	vty_out(vty, "--ConnId ------------Subscriber RAN --LAC Use --Tokens CSA A5 State%s",
+	vty_out(vty, "--ConnId ------------Subscriber RAN --LAC Use --Tokens C A5 State%s",
 		VTY_NEWLINE);
 }
 
 static void vty_dump_one_conn(struct vty *vty, const struct gsm_subscriber_connection *conn)
 {
-	vty_out(vty, "%08x %22s %3s %5u %3u %08x %c%c%c /%1u %27s %s",
+	vty_out(vty, "%08x %22s %3s %5u %3u %08x %c /%1u %27s %s",
 		conn->a.conn_id,
 		conn->vsub ? vlr_subscr_name(conn->vsub) : "-",
 		conn->via_ran == RAN_UTRAN_IU ? "Iu" : "A",
@@ -72,8 +72,6 @@ static void vty_dump_one_conn(struct vty *vty, const struct gsm_subscriber_conne
 		conn->use_count,
 		conn->use_tokens,
 		conn->received_cm_service_request ? 'C' : '-',
-		conn->sec_operation ? 'S' : '-',
-		conn->anch_operation ? 'A' : '-',
 		conn->encr.alg_id,
 		conn->conn_fsm ? osmo_fsm_inst_state_name(conn->conn_fsm) : "-",
 		VTY_NEWLINE);
