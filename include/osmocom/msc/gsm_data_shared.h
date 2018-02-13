@@ -1,7 +1,6 @@
 #ifndef _GSM_DATA_SHAREDH
 #define _GSM_DATA_SHAREDH
 
-#include <regex.h>
 #include <stdbool.h>
 #include <stdint.h>
 
@@ -40,11 +39,5 @@ enum gsm_paging_event {
 	GSM_PAGING_OOM,
 	GSM_PAGING_BUSY,
 };
-
-/*
- * help with parsing regexps
- */
-int gsm_parse_reg(void *ctx, regex_t *reg, char **str,
-		int argc, const char **argv) __attribute__ ((warn_unused_result));
 
 #endif

@@ -54,31 +54,6 @@ const char *rrlp_mode_name(enum rrlp_mode mode)
 	return get_value_string(rrlp_mode_names, mode);
 }
 
-int gsm_parse_reg(void *ctx, regex_t *reg, char **str, int argc, const char **argv)
-{
-	int ret;
-
-	ret = 0;
-	if (*str) {
-		talloc_free(*str);
-		*str = NULL;
-	}
-	regfree(reg);
-
-	if (argc > 0) {
-		*str = talloc_strdup(ctx, argv[0]);
-		ret = regcomp(reg, argv[0], 0);
-
-		/* handle compilation failures */
-		if (ret != 0) {
-			talloc_free(*str);
-			*str = NULL;
-		}
-	}
-
-	return ret;
-}
-
 bool classmark_is_r99(struct gsm_classmark *cm)
 {
 	int rev_lev = 0;
