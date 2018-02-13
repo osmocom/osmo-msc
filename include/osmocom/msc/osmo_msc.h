@@ -8,8 +8,6 @@
 
 #include <osmocom/msc/gsm_data.h>
 
-#include "bsc_api.h"
-
 #define MSC_HLR_REMOTE_IP_DEFAULT "127.0.0.1"
 #define MSC_HLR_REMOTE_PORT_DEFAULT OSMO_GSUP_PORT
 
@@ -55,8 +53,6 @@ enum msc_compl_l3_rc {
 	MSC_CONN_ACCEPT = 0,
 	MSC_CONN_REJECT = 1,
 };
-
-struct bsc_api *msc_bsc_api();
 
 int msc_create_conn_fsm(struct gsm_subscriber_connection *conn, const char *id);
 

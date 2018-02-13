@@ -46,7 +46,6 @@
 #include <osmocom/msc/transaction.h>
 #include <osmocom/msc/ussd.h>
 #include <osmocom/msc/silent_call.h>
-#include <osmocom/msc/bsc_api.h>
 #include <osmocom/msc/osmo_msc.h>
 #include <osmocom/msc/mncc_int.h>
 #include <osmocom/abis/e1_input.h>

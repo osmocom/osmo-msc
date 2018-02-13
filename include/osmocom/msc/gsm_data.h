@@ -344,7 +344,6 @@ struct gsm_network {
 	 * we have a subscriber connection.
 	 */
 	struct llist_head trans_list;
-	struct bsc_api *bsc_api;
 
 	unsigned int paging_response_timer;
 

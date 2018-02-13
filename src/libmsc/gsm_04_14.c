@@ -30,7 +30,6 @@
 #include <osmocom/msc/gsm_data.h>
 #include <osmocom/msc/gsm_subscriber.h>
 #include <osmocom/msc/gsm_04_08.h>
-#include <osmocom/msc/bsc_api.h>
 #include <osmocom/msc/msc_ifaces.h>
 
 #include <osmocom/gsm/gsm48.h>

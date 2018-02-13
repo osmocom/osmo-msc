@@ -1,7 +1,6 @@
 noinst_HEADERS = \
 	a_iface.h \
 	a_iface_bssap.h \
-	bsc_api.h \
 	common.h \
 	common_cs.h \
 	db.h \

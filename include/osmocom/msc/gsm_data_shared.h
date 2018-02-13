@@ -44,7 +44,6 @@ enum gsm_paging_event {
 struct gsm_mncc;
 struct osmo_rtp_socket;
 struct rtp_socket;
-struct bsc_api;
 
 /*
  * help with parsing regexps

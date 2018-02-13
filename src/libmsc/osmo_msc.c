@@ -22,7 +22,6 @@
  */
 
 #include <osmocom/msc/osmo_msc.h>
-#include <osmocom/msc/bsc_api.h>
 #include <osmocom/msc/debug.h>
 #include <osmocom/msc/transaction.h>
 #include <osmocom/msc/db.h>
@@ -261,23 +260,6 @@ int msc_clear_request(struct gsm_subscriber_connection *conn, uint32_t cause)
 {
 	msc_subscr_conn_close(conn, cause);
 	return 1;
-}
-
-/* MSC-level operations to be called by libbsc in NITB */
-static struct bsc_api msc_handler = {
-	.sapi_n_reject = msc_sapi_n_reject,
-	.compl_l3 = msc_compl_l3,
-	.dtap = msc_dtap,
-	.clear_request = msc_clear_request,
-	.assign_compl = msc_assign_compl,
-	.assign_fail = msc_assign_fail,
-	.classmark_chg = msc_classmark_chg,
-	.cipher_mode_compl = msc_cipher_mode_compl,
-	.conn_cleanup = msc_subscr_con_cleanup,
-};
-
-struct bsc_api *msc_bsc_api() {
-	return &msc_handler;
 }
 
 static void msc_subscr_conn_release_all(struct gsm_subscriber_connection *conn, uint32_t cause)

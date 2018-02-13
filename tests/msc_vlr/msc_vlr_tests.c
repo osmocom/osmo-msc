@@ -219,7 +219,7 @@ void rx_from_ms(struct msgb *msg)
 		reset_l3_seq_nr();
 		patch_l3_seq_nr(msg);
 		rc = msc_compl_l3(g_conn, msg, 23);
-		if (rc == BSC_API_CONN_POL_REJECT) {
+		if (rc != MSC_CONN_ACCEPT) {
 			msc_subscr_con_free(g_conn);
 			g_conn = NULL;
 		}
