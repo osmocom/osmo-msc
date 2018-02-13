@@ -168,8 +168,6 @@ struct gsm_subscriber_connection {
 
 	/* MNCC rtp bridge markers */
 	int mncc_rtp_bridge;
-	int mncc_rtp_create_pending;
-	int mncc_rtp_connect_pending;
 
 	/* back pointers */
 	struct gsm_network *network;
