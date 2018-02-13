@@ -444,7 +444,7 @@ DRLL Freeing subscriber connection with NULL subscriber
 ===== [1] test_gsm_authen(901700000004620): SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 8
+talloc_total_blocks(tall_bsc_ctx) == 7
 
 ===== [2] test_gsm_authen_tmsi(901700000004620)...
 - Location Update request causes a GSUP Send Auth Info request to HLR
@@ -1096,7 +1096,7 @@ DRLL Freeing subscriber connection with NULL subscriber
 ===== [2] test_gsm_authen_tmsi(901700000004620): SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 8
+talloc_total_blocks(tall_bsc_ctx) == 7
 
 ===== [3] test_gsm_authen_imei(901700000004620)...
 - Location Update request causes a GSUP Send Auth Info request to HLR
@@ -1316,7 +1316,7 @@ DRLL Freeing subscriber connection with NULL subscriber
 ===== [3] test_gsm_authen_imei(901700000004620): SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 8
+talloc_total_blocks(tall_bsc_ctx) == 7
 
 ===== [4] test_gsm_authen_tmsi_imei(901700000004620)...
 - Location Update request causes a GSUP Send Auth Info request to HLR
@@ -1567,7 +1567,7 @@ DRLL Freeing subscriber connection with NULL subscriber
 ===== [4] test_gsm_authen_tmsi_imei(901700000004620): SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 8
+talloc_total_blocks(tall_bsc_ctx) == 7
 
 ===== [5] test_gsm_milenage_authen(901700000010650)...
 - Location Update request causes a GSUP Send Auth Info request to HLR
@@ -1996,8 +1996,8 @@ DRLL Freeing subscriber connection with NULL subscriber
 ===== [5] test_gsm_milenage_authen(901700000010650): SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 8
+talloc_total_blocks(tall_bsc_ctx) == 7
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 8
+talloc_total_blocks(tall_bsc_ctx) == 7
 

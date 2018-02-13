@@ -44,14 +44,8 @@ struct gsm_network *gsm_network_init(void *ctx,
 {
 	struct gsm_network *net;
 
-	const char *default_regexp = ".*";
-
 	net = talloc_zero(ctx, struct gsm_network);
 	if (!net)
-		return NULL;
-
-	if (gsm_parse_reg(net, &net->authorized_regexp, &net->authorized_reg_str, 1,
-			  &default_regexp) != 0)
 		return NULL;
 
 	net->country_code = country_code;

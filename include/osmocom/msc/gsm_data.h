@@ -236,8 +236,6 @@ struct gsm_network {
 	char *name_long;
 	char *name_short;
 	enum gsm_auth_policy auth_policy;
-	regex_t authorized_regexp;
-	char *authorized_reg_str;
 	/* bit-mask of permitted encryption algorithms. LSB=A5/0, MSB=A5/7 */
 	uint8_t a5_encryption_mask;
 	bool authentication_required;

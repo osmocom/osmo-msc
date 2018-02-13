@@ -156,9 +156,6 @@ class TestVTYMSC(TestVTYBase):
         self.vty.command("network")
         self.assertTrue(self.vty.verify("auth policy closed", ['']))
         self.assertTrue(self.vty.verify("auth policy regexp", ['']))
-        self.assertTrue(self.vty.verify("authorized-regexp ^001", ['']))
-        self.assertTrue(self.vty.verify("authorized-regexp 02$", ['']))
-        self.assertTrue(self.vty.verify("authorized-regexp *123.*", ['']))
         self.vty.command("end")
 
     def testSi2Q(self):

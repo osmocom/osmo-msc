@@ -458,7 +458,7 @@ DRLL Freeing subscriber connection with NULL subscriber
 ===== [1] test_umts_authen_geran(901700000004620): SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 8
+talloc_total_blocks(tall_bsc_ctx) == 7
 
 ===== [2] test_umts_authen_utran(901700000004620)...
 - Location Update request causes a GSUP Send Auth Info request to HLR
@@ -946,7 +946,7 @@ DRLL Freeing subscriber connection with NULL subscriber
 ===== [2] test_umts_authen_utran(901700000004620): SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 8
+talloc_total_blocks(tall_bsc_ctx) == 7
 
 ===== [3] test_umts_authen_resync_geran(901700000004620)...
 - Location Update request causes a GSUP Send Auth Info request to HLR
@@ -1159,7 +1159,7 @@ DREF freeing VLR subscr MSISDN:42342
 ===== [3] test_umts_authen_resync_geran(901700000004620): SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 8
+talloc_total_blocks(tall_bsc_ctx) == 7
 
 ===== [4] test_umts_authen_resync_utran(901700000004620)...
 - Location Update request causes a GSUP Send Auth Info request to HLR
@@ -1382,8 +1382,8 @@ DREF freeing VLR subscr MSISDN:42342
 ===== [4] test_umts_authen_resync_utran(901700000004620): SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 8
+talloc_total_blocks(tall_bsc_ctx) == 7
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 8
+talloc_total_blocks(tall_bsc_ctx) == 7
 

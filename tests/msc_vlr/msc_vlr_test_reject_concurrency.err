@@ -152,7 +152,7 @@ DREF freeing VLR subscr MSISDN:46071
 ===== [1] test_reject_2nd_conn(901700000004620): SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 8
+talloc_total_blocks(tall_bsc_ctx) == 7
 
 ===== [2] test_reject_lu_during_lu(901700000004620)...
 - Location Update Request
@@ -277,7 +277,7 @@ DREF freeing VLR subscr MSISDN:46071
 ===== [2] test_reject_lu_during_lu(901700000004620): SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 8
+talloc_total_blocks(tall_bsc_ctx) == 7
 
 ===== [3] test_reject_cm_during_lu(901700000004620)...
 - Location Update Request
@@ -408,7 +408,7 @@ DREF freeing VLR subscr MSISDN:46071
 ===== [3] test_reject_cm_during_lu(901700000004620): SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 8
+talloc_total_blocks(tall_bsc_ctx) == 7
 
 ===== [4] test_reject_paging_resp_during_lu(901700000004620)...
 - Location Update Request
@@ -534,7 +534,7 @@ DREF freeing VLR subscr MSISDN:46071
 ===== [4] test_reject_paging_resp_during_lu(901700000004620): SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 8
+talloc_total_blocks(tall_bsc_ctx) == 7
 
 ===== [5] test_reject_lu_during_cm(901700000004620)...
 ---
@@ -727,7 +727,7 @@ DREF freeing VLR subscr MSISDN:46071
 ===== [5] test_reject_lu_during_cm(901700000004620): SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 8
+talloc_total_blocks(tall_bsc_ctx) == 7
 
 ===== [6] test_reject_cm_during_cm(901700000004620)...
 ---
@@ -922,7 +922,7 @@ DREF freeing VLR subscr MSISDN:46071
 ===== [6] test_reject_cm_during_cm(901700000004620): SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 8
+talloc_total_blocks(tall_bsc_ctx) == 7
 
 ===== [7] test_reject_paging_resp_during_cm(901700000004620)...
 ---
@@ -1123,7 +1123,7 @@ DREF freeing VLR subscr MSISDN:46071
 ===== [7] test_reject_paging_resp_during_cm(901700000004620): SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 8
+talloc_total_blocks(tall_bsc_ctx) == 7
 
 ===== [8] test_reject_lu_during_paging_resp(901700000004620)...
 ---
@@ -1350,7 +1350,7 @@ DREF freeing VLR subscr MSISDN:46071
 ===== [8] test_reject_lu_during_paging_resp(901700000004620): SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 8
+talloc_total_blocks(tall_bsc_ctx) == 7
 
 ===== [9] test_accept_cm_during_paging_resp(901700000004620)...
 ---
@@ -1594,7 +1594,7 @@ DREF freeing VLR subscr MSISDN:46071
 ===== [9] test_accept_cm_during_paging_resp(901700000004620): SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 8
+talloc_total_blocks(tall_bsc_ctx) == 7
 
 ===== [10] test_reject_paging_resp_during_paging_resp(901700000004620)...
 ---
@@ -1820,8 +1820,8 @@ DREF freeing VLR subscr MSISDN:46071
 ===== [10] test_reject_paging_resp_during_paging_resp(901700000004620): SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 8
+talloc_total_blocks(tall_bsc_ctx) == 7
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 8
+talloc_total_blocks(tall_bsc_ctx) == 7
 

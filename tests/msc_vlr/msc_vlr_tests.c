@@ -757,14 +757,13 @@ static void check_talloc(void *msgb_ctx, void *tall_bsc_ctx, int expected_blocks
 	talloc_report_full(msgb_ctx, stderr);
 	/* Expecting these to stick around in tall_bsc_ctx:
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 8
+talloc_total_blocks(tall_bsc_ctx) == 7
 full talloc report on 'subscr_conn_test_ctx' (total   2642 bytes in   8 blocks)
     struct gsup_client             contains    248 bytes in   1 blocks (ref 0) 0x61300000dee0
-    struct gsm_network             contains   2410 bytes in   6 blocks (ref 0) 0x61700000fce0
+    struct gsm_network             contains   2023 bytes in   6 blocks (ref 0) 0x61700000fce0
         struct vlr_instance            contains    160 bytes in   1 blocks (ref 0) 0x611000009a60
         no_gsup_server                 contains     15 bytes in   1 blocks (ref 0) 0x60b00000ade0
         ../../../src/libosmocore/src/rate_ctr.c:199 contains   1552 bytes in   1 blocks (ref 0) 0x61b00001eae0
-        .*                             contains      3 bytes in   1 blocks (ref 0) 0x60b00000af40
     msgb                           contains      0 bytes in   1 blocks (ref 0) 0x60800000bf80
 	*/
 	fprintf(stderr, "talloc_total_blocks(tall_bsc_ctx) == %zu\n",
@@ -840,7 +839,7 @@ static void run_tests(int nr, const char *imsi)
 
 		msc_vlr_tests[test_nr](test_nr + 1, imsi);
 
-		check_talloc(msgb_ctx, tall_bsc_ctx, 8);
+		check_talloc(msgb_ctx, tall_bsc_ctx, 7);
 	}
 }
 
@@ -914,6 +913,6 @@ int main(int argc, char **argv)
 
 	printf("Done\n");
 
-	check_talloc(msgb_ctx, tall_bsc_ctx, 8);
+	check_talloc(msgb_ctx, tall_bsc_ctx, 7);
 	return 0;
 }

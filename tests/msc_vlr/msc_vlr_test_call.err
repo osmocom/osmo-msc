@@ -345,7 +345,7 @@ DREF freeing VLR subscr MSISDN:42342
 ===== [1] test_call_mo(901700000004620): SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 8
+talloc_total_blocks(tall_bsc_ctx) == 7
 
 ===== [2] test_call_mt(901700000004620)...
 - Total time passed: 0.000000 s
@@ -699,8 +699,8 @@ DREF freeing VLR subscr MSISDN:42342
 ===== [2] test_call_mt(901700000004620): SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 8
+talloc_total_blocks(tall_bsc_ctx) == 7
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 8
+talloc_total_blocks(tall_bsc_ctx) == 7
 

@@ -121,22 +121,6 @@ DEFUN(cfg_net_auth_policy,
 	return CMD_SUCCESS;
 }
 
-DEFUN(cfg_net_authorize_regexp, cfg_net_authorize_regexp_cmd,
-      "authorized-regexp REGEXP",
-      "Set regexp for IMSI which will be used for authorization decision\n"
-      "Regular expression, IMSIs matching it are allowed to use the network\n")
-{
-	struct gsm_network *gsmnet = gsmnet_from_vty(vty);
-	if (gsm_parse_reg(gsmnet, &gsmnet->authorized_regexp,
-			  &gsmnet->authorized_reg_str, argc, argv) != 0) {
-		vty_out(vty, "%%Failed to parse the authorized-regexp: '%s'%s",
-			argv[0], VTY_NEWLINE);
-		return CMD_WARNING;
-	}
-
-	return CMD_SUCCESS;
-}
-
 DEFUN(cfg_net_encryption,
       cfg_net_encryption_cmd,
       "encryption a5 <0-3> [<0-3>] [<0-3>] [<0-3>]",
@@ -307,7 +291,6 @@ int common_cs_vty_init(struct gsm_network *network,
 	install_element(GSMNET_NODE, &cfg_net_name_short_cmd);
 	install_element(GSMNET_NODE, &cfg_net_name_long_cmd);
 	install_element(GSMNET_NODE, &cfg_net_auth_policy_cmd);
-	install_element(GSMNET_NODE, &cfg_net_authorize_regexp_cmd);
 	install_element(GSMNET_NODE, &cfg_net_encryption_cmd);
 	install_element(GSMNET_NODE, &cfg_net_authentication_cmd);
 	install_element(GSMNET_NODE, &cfg_net_rrlp_mode_cmd);
