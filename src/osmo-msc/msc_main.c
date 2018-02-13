@@ -402,20 +402,6 @@ int main(int argc, char **argv)
 		return -1;
 #endif
 
-	/*
-	 * For osmo-nitb, skip TCH/F for now, because otherwise dyn TS
-	 * always imply the possibility to have a mix of TCH/F and
-	 * TCH/H channels; if two phones request a TCH/F and a TCH/H,
-	 * respectively, they cannot call each other. If we deny TCH/F,
-	 * they will both fall back to TCH/H, and dynamic channels are
-	 * usable. See OS#1778.
-	 *
-	 * A third-party MSC may well be able to handle a TCH/H TCH/F
-	 * mismatch. Moreover, this option may be overwritten in the
-	 * config file or in VTY.
-	 */
-	msc_network->dyn_ts_allow_tch_f = false;
-
 	rc = vty_read_config_file(msc_cmdline_config.config_file, NULL);
 	if (rc < 0) {
 		LOGP(DMSC, LOGL_FATAL, "Failed to parse the config file: '%s'\n",
