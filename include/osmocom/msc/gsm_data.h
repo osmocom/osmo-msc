@@ -207,13 +207,6 @@ static const struct rate_ctr_group_desc msc_ctrg_desc = {
 	msc_ctr_description,
 };
 
-enum gsm_auth_policy {
-	GSM_AUTH_POLICY_CLOSED, /* only subscribers authorized in DB */
-	GSM_AUTH_POLICY_ACCEPT_ALL, /* accept everyone, even if not authorized in DB */
-	GSM_AUTH_POLICY_TOKEN, /* accept first, send token per sms, then revoke authorization */
-	GSM_AUTH_POLICY_REGEXP, /* accept IMSIs matching given regexp */
-};
-
 #define MSC_PAGING_RESPONSE_TIMER_DEFAULT 10
 
 struct gsm_tz {
@@ -235,7 +228,6 @@ struct gsm_network {
 	uint16_t network_code;
 	char *name_long;
 	char *name_short;
-	enum gsm_auth_policy auth_policy;
 	/* bit-mask of permitted encryption algorithms. LSB=A5/0, MSB=A5/7 */
 	uint8_t a5_encryption_mask;
 	bool authentication_required;
@@ -371,9 +363,6 @@ extern void talloc_ctx_init(void *ctx_root);
 
 extern void *tall_bsc_ctx;
 extern int ipacc_rtp_direct;
-
-enum gsm_auth_policy gsm_auth_policy_parse(const char *arg);
-const char *gsm_auth_policy_name(enum gsm_auth_policy policy);
 
 enum rrlp_mode rrlp_mode_parse(const char *arg);
 const char *rrlp_mode_name(enum rrlp_mode mode);

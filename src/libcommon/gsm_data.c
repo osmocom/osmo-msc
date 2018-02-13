@@ -36,24 +36,6 @@
 
 void *tall_bsc_ctx;
 
-static const struct value_string auth_policy_names[] = {
-	{ GSM_AUTH_POLICY_CLOSED,	"closed" },
-	{ GSM_AUTH_POLICY_ACCEPT_ALL,	"accept-all" },
-	{ GSM_AUTH_POLICY_TOKEN,	"token" },
-	{ GSM_AUTH_POLICY_REGEXP,	"regexp" },
-	{ 0,				NULL }
-};
-
-enum gsm_auth_policy gsm_auth_policy_parse(const char *arg)
-{
-	return get_string_value(auth_policy_names, arg);
-}
-
-const char *gsm_auth_policy_name(enum gsm_auth_policy policy)
-{
-	return get_value_string(auth_policy_names, policy);
-}
-
 static const struct value_string rrlp_mode_names[] = {
 	{ RRLP_MODE_NONE,	"none" },
 	{ RRLP_MODE_MS_BASED,	"ms-based" },

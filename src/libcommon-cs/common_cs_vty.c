@@ -103,24 +103,6 @@ DEFUN(cfg_net_name_long,
 	return CMD_SUCCESS;
 }
 
-DEFUN(cfg_net_auth_policy,
-      cfg_net_auth_policy_cmd,
-      "auth policy (closed|accept-all|regexp|token)",
-	"Authentication (not cryptographic)\n"
-	"Set the GSM network authentication policy\n"
-	"Require the MS to be activated in HLR\n"
-	"Accept all MS, whether in HLR or not\n"
-	"Use regular expression for IMSI authorization decision\n"
-	"Use SMS-token based authentication\n")
-{
-	enum gsm_auth_policy policy = gsm_auth_policy_parse(argv[0]);
-	struct gsm_network *gsmnet = gsmnet_from_vty(vty);
-
-	gsmnet->auth_policy = policy;
-
-	return CMD_SUCCESS;
-}
-
 DEFUN(cfg_net_encryption,
       cfg_net_encryption_cmd,
       "encryption a5 <0-3> [<0-3>] [<0-3>] [<0-3>]",
@@ -290,7 +272,6 @@ int common_cs_vty_init(struct gsm_network *network,
 	install_element(GSMNET_NODE, &cfg_net_mnc_cmd);
 	install_element(GSMNET_NODE, &cfg_net_name_short_cmd);
 	install_element(GSMNET_NODE, &cfg_net_name_long_cmd);
-	install_element(GSMNET_NODE, &cfg_net_auth_policy_cmd);
 	install_element(GSMNET_NODE, &cfg_net_encryption_cmd);
 	install_element(GSMNET_NODE, &cfg_net_authentication_cmd);
 	install_element(GSMNET_NODE, &cfg_net_rrlp_mode_cmd);
