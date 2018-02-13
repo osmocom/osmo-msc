@@ -187,8 +187,6 @@ static int config_write_net(struct vty *vty)
 	vty_out(vty, " short name %s%s", gsmnet->name_short, VTY_NEWLINE);
 	vty_out(vty, " long name %s%s", gsmnet->name_long, VTY_NEWLINE);
 	vty_out(vty, " auth policy %s%s", gsm_auth_policy_name(gsmnet->auth_policy), VTY_NEWLINE);
-	vty_out(vty, " location updating reject cause %u%s",
-		gsmnet->reject_cause, VTY_NEWLINE);
 	vty_out(vty, " encryption a5");
 	for (i = 0; i < 8; i++) {
 		if (gsmnet->a5_encryption_mask & (1 << i))

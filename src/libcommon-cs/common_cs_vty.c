@@ -137,22 +137,6 @@ DEFUN(cfg_net_authorize_regexp, cfg_net_authorize_regexp_cmd,
 	return CMD_SUCCESS;
 }
 
-DEFUN(cfg_net_reject_cause,
-      cfg_net_reject_cause_cmd,
-      "location updating reject cause <2-111>",
-      "Set the reject cause of location updating reject\n"
-      "Set the reject cause of location updating reject\n"
-      "Set the reject cause of location updating reject\n"
-      "Set the reject cause of location updating reject\n"
-      "Cause Value as Per GSM TS 04.08\n")
-{
-	struct gsm_network *gsmnet = gsmnet_from_vty(vty);
-
-	gsmnet->reject_cause = atoi(argv[0]);
-
-	return CMD_SUCCESS;
-}
-
 DEFUN(cfg_net_encryption,
       cfg_net_encryption_cmd,
       "encryption a5 <0-3> [<0-3>] [<0-3>] [<0-3>]",
@@ -324,7 +308,6 @@ int common_cs_vty_init(struct gsm_network *network,
 	install_element(GSMNET_NODE, &cfg_net_name_long_cmd);
 	install_element(GSMNET_NODE, &cfg_net_auth_policy_cmd);
 	install_element(GSMNET_NODE, &cfg_net_authorize_regexp_cmd);
-	install_element(GSMNET_NODE, &cfg_net_reject_cause_cmd);
 	install_element(GSMNET_NODE, &cfg_net_encryption_cmd);
 	install_element(GSMNET_NODE, &cfg_net_authentication_cmd);
 	install_element(GSMNET_NODE, &cfg_net_rrlp_mode_cmd);
