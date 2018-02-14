@@ -522,13 +522,19 @@ static int rx_bssmap(struct osmo_sccp_user *scu, const struct a_conn_info *a_con
 {
 	struct gsm_subscriber_connection *conn;
 	struct tlv_parsed tp;
+	int rc;
 
 	if (msgb_l3len(msg) < 1) {
 		LOGP(DBSSAP, LOGL_NOTICE, "Error: No data received -- discarding message!\n");
 		return -1;
 	}
 
-	tlv_parse(&tp, gsm0808_att_tlvdef(), msg->l3h + 1, msgb_l3len(msg) - 1, 0, 0);
+	rc = tlv_parse(&tp, gsm0808_att_tlvdef(), msg->l3h + 1, msgb_l3len(msg) - 1, 0, 0);
+	if (rc < 0) {
+		LOGP(DBSSAP, LOGL_ERROR, "Failed parsing TLV -- discarding message! %s\n",
+			osmo_hexdump(msg->l3h, msgb_l3len(msg)));
+		return -EINVAL;
+	}
 
 	/* Only message types allowed without a 'conn' */
 	switch (msg->l3h[0]) {
