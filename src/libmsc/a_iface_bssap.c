@@ -214,21 +214,20 @@ void a_sccp_rx_udt(struct osmo_sccp_user *scu, const struct a_conn_info *a_conn_
  */
 
 /* Endpoint to handle BSSMAP clear request */
-static int bssmap_rx_clear_rqst(struct gsm_subscriber_connection *conn, struct msgb *msg)
+static int bssmap_rx_clear_rqst(struct gsm_subscriber_connection *conn,
+				struct msgb *msg, struct tlv_parsed *tp)
 {
-	struct tlv_parsed tp;
 	int rc;
 	struct msgb *msg_resp;
 	uint8_t cause;
 
 	LOGPCONN(conn, LOGL_INFO, "Rx BSSMAP CLEAR REQUEST\n");
 
-	tlv_parse(&tp, gsm0808_att_tlvdef(), msg->l3h + 1, msgb_l3len(msg) - 1, 0, 0);
-	if (!TLVP_PRESENT(&tp, GSM0808_IE_CAUSE)) {
+	if (!TLVP_PRESENT(tp, GSM0808_IE_CAUSE)) {
 		LOGP(DBSSAP, LOGL_ERROR, "Cause code is missing -- discarding message!\n");
 		return -EINVAL;
 	}
-	cause = TLVP_VAL(&tp, GSM0808_IE_CAUSE)[0];
+	cause = TLVP_VAL(tp, GSM0808_IE_CAUSE)[0];
 
 	/* Respond with clear command */
 	msg_resp = gsm0808_create_clear_command(GSM0808_CAUSE_CALL_CONTROL);
@@ -256,9 +255,9 @@ static int bssmap_rx_clear_complete(struct osmo_sccp_user *scu,
 }
 
 /* Endpoint to handle layer 3 complete messages */
-static int bssmap_rx_l3_compl(struct osmo_sccp_user *scu, const struct a_conn_info *a_conn_info, struct msgb *msg)
+static int bssmap_rx_l3_compl(struct osmo_sccp_user *scu, const struct a_conn_info *a_conn_info,
+			      struct msgb *msg, struct tlv_parsed *tp)
 {
-	struct tlv_parsed tp;
 	struct {
 		uint8_t ident;
 		struct gsm48_loc_area_id lai;
@@ -276,12 +275,11 @@ static int bssmap_rx_l3_compl(struct osmo_sccp_user *scu, const struct a_conn_in
 
 	LOGP(DBSSAP, LOGL_INFO, "Rx BSSMAP COMPLETE L3 INFO (conn_id=%i)\n", a_conn_info->conn_id);
 
-	tlv_parse(&tp, gsm0808_att_tlvdef(), msg->l3h + 1, msgb_l3len(msg) - 1, 0, 0);
-	if (!TLVP_PRESENT(&tp, GSM0808_IE_CELL_IDENTIFIER)) {
+	if (!TLVP_PRESENT(tp, GSM0808_IE_CELL_IDENTIFIER)) {
 		LOGP(DBSSAP, LOGL_ERROR, "Mandatory CELL IDENTIFIER not present -- discarding message!\n");
 		return -EINVAL;
 	}
-	if (!TLVP_PRESENT(&tp, GSM0808_IE_LAYER_3_INFORMATION)) {
+	if (!TLVP_PRESENT(tp, GSM0808_IE_LAYER_3_INFORMATION)) {
 		LOGP(DBSSAP, LOGL_ERROR, "Mandatory LAYER 3 INFORMATION not present -- discarding message!\n");
 		return -EINVAL;
 	}
@@ -290,8 +288,8 @@ static int bssmap_rx_l3_compl(struct osmo_sccp_user *scu, const struct a_conn_in
 	/* FIXME: Encapsulate this in a parser/generator function inside
 	 * libosmocore, add support for all specified cell identification
 	 * discriminators (see 3GPP ts 3.2.2.17 Cell Identifier) */
-	data_length = TLVP_LEN(&tp, GSM0808_IE_CELL_IDENTIFIER);
-	data = TLVP_VAL(&tp, GSM0808_IE_CELL_IDENTIFIER);
+	data_length = TLVP_LEN(tp, GSM0808_IE_CELL_IDENTIFIER);
+	data = TLVP_VAL(tp, GSM0808_IE_CELL_IDENTIFIER);
 	if (sizeof(lai_ci) != data_length) {
 		LOGP(DBSSAP, LOGL_ERROR,
 		     "Unable to parse element CELL IDENTIFIER (wrong field length) -- discarding message!\n");
@@ -311,8 +309,8 @@ static int bssmap_rx_l3_compl(struct osmo_sccp_user *scu, const struct a_conn_in
 
 	/* Parse Layer 3 Information element */
 	/* FIXME: This is probably to hackish, compiler also complains "assignment discards ‘const’ qualifier..." */
-	msg->l3h = (uint8_t*)TLVP_VAL(&tp, GSM0808_IE_LAYER_3_INFORMATION);
-	msg->tail = msg->l3h + TLVP_LEN(&tp, GSM0808_IE_LAYER_3_INFORMATION);
+	msg->l3h = (uint8_t*)TLVP_VAL(tp, GSM0808_IE_LAYER_3_INFORMATION);
+	msg->tail = msg->l3h + TLVP_LEN(tp, GSM0808_IE_LAYER_3_INFORMATION);
 
 	/* Create new subscriber context */
 	conn = subscr_conn_allocate_a(a_conn_info, network, lac, scu, a_conn_info->conn_id);
@@ -332,9 +330,9 @@ static int bssmap_rx_l3_compl(struct osmo_sccp_user *scu, const struct a_conn_in
 }
 
 /* Endpoint to handle BSSMAP classmark update */
-static int bssmap_rx_classmark_upd(struct gsm_subscriber_connection *conn, struct msgb *msg)
+static int bssmap_rx_classmark_upd(struct gsm_subscriber_connection *conn, struct msgb *msg,
+				   struct tlv_parsed *tp)
 {
-	struct tlv_parsed tp;
 	const uint8_t *cm2 = NULL;
 	const uint8_t *cm3 = NULL;
 	uint8_t cm2_len = 0;
@@ -342,18 +340,17 @@ static int bssmap_rx_classmark_upd(struct gsm_subscriber_connection *conn, struc
 
 	LOGPCONN(conn, LOGL_DEBUG, "Rx BSSMAP CLASSMARK UPDATE\n");
 
-	tlv_parse(&tp, gsm0808_att_tlvdef(), msg->l3h + 1, msgb_l3len(msg) - 1, 0, 0);
-	if (!TLVP_PRESENT(&tp, GSM0808_IE_CLASSMARK_INFORMATION_T2)) {
+	if (!TLVP_PRESENT(tp, GSM0808_IE_CLASSMARK_INFORMATION_T2)) {
 		LOGPCONN(conn, LOGL_ERROR, "Mandatory Classmark Information Type 2 not present -- discarding message!\n");
 		return -EINVAL;
 	}
 
-	cm2 = TLVP_VAL(&tp, GSM0808_IE_CLASSMARK_INFORMATION_T2);
-	cm2_len = TLVP_LEN(&tp, GSM0808_IE_CLASSMARK_INFORMATION_T2);
+	cm2 = TLVP_VAL(tp, GSM0808_IE_CLASSMARK_INFORMATION_T2);
+	cm2_len = TLVP_LEN(tp, GSM0808_IE_CLASSMARK_INFORMATION_T2);
 
-	if (TLVP_PRESENT(&tp, GSM0808_IE_CLASSMARK_INFORMATION_T3)) {
-		cm3 = TLVP_VAL(&tp, GSM0808_IE_CLASSMARK_INFORMATION_T3);
-		cm3_len = TLVP_LEN(&tp, GSM0808_IE_CLASSMARK_INFORMATION_T3);
+	if (TLVP_PRESENT(tp, GSM0808_IE_CLASSMARK_INFORMATION_T3)) {
+		cm3 = TLVP_VAL(tp, GSM0808_IE_CLASSMARK_INFORMATION_T3);
+		cm3_len = TLVP_LEN(tp, GSM0808_IE_CLASSMARK_INFORMATION_T3);
 	}
 
 	/* Inform MSC about the classmark change */
@@ -363,7 +360,8 @@ static int bssmap_rx_classmark_upd(struct gsm_subscriber_connection *conn, struc
 }
 
 /* Endpoint to handle BSSMAP cipher mode complete */
-static int bssmap_rx_ciph_compl(struct gsm_subscriber_connection *conn, struct msgb *msg)
+static int bssmap_rx_ciph_compl(struct gsm_subscriber_connection *conn, struct msgb *msg,
+				struct tlv_parsed *tp)
 {
 	/* FIXME: The field GSM0808_IE_LAYER_3_MESSAGE_CONTENTS is optional by
 	 * means of the specification. So there can be messages without L3 info.
@@ -372,20 +370,17 @@ static int bssmap_rx_ciph_compl(struct gsm_subscriber_connection *conn, struct m
 	 * msc_cipher_mode_compl() was never meant to be used without L3 data.
 	 * This needs to be discussed further! */
 
-	struct tlv_parsed tp;
 	uint8_t alg_id = 1;
 
 	LOGPCONN(conn, LOGL_DEBUG, "Rx BSSMAP CIPHER MODE COMPLETE\n");
 
-	tlv_parse(&tp, gsm0808_att_tlvdef(), msg->l3h + 1, msgb_l3len(msg) - 1, 0, 0);
-
-	if (TLVP_PRESENT(&tp, GSM0808_IE_CHOSEN_ENCR_ALG)) {
-		alg_id = TLVP_VAL(&tp, GSM0808_IE_CHOSEN_ENCR_ALG)[0] - 1;
+	if (TLVP_PRESENT(tp, GSM0808_IE_CHOSEN_ENCR_ALG)) {
+		alg_id = TLVP_VAL(tp, GSM0808_IE_CHOSEN_ENCR_ALG)[0] - 1;
 	}
 
-	if (TLVP_PRESENT(&tp, GSM0808_IE_LAYER_3_MESSAGE_CONTENTS)) {
-		msg->l3h = (uint8_t*)TLVP_VAL(&tp, GSM0808_IE_LAYER_3_MESSAGE_CONTENTS);
-		msg->tail = msg->l3h + TLVP_LEN(&tp, GSM0808_IE_LAYER_3_MESSAGE_CONTENTS);
+	if (TLVP_PRESENT(tp, GSM0808_IE_LAYER_3_MESSAGE_CONTENTS)) {
+		msg->l3h = (uint8_t*)TLVP_VAL(tp, GSM0808_IE_LAYER_3_MESSAGE_CONTENTS);
+		msg->tail = msg->l3h + TLVP_LEN(tp, GSM0808_IE_LAYER_3_MESSAGE_CONTENTS);
 	} else {
 		msg = NULL;
 	}
@@ -397,20 +392,19 @@ static int bssmap_rx_ciph_compl(struct gsm_subscriber_connection *conn, struct m
 }
 
 /* Endpoint to handle BSSMAP cipher mode reject */
-static int bssmap_rx_ciph_rej(struct gsm_subscriber_connection *conn, struct msgb *msg)
+static int bssmap_rx_ciph_rej(struct gsm_subscriber_connection *conn,
+			      struct msgb *msg, struct tlv_parsed *tp)
 {
-	struct tlv_parsed tp;
 	uint8_t cause;
 
 	LOGPCONN(conn, LOGL_NOTICE, "RX BSSMAP CIPHER MODE REJECT\n");
 
-	tlv_parse(&tp, gsm0808_att_tlvdef(), msg->l3h + 1, msgb_l3len(msg) - 1, 0, 0);
-	if (!TLVP_PRESENT(&tp, BSS_MAP_MSG_CIPHER_MODE_REJECT)) {
+	if (!TLVP_PRESENT(tp, BSS_MAP_MSG_CIPHER_MODE_REJECT)) {
 		LOGPCONN(conn, LOGL_ERROR, "Cause code is missing -- discarding message!\n");
 		return -EINVAL;
 	}
 
-	cause = TLVP_VAL(&tp, BSS_MAP_MSG_CIPHER_MODE_REJECT)[0];
+	cause = TLVP_VAL(tp, BSS_MAP_MSG_CIPHER_MODE_REJECT)[0];
 	LOGPCONN(conn, LOGL_NOTICE, "Cipher mode rejection cause: %i\n", cause);
 
 	/* FIXME: Can we do something meaningful here? e.g. report to the
@@ -420,24 +414,23 @@ static int bssmap_rx_ciph_rej(struct gsm_subscriber_connection *conn, struct msg
 }
 
 /* Endpoint to handle BSSMAP assignment failure */
-static int bssmap_rx_ass_fail(struct gsm_subscriber_connection *conn, struct msgb *msg)
+static int bssmap_rx_ass_fail(struct gsm_subscriber_connection *conn, struct msgb *msg,
+			      struct tlv_parsed *tp)
 {
-	struct tlv_parsed tp;
 	uint8_t cause;
 	uint8_t *rr_cause_ptr = NULL;
 	uint8_t rr_cause;
 
 	LOGPCONN(conn, LOGL_NOTICE, "Rx BSSMAP ASSIGNMENT FAILURE message\n");
 
-	tlv_parse(&tp, gsm0808_att_tlvdef(), msg->l3h + 1, msgb_l3len(msg) - 1, 0, 0);
-	if (!TLVP_PRESENT(&tp, GSM0808_IE_CAUSE)) {
+	if (!TLVP_PRESENT(tp, GSM0808_IE_CAUSE)) {
 		LOGPCONN(conn, LOGL_ERROR, "Cause code is missing -- discarding message!\n");
 		return -EINVAL;
 	}
-	cause = TLVP_VAL(&tp, GSM0808_IE_CAUSE)[0];
+	cause = TLVP_VAL(tp, GSM0808_IE_CAUSE)[0];
 
-	if (TLVP_PRESENT(&tp, GSM0808_IE_RR_CAUSE)) {
-		rr_cause = TLVP_VAL(&tp, GSM0808_IE_RR_CAUSE)[0];
+	if (TLVP_PRESENT(tp, GSM0808_IE_RR_CAUSE)) {
+		rr_cause = TLVP_VAL(tp, GSM0808_IE_RR_CAUSE)[0];
 		rr_cause_ptr = &rr_cause;
 	}
 
@@ -454,9 +447,9 @@ static int bssmap_rx_ass_fail(struct gsm_subscriber_connection *conn, struct msg
 }
 
 /* Endpoint to handle sapi "n" reject */
-static int bssmap_rx_sapi_n_rej(struct gsm_subscriber_connection *conn, struct msgb *msg)
+static int bssmap_rx_sapi_n_rej(struct gsm_subscriber_connection *conn, struct msgb *msg,
+				struct tlv_parsed *tp)
 {
-	struct tlv_parsed tp;
 	uint8_t dlci;
 
 	LOGPCONN(conn, LOGL_NOTICE, "Rx BSSMAP SAPI-N-REJECT message\n");
@@ -464,18 +457,15 @@ static int bssmap_rx_sapi_n_rej(struct gsm_subscriber_connection *conn, struct m
 	/* Note: The MSC code seems not to care about the cause code, but by
 	 * the specification it is mandatory, so we check its presence. See
 	 * also 3GPP TS 48.008 3.2.1.34 SAPI "n" REJECT */
-	tlv_parse(&tp, gsm0808_att_tlvdef(), msg->l3h + 1, msgb_l3len(msg) - 1, 0, 0);
-	if (!TLVP_PRESENT(&tp, GSM0808_IE_CAUSE)) {
+	if (!TLVP_PRESENT(tp, GSM0808_IE_CAUSE)) {
 		LOGPCONN(conn, LOGL_ERROR, "Cause code is missing -- discarding message!\n");
 		return -EINVAL;
 	}
-
-	tlv_parse(&tp, gsm0808_att_tlvdef(), msg->l3h + 1, msgb_l3len(msg) - 1, 0, 0);
-	if (!TLVP_PRESENT(&tp, GSM0808_IE_DLCI)) {
+	if (!TLVP_PRESENT(tp, GSM0808_IE_DLCI)) {
 		LOGPCONN(conn, LOGL_ERROR, "DLCI is missing -- discarding message!\n");
 		return -EINVAL;
 	}
-	dlci = TLVP_VAL(&tp, GSM0808_IE_DLCI)[0];
+	dlci = TLVP_VAL(tp, GSM0808_IE_DLCI)[0];
 
 	/* Inform the MSC about the sapi "n" reject event */
 	msc_sapi_n_reject(conn, dlci);
@@ -484,10 +474,10 @@ static int bssmap_rx_sapi_n_rej(struct gsm_subscriber_connection *conn, struct m
 }
 
 /* Endpoint to handle assignment complete */
-static int bssmap_rx_ass_compl(struct gsm_subscriber_connection *conn, struct msgb *msg)
+static int bssmap_rx_ass_compl(struct gsm_subscriber_connection *conn, struct msgb *msg,
+			       struct tlv_parsed *tp)
 {
 	struct mgcp_client *mgcp;
-	struct tlv_parsed tp;
 	struct sockaddr_storage rtp_addr;
 	struct sockaddr_in *rtp_addr_in;
 	int rc;
@@ -497,16 +487,14 @@ static int bssmap_rx_ass_compl(struct gsm_subscriber_connection *conn, struct ms
 
 	LOGPCONN(conn, LOGL_INFO, "Rx BSSMAP ASSIGNMENT COMPLETE message\n");
 
-	tlv_parse(&tp, gsm0808_att_tlvdef(), msg->l3h + 1, msgb_l3len(msg) - 1, 0, 0);
-
-	if (!TLVP_PRESENT(&tp, GSM0808_IE_AOIP_TRASP_ADDR)) {
+	if (!TLVP_PRESENT(tp, GSM0808_IE_AOIP_TRASP_ADDR)) {
 		LOGPCONN(conn, LOGL_ERROR, "AoIP transport identifier missing -- discarding message!\n");
 		return -EINVAL;
 	}
 
 	/* Decode AoIP transport address element */
-	rc = gsm0808_dec_aoip_trasp_addr(&rtp_addr, TLVP_VAL(&tp, GSM0808_IE_AOIP_TRASP_ADDR),
-					 TLVP_LEN(&tp, GSM0808_IE_AOIP_TRASP_ADDR));
+	rc = gsm0808_dec_aoip_trasp_addr(&rtp_addr, TLVP_VAL(tp, GSM0808_IE_AOIP_TRASP_ADDR),
+					 TLVP_LEN(tp, GSM0808_IE_AOIP_TRASP_ADDR));
 	if (rc < 0) {
 		LOGPCONN(conn, LOGL_ERROR, "Unable to decode aoip transport address.\n");
 		return -EINVAL;
@@ -533,16 +521,19 @@ static int bssmap_rx_ass_compl(struct gsm_subscriber_connection *conn, struct ms
 static int rx_bssmap(struct osmo_sccp_user *scu, const struct a_conn_info *a_conn_info, struct msgb *msg)
 {
 	struct gsm_subscriber_connection *conn;
+	struct tlv_parsed tp;
 
 	if (msgb_l3len(msg) < 1) {
 		LOGP(DBSSAP, LOGL_NOTICE, "Error: No data received -- discarding message!\n");
 		return -1;
 	}
 
+	tlv_parse(&tp, gsm0808_att_tlvdef(), msg->l3h + 1, msgb_l3len(msg) - 1, 0, 0);
+
 	/* Only message types allowed without a 'conn' */
 	switch (msg->l3h[0]) {
 	case BSS_MAP_MSG_COMPLETE_LAYER_3:
-		return bssmap_rx_l3_compl(scu, a_conn_info, msg);
+		return bssmap_rx_l3_compl(scu, a_conn_info, msg, &tp);
 	case BSS_MAP_MSG_CLEAR_COMPLETE:
 		return bssmap_rx_clear_complete(scu, a_conn_info, msg);
 	default:
@@ -559,19 +550,19 @@ static int rx_bssmap(struct osmo_sccp_user *scu, const struct a_conn_info *a_con
 
 	switch (msg->l3h[0]) {
 	case BSS_MAP_MSG_CLEAR_RQST:
-		return bssmap_rx_clear_rqst(conn, msg);
+		return bssmap_rx_clear_rqst(conn, msg, &tp);
 	case BSS_MAP_MSG_CLASSMARK_UPDATE:
-		return bssmap_rx_classmark_upd(conn, msg);
+		return bssmap_rx_classmark_upd(conn, msg, &tp);
 	case BSS_MAP_MSG_CIPHER_MODE_COMPLETE:
-		return bssmap_rx_ciph_compl(conn, msg);
+		return bssmap_rx_ciph_compl(conn, msg, &tp);
 	case BSS_MAP_MSG_CIPHER_MODE_REJECT:
-		return bssmap_rx_ciph_rej(conn, msg);
+		return bssmap_rx_ciph_rej(conn, msg, &tp);
 	case BSS_MAP_MSG_ASSIGMENT_FAILURE:
-		return bssmap_rx_ass_fail(conn, msg);
+		return bssmap_rx_ass_fail(conn, msg, &tp);
 	case BSS_MAP_MSG_SAPI_N_REJECT:
-		return bssmap_rx_sapi_n_rej(conn, msg);
+		return bssmap_rx_sapi_n_rej(conn, msg, &tp);
 	case BSS_MAP_MSG_ASSIGMENT_COMPLETE:
-		return bssmap_rx_ass_compl(conn, msg);
+		return bssmap_rx_ass_compl(conn, msg, &tp);
 	default:
 		LOGPCONN(conn, LOGL_ERROR, "Unimplemented msg type: %s\n", gsm0808_bssmap_name(msg->l3h[0]));
 		return -EINVAL;
