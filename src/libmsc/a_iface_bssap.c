@@ -245,7 +245,7 @@ static int bssmap_rx_clear_complete(struct osmo_sccp_user *scu,
 {
 	int rc;
 
-	LOGP(DMSC, LOGL_INFO, "Rx BSSMAP CLEAR COMPPLETE, releasing SCCP connection\n");
+	LOGP(DMSC, LOGL_INFO, "Rx BSSMAP CLEAR COMPLETE, releasing SCCP connection\n");
 	rc = osmo_sccp_tx_disconn(scu, a_conn_info->conn_id,
 				  NULL, SCCP_RELEASE_CAUSE_END_USER_ORIGINATED);
 
