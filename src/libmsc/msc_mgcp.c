@@ -145,6 +145,15 @@ static void _handle_error(struct mgcp_ctx *mgcp_ctx, enum msc_mgcp_cause_code ca
 			  const char *file, int line)
 {
 	struct osmo_fsm_inst *fi;
+	struct gsm_mncc mncc = {
+		.msg_type = MNCC_REL_REQ,
+		.callref = mgcp_ctx->trans->callref,
+		.cause = {
+			.location = GSM48_CAUSE_LOC_PRN_S_LU,
+			.coding = 0, /* FIXME */
+			.value = GSM48_CC_CAUSE_RESOURCE_UNAVAIL
+		}
+	};
 
 	OSMO_ASSERT(mgcp_ctx);
 	fi = mgcp_ctx->fsm;
@@ -159,6 +168,8 @@ static void _handle_error(struct mgcp_ctx *mgcp_ctx, enum msc_mgcp_cause_code ca
 	/* Simulate the call end by sending a teardown event, so that
 	 * the FSM proceeds directly with the DLCX */
 	osmo_fsm_inst_dispatch(mgcp_ctx->fsm, EV_TEARDOWN_ERROR, mgcp_ctx);
+
+	mncc_tx_to_cc(mgcp_ctx->trans->net, MNCC_REL_REQ, &mncc);
 }
 
 /* Timer callback to shut down in case of connectivity problems */
