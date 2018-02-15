@@ -31,6 +31,7 @@
 #include <osmocom/msc/transaction.h>
 #include <osmocom/msc/signal.h>
 #include <osmocom/msc/a_iface.h>
+#include <osmocom/msc/iucs.h>
 
 #define SUBSCR_CONN_TIMEOUT 5 /* seconds */
 
@@ -302,6 +303,25 @@ static struct osmo_fsm subscr_conn_fsm = {
 	.cleanup = subscr_conn_fsm_cleanup,
 	.timer_cb = subscr_conn_fsm_timeout,
 };
+
+char *msc_subscr_conn_get_conn_id(struct gsm_subscriber_connection *conn)
+{
+	char *id;
+
+	switch (conn->via_ran) {
+	case RAN_GERAN_A:
+		id = talloc_asprintf(conn, "GERAN_A-%08x", conn->a.conn_id);
+		break;
+	case RAN_UTRAN_IU:
+		id = talloc_asprintf(conn, "UTRAN_IU-%08x", iu_get_conn_id(conn->iu.ue_ctx));
+		break;
+	default:
+		LOGP(DMM, LOGL_ERROR, "RAN of conn %p unknown!\n", conn);
+		return NULL;
+	}
+
+	return id;
+}
 
 int msc_create_conn_fsm(struct gsm_subscriber_connection *conn, const char *id)
 {

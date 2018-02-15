@@ -54,6 +54,7 @@ enum msc_compl_l3_rc {
 	MSC_CONN_REJECT = 1,
 };
 
+char *msc_subscr_conn_get_conn_id(struct gsm_subscriber_connection *conn);
 int msc_create_conn_fsm(struct gsm_subscriber_connection *conn, const char *id);
 
 int msc_vlr_alloc(struct gsm_network *net);
