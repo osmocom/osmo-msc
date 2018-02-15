@@ -251,3 +251,7 @@ int iu_rab_act_cs(struct gsm_trans *trans)
 	return 0;
 }
 
+uint32_t iu_get_conn_id(const struct ranap_ue_conn_ctx *ue)
+{
+	return ue->conn_id;
+}

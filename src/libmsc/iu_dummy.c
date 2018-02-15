@@ -90,4 +90,10 @@ int ranap_iu_tx_release(struct ranap_ue_conn_ctx *ctx, const struct RANAP_Cause 
 	return 0;
 }
 
+uint32_t iu_get_conn_id(const struct ranap_ue_conn_ctx *ue)
+{
+	LOGP(DLGLOBAL, LOGL_INFO, "iu_get_conn_id() dummy called, returning BOGUS value\n");
+	return 23;
+}
+
 #endif
