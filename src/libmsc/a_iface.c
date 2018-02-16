@@ -194,7 +194,7 @@ int a_iface_tx_cipher_mode(const struct gsm_subscriber_connection *conn,
 int a_iface_tx_paging(const char *imsi, uint32_t tmsi, uint16_t lac)
 {
 	struct bsc_context *bsc_ctx;
-	struct gsm0808_cell_id_list cil;
+	struct gsm0808_cell_id_list2 cil;
 	struct msgb *msg;
 	int page_count = 0;
 	struct osmo_ss7_instance *ss7;
@@ -202,7 +202,7 @@ int a_iface_tx_paging(const char *imsi, uint32_t tmsi, uint16_t lac)
 	OSMO_ASSERT(imsi);
 
 	cil.id_discr = CELL_IDENT_LAC;
-	cil.id_list_lac[0] = lac;
+	cil.id_list[0].lac = lac;
 	cil.id_list_len = 1;
 
 	ss7 = osmo_ss7_instance_find(gsm_network->a.cs7_instance);
@@ -215,7 +215,7 @@ int a_iface_tx_paging(const char *imsi, uint32_t tmsi, uint16_t lac)
 			     "Tx BSSMAP paging message from MSC %s to BSC %s (imsi=%s, tmsi=0x%08x, lac=%u)\n",
 			     osmo_sccp_addr_name(ss7, &bsc_ctx->msc_addr),
 			     osmo_sccp_addr_name(ss7, &bsc_ctx->bsc_addr), imsi, tmsi, lac);
-			msg = gsm0808_create_paging(imsi, &tmsi, &cil, NULL);
+			msg = gsm0808_create_paging2(imsi, &tmsi, &cil, NULL);
 			osmo_sccp_tx_unitdata_msg(bsc_ctx->sccp_user,
 						  &bsc_ctx->msc_addr, &bsc_ctx->bsc_addr, msg);
 			page_count++;
