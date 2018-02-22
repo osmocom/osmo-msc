@@ -28,6 +28,7 @@
 #include <inttypes.h>
 
 #include <osmocom/vty/command.h>
+#include <osmocom/vty/misc.h>
 #ifdef BUILD_IU
 #include <osmocom/ranap/iu_client.h>
 #endif
@@ -239,4 +240,5 @@ void msc_vty_init(struct gsm_network *msc_network)
 #ifdef BUILD_IU
 	ranap_iu_vty_init(MSC_NODE, (enum ranap_nsap_addr_enc*)&msc_network->iu.rab_assign_addr_enc);
 #endif
+	osmo_fsm_vty_add_cmds();
 }
