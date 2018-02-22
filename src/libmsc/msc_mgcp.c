@@ -63,7 +63,7 @@ enum msc_mgcp_cause_code {
 	MGCP_ERR_UNSUPP_ADDR_FMT,
 	MGCP_ERR_RAN_TIMEOUT,
 	MGCP_ERR_ASS_TIMEOUT,
-	MGCP_ERR_NOMEM,
+	MGCP_ERR_TOOLONG,
 	MGCP_ERR_ASSGMNT_FAIL
 };
 
@@ -78,7 +78,7 @@ static const struct value_string msc_mgcp_cause_codes_names[] = {
 	{MGCP_ERR_UNSUPP_ADDR_FMT, "unsupported network address format used (RAN)"},
 	{MGCP_ERR_RAN_TIMEOUT, "call could not be completed in time (RAN)"},
 	{MGCP_ERR_ASS_TIMEOUT, "assignment could not be completed in time (RAN)"},
-	{MGCP_ERR_NOMEM, "out of memory"},
+	{MGCP_ERR_TOOLONG, "string value too long"},
 	{MGCP_ERR_ASSGMNT_FAIL, "assignment failure (RAN)"},
 	{0, NULL}
 };
@@ -285,7 +285,7 @@ static void fsm_crcx_ran_cb(struct osmo_fsm_inst *fi, uint32_t event, void *data
 	};
 	if (snprintf(mgcp_msg.endpoint, MGCP_ENDPOINT_MAXLEN, MGCP_ENDPOINT_FORMAT, mgcp_ctx->rtp_endpoint) >=
 	    MGCP_ENDPOINT_MAXLEN) {
-		handle_error(mgcp_ctx, MGCP_ERR_NOMEM, true);
+		handle_error(mgcp_ctx, MGCP_ERR_TOOLONG, true);
 		return;
 	}
 	msg = mgcp_msg_gen(mgcp, &mgcp_msg);
@@ -378,7 +378,7 @@ static void fsm_crcx_cn_cb(struct osmo_fsm_inst *fi, uint32_t event, void *data)
 	};
 	if (snprintf(mgcp_msg.endpoint, MGCP_ENDPOINT_MAXLEN, MGCP_ENDPOINT_FORMAT, mgcp_ctx->rtp_endpoint) >=
 	    MGCP_ENDPOINT_MAXLEN) {
-		handle_error(mgcp_ctx, MGCP_ERR_NOMEM, true);
+		handle_error(mgcp_ctx, MGCP_ERR_TOOLONG, true);
 		return;
 	}
 	msg = mgcp_msg_gen(mgcp, &mgcp_msg);
@@ -541,7 +541,7 @@ static void fsm_mdcx_cn_cb(struct osmo_fsm_inst *fi, uint32_t event, void *data)
 	};
 	if (snprintf(mgcp_msg.endpoint, MGCP_ENDPOINT_MAXLEN, MGCP_ENDPOINT_FORMAT, mgcp_ctx->rtp_endpoint) >=
 	    MGCP_ENDPOINT_MAXLEN) {
-		handle_error(mgcp_ctx, MGCP_ERR_NOMEM, true);
+		handle_error(mgcp_ctx, MGCP_ERR_TOOLONG, true);
 		return;
 	}
 	msg = mgcp_msg_gen(mgcp, &mgcp_msg);
@@ -657,7 +657,7 @@ static void fsm_mdcx_ran_cb(struct osmo_fsm_inst *fi, uint32_t event, void *data
 	};
 	if (snprintf(mgcp_msg.endpoint, MGCP_ENDPOINT_MAXLEN, MGCP_ENDPOINT_FORMAT, mgcp_ctx->rtp_endpoint) >=
 	    MGCP_ENDPOINT_MAXLEN) {
-		handle_error(mgcp_ctx, MGCP_ERR_NOMEM, true);
+		handle_error(mgcp_ctx, MGCP_ERR_TOOLONG, true);
 		return;
 	}
 	msg = mgcp_msg_gen(mgcp, &mgcp_msg);
@@ -741,7 +741,7 @@ static void fsm_call_cb(struct osmo_fsm_inst *fi, uint32_t event, void *data)
 	};
 	if (snprintf(mgcp_msg.endpoint, MGCP_ENDPOINT_MAXLEN, MGCP_ENDPOINT_FORMAT, mgcp_ctx->rtp_endpoint) >=
 	    MGCP_ENDPOINT_MAXLEN) {
-		handle_error(mgcp_ctx, MGCP_ERR_NOMEM, true);
+		handle_error(mgcp_ctx, MGCP_ERR_TOOLONG, true);
 		return;
 	}
 	msg = mgcp_msg_gen(mgcp, &mgcp_msg);
