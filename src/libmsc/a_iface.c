@@ -478,7 +478,7 @@ void a_start_reset(struct bsc_context *bsc_ctx, bool already_connected)
 	bsc_ctx->reset = a_reset_alloc(bsc_ctx, bsc_name, a_reset_cb, bsc_ctx, already_connected);
 }
 
-/* determine if given msg is a BSSMAP RESET (true) or not (false) */
+/* determine if given msg is BSSMAP RESET related (true) or not (false) */
 static bool bssmap_is_reset(struct msgb *msg)
 {
 	struct bssmap_header *bs = (struct bssmap_header *)msgb_l2(msg);
@@ -490,6 +490,9 @@ static bool bssmap_is_reset(struct msgb *msg)
 		return false;
 
 	if (msg->l2h[sizeof(*bs)] == BSS_MAP_MSG_RESET)
+		return true;
+
+	if (msg->l2h[sizeof(*bs)] == BSS_MAP_MSG_RESET_ACKNOWLEDGE)
 		return true;
 
 	return false;
@@ -555,26 +558,25 @@ static int sccp_sap_up(struct osmo_prim_hdr *oph, void *_scu)
 
 	case OSMO_PRIM(OSMO_SCU_PRIM_N_UNITDATA, PRIM_OP_INDICATION):
 		/* Handle inbound UNITDATA */
+
+		/* Get BSC context, create a new one if necessary */
 		a_conn_info.bsc = get_bsc_context_by_sccp_addr(&scu_prim->u.unitdata.calling_addr);
 		if (!a_conn_info.bsc) {
 			/* We haven't heard from this BSC before, allocate it */
 			a_conn_info.bsc = add_bsc(&scu_prim->u.unitdata.called_addr,
 						&scu_prim->u.unitdata.calling_addr, scu);
-			/* if this not an inbound RESET, trigger an outbound RESET */
-			if (!bssmap_is_reset(oph->msg)) {
-				LOGP(DBSSAP, LOGL_NOTICE, "Ignoring N-UNITDATA.ind(%s), BSC not reset yet\n",
-					msgb_hexdump_l2(oph->msg));
-				a_start_reset(a_conn_info.bsc, false);
-				break;
-			}
-		} else {
-			/* This BSC is already known to us, check if we have been through reset yet */
-			if (a_reset_conn_ready(a_conn_info.bsc->reset) == false) {
-				LOGP(DBSSAP, LOGL_NOTICE, "Ignoring N-UNITDATA.ind(%s), BSC not reset yet\n",
-					msgb_hexdump_l2(oph->msg));
-				break;
-			}
+			/* Make sure that reset procedure is started */
+			a_start_reset(a_conn_info.bsc, false);
 		}
+
+		/* As long as we are in the reset phase, only reset related BSSMAP messages may pass
+		 * beond here. */
+		if (!bssmap_is_reset(oph->msg) && a_reset_conn_ready(a_conn_info.bsc->reset) == false) {
+			LOGP(DBSSAP, LOGL_NOTICE, "Ignoring N-UNITDATA.ind(%s), BSC not reset yet\n",
+			     msgb_hexdump_l2(oph->msg));
+			break;
+		}
+
 		DEBUGP(DBSSAP, "N-UNITDATA.ind(%s)\n", msgb_hexdump_l2(oph->msg));
 		a_sccp_rx_udt(scu, &a_conn_info, oph->msg);
 		break;
