@@ -183,8 +183,9 @@ static int config_write_net(struct vty *vty)
 	int i;
 
 	vty_out(vty, "network%s", VTY_NEWLINE);
-	vty_out(vty, " network country code %u%s", gsmnet->country_code, VTY_NEWLINE);
-	vty_out(vty, " mobile network code %u%s", gsmnet->network_code, VTY_NEWLINE);
+	vty_out(vty, " network country code %s%s", osmo_mcc_name(gsmnet->plmn.mcc), VTY_NEWLINE);
+	vty_out(vty, " mobile network code %s%s",
+		osmo_mnc_name(gsmnet->plmn.mnc, gsmnet->plmn.mnc_3_digits), VTY_NEWLINE);
 	vty_out(vty, " short name %s%s", gsmnet->name_short, VTY_NEWLINE);
 	vty_out(vty, " long name %s%s", gsmnet->name_long, VTY_NEWLINE);
 	vty_out(vty, " encryption a5");

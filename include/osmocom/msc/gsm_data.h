@@ -223,11 +223,11 @@ struct gsm_network {
 	 * these have in common, like country and network code, put in yet
 	 * separate structs and placed as members in osmo_bsc and osmo_msc. */
 
-	/* global parameters */
-	uint16_t country_code;
-	uint16_t network_code;
+	struct osmo_plmn_id plmn;
+
 	char *name_long;
 	char *name_short;
+
 	/* bit-mask of permitted encryption algorithms. LSB=A5/0, MSB=A5/7 */
 	uint8_t a5_encryption_mask;
 	bool authentication_required;

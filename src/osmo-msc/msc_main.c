@@ -281,9 +281,7 @@ static int rcvmsg_iu_cs(struct msgb *msg, struct gprs_ra_id *ra_id, uint16_t *sa
 {
 	DEBUGP(DIUCS, "got IuCS message %d bytes: %s\n", msg->len, msgb_hexdump(msg));
 	if (ra_id) {
-		DEBUGP(DIUCS, "got IuCS message on"
-		       " MNC %d MCC %d LAC %d RAC %d\n",
-		       ra_id->mnc, ra_id->mcc, ra_id->lac, ra_id->rac);
+		DEBUGP(DIUCS, "got IuCS message on %s\n", osmo_rai_name(ra_id));
 	}
 
 	return gsm0408_rcvmsg_iucs(msc_network, msg, ra_id? &ra_id->lac : NULL);

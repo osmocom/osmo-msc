@@ -61,7 +61,7 @@ DEFUN(cfg_net_ncc,
 {
 	struct gsm_network *gsmnet = gsmnet_from_vty(vty);
 
-	gsmnet->country_code = atoi(argv[0]);
+	gsmnet->plmn.mcc = atoi(argv[0]);
 
 	return CMD_SUCCESS;
 }
@@ -75,8 +75,16 @@ DEFUN(cfg_net_mnc,
       "Mobile Network Code to use\n")
 {
 	struct gsm_network *gsmnet = gsmnet_from_vty(vty);
+	uint16_t mnc;
+	bool mnc_3_digits;
 
-	gsmnet->network_code = atoi(argv[0]);
+	if (osmo_mnc_from_str(argv[0], &mnc, &mnc_3_digits)) {
+		vty_out(vty, "%% Error decoding MNC: %s%s", argv[0], VTY_NEWLINE);
+		return CMD_WARNING;
+	}
+
+	gsmnet->plmn.mnc = mnc;
+	gsmnet->plmn.mnc_3_digits = mnc_3_digits;
 
 	return CMD_SUCCESS;
 }

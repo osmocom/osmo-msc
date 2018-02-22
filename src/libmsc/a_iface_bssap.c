@@ -263,9 +263,7 @@ static int bssmap_rx_l3_compl(struct osmo_sccp_user *scu, const struct a_conn_in
 		struct gsm48_loc_area_id lai;
 		uint16_t ci;
 	} __attribute__ ((packed)) lai_ci;
-	uint16_t mcc;
-	uint16_t mnc;
-	uint16_t lac;
+	struct osmo_location_area_id lai;
 	uint8_t data_length;
 	const uint8_t *data;
 	int rc;
@@ -301,18 +299,15 @@ static int bssmap_rx_l3_compl(struct osmo_sccp_user *scu, const struct a_conn_in
 		     "Unable to parse element CELL IDENTIFIER (wrong cell identification discriminator) -- discarding message!\n");
 		return -EINVAL;
 	}
-	if (gsm48_decode_lai(&lai_ci.lai, &mcc, &mnc, &lac) != 0) {
-		LOGP(DBSSAP, LOGL_ERROR,
-		     "Unable to parse element CELL IDENTIFIER (lai decoding failed) -- discarding message!\n");
-		return -EINVAL;
-	}
+	gsm48_decode_lai2(&lai_ci.lai, &lai);
+	/* FIXME: Actually compare the MCC-MNC to the local network config?? */
 
 	/* Parse Layer 3 Information element */
 	msg->l3h = (uint8_t*)TLVP_VAL(tp, GSM0808_IE_LAYER_3_INFORMATION);
 	msgb_l3trim(msg, TLVP_LEN(tp, GSM0808_IE_LAYER_3_INFORMATION));
 
 	/* Create new subscriber context */
-	conn = subscr_conn_allocate_a(a_conn_info, network, lac, scu, a_conn_info->conn_id);
+	conn = subscr_conn_allocate_a(a_conn_info, network, lai.lac, scu, a_conn_info->conn_id);
 
 	/* Handover location update to the MSC code */
 	rc = msc_compl_l3(conn, msg, 0);

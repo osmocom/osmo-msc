@@ -222,15 +222,17 @@ static int gsm0408_loc_upd_acc(struct gsm_subscriber_connection *conn,
 	struct gsm48_hdr *gh;
 	struct gsm48_loc_area_id *lai;
 	uint8_t *mid;
+	struct osmo_location_area_id laid = {
+		.plmn = conn->network->plmn,
+		.lac = conn->lac,
+	};
 
 	gh = (struct gsm48_hdr *) msgb_put(msg, sizeof(*gh));
 	gh->proto_discr = GSM48_PDISC_MM;
 	gh->msg_type = GSM48_MT_MM_LOC_UPD_ACCEPT;
 
 	lai = (struct gsm48_loc_area_id *) msgb_put(msg, sizeof(*lai));
-	gsm48_generate_lai(lai, conn->network->country_code,
-			   conn->network->network_code,
-			   conn->lac);
+	gsm48_generate_lai2(lai, &laid);
 
 	if (send_tmsi == GSM_RESERVED_TMSI) {
 		/* we did not allocate a TMSI to the MS, so we need to
@@ -381,10 +383,8 @@ int mm_rx_loc_upd_req(struct gsm_subscriber_connection *conn, struct msgb *msg)
 		break;
 	}
 
-	gsm48_decode_lai(&lu->lai, &old_lai.plmn.mcc,
-			 &old_lai.plmn.mnc, &old_lai.lac);
-	new_lai.plmn.mcc = conn->network->country_code;
-	new_lai.plmn.mnc = conn->network->network_code;
+	gsm48_decode_lai2(&lu->lai, &old_lai);
+	new_lai.plmn = conn->network->plmn;
 	new_lai.lac = conn->lac;
 	DEBUGP(DMM, "LU/new-LAC: %u/%u\n", old_lai.lac, new_lai.lac);
 
@@ -701,8 +701,7 @@ int gsm48_rx_mm_serv_req(struct gsm_subscriber_connection *conn, struct msgb *ms
 	bool is_utran;
 	int rc;
 
-	lai.plmn.mcc = conn->network->country_code;
-	lai.plmn.mnc = conn->network->network_code;
+	lai.plmn = conn->network->plmn;
 	lai.lac = conn->lac;
 
 	DEBUGP(DMM, "<- CM SERVICE REQUEST ");
@@ -1152,8 +1151,7 @@ static int gsm48_rx_rr_pag_resp(struct gsm_subscriber_connection *conn, struct m
 	struct osmo_location_area_id lai;
 	bool is_utran;
 
-	lai.plmn.mcc = conn->network->country_code;
-	lai.plmn.mnc = conn->network->network_code;
+	lai.plmn = conn->network->plmn;
 	lai.lac = conn->lac;
 
 	resp = (struct gsm48_pag_resp *) &gh->data[0];

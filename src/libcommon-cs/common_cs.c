@@ -45,8 +45,8 @@ struct gsm_network *gsm_network_init(void *ctx, mncc_recv_cb_t mncc_recv)
 	if (!net)
 		return NULL;
 
-	net->country_code = 1;
-	net->network_code = 1;
+	net->plmn = (struct osmo_plmn_id){ .mcc=1, .mnc=1 };
+
 	/* Permit a compile-time default of A5/3 and A5/1 */
 	net->a5_encryption_mask = (1 << 3) | (1 << 1);
 

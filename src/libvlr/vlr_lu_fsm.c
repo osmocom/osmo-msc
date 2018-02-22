@@ -911,14 +911,6 @@ static int assoc_lfp_with_sub(struct osmo_fsm_inst *fi, struct vlr_subscr *vsub)
 	return 0;
 }
 
-static const char *lai_name(struct osmo_location_area_id *lai)
-{
-	static char buf[64];
-	snprintf(buf, sizeof(buf),"MCC:%u, MNC:%u, LAC:%u",
-		 lai->plmn.mcc, lai->plmn.mnc, lai->lac);
-	return buf;
-}
-
 static int _lu_fsm_associate_vsub(struct osmo_fsm_inst *fi)
 {
 	struct lu_fsm_priv *lfp = fi->priv;
@@ -988,7 +980,7 @@ static void _start_lu_main(struct osmo_fsm_inst *fi)
 #endif
 		LOGPFSML(fi, LOGL_NOTICE, "LAI change from %s,"
 			 " but checking previous VLR not implemented\n",
-			 lai_name(&lfp->old_lai));
+			 osmo_lai_name(&lfp->old_lai));
 	}
 
 	/* If this is a TMSI based LU, we may not have the IMSI. Make sure that
