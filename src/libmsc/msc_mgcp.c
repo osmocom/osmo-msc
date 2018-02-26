@@ -134,6 +134,18 @@ enum msc_mgcp_fsm_evt {
 	EV_DLCX_ALL_RESP,
 };
 
+static const struct value_string msc_mgcp_fsm_evt_names[] = {
+	OSMO_VALUE_STRING(EV_INIT),
+	OSMO_VALUE_STRING(EV_ASSIGN),
+	OSMO_VALUE_STRING(EV_CONNECT),
+	OSMO_VALUE_STRING(EV_TEARDOWN),
+	OSMO_VALUE_STRING(EV_TEARDOWN_ERROR),
+	OSMO_VALUE_STRING(EV_CRCX_RAN_RESP),
+	OSMO_VALUE_STRING(EV_CRCX_CN_RESP),
+	OSMO_VALUE_STRING(EV_DLCX_ALL_RESP),
+	{0, NULL}
+};
+
 /* A general error handler function. On error we still have an interest to
  * remove a half open connection (if possible). This function will execute
  * a controlled jump to the DLCX phase. From there, the FSM will then just
@@ -860,6 +872,7 @@ static struct osmo_fsm fsm_msc_mgcp = {
 	.num_states = ARRAY_SIZE(fsm_msc_mgcp_states),
 	.log_subsys = DMGCP,
 	.timer_cb = fsm_timeout_cb,
+	.event_names = msc_mgcp_fsm_evt_names,
 };
 
 /* Notify that a new call begins. This will create a connection for the
