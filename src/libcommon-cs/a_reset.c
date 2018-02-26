@@ -43,6 +43,13 @@ enum fsm_evt {
 	EV_N_CONNECT,		/* made a successful connection */
 };
 
+static const struct value_string fsm_event_names[] = {
+	OSMO_VALUE_STRING(EV_RESET_ACK),
+	OSMO_VALUE_STRING(EV_N_DISCONNECT),
+	OSMO_VALUE_STRING(EV_N_CONNECT),
+	{0, NULL}
+};
+
 /* Disconnected state */
 static void fsm_disc_cb(struct osmo_fsm_inst *fi, uint32_t event, void *data)
 {
@@ -111,6 +118,7 @@ static struct osmo_fsm fsm = {
 	.num_states = ARRAY_SIZE(fsm_states),
 	.log_subsys = DMSC,
 	.timer_cb = fsm_reset_ack_timeout_cb,
+	.event_names = fsm_event_names,
 };
 
 /* Create and start state machine which handles the reset/reset-ack procedure */
