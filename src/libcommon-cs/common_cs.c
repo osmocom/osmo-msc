@@ -37,10 +37,7 @@
  * The long term aim should be to have entirely separate structs for libbsc and
  * libmsc with some common general items.
  */
-struct gsm_network *gsm_network_init(void *ctx,
-				     uint16_t country_code,
-				     uint16_t network_code,
-				     mncc_recv_cb_t mncc_recv)
+struct gsm_network *gsm_network_init(void *ctx, mncc_recv_cb_t mncc_recv)
 {
 	struct gsm_network *net;
 
@@ -48,8 +45,8 @@ struct gsm_network *gsm_network_init(void *ctx,
 	if (!net)
 		return NULL;
 
-	net->country_code = country_code;
-	net->network_code = network_code;
+	net->country_code = 1;
+	net->network_code = 1;
 	/* Permit a compile-time default of A5/3 and A5/1 */
 	net->a5_encryption_mask = (1 << 3) | (1 << 1);
 

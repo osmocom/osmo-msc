@@ -845,7 +845,7 @@ static void run_tests(int nr, const char *imsi)
 
 struct gsm_network *test_net(void *ctx)
 {
-	struct gsm_network *net = gsm_network_init(ctx, 1, 1, mncc_recv);
+	struct gsm_network *net = gsm_network_init(ctx, mncc_recv);
 
 	net->gsup_server_addr_str = talloc_strdup(net, "no_gsup_server");
 	net->gsup_server_port = 0;
