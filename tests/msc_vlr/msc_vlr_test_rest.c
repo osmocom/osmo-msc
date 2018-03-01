@@ -191,10 +191,46 @@ void test_lu_unknown_tmsi(uint8_t nr, const char *imsi)
 	comment_end(nr, imsi);
 }
 
+void test_bb_lu(uint8_t nr, const char *imsi)
+{
+	comment_start(nr, imsi);
+
+	btw("Location Update request causes a GSUP LU request to HLR");
+	lu_result_sent = RES_NONE;
+	gsup_expect_tx("04010809710000000000f1");
+	ms_sends_msg("05087009f107000033089910070000000010");
+	OSMO_ASSERT(gsup_tx_confirmed);
+	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
+
+	btw("HLR sends _INSERT_DATA_REQUEST, VLR responds with _INSERT_DATA_RESULT");
+	gsup_rx("10010809710000000000f108030288f8",
+		"12010809710000000000f1");
+	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
+
+	btw("having received subscriber data does not mean acceptance");
+	EXPECT_ACCEPTED(false);
+
+	thwart_rx_non_initial_requests();
+
+	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
+
+	btw("HLR also sends GSUP _UPDATE_LOCATION_RESULT");
+	expect_bssap_clear();
+	gsup_rx("06010809710000000000f1", NULL);
+	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
+
+	btw("LU was successful, and the conn has already been closed");
+	VERBOSE_ASSERT(lu_result_sent, == RES_ACCEPT, "%d");
+	EXPECT_CONN_COUNT(0);
+	clear_vlr();
+	comment_end(nr, imsi);
+}
+
 msc_vlr_test_func_t msc_vlr_tests[] = {
 	test_early_stage,
 	test_cm_service_without_lu,
 	test_two_lu,
 	test_lu_unknown_tmsi,
+	test_bb_lu,
 	NULL
 };
