@@ -23,11 +23,12 @@
 
 #include "msc_vlr_tests.h"
 
-void test_ciph(uint8_t nr, const char *imsi)
+void test_ciph()
 {
 	struct vlr_subscr *vsub;
+	const char *imsi = "901700000004620";
 
-	comment_start(nr, imsi);
+	comment_start();
 
 	/* implicit: net->authentication_required = true; */
 	net->a5_encryption_mask = (1 << 1);
@@ -231,14 +232,15 @@ void test_ciph(uint8_t nr, const char *imsi)
 
 	EXPECT_CONN_COUNT(0);
 	clear_vlr();
-	comment_end(nr, imsi);
+	comment_end();
 }
 
-void test_ciph_tmsi(uint8_t nr, const char *imsi)
+void test_ciph_tmsi()
 {
 	struct vlr_subscr *vsub;
+	const char *imsi = "901700000004620";
 
-	comment_start(nr, imsi);
+	comment_start();
 
 	/* implicit: net->authentication_required = true; */
 	net->a5_encryption_mask = (1 << 1);
@@ -469,14 +471,15 @@ void test_ciph_tmsi(uint8_t nr, const char *imsi)
 
 	EXPECT_CONN_COUNT(0);
 	clear_vlr();
-	comment_end(nr, imsi);
+	comment_end();
 }
 
-void test_ciph_imei(uint8_t nr, const char *imsi)
+void test_ciph_imei()
 {
 	struct vlr_subscr *vsub;
+	const char *imsi = "901700000004620";
 
-	comment_start(nr, imsi);
+	comment_start();
 
 	/* implicit: net->authentication_required = true; */
 	net->a5_encryption_mask = (1 << 1);
@@ -570,14 +573,15 @@ void test_ciph_imei(uint8_t nr, const char *imsi)
 
 	EXPECT_CONN_COUNT(0);
 	clear_vlr();
-	comment_end(nr, imsi);
+	comment_end();
 }
 
-void test_ciph_imeisv(uint8_t nr, const char *imsi)
+void test_ciph_imeisv()
 {
 	struct vlr_subscr *vsub;
+	const char *imsi = "901700000004620";
 
-	comment_start(nr, imsi);
+	comment_start();
 
 	/* implicit: net->authentication_required = true; */
 	net->a5_encryption_mask = (1 << 1);
@@ -667,14 +671,15 @@ void test_ciph_imeisv(uint8_t nr, const char *imsi)
 
 	EXPECT_CONN_COUNT(0);
 	clear_vlr();
-	comment_end(nr, imsi);
+	comment_end();
 }
 
-void test_ciph_tmsi_imei(uint8_t nr, const char *imsi)
+void test_ciph_tmsi_imei()
 {
 	struct vlr_subscr *vsub;
+	const char *imsi = "901700000004620";
 
-	comment_start(nr, imsi);
+	comment_start();
 
 	/* implicit: net->authentication_required = true; */
 	net->a5_encryption_mask = (1 << 1);
@@ -786,12 +791,12 @@ void test_ciph_tmsi_imei(uint8_t nr, const char *imsi)
 
 	EXPECT_CONN_COUNT(0);
 	clear_vlr();
-	comment_end(nr, imsi);
+	comment_end();
 }
 
-void test_lu_unknown_tmsi(uint8_t nr, const char *imsi)
+void test_lu_unknown_tmsi()
 {
-	comment_start(nr, imsi);
+	comment_start();
 
 	btw("Location Update request with unknown TMSI sends ID Request for IMSI");
 	lu_result_sent = RES_NONE;
@@ -827,7 +832,7 @@ void test_lu_unknown_tmsi(uint8_t nr, const char *imsi)
 	VERBOSE_ASSERT(lu_result_sent, == RES_ACCEPT, "%d");
 	EXPECT_CONN_COUNT(0);
 	clear_vlr();
-	comment_end(nr, imsi);
+	comment_end();
 }
 
 msc_vlr_test_func_t msc_vlr_tests[] = {

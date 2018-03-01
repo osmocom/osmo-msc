@@ -1,4 +1,4 @@
-===== [1] test_call_mo(901700000004620)...
+===== test_call_mo
 - Total time passed: 0.000000 s
 - Location Update request causes a GSUP Send Auth Info request to HLR
   MSC <--RAN_UTRAN_IU-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
@@ -342,12 +342,12 @@ DRLL subscr MSISDN:42342: Freeing subscriber connection
 DREF VLR subscr MSISDN:42342 usage decreases to: 1
   llist_count(&net->subscr_conns) == 0
 DREF freeing VLR subscr MSISDN:42342
-===== [1] test_call_mo(901700000004620): SUCCESS
+===== test_call_mo: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
 talloc_total_blocks(tall_bsc_ctx) == 7
 
-===== [2] test_call_mt(901700000004620)...
+===== test_call_mt
 - Total time passed: 0.000000 s
 - Location Update request causes a GSUP Send Auth Info request to HLR
   MSC <--RAN_UTRAN_IU-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
@@ -696,7 +696,7 @@ DRLL subscr MSISDN:42342: Freeing subscriber connection
 DREF VLR subscr MSISDN:42342 usage decreases to: 1
   llist_count(&net->subscr_conns) == 0
 DREF freeing VLR subscr MSISDN:42342
-===== [2] test_call_mt(901700000004620): SUCCESS
+===== test_call_mt: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
 talloc_total_blocks(tall_bsc_ctx) == 7

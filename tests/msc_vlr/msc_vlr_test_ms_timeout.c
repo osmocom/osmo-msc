@@ -23,9 +23,9 @@
 
 #include "msc_vlr_tests.h"
 
-void test_ms_timeout_lu_auth_resp(uint8_t nr, const char *imsi)
+void test_ms_timeout_lu_auth_resp()
 {
-	comment_start(nr, imsi);
+	comment_start();
 
 	net->authentication_required = true;
 
@@ -80,12 +80,12 @@ void test_ms_timeout_lu_auth_resp(uint8_t nr, const char *imsi)
 	EXPECT_CONN_COUNT(0);
 	VERBOSE_ASSERT(lu_result_sent, == RES_REJECT, "%d");
 
-	comment_end(nr, imsi);
+	comment_end();
 }
 
-void test_ms_timeout_cm_auth_resp(uint8_t nr, const char *imsi)
+void test_ms_timeout_cm_auth_resp()
 {
-	comment_start(nr, imsi);
+	comment_start();
 
 	net->authentication_required = true;
 
@@ -179,16 +179,17 @@ void test_ms_timeout_cm_auth_resp(uint8_t nr, const char *imsi)
 	VERBOSE_ASSERT(cm_service_result_sent, == RES_REJECT, "%d");
 
 	clear_vlr();
-	comment_end(nr, imsi);
+	comment_end();
 }
 
-void test_ms_timeout_paging(uint8_t nr, const char *imsi)
+void test_ms_timeout_paging()
 {
 	struct vlr_subscr *vsub;
+	const char *imsi = "901700000004620";
 
 	rx_from_ran = RAN_GERAN_A;
 
-	comment_start(nr, imsi);
+	comment_start();
 
 	fake_time_start();
 
@@ -283,7 +284,7 @@ void test_ms_timeout_paging(uint8_t nr, const char *imsi)
 
 	EXPECT_CONN_COUNT(0);
 	clear_vlr();
-	comment_end(nr, imsi);
+	comment_end();
 }
 
 msc_vlr_test_func_t msc_vlr_tests[] = {

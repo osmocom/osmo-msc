@@ -1,4 +1,4 @@
-===== [1] test_no_authen(901700000004620)...
+===== test_no_authen
 - Location Update request causes a GSUP LU request to HLR
   MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
   new conn
@@ -317,12 +317,12 @@ DREF unknown: MSC conn use - compl_l3 == 0 (0x0)
 DRLL Freeing subscriber connection with NULL subscriber
   bssap_clear_sent == 1
   llist_count(&net->subscr_conns) == 0
-===== [1] test_no_authen(901700000004620): SUCCESS
+===== test_no_authen: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
 talloc_total_blocks(tall_bsc_ctx) == 7
 
-===== [2] test_no_authen_tmsi(901700000004620)...
+===== test_no_authen_tmsi
 - Location Update request causes a GSUP LU request to HLR
   MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
   new conn
@@ -828,12 +828,12 @@ DREF unknown: MSC conn use - compl_l3 == 0 (0x0)
 DRLL Freeing subscriber connection with NULL subscriber
   bssap_clear_sent == 1
   llist_count(&net->subscr_conns) == 0
-===== [2] test_no_authen_tmsi(901700000004620): SUCCESS
+===== test_no_authen_tmsi: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
 talloc_total_blocks(tall_bsc_ctx) == 7
 
-===== [3] test_no_authen_imei(901700000004620)...
+===== test_no_authen_imei
 - Location Update request causes a GSUP LU request to HLR
   MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
   new conn
@@ -1001,12 +1001,12 @@ DREF unknown: MSC conn use - compl_l3 == 0 (0x0)
 DRLL Freeing subscriber connection with NULL subscriber
   bssap_clear_sent == 1
   llist_count(&net->subscr_conns) == 0
-===== [3] test_no_authen_imei(901700000004620): SUCCESS
+===== test_no_authen_imei: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
 talloc_total_blocks(tall_bsc_ctx) == 7
 
-===== [4] test_no_authen_tmsi_imei(901700000004620)...
+===== test_no_authen_tmsi_imei
 - Location Update request causes a GSUP LU request to HLR
   MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
   new conn
@@ -1199,12 +1199,12 @@ DREF unknown: MSC conn use - compl_l3 == 0 (0x0)
 DRLL Freeing subscriber connection with NULL subscriber
   bssap_clear_sent == 1
   llist_count(&net->subscr_conns) == 0
-===== [4] test_no_authen_tmsi_imei(901700000004620): SUCCESS
+===== test_no_authen_tmsi_imei: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
 talloc_total_blocks(tall_bsc_ctx) == 7
 
-===== [5] test_no_authen_imeisv(901700000004620)...
+===== test_no_authen_imeisv
 - Location Update request causes an IMEISV ID request back to the MS
   MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
   new conn
@@ -1357,12 +1357,12 @@ DREF unknown: MSC conn use - compl_l3 == 0 (0x0)
 DRLL Freeing subscriber connection with NULL subscriber
   bssap_clear_sent == 1
   llist_count(&net->subscr_conns) == 0
-===== [5] test_no_authen_imeisv(901700000004620): SUCCESS
+===== test_no_authen_imeisv: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
 talloc_total_blocks(tall_bsc_ctx) == 7
 
-===== [6] test_no_authen_imeisv_imei(901700000004620)...
+===== test_no_authen_imeisv_imei
 - Location Update request causes an IMEISV ID request back to the MS
   MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
   new conn
@@ -1547,12 +1547,12 @@ DREF unknown: MSC conn use - compl_l3 == 0 (0x0)
 DRLL Freeing subscriber connection with NULL subscriber
   bssap_clear_sent == 1
   llist_count(&net->subscr_conns) == 0
-===== [6] test_no_authen_imeisv_imei(901700000004620): SUCCESS
+===== test_no_authen_imeisv_imei: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
 talloc_total_blocks(tall_bsc_ctx) == 7
 
-===== [7] test_no_authen_imeisv_tmsi(901700000004620)...
+===== test_no_authen_imeisv_tmsi
 - Location Update request causes an IMEISV ID request back to the MS
   MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
   new conn
@@ -1903,12 +1903,12 @@ DREF unknown: MSC conn use - compl_l3 == 0 (0x0)
 DRLL Freeing subscriber connection with NULL subscriber
   bssap_clear_sent == 1
   llist_count(&net->subscr_conns) == 0
-===== [7] test_no_authen_imeisv_tmsi(901700000004620): SUCCESS
+===== test_no_authen_imeisv_tmsi: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
 talloc_total_blocks(tall_bsc_ctx) == 7
 
-===== [8] test_no_authen_imeisv_tmsi_imei(901700000004620)...
+===== test_no_authen_imeisv_tmsi_imei
 - Location Update request causes an IMEISV ID request back to the MS
   MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
   new conn
@@ -2119,7 +2119,7 @@ DREF unknown: MSC conn use - compl_l3 == 0 (0x0)
 DRLL Freeing subscriber connection with NULL subscriber
   bssap_clear_sent == 1
   llist_count(&net->subscr_conns) == 0
-===== [8] test_no_authen_imeisv_tmsi_imei(901700000004620): SUCCESS
+===== test_no_authen_imeisv_tmsi_imei: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
 talloc_total_blocks(tall_bsc_ctx) == 7

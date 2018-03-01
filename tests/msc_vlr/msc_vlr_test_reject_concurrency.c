@@ -23,10 +23,10 @@
 
 #include "msc_vlr_tests.h"
 
-void test_reject_2nd_conn(uint8_t nr, const char *imsi)
+void test_reject_2nd_conn()
 {
 	struct gsm_subscriber_connection *conn1;
-	comment_start(nr, imsi);
+	comment_start();
 
 	btw("Location Update Request on one connection");
 	lu_result_sent = RES_NONE;
@@ -64,7 +64,7 @@ void test_reject_2nd_conn(uint8_t nr, const char *imsi)
 	EXPECT_CONN_COUNT(0);
 
 	clear_vlr();
-	comment_end(nr, imsi);
+	comment_end();
 }
 
 void _normal_lu_part1()
@@ -115,8 +115,9 @@ void _normal_cm_service_req()
 	EXPECT_ACCEPTED(true);
 }
 
-void _page(const char *imsi)
+void _page()
 {
+	const char *imsi = "901700000004620";
 	struct vlr_subscr *vsub;
 
 	BTW("an SMS is sent, MS is paged");
@@ -188,9 +189,9 @@ void _paging_resp_part2(int expect_conn_count, bool expect_clear)
 	EXPECT_CONN_COUNT(expect_conn_count);
 }
 
-void test_reject_lu_during_lu(uint8_t nr, const char *imsi)
+void test_reject_lu_during_lu()
 {
-	comment_start(nr, imsi);
+	comment_start();
 
 	_normal_lu_part1();
 
@@ -203,12 +204,12 @@ void test_reject_lu_during_lu(uint8_t nr, const char *imsi)
 	_normal_lu_part2();
 
 	clear_vlr();
-	comment_end(nr, imsi);
+	comment_end();
 }
 
-void test_reject_cm_during_lu(uint8_t nr, const char *imsi)
+void test_reject_cm_during_lu()
 {
-	comment_start(nr, imsi);
+	comment_start();
 
 	_normal_lu_part1();
 
@@ -224,12 +225,12 @@ void test_reject_cm_during_lu(uint8_t nr, const char *imsi)
 	_normal_lu_part2();
 
 	clear_vlr();
-	comment_end(nr, imsi);
+	comment_end();
 }
 
-void test_reject_paging_resp_during_lu(uint8_t nr, const char *imsi)
+void test_reject_paging_resp_during_lu()
 {
-	comment_start(nr, imsi);
+	comment_start();
 
 	_normal_lu_part1();
 
@@ -242,12 +243,12 @@ void test_reject_paging_resp_during_lu(uint8_t nr, const char *imsi)
 	_normal_lu_part2();
 
 	clear_vlr();
-	comment_end(nr, imsi);
+	comment_end();
 }
 
-void test_reject_lu_during_cm(uint8_t nr, const char *imsi)
+void test_reject_lu_during_cm()
 {
-	comment_start(nr, imsi);
+	comment_start();
 
 	_normal_lu();
 	_normal_cm_service_req();
@@ -266,12 +267,12 @@ void test_reject_lu_during_cm(uint8_t nr, const char *imsi)
 	EXPECT_CONN_COUNT(0);
 
 	clear_vlr();
-	comment_end(nr, imsi);
+	comment_end();
 }
 
-void test_reject_cm_during_cm(uint8_t nr, const char *imsi)
+void test_reject_cm_during_cm()
 {
-	comment_start(nr, imsi);
+	comment_start();
 
 	_normal_lu();
 	_normal_cm_service_req();
@@ -289,12 +290,12 @@ void test_reject_cm_during_cm(uint8_t nr, const char *imsi)
 	EXPECT_CONN_COUNT(0);
 
 	clear_vlr();
-	comment_end(nr, imsi);
+	comment_end();
 }
 
-void test_reject_paging_resp_during_cm(uint8_t nr, const char *imsi)
+void test_reject_paging_resp_during_cm()
 {
-	comment_start(nr, imsi);
+	comment_start();
 
 	_normal_lu();
 	_normal_cm_service_req();
@@ -314,15 +315,15 @@ void test_reject_paging_resp_during_cm(uint8_t nr, const char *imsi)
 	EXPECT_CONN_COUNT(0);
 
 	clear_vlr();
-	comment_end(nr, imsi);
+	comment_end();
 }
 
-void test_reject_paging_resp_during_paging_resp(uint8_t nr, const char *imsi)
+void test_reject_paging_resp_during_paging_resp()
 {
-	comment_start(nr, imsi);
+	comment_start();
 
 	_normal_lu();
-	_page(imsi);
+	_page();
 	_paging_resp_part1();
 
 	BTW("MS sends another erratic Paging Response which is dropped silently");
@@ -331,15 +332,15 @@ void test_reject_paging_resp_during_paging_resp(uint8_t nr, const char *imsi)
 	_paging_resp_part2(0, true);
 
 	clear_vlr();
-	comment_end(nr, imsi);
+	comment_end();
 }
 
-void test_reject_lu_during_paging_resp(uint8_t nr, const char *imsi)
+void test_reject_lu_during_paging_resp()
 {
-	comment_start(nr, imsi);
+	comment_start();
 
 	_normal_lu();
-	_page(imsi);
+	_page();
 	_paging_resp_part1();
 
 	BTW("MS sends erratic LU Request, which is dropped silently");
@@ -351,15 +352,15 @@ void test_reject_lu_during_paging_resp(uint8_t nr, const char *imsi)
 	_paging_resp_part2(0, true);
 
 	clear_vlr();
-	comment_end(nr, imsi);
+	comment_end();
 }
 
-void test_accept_cm_during_paging_resp(uint8_t nr, const char *imsi)
+void test_accept_cm_during_paging_resp()
 {
-	comment_start(nr, imsi);
+	comment_start();
 
 	_normal_lu();
-	_page(imsi);
+	_page();
 	_paging_resp_part1();
 
 	BTW("CM Service Request during open connection is accepted");
@@ -378,7 +379,7 @@ void test_accept_cm_during_paging_resp(uint8_t nr, const char *imsi)
 	EXPECT_CONN_COUNT(0);
 
 	clear_vlr();
-	comment_end(nr, imsi);
+	comment_end();
 }
 
 msc_vlr_test_func_t msc_vlr_tests[] = {

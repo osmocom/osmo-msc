@@ -23,9 +23,9 @@
 
 #include "msc_vlr_tests.h"
 
-void test_hlr_rej_auth_info_unknown_imsi(uint8_t nr, const char *imsi)
+void test_hlr_rej_auth_info_unknown_imsi()
 {
-	comment_start(nr, imsi);
+	comment_start();
 
 	net->authentication_required = true;
 
@@ -46,12 +46,12 @@ void test_hlr_rej_auth_info_unknown_imsi(uint8_t nr, const char *imsi)
 
 	EXPECT_CONN_COUNT(0);
 	clear_vlr();
-	comment_end(nr, imsi);
+	comment_end();
 }
 
-void test_hlr_rej_auth_info_net_fail(uint8_t nr, const char *imsi)
+void test_hlr_rej_auth_info_net_fail()
 {
-	comment_start(nr, imsi);
+	comment_start();
 
 	net->authentication_required = true;
 
@@ -72,14 +72,15 @@ void test_hlr_rej_auth_info_net_fail(uint8_t nr, const char *imsi)
 
 	EXPECT_CONN_COUNT(0);
 	clear_vlr();
-	comment_end(nr, imsi);
+	comment_end();
 }
 
-void test_hlr_rej_auth_info_net_fail_no_reuse_tuples(uint8_t nr, const char *imsi)
+void test_hlr_rej_auth_info_net_fail_no_reuse_tuples()
 {
 	struct vlr_subscr *vsub;
+	const char *imsi = "901700000004620";
 
-	comment_start(nr, imsi);
+	comment_start();
 
 	net->authentication_required = true;
 	net->vlr->cfg.auth_reuse_old_sets_on_error = false;
@@ -158,14 +159,15 @@ void test_hlr_rej_auth_info_net_fail_no_reuse_tuples(uint8_t nr, const char *ims
 
 	EXPECT_CONN_COUNT(0);
 	clear_vlr();
-	comment_end(nr, imsi);
+	comment_end();
 }
 
-void test_hlr_rej_auth_info_unkown_imsi_no_reuse_tuples(uint8_t nr, const char *imsi)
+void test_hlr_rej_auth_info_unkown_imsi_no_reuse_tuples()
 {
 	struct vlr_subscr *vsub;
+	const char *imsi = "901700000004620";
 
-	comment_start(nr, imsi);
+	comment_start();
 
 	net->authentication_required = true;
 	net->vlr->cfg.auth_reuse_old_sets_on_error = true;
@@ -245,12 +247,12 @@ void test_hlr_rej_auth_info_unkown_imsi_no_reuse_tuples(uint8_t nr, const char *
 
 	EXPECT_CONN_COUNT(0);
 	clear_vlr();
-	comment_end(nr, imsi);
+	comment_end();
 }
 
-void test_hlr_acc_but_no_auth_tuples(uint8_t nr, const char *imsi)
+void test_hlr_acc_but_no_auth_tuples()
 {
-	comment_start(nr, imsi);
+	comment_start();
 
 	net->authentication_required = true;
 	net->vlr->cfg.auth_reuse_old_sets_on_error = true;
@@ -277,14 +279,15 @@ void test_hlr_acc_but_no_auth_tuples(uint8_t nr, const char *imsi)
 
 	EXPECT_CONN_COUNT(0);
 	clear_vlr();
-	comment_end(nr, imsi);
+	comment_end();
 }
 
-void test_hlr_rej_auth_info_net_fail_reuse_tuples(uint8_t nr, const char *imsi)
+void test_hlr_rej_auth_info_net_fail_reuse_tuples()
 {
 	struct vlr_subscr *vsub;
+	const char *imsi = "901700000004620";
 
-	comment_start(nr, imsi);
+	comment_start();
 
 	net->authentication_required = true;
 	net->vlr->cfg.auth_reuse_old_sets_on_error = true;
@@ -379,12 +382,12 @@ void test_hlr_rej_auth_info_net_fail_reuse_tuples(uint8_t nr, const char *imsi)
 	EXPECT_CONN_COUNT(0);
 
 	clear_vlr();
-	comment_end(nr, imsi);
+	comment_end();
 }
 
-void test_hlr_rej_lu(uint8_t nr, const char *imsi)
+void test_hlr_rej_lu()
 {
-	comment_start(nr, imsi);
+	comment_start();
 
 	btw("Location Update request causes a GSUP LU request to HLR");
 	lu_result_sent = RES_NONE;
@@ -402,12 +405,12 @@ void test_hlr_rej_lu(uint8_t nr, const char *imsi)
 	EXPECT_CONN_COUNT(0);
 
 	clear_vlr();
-	comment_end(nr, imsi);
+	comment_end();
 }
 
-void test_hlr_no_insert_data(uint8_t nr, const char *imsi)
+void test_hlr_no_insert_data()
 {
-	comment_start(nr, imsi);
+	comment_start();
 
 	btw("Location Update request causes a GSUP LU request to HLR");
 	lu_result_sent = RES_NONE;
@@ -428,7 +431,7 @@ void test_hlr_no_insert_data(uint8_t nr, const char *imsi)
 
 	EXPECT_CONN_COUNT(0);
 	clear_vlr();
-	comment_end(nr, imsi);
+	comment_end();
 }
 
 msc_vlr_test_func_t msc_vlr_tests[] = {

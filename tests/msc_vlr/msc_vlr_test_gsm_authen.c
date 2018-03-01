@@ -23,11 +23,12 @@
 
 #include "msc_vlr_tests.h"
 
-void test_gsm_authen(uint8_t nr, const char *imsi)
+void test_gsm_authen()
 {
 	struct vlr_subscr *vsub;
+	const char *imsi = "901700000004620";
 
-	comment_start(nr, imsi);
+	comment_start();
 
 	net->authentication_required = true;
 
@@ -209,14 +210,15 @@ void test_gsm_authen(uint8_t nr, const char *imsi)
 
 	EXPECT_CONN_COUNT(0);
 	clear_vlr();
-	comment_end(nr, imsi);
+	comment_end();
 }
 
-void test_gsm_authen_tmsi(uint8_t nr, const char *imsi)
+void test_gsm_authen_tmsi()
 {
 	struct vlr_subscr *vsub;
+	const char *imsi = "901700000004620";
 
-	comment_start(nr, imsi);
+	comment_start();
 
 	net->authentication_required = true;
 	net->vlr->cfg.assign_tmsi = true;
@@ -485,14 +487,15 @@ void test_gsm_authen_tmsi(uint8_t nr, const char *imsi)
 
 	EXPECT_CONN_COUNT(0);
 	clear_vlr();
-	comment_end(nr, imsi);
+	comment_end();
 }
 
-void test_gsm_authen_imei(uint8_t nr, const char *imsi)
+void test_gsm_authen_imei()
 {
 	struct vlr_subscr *vsub;
+	const char *imsi = "901700000004620";
 
-	comment_start(nr, imsi);
+	comment_start();
 
 	net->authentication_required = true;
 	net->vlr->cfg.check_imei_rqd = true;
@@ -580,14 +583,15 @@ void test_gsm_authen_imei(uint8_t nr, const char *imsi)
 
 	EXPECT_CONN_COUNT(0);
 	clear_vlr();
-	comment_end(nr, imsi);
+	comment_end();
 }
 
-void test_gsm_authen_tmsi_imei(uint8_t nr, const char *imsi)
+void test_gsm_authen_tmsi_imei()
 {
 	struct vlr_subscr *vsub;
+	const char *imsi = "901700000004620";
 
-	comment_start(nr, imsi);
+	comment_start();
 
 	net->authentication_required = true;
 	net->vlr->cfg.assign_tmsi = true;
@@ -695,15 +699,15 @@ void test_gsm_authen_tmsi_imei(uint8_t nr, const char *imsi)
 
 	EXPECT_CONN_COUNT(0);
 	clear_vlr();
-	comment_end(nr, imsi);
+	comment_end();
 }
 
-void test_gsm_milenage_authen(uint8_t nr, const char *ignored)
+void test_gsm_milenage_authen()
 {
 	struct vlr_subscr *vsub;
 	const char *imsi = "901700000010650";
 
-	comment_start(nr, imsi);
+	comment_start();
 
 	net->authentication_required = true;
 	rx_from_ran = RAN_GERAN_A;
@@ -907,7 +911,7 @@ void test_gsm_milenage_authen(uint8_t nr, const char *ignored)
 
 	EXPECT_CONN_COUNT(0);
 	clear_vlr();
-	comment_end(nr, imsi);
+	comment_end();
 }
 
 msc_vlr_test_func_t msc_vlr_tests[] = {

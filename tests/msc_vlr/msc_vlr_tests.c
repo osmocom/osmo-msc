@@ -826,18 +826,21 @@ static void handle_options(int argc, char **argv)
 
 void *msgb_ctx = NULL;
 
-static void run_tests(int nr, const char *imsi)
+static void run_tests(int nr)
 {
-	uint8_t test_nr;
-
-	printf("Testing for IMSI %s\n", imsi);
-
+	int test_nr;
 	nr--; /* arg's first test is 1, in here it's 0 */
 	for (test_nr = 0; msc_vlr_tests[test_nr]; test_nr++) {
 		if (nr >= 0 && test_nr != nr)
 			continue;
 
-		msc_vlr_tests[test_nr](test_nr + 1, imsi);
+		if (cmdline_opts.verbose)
+			fprintf(stderr, "(test nr %d)\n", test_nr + 1);
+
+		msc_vlr_tests[test_nr]();
+
+		if (cmdline_opts.verbose)
+			fprintf(stderr, "(test nr %d)\n", test_nr + 1);
 
 		check_talloc(msgb_ctx, tall_bsc_ctx, 7);
 	}
@@ -893,9 +896,9 @@ int main(int argc, char **argv)
 
 	clear_vlr();
 
-	if (optind >= argc) {
-		run_tests(-1, "901700000004620");
-	} else {
+	if (optind >= argc)
+		run_tests(-1);
+	else {
 		int arg;
 		long int nr;
 		for (arg = optind; arg < argc; arg++) {
@@ -907,7 +910,7 @@ int main(int argc, char **argv)
 				exit(1);
 			}
 
-			run_tests(nr, "901700000004620");
+			run_tests(nr);
 		}
 	}
 

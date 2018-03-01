@@ -322,18 +322,18 @@ void _test_umts_authen(enum ran_type via_ran)
 	clear_vlr();
 }
 
-void test_umts_authen_geran(uint8_t nr, const char *imsi)
+void test_umts_authen_geran()
 {
-	comment_start(nr, imsi);
+	comment_start();
 	_test_umts_authen(RAN_GERAN_A);
-	comment_end(nr, imsi);
+	comment_end();
 }
 
-void test_umts_authen_utran(uint8_t nr, const char *imsi)
+void test_umts_authen_utran()
 {
-	comment_start(nr, imsi);
+	comment_start();
 	_test_umts_authen(RAN_UTRAN_IU);
-	comment_end(nr, imsi);
+	comment_end();
 }
 
 #define RECALC_AUTS 0
@@ -558,18 +558,18 @@ void _test_umts_authen_resync(enum ran_type via_ran)
 	clear_vlr();
 }
 
-void test_umts_authen_resync_geran(uint8_t nr, const char *imsi)
+void test_umts_authen_resync_geran()
 {
-	comment_start(nr, imsi);
+	comment_start();
 	_test_umts_authen_resync(RAN_GERAN_A);
-	comment_end(nr, imsi);
+	comment_end();
 }
 
-void test_umts_authen_resync_utran(uint8_t nr, const char *imsi)
+void test_umts_authen_resync_utran()
 {
-	comment_start(nr, imsi);
+	comment_start();
 	_test_umts_authen_resync(RAN_UTRAN_IU);
-	comment_end(nr, imsi);
+	comment_end();
 }
 
 msc_vlr_test_func_t msc_vlr_tests[] = {
