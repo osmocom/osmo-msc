@@ -794,47 +794,6 @@ void test_ciph_tmsi_imei()
 	comment_end();
 }
 
-void test_lu_unknown_tmsi()
-{
-	comment_start();
-
-	btw("Location Update request with unknown TMSI sends ID Request for IMSI");
-	lu_result_sent = RES_NONE;
-	dtap_expect_tx("051801");
-	ms_sends_msg("050802008168000130" "05f4" "23422342");
-	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
-
-	EXPECT_ACCEPTED(false);
-	thwart_rx_non_initial_requests();
-
-	btw("MS tells us the IMSI, causes a GSUP LU request to HLR");
-	gsup_expect_tx("04010809710000004026f0");
-	ms_sends_msg("0559089910070000006402");
-	OSMO_ASSERT(gsup_tx_confirmed);
-	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
-
-	btw("HLR sends _INSERT_DATA_REQUEST, VLR responds with _INSERT_DATA_RESULT");
-	gsup_rx("10010809710000004026f00804036470f1",
-		"12010809710000004026f0");
-	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
-
-	btw("having received subscriber data does not mean acceptance");
-	EXPECT_ACCEPTED(false);
-	thwart_rx_non_initial_requests();
-	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
-
-	btw("HLR also sends GSUP _UPDATE_LOCATION_RESULT");
-	expect_bssap_clear();
-	gsup_rx("06010809710000004026f0", NULL);
-	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
-
-	btw("LU was successful, and the conn has already been closed");
-	VERBOSE_ASSERT(lu_result_sent, == RES_ACCEPT, "%d");
-	EXPECT_CONN_COUNT(0);
-	clear_vlr();
-	comment_end();
-}
-
 msc_vlr_test_func_t msc_vlr_tests[] = {
 	test_ciph,
 	test_ciph_tmsi,
