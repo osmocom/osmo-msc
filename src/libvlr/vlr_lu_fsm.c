@@ -68,10 +68,12 @@ static const struct value_string upd_hlr_vlr_event_names[] = {
 	{ 0, NULL }
 };
 
+static inline struct vlr_subscr *upd_hlr_vlr_fi_priv(struct osmo_fsm_inst *fi);
+
 static void upd_hlr_vlr_fsm_init(struct osmo_fsm_inst *fi, uint32_t event,
 				 void *data)
 {
-	struct vlr_subscr *vsub = fi->priv;
+	struct vlr_subscr *vsub = upd_hlr_vlr_fi_priv(fi);
 	int rc;
 
 	OSMO_ASSERT(event == UPD_HLR_VLR_E_START);
@@ -87,7 +89,7 @@ static void upd_hlr_vlr_fsm_init(struct osmo_fsm_inst *fi, uint32_t event,
 static void upd_hlr_vlr_fsm_wait_data(struct osmo_fsm_inst *fi, uint32_t event,
 				      void *data)
 {
-	struct vlr_subscr *vsub = fi->priv;
+	struct vlr_subscr *vsub = upd_hlr_vlr_fi_priv(fi);
 
 	switch (event) {
 	case UPD_HLR_VLR_E_INS_SUB_DATA:
@@ -151,6 +153,12 @@ static struct osmo_fsm upd_hlr_vlr_fsm = {
 	.event_names = upd_hlr_vlr_event_names,
 };
 
+static inline struct vlr_subscr *upd_hlr_vlr_fi_priv(struct osmo_fsm_inst *fi)
+{
+	OSMO_ASSERT(fi->fsm == &upd_hlr_vlr_fsm);
+	return (struct vlr_subscr*)fi->priv;
+}
+
 struct osmo_fsm_inst *
 upd_hlr_vlr_proc_start(struct osmo_fsm_inst *parent,
 		       struct vlr_subscr *vsub,
@@ -193,10 +201,12 @@ static const struct value_string sub_pres_vlr_event_names[] = {
 	{ 0, NULL }
 };
 
+static inline struct vlr_subscr *sub_pres_vlr_fi_priv(struct osmo_fsm_inst *fi);
+
 static void sub_pres_vlr_fsm_init(struct osmo_fsm_inst *fi, uint32_t event,
 				  void *data)
 {
-	struct vlr_subscr *vsub = fi->priv;
+	struct vlr_subscr *vsub = sub_pres_vlr_fi_priv(fi);
 	OSMO_ASSERT(event == SUB_PRES_VLR_E_START);
 
 	if (!vsub->ms_not_reachable_flag) {
@@ -212,7 +222,7 @@ static void sub_pres_vlr_fsm_init(struct osmo_fsm_inst *fi, uint32_t event,
 static void sub_pres_vlr_fsm_wait_hlr(struct osmo_fsm_inst *fi, uint32_t event,
 				      void *data)
 {
-	struct vlr_subscr *vsub = fi->priv;
+	struct vlr_subscr *vsub = sub_pres_vlr_fi_priv(fi);
 
 	switch (event) {
 	case SUB_PRES_VLR_E_READY_SM_CNF:
@@ -254,6 +264,12 @@ static struct osmo_fsm sub_pres_vlr_fsm = {
 	.log_subsys = DVLR,
 	.event_names = sub_pres_vlr_event_names,
 };
+
+static inline struct vlr_subscr *sub_pres_vlr_fi_priv(struct osmo_fsm_inst *fi)
+{
+	OSMO_ASSERT(fi->fsm == &sub_pres_vlr_fsm);
+	return (struct vlr_subscr*)fi->priv;
+}
 
 /* Note that the start event is dispatched right away, so in case the FSM immediately concludes from that
  * event, the created FSM struct may no longer be valid as it already deallocated again, and it may
@@ -322,11 +338,13 @@ struct lu_compl_vlr_priv {
 	bool assign_tmsi;
 };
 
+static inline struct lu_compl_vlr_priv *lu_compl_vlr_fi_priv(struct osmo_fsm_inst *fi);
+
 static void _vlr_lu_compl_fsm_done(struct osmo_fsm_inst *fi,
 				   enum vlr_fsm_result result,
 				   uint8_t cause)
 {
-	struct lu_compl_vlr_priv *lcvp = fi->priv;
+	struct lu_compl_vlr_priv *lcvp = lu_compl_vlr_fi_priv(fi);
 	lcvp->result = result;
 	lcvp->cause = cause;
 	osmo_fsm_inst_state_chg(fi, LU_COMPL_VLR_S_DONE, 0, 0);
@@ -334,7 +352,7 @@ static void _vlr_lu_compl_fsm_done(struct osmo_fsm_inst *fi,
 
 static void vlr_lu_compl_fsm_success(struct osmo_fsm_inst *fi)
 {
-	struct lu_compl_vlr_priv *lcvp = fi->priv;
+	struct lu_compl_vlr_priv *lcvp = lu_compl_vlr_fi_priv(fi);
 	struct vlr_subscr *vsub = lcvp->vsub;
 	if (!vsub->lu_complete) {
 		vsub->lu_complete = true;
@@ -346,7 +364,7 @@ static void vlr_lu_compl_fsm_success(struct osmo_fsm_inst *fi)
 
 static void vlr_lu_compl_fsm_failure(struct osmo_fsm_inst *fi, uint8_t cause)
 {
-	struct lu_compl_vlr_priv *lcvp = fi->priv;
+	struct lu_compl_vlr_priv *lcvp = lu_compl_vlr_fi_priv(fi);
 	lcvp->vsub->vlr->ops.tx_lu_rej(lcvp->msc_conn_ref, cause);
 	_vlr_lu_compl_fsm_done(fi, VLR_FSM_RESULT_FAILURE, cause);
 }
@@ -354,7 +372,7 @@ static void vlr_lu_compl_fsm_failure(struct osmo_fsm_inst *fi, uint8_t cause)
 static void vlr_lu_compl_fsm_dispatch_result(struct osmo_fsm_inst *fi,
 					     uint32_t prev_state)
 {
-	struct lu_compl_vlr_priv *lcvp = fi->priv;
+	struct lu_compl_vlr_priv *lcvp = lu_compl_vlr_fi_priv(fi);
 	if (!fi->proc.parent) {
 		LOGPFSML(fi, LOGL_ERROR, "No parent FSM\n");
 		return;
@@ -369,7 +387,7 @@ static void vlr_lu_compl_fsm_dispatch_result(struct osmo_fsm_inst *fi,
 static void lu_compl_vlr_init(struct osmo_fsm_inst *fi, uint32_t event,
 			      void *data)
 {
-	struct lu_compl_vlr_priv *lcvp = fi->priv;
+	struct lu_compl_vlr_priv *lcvp = lu_compl_vlr_fi_priv(fi);
 	struct vlr_subscr *vsub = lcvp->vsub;
 	struct vlr_instance *vlr;
 	OSMO_ASSERT(vsub);
@@ -400,7 +418,7 @@ static void lu_compl_vlr_init(struct osmo_fsm_inst *fi, uint32_t event,
 
 static void lu_compl_vlr_new_tmsi(struct osmo_fsm_inst *fi)
 {
-	struct lu_compl_vlr_priv *lcvp = fi->priv;
+	struct lu_compl_vlr_priv *lcvp = lu_compl_vlr_fi_priv(fi);
 	struct vlr_subscr *vsub = lcvp->vsub;
 	struct vlr_instance *vlr = vsub->vlr;
 
@@ -423,7 +441,7 @@ static void lu_compl_vlr_wait_subscr_pres(struct osmo_fsm_inst *fi,
 					  uint32_t event,
 					  void *data)
 {
-	struct lu_compl_vlr_priv *lcvp = fi->priv;
+	struct lu_compl_vlr_priv *lcvp = lu_compl_vlr_fi_priv(fi);
 	struct vlr_subscr *vsub = lcvp->vsub;
 	struct vlr_instance *vlr = vsub->vlr;
 
@@ -459,7 +477,7 @@ static void lu_compl_vlr_wait_subscr_pres(struct osmo_fsm_inst *fi,
 static void lu_compl_vlr_wait_imei(struct osmo_fsm_inst *fi, uint32_t event,
 				   void *data)
 {
-	struct lu_compl_vlr_priv *lcvp = fi->priv;
+	struct lu_compl_vlr_priv *lcvp = lu_compl_vlr_fi_priv(fi);
 	struct vlr_subscr *vsub = lcvp->vsub;
 	struct vlr_instance *vlr = vsub->vlr;
 
@@ -501,11 +519,13 @@ static void lu_compl_vlr_wait_imei(struct osmo_fsm_inst *fi, uint32_t event,
 	vlr_lu_compl_fsm_success(fi);
 }
 
+static inline struct lu_compl_vlr_priv *lu_compl_vlr_fi_priv(struct osmo_fsm_inst *fi);
+
 /* Waiting for TMSI confirmation */
 static void lu_compl_vlr_wait_tmsi(struct osmo_fsm_inst *fi, uint32_t event,
 				   void *data)
 {
-	struct lu_compl_vlr_priv *lcvp = fi->priv;
+	struct lu_compl_vlr_priv *lcvp = lu_compl_vlr_fi_priv(fi);
 	struct vlr_subscr *vsub = lcvp->vsub;
 
 	OSMO_ASSERT(event == LU_COMPL_VLR_E_NEW_TMSI_ACK);
@@ -578,6 +598,12 @@ static struct osmo_fsm lu_compl_vlr_fsm = {
 	.log_subsys = DVLR,
 	.event_names = lu_compl_vlr_event_names,
 };
+
+static inline struct lu_compl_vlr_priv *lu_compl_vlr_fi_priv(struct osmo_fsm_inst *fi)
+{
+	OSMO_ASSERT(fi->fsm == &lu_compl_vlr_fsm);
+	return (struct lu_compl_vlr_priv*)fi->priv;
+}
 
 struct osmo_fsm_inst *
 lu_compl_vlr_proc_alloc(struct osmo_fsm_inst *parent,
@@ -685,10 +711,12 @@ static bool hlr_update_needed(struct vlr_subscr *vsub)
 	return true;
 }
 
+static inline struct lu_fsm_priv *lu_fsm_fi_priv(struct osmo_fsm_inst *fi);
+
 static void lu_fsm_dispatch_result(struct osmo_fsm_inst *fi,
 				   uint32_t prev_state)
 {
-	struct lu_fsm_priv *lfp = fi->priv;
+	struct lu_fsm_priv *lfp = lu_fsm_fi_priv(fi);
 	if (!fi->proc.parent) {
 		LOGPFSML(fi, LOGL_ERROR, "No parent FSM\n");
 		return;
@@ -703,7 +731,7 @@ static void lu_fsm_dispatch_result(struct osmo_fsm_inst *fi,
 static void _lu_fsm_done(struct osmo_fsm_inst *fi,
 			 enum vlr_fsm_result result)
 {
-	struct lu_fsm_priv *lfp = fi->priv;
+	struct lu_fsm_priv *lfp = lu_fsm_fi_priv(fi);
 	lfp->result = result;
 	osmo_fsm_inst_state_chg(fi, VLR_ULA_S_DONE, 0, 0);
 }
@@ -715,7 +743,7 @@ static void lu_fsm_success(struct osmo_fsm_inst *fi)
 
 static void lu_fsm_failure(struct osmo_fsm_inst *fi, uint8_t rej_cause)
 {
-	struct lu_fsm_priv *lfp = fi->priv;
+	struct lu_fsm_priv *lfp = lu_fsm_fi_priv(fi);
 	if (rej_cause)
 		lfp->vlr->ops.tx_lu_rej(lfp->msc_conn_ref, rej_cause);
 	_lu_fsm_done(fi, VLR_FSM_RESULT_FAILURE);
@@ -723,7 +751,7 @@ static void lu_fsm_failure(struct osmo_fsm_inst *fi, uint8_t rej_cause)
 
 static void vlr_loc_upd_start_lu_compl_fsm(struct osmo_fsm_inst *fi)
 {
-	struct lu_fsm_priv *lfp = fi->priv;
+	struct lu_fsm_priv *lfp = lu_fsm_fi_priv(fi);
 	lfp->lu_compl_vlr_fsm =
 		lu_compl_vlr_proc_alloc(fi, lfp->vsub, lfp->msc_conn_ref,
 					VLR_ULA_E_LU_COMPL_SUCCESS,
@@ -735,7 +763,7 @@ static void vlr_loc_upd_start_lu_compl_fsm(struct osmo_fsm_inst *fi)
 
 static void lu_fsm_discard_lu_compl_fsm(struct osmo_fsm_inst *fi)
 {
-	struct lu_fsm_priv *lfp = fi->priv;
+	struct lu_fsm_priv *lfp = lu_fsm_fi_priv(fi);
 	if (!lfp->lu_compl_vlr_fsm)
 		return;
 	osmo_fsm_inst_term(lfp->lu_compl_vlr_fsm, OSMO_FSM_TERM_PARENT, NULL);
@@ -744,7 +772,7 @@ static void lu_fsm_discard_lu_compl_fsm(struct osmo_fsm_inst *fi)
 /* 4.1.2.1 Node 4 */
 static void vlr_loc_upd_node_4(struct osmo_fsm_inst *fi)
 {
-	struct lu_fsm_priv *lfp = fi->priv;
+	struct lu_fsm_priv *lfp = lu_fsm_fi_priv(fi);
 	struct vlr_subscr *vsub = lfp->vsub;
 	bool hlr_unknown = false;
 
@@ -784,7 +812,7 @@ static void vlr_loc_upd_node_b(struct osmo_fsm_inst *fi)
 /* Non-standard: after Ciphering Mode Complete (or no ciph required) */
 static void vlr_loc_upd_post_ciph(struct osmo_fsm_inst *fi)
 {
-	struct lu_fsm_priv *lfp = fi->priv;
+	struct lu_fsm_priv *lfp = lu_fsm_fi_priv(fi);
 	struct vlr_subscr *vsub = lfp->vsub;
 
 	LOGPFSM(fi, "%s()\n", __func__);
@@ -816,7 +844,7 @@ static void vlr_loc_upd_post_ciph(struct osmo_fsm_inst *fi)
 /* 4.1.2.1 after Authentication successful (or no auth rqd) */
 static void vlr_loc_upd_post_auth(struct osmo_fsm_inst *fi)
 {
-	struct lu_fsm_priv *lfp = fi->priv;
+	struct lu_fsm_priv *lfp = lu_fsm_fi_priv(fi);
 	struct vlr_subscr *vsub = lfp->vsub;
 
 	LOGPFSM(fi, "%s()\n", __func__);
@@ -849,7 +877,7 @@ static void vlr_loc_upd_post_auth(struct osmo_fsm_inst *fi)
 
 static void vlr_loc_upd_node1(struct osmo_fsm_inst *fi)
 {
-	struct lu_fsm_priv *lfp = fi->priv;
+	struct lu_fsm_priv *lfp = lu_fsm_fi_priv(fi);
 	struct vlr_subscr *vsub = lfp->vsub;
 
 	LOGPFSM(fi, "%s()\n", __func__);
@@ -872,7 +900,7 @@ static void vlr_loc_upd_node1(struct osmo_fsm_inst *fi)
 
 static void vlr_loc_upd_want_imsi(struct osmo_fsm_inst *fi)
 {
-	struct lu_fsm_priv *lfp = fi->priv;
+	struct lu_fsm_priv *lfp = lu_fsm_fi_priv(fi);
 	struct vlr_instance *vlr = lfp->vlr;
 
 	LOGPFSM(fi, "%s()\n", __func__);
@@ -888,7 +916,7 @@ static void vlr_loc_upd_want_imsi(struct osmo_fsm_inst *fi)
 
 static int assoc_lfp_with_sub(struct osmo_fsm_inst *fi, struct vlr_subscr *vsub)
 {
-	struct lu_fsm_priv *lfp = fi->priv;
+	struct lu_fsm_priv *lfp = lu_fsm_fi_priv(fi);
 	struct vlr_instance *vlr = lfp->vlr;
 
 	if (vsub->lu_fsm) {
@@ -913,7 +941,7 @@ static int assoc_lfp_with_sub(struct osmo_fsm_inst *fi, struct vlr_subscr *vsub)
 
 static int _lu_fsm_associate_vsub(struct osmo_fsm_inst *fi)
 {
-	struct lu_fsm_priv *lfp = fi->priv;
+	struct lu_fsm_priv *lfp = lu_fsm_fi_priv(fi);
 	struct vlr_instance *vlr = lfp->vlr;
 	struct vlr_subscr *vsub = NULL;
 
@@ -965,7 +993,7 @@ static int _lu_fsm_associate_vsub(struct osmo_fsm_inst *fi)
 /* 4.1.2.1: Subscriber (via MSC/SGSN) requests location update */
 static void _start_lu_main(struct osmo_fsm_inst *fi)
 {
-	struct lu_fsm_priv *lfp = fi->priv;
+	struct lu_fsm_priv *lfp = lu_fsm_fi_priv(fi);
 	struct vlr_instance *vlr = lfp->vlr;
 
 	/* TODO: PUESBINE related handling */
@@ -994,7 +1022,7 @@ static void _start_lu_main(struct osmo_fsm_inst *fi)
 static void lu_fsm_idle(struct osmo_fsm_inst *fi, uint32_t event,
 			void *data)
 {
-	struct lu_fsm_priv *lfp = fi->priv;
+	struct lu_fsm_priv *lfp = lu_fsm_fi_priv(fi);
 	struct vlr_instance *vlr = lfp->vlr;
 
 	OSMO_ASSERT(event == VLR_ULA_E_UPDATE_LA);
@@ -1054,7 +1082,7 @@ static void lu_fsm_wait_pvlr(struct osmo_fsm_inst *fi, uint32_t event,
 static void lu_fsm_wait_auth(struct osmo_fsm_inst *fi, uint32_t event,
 			     void *data)
 {
-	struct lu_fsm_priv *lfp = fi->priv;
+	struct lu_fsm_priv *lfp = lu_fsm_fi_priv(fi);
 	enum vlr_auth_fsm_result *res = data;
 	uint8_t rej_cause = 0;
 
@@ -1098,7 +1126,7 @@ static void lu_fsm_wait_auth(struct osmo_fsm_inst *fi, uint32_t event,
 static void lu_fsm_wait_ciph(struct osmo_fsm_inst *fi, uint32_t event,
 			     void *data)
 {
-	struct lu_fsm_priv *lfp = fi->priv;
+	struct lu_fsm_priv *lfp = lu_fsm_fi_priv(fi);
 	struct vlr_subscr *vsub = lfp->vsub;
 	struct vlr_ciph_result res = { .cause = VLR_CIPH_REJECT };
 
@@ -1133,7 +1161,7 @@ static void lu_fsm_wait_ciph(struct osmo_fsm_inst *fi, uint32_t event,
 static void lu_fsm_wait_imsi(struct osmo_fsm_inst *fi, uint32_t event,
 			     void *data)
 {
-	struct lu_fsm_priv *lfp = fi->priv;
+	struct lu_fsm_priv *lfp = lu_fsm_fi_priv(fi);
 	struct vlr_subscr *vsub = lfp->vsub;
 	char *mi_string = data;
 
@@ -1153,7 +1181,7 @@ static void lu_fsm_wait_imsi(struct osmo_fsm_inst *fi, uint32_t event,
 static void lu_fsm_wait_hlr_ul_res(struct osmo_fsm_inst *fi, uint32_t event,
 				   void *data)
 {
-	struct lu_fsm_priv *lfp = fi->priv;
+	struct lu_fsm_priv *lfp = lu_fsm_fi_priv(fi);
 
 	switch (event) {
 	case VLR_ULA_E_HLR_LU_RES:
@@ -1196,7 +1224,7 @@ static void lu_fsm_wait_hlr_ul_res(struct osmo_fsm_inst *fi, uint32_t event,
 static void lu_fsm_wait_lu_compl(struct osmo_fsm_inst *fi, uint32_t event,
 				 void *data)
 {
-	struct lu_fsm_priv *lfp = fi->priv;
+	struct lu_fsm_priv *lfp = lu_fsm_fi_priv(fi);
 	uint8_t cause;
 
 	switch (event) {
@@ -1235,7 +1263,7 @@ static void lu_fsm_wait_lu_compl(struct osmo_fsm_inst *fi, uint32_t event,
 static void lu_fsm_wait_lu_compl_standalone(struct osmo_fsm_inst *fi,
 					uint32_t event, void *data)
 {
-	struct lu_fsm_priv *lfp = fi->priv;
+	struct lu_fsm_priv *lfp = lu_fsm_fi_priv(fi);
 	struct vlr_subscr *vsub = lfp->vsub;
 	uint8_t cause;
 
@@ -1355,7 +1383,7 @@ static const struct osmo_fsm_state vlr_lu_fsm_states[] = {
 
 static void fsm_lu_cleanup(struct osmo_fsm_inst *fi, enum osmo_fsm_term_cause cause)
 {
-	struct lu_fsm_priv *lfp = fi->priv;
+	struct lu_fsm_priv *lfp = lu_fsm_fi_priv(fi);
 	struct vlr_subscr *vsub = lfp->vsub;
 
 	LOGPFSM(fi, "fsm_lu_cleanup called with cause %s\n",
@@ -1374,6 +1402,12 @@ static struct osmo_fsm vlr_lu_fsm = {
 	.event_names = fsm_lu_event_names,
 	.cleanup = fsm_lu_cleanup,
 };
+
+static inline struct lu_fsm_priv *lu_fsm_fi_priv(struct osmo_fsm_inst *fi)
+{
+	OSMO_ASSERT(fi->fsm == &vlr_lu_fsm);
+	return (struct lu_fsm_priv*)fi->priv;
+}
 
 struct osmo_fsm_inst *
 vlr_loc_update(struct osmo_fsm_inst *parent,
