@@ -64,7 +64,9 @@ DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_AUTHENTICATED}: Deallocated
 DVLR vlr_lu_fsm(901700000010650){VLR_ULA_S_WAIT_AUTH}: Received Event VLR_ULA_E_AUTH_RES
 DVLR vlr_lu_fsm(901700000010650){VLR_ULA_S_WAIT_AUTH}: vlr_loc_upd_post_auth()
 DVLR vlr_lu_fsm(901700000010650){VLR_ULA_S_WAIT_AUTH}: Set Ciphering Mode
-- sending SecurityModeControl for IMSI:901700000010650
+DMM -> SECURITY MODE CONTROL IMSI:901700000010650
+- sending SecurityModeControl for UE ctx 42 send_ck=0 new_key=1
+- ...ik=27497388b6cb044648f396aa155b95ef
 DVLR vlr_lu_fsm(901700000010650){VLR_ULA_S_WAIT_AUTH}: state_chg to VLR_ULA_S_WAIT_CIPH
 DMM IMSI:901700000010650: bump: conn still being established (SUBSCR_CONN_S_NEW)
 DREF IMSI:901700000010650: MSC conn use - dtap == 1 (0x4)
@@ -228,7 +230,9 @@ DVLR Process_Access_Request_VLR(901700000010650){PR_ARQ_S_WAIT_AUTH}: Received E
 DVLR Process_Access_Request_VLR(901700000010650){PR_ARQ_S_WAIT_AUTH}: got VLR_AUTH_RES_PASSED
 DVLR Process_Access_Request_VLR(901700000010650){PR_ARQ_S_WAIT_AUTH}: _proc_arq_vlr_node2()
 DVLR Process_Access_Request_VLR(901700000010650){PR_ARQ_S_WAIT_AUTH}: Set Ciphering Mode
-- sending SecurityModeControl for MSISDN:42342
+DMM -> SECURITY MODE CONTROL MSISDN:42342
+- sending SecurityModeControl for UE ctx 42 send_ck=0 new_key=1
+- ...ik=1159ec926a50e98c034a6b7d7c9f418d
 DVLR Process_Access_Request_VLR(901700000010650){PR_ARQ_S_WAIT_AUTH}: state_chg to PR_ARQ_S_WAIT_CIPH
 DMM MSISDN:42342: bump: conn still being established (SUBSCR_CONN_S_NEW)
 DREF MSISDN:42342: MSC conn use - dtap == 1 (0x4)
@@ -413,7 +417,9 @@ DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_AUTHENTICATED}: Deallocated
 DVLR vlr_lu_fsm(901700000010650){VLR_ULA_S_WAIT_AUTH}: Received Event VLR_ULA_E_AUTH_RES
 DVLR vlr_lu_fsm(901700000010650){VLR_ULA_S_WAIT_AUTH}: vlr_loc_upd_post_auth()
 DVLR vlr_lu_fsm(901700000010650){VLR_ULA_S_WAIT_AUTH}: Set Ciphering Mode
-- sending SecurityModeControl for IMSI:901700000010650
+DMM -> SECURITY MODE CONTROL IMSI:901700000010650
+- sending SecurityModeControl for UE ctx 42 send_ck=0 new_key=1
+- ...ik=27497388b6cb044648f396aa155b95ef
 DVLR vlr_lu_fsm(901700000010650){VLR_ULA_S_WAIT_AUTH}: state_chg to VLR_ULA_S_WAIT_CIPH
 DMM IMSI:901700000010650: bump: conn still being established (SUBSCR_CONN_S_NEW)
 DREF IMSI:901700000010650: MSC conn use - dtap == 1 (0x4)
@@ -585,7 +591,9 @@ DVLR Process_Access_Request_VLR(901700000010650){PR_ARQ_S_WAIT_AUTH}: Received E
 DVLR Process_Access_Request_VLR(901700000010650){PR_ARQ_S_WAIT_AUTH}: got VLR_AUTH_RES_PASSED
 DVLR Process_Access_Request_VLR(901700000010650){PR_ARQ_S_WAIT_AUTH}: _proc_arq_vlr_node2()
 DVLR Process_Access_Request_VLR(901700000010650){PR_ARQ_S_WAIT_AUTH}: Set Ciphering Mode
-- sending SecurityModeControl for MSISDN:42342
+DMM -> SECURITY MODE CONTROL MSISDN:42342
+- sending SecurityModeControl for UE ctx 42 send_ck=0 new_key=1
+- ...ik=1159ec926a50e98c034a6b7d7c9f418d
 DVLR Process_Access_Request_VLR(901700000010650){PR_ARQ_S_WAIT_AUTH}: state_chg to PR_ARQ_S_WAIT_CIPH
 DMM MSISDN:42342: bump: conn still being established (SUBSCR_CONN_S_NEW)
 DREF MSISDN:42342: MSC conn use - dtap == 1 (0x4)

@@ -705,34 +705,59 @@ static int fake_vlr_tx_auth_rej(void *msc_conn_ref)
 	return 0;
 }
 
+/* override, requires '-Wl,--wrap=a_iface_tx_cipher_mode' */
+int __real_a_iface_tx_cipher_mode(const struct gsm_subscriber_connection *conn,
+				  struct gsm0808_encrypt_info *ei, int include_imeisv);
+int __wrap_a_iface_tx_cipher_mode(const struct gsm_subscriber_connection *conn,
+				  struct gsm0808_encrypt_info *ei, int include_imeisv)
+{
+	int i;
+	btw("sending Ciphering Mode Command for %s: include_imeisv=%d",
+	    vlr_subscr_name(conn->vsub), include_imeisv);
+	for (i = 0; i < ei->perm_algo_len; i++)
+		btw("...perm algo: %u", ei->perm_algo[i]);
+	OSMO_ASSERT(ei->key_len <= sizeof(ei->key));
+	btw("...key: %s", osmo_hexdump_nospc(ei->key, ei->key_len));
+	cipher_mode_cmd_sent = true;
+	cipher_mode_cmd_sent_with_imeisv = include_imeisv;
+	return 0;
+}
+
+/* override, requires '-Wl,--wrap=ranap_iu_tx_sec_mode_cmd' */
+int __real_ranap_iu_tx_sec_mode_cmd(struct ranap_ue_conn_ctx *uectx, struct osmo_auth_vector *vec,
+				    int send_ck, int new_key);
+int __wrap_ranap_iu_tx_sec_mode_cmd(struct ranap_ue_conn_ctx *uectx, struct osmo_auth_vector *vec,
+				    int send_ck, int new_key)
+{
+	btw("sending SecurityModeControl for UE ctx %u send_ck=%d new_key=%d",
+	    uectx->conn_id, send_ck, new_key);
+	btw("...ik=%s", osmo_hexdump_nospc(vec->ik, sizeof(vec->ik)));
+	if (send_ck)
+		btw("...ck=%s", osmo_hexdump_nospc(vec->ck, sizeof(vec->ck)));
+	cipher_mode_cmd_sent = true;
+	cipher_mode_cmd_sent_with_imeisv = false;
+	return 0;
+}
+
+extern int msc_vlr_set_ciph_mode(void *msc_conn_ref, bool umts_aka, bool retrieve_imeisv);
+
 static int fake_vlr_tx_ciph_mode_cmd(void *msc_conn_ref, bool umts_aka, bool retrieve_imeisv)
 {
-	/* FIXME: we actually would like to see the message bytes checked here,
-	 * not possible while msc_vlr_set_ciph_mode() calls
-	 * gsm0808_cipher_mode() directly. When the MSCSPLIT is ready, check
-	 * the tx bytes in the sense of dtap_expect_tx() above. */
+	int rc;
+#ifndef BUILD_IU
+	/* If we built without support for IU, fake the IU part here. The root cause is that we don't
+	 * have differing sets of expected outputs for --enable-iu and --disable-iu. */
 	struct gsm_subscriber_connection *conn = msc_conn_ref;
-	switch (conn->via_ran) {
-	case RAN_GERAN_A:
-		btw("sending Ciphering Mode Command for %s: ciphers=0x%02x kc=%s"
-		    " retrieve_imeisv=%d",
-		    vlr_subscr_name(conn->vsub),
-		    conn->network->a5_encryption_mask,
-		    osmo_hexdump_nospc(conn->vsub->last_tuple->vec.kc, 8),
-		    retrieve_imeisv);
-		break;
-	case RAN_UTRAN_IU:
-		btw("sending SecurityModeControl for %s",
-		    vlr_subscr_name(conn->vsub));
-		break;
-	default:
-		btw("UNKNOWN RAN TYPE %d", conn->via_ran);
-		OSMO_ASSERT(false);
-		return -1;
-	}
-	cipher_mode_cmd_sent = true;
-	cipher_mode_cmd_sent_with_imeisv = retrieve_imeisv;
-	return 0;
+	if (conn->via_ran == RAN_UTRAN_IU) {
+		DEBUGP(DMM, "-> SECURITY MODE CONTROL %s\n", vlr_subscr_name(conn->vsub));
+		rc = __wrap_ranap_iu_tx_sec_mode_cmd(conn->iu.ue_ctx, &conn->vsub->last_tuple->vec,
+						     0, 1);
+	} else
+#endif
+	rc = msc_vlr_set_ciph_mode(msc_conn_ref, umts_aka, retrieve_imeisv);
+	if (rc)
+		btw("ERROR sending ciphering mode command: rc=%d", rc);
+	return rc;
 }
 
 void ms_sends_security_mode_complete()

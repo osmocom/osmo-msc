@@ -3611,10 +3611,11 @@ static int msc_vlr_tx_cm_serv_rej(void *msc_conn_ref, enum vlr_proc_arq_result r
 osmo_static_assert(sizeof(((struct gsm0808_encrypt_info*)0)->key) >= sizeof(((struct osmo_auth_vector*)0)->kc),
 		   gsm0808_encrypt_info_key_fits_osmo_auth_vec_kc);
 
-/* VLR asks us to start using ciphering */
-static int msc_vlr_set_ciph_mode(void *msc_conn_ref,
-				 bool umts_aka,
-				 bool retrieve_imeisv)
+/* VLR asks us to start using ciphering.
+ * (Keep non-static to allow regression testing on this function.) */
+int msc_vlr_set_ciph_mode(void *msc_conn_ref,
+			  bool umts_aka,
+			  bool retrieve_imeisv)
 {
 	struct gsm_subscriber_connection *conn = msc_conn_ref;
 	struct vlr_subscr *vsub;

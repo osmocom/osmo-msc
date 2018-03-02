@@ -32,6 +32,8 @@ AM_LDFLAGS = \
 	-Wl,--wrap=osmo_get_rand_id \
 	-Wl,--wrap=msc_mgcp_call_release \
 	-Wl,--wrap=msc_mgcp_call_assignment \
+	-Wl,--wrap=a_iface_tx_cipher_mode \
+	-Wl,--wrap=ranap_iu_tx_sec_mode_cmd \
 	$(NULL)
 
 LDADD = \
