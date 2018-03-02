@@ -830,7 +830,7 @@ static void vlr_loc_upd_post_auth(struct osmo_fsm_inst *fi)
 
 	if (!vsub->last_tuple) {
 		LOGPFSML(fi, LOGL_ERROR, "No auth tuple available\n");
-		vlr_lu_compl_fsm_failure(fi, GSM48_REJECT_NETWORK_FAILURE);
+		lu_fsm_failure(fi, GSM48_REJECT_NETWORK_FAILURE);
 		return;
 	}
 
@@ -840,7 +840,7 @@ static void vlr_loc_upd_post_auth(struct osmo_fsm_inst *fi)
 			      vsub->vlr->cfg.retrieve_imeisv_ciphered)) {
 		LOGPFSML(fi, LOGL_ERROR,
 			 "Failed to send Ciphering Mode Command\n");
-		vlr_lu_compl_fsm_failure(fi, GSM48_REJECT_NETWORK_FAILURE);
+		lu_fsm_failure(fi, GSM48_REJECT_NETWORK_FAILURE);
 		return;
 	}
 
