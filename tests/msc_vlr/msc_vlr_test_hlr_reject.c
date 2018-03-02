@@ -23,7 +23,7 @@
 
 #include "msc_vlr_tests.h"
 
-void test_hlr_rej_auth_info_unknown_imsi()
+static void test_hlr_rej_auth_info_unknown_imsi()
 {
 	comment_start();
 
@@ -49,7 +49,7 @@ void test_hlr_rej_auth_info_unknown_imsi()
 	comment_end();
 }
 
-void test_hlr_rej_auth_info_net_fail()
+static void test_hlr_rej_auth_info_net_fail()
 {
 	comment_start();
 
@@ -75,7 +75,7 @@ void test_hlr_rej_auth_info_net_fail()
 	comment_end();
 }
 
-void test_hlr_rej_auth_info_net_fail_no_reuse_tuples()
+static void test_hlr_rej_auth_info_net_fail_no_reuse_tuples()
 {
 	struct vlr_subscr *vsub;
 	const char *imsi = "901700000004620";
@@ -162,7 +162,7 @@ void test_hlr_rej_auth_info_net_fail_no_reuse_tuples()
 	comment_end();
 }
 
-void test_hlr_rej_auth_info_unkown_imsi_no_reuse_tuples()
+static void test_hlr_rej_auth_info_unkown_imsi_no_reuse_tuples()
 {
 	struct vlr_subscr *vsub;
 	const char *imsi = "901700000004620";
@@ -250,7 +250,7 @@ void test_hlr_rej_auth_info_unkown_imsi_no_reuse_tuples()
 	comment_end();
 }
 
-void test_hlr_acc_but_no_auth_tuples()
+static void test_hlr_acc_but_no_auth_tuples()
 {
 	comment_start();
 
@@ -282,7 +282,7 @@ void test_hlr_acc_but_no_auth_tuples()
 	comment_end();
 }
 
-void test_hlr_rej_auth_info_net_fail_reuse_tuples()
+static void test_hlr_rej_auth_info_net_fail_reuse_tuples()
 {
 	struct vlr_subscr *vsub;
 	const char *imsi = "901700000004620";
@@ -385,7 +385,7 @@ void test_hlr_rej_auth_info_net_fail_reuse_tuples()
 	comment_end();
 }
 
-void test_hlr_rej_lu()
+static void test_hlr_rej_lu()
 {
 	comment_start();
 
@@ -408,7 +408,7 @@ void test_hlr_rej_lu()
 	comment_end();
 }
 
-void test_hlr_no_insert_data()
+static void test_hlr_no_insert_data()
 {
 	comment_start();
 

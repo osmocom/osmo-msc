@@ -23,7 +23,7 @@
 
 #include "msc_vlr_tests.h"
 
-void test_ms_timeout_lu_auth_resp()
+static void test_ms_timeout_lu_auth_resp()
 {
 	comment_start();
 
@@ -83,7 +83,7 @@ void test_ms_timeout_lu_auth_resp()
 	comment_end();
 }
 
-void test_ms_timeout_cm_auth_resp()
+static void test_ms_timeout_cm_auth_resp()
 {
 	comment_start();
 
@@ -182,7 +182,7 @@ void test_ms_timeout_cm_auth_resp()
 	comment_end();
 }
 
-void test_ms_timeout_paging()
+static void test_ms_timeout_paging()
 {
 	struct vlr_subscr *vsub;
 	const char *imsi = "901700000004620";

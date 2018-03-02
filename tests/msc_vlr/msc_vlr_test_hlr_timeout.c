@@ -25,7 +25,7 @@
 
 #include <osmocom/core/logging.h>
 
-void test_hlr_timeout_lu_auth_info()
+static void test_hlr_timeout_lu_auth_info()
 {
 	comment_start();
 
@@ -64,7 +64,7 @@ void test_hlr_timeout_lu_auth_info()
 	comment_end();
 }
 
-void test_hlr_timeout_lu_upd_loc_result()
+static void test_hlr_timeout_lu_upd_loc_result()
 {
 	comment_start();
 

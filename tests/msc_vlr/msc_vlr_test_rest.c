@@ -23,7 +23,7 @@
 
 #include "msc_vlr_tests.h"
 
-void test_early_stage()
+static void test_early_stage()
 {
 	comment_start();
 
@@ -62,7 +62,7 @@ void test_early_stage()
 	comment_end();
 }
 
-void test_cm_service_without_lu()
+static void test_cm_service_without_lu()
 {
 	comment_start();
 
@@ -78,7 +78,7 @@ void test_cm_service_without_lu()
 	comment_end();
 }
 
-void test_two_lu()
+static void test_two_lu()
 {
 	comment_start();
 
@@ -150,7 +150,7 @@ void test_two_lu()
 	comment_end();
 }
 
-void test_lu_unknown_tmsi()
+static void test_lu_unknown_tmsi()
 {
 	comment_start();
 

@@ -36,7 +36,7 @@
 		break; \
 	}
 
-void _test_umts_authen(enum ran_type via_ran)
+static void _test_umts_authen(enum ran_type via_ran)
 {
 	struct vlr_subscr *vsub;
 	const char *imsi = "901700000010650";
@@ -322,14 +322,14 @@ void _test_umts_authen(enum ran_type via_ran)
 	clear_vlr();
 }
 
-void test_umts_authen_geran()
+static void test_umts_authen_geran()
 {
 	comment_start();
 	_test_umts_authen(RAN_GERAN_A);
 	comment_end();
 }
 
-void test_umts_authen_utran()
+static void test_umts_authen_utran()
 {
 	comment_start();
 	_test_umts_authen(RAN_UTRAN_IU);
@@ -346,7 +346,7 @@ extern int milenage_f1(const u8 *opc, const u8 *k, const u8 *_rand,
 		       const u8 *sqn, const u8 *amf, u8 *mac_a, u8 *mac_s);
 #endif
 
-void _test_umts_authen_resync(enum ran_type via_ran)
+static void _test_umts_authen_resync(enum ran_type via_ran)
 {
 	struct vlr_subscr *vsub;
 	const char *imsi = "901700000010650";
@@ -558,14 +558,14 @@ void _test_umts_authen_resync(enum ran_type via_ran)
 	clear_vlr();
 }
 
-void test_umts_authen_resync_geran()
+static void test_umts_authen_resync_geran()
 {
 	comment_start();
 	_test_umts_authen_resync(RAN_GERAN_A);
 	comment_end();
 }
 
-void test_umts_authen_resync_utran()
+static void test_umts_authen_resync_utran()
 {
 	comment_start();
 	_test_umts_authen_resync(RAN_UTRAN_IU);

@@ -23,7 +23,7 @@
 
 #include "msc_vlr_tests.h"
 
-void test_reject_2nd_conn()
+static void test_reject_2nd_conn()
 {
 	struct gsm_subscriber_connection *conn1;
 	comment_start();
@@ -67,7 +67,7 @@ void test_reject_2nd_conn()
 	comment_end();
 }
 
-void _normal_lu_part1()
+static void _normal_lu_part1()
 {
 	btw("Location Update Request");
 	lu_result_sent = RES_NONE;
@@ -78,7 +78,7 @@ void _normal_lu_part1()
 	EXPECT_CONN_COUNT(1);
 }
 
-void _normal_lu_part2()
+static void _normal_lu_part2()
 {
 	btw("HLR sends _INSERT_DATA_REQUEST, VLR responds with _INSERT_DATA_RESULT");
 	lu_result_sent = RES_NONE;
@@ -96,14 +96,14 @@ void _normal_lu_part2()
 	EXPECT_CONN_COUNT(0);
 }
 
-void _normal_lu()
+static void _normal_lu()
 {
 	BTW("Subscriber does a normal LU");
 	_normal_lu_part1();
 	_normal_lu_part2();
 }
 
-void _normal_cm_service_req()
+static void _normal_cm_service_req()
 {
 	BTW("Subscriber does a normal CM Service Request");
 	cm_service_result_sent = RES_NONE;
@@ -115,7 +115,7 @@ void _normal_cm_service_req()
 	EXPECT_ACCEPTED(true);
 }
 
-void _page()
+static void _page()
 {
 	const char *imsi = "901700000004620";
 	struct vlr_subscr *vsub;
@@ -138,7 +138,7 @@ void _page()
 	VERBOSE_ASSERT(paging_stopped, == false, "%d");
 }
 
-void _paging_resp_part1()
+static void _paging_resp_part1()
 {
 	btw("MS replies with Paging Response, we deliver the SMS");
 	dtap_expect_tx("09" /* SMS messages */
@@ -170,7 +170,7 @@ void _paging_resp_part1()
 	EXPECT_CONN_COUNT(1);
 }
 
-void _paging_resp_part2(int expect_conn_count, bool expect_clear)
+static void _paging_resp_part2(int expect_conn_count, bool expect_clear)
 {
 	btw("MS replies with CP-ACK for received SMS");
 	ms_sends_msg("8904");
@@ -189,7 +189,7 @@ void _paging_resp_part2(int expect_conn_count, bool expect_clear)
 	EXPECT_CONN_COUNT(expect_conn_count);
 }
 
-void test_reject_lu_during_lu()
+static void test_reject_lu_during_lu()
 {
 	comment_start();
 
@@ -207,7 +207,7 @@ void test_reject_lu_during_lu()
 	comment_end();
 }
 
-void test_reject_cm_during_lu()
+static void test_reject_cm_during_lu()
 {
 	comment_start();
 
@@ -228,7 +228,7 @@ void test_reject_cm_during_lu()
 	comment_end();
 }
 
-void test_reject_paging_resp_during_lu()
+static void test_reject_paging_resp_during_lu()
 {
 	comment_start();
 
@@ -246,7 +246,7 @@ void test_reject_paging_resp_during_lu()
 	comment_end();
 }
 
-void test_reject_lu_during_cm()
+static void test_reject_lu_during_cm()
 {
 	comment_start();
 
@@ -270,7 +270,7 @@ void test_reject_lu_during_cm()
 	comment_end();
 }
 
-void test_reject_cm_during_cm()
+static void test_reject_cm_during_cm()
 {
 	comment_start();
 
@@ -293,7 +293,7 @@ void test_reject_cm_during_cm()
 	comment_end();
 }
 
-void test_reject_paging_resp_during_cm()
+static void test_reject_paging_resp_during_cm()
 {
 	comment_start();
 
@@ -318,7 +318,7 @@ void test_reject_paging_resp_during_cm()
 	comment_end();
 }
 
-void test_reject_paging_resp_during_paging_resp()
+static void test_reject_paging_resp_during_paging_resp()
 {
 	comment_start();
 
@@ -335,7 +335,7 @@ void test_reject_paging_resp_during_paging_resp()
 	comment_end();
 }
 
-void test_reject_lu_during_paging_resp()
+static void test_reject_lu_during_paging_resp()
 {
 	comment_start();
 
@@ -355,7 +355,7 @@ void test_reject_lu_during_paging_resp()
 	comment_end();
 }
 
-void test_accept_cm_during_paging_resp()
+static void test_accept_cm_during_paging_resp()
 {
 	comment_start();
 

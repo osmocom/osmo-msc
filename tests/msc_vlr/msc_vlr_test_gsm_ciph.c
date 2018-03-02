@@ -23,7 +23,7 @@
 
 #include "msc_vlr_tests.h"
 
-void test_ciph()
+static void test_ciph()
 {
 	struct vlr_subscr *vsub;
 	const char *imsi = "901700000004620";
@@ -235,7 +235,7 @@ void test_ciph()
 	comment_end();
 }
 
-void test_ciph_tmsi()
+static void test_ciph_tmsi()
 {
 	struct vlr_subscr *vsub;
 	const char *imsi = "901700000004620";
@@ -474,7 +474,7 @@ void test_ciph_tmsi()
 	comment_end();
 }
 
-void test_ciph_imei()
+static void test_ciph_imei()
 {
 	struct vlr_subscr *vsub;
 	const char *imsi = "901700000004620";
@@ -576,7 +576,7 @@ void test_ciph_imei()
 	comment_end();
 }
 
-void test_ciph_imeisv()
+static void test_ciph_imeisv()
 {
 	struct vlr_subscr *vsub;
 	const char *imsi = "901700000004620";
@@ -674,7 +674,7 @@ void test_ciph_imeisv()
 	comment_end();
 }
 
-void test_ciph_tmsi_imei()
+static void test_ciph_tmsi_imei()
 {
 	struct vlr_subscr *vsub;
 	const char *imsi = "901700000004620";

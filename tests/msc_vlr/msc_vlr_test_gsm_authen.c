@@ -23,7 +23,7 @@
 
 #include "msc_vlr_tests.h"
 
-void test_gsm_authen()
+static void test_gsm_authen()
 {
 	struct vlr_subscr *vsub;
 	const char *imsi = "901700000004620";
@@ -213,7 +213,7 @@ void test_gsm_authen()
 	comment_end();
 }
 
-void test_gsm_authen_tmsi()
+static void test_gsm_authen_tmsi()
 {
 	struct vlr_subscr *vsub;
 	const char *imsi = "901700000004620";
@@ -490,7 +490,7 @@ void test_gsm_authen_tmsi()
 	comment_end();
 }
 
-void test_gsm_authen_imei()
+static void test_gsm_authen_imei()
 {
 	struct vlr_subscr *vsub;
 	const char *imsi = "901700000004620";
@@ -586,7 +586,7 @@ void test_gsm_authen_imei()
 	comment_end();
 }
 
-void test_gsm_authen_tmsi_imei()
+static void test_gsm_authen_tmsi_imei()
 {
 	struct vlr_subscr *vsub;
 	const char *imsi = "901700000004620";
@@ -702,7 +702,7 @@ void test_gsm_authen_tmsi_imei()
 	comment_end();
 }
 
-void test_gsm_milenage_authen()
+static void test_gsm_milenage_authen()
 {
 	struct vlr_subscr *vsub;
 	const char *imsi = "901700000010650";

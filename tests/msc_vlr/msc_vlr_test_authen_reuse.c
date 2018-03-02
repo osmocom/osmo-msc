@@ -38,10 +38,10 @@
 		break; \
 	}
 
-void _test_auth_reuse(enum ran_type via_ran,
-		      int set_max_reuse_count,
-		      int loop_requests_without_hlr,
-		      bool final_request_with_hlr)
+static void _test_auth_reuse(enum ran_type via_ran,
+			     int set_max_reuse_count,
+			     int loop_requests_without_hlr,
+			     bool final_request_with_hlr)
 {
 	struct vlr_subscr *vsub;
 	const char *imsi = "901700000010650";
@@ -284,42 +284,42 @@ void _test_auth_reuse(enum ran_type via_ran,
 	clear_vlr();
 }
 
-void test_auth_use_twice_geran()
+static void test_auth_use_twice_geran()
 {
 	comment_start();
 	_test_auth_reuse(RAN_GERAN_A, 1, 1, true);
 	comment_end();
 }
 
-void test_auth_use_twice_utran()
+static void test_auth_use_twice_utran()
 {
 	comment_start();
 	_test_auth_reuse(RAN_UTRAN_IU, 1, 1, true);
 	comment_end();
 }
 
-void test_auth_use_infinitely_geran()
+static void test_auth_use_infinitely_geran()
 {
 	comment_start();
 	_test_auth_reuse(RAN_GERAN_A, -1, 3, false);
 	comment_end();
 }
 
-void test_auth_use_infinitely_utran()
+static void test_auth_use_infinitely_utran()
 {
 	comment_start();
 	_test_auth_reuse(RAN_UTRAN_IU, -1, 3, false);
 	comment_end();
 }
 
-void test_no_auth_reuse_geran()
+static void test_no_auth_reuse_geran()
 {
 	comment_start();
 	_test_auth_reuse(RAN_GERAN_A, 0, 0, true);
 	comment_end();
 }
 
-void test_no_auth_reuse_utran()
+static void test_no_auth_reuse_utran()
 {
 	comment_start();
 	_test_auth_reuse(RAN_UTRAN_IU, 0, 0, true);

@@ -25,7 +25,7 @@
 
 #include <osmocom/msc/gsm_04_08.h>
 
-void mncc_sends_to_cc(uint32_t msg_type, struct gsm_mncc *mncc)
+static void mncc_sends_to_cc(uint32_t msg_type, struct gsm_mncc *mncc)
 {
 	mncc->msg_type = msg_type;
 	mncc_tx_to_cc(net, msg_type, mncc);
@@ -151,7 +151,7 @@ static void standard_lu()
 	vlr_subscr_put(vsub);
 }
 
-void test_call_mo()
+static void test_call_mo()
 {
 	struct gsm_mncc mncc = {
 		.imsi = IMSI,
@@ -251,7 +251,7 @@ void test_call_mo()
 	comment_end();
 }
 
-void test_call_mt()
+static void test_call_mt()
 {
 	struct gsm_mncc mncc = {
 		.imsi = IMSI,
