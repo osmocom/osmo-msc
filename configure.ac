@@ -62,6 +62,24 @@ then
 	CPPFLAGS="$CPPFLAGS -fsanitize=address -fsanitize=undefined"
 fi
 
+AC_ARG_ENABLE(werror,
+	[AS_HELP_STRING(
+		[--enable-werror],
+		[Turn all compiler warnings into errors, with exceptions:
+		 a) deprecation (allow upstream to mark deprecation without breaking builds);
+		 b) "#warning" pragmas (allow to remind ourselves of errors without breaking builds)
+		]
+	)],
+	[werror=$enableval], [werror="no"])
+if test x"$werror" = x"yes"
+then
+	WERROR_FLAGS="-Werror"
+	WERROR_FLAGS+=" -Wno-error=deprecated -Wno-error=deprecated-declarations"
+	WERROR_FLAGS+=" -Wno-error=cpp" # "#warning"
+	CFLAGS="$CFLAGS $WERROR_FLAGS"
+	CPPFLAGS="$CPPFLAGS $WERROR_FLAGS"
+fi
+
 # Enable/disable smpp support in the msc?
 AC_ARG_ENABLE([smpp], [AS_HELP_STRING([--enable-smpp], [Build the SMPP interface])],
     [osmo_ac_build_smpp="$enableval"],[osmo_ac_build_smpp="no"])
@@ -174,6 +192,9 @@ fi
 AC_MSG_CHECKING([whether to enable VTY/CTRL tests])
 AC_MSG_RESULT([$enable_ext_tests])
 AM_CONDITIONAL(ENABLE_EXT_TESTS, test "x$enable_ext_tests" = "xyes")
+
+AC_MSG_RESULT([CFLAGS="$CFLAGS"])
+AC_MSG_RESULT([CPPFLAGS="$CPPFLAGS"])
 
 dnl Generate the output
 AM_CONFIG_HEADER(bscconfig.h)
