@@ -136,34 +136,57 @@ static bool check_auth_resp(struct vlr_subscr *vsub, bool is_r99,
 	struct gsm_auth_tuple *at = vsub->last_tuple;
 	struct osmo_auth_vector *vec = &at->vec;
 	bool check_umts;
+	bool res_is_umts_aka;
 	OSMO_ASSERT(at);
 
 	LOGVSUBP(LOGL_DEBUG, vsub, "received res: %s\n",
 		 osmo_hexdump(res, res_len));
 
 	/* RES must be present and at least 32bit */
-	if (!res || res_len < sizeof(vec->sres)) {
-		LOGVSUBP(LOGL_NOTICE, vsub, "AUTH RES missing or too short "
-			 "(%u)\n", res_len);
+	if (!res || !res_len) {
+		LOGVSUBP(LOGL_NOTICE, vsub, "AUTH SRES/RES missing\n");
 		goto out_false;
 	}
 
-	check_umts = false;
-	if (is_r99 && (vec->auth_types & OSMO_AUTH_TYPE_UMTS)) {
-		check_umts = true;
-		/* We have a R99 capable UE and have a UMTS AKA capable USIM.
-		 * However, the ME may still choose to only perform GSM AKA, as
-		 * long as the bearer is GERAN */
-		if (res_len != vec->res_len) {
-			if (is_utran) {
-				LOGVSUBP(LOGL_NOTICE, vsub,
-					 "AUTH via UTRAN but "
-					 "res_len(%u) != vec->res_len(%u)\n",
-					 res_len, vec->res_len);
-				goto out_false;
-			}
-			check_umts = false;
-		}
+	/* We're deciding the UMTS AKA-ness of the response by the RES size. So let's make sure we can't
+	 * mix them up by size. On UTRAN, we expect full length RES always, no way to mix up there. */
+	if (!is_utran && vec->res_len == sizeof(vec->sres))
+		LOGVSUBP(LOGL_ERROR, vsub, "Unforeseen situation: UMTS AKA's RES length"
+			 " equals the size of SRES: %u -- this code wants to differentiate"
+			 " the two by their size, which won't work properly now.\n", vec->res_len);
+
+	/* RES must be either vec->res_len (UMTS AKA) or sizeof(sres) (GSM AKA) */
+	if (res_len == vec->res_len)
+		res_is_umts_aka = true;
+	else if (res_len == sizeof(vec->sres))
+		res_is_umts_aka = false;
+	else {
+		if (is_utran)
+			LOGVSUBP(LOGL_NOTICE, vsub, "AUTH RES has invalid length: %u."
+				 " Expected %u (UMTS AKA)\n",
+				 res_len, vec->res_len);
+		else
+			LOGVSUBP(LOGL_NOTICE, vsub, "AUTH SRES/RES has invalid length: %u."
+				 " Expected either %zu (GSM AKA) or %u (UMTS AKA)\n",
+				 res_len, sizeof(vec->sres), vec->res_len);
+		goto out_false;
+	}
+
+	check_umts = (is_r99
+		      && (vec->auth_types & OSMO_AUTH_TYPE_UMTS)
+		      && res_is_umts_aka);
+
+	/* Even on an R99 capable MS with a UMTS AKA capable USIM,
+	 * the MS may still choose to only perform GSM AKA, as
+	 * long as the bearer is GERAN -- never on UTRAN: */
+	if (is_utran && !check_umts) {
+		LOGVSUBP(LOGL_ERROR, vsub,
+			 "AUTH via UTRAN, cannot allow GSM AKA"
+			 " (MS is %sR99 capable, vec has %sUMTS AKA tokens, res_len=%u is %s)\n",
+			 is_r99 ? "" : "NOT ",
+			 (vec->auth_types & OSMO_AUTH_TYPE_UMTS) ? "" : "NO ",
+			 res_len, (res_len == vec->res_len)? "valid" : "INVALID on UTRAN");
+		goto out_false;
 	}
 
 	if (check_umts) {
