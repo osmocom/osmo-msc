@@ -726,34 +726,6 @@ DEFUN(ena_subscr_expire,
 	return CMD_SUCCESS;
 }
 
-#define A3A8_ALG_TYPES "(none|xor|comp128v1)"
-#define A3A8_ALG_HELP 			\
-	"Use No A3A8 algorithm\n"	\
-	"Use XOR algorithm\n"		\
-	"Use COMP128v1 algorithm\n"
-
-DEFUN(ena_subscr_a3a8,
-      ena_subscr_a3a8_cmd,
-      "subscriber " SUBSCR_TYPES " ID a3a8 " A3A8_ALG_TYPES " [KI]",
-      SUBSCR_HELP "Set a3a8 parameters for the subscriber\n"
-      A3A8_ALG_HELP "Encryption Key Ki\n")
-{
-	vty_out(vty, "%% 'subscriber a3a8' is no longer supported.%s"
-		"%% This is now up to osmo-hlr.%s",
-		VTY_NEWLINE, VTY_NEWLINE);
-	return CMD_WARNING;
-}
-
-DEFUN(subscriber_update,
-      subscriber_update_cmd,
-      "subscriber " SUBSCR_TYPES " ID update",
-      SUBSCR_HELP "Update the subscriber data from the dabase.\n")
-{
-	vty_out(vty, "%% 'subscriber update' is no longer supported.%s",
-		VTY_NEWLINE);
-	return CMD_WARNING;
-}
-
 static int scall_cbfn(unsigned int subsys, unsigned int signal,
 			void *handler_data, void *signal_data)
 {
@@ -1019,13 +991,11 @@ int bsc_vty_init_extra(void)
 	install_element_ve(&subscriber_ussd_notify_cmd);
 	install_element_ve(&subscriber_mstest_close_cmd);
 	install_element_ve(&subscriber_mstest_open_cmd);
-	install_element_ve(&subscriber_update_cmd);
 	install_element_ve(&show_stats_cmd);
 	install_element_ve(&show_smsqueue_cmd);
 	install_element_ve(&logging_fltr_imsi_cmd);
 
 	install_element(ENABLE_NODE, &ena_subscr_expire_cmd);
-	install_element(ENABLE_NODE, &ena_subscr_a3a8_cmd);
 	install_element(ENABLE_NODE, &smsqueue_trigger_cmd);
 	install_element(ENABLE_NODE, &smsqueue_max_cmd);
 	install_element(ENABLE_NODE, &smsqueue_clear_cmd);
