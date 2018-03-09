@@ -112,7 +112,7 @@ static struct osmo_timer_list db_sync_timer;
 
 static void print_usage()
 {
-	printf("Usage: osmo-nitb\n");
+	printf("Usage: osmo-msc\n");
 }
 
 static void print_help()
