@@ -284,6 +284,7 @@ static void _proc_arq_vlr_node2(struct osmo_fsm_inst *fi)
 {
 	struct proc_arq_priv *par = fi->priv;
 	struct vlr_subscr *vsub = par->vsub;
+	bool umts_aka;
 
 	LOGPFSM(fi, "%s()\n", __func__);
 
@@ -292,9 +293,22 @@ static void _proc_arq_vlr_node2(struct osmo_fsm_inst *fi)
 		return;
 	}
 
+	switch (vsub->sec_ctx) {
+	case VLR_SEC_CTX_GSM:
+		umts_aka = false;
+		break;
+	case VLR_SEC_CTX_UMTS:
+		umts_aka = true;
+		break;
+	default:
+		LOGPFSML(fi, LOGL_ERROR, "Cannot start ciphering, security context is not established\n");
+		proc_arq_fsm_done(fi, VLR_PR_ARQ_RES_SYSTEM_FAILURE);
+		return;
+	}
+
 	if (vlr_set_ciph_mode(vsub->vlr, fi, par->msc_conn_ref,
 			      par->ciphering_required,
-			      vlr_use_umts_aka(&vsub->last_tuple->vec, par->is_r99),
+			      umts_aka,
 			      vsub->vlr->cfg.retrieve_imeisv_ciphered)) {
 		LOGPFSML(fi, LOGL_ERROR,
 			 "Failed to send Ciphering Mode Command\n");

@@ -846,6 +846,7 @@ static void vlr_loc_upd_post_auth(struct osmo_fsm_inst *fi)
 {
 	struct lu_fsm_priv *lfp = lu_fsm_fi_priv(fi);
 	struct vlr_subscr *vsub = lfp->vsub;
+	bool umts_aka;
 
 	LOGPFSM(fi, "%s()\n", __func__);
 
@@ -862,9 +863,22 @@ static void vlr_loc_upd_post_auth(struct osmo_fsm_inst *fi)
 		return;
 	}
 
+	switch (vsub->sec_ctx) {
+	case VLR_SEC_CTX_GSM:
+		umts_aka = false;
+		break;
+	case VLR_SEC_CTX_UMTS:
+		umts_aka = true;
+		break;
+	default:
+		LOGPFSML(fi, LOGL_ERROR, "Cannot start ciphering, security context is not established\n");
+		lu_fsm_failure(fi, GSM48_REJECT_NETWORK_FAILURE);
+		return;
+	}
+
 	if (vlr_set_ciph_mode(vsub->vlr, fi, lfp->msc_conn_ref,
 			      lfp->ciphering_required,
-			      vlr_use_umts_aka(&vsub->last_tuple->vec, lfp->is_r99),
+			      umts_aka,
 			      vsub->vlr->cfg.retrieve_imeisv_ciphered)) {
 		LOGPFSML(fi, LOGL_ERROR,
 			 "Failed to send Ciphering Mode Command\n");

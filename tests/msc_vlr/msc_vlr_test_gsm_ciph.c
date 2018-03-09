@@ -901,10 +901,7 @@ static void test_gsm_ciph_in_umts_env()
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("MS sends *GSM AKA* Authen Response, VLR accepts and sends Ciphering Mode Command to MS");
-	/* EXPECTING ERROR: should be the GSM AKA kc:
 	expect_cipher_mode_cmd("7a75f0ac9b844400");
-	 * but instead is the UMTS AKA derived kc: */
-	expect_cipher_mode_cmd("85c985d6f980e18e");
 	ms_sends_msg("0554" "dacc4b26");
 	OSMO_ASSERT(cipher_mode_cmd_sent);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
@@ -947,10 +944,7 @@ static void test_gsm_ciph_in_umts_env()
 	thwart_rx_non_initial_requests();
 
 	btw("MS sends *GSM AKA* Authen Response, VLR accepts and requests Ciphering");
-	/* EXPECTING ERROR: should be the GSM AKA kc:
 	expect_cipher_mode_cmd("da149b11d473f400");
-	 * but instead is the UMTS AKA derived kc: */
-	expect_cipher_mode_cmd("dec1351054200a58");
 	ms_sends_msg("0554" "2fb4cfad");
 	VERBOSE_ASSERT(cm_service_result_sent, == RES_NONE, "%d");
 	VERBOSE_ASSERT(cipher_mode_cmd_sent, == true, "%d");
@@ -1006,10 +1000,7 @@ static void test_gsm_ciph_in_umts_env()
 	thwart_rx_non_initial_requests();
 
 	btw("MS sends *GSM AKA* Authen Response, VLR accepts and requests Ciphering");
-	/* EXPECTING ERROR: should be the GSM AKA kc:
 	expect_cipher_mode_cmd("26ec67fad3073000");
-	 * but instead is the UMTS AKA derived kc: */
-	expect_cipher_mode_cmd("3721013ab07e55fb");
 	ms_sends_msg("0554" "0ff61e0f");
 	VERBOSE_ASSERT(cipher_mode_cmd_sent, == true, "%d");
 

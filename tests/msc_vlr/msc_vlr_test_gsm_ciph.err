@@ -1787,7 +1787,7 @@ DVLR vlr_lu_fsm(901700000010650){VLR_ULA_S_WAIT_AUTH}: Set Ciphering Mode
 DMM -> CIPHER MODE COMMAND IMSI:901700000010650
 - sending Ciphering Mode Command for IMSI:901700000010650: include_imeisv=0
 - ...perm algo: 2
-- ...key: 85c985d6f980e18e
+- ...key: 7a75f0ac9b844400
 DVLR vlr_lu_fsm(901700000010650){VLR_ULA_S_WAIT_AUTH}: state_chg to VLR_ULA_S_WAIT_CIPH
 DMM IMSI:901700000010650: bump: conn still being established (SUBSCR_CONN_S_NEW)
 DREF IMSI:901700000010650: MSC conn use - dtap == 1 (0x4)
@@ -1943,7 +1943,7 @@ DMM -> CIPHER MODE COMMAND MSISDN:42342
 DMSC CLASSMARK 1 unknown, assuming MS supports A5/1
 - sending Ciphering Mode Command for MSISDN:42342: include_imeisv=0
 - ...perm algo: 2
-- ...key: dec1351054200a58
+- ...key: da149b11d473f400
 DVLR Process_Access_Request_VLR(901700000010650){PR_ARQ_S_WAIT_AUTH}: state_chg to PR_ARQ_S_WAIT_CIPH
 DMM MSISDN:42342: bump: conn still being established (SUBSCR_CONN_S_NEW)
 DREF MSISDN:42342: MSC conn use - dtap == 1 (0x4)
@@ -2082,7 +2082,7 @@ DMM -> CIPHER MODE COMMAND MSISDN:42342
 DMSC CLASSMARK 1 unknown, assuming MS supports A5/1
 - sending Ciphering Mode Command for MSISDN:42342: include_imeisv=0
 - ...perm algo: 2
-- ...key: 3721013ab07e55fb
+- ...key: 26ec67fad3073000
 DVLR Process_Access_Request_VLR(901700000010650){PR_ARQ_S_WAIT_AUTH}: state_chg to PR_ARQ_S_WAIT_CIPH
 DMM MSISDN:42342: bump: conn still being established (SUBSCR_CONN_S_NEW)
 DREF MSISDN:42342: MSC conn use - dtap == 1 (0x4)
