@@ -524,16 +524,20 @@ DEFUN(subscriber_silent_call_start,
 		type = RSL_CHANNEED_ANY;	/* Defaults to ANY */
 
 	rc = gsm_silent_call_start(vsub, vty, type);
-	if (rc <= 0) {
-		vty_out(vty, "%% Subscriber not attached%s",
-			VTY_NEWLINE);
-		vlr_subscr_put(vsub);
-		return CMD_WARNING;
+	switch (rc) {
+	case -ENODEV:
+		vty_out(vty, "%% Subscriber not attached%s", VTY_NEWLINE);
+		break;
+	default:
+		if (rc)
+			vty_out(vty, "%% Cannot start silent call (rc=%d)%s", rc, VTY_NEWLINE);
+		else
+			vty_out(vty, "%% Silent call initiated%s", VTY_NEWLINE);
+		break;
 	}
 
 	vlr_subscr_put(vsub);
-
-	return CMD_SUCCESS;
+	return rc ? CMD_WARNING : CMD_SUCCESS;
 }
 
 DEFUN(subscriber_silent_call_stop,
@@ -553,14 +557,24 @@ DEFUN(subscriber_silent_call_stop,
 	}
 
 	rc = gsm_silent_call_stop(vsub);
-	if (rc < 0) {
-		vlr_subscr_put(vsub);
-		return CMD_WARNING;
+	switch (rc) {
+	case -ENODEV:
+		vty_out(vty, "%% No active connection for subscriber%s", VTY_NEWLINE);
+		break;
+	case -ENOENT:
+		vty_out(vty, "%% Subscriber has no silent call active%s",
+			VTY_NEWLINE);
+		break;
+	default:
+		if (rc)
+			vty_out(vty, "%% Cannot stop silent call (rc=%d)%s", rc, VTY_NEWLINE);
+		else
+			vty_out(vty, "%% Silent call stopped%s", VTY_NEWLINE);
+		break;
 	}
 
 	vlr_subscr_put(vsub);
-
-	return CMD_SUCCESS;
+	return rc ? CMD_WARNING : CMD_SUCCESS;
 }
 
 DEFUN(subscriber_ussd_notify,

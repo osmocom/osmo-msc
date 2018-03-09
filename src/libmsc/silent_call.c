@@ -30,6 +30,7 @@
 #include <osmocom/msc/gsm_data.h>
 #include <osmocom/msc/gsm_subscriber.h>
 #include <osmocom/msc/osmo_msc.h>
+#include <osmocom/msc/vlr.h>
 
 /* paging of the requested subscriber has completed */
 static int paging_cb_silent(unsigned int hooknum, unsigned int event,
@@ -130,7 +131,9 @@ int gsm_silent_call_start(struct vlr_subscr *vsub, void *data, int type)
 	 * A-interface. */
 	req = subscr_request_conn(vsub, paging_cb_silent, data,
 				  "establish silent call");
-	return req != NULL;
+	if (!req)
+		return -ENODEV;
+	return 0;
 }
 
 /* end a silent call with a given subscriber */
@@ -139,12 +142,18 @@ int gsm_silent_call_stop(struct vlr_subscr *vsub)
 	struct gsm_subscriber_connection *conn;
 
 	conn = connection_for_subscr(vsub);
-	if (!conn)
-		return -EINVAL;
+	if (!conn) {
+		LOGP(DMM, LOGL_ERROR, "%s: Cannot stop silent call, no connection for subscriber\n",
+		     vlr_subscr_name(vsub));
+		return -ENODEV;
+	}
 
 	/* did we actually establish a silent call for this guy? */
-	if (!conn->silent_call)
-		return -EINVAL;
+	if (!conn->silent_call) {
+		LOGP(DMM, LOGL_ERROR, "%s: Cannot stop silent call, subscriber has no active silent call\n",
+		     vlr_subscr_name(vsub));
+		return -ENOENT;
+	}
 
 #if BEFORE_MSCSPLIT
 	/* Re-enable this log output once we can obtain this information via
