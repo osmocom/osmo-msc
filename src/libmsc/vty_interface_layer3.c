@@ -608,6 +608,31 @@ DEFUN(subscriber_ussd_notify,
 	return CMD_SUCCESS;
 }
 
+DEFUN(subscriber_paging,
+      subscriber_paging_cmd,
+      "subscriber " SUBSCR_TYPES " ID paging",
+      SUBSCR_HELP "Issue an empty Paging for the subscriber (for debugging)\n")
+{
+	struct gsm_network *gsmnet = gsmnet_from_vty(vty);
+	struct vlr_subscr *vsub = get_vsub_by_argv(gsmnet, argv[0], argv[1]);
+	struct subscr_request *req;
+
+	if (!vsub) {
+		vty_out(vty, "%% No subscriber found for %s %s%s",
+			argv[0], argv[1], VTY_NEWLINE);
+		return CMD_WARNING;
+	}
+
+	req = subscr_request_conn(vsub, NULL, NULL, "manual Paging from VTY");
+	if (req)
+		vty_out(vty, "%% paging subscriber%s", VTY_NEWLINE);
+	else
+		vty_out(vty, "%% paging subscriber failed%s", VTY_NEWLINE);
+
+	vlr_subscr_put(vsub);
+	return req ? CMD_SUCCESS : CMD_WARNING;
+}
+
 static int loop_by_char(uint8_t ch)
 {
 	switch (ch) {
@@ -992,6 +1017,7 @@ int bsc_vty_init_extra(void)
 	install_element_ve(&subscriber_ussd_notify_cmd);
 	install_element_ve(&subscriber_mstest_close_cmd);
 	install_element_ve(&subscriber_mstest_open_cmd);
+	install_element_ve(&subscriber_paging_cmd);
 	install_element_ve(&show_stats_cmd);
 	install_element_ve(&show_smsqueue_cmd);
 	install_element_ve(&logging_fltr_imsi_cmd);
