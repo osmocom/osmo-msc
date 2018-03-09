@@ -343,9 +343,10 @@ static struct vlr_subscr *get_vsub_by_argv(struct gsm_network *gsmnet,
 
 	return NULL;
 }
-#define SUBSCR_TYPES "(extension|imsi|tmsi|id)"
+#define SUBSCR_TYPES "(msisdn|extension|imsi|tmsi|id)"
 #define SUBSCR_HELP "Operations on a Subscriber\n"			\
-	"Identify subscriber by extension (phone number)\n"		\
+	"Identify subscriber by MSISDN (phone number)\n"		\
+	"Legacy alias for 'msisdn'\n"		\
 	"Identify subscriber by IMSI\n"					\
 	"Identify subscriber by TMSI\n"					\
 	"Identify subscriber by database ID\n"				\
