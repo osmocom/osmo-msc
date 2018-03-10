@@ -572,10 +572,112 @@ static void test_umts_authen_resync_utran()
 	comment_end();
 }
 
+static void _test_umts_authen_too_short_res(enum ran_type via_ran)
+{
+	net->authentication_required = true;
+	net->vlr->cfg.assign_tmsi = true;
+	rx_from_ran = via_ran;
+
+	btw("Location Update request causes a GSUP Send Auth Info request to HLR");
+	lu_result_sent = RES_NONE;
+	gsup_expect_tx("080108" "09710000000156f0");
+	ms_sends_msg("0508" /* MM LU */
+		     "7" /* ciph key seq: no key available */
+		     "0" /* LU type: normal */
+		     "ffffff" "0000" /* LAI, LAC */
+		     "57" /* classmark 1: R99, early classmark, no power lvl */
+		     "089910070000106005" /* IMSI */
+		     "3303575886" /* classmark 2 */
+		     );
+	OSMO_ASSERT(gsup_tx_confirmed);
+	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
+
+	btw("from HLR, rx _SEND_AUTH_INFO_RESULT; VLR sends Auth Req to MS");
+	/* based on auc_3g:
+	 * K = 'EB215756028D60E3275E613320AEC880',
+	 * OPC = 'FB2A3D1B360F599ABAB99DB8669F8308'
+	 * SQN = 0
+	 */
+	auth_request_sent = false;
+	auth_request_expect_rand = "39fa2f4e3d523d8619a73b4f65c3e14d";
+	auth_request_expect_autn = "8704f5ba55f30000d2ee44b22c8ea919";
+	gsup_rx("0a"
+		/* imsi */
+		"0108" "09710000000156f0"
+		/* 5 auth vectors... */
+		/* TL    TL     rand */
+		"0362"  "2010" "39fa2f4e3d523d8619a73b4f65c3e14d"
+		/*       TL     sres       TL     kc */
+			"2104" "9b36efdf" "2208" "059a4f668f6fbe39"
+		/*       TL     3G IK */
+			"2310" "27497388b6cb044648f396aa155b95ef"
+		/*       TL     3G CK */
+			"2410" "f64735036e5871319c679f4742a75ea1"
+		/*       TL     AUTN */
+			"2510" "8704f5ba55f30000d2ee44b22c8ea919"
+		/*       TL     RES */
+			"2708" "e229c19e791f2e41"
+		/* TL    TL     rand */
+		"0362"  "2010" "c187a53a5e6b9d573cac7c74451fd46d"
+			"2104" "85aa3130" "2208" "d3d50a000bf04f6e"
+			"2310" "1159ec926a50e98c034a6b7d7c9f418d"
+			"2410" "df3a03d9ca5335641efc8e36d76cd20b"
+			"2510" "1843a645b98d00005b2d666af46c45d9"
+			"2708" "7db47cf7f81e4dc7"
+		"0362"  "2010" "efa9c29a9742148d5c9070348716e1bb"
+			"2104" "69d5f9fb" "2208" "3df176f0c29f1a3d"
+			"2310" "eb50e770ddcc3060101d2f43b6c2b884"
+			"2410" "76542abce5ff9345b0e8947f4c6e019c"
+			"2510" "f9375e6d41e1000096e7fe4ff1c27e39"
+			"2708" "706f996719ba609c"
+		"0362"  "2010" "f023d5a3b24726e0631b64b3840f8253"
+			"2104" "d570c03f" "2208" "ec011be8919883d6"
+			"2310" "c4e58af4ba43f3bcd904e16984f086d7"
+			"2410" "0593f65e752e5cb7f473862bda05aa0a"
+			"2510" "541ff1f077270000c5ea00d658bc7e9a"
+			"2708" "3fd26072eaa2a04d"
+		"0362"  "2010" "2f8f90c780d6a9c0c53da7ac57b6707e"
+			"2104" "b072446f220823f39f9f425ad6e6"
+			"2310" "65af0527fda95b0dc5ae4aa515cdf32f"
+			"2410" "537c3b35a3b13b08d08eeb28098f45cc"
+			"2510" "4bf4e564f75300009bc796706bc65744"
+			"2708" "0edb0eadbea94ac2",
+		NULL);
+	VERBOSE_ASSERT(auth_request_sent, == true, "%d");
+	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
+
+	btw("MS sends Authen Response of wrong RES size, VLR thwarts");
+	gsup_expect_tx("0b010809710000000156f0"); /* OSMO_GSUP_MSGT_AUTH_FAIL_REPORT */
+	expect_release_clear(via_ran);
+	ms_sends_msg("0554" "e229c19e" "2103" "791f2e" /* nipped one byte */);
+	VERBOSE_ASSERT(lu_result_sent, == RES_REJECT, "%d");
+	ASSERT_RELEASE_CLEAR(via_ran);
+
+	EXPECT_CONN_COUNT(0);
+	clear_vlr();
+}
+
+static void test_umts_authen_too_short_res_geran()
+{
+	comment_start();
+	_test_umts_authen_too_short_res(RAN_GERAN_A);
+	comment_end();
+}
+
+static void test_umts_authen_too_short_res_utran()
+{
+	comment_start();
+	_test_umts_authen_too_short_res(RAN_UTRAN_IU);
+	comment_end();
+}
+
+
 msc_vlr_test_func_t msc_vlr_tests[] = {
 	test_umts_authen_geran,
 	test_umts_authen_utran,
 	test_umts_authen_resync_geran,
 	test_umts_authen_resync_utran,
+	test_umts_authen_too_short_res_geran,
+	test_umts_authen_too_short_res_utran,
 	NULL
 };
