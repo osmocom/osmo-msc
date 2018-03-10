@@ -914,11 +914,70 @@ static void test_gsm_milenage_authen()
 	comment_end();
 }
 
+static void test_wrong_sres_length()
+{
+	comment_start();
+	fake_time_start();
+
+	net->authentication_required = true;
+
+	btw("Location Update request causes a GSUP Send Auth Info request to HLR");
+	lu_result_sent = RES_NONE;
+	gsup_expect_tx("08010809710000004026f0");
+	ms_sends_msg("050802008168000130089910070000006402");
+	OSMO_ASSERT(gsup_tx_confirmed);
+	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
+
+	btw("from HLR, rx _SEND_AUTH_INFO_RESULT; VLR sends Auth Req to MS");
+	auth_request_sent = false;
+	auth_request_expect_rand = "585df1ae287f6e273dce07090d61320b";
+	auth_request_expect_autn = NULL;
+	/* Based on a Ki of 000102030405060708090a0b0c0d0e0f */
+	gsup_rx("0a"
+		/* imsi */
+		"0108" "09710000004026f0"
+		/* 5 auth vectors... */
+		/* TL    TL     rand */
+		"0322"  "2010" "585df1ae287f6e273dce07090d61320b"
+		/*       TL     sres       TL     kc */
+			"2104" "2d8b2c3e" "2208" "61855fb81fc2a800"
+		"0322"  "2010" "12aca96fb4ffdea5c985cbafa9b6e18b"
+			"2104" "20bde240" "2208" "07fa7502e07e1c00"
+		"0322"  "2010" "e7c03ba7cf0e2fde82b2dc4d63077d42"
+			"2104" "a29514ae" "2208" "e2b234f807886400"
+		"0322"  "2010" "fa8f20b781b5881329d4fea26b1a3c51"
+			"2104" "5afc8d72" "2208" "2392f14f709ae000"
+		"0322"  "2010" "0fd4cc8dbe8715d1f439e304edfd68dc"
+			"2104" "bc8d1c5b" "2208" "da7cdd6bfe2d7000",
+		NULL);
+	VERBOSE_ASSERT(auth_request_sent, == true, "%d");
+	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
+
+	btw("If the HLR were to send a GSUP _UPDATE_LOCATION_RESULT we'd still reject");
+	gsup_rx("06010809710000004026f0", NULL);
+	EXPECT_ACCEPTED(false);
+
+	thwart_rx_non_initial_requests();
+
+	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
+
+	btw("MS sends Authen Response with too short SRES data, auth is thwarted.");
+	gsup_expect_tx("0b010809710000004026f0"); /* OSMO_GSUP_MSGT_AUTH_FAIL_REPORT */
+	expect_bssap_clear();
+	ms_sends_msg("05542d8b2c");
+	VERBOSE_ASSERT(lu_result_sent, == RES_REJECT, "%d");
+
+	EXPECT_CONN_COUNT(0);
+	clear_vlr();
+	comment_end();
+}
+
 msc_vlr_test_func_t msc_vlr_tests[] = {
 	test_gsm_authen,
 	test_gsm_authen_tmsi,
 	test_gsm_authen_imei,
 	test_gsm_authen_tmsi_imei,
 	test_gsm_milenage_authen,
+	test_wrong_sres_length,
 	NULL
 };

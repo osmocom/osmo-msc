@@ -971,8 +971,12 @@ static int gsm48_rx_mm_auth_resp(struct gsm_subscriber_connection *conn, struct 
 	}
 
 	if (rc) {
-		msc_subscr_conn_close(conn, GSM_CAUSE_AUTH_FAILED);
-		return -EINVAL;
+		LOGP(DMM, LOGL_ERROR,
+		     "%s: MM AUTHENTICATION RESPONSE: invalid: parsing %s AKA Auth Response"
+		     " failed with rc=%d; dispatching zero length SRES/RES to trigger failure\n",
+		     vlr_subscr_name(conn->vsub), is_r99 ? "UMTS" : "GSM", rc);
+		memset(res, 0, sizeof(res));
+		res_len = 0;
 	}
 
 	DEBUGP(DMM, "%s: MM %s AUTHENTICATION RESPONSE (%s = %s)\n",
