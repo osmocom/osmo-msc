@@ -952,7 +952,7 @@ static int gsm48_rx_mm_auth_resp(struct gsm_subscriber_connection *conn, struct 
 	uint8_t res[16];
 	uint8_t res_len;
 	int rc;
-	bool is_r99;
+	bool is_umts;
 
 	if (!conn->vsub) {
 		LOGP(DMM, LOGL_ERROR,
@@ -961,30 +961,28 @@ static int gsm48_rx_mm_auth_resp(struct gsm_subscriber_connection *conn, struct 
 		return -EINVAL;
 	}
 
-	if (msgb_l3len(msg) >
-	    sizeof(struct gsm48_hdr) + sizeof(struct gsm48_auth_resp)) {
+	is_umts = (msgb_l3len(msg) > sizeof(struct gsm48_hdr) + sizeof(struct gsm48_auth_resp));
+
+	if (is_umts)
 		rc = parse_umts_auth_resp(res, &res_len, conn, msg);
-		is_r99 = true;
-	} else {
+	else
 		rc = parse_gsm_auth_resp(res, &res_len, conn, msg);
-		is_r99 = false;
-	}
 
 	if (rc) {
 		LOGP(DMM, LOGL_ERROR,
 		     "%s: MM AUTHENTICATION RESPONSE: invalid: parsing %s AKA Auth Response"
 		     " failed with rc=%d; dispatching zero length SRES/RES to trigger failure\n",
-		     vlr_subscr_name(conn->vsub), is_r99 ? "UMTS" : "GSM", rc);
+		     vlr_subscr_name(conn->vsub), is_umts ? "UMTS" : "GSM", rc);
 		memset(res, 0, sizeof(res));
 		res_len = 0;
 	}
 
 	DEBUGP(DMM, "%s: MM %s AUTHENTICATION RESPONSE (%s = %s)\n",
 	       vlr_subscr_name(conn->vsub),
-	       is_r99 ? "R99" : "GSM", is_r99 ? "res" : "sres",
+	       is_umts ? "R99" : "GSM", is_umts ? "res" : "sres",
 	       osmo_hexdump_nospc(res, res_len));
 
-	return vlr_subscr_rx_auth_resp(conn->vsub, is_r99,
+	return vlr_subscr_rx_auth_resp(conn->vsub, classmark_is_r99(&conn->classmark),
 				       conn->via_ran == RAN_UTRAN_IU,
 				       res, res_len);
 }
