@@ -76,6 +76,28 @@ extern const char *auth_request_expect_autn;
 
 extern bool cipher_mode_cmd_sent;
 extern bool cipher_mode_cmd_sent_with_imeisv;
+extern const char *cipher_mode_expect_kc;
+
+extern bool security_mode_ctrl_sent;
+extern const char *security_mode_expect_ck;
+extern const char *security_mode_expect_ik;
+
+static inline void expect_cipher_mode_cmd(const char *kc)
+{
+	cipher_mode_cmd_sent = false;
+	cipher_mode_expect_kc = kc;
+	/* make sure we don't mix up the two */
+	security_mode_ctrl_sent = false;
+}
+
+static inline void expect_security_mode_ctrl(const char *ck, const char *ik)
+{
+	security_mode_ctrl_sent = false;
+	security_mode_expect_ck = ck;
+	security_mode_expect_ik = ik;
+	/* make sure we don't mix up the two */
+	cipher_mode_cmd_sent = false;
+}
 
 extern bool paging_sent;
 extern bool paging_stopped;

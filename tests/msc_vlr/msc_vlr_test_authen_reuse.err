@@ -497,7 +497,7 @@ DMM -> SECURITY MODE CONTROL IMSI:901700000010650
 DVLR vlr_lu_fsm(901700000010650){VLR_ULA_S_WAIT_AUTH}: state_chg to VLR_ULA_S_WAIT_CIPH
 DMM IMSI:901700000010650: bump: conn still being established (SUBSCR_CONN_S_NEW)
 DREF IMSI:901700000010650: MSC conn use - dtap == 1 (0x4)
-  cipher_mode_cmd_sent == 1
+  security_mode_ctrl_sent == 1
   lu_result_sent == 0
 - MS sends SecurityModeControl acceptance, VLR accepts and sends GSUP LU Req to HLR
 DMM <- SECURITY MODE COMPLETE IMSI:901700000010650
@@ -677,7 +677,7 @@ DMM -> SECURITY MODE CONTROL MSISDN:42342
 DVLR Process_Access_Request_VLR(901700000010650){PR_ARQ_S_WAIT_AUTH}: state_chg to PR_ARQ_S_WAIT_CIPH
 DMM MSISDN:42342: bump: conn still being established (SUBSCR_CONN_S_NEW)
 DREF MSISDN:42342: MSC conn use - dtap == 1 (0x4)
-  cipher_mode_cmd_sent == 1
+  security_mode_ctrl_sent == 1
   cm_service_result_sent == 0
 - MS sends SecurityModeControl acceptance, VLR accepts; above Ciphering is an implicit CM Service Accept
 DMM <- SECURITY MODE COMPLETE MSISDN:42342
@@ -808,7 +808,7 @@ DMM -> SECURITY MODE CONTROL MSISDN:42342
 DVLR Process_Access_Request_VLR(901700000010650){PR_ARQ_S_WAIT_AUTH}: state_chg to PR_ARQ_S_WAIT_CIPH
 DMM MSISDN:42342: bump: conn still being established (SUBSCR_CONN_S_NEW)
 DREF MSISDN:42342: MSC conn use - dtap == 1 (0x4)
-  cipher_mode_cmd_sent == 1
+  security_mode_ctrl_sent == 1
   cm_service_result_sent == 0
 - MS sends SecurityModeControl acceptance, VLR accepts; above Ciphering is an implicit CM Service Accept
 DMM <- SECURITY MODE COMPLETE MSISDN:42342
@@ -1478,7 +1478,7 @@ DMM -> SECURITY MODE CONTROL IMSI:901700000010650
 DVLR vlr_lu_fsm(901700000010650){VLR_ULA_S_WAIT_AUTH}: state_chg to VLR_ULA_S_WAIT_CIPH
 DMM IMSI:901700000010650: bump: conn still being established (SUBSCR_CONN_S_NEW)
 DREF IMSI:901700000010650: MSC conn use - dtap == 1 (0x4)
-  cipher_mode_cmd_sent == 1
+  security_mode_ctrl_sent == 1
   lu_result_sent == 0
 - MS sends SecurityModeControl acceptance, VLR accepts and sends GSUP LU Req to HLR
 DMM <- SECURITY MODE COMPLETE IMSI:901700000010650
@@ -1658,7 +1658,7 @@ DMM -> SECURITY MODE CONTROL MSISDN:42342
 DVLR Process_Access_Request_VLR(901700000010650){PR_ARQ_S_WAIT_AUTH}: state_chg to PR_ARQ_S_WAIT_CIPH
 DMM MSISDN:42342: bump: conn still being established (SUBSCR_CONN_S_NEW)
 DREF MSISDN:42342: MSC conn use - dtap == 1 (0x4)
-  cipher_mode_cmd_sent == 1
+  security_mode_ctrl_sent == 1
   cm_service_result_sent == 0
 - MS sends SecurityModeControl acceptance, VLR accepts; above Ciphering is an implicit CM Service Accept
 DMM <- SECURITY MODE COMPLETE MSISDN:42342
@@ -1775,7 +1775,7 @@ DMM -> SECURITY MODE CONTROL MSISDN:42342
 DVLR Process_Access_Request_VLR(901700000010650){PR_ARQ_S_WAIT_AUTH}: state_chg to PR_ARQ_S_WAIT_CIPH
 DMM MSISDN:42342: bump: conn still being established (SUBSCR_CONN_S_NEW)
 DREF MSISDN:42342: MSC conn use - dtap == 1 (0x4)
-  cipher_mode_cmd_sent == 1
+  security_mode_ctrl_sent == 1
   cm_service_result_sent == 0
 - MS sends SecurityModeControl acceptance, VLR accepts; above Ciphering is an implicit CM Service Accept
 DMM <- SECURITY MODE COMPLETE MSISDN:42342
@@ -1892,7 +1892,7 @@ DMM -> SECURITY MODE CONTROL MSISDN:42342
 DVLR Process_Access_Request_VLR(901700000010650){PR_ARQ_S_WAIT_AUTH}: state_chg to PR_ARQ_S_WAIT_CIPH
 DMM MSISDN:42342: bump: conn still being established (SUBSCR_CONN_S_NEW)
 DREF MSISDN:42342: MSC conn use - dtap == 1 (0x4)
-  cipher_mode_cmd_sent == 1
+  security_mode_ctrl_sent == 1
   cm_service_result_sent == 0
 - MS sends SecurityModeControl acceptance, VLR accepts; above Ciphering is an implicit CM Service Accept
 DMM <- SECURITY MODE COMPLETE MSISDN:42342
@@ -2362,7 +2362,7 @@ DMM -> SECURITY MODE CONTROL IMSI:901700000010650
 DVLR vlr_lu_fsm(901700000010650){VLR_ULA_S_WAIT_AUTH}: state_chg to VLR_ULA_S_WAIT_CIPH
 DMM IMSI:901700000010650: bump: conn still being established (SUBSCR_CONN_S_NEW)
 DREF IMSI:901700000010650: MSC conn use - dtap == 1 (0x4)
-  cipher_mode_cmd_sent == 1
+  security_mode_ctrl_sent == 1
   lu_result_sent == 0
 - MS sends SecurityModeControl acceptance, VLR accepts and sends GSUP LU Req to HLR
 DMM <- SECURITY MODE COMPLETE IMSI:901700000010650
@@ -2556,7 +2556,7 @@ DMM -> SECURITY MODE CONTROL MSISDN:42342
 DVLR Process_Access_Request_VLR(901700000010650){PR_ARQ_S_WAIT_AUTH}: state_chg to PR_ARQ_S_WAIT_CIPH
 DMM MSISDN:42342: bump: conn still being established (SUBSCR_CONN_S_NEW)
 DREF MSISDN:42342: MSC conn use - dtap == 1 (0x4)
-  cipher_mode_cmd_sent == 1
+  security_mode_ctrl_sent == 1
   cm_service_result_sent == 0
 - MS sends SecurityModeControl acceptance, VLR accepts; above Ciphering is an implicit CM Service Accept
 DMM <- SECURITY MODE COMPLETE MSISDN:42342

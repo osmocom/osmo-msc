@@ -144,9 +144,9 @@ static void _test_umts_authen(enum ran_type via_ran)
 	} else {
 		/* On UTRAN */
 		btw("MS sends Authen Response, VLR accepts and sends SecurityModeControl");
-		cipher_mode_cmd_sent = false;
+		expect_security_mode_ctrl(NULL, "27497388b6cb044648f396aa155b95ef");
 		ms_sends_msg("0554" "e229c19e" "2104" "791f2e41");
-		VERBOSE_ASSERT(cipher_mode_cmd_sent, == true, "%d");
+		VERBOSE_ASSERT(security_mode_ctrl_sent, == true, "%d");
 		VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 		btw("MS sends SecurityModeControl acceptance, VLR accepts and sends GSUP LU Req to HLR");
@@ -213,9 +213,9 @@ static void _test_umts_authen(enum ran_type via_ran)
 	} else {
 		/* On UTRAN */
 		btw("MS sends Authen Response, VLR accepts and sends SecurityModeControl");
-		cipher_mode_cmd_sent = false;
+		expect_security_mode_ctrl(NULL, "1159ec926a50e98c034a6b7d7c9f418d");
 		ms_sends_msg("0554" "7db47cf7" "2104" "f81e4dc7"); /* 2nd vector's res, s.a. */
-		VERBOSE_ASSERT(cipher_mode_cmd_sent, == true, "%d");
+		VERBOSE_ASSERT(security_mode_ctrl_sent, == true, "%d");
 		VERBOSE_ASSERT(cm_service_result_sent, == RES_NONE, "%d");
 
 		btw("MS sends SecurityModeControl acceptance, VLR accepts; above Ciphering is an implicit CM Service Accept");
@@ -278,9 +278,9 @@ static void _test_umts_authen(enum ran_type via_ran)
 	} else {
 		/* On UTRAN */
 		btw("MS sends Authen Response, VLR accepts and sends SecurityModeControl");
-		cipher_mode_cmd_sent = false;
+		expect_security_mode_ctrl(NULL, "eb50e770ddcc3060101d2f43b6c2b884");
 		ms_sends_msg("0554" "706f9967" "2104" "19ba609c"); /* 3nd vector's res, s.a. */
-		VERBOSE_ASSERT(cipher_mode_cmd_sent, == true, "%d");
+		VERBOSE_ASSERT(security_mode_ctrl_sent, == true, "%d");
 		VERBOSE_ASSERT(paging_stopped, == false, "%d");
 
 		btw("MS sends SecurityModeControl acceptance, VLR accepts and sends SMS");
@@ -512,9 +512,9 @@ static void _test_umts_authen_resync(enum ran_type via_ran)
 	} else {
 		/* On UTRAN */
 		btw("MS sends Authen Response, VLR accepts and sends SecurityModeControl");
-		cipher_mode_cmd_sent = false;
+		expect_security_mode_ctrl(NULL, "8a90c769b7272f3bb7a1c1fbb1ea9349");
 		ms_sends_msg("0554" "1df5f0b4" "2104" "f22b696e");
-		VERBOSE_ASSERT(cipher_mode_cmd_sent, == true, "%d");
+		VERBOSE_ASSERT(security_mode_ctrl_sent, == true, "%d");
 		VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 		btw("MS sends SecurityModeControl acceptance, VLR accepts and sends GSUP LU Req to HLR");

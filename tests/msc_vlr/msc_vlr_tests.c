@@ -62,6 +62,10 @@ const char *auth_request_expect_rand;
 const char *auth_request_expect_autn;
 bool cipher_mode_cmd_sent;
 bool cipher_mode_cmd_sent_with_imeisv;
+const char *cipher_mode_expect_kc;
+bool security_mode_ctrl_sent;
+const char *security_mode_expect_ck;
+const char *security_mode_expect_ik;
 
 bool iu_release_expected = false;
 bool iu_release_sent = false;
@@ -386,6 +390,14 @@ void clear_vlr()
 	auth_request_sent = false;
 	auth_request_expect_rand = NULL;
 	auth_request_expect_autn = NULL;
+
+	cipher_mode_cmd_sent = false;
+	cipher_mode_cmd_sent_with_imeisv = false;
+	cipher_mode_expect_kc = NULL;
+
+	security_mode_ctrl_sent = false;
+	security_mode_expect_ck = NULL;
+	security_mode_expect_ik = NULL;
 
 	next_rand_byte = 0;
 
@@ -720,6 +732,12 @@ int __wrap_a_iface_tx_cipher_mode(const struct gsm_subscriber_connection *conn,
 	btw("...key: %s", osmo_hexdump_nospc(ei->key, ei->key_len));
 	cipher_mode_cmd_sent = true;
 	cipher_mode_cmd_sent_with_imeisv = include_imeisv;
+
+	if (!cipher_mode_expect_kc
+	    || strcmp(cipher_mode_expect_kc, osmo_hexdump_nospc(ei->key, ei->key_len))) {
+		log("FAILURE: expected kc=%s", cipher_mode_expect_kc ? : "NULL");
+		OSMO_ASSERT(false);
+	}
 	return 0;
 }
 
@@ -734,8 +752,18 @@ int __wrap_ranap_iu_tx_sec_mode_cmd(struct ranap_ue_conn_ctx *uectx, struct osmo
 	btw("...ik=%s", osmo_hexdump_nospc(vec->ik, sizeof(vec->ik)));
 	if (send_ck)
 		btw("...ck=%s", osmo_hexdump_nospc(vec->ck, sizeof(vec->ck)));
-	cipher_mode_cmd_sent = true;
-	cipher_mode_cmd_sent_with_imeisv = false;
+	security_mode_ctrl_sent = true;
+	if (!security_mode_expect_ik
+	    || strcmp(security_mode_expect_ik, osmo_hexdump_nospc(vec->ik, sizeof(vec->ik)))) {
+		log("FAILURE: expected ik=%s", security_mode_expect_ik ? : "NULL");
+		OSMO_ASSERT(false);
+	}
+	if (((!!send_ck) != (!!security_mode_expect_ck))
+	    || (security_mode_expect_ck
+		&& strcmp(security_mode_expect_ck, osmo_hexdump_nospc(vec->ck, sizeof(vec->ck))))) {
+		log("FAILURE: expected ck=%s", security_mode_expect_ck ? : "NULL");
+		OSMO_ASSERT(false);
+	}
 	return 0;
 }
 

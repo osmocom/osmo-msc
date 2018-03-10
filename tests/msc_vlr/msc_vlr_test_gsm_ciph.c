@@ -66,7 +66,7 @@ static void test_ciph()
 	VERBOSE_ASSERT(auth_request_sent, == true, "%d");
 
 	btw("MS sends Authen Response, VLR accepts and sends Ciphering Mode Command to MS");
-	cipher_mode_cmd_sent = false;
+	expect_cipher_mode_cmd("61855fb81fc2a800");
 	ms_sends_msg("05542d8b2c3e");
 	OSMO_ASSERT(cipher_mode_cmd_sent);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
@@ -111,7 +111,7 @@ static void test_ciph()
 	thwart_rx_non_initial_requests();
 
 	btw("MS sends Authen Response, VLR accepts and requests Ciphering");
-	cipher_mode_cmd_sent = false;
+	expect_cipher_mode_cmd("07fa7502e07e1c00");
 	ms_sends_msg("0554" "20bde240" /* 2nd vector's sres, s.a. */);
 	VERBOSE_ASSERT(cm_service_result_sent, == RES_NONE, "%d");
 	VERBOSE_ASSERT(cipher_mode_cmd_sent, == true, "%d");
@@ -168,7 +168,7 @@ static void test_ciph()
 	thwart_rx_non_initial_requests();
 
 	btw("MS sends Authen Response, VLR accepts and requests Ciphering");
-	cipher_mode_cmd_sent = false;
+	expect_cipher_mode_cmd("e2b234f807886400");
 	ms_sends_msg("0554" "a29514ae" /* 3rd vector's sres, s.a. */);
 	VERBOSE_ASSERT(cipher_mode_cmd_sent, == true, "%d");
 
@@ -279,7 +279,7 @@ static void test_ciph_tmsi()
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("MS sends Authen Response, VLR accepts and sends Ciphering Mode Command to MS");
-	cipher_mode_cmd_sent = false;
+	expect_cipher_mode_cmd("61855fb81fc2a800");
 	ms_sends_msg("05542d8b2c3e");
 	OSMO_ASSERT(cipher_mode_cmd_sent);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
@@ -350,7 +350,7 @@ static void test_ciph_tmsi()
 	thwart_rx_non_initial_requests();
 
 	btw("MS sends Authen Response, VLR accepts and requests Ciphering");
-	cipher_mode_cmd_sent = false;
+	expect_cipher_mode_cmd("07fa7502e07e1c00");
 	ms_sends_msg("0554" "20bde240" /* 2nd vector's sres, s.a. */);
 	VERBOSE_ASSERT(cm_service_result_sent, == RES_NONE, "%d");
 	VERBOSE_ASSERT(cipher_mode_cmd_sent, == true, "%d");
@@ -407,7 +407,7 @@ static void test_ciph_tmsi()
 	thwart_rx_non_initial_requests();
 
 	btw("MS sends Authen Response, VLR accepts and requests Ciphering");
-	cipher_mode_cmd_sent = false;
+	expect_cipher_mode_cmd("e2b234f807886400");
 	ms_sends_msg("0554" "a29514ae" /* 3rd vector's sres, s.a. */);
 	VERBOSE_ASSERT(cipher_mode_cmd_sent, == true, "%d");
 
@@ -518,7 +518,7 @@ static void test_ciph_imei()
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("MS sends Authen Response, VLR accepts and sends Ciphering Mode Command to MS");
-	cipher_mode_cmd_sent = false;
+	expect_cipher_mode_cmd("61855fb81fc2a800");
 	ms_sends_msg("05542d8b2c3e");
 	OSMO_ASSERT(cipher_mode_cmd_sent);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
@@ -620,7 +620,7 @@ static void test_ciph_imeisv()
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("MS sends Authen Response, VLR accepts and sends Ciphering Mode Command to MS");
-	cipher_mode_cmd_sent = false;
+	expect_cipher_mode_cmd("61855fb81fc2a800");
 	ms_sends_msg("05542d8b2c3e");
 	VERBOSE_ASSERT(cipher_mode_cmd_sent, == true, "%d");
 	VERBOSE_ASSERT(cipher_mode_cmd_sent_with_imeisv, == true, "%d");
@@ -719,7 +719,7 @@ static void test_ciph_tmsi_imei()
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("MS sends Authen Response, VLR accepts and sends Ciphering Mode Command to MS");
-	cipher_mode_cmd_sent = false;
+	expect_cipher_mode_cmd("61855fb81fc2a800");
 	ms_sends_msg("05542d8b2c3e");
 	OSMO_ASSERT(cipher_mode_cmd_sent);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
