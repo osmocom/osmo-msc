@@ -979,7 +979,7 @@ static int gsm48_rx_mm_auth_resp(struct gsm_subscriber_connection *conn, struct 
 
 	DEBUGP(DMM, "%s: MM %s AUTHENTICATION RESPONSE (%s = %s)\n",
 	       vlr_subscr_name(conn->vsub),
-	       is_umts ? "R99" : "GSM", is_umts ? "res" : "sres",
+	       is_umts ? "UMTS" : "GSM", is_umts ? "res" : "sres",
 	       osmo_hexdump_nospc(res, res_len));
 
 	return vlr_subscr_rx_auth_resp(conn->vsub, classmark_is_r99(&conn->classmark),
