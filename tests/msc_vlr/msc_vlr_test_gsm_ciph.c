@@ -794,11 +794,271 @@ static void test_ciph_tmsi_imei()
 	comment_end();
 }
 
+static void test_gsm_ciph_in_umts_env()
+{
+	struct vlr_subscr *vsub;
+	const char *imsi = "901700000010650";
+	const char *sms =
+		"09" /* SMS messages */
+		"01" /* CP-DATA */
+		"58" /* length */
+		"01" /* Network to MS */
+		"00" /* reference */
+		/* originator (gsm411_send_sms() hardcodes this weird nr) */
+		"0791" "447758100650" /* 447785016005 */
+		"00" /* dest */
+		/* SMS TPDU */
+		"4c" /* len */
+		"00" /* SMS deliver */
+		"05802443f2" /* originating address 42342 */
+		"00" /* TP-PID */
+		"00" /* GSM default alphabet */
+		"071010" /* Y-M-D (from wrapped gsm340_gen_scts())*/
+		"000000" /* H-M-S */
+		"00" /* GMT+0 */
+		"44" /* data length */
+		"5079da1e1ee7416937485e9ea7c965373d1d6683c270383b3d0e"
+		"d3d36ff71c949e83c22072799e9687c5ec32a81d96afcbf4b4fb"
+		"0c7ac3e9e9b7db05";
+
+	comment_start();
+
+	/* implicit: net->authentication_required = true; */
+	net->a5_encryption_mask = (1 << 1);
+	rx_from_ran = RAN_GERAN_A;
+
+	btw("Location Update request causes a GSUP Send Auth Info request to HLR");
+	lu_result_sent = RES_NONE;
+	gsup_expect_tx("080108" "09710000000156f0");
+	ms_sends_msg("0508" /* MM LU */
+		     "7" /* ciph key seq: no key available */
+		     "0" /* LU type: normal */
+		     "ffffff" "0000" /* LAI, LAC */
+		     "57" /* classmark 1: R99, early classmark, no power lvl */
+		     "089910070000106005" /* IMSI */
+		     "3303575886" /* classmark 2 */
+		     );
+	OSMO_ASSERT(gsup_tx_confirmed);
+	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
+
+	btw("from HLR, rx _SEND_AUTH_INFO_RESULT; VLR sends *UMTS AKA* Auth Req to MS");
+	/* based on
+	 * 2G auth: COMP128v1
+	 *          KI=7bcd108be4c3d551ee6c67faaf52bd68
+	 * 3G auth: MILENAGE
+	 *          K=7bcd108be4c3d551ee6c67faaf52bd68
+	 *          OPC=6e23f641ce724679b73d933515a8589d
+	 *          IND-bitlen=5 last-SQN=641
+	 * Note that the SRES will be calculated by COMP128v1, separately from 3G tokens;
+	 * the resulting Kc to use for ciphering returned by the HLR is also calculated from COMP128v1.
+	 */
+	auth_request_sent = false;
+	auth_request_expect_rand = "4ac8d1cd1a51937597ca1016fe69a0fa";
+	auth_request_expect_autn = "2d837d2b0d6f00004b282d5acf23428d";
+	gsup_rx("0a"
+		/* imsi */
+		"0108" "09710000000156f0"
+		/* 5 auth vectors... */
+		/* TL    TL     rand */
+		"0362" "2010" "4ac8d1cd1a51937597ca1016fe69a0fa"
+		/*       TL     sres       TL     kc */
+		       "2104" "dacc4b26" "2208" "7a75f0ac9b844400"
+		/*       TL     3G IK */
+		       "2310" "3747da4e31545baa2db59e500bdae047"
+		/*       TL     3G CK */
+		       "2410" "8544d35b945ccba01a7f1293575291c3"
+		/*       TL     AUTN */
+		       "2510" "2d837d2b0d6f00004b282d5acf23428d"
+		/*       TL     RES */
+		       "2708" "37527064741f8ddb"
+		/* TL    TL     rand */
+		"0362" "2010" "b2661531b97b12c5a2edc21a0ed16fc5"
+		       "2104" "2fb4cfad" "2208" "da149b11d473f400"
+		       "2310" "3fe013b1a428ea737c37f8f0288c8edf"
+		       "2410" "f275438c02b97e4d6f639dddda3d10b9"
+		       "2510" "78cdd96c60840000322f421b3bb778b1"
+		       "2708" "ed3ebf9cb6ea48ed"
+		"0362" "2010" "54d8f19778056666b41c8c25e52eb60c"
+		       "2104" "0ff61e0f" "2208" "26ec67fad3073000"
+		       "2310" "2868b0922c652616f1c975e3eaf7943a"
+		       "2410" "6a84a20b1bc13ec9840466406d2dd91e"
+		       "2510" "53f3e5632b3d00008865dd54d49663f2"
+		       "2708" "86e848a9e7ad8cd5"
+		"0362" "2010" "1f05607ff9c8984f46ad97f8c9a94982"
+		       "2104" "91a36e3d" "2208" "5d84421884fdcc00"
+		       "2310" "2171fef54b81e30c83a598a5e44f634c"
+		       "2410" "f02d088697509827565b46938fece211"
+		       "2510" "1b43bbf9815e00001cb9b2a9f6b8a77c"
+		       "2708" "373e67d62e719c51"
+		"0362" "2010" "80d89a58a2a41050918caf68a4e93c64"
+		       "2104" "a319f5f1" "2208" "883df2b867293000"
+		       "2310" "fa5d70f929ff298efb160413698dc107"
+		       "2410" "ae9a3d8ce70ce13bac297bdb91cd6c68"
+		       "2510" "5c0dc2eeaefa0000396882a1fe2cf80b"
+		       "2708" "65ab1cad216bfe87",
+		NULL);
+	VERBOSE_ASSERT(auth_request_sent, == true, "%d");
+	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
+
+	btw("MS sends *GSM AKA* Authen Response, VLR accepts and sends Ciphering Mode Command to MS");
+	/* EXPECTING ERROR: should be the GSM AKA kc:
+	expect_cipher_mode_cmd("7a75f0ac9b844400");
+	 * but instead is the UMTS AKA derived kc: */
+	expect_cipher_mode_cmd("85c985d6f980e18e");
+	ms_sends_msg("0554" "dacc4b26");
+	OSMO_ASSERT(cipher_mode_cmd_sent);
+	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
+
+	btw("MS sends Ciphering Mode Complete, VLR accepts and sends GSUP LU Req to HLR");
+	gsup_expect_tx("04010809710000000156f0");
+	ms_sends_msg("0632");
+	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
+
+	btw("HLR sends _INSERT_DATA_REQUEST, VLR responds with _INSERT_DATA_RESULT");
+	gsup_rx("10010809710000000156f00804032443f2",
+		"12010809710000000156f0");
+	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
+
+	btw("HLR also sends GSUP _UPDATE_LOCATION_RESULT");
+	expect_bssap_clear();
+	gsup_rx("06010809710000000156f0", NULL);
+	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
+
+	btw("LU was successful, and the conn has already been closed");
+	VERBOSE_ASSERT(lu_result_sent, == RES_ACCEPT, "%d");
+	EXPECT_CONN_COUNT(0);
+
+	BTW("after a while, a new conn sends a CM Service Request. VLR responds with *UMTS AKA* Auth Req, 2nd auth vector");
+	auth_request_sent = false;
+	auth_request_expect_rand = "b2661531b97b12c5a2edc21a0ed16fc5";
+	auth_request_expect_autn = "78cdd96c60840000322f421b3bb778b1";
+	cm_service_result_sent = RES_NONE;
+	ms_sends_msg("052478"
+		     "03575886" /* classmark 2 */
+		     "089910070000106005" /* IMSI */);
+	OSMO_ASSERT(g_conn);
+	OSMO_ASSERT(g_conn->conn_fsm);
+	OSMO_ASSERT(g_conn->vsub);
+	VERBOSE_ASSERT(cm_service_result_sent, == RES_NONE, "%d");
+	VERBOSE_ASSERT(auth_request_sent, == true, "%d");
+
+	btw("needs auth, not yet accepted");
+	EXPECT_ACCEPTED(false);
+	thwart_rx_non_initial_requests();
+
+	btw("MS sends *GSM AKA* Authen Response, VLR accepts and requests Ciphering");
+	/* EXPECTING ERROR: should be the GSM AKA kc:
+	expect_cipher_mode_cmd("da149b11d473f400");
+	 * but instead is the UMTS AKA derived kc: */
+	expect_cipher_mode_cmd("dec1351054200a58");
+	ms_sends_msg("0554" "2fb4cfad");
+	VERBOSE_ASSERT(cm_service_result_sent, == RES_NONE, "%d");
+	VERBOSE_ASSERT(cipher_mode_cmd_sent, == true, "%d");
+
+	btw("MS sends Ciphering Mode Complete, VLR accepts; above Ciphering is an implicit CM Service Accept");
+	ms_sends_msg("0632");
+	VERBOSE_ASSERT(cm_service_result_sent, == RES_NONE, "%d");
+
+	btw("a USSD request is serviced");
+	dtap_expect_tx_ussd("Your extension is 42342\r");
+	expect_bssap_clear();
+	ms_sends_msg("0b3b1c15a11302010002013b300b04010f0406aa510c061b017f0100");
+	OSMO_ASSERT(dtap_tx_confirmed);
+	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
+
+	btw("all requests serviced, conn has been released");
+	EXPECT_CONN_COUNT(0);
+
+	BTW("an SMS is sent, MS is paged");
+	paging_expect_imsi(imsi);
+	paging_sent = false;
+	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi);
+	OSMO_ASSERT(vsub);
+	VERBOSE_ASSERT(llist_count(&vsub->cs.requests), == 0, "%d");
+
+	send_sms(vsub, vsub,
+		 "Privacy in residential applications is a desirable"
+		 " marketing option.");
+
+	VERBOSE_ASSERT(llist_count(&vsub->cs.requests), == 1, "%d");
+	vlr_subscr_put(vsub);
+	vsub = NULL;
+	VERBOSE_ASSERT(paging_sent, == true, "%d");
+	VERBOSE_ASSERT(paging_stopped, == false, "%d");
+
+	btw("the subscriber and its pending request should remain");
+	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi);
+	OSMO_ASSERT(vsub);
+	VERBOSE_ASSERT(llist_count(&vsub->cs.requests), == 1, "%d");
+	vlr_subscr_put(vsub);
+
+	btw("MS replies with Paging Response, and VLR sends *UMTS AKA* Auth Request with third key");
+	auth_request_sent = false;
+	auth_request_expect_rand = "54d8f19778056666b41c8c25e52eb60c";
+	auth_request_expect_autn = "53f3e5632b3d00008865dd54d49663f2";
+	ms_sends_msg("062707"
+		     "03575886" /* classmark 2 */
+		     "089910070000106005" /* IMSI */);
+	VERBOSE_ASSERT(auth_request_sent, == true, "%d");
+
+	btw("needs auth, not yet accepted");
+	EXPECT_ACCEPTED(false);
+	thwart_rx_non_initial_requests();
+
+	btw("MS sends *GSM AKA* Authen Response, VLR accepts and requests Ciphering");
+	/* EXPECTING ERROR: should be the GSM AKA kc:
+	expect_cipher_mode_cmd("26ec67fad3073000");
+	 * but instead is the UMTS AKA derived kc: */
+	expect_cipher_mode_cmd("3721013ab07e55fb");
+	ms_sends_msg("0554" "0ff61e0f");
+	VERBOSE_ASSERT(cipher_mode_cmd_sent, == true, "%d");
+
+	btw("MS sends Ciphering Mode Complete, VLR accepts and sends pending SMS");
+	dtap_expect_tx(sms);
+	ms_sends_msg("0632");
+	VERBOSE_ASSERT(dtap_tx_confirmed, == true, "%d");
+	VERBOSE_ASSERT(paging_stopped, == true, "%d");
+
+	btw("SMS was delivered, no requests pending for subscr");
+	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi);
+	OSMO_ASSERT(vsub);
+	VERBOSE_ASSERT(llist_count(&vsub->cs.requests), == 0, "%d");
+	vlr_subscr_put(vsub);
+
+	btw("conn is still open to wait for SMS ack dance");
+	EXPECT_CONN_COUNT(1);
+
+	btw("MS replies with CP-ACK for received SMS");
+	ms_sends_msg("8904");
+	EXPECT_CONN_COUNT(1);
+
+	btw("MS also sends RP-ACK, MSC in turn sends CP-ACK for that");
+	dtap_expect_tx("0904");
+	expect_bssap_clear();
+	ms_sends_msg("890106020041020000");
+	VERBOSE_ASSERT(dtap_tx_confirmed, == true, "%d");
+	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
+
+	btw("SMS is done, conn is gone");
+	EXPECT_CONN_COUNT(0);
+
+	BTW("subscriber detaches");
+	expect_bssap_clear();
+	ms_sends_msg("050130"
+		     "089910070000106005" /* IMSI */);
+	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
+
+	EXPECT_CONN_COUNT(0);
+	clear_vlr();
+	comment_end();
+}
+
 msc_vlr_test_func_t msc_vlr_tests[] = {
 	test_ciph,
 	test_ciph_tmsi,
 	test_ciph_imei,
 	test_ciph_imeisv,
 	test_ciph_tmsi_imei,
+	test_gsm_ciph_in_umts_env,
 	NULL
 };
