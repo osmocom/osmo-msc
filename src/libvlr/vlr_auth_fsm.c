@@ -139,8 +139,10 @@ static bool check_auth_resp(struct vlr_subscr *vsub, bool is_r99,
 	bool res_is_umts_aka;
 	OSMO_ASSERT(at);
 
-	LOGVSUBP(LOGL_DEBUG, vsub, "received res: %s\n",
-		 osmo_hexdump(res, res_len));
+	LOGVSUBP(LOGL_DEBUG, vsub, "AUTH on %s received %s: %s (%u bytes)\n",
+		 is_utran ? "UTRAN" : "GERAN",
+		 is_utran ? "RES" : "SRES/RES",
+		 osmo_hexdump_nospc(res, res_len), res_len);
 
 	/* RES must be present and at least 32bit */
 	if (!res || !res_len) {
