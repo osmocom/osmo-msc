@@ -37,7 +37,7 @@ DREF VLR subscr IMSI:901700000010650 usage increases to: 2
 DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_NEEDS_AUTH_WAIT_AI}: Received Event VLR_AUTH_E_HLR_SAI_ACK
 DVLR SUBSCR(IMSI:901700000010650) Received 1 auth tuples
 DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_NEEDS_AUTH_WAIT_AI}: state_chg to VLR_SUB_AS_WAIT_RESP
-DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_WAIT_RESP}: got auth tuple: use_count=1 key_seq=0
+DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_WAIT_RESP}: got auth tuple: use_count=1 key_seq=0 -- will use UMTS AKA (is_r99=yes, at->vec.auth_types=0x3)
 - sending UMTS Auth Request for IMSI:901700000010650: tuple use_count=1 key_seq=0 auth_types=0x3 and...
 - ...rand=39fa2f4e3d523d8619a73b4f65c3e14d
 - ...autn=8704f5ba55f30000d2ee44b22c8ea919
@@ -203,7 +203,7 @@ DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_NEEDS_AUTH}: Allocated
 DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_NEEDS_AUTH}: is child of Process_Access_Request_VLR(901700000010650)
 DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_NEEDS_AUTH}: Received Event VLR_AUTH_E_START
 DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_NEEDS_AUTH}: state_chg to VLR_SUB_AS_WAIT_RESP
-DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_WAIT_RESP}: got auth tuple: use_count=2 key_seq=0
+DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_WAIT_RESP}: got auth tuple: use_count=2 key_seq=0 -- will use UMTS AKA (is_r99=yes, at->vec.auth_types=0x3)
 - sending UMTS Auth Request for MSISDN:42342: tuple use_count=2 key_seq=0 auth_types=0x3 and...
 - ...rand=39fa2f4e3d523d8619a73b4f65c3e14d
 - ...autn=8704f5ba55f30000d2ee44b22c8ea919
@@ -325,7 +325,7 @@ DREF VLR subscr MSISDN:42342 usage increases to: 3
 DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_NEEDS_AUTH_WAIT_AI}: Received Event VLR_AUTH_E_HLR_SAI_ACK
 DVLR SUBSCR(MSISDN:42342) Received 1 auth tuples
 DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_NEEDS_AUTH_WAIT_AI}: state_chg to VLR_SUB_AS_WAIT_RESP
-DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_WAIT_RESP}: got auth tuple: use_count=1 key_seq=0
+DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_WAIT_RESP}: got auth tuple: use_count=1 key_seq=0 -- will use UMTS AKA (is_r99=yes, at->vec.auth_types=0x3)
 - sending UMTS Auth Request for MSISDN:42342: tuple use_count=1 key_seq=0 auth_types=0x3 and...
 - ...rand=c187a53a5e6b9d573cac7c74451fd46d
 - ...autn=1843a645b98d00005b2d666af46c45d9
@@ -465,7 +465,7 @@ DREF VLR subscr IMSI:901700000010650 usage increases to: 2
 DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_NEEDS_AUTH_WAIT_AI}: Received Event VLR_AUTH_E_HLR_SAI_ACK
 DVLR SUBSCR(IMSI:901700000010650) Received 1 auth tuples
 DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_NEEDS_AUTH_WAIT_AI}: state_chg to VLR_SUB_AS_WAIT_RESP
-DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_WAIT_RESP}: got auth tuple: use_count=1 key_seq=0
+DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_WAIT_RESP}: got auth tuple: use_count=1 key_seq=0 -- will use UMTS AKA (is_r99=yes, at->vec.auth_types=0x3)
 - sending UMTS Auth Request for IMSI:901700000010650: tuple use_count=1 key_seq=0 auth_types=0x3 and...
 - ...rand=39fa2f4e3d523d8619a73b4f65c3e14d
 - ...autn=8704f5ba55f30000d2ee44b22c8ea919
@@ -643,7 +643,7 @@ DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_NEEDS_AUTH}: Allocated
 DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_NEEDS_AUTH}: is child of Process_Access_Request_VLR(901700000010650)
 DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_NEEDS_AUTH}: Received Event VLR_AUTH_E_START
 DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_NEEDS_AUTH}: state_chg to VLR_SUB_AS_WAIT_RESP
-DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_WAIT_RESP}: got auth tuple: use_count=2 key_seq=0
+DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_WAIT_RESP}: got auth tuple: use_count=2 key_seq=0 -- will use UMTS AKA (is_r99=yes, at->vec.auth_types=0x3)
 - sending UMTS Auth Request for MSISDN:42342: tuple use_count=2 key_seq=0 auth_types=0x3 and...
 - ...rand=39fa2f4e3d523d8619a73b4f65c3e14d
 - ...autn=8704f5ba55f30000d2ee44b22c8ea919
@@ -775,7 +775,7 @@ DREF VLR subscr MSISDN:42342 usage increases to: 3
 DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_NEEDS_AUTH_WAIT_AI}: Received Event VLR_AUTH_E_HLR_SAI_ACK
 DVLR SUBSCR(MSISDN:42342) Received 1 auth tuples
 DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_NEEDS_AUTH_WAIT_AI}: state_chg to VLR_SUB_AS_WAIT_RESP
-DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_WAIT_RESP}: got auth tuple: use_count=1 key_seq=0
+DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_WAIT_RESP}: got auth tuple: use_count=1 key_seq=0 -- will use UMTS AKA (is_r99=yes, at->vec.auth_types=0x3)
 - sending UMTS Auth Request for MSISDN:42342: tuple use_count=1 key_seq=0 auth_types=0x3 and...
 - ...rand=c187a53a5e6b9d573cac7c74451fd46d
 - ...autn=1843a645b98d00005b2d666af46c45d9
@@ -925,7 +925,7 @@ DREF VLR subscr IMSI:901700000010650 usage increases to: 2
 DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_NEEDS_AUTH_WAIT_AI}: Received Event VLR_AUTH_E_HLR_SAI_ACK
 DVLR SUBSCR(IMSI:901700000010650) Received 1 auth tuples
 DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_NEEDS_AUTH_WAIT_AI}: state_chg to VLR_SUB_AS_WAIT_RESP
-DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_WAIT_RESP}: got auth tuple: use_count=1 key_seq=0
+DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_WAIT_RESP}: got auth tuple: use_count=1 key_seq=0 -- will use UMTS AKA (is_r99=yes, at->vec.auth_types=0x3)
 - sending UMTS Auth Request for IMSI:901700000010650: tuple use_count=1 key_seq=0 auth_types=0x3 and...
 - ...rand=39fa2f4e3d523d8619a73b4f65c3e14d
 - ...autn=8704f5ba55f30000d2ee44b22c8ea919
@@ -1091,7 +1091,7 @@ DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_NEEDS_AUTH}: Allocated
 DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_NEEDS_AUTH}: is child of Process_Access_Request_VLR(901700000010650)
 DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_NEEDS_AUTH}: Received Event VLR_AUTH_E_START
 DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_NEEDS_AUTH}: state_chg to VLR_SUB_AS_WAIT_RESP
-DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_WAIT_RESP}: got auth tuple: use_count=2 key_seq=0
+DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_WAIT_RESP}: got auth tuple: use_count=2 key_seq=0 -- will use UMTS AKA (is_r99=yes, at->vec.auth_types=0x3)
 - sending UMTS Auth Request for MSISDN:42342: tuple use_count=2 key_seq=0 auth_types=0x3 and...
 - ...rand=39fa2f4e3d523d8619a73b4f65c3e14d
 - ...autn=8704f5ba55f30000d2ee44b22c8ea919
@@ -1198,7 +1198,7 @@ DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_NEEDS_AUTH}: Allocated
 DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_NEEDS_AUTH}: is child of Process_Access_Request_VLR(901700000010650)
 DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_NEEDS_AUTH}: Received Event VLR_AUTH_E_START
 DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_NEEDS_AUTH}: state_chg to VLR_SUB_AS_WAIT_RESP
-DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_WAIT_RESP}: got auth tuple: use_count=3 key_seq=0
+DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_WAIT_RESP}: got auth tuple: use_count=3 key_seq=0 -- will use UMTS AKA (is_r99=yes, at->vec.auth_types=0x3)
 - sending UMTS Auth Request for MSISDN:42342: tuple use_count=3 key_seq=0 auth_types=0x3 and...
 - ...rand=39fa2f4e3d523d8619a73b4f65c3e14d
 - ...autn=8704f5ba55f30000d2ee44b22c8ea919
@@ -1305,7 +1305,7 @@ DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_NEEDS_AUTH}: Allocated
 DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_NEEDS_AUTH}: is child of Process_Access_Request_VLR(901700000010650)
 DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_NEEDS_AUTH}: Received Event VLR_AUTH_E_START
 DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_NEEDS_AUTH}: state_chg to VLR_SUB_AS_WAIT_RESP
-DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_WAIT_RESP}: got auth tuple: use_count=4 key_seq=0
+DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_WAIT_RESP}: got auth tuple: use_count=4 key_seq=0 -- will use UMTS AKA (is_r99=yes, at->vec.auth_types=0x3)
 - sending UMTS Auth Request for MSISDN:42342: tuple use_count=4 key_seq=0 auth_types=0x3 and...
 - ...rand=39fa2f4e3d523d8619a73b4f65c3e14d
 - ...autn=8704f5ba55f30000d2ee44b22c8ea919
@@ -1446,7 +1446,7 @@ DREF VLR subscr IMSI:901700000010650 usage increases to: 2
 DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_NEEDS_AUTH_WAIT_AI}: Received Event VLR_AUTH_E_HLR_SAI_ACK
 DVLR SUBSCR(IMSI:901700000010650) Received 1 auth tuples
 DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_NEEDS_AUTH_WAIT_AI}: state_chg to VLR_SUB_AS_WAIT_RESP
-DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_WAIT_RESP}: got auth tuple: use_count=1 key_seq=0
+DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_WAIT_RESP}: got auth tuple: use_count=1 key_seq=0 -- will use UMTS AKA (is_r99=yes, at->vec.auth_types=0x3)
 - sending UMTS Auth Request for IMSI:901700000010650: tuple use_count=1 key_seq=0 auth_types=0x3 and...
 - ...rand=39fa2f4e3d523d8619a73b4f65c3e14d
 - ...autn=8704f5ba55f30000d2ee44b22c8ea919
@@ -1624,7 +1624,7 @@ DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_NEEDS_AUTH}: Allocated
 DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_NEEDS_AUTH}: is child of Process_Access_Request_VLR(901700000010650)
 DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_NEEDS_AUTH}: Received Event VLR_AUTH_E_START
 DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_NEEDS_AUTH}: state_chg to VLR_SUB_AS_WAIT_RESP
-DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_WAIT_RESP}: got auth tuple: use_count=2 key_seq=0
+DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_WAIT_RESP}: got auth tuple: use_count=2 key_seq=0 -- will use UMTS AKA (is_r99=yes, at->vec.auth_types=0x3)
 - sending UMTS Auth Request for MSISDN:42342: tuple use_count=2 key_seq=0 auth_types=0x3 and...
 - ...rand=39fa2f4e3d523d8619a73b4f65c3e14d
 - ...autn=8704f5ba55f30000d2ee44b22c8ea919
@@ -1741,7 +1741,7 @@ DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_NEEDS_AUTH}: Allocated
 DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_NEEDS_AUTH}: is child of Process_Access_Request_VLR(901700000010650)
 DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_NEEDS_AUTH}: Received Event VLR_AUTH_E_START
 DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_NEEDS_AUTH}: state_chg to VLR_SUB_AS_WAIT_RESP
-DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_WAIT_RESP}: got auth tuple: use_count=3 key_seq=0
+DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_WAIT_RESP}: got auth tuple: use_count=3 key_seq=0 -- will use UMTS AKA (is_r99=yes, at->vec.auth_types=0x3)
 - sending UMTS Auth Request for MSISDN:42342: tuple use_count=3 key_seq=0 auth_types=0x3 and...
 - ...rand=39fa2f4e3d523d8619a73b4f65c3e14d
 - ...autn=8704f5ba55f30000d2ee44b22c8ea919
@@ -1858,7 +1858,7 @@ DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_NEEDS_AUTH}: Allocated
 DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_NEEDS_AUTH}: is child of Process_Access_Request_VLR(901700000010650)
 DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_NEEDS_AUTH}: Received Event VLR_AUTH_E_START
 DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_NEEDS_AUTH}: state_chg to VLR_SUB_AS_WAIT_RESP
-DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_WAIT_RESP}: got auth tuple: use_count=4 key_seq=0
+DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_WAIT_RESP}: got auth tuple: use_count=4 key_seq=0 -- will use UMTS AKA (is_r99=yes, at->vec.auth_types=0x3)
 - sending UMTS Auth Request for MSISDN:42342: tuple use_count=4 key_seq=0 auth_types=0x3 and...
 - ...rand=39fa2f4e3d523d8619a73b4f65c3e14d
 - ...autn=8704f5ba55f30000d2ee44b22c8ea919
@@ -2009,7 +2009,7 @@ DREF VLR subscr IMSI:901700000010650 usage increases to: 2
 DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_NEEDS_AUTH_WAIT_AI}: Received Event VLR_AUTH_E_HLR_SAI_ACK
 DVLR SUBSCR(IMSI:901700000010650) Received 1 auth tuples
 DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_NEEDS_AUTH_WAIT_AI}: state_chg to VLR_SUB_AS_WAIT_RESP
-DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_WAIT_RESP}: got auth tuple: use_count=1 key_seq=0
+DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_WAIT_RESP}: got auth tuple: use_count=1 key_seq=0 -- will use UMTS AKA (is_r99=yes, at->vec.auth_types=0x3)
 - sending UMTS Auth Request for IMSI:901700000010650: tuple use_count=1 key_seq=0 auth_types=0x3 and...
 - ...rand=39fa2f4e3d523d8619a73b4f65c3e14d
 - ...autn=8704f5ba55f30000d2ee44b22c8ea919
@@ -2190,7 +2190,7 @@ DREF VLR subscr MSISDN:42342 usage increases to: 3
 DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_NEEDS_AUTH_WAIT_AI}: Received Event VLR_AUTH_E_HLR_SAI_ACK
 DVLR SUBSCR(MSISDN:42342) Received 1 auth tuples
 DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_NEEDS_AUTH_WAIT_AI}: state_chg to VLR_SUB_AS_WAIT_RESP
-DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_WAIT_RESP}: got auth tuple: use_count=1 key_seq=0
+DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_WAIT_RESP}: got auth tuple: use_count=1 key_seq=0 -- will use UMTS AKA (is_r99=yes, at->vec.auth_types=0x3)
 - sending UMTS Auth Request for MSISDN:42342: tuple use_count=1 key_seq=0 auth_types=0x3 and...
 - ...rand=c187a53a5e6b9d573cac7c74451fd46d
 - ...autn=1843a645b98d00005b2d666af46c45d9
@@ -2330,7 +2330,7 @@ DREF VLR subscr IMSI:901700000010650 usage increases to: 2
 DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_NEEDS_AUTH_WAIT_AI}: Received Event VLR_AUTH_E_HLR_SAI_ACK
 DVLR SUBSCR(IMSI:901700000010650) Received 1 auth tuples
 DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_NEEDS_AUTH_WAIT_AI}: state_chg to VLR_SUB_AS_WAIT_RESP
-DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_WAIT_RESP}: got auth tuple: use_count=1 key_seq=0
+DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_WAIT_RESP}: got auth tuple: use_count=1 key_seq=0 -- will use UMTS AKA (is_r99=yes, at->vec.auth_types=0x3)
 - sending UMTS Auth Request for IMSI:901700000010650: tuple use_count=1 key_seq=0 auth_types=0x3 and...
 - ...rand=39fa2f4e3d523d8619a73b4f65c3e14d
 - ...autn=8704f5ba55f30000d2ee44b22c8ea919
@@ -2523,7 +2523,7 @@ DREF VLR subscr MSISDN:42342 usage increases to: 3
 DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_NEEDS_AUTH_WAIT_AI}: Received Event VLR_AUTH_E_HLR_SAI_ACK
 DVLR SUBSCR(MSISDN:42342) Received 1 auth tuples
 DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_NEEDS_AUTH_WAIT_AI}: state_chg to VLR_SUB_AS_WAIT_RESP
-DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_WAIT_RESP}: got auth tuple: use_count=1 key_seq=0
+DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_WAIT_RESP}: got auth tuple: use_count=1 key_seq=0 -- will use UMTS AKA (is_r99=yes, at->vec.auth_types=0x3)
 - sending UMTS Auth Request for MSISDN:42342: tuple use_count=1 key_seq=0 auth_types=0x3 and...
 - ...rand=c187a53a5e6b9d573cac7c74451fd46d
 - ...autn=1843a645b98d00005b2d666af46c45d9

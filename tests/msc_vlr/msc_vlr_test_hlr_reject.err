@@ -191,7 +191,7 @@ DREF VLR subscr IMSI:901700000004620 usage increases to: 2
 DVLR VLR_Authenticate(901700000004620){VLR_SUB_AS_NEEDS_AUTH_WAIT_AI}: Received Event VLR_AUTH_E_HLR_SAI_ACK
 DVLR SUBSCR(IMSI:901700000004620) Received 1 auth tuples
 DVLR VLR_Authenticate(901700000004620){VLR_SUB_AS_NEEDS_AUTH_WAIT_AI}: state_chg to VLR_SUB_AS_WAIT_RESP
-DVLR VLR_Authenticate(901700000004620){VLR_SUB_AS_WAIT_RESP}: got auth tuple: use_count=1 key_seq=0
+DVLR VLR_Authenticate(901700000004620){VLR_SUB_AS_WAIT_RESP}: got auth tuple: use_count=1 key_seq=0 -- will use GSM AKA (is_r99=no, at->vec.auth_types=0x1)
 - sending GSM Auth Request for IMSI:901700000004620: tuple use_count=1 key_seq=0 auth_types=0x1 and...
 - ...rand=585df1ae287f6e273dce07090d61320b
 - ...expecting sres=2d8b2c3e
@@ -341,7 +341,7 @@ DREF VLR subscr MSISDN:46071 usage increases to: 3
 DVLR VLR_Authenticate(901700000004620){VLR_SUB_AS_NEEDS_AUTH_WAIT_AI}: Received Event VLR_AUTH_E_HLR_SAI_NACK
 DVLR VLR_Authenticate(901700000004620){VLR_SUB_AS_NEEDS_AUTH_WAIT_AI}: GSUP: rx Auth Info Error cause: 17: Network failure
 DVLR VLR_Authenticate(901700000004620){VLR_SUB_AS_NEEDS_AUTH_WAIT_AI}: state_chg to VLR_SUB_AS_WAIT_RESP
-DVLR VLR_Authenticate(901700000004620){VLR_SUB_AS_WAIT_RESP}: got auth tuple: use_count=2 key_seq=0
+DVLR VLR_Authenticate(901700000004620){VLR_SUB_AS_WAIT_RESP}: got auth tuple: use_count=2 key_seq=0 -- will use GSM AKA (is_r99=no, at->vec.auth_types=0x1)
 - sending GSM Auth Request for MSISDN:46071: tuple use_count=2 key_seq=0 auth_types=0x1 and...
 - ...rand=585df1ae287f6e273dce07090d61320b
 - ...expecting sres=2d8b2c3e
@@ -494,7 +494,7 @@ DREF VLR subscr IMSI:901700000004620 usage increases to: 2
 DVLR VLR_Authenticate(901700000004620){VLR_SUB_AS_NEEDS_AUTH_WAIT_AI}: Received Event VLR_AUTH_E_HLR_SAI_ACK
 DVLR SUBSCR(IMSI:901700000004620) Received 1 auth tuples
 DVLR VLR_Authenticate(901700000004620){VLR_SUB_AS_NEEDS_AUTH_WAIT_AI}: state_chg to VLR_SUB_AS_WAIT_RESP
-DVLR VLR_Authenticate(901700000004620){VLR_SUB_AS_WAIT_RESP}: got auth tuple: use_count=1 key_seq=0
+DVLR VLR_Authenticate(901700000004620){VLR_SUB_AS_WAIT_RESP}: got auth tuple: use_count=1 key_seq=0 -- will use GSM AKA (is_r99=no, at->vec.auth_types=0x1)
 - sending GSM Auth Request for IMSI:901700000004620: tuple use_count=1 key_seq=0 auth_types=0x1 and...
 - ...rand=585df1ae287f6e273dce07090d61320b
 - ...expecting sres=2d8b2c3e
@@ -722,7 +722,7 @@ DREF VLR subscr IMSI:901700000004620 usage increases to: 2
 DVLR VLR_Authenticate(901700000004620){VLR_SUB_AS_NEEDS_AUTH_WAIT_AI}: Received Event VLR_AUTH_E_HLR_SAI_ACK
 DVLR SUBSCR(IMSI:901700000004620) Received 1 auth tuples
 DVLR VLR_Authenticate(901700000004620){VLR_SUB_AS_NEEDS_AUTH_WAIT_AI}: state_chg to VLR_SUB_AS_WAIT_RESP
-DVLR VLR_Authenticate(901700000004620){VLR_SUB_AS_WAIT_RESP}: got auth tuple: use_count=1 key_seq=0
+DVLR VLR_Authenticate(901700000004620){VLR_SUB_AS_WAIT_RESP}: got auth tuple: use_count=1 key_seq=0 -- will use GSM AKA (is_r99=no, at->vec.auth_types=0x1)
 - sending GSM Auth Request for IMSI:901700000004620: tuple use_count=1 key_seq=0 auth_types=0x1 and...
 - ...rand=585df1ae287f6e273dce07090d61320b
 - ...expecting sres=2d8b2c3e

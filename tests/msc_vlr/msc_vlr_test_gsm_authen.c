@@ -35,7 +35,9 @@ static void test_gsm_authen()
 	btw("Location Update request causes a GSUP Send Auth Info request to HLR");
 	lu_result_sent = RES_NONE;
 	gsup_expect_tx("08010809710000004026f0");
-	ms_sends_msg("050802008168000130089910070000006402");
+	ms_sends_msg("0508020081680001"
+		     "30" /* <-- Revision Level == 1, i.e. is_r99 == false */
+		     "089910070000006402");
 	OSMO_ASSERT(gsup_tx_confirmed);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
@@ -226,7 +228,9 @@ static void test_gsm_authen_tmsi()
 	btw("Location Update request causes a GSUP Send Auth Info request to HLR");
 	lu_result_sent = RES_NONE;
 	gsup_expect_tx("08010809710000004026f0");
-	ms_sends_msg("050802008168000130089910070000006402");
+	ms_sends_msg("0508020081680001"
+		     "30" /* <-- Revision Level == 1, i.e. is_r99 == false */
+		     "089910070000006402");
 	OSMO_ASSERT(gsup_tx_confirmed);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
@@ -433,7 +437,9 @@ static void test_gsm_authen_tmsi()
 	lu_result_sent = RES_NONE;
 	auth_request_sent = false;
 	auth_request_expect_rand = "fa8f20b781b5881329d4fea26b1a3c51";
-	ms_sends_msg("050802008168000130" "05f4" "03020100");
+	ms_sends_msg("0508020081680001"
+		     "30" /* <-- Revision Level == 1, i.e. is_r99 == false */
+		     "05f4" "03020100");
 	VERBOSE_ASSERT(auth_request_sent, == true, "%d");
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
@@ -503,7 +509,9 @@ static void test_gsm_authen_imei()
 	btw("Location Update request causes a GSUP Send Auth Info request to HLR");
 	lu_result_sent = RES_NONE;
 	gsup_expect_tx("08010809710000004026f0");
-	ms_sends_msg("050802008168000130089910070000006402");
+	ms_sends_msg("0508020081680001"
+		     "30" /* <-- Revision Level == 1, i.e. is_r99 == false */
+		     "089910070000006402");
 	OSMO_ASSERT(gsup_tx_confirmed);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
@@ -600,7 +608,9 @@ static void test_gsm_authen_tmsi_imei()
 	btw("Location Update request causes a GSUP Send Auth Info request to HLR");
 	lu_result_sent = RES_NONE;
 	gsup_expect_tx("08010809710000004026f0");
-	ms_sends_msg("050802008168000130089910070000006402");
+	ms_sends_msg("0508020081680001"
+		     "30" /* <-- Revision Level == 1, i.e. is_r99 == false */
+		     "089910070000006402");
 	OSMO_ASSERT(gsup_tx_confirmed);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
@@ -924,7 +934,9 @@ static void test_wrong_sres_length()
 	btw("Location Update request causes a GSUP Send Auth Info request to HLR");
 	lu_result_sent = RES_NONE;
 	gsup_expect_tx("08010809710000004026f0");
-	ms_sends_msg("050802008168000130089910070000006402");
+	ms_sends_msg("0508020081680001"
+		     "30" /* <-- Revision Level == 1, i.e. is_r99 == false */
+		     "089910070000006402");
 	OSMO_ASSERT(gsup_tx_confirmed);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 

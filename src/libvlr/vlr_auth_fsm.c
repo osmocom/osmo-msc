@@ -266,6 +266,7 @@ static int _vlr_subscr_authenticate(struct osmo_fsm_inst *fi)
 	struct auth_fsm_priv *afp = fi->priv;
 	struct vlr_subscr *vsub = afp->vsub;
 	struct gsm_auth_tuple *at;
+	bool use_umts_aka;
 
 	/* Caller ensures we have vectors available */
 	at = vlr_subscr_get_auth_tuple(vsub, afp->auth_tuple_max_reuse_count);
@@ -277,16 +278,16 @@ static int _vlr_subscr_authenticate(struct osmo_fsm_inst *fi)
 		return -1;
 	}
 
-	LOGPFSM(fi, "got auth tuple: use_count=%d key_seq=%d\n",
-		at->use_count, at->key_seq);
-
-	OSMO_ASSERT(at);
+	use_umts_aka = vlr_use_umts_aka(&at->vec, afp->is_r99);
+	LOGPFSM(fi, "got auth tuple: use_count=%d key_seq=%d"
+		" -- will use %s AKA (is_r99=%s, at->vec.auth_types=0x%x)\n",
+		at->use_count, at->key_seq,
+		use_umts_aka ? "UMTS" : "GSM", afp->is_r99 ? "yes" : "no", at->vec.auth_types);
 
 	/* Transmit auth req to subscriber */
 	afp->auth_requested = true;
 	vsub->last_tuple = at;
-	vsub->vlr->ops.tx_auth_req(vsub->msc_conn_ref, at,
-				   vlr_use_umts_aka(&at->vec, afp->is_r99));
+	vsub->vlr->ops.tx_auth_req(vsub->msc_conn_ref, at, use_umts_aka);
 	return 0;
 }
 
