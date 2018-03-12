@@ -264,11 +264,15 @@ DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_ACCEPTED}: bump: still awaiting f
   MSC <--RAN_UTRAN_IU-- MS: GSM48_MT_CC_SETUP
 DREF MSISDN:42342: MSC conn use + dtap == 2 (0x6)
 DRLL Dispatching 04.08 message GSM48_MT_CC_SETUP (0x3:0x5)
+DCC Unknown transaction ID 8, creating new trans.
+DCC (ti 08 sub MSISDN:42342 callref 80000001) New transaction
 DREF VLR subscr MSISDN:42342 usage increases to: 3
 DREF MSISDN:42342: MSC conn use + trans_cc == 3 (0xe)
 DMM MSISDN:42342: rx msg GSM48_MT_CC_SETUP: received_cm_service_request changes to false
+DCC (ti 08 sub MSISDN:42342) new state NULL -> INITIATED
 DCC Subscriber MSISDN:42342 (42342) sends SETUP to 123
 DMNCC transmit message MNCC_SETUP_IND
+DCC Sending 'MNCC_SETUP_IND' to MNCC.
   MSC --> MNCC: callref 0x80000001: MNCC_SETUP_IND
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_ACCEPTED}: Received Event SUBSCR_CONN_E_COMMUNICATING
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_ACCEPTED}: state_chg to SUBSCR_CONN_S_COMMUNICATING
@@ -277,6 +281,8 @@ DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: bump: connection 
 DREF MSISDN:42342: MSC conn use - dtap == 2 (0xc)
 - MNCC says that's fine
 DMNCC receive message MNCC_CALL_PROC_REQ
+DCC (ti 08 sub 42342) Received 'MNCC_CALL_PROC_REQ' from MNCC in state 1 (INITIATED)
+DCC (ti 08 sub MSISDN:42342) new state INITIATED -> MO_CALL_PROC
 DMSC msc_tx 2 bytes to MSISDN:42342 via RAN_UTRAN_IU
 - DTAP --RAN_UTRAN_IU--> MS: GSM48_MT_CC_CALL_PROC: 8302
 - DTAP matches expected message
@@ -284,10 +290,15 @@ DMSC msc_tx 2 bytes to MSISDN:42342 via RAN_UTRAN_IU
 - Total time passed: 1.000023 s
 - The other call leg got established (not shown here), MNCC tells us so
 DMNCC receive message MNCC_ALERT_REQ
+DCC (ti 08 sub 42342) Received 'MNCC_ALERT_REQ' from MNCC in state 3 (MO_CALL_PROC)
+DCC (ti 08 sub MSISDN:42342) new state MO_CALL_PROC -> CALL_DELIVERED
 DMSC msc_tx 2 bytes to MSISDN:42342 via RAN_UTRAN_IU
 - DTAP --RAN_UTRAN_IU--> MS: GSM48_MT_CC_ALERTING: 8301
 - DTAP matches expected message
 DMNCC receive message MNCC_SETUP_RSP
+DCC (ti 08 sub 42342) Received 'MNCC_SETUP_RSP' from MNCC in state 4 (CALL_DELIVERED)
+DCC starting timer T313 with 30 seconds
+DCC (ti 08 sub MSISDN:42342) new state CALL_DELIVERED -> CONNECT_IND
 DMSC msc_tx 2 bytes to MSISDN:42342 via RAN_UTRAN_IU
 - DTAP --RAN_UTRAN_IU--> MS: GSM48_MT_CC_CONNECT: 8307
 - DTAP matches expected message
@@ -295,7 +306,10 @@ DMSC msc_tx 2 bytes to MSISDN:42342 via RAN_UTRAN_IU
   MSC <--RAN_UTRAN_IU-- MS: GSM48_MT_CC_CONNECT_ACK
 DREF MSISDN:42342: MSC conn use + dtap == 3 (0xe)
 DRLL Dispatching 04.08 message GSM48_MT_CC_CONNECT_ACK (0x3:0xf)
+DCC stopping pending timer T313
+DCC (ti 08 sub MSISDN:42342) new state CONNECT_IND -> ACTIVE
 DMNCC transmit message MNCC_SETUP_COMPL_IND
+DCC Sending 'MNCC_SETUP_COMPL_IND' to MNCC.
   MSC --> MNCC: callref 0x80000001: MNCC_SETUP_COMPL_IND
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: Received Event SUBSCR_CONN_E_COMMUNICATING
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: Received Event SUBSCR_CONN_E_BUMP
@@ -309,22 +323,30 @@ DREF MSISDN:42342: MSC conn use - dtap == 2 (0xc)
   MSC <--RAN_UTRAN_IU-- MS: GSM48_MT_CC_DISCONNECT
 DREF MSISDN:42342: MSC conn use + dtap == 3 (0xe)
 DRLL Dispatching 04.08 message GSM48_MT_CC_DISCONNECT (0x3:0x25)
+DCC (ti 08 sub MSISDN:42342) new state ACTIVE -> DISCONNECT_IND
 DMNCC transmit message MNCC_DISC_IND
+DCC Sending 'MNCC_DISC_IND' to MNCC.
   MSC --> MNCC: callref 0x80000001: MNCC_DISC_IND
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: Received Event SUBSCR_CONN_E_COMMUNICATING
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: Received Event SUBSCR_CONN_E_BUMP
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: bump: connection still has active transaction: CC
 DREF MSISDN:42342: MSC conn use - dtap == 2 (0xc)
 DMNCC receive message MNCC_REL_REQ
+DCC (ti 08 sub 42342) Received 'MNCC_REL_REQ' from MNCC in state 12 (DISCONNECT_IND)
+DCC starting timer T308 with 10 seconds
+DCC (ti 08 sub MSISDN:42342) new state DISCONNECT_IND -> RELEASE_REQ
 DMSC msc_tx 2 bytes to MSISDN:42342 via RAN_UTRAN_IU
 - DTAP --RAN_UTRAN_IU--> MS: GSM48_MT_CC_RELEASE: 832d
 - DTAP matches expected message
   MSC <--RAN_UTRAN_IU-- MS: GSM48_MT_CC_RELEASE_COMPL
 DREF MSISDN:42342: MSC conn use + dtap == 3 (0xe)
 DRLL Dispatching 04.08 message GSM48_MT_CC_RELEASE_COMPL (0x3:0x2a)
+DCC stopping pending timer T308
 DMNCC transmit message MNCC_REL_CNF
+DCC Sending 'MNCC_REL_CNF' to MNCC.
   MSC --> MNCC: callref 0x80000001: MNCC_REL_CNF
   MS <--Call Release-- MSC: subscr=MSISDN:42342 callref=0x0
+DCC (ti 08 sub MSISDN:42342) new state RELEASE_REQ -> NULL
 DREF VLR subscr MSISDN:42342 usage decreases to: 2
 DREF MSISDN:42342: MSC conn use - trans_cc == 2 (0x6)
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: Received Event SUBSCR_CONN_E_COMMUNICATING
@@ -534,6 +556,7 @@ DREF VLR subscr MSISDN:42342 usage decreases to: 1
 - after a while, MNCC asks us to setup a call, causing Paging
 DMNCC receive message MNCC_SETUP_REQ
 DREF VLR subscr MSISDN:42342 usage increases to: 2
+DCC (ti ff sub MSISDN:42342 callref 423) New transaction
 DREF VLR subscr MSISDN:42342 usage increases to: 3
 DMM Subscriber MSISDN:42342 not paged yet, start paging.
   RAN_UTRAN_IU sends out paging request to IMSI 901700000010650, TMSI 0x03020100, LAC 23
@@ -616,7 +639,10 @@ DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_NEW}: SUBSCR_CONN_FROM_PAGING_RES
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_NEW}: state_chg to SUBSCR_CONN_S_ACCEPTED
 DPAG Paging success for MSISDN:42342 (event=0)
 DPAG Calling paging cbfn.
+DCC Paging subscr 42342 succeeded!
 DREF MSISDN:42342: MSC conn use + trans_cc == 2 (0xc)
+DCC starting timer T303 with 30 seconds
+DCC (ti 00 sub MSISDN:42342) new state NULL -> CALL_PRESENT
 DMSC msc_tx 2 bytes to MSISDN:42342 via RAN_UTRAN_IU
 - DTAP --RAN_UTRAN_IU--> MS: GSM48_MT_CC_SETUP: 0305
 - DTAP matches expected message
@@ -627,8 +653,12 @@ DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_ACCEPTED}: bump: connection still
   MSC <--RAN_UTRAN_IU-- MS: GSM48_MT_CC_CALL_CONF
 DREF MSISDN:42342: MSC conn use + dtap == 3 (0xe)
 DRLL Dispatching 04.08 message GSM48_MT_CC_CALL_CONF (0x3:0x8)
+DCC stopping pending timer T303
+DCC starting timer T310 with 30 seconds
+DCC (ti 00 sub MSISDN:42342) new state CALL_PRESENT -> MO_TERM_CALL_CONF
   MS <--Call Assignment-- MSC: subscr=MSISDN:42342 callref=0x423
 DMNCC transmit message MNCC_CALL_CONF_IND
+DCC Sending 'MNCC_CALL_CONF_IND' to MNCC.
   MSC --> MNCC: callref 0x423: MNCC_CALL_CONF_IND
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_ACCEPTED}: Received Event SUBSCR_CONN_E_COMMUNICATING
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_ACCEPTED}: state_chg to SUBSCR_CONN_S_COMMUNICATING
@@ -639,7 +669,11 @@ DREF MSISDN:42342: MSC conn use - dtap == 2 (0xc)
   MSC <--RAN_UTRAN_IU-- MS: GSM48_MT_CC_ALERTING
 DREF MSISDN:42342: MSC conn use + dtap == 3 (0xe)
 DRLL Dispatching 04.08 message GSM48_MT_CC_ALERTING (0x3:0x1)
+DCC stopping pending timer T310
+DCC starting timer T301 with 180 seconds
+DCC (ti 00 sub MSISDN:42342) new state MO_TERM_CALL_CONF -> CALL_RECEIVED
 DMNCC transmit message MNCC_ALERT_IND
+DCC Sending 'MNCC_ALERT_IND' to MNCC.
   MSC --> MNCC: callref 0x423: MNCC_ALERT_IND
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: Received Event SUBSCR_CONN_E_COMMUNICATING
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: Received Event SUBSCR_CONN_E_BUMP
@@ -649,13 +683,18 @@ DREF MSISDN:42342: MSC conn use - dtap == 2 (0xc)
   MSC <--RAN_UTRAN_IU-- MS: GSM48_MT_CC_CONNECT
 DREF MSISDN:42342: MSC conn use + dtap == 3 (0xe)
 DRLL Dispatching 04.08 message GSM48_MT_CC_CONNECT (0x3:0x7)
+DCC stopping pending timer T301
+DCC (ti 00 sub MSISDN:42342) new state CALL_RECEIVED -> CONNECT_REQUEST
 DMNCC transmit message MNCC_SETUP_CNF
+DCC Sending 'MNCC_SETUP_CNF' to MNCC.
   MSC --> MNCC: callref 0x423: MNCC_SETUP_CNF
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: Received Event SUBSCR_CONN_E_COMMUNICATING
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: Received Event SUBSCR_CONN_E_BUMP
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: bump: connection still has active transaction: CC
 DREF MSISDN:42342: MSC conn use - dtap == 2 (0xc)
 DMNCC receive message MNCC_SETUP_COMPL_REQ
+DCC (ti 00 sub 42342) Received 'MNCC_SETUP_COMPL_REQ' from MNCC in state 8 (CONNECT_REQUEST)
+DCC (ti 00 sub MSISDN:42342) new state CONNECT_REQUEST -> ACTIVE
 DMSC msc_tx 2 bytes to MSISDN:42342 via RAN_UTRAN_IU
 - DTAP --RAN_UTRAN_IU--> MS: GSM48_MT_CC_CONNECT_ACK: 030f
 - DTAP matches expected message
@@ -667,22 +706,30 @@ DMSC msc_tx 2 bytes to MSISDN:42342 via RAN_UTRAN_IU
   MSC <--RAN_UTRAN_IU-- MS: GSM48_MT_CC_DISCONNECT
 DREF MSISDN:42342: MSC conn use + dtap == 3 (0xe)
 DRLL Dispatching 04.08 message GSM48_MT_CC_DISCONNECT (0x3:0x25)
+DCC (ti 00 sub MSISDN:42342) new state ACTIVE -> DISCONNECT_IND
 DMNCC transmit message MNCC_DISC_IND
+DCC Sending 'MNCC_DISC_IND' to MNCC.
   MSC --> MNCC: callref 0x423: MNCC_DISC_IND
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: Received Event SUBSCR_CONN_E_COMMUNICATING
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: Received Event SUBSCR_CONN_E_BUMP
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: bump: connection still has active transaction: CC
 DREF MSISDN:42342: MSC conn use - dtap == 2 (0xc)
 DMNCC receive message MNCC_REL_REQ
+DCC (ti 00 sub 42342) Received 'MNCC_REL_REQ' from MNCC in state 12 (DISCONNECT_IND)
+DCC starting timer T308 with 10 seconds
+DCC (ti 00 sub MSISDN:42342) new state DISCONNECT_IND -> RELEASE_REQ
 DMSC msc_tx 2 bytes to MSISDN:42342 via RAN_UTRAN_IU
 - DTAP --RAN_UTRAN_IU--> MS: GSM48_MT_CC_RELEASE: 032d
 - DTAP matches expected message
   MSC <--RAN_UTRAN_IU-- MS: GSM48_MT_CC_RELEASE_COMPL
 DREF MSISDN:42342: MSC conn use + dtap == 3 (0xe)
 DRLL Dispatching 04.08 message GSM48_MT_CC_RELEASE_COMPL (0x3:0x2a)
+DCC stopping pending timer T308
 DMNCC transmit message MNCC_REL_CNF
+DCC Sending 'MNCC_REL_CNF' to MNCC.
   MSC --> MNCC: callref 0x423: MNCC_REL_CNF
   MS <--Call Release-- MSC: subscr=MSISDN:42342 callref=0x0
+DCC (ti 00 sub MSISDN:42342) new state RELEASE_REQ -> NULL
 DREF VLR subscr MSISDN:42342 usage decreases to: 2
 DREF MSISDN:42342: MSC conn use - trans_cc == 2 (0x6)
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: Received Event SUBSCR_CONN_E_COMMUNICATING

@@ -377,6 +377,7 @@ DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_NEW}: SUBSCR_CONN_FROM_PAGING_RES
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_NEW}: state_chg to SUBSCR_CONN_S_ACCEPTED
 DPAG Paging success for MSISDN:42342 (event=0)
 DPAG Calling paging cbfn.
+DCC (ti 00 sub MSISDN:42342 callref 40000001) New transaction
 DREF VLR subscr MSISDN:42342 usage increases to: 5
 DREF MSISDN:42342: MSC conn use + trans_sms == 3 (0x16)
 DMSC msc_tx 91 bytes to MSISDN:42342 via RAN_GERAN_A
@@ -875,6 +876,7 @@ DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_NEW}: SUBSCR_CONN_FROM_PAGING_RES
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_NEW}: state_chg to SUBSCR_CONN_S_ACCEPTED
 DPAG Paging success for MSISDN:42342 (event=0)
 DPAG Calling paging cbfn.
+DCC (ti 00 sub MSISDN:42342 callref 40000002) New transaction
 DREF VLR subscr MSISDN:42342 usage increases to: 5
 DREF MSISDN:42342: MSC conn use + trans_sms == 2 (0x14)
 DMSC msc_tx 91 bytes to MSISDN:42342 via RAN_UTRAN_IU
