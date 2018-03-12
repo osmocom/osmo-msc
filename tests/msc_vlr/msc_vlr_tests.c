@@ -433,7 +433,7 @@ static struct log_info_cat test_categories[] = {
 	[DCC] = {
 		.name = "DCC",
 		.description = "Layer3 Call Control (CC)",
-		.enabled = 1, .loglevel = LOGL_INFO,
+		.enabled = 1, .loglevel = LOGL_DEBUG,
 	},
 	[DMM] = {
 		.name = "DMM",
