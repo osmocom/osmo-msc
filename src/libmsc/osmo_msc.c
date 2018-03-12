@@ -47,7 +47,7 @@ void msc_sapi_n_reject(struct gsm_subscriber_connection *conn, int dlci)
 		gsm411_sapi_n_reject(conn);
 }
 
-static void subscr_conn_release_when_unused(struct gsm_subscriber_connection *conn)
+void subscr_conn_release_when_unused(struct gsm_subscriber_connection *conn)
 {
 	if (!conn)
 		return;

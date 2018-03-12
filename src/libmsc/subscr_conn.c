@@ -371,8 +371,11 @@ bool msc_subscr_conn_is_accepted(const struct gsm_subscriber_connection *conn)
 void msc_subscr_conn_communicating(struct gsm_subscriber_connection *conn)
 {
 	OSMO_ASSERT(conn);
-	osmo_fsm_inst_dispatch(conn->conn_fsm, SUBSCR_CONN_E_COMMUNICATING,
-			       NULL);
+	/* This function is called to indicate that *some* communication is happening with the phone.
+	 * Late in the process, that may be a Release Confirm and the FSM and conn are already in
+	 * teardown. No need to signal SUBSCR_CONN_E_COMMUNICATING then. */
+	if (conn->conn_fsm)
+		osmo_fsm_inst_dispatch(conn->conn_fsm, SUBSCR_CONN_E_COMMUNICATING, NULL);
 }
 
 void msc_subscr_conn_init(void)

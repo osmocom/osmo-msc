@@ -482,20 +482,13 @@ static void test_call_mo_to_unknown_timeout()
 	fake_time_passes(10, 23);
 
 	btw("The CC Release times out and we still properly clear the conn");
-	btw("ERROR: currently this is broken and will be fixed in a subsequent commit");
 	cc_to_mncc_expect_tx("", MNCC_REL_CNF);
-	expect_iu_release(); /* <-- will currently not work out */
+	expect_iu_release();
 	fake_time_passes(10, 23);
 	OSMO_ASSERT(cc_to_mncc_tx_confirmed);
-	/* EXPECTING ERROR: here, we should be able to do:
 	OSMO_ASSERT(iu_release_sent);
-	EXPECT_CONN_COUNT(0);
-	*/
-	BTW("This test is currently expecting erratic behavior:");
-	EXPECT_CONN_COUNT(1);
-	/* need to free manually for the sake of this test suite */
-	msc_subscr_conn_close(g_conn, 0);
 
+	EXPECT_CONN_COUNT(0);
 	clear_vlr();
 	comment_end();
 }
