@@ -117,6 +117,7 @@ struct gsm_trans *trans_alloc(struct gsm_network *net,
 void trans_free(struct gsm_trans *trans)
 {
 	enum msc_subscr_conn_use conn_usage_token = MSC_CONN_USE_UNTRACKED;
+	struct gsm_subscriber_connection *conn;
 
 	switch (trans->protocol) {
 	case GSM48_PDISC_CC:
@@ -144,8 +145,15 @@ void trans_free(struct gsm_trans *trans)
 	if (trans->conn)
 		msc_subscr_conn_put(trans->conn, conn_usage_token);
 
+	conn = trans->conn;
 	trans->conn = NULL;
 	talloc_free(trans);
+
+	/* trans_free() should always happen while the conn_fsm is still around. */
+	OSMO_ASSERT(conn->conn_fsm);
+
+	/* Ask the conn_fsm whether all transactions are done, and to close the conn if so. */
+	subscr_conn_bump(conn);
 }
 
 /*! allocate an unused transaction ID for the given subscriber

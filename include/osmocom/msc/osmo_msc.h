@@ -110,4 +110,6 @@ void _msc_subscr_conn_put(struct gsm_subscriber_connection *conn,
 
 void msc_stop_paging(struct vlr_subscr *vsub);
 
+void subscr_conn_bump(struct gsm_subscriber_connection *conn);
+
 #endif
