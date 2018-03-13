@@ -1257,6 +1257,10 @@ static void lu_fsm_wait_lu_compl(struct osmo_fsm_inst *fi, uint32_t event,
 		/* TODO: Set_Notification_Type 23.078 */
 		/* TODO: Notify_gsmSCF 23.078 */
 		/* TODO: Authenticated Radio Contact Established -> ARC */
+
+		if (lfp->type == VLR_LU_TYPE_IMSI_ATTACH)
+			lfp->vlr->ops.tx_mm_info(lfp->msc_conn_ref);
+
 		lu_fsm_success(fi);
 		break;
 	case VLR_ULA_E_LU_COMPL_FAILURE:

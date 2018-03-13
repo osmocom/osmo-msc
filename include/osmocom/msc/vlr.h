@@ -217,6 +217,7 @@ struct vlr_ops {
 	/* UTRAN: send Common Id (when auth+ciph are complete) */
 	int (*tx_common_id)(void *msc_conn_ref);
 
+	int (*tx_mm_info)(void *msc_conn_ref);
 
 	/* notify MSC/SGSN that the subscriber data in VLR has been updated */
 	void (*subscr_update)(struct vlr_subscr *vsub);
