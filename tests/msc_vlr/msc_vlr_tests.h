@@ -112,6 +112,8 @@ extern const char *cc_to_mncc_tx_expected_imsi;
 extern bool cc_to_mncc_tx_confirmed;
 extern uint32_t cc_to_mncc_tx_got_callref;
 
+extern struct gsm_mncc *on_call_release_mncc_sends_to_cc_data;
+
 static inline void expect_iu_release()
 {
 	iu_release_expected = true;

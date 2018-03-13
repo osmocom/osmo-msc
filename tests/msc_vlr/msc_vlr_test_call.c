@@ -31,6 +31,12 @@ static void mncc_sends_to_cc(uint32_t msg_type, struct gsm_mncc *mncc)
 	mncc_tx_to_cc(net, msg_type, mncc);
 }
 
+static void on_call_release_mncc_sends_to_cc(uint32_t msg_type, struct gsm_mncc *mncc)
+{
+	mncc->msg_type = msg_type;
+	on_call_release_mncc_sends_to_cc_data = mncc;
+}
+
 #define IMSI "901700000010650"
 
 static void standard_lu()
@@ -334,6 +340,80 @@ static void test_call_mt()
 	comment_end();
 }
 
+static void test_call_mt2()
+{
+	struct gsm_mncc mncc = {
+		.imsi = IMSI,
+		.callref = 0x423,
+	};
+
+	comment_start();
+
+	fake_time_start();
+
+	standard_lu();
+
+	BTW("after a while, MNCC asks us to setup a call, causing Paging");
+	
+	paging_expect_imsi(IMSI);
+	paging_sent = false;
+	mncc_sends_to_cc(MNCC_SETUP_REQ, &mncc);
+
+	VERBOSE_ASSERT(paging_sent, == true, "%d");
+	VERBOSE_ASSERT(paging_stopped, == false, "%d");
+
+	btw("MS replies with Paging Response, and VLR sends Auth Request");
+	auth_request_sent = false;
+	auth_request_expect_rand = "c187a53a5e6b9d573cac7c74451fd46d";
+	auth_request_expect_autn = "1843a645b98d00005b2d666af46c45d9";
+	ms_sends_msg("062707"
+		     "03575886" /* classmark 2 */
+		     "089910070000106005" /* IMSI */);
+	VERBOSE_ASSERT(auth_request_sent, == true, "%d");
+
+	btw("MS sends Authen Response, VLR accepts and sends SecurityModeControl");
+	expect_security_mode_ctrl(NULL, "1159ec926a50e98c034a6b7d7c9f418d");
+	ms_sends_msg("0554" "7db47cf7" "2104" "f81e4dc7"); /* 2nd vector's res, s.a. */
+	VERBOSE_ASSERT(security_mode_ctrl_sent, == true, "%d");
+
+	btw("MS sends SecurityModeControl acceptance, VLR accepts, sends CC Setup");
+	dtap_expect_tx("0305" /* CC: Setup */);
+	ms_sends_security_mode_complete();
+	VERBOSE_ASSERT(paging_stopped, == true, "%d");
+
+	cc_to_mncc_expect_tx(IMSI, MNCC_CALL_CONF_IND);
+	ms_sends_msg("8348" /* CC: Call Confirmed */
+		     "0406600402000581" /* Bearer Capability */
+		     "15020100" /* Call Control Capabilities */
+		     "40080402600400021f00" /* Supported Codec List */);
+	OSMO_ASSERT(cc_to_mncc_tx_confirmed);
+
+	fake_time_passes(1, 23);
+
+	cc_to_mncc_expect_tx("", MNCC_ALERT_IND);
+	ms_sends_msg("8381" /* CC: Alerting */);
+	OSMO_ASSERT(cc_to_mncc_tx_confirmed);
+
+	fake_time_passes(15, 23);
+
+	btw("The call failed, the BSC sends a BSSMAP Clear Request");
+	on_call_release_mncc_sends_to_cc(MNCC_REL_REQ, &mncc);
+	cc_to_mncc_expect_tx("", MNCC_REL_CNF);
+	dtap_expect_tx("032d"); /* CC: Release */
+	expect_iu_release();
+	msc_clear_request(g_conn, 0);
+	OSMO_ASSERT(cc_to_mncc_tx_confirmed);
+	OSMO_ASSERT(iu_release_sent);
+
+	EXPECT_CONN_COUNT(0);
+
+	/* Make sure a pending release timer doesn't fire later to access freed data */
+	fake_time_passes(15, 23);
+
+	clear_vlr();
+	comment_end();
+}
+
 static void test_call_mo_to_unknown()
 {
 	struct gsm_mncc mncc = {
@@ -497,6 +577,7 @@ static void test_call_mo_to_unknown_timeout()
 msc_vlr_test_func_t msc_vlr_tests[] = {
 	test_call_mo,
 	test_call_mt,
+	test_call_mt2,
 	test_call_mo_to_unknown,
 	test_call_mo_to_unknown_timeout,
 	NULL

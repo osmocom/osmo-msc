@@ -616,12 +616,19 @@ int __wrap_msc_mgcp_call_assignment(struct gsm_trans *trans)
 	return 0;
 }
 
+struct gsm_mncc *on_call_release_mncc_sends_to_cc_data = NULL;
+
 /* override, requires '-Wl,--wrap=msc_mgcp_call_release' */
 void __real_msc_mgcp_call_release(struct gsm_trans *trans);
 void __wrap_msc_mgcp_call_release(struct gsm_trans *trans)
 {
 	log("MS <--Call Release-- MSC: subscr=%s callref=0x%x",
 	    vlr_subscr_name(trans->vsub), trans->callref);
+	if (on_call_release_mncc_sends_to_cc_data) {
+		mncc_tx_to_cc(trans->net, on_call_release_mncc_sends_to_cc_data->msg_type,
+			      on_call_release_mncc_sends_to_cc_data);
+		on_call_release_mncc_sends_to_cc_data = NULL;
+	}
 }
 
 static int fake_vlr_tx_lu_acc(void *msc_conn_ref, uint32_t send_tmsi)
