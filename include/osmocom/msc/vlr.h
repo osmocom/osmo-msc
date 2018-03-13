@@ -74,7 +74,7 @@ enum vlr_ciph_result_cause {
 
 struct vlr_ciph_result {
 	enum vlr_ciph_result_cause cause;
-	const char *imeisv;
+	char imeisv[GSM48_MI_SIZE];
 };
 
 enum vlr_subscr_security_context {

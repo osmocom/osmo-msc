@@ -173,7 +173,6 @@ void msc_cipher_mode_compl(struct gsm_subscriber_connection *conn,
 		unsigned int payload_len = msgb_l3len(msg) - sizeof(*gh);
 		struct tlv_parsed tp;
 		uint8_t mi_type;
-		char imeisv[GSM48_MI_SIZE] = "";
 
 		if (!gh) {
 			LOGP(DRR, LOGL_ERROR, "invalid: msgb without l3 header\n");
@@ -187,10 +186,9 @@ void msc_cipher_mode_compl(struct gsm_subscriber_connection *conn,
 			mi_type = TLVP_VAL(&tp, GSM48_IE_MOBILE_ID)[0] & GSM_MI_TYPE_MASK;
 			if (mi_type == GSM_MI_TYPE_IMEISV
 			    && TLVP_LEN(&tp, GSM48_IE_MOBILE_ID) > 0) {
-				gsm48_mi_to_string(imeisv, sizeof(imeisv),
+				gsm48_mi_to_string(ciph_res.imeisv, sizeof(ciph_res.imeisv),
 						   TLVP_VAL(&tp, GSM48_IE_MOBILE_ID),
 						   TLVP_LEN(&tp, GSM48_IE_MOBILE_ID));
-				ciph_res.imeisv = imeisv;
 			}
 		}
 	}

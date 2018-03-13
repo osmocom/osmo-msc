@@ -1165,7 +1165,7 @@ static void lu_fsm_wait_ciph(struct osmo_fsm_inst *fi, uint32_t event,
 		return;
 	}
 
-	if (res.imeisv) {
+	if (*res.imeisv) {
 		LOGPFSM(fi, "got IMEISV: %s\n", res.imeisv);
 		vlr_subscr_set_imeisv(vsub, res.imeisv);
 	}

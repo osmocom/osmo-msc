@@ -500,7 +500,7 @@ static void proc_arq_vlr_fn_w_ciph(struct osmo_fsm_inst *fi,
 	}
 
 
-	if (res.imeisv) {
+	if (*res.imeisv) {
 		LOGPFSM(fi, "got IMEISV: %s\n", res.imeisv);
 		vlr_subscr_set_imeisv(vsub, res.imeisv);
 	}
