@@ -121,6 +121,15 @@ void trans_free(struct gsm_trans *trans)
 	switch (trans->protocol) {
 	case GSM48_PDISC_CC:
 		_gsm48_cc_trans_free(trans);
+		if (osmo_timer_pending(&trans->cc.timer)) {
+			LOGP(DCC, LOGL_ERROR,
+			     "%s Timer 0x%x is still running while discarding transaction"
+			     " -- this is a bug: we were still expecting a response but"
+			     " are freeing the transaction anyway\n",
+			     vlr_subscr_name(trans->conn->vsub), trans->cc.Tcurrent);
+			osmo_timer_del(&trans->cc.timer);
+			trans->cc.Tcurrent = 0;
+		}
 		conn_usage_token = MSC_CONN_USE_TRANS_CC;
 		break;
 	case GSM48_PDISC_SMS:
