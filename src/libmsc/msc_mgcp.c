@@ -58,6 +58,7 @@ enum msc_mgcp_cause_code {
 	MGCP_ERR_MGW_FAIL,
 	MGCP_ERR_MGW_INVAL_RESP,
 	MGCP_ERR_MGW_TX_FAIL,
+	MGCP_ERR_MGW_TIMEOUT,
 	MGCP_ERR_UNEXP_TEARDOWN,
 	MGCP_ERR_UNSUPP_ADDR_FMT,
 	MGCP_ERR_RAN_TIMEOUT,
@@ -72,6 +73,7 @@ static const struct value_string msc_mgcp_cause_codes_names[] = {
 	{MGCP_ERR_MGW_FAIL, "operation failed on MGW"},
 	{MGCP_ERR_MGW_INVAL_RESP, "invalid / unparseable response from MGW"},
 	{MGCP_ERR_MGW_TX_FAIL, "failed to transmit MGCP message to MGW"},
+	{MGCP_ERR_MGW_TIMEOUT, "request to MGW timed out"},
 	{MGCP_ERR_UNEXP_TEARDOWN, "unexpected connection teardown"},
 	{MGCP_ERR_UNSUPP_ADDR_FMT, "unsupported network address format used (RAN)"},
 	{MGCP_ERR_RAN_TIMEOUT, "call could not be completed in time (RAN)"},
@@ -150,11 +152,9 @@ static const struct value_string msc_mgcp_fsm_evt_names[] = {
  * remove a half open connection (if possible). This function will execute
  * a controlled jump to the DLCX phase. From there, the FSM will then just
  * continue like the call were ended normally */
-
-#define handle_error(mgcp_ctx, cause) \
-	_handle_error(mgcp_ctx, cause, __FILE__, __LINE__)
-static void _handle_error(struct mgcp_ctx *mgcp_ctx, enum msc_mgcp_cause_code cause,
-			  const char *file, int line)
+#define handle_error(mgcp_ctx, cause, dlcx) _handle_error(mgcp_ctx, cause, dlcx, __FILE__, __LINE__)
+static void _handle_error(struct mgcp_ctx *mgcp_ctx, enum msc_mgcp_cause_code cause, bool dlcx, const char *file,
+			  int line)
 {
 	struct osmo_fsm_inst *fi;
 	struct gsm_mncc mncc = {
@@ -174,13 +174,32 @@ static void _handle_error(struct mgcp_ctx *mgcp_ctx, enum msc_mgcp_cause_code ca
 	LOGPFSMLSRC(mgcp_ctx->fsm, LOGL_ERROR, file, line, "%s -- graceful shutdown...\n",
 		    get_value_string(msc_mgcp_cause_codes_names, cause));
 
-	/* Set the VM into the state where it waits for the call end */
-	osmo_fsm_inst_state_chg(fi, ST_CALL, 0, 0);
+	/* For the shutdown we have two options. Whenever it makes sense to
+	 * send a DLCX to the MGW in order to be sure that the connection is
+	 * properly cleaned up, the dlcx flag should be set. In other cases
+	 * where a DLCX does not make sense (e.g. the MGW times out), halting
+	 * directly is the better options. In those cases, the dlcx flag
+	 * should not be set */
+	if (dlcx) {
+		/* Fast-forward the FSM into call state. In this state the FSM
+		 * expects either an EV_TEARDOWN or an EV_TEARDOWN_ERROR. When
+		 * one of the two events is received a DLCX will be send to
+		 * the MGW. After that. The FSM automatically halts but will
+		 * still expect a call msc_mgcp_call_release() to be freed
+		 * completely */
+		osmo_fsm_inst_state_chg(fi, ST_CALL, 0, 0);
+		osmo_fsm_inst_dispatch(mgcp_ctx->fsm, EV_TEARDOWN_ERROR, mgcp_ctx);
+	} else {
+		/* Halt the state machine immediately. The FSM will not be
+		 * freed yet, we stil require the higher layers to call
+		 * msc_mgcp_call_release() */
+		osmo_fsm_inst_state_chg(fi, ST_HALT, 0, 0);
+		osmo_fsm_inst_dispatch(fi, EV_TEARDOWN_ERROR, mgcp_ctx);
+	}
 
-	/* Simulate the call end by sending a teardown event, so that
-	 * the FSM proceeds directly with the DLCX */
-	osmo_fsm_inst_dispatch(mgcp_ctx->fsm, EV_TEARDOWN_ERROR, mgcp_ctx);
-
+	/* Request the higher layers to release the call */
+	mncc_set_cause(&mncc, GSM48_CAUSE_LOC_TRANS_NET,
+		       GSM48_CC_CAUSE_RESOURCE_UNAVAIL);
 	mncc_tx_to_cc(mgcp_ctx->trans->net, MNCC_REL_REQ, &mncc);
 }
 
@@ -205,14 +224,13 @@ static int fsm_timeout_cb(struct osmo_fsm_inst *fi)
 		/* Cancel the transaction that timed out */
 		mgcp_client_cancel(mgcp, mgcp_ctx->mgw_pending_trans);
 
-		/* Initiate self destruction of the FSM */
-		osmo_fsm_inst_state_chg(fi, ST_HALT, 0, 0);
-		osmo_fsm_inst_dispatch(fi, EV_TEARDOWN_ERROR, mgcp_ctx);
+		/* halt of the FSM */
+		handle_error(mgcp_ctx, MGCP_ERR_MGW_TIMEOUT, false);
 	} else if (fi->T == MGCP_RAN_TIMEOUT_TIMER_NR) {
 		/* If the logic that controls the RAN is unable to negotiate a
 		 * connection, we presumably still have a working connection to
 		 * the MGW, we will try to shut down gracefully. */
-		handle_error(mgcp_ctx, MGCP_ERR_RAN_TIMEOUT);
+		handle_error(mgcp_ctx, MGCP_ERR_RAN_TIMEOUT, true);
 	} else if (fi->T == MGCP_REL_TIMEOUT_TIMER_NR) {
 		/* Under normal conditions, the MSC logic should always command
 		 * to release the call at some point. However, the release may
@@ -228,7 +246,7 @@ static int fsm_timeout_cb(struct osmo_fsm_inst *fi)
 	} else if (fi->T == MGCP_ASS_TIMEOUT_TIMER_NR) {
 		/* There may be rare cases in which the MSC is unable to
 		 * complete the call assignment */
-		handle_error(mgcp_ctx, MGCP_ERR_ASS_TIMEOUT);
+		handle_error(mgcp_ctx, MGCP_ERR_ASS_TIMEOUT, true);
 	} else {
 		/* Ther must not be any unsolicited timers in this FSM. If so,
 		 * we have serious problem. */
@@ -267,7 +285,7 @@ static void fsm_crcx_ran_cb(struct osmo_fsm_inst *fi, uint32_t event, void *data
 	};
 	if (snprintf(mgcp_msg.endpoint, MGCP_ENDPOINT_MAXLEN, MGCP_ENDPOINT_FORMAT, mgcp_ctx->rtp_endpoint) >=
 	    MGCP_ENDPOINT_MAXLEN) {
-		handle_error(mgcp_ctx, MGCP_ERR_NOMEM);
+		handle_error(mgcp_ctx, MGCP_ERR_NOMEM, true);
 		return;
 	}
 	msg = mgcp_msg_gen(mgcp, &mgcp_msg);
@@ -277,7 +295,7 @@ static void fsm_crcx_ran_cb(struct osmo_fsm_inst *fi, uint32_t event, void *data
 	mgcp_ctx->mgw_pending_trans = mgcp_msg_trans_id(msg);
 	rc = mgcp_client_tx(mgcp, msg, mgw_crcx_ran_resp_cb, mgcp_ctx);
 	if (rc < 0) {
-		handle_error(mgcp_ctx, MGCP_ERR_MGW_TX_FAIL);
+		handle_error(mgcp_ctx, MGCP_ERR_MGW_TX_FAIL, true);
 		return;
 	}
 
@@ -301,7 +319,7 @@ static void mgw_crcx_ran_resp_cb(struct mgcp_response *r, void *priv)
 	if (r->head.response_code != 200) {
 		LOGPFSML(mgcp_ctx->fsm, LOGL_ERROR,
 			 "CRCX/RAN: response yields error: %d %s\n", r->head.response_code, r->head.comment);
-		handle_error(mgcp_ctx, MGCP_ERR_MGW_FAIL);
+		handle_error(mgcp_ctx, MGCP_ERR_MGW_FAIL, true);
 		return;
 	}
 
@@ -312,7 +330,7 @@ static void mgw_crcx_ran_resp_cb(struct mgcp_response *r, void *priv)
 	rc = mgcp_response_parse_params(r);
 	if (rc) {
 		LOGPFSML(mgcp_ctx->fsm, LOGL_ERROR, "CRCX/RAN: Cannot parse response\n");
-		handle_error(mgcp_ctx, MGCP_ERR_MGW_INVAL_RESP);
+		handle_error(mgcp_ctx, MGCP_ERR_MGW_INVAL_RESP, true);
 		return;
 	}
 
@@ -344,7 +362,7 @@ static void fsm_crcx_cn_cb(struct osmo_fsm_inst *fi, uint32_t event, void *data)
 	case EV_CRCX_RAN_RESP:
 		break;
 	default:
-		handle_error(mgcp_ctx, MGCP_ERR_UNEXP_TEARDOWN);
+		handle_error(mgcp_ctx, MGCP_ERR_UNEXP_TEARDOWN, true);
 		return;
 	}
 
@@ -360,7 +378,7 @@ static void fsm_crcx_cn_cb(struct osmo_fsm_inst *fi, uint32_t event, void *data)
 	};
 	if (snprintf(mgcp_msg.endpoint, MGCP_ENDPOINT_MAXLEN, MGCP_ENDPOINT_FORMAT, mgcp_ctx->rtp_endpoint) >=
 	    MGCP_ENDPOINT_MAXLEN) {
-		handle_error(mgcp_ctx, MGCP_ERR_NOMEM);
+		handle_error(mgcp_ctx, MGCP_ERR_NOMEM, true);
 		return;
 	}
 	msg = mgcp_msg_gen(mgcp, &mgcp_msg);
@@ -370,7 +388,7 @@ static void fsm_crcx_cn_cb(struct osmo_fsm_inst *fi, uint32_t event, void *data)
 	mgcp_ctx->mgw_pending_trans = mgcp_msg_trans_id(msg);
 	rc = mgcp_client_tx(mgcp, msg, mgw_crcx_cn_resp_cb, mgcp_ctx);
 	if (rc < 0) {
-		handle_error(mgcp_ctx, MGCP_ERR_MGW_TX_FAIL);
+		handle_error(mgcp_ctx, MGCP_ERR_MGW_TX_FAIL, true);
 		return;
 	}
 
@@ -394,7 +412,7 @@ static void mgw_crcx_cn_resp_cb(struct mgcp_response *r, void *priv)
 	if (r->head.response_code != 200) {
 		LOGPFSML(mgcp_ctx->fsm, LOGL_ERROR,
 			 "CRCX/CN: response yields error: %d %s\n", r->head.response_code, r->head.comment);
-		handle_error(mgcp_ctx, MGCP_ERR_MGW_FAIL);
+		handle_error(mgcp_ctx, MGCP_ERR_MGW_FAIL, true);
 		return;
 	}
 
@@ -405,7 +423,7 @@ static void mgw_crcx_cn_resp_cb(struct mgcp_response *r, void *priv)
 	rc = mgcp_response_parse_params(r);
 	if (rc) {
 		LOGPFSML(mgcp_ctx->fsm, LOGL_ERROR, "CRCX/CN: Cannot parse response\n");
-		handle_error(mgcp_ctx, MGCP_ERR_MGW_INVAL_RESP);
+		handle_error(mgcp_ctx, MGCP_ERR_MGW_INVAL_RESP, true);
 		return;
 	}
 
@@ -435,7 +453,7 @@ static void fsm_crcx_compl(struct osmo_fsm_inst *fi, uint32_t event, void *data)
 	case EV_CRCX_CN_RESP:
 		break;
 	default:
-		handle_error(mgcp_ctx, MGCP_ERR_UNEXP_TEARDOWN);
+		handle_error(mgcp_ctx, MGCP_ERR_UNEXP_TEARDOWN, true);
 		return;
 	}
 
@@ -473,7 +491,7 @@ static void fsm_crcx_compl(struct osmo_fsm_inst *fi, uint32_t event, void *data)
 	return;
 
 error:
-	handle_error(mgcp_ctx, MGCP_ERR_ASSGMNT_FAIL);
+	handle_error(mgcp_ctx, MGCP_ERR_ASSGMNT_FAIL, true);
 }
 
 static void mgw_mdcx_cn_resp_cb(struct mgcp_response *r, void *priv);
@@ -501,7 +519,7 @@ static void fsm_mdcx_cn_cb(struct osmo_fsm_inst *fi, uint32_t event, void *data)
 	case EV_CONNECT:
 		break;
 	default:
-		handle_error(mgcp_ctx, MGCP_ERR_UNEXP_TEARDOWN);
+		handle_error(mgcp_ctx, MGCP_ERR_UNEXP_TEARDOWN, true);
 		return;
 	}
 
@@ -523,7 +541,7 @@ static void fsm_mdcx_cn_cb(struct osmo_fsm_inst *fi, uint32_t event, void *data)
 	};
 	if (snprintf(mgcp_msg.endpoint, MGCP_ENDPOINT_MAXLEN, MGCP_ENDPOINT_FORMAT, mgcp_ctx->rtp_endpoint) >=
 	    MGCP_ENDPOINT_MAXLEN) {
-		handle_error(mgcp_ctx, MGCP_ERR_NOMEM);
+		handle_error(mgcp_ctx, MGCP_ERR_NOMEM, true);
 		return;
 	}
 	msg = mgcp_msg_gen(mgcp, &mgcp_msg);
@@ -533,7 +551,7 @@ static void fsm_mdcx_cn_cb(struct osmo_fsm_inst *fi, uint32_t event, void *data)
 	mgcp_ctx->mgw_pending_trans = mgcp_msg_trans_id(msg);
 	rc = mgcp_client_tx(mgcp, msg, mgw_mdcx_cn_resp_cb, mgcp_ctx);
 	if (rc < 0) {
-		handle_error(mgcp_ctx, MGCP_ERR_MGW_TX_FAIL);
+		handle_error(mgcp_ctx, MGCP_ERR_MGW_TX_FAIL, true);
 		return;
 	}
 
@@ -550,7 +568,7 @@ static void mgw_mdcx_cn_resp_cb(struct mgcp_response *r, void *priv)
 	if (r->head.response_code != 200) {
 		LOGPFSML(mgcp_ctx->fsm, LOGL_ERROR,
 			 "MDCX/CN: response yields error: %d %s\n", r->head.response_code, r->head.comment);
-		handle_error(mgcp_ctx, MGCP_ERR_MGW_FAIL);
+		handle_error(mgcp_ctx, MGCP_ERR_MGW_FAIL, true);
 		return;
 	}
 
@@ -577,7 +595,7 @@ static void fsm_mdcx_cn_compl_cb(struct osmo_fsm_inst *fi, uint32_t event, void 
 	case EV_MDCX_CN_RESP:
 		break;
 	default:
-		handle_error(mgcp_ctx, MGCP_ERR_UNEXP_TEARDOWN);
+		handle_error(mgcp_ctx, MGCP_ERR_UNEXP_TEARDOWN, true);
 		return;
 	}
 
@@ -617,7 +635,7 @@ static void fsm_mdcx_ran_cb(struct osmo_fsm_inst *fi, uint32_t event, void *data
 	case EV_ASSIGN:
 		break;
 	default:
-		handle_error(mgcp_ctx, MGCP_ERR_UNEXP_TEARDOWN);
+		handle_error(mgcp_ctx, MGCP_ERR_UNEXP_TEARDOWN, true);
 		return;
 	}
 
@@ -639,7 +657,7 @@ static void fsm_mdcx_ran_cb(struct osmo_fsm_inst *fi, uint32_t event, void *data
 	};
 	if (snprintf(mgcp_msg.endpoint, MGCP_ENDPOINT_MAXLEN, MGCP_ENDPOINT_FORMAT, mgcp_ctx->rtp_endpoint) >=
 	    MGCP_ENDPOINT_MAXLEN) {
-		handle_error(mgcp_ctx, MGCP_ERR_NOMEM);
+		handle_error(mgcp_ctx, MGCP_ERR_NOMEM, true);
 		return;
 	}
 	msg = mgcp_msg_gen(mgcp, &mgcp_msg);
@@ -649,7 +667,7 @@ static void fsm_mdcx_ran_cb(struct osmo_fsm_inst *fi, uint32_t event, void *data
 	mgcp_ctx->mgw_pending_trans = mgcp_msg_trans_id(msg);
 	rc = mgcp_client_tx(mgcp, msg, mgw_mdcx_ran_resp_cb, mgcp_ctx);
 	if (rc < 0) {
-		handle_error(mgcp_ctx, MGCP_ERR_MGW_TX_FAIL);
+		handle_error(mgcp_ctx, MGCP_ERR_MGW_TX_FAIL, true);
 		return;
 	}
 
@@ -666,7 +684,7 @@ static void mgw_mdcx_ran_resp_cb(struct mgcp_response *r, void *priv)
 	if (r->head.response_code != 200) {
 		LOGPFSML(mgcp_ctx->fsm, LOGL_ERROR,
 			 "MDCX/RAN: response yields error: %d %s\n", r->head.response_code, r->head.comment);
-		handle_error(mgcp_ctx, MGCP_ERR_MGW_FAIL);
+		handle_error(mgcp_ctx, MGCP_ERR_MGW_FAIL, true);
 		return;
 	}
 
@@ -684,7 +702,7 @@ static void fsm_mdcx_ran_compl_cb(struct osmo_fsm_inst *fi, uint32_t event, void
 	case EV_MDCX_RAN_RESP:
 		break;
 	default:
-		handle_error(mgcp_ctx, MGCP_ERR_UNEXP_TEARDOWN);
+		handle_error(mgcp_ctx, MGCP_ERR_UNEXP_TEARDOWN, true);
 		return;
 	}
 
@@ -723,7 +741,7 @@ static void fsm_call_cb(struct osmo_fsm_inst *fi, uint32_t event, void *data)
 	};
 	if (snprintf(mgcp_msg.endpoint, MGCP_ENDPOINT_MAXLEN, MGCP_ENDPOINT_FORMAT, mgcp_ctx->rtp_endpoint) >=
 	    MGCP_ENDPOINT_MAXLEN) {
-		handle_error(mgcp_ctx, MGCP_ERR_NOMEM);
+		handle_error(mgcp_ctx, MGCP_ERR_NOMEM, true);
 		return;
 	}
 	msg = mgcp_msg_gen(mgcp, &mgcp_msg);
@@ -733,7 +751,7 @@ static void fsm_call_cb(struct osmo_fsm_inst *fi, uint32_t event, void *data)
 	mgcp_ctx->mgw_pending_trans = mgcp_msg_trans_id(msg);
 	rc = mgcp_client_tx(mgcp, msg, mgw_dlcx_all_resp_cb, mgcp_ctx);
 	if (rc < 0) {
-		handle_error(mgcp_ctx, MGCP_ERR_MGW_TX_FAIL);
+		handle_error(mgcp_ctx, MGCP_ERR_MGW_TX_FAIL, true);
 		return;
 	}
 
@@ -751,7 +769,7 @@ static void mgw_dlcx_all_resp_cb(struct mgcp_response *r, void *priv)
 	if (r->head.response_code != 200 && r->head.response_code != 250) {
 		LOGPFSML(mgcp_ctx->fsm, LOGL_ERROR,
 			 "DLCX: response yields error: %d %s\n", r->head.response_code, r->head.comment);
-		handle_error(mgcp_ctx, MGCP_ERR_MGW_FAIL);
+		handle_error(mgcp_ctx, MGCP_ERR_MGW_FAIL, true);
 		return;
 	}
 
