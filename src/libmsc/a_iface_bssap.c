@@ -258,12 +258,8 @@ static int bssmap_rx_clear_complete(struct osmo_sccp_user *scu,
 static int bssmap_rx_l3_compl(struct osmo_sccp_user *scu, const struct a_conn_info *a_conn_info,
 			      struct msgb *msg, struct tlv_parsed *tp)
 {
-	struct {
-		uint8_t ident;
-		struct gsm48_loc_area_id lai;
-		uint16_t ci;
-	} __attribute__ ((packed)) lai_ci;
-	struct osmo_location_area_id lai;
+	struct gsm0808_cell_id_list2 cil;
+	uint16_t lac = 0;
 	uint8_t data_length;
 	const uint8_t *data;
 	int rc;
@@ -282,32 +278,67 @@ static int bssmap_rx_l3_compl(struct osmo_sccp_user *scu, const struct a_conn_in
 		return -EINVAL;
 	}
 
-	/* Parse Cell ID element */
-	/* FIXME: Encapsulate this in a parser/generator function inside
-	 * libosmocore, add support for all specified cell identification
-	 * discriminators (see 3GPP ts 3.2.2.17 Cell Identifier) */
+	/* Parse Cell ID element -- this should yield a cell identifier "list" with 1 element. */
+
 	data_length = TLVP_LEN(tp, GSM0808_IE_CELL_IDENTIFIER);
 	data = TLVP_VAL(tp, GSM0808_IE_CELL_IDENTIFIER);
-	if (sizeof(lai_ci) != data_length) {
+	if (gsm0808_dec_cell_id_list2(&cil, data, data_length) < 0 || cil.id_list_len != 1) {
 		LOGP(DBSSAP, LOGL_ERROR,
-		     "Unable to parse element CELL IDENTIFIER (wrong field length) -- discarding message!\n");
+		     "Unable to parse element CELL IDENTIFIER -- discarding message!\n");
 		return -EINVAL;
 	}
-	memcpy(&lai_ci, data, sizeof(lai_ci));
-	if (lai_ci.ident != CELL_IDENT_WHOLE_GLOBAL) {
+
+	/* Determine the LAC which we will use for this subscriber. */
+	switch (cil.id_discr) {
+	case CELL_IDENT_WHOLE_GLOBAL: {
+		const struct osmo_cell_global_id *id = &cil.id_list[0].global;
+		if (osmo_plmn_cmp(&id->lai.plmn, &network->plmn) != 0) {
+			LOGP(DBSSAP, LOGL_ERROR,
+			     "WHOLE GLOBAL CELL IDENTIFIER does not match network MCC/MNC -- discarding message!\n");
+			return -EINVAL;
+		}
+		lac = id->lai.lac;
+		break;
+	}
+	case CELL_IDENT_LAC_AND_CI: {
+		const struct osmo_lac_and_ci_id *id = &cil.id_list[0].lac_and_ci;
+		lac = id->lac;
+		break;
+	}
+	case CELL_IDENT_LAI_AND_LAC: {
+		const struct osmo_location_area_id *id = &cil.id_list[0].lai_and_lac;
+		if (osmo_plmn_cmp(&id->plmn, &network->plmn) != 0) {
+			LOGP(DBSSAP, LOGL_ERROR,
+			     "LAI AND LAC CELL IDENTIFIER does not match network MCC/MNC -- discarding message!\n");
+			return -EINVAL;
+		}
+		lac = id->lac;
+		break;
+	}
+	case CELL_IDENT_LAC:
+		lac = cil.id_list[0].lac;
+		break;
+
+	case CELL_IDENT_CI:
+	case CELL_IDENT_NO_CELL:
+	case CELL_IDENT_BSS:
 		LOGP(DBSSAP, LOGL_ERROR,
-		     "Unable to parse element CELL IDENTIFIER (wrong cell identification discriminator) -- discarding message!\n");
+		     "CELL IDENTIFIER does not specify a LAC -- discarding message!\n");
+		return -EINVAL;
+
+	default:
+		LOGP(DBSSAP, LOGL_ERROR,
+		     "Unable to parse element CELL IDENTIFIER (unknown cell identification discriminator 0x%x) "
+		     "-- discarding message!\n", cil.id_discr);
 		return -EINVAL;
 	}
-	gsm48_decode_lai2(&lai_ci.lai, &lai);
-	/* FIXME: Actually compare the MCC-MNC to the local network config?? */
 
 	/* Parse Layer 3 Information element */
 	msg->l3h = (uint8_t*)TLVP_VAL(tp, GSM0808_IE_LAYER_3_INFORMATION);
 	msgb_l3trim(msg, TLVP_LEN(tp, GSM0808_IE_LAYER_3_INFORMATION));
 
 	/* Create new subscriber context */
-	conn = subscr_conn_allocate_a(a_conn_info, network, lai.lac, scu, a_conn_info->conn_id);
+	conn = subscr_conn_allocate_a(a_conn_info, network, lac, scu, a_conn_info->conn_id);
 
 	/* Handover location update to the MSC code */
 	rc = msc_compl_l3(conn, msg, 0);
