@@ -781,8 +781,11 @@ static void mgw_dlcx_all_resp_cb(struct mgcp_response *r, void *priv)
 static void fsm_halt_cb(struct osmo_fsm_inst *fi, uint32_t event, void *data)
 {
 	struct mgcp_ctx *mgcp_ctx = data;
+	struct mgcp_client *mgcp;
 
 	OSMO_ASSERT(mgcp_ctx);
+	mgcp = mgcp_ctx->mgcp;
+	OSMO_ASSERT(mgcp);
 
 	/* NOTE: We must not free the context information now, we have to
 	 * wait until msc_mgcp_call_release() is called. Then we are sure
@@ -792,6 +795,10 @@ static void fsm_halt_cb(struct osmo_fsm_inst *fi, uint32_t event, void *data)
 	 * so lets keep the context info until we are explicitly asked for
 	 * throwing it away. */
 	if (mgcp_ctx->free_ctx) {
+		/* Be sure that there is no pending MGW transaction */
+		mgcp_client_cancel(mgcp, mgcp_ctx->mgw_pending_trans);
+
+		/* Free FSM and its context information  */
 		osmo_fsm_inst_free(mgcp_ctx->fsm);
 		talloc_free(mgcp_ctx);
 		return;
