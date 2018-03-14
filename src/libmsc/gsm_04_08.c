@@ -1551,9 +1551,6 @@ static void gsm48_cc_timeout(void *arg)
 		}
 		trans_free(trans);
 		return;
-//		release = 1;
-//		l4_cause = 14;
-//		break;
 	case 0x306:
 		release = 1;
 		mo_cause = trans->cc.msg.cause.value;
