@@ -23,6 +23,11 @@
 /* TS 48.008 DLCI containing DCCH/ACCH + SAPI */
 #define OMSC_LINKID_CB(__msgb)   (__msgb)->cb[3]
 
+#include "../../bscconfig.h"
+#if BUILD_IU
+#include <osmocom/ranap/iu_client.h>
+#endif
+
 /** annotations for msgb ownership */
 #define __uses
 
@@ -311,12 +316,14 @@ struct gsm_network {
 		struct mgcp_client *client;
 	} mgw;
 
+#if BUILD_IU
 	struct {
 		/* CS7 instance id number (set via VTY) */
 		uint32_t cs7_instance;
-		int rab_assign_addr_enc;
+		enum ranap_nsap_addr_enc rab_assign_addr_enc;
 		struct osmo_sccp_instance *sccp;
 	} iu;
+#endif
 
 	struct {
 		/* CS7 instance id number (set via VTY) */

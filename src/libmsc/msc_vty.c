@@ -380,8 +380,14 @@ DEFUN(cfg_msc_cs7_instance_iu,
       "cs7-instance-iu <0-15>",
       "Set SS7 to be used by the Iu-Interface.\n" "SS7 instance reference number\n")
 {
+#if BUILD_IU
 	gsmnet->iu.cs7_instance = atoi(argv[0]);
 	return CMD_SUCCESS;
+#else
+	vty_out(vty, "WARNING: 'cs7-instance-iu' without effect: built without Iu support%s",
+		VTY_NEWLINE);
+	return CMD_WARNING;
+#endif
 }
 
 DEFUN(cfg_msc_auth_tuple_max_reuse_count, cfg_msc_auth_tuple_max_reuse_count_cmd,
@@ -437,8 +443,10 @@ static int config_write_msc(struct vty *vty)
 
 	vty_out(vty, " cs7-instance-a %u%s", gsmnet->a.cs7_instance,
 		VTY_NEWLINE);
+#if BUILD_IU
 	vty_out(vty, " cs7-instance-iu %u%s", gsmnet->iu.cs7_instance,
 		VTY_NEWLINE);
+#endif
 
 	if (gsmnet->vlr->cfg.auth_tuple_max_reuse_count)
 		vty_out(vty, " auth-tuple-max-reuse-count %d%s",
@@ -1422,7 +1430,7 @@ void msc_vty_init(struct gsm_network *msc_network)
 
 	mgcp_client_vty_init(msc_network, MSC_NODE, &msc_network->mgw.conf);
 #ifdef BUILD_IU
-	ranap_iu_vty_init(MSC_NODE, (enum ranap_nsap_addr_enc*)&msc_network->iu.rab_assign_addr_enc);
+	ranap_iu_vty_init(MSC_NODE, &msc_network->iu.rab_assign_addr_enc);
 #endif
 	osmo_fsm_vty_add_cmds();
 
