@@ -47,7 +47,7 @@ void msc_sapi_n_reject(struct gsm_subscriber_connection *conn, int dlci)
 		gsm411_sapi_n_reject(conn);
 }
 
-static void subscr_conn_bump(struct gsm_subscriber_connection *conn)
+static void subscr_conn_release_when_unused(struct gsm_subscriber_connection *conn)
 {
 	if (!conn)
 		return;
@@ -55,12 +55,12 @@ static void subscr_conn_bump(struct gsm_subscriber_connection *conn)
 		return;
 	if (!(conn->conn_fsm->state == SUBSCR_CONN_S_ACCEPTED
 	      || conn->conn_fsm->state == SUBSCR_CONN_S_COMMUNICATING)) {
-		DEBUGP(DMM, "%s: bump: conn still being established (%s)\n",
-		       vlr_subscr_name(conn->vsub),
+		DEBUGP(DMM, "%s: %s: conn still being established (%s)\n",
+		       vlr_subscr_name(conn->vsub), __func__,
 		       osmo_fsm_inst_state_name(conn->conn_fsm));
 		return;
 	}
-	osmo_fsm_inst_dispatch(conn->conn_fsm, SUBSCR_CONN_E_BUMP, NULL);
+	osmo_fsm_inst_dispatch(conn->conn_fsm, SUBSCR_CONN_E_RELEASE_WHEN_UNUSED, NULL);
 }
 
 /* receive a Level 3 Complete message and return MSC_CONN_ACCEPT or
@@ -71,8 +71,7 @@ int msc_compl_l3(struct gsm_subscriber_connection *conn,
 	msc_subscr_conn_get(conn, MSC_CONN_USE_COMPL_L3);
 	gsm0408_dispatch(conn, msg);
 
-	/* Bump whether the conn wants to be closed */
-	subscr_conn_bump(conn);
+	subscr_conn_release_when_unused(conn);
 
 	/* If this should be kept, the conn->conn_fsm has placed a use_count */
 	msc_subscr_conn_put(conn, MSC_CONN_USE_COMPL_L3);
@@ -106,8 +105,7 @@ void msc_dtap(struct gsm_subscriber_connection *conn, uint8_t link_id, struct ms
 	msc_subscr_conn_get(conn, MSC_CONN_USE_DTAP);
 	gsm0408_dispatch(conn, msg);
 
-	/* Bump whether the conn wants to be closed */
-	subscr_conn_bump(conn);
+	subscr_conn_release_when_unused(conn);
 	msc_subscr_conn_put(conn, MSC_CONN_USE_DTAP);
 }
 

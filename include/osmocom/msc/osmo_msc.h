@@ -21,7 +21,7 @@ enum subscr_conn_fsm_event {
 	/* received first reply from MS in "real" CC, SMS, USSD communication */
 	SUBSCR_CONN_E_COMMUNICATING,
 	/* Some async action has completed, check again whether all is done */
-	SUBSCR_CONN_E_BUMP,
+	SUBSCR_CONN_E_RELEASE_WHEN_UNUSED,
 	/* MS/BTS/BSC originated close request */
 	SUBSCR_CONN_E_MO_CLOSE,
 	/* MSC originated close request, e.g. failed authentication */

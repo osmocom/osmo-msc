@@ -40,7 +40,7 @@ static const struct value_string subscr_conn_fsm_event_names[] = {
 	OSMO_VALUE_STRING(SUBSCR_CONN_E_START),
 	OSMO_VALUE_STRING(SUBSCR_CONN_E_ACCEPTED),
 	OSMO_VALUE_STRING(SUBSCR_CONN_E_COMMUNICATING),
-	OSMO_VALUE_STRING(SUBSCR_CONN_E_BUMP),
+	OSMO_VALUE_STRING(SUBSCR_CONN_E_RELEASE_WHEN_UNUSED),
 	OSMO_VALUE_STRING(SUBSCR_CONN_E_MO_CLOSE),
 	OSMO_VALUE_STRING(SUBSCR_CONN_E_CN_CLOSE),
 	{ 0, NULL }
@@ -130,21 +130,22 @@ void subscr_conn_fsm_new(struct osmo_fsm_inst *fi, uint32_t event, void *data)
 		LOGPFSML(fi, LOGL_DEBUG, "received_cm_service_request = true\n");
 	}
 
-	osmo_fsm_inst_dispatch(fi, SUBSCR_CONN_E_BUMP, data);
+	osmo_fsm_inst_dispatch(fi, SUBSCR_CONN_E_RELEASE_WHEN_UNUSED, data);
 }
 
-static void subscr_conn_fsm_bump(struct osmo_fsm_inst *fi, uint32_t event, void *data)
+static void subscr_conn_fsm_release_when_unused(struct osmo_fsm_inst *fi, uint32_t event, void *data)
 {
 	struct gsm_subscriber_connection *conn = fi->priv;
 	struct gsm_trans *trans;
 
 	if (conn->silent_call) {
-		LOGPFSML(fi, LOGL_DEBUG, "bump: silent call still active\n");
+		LOGPFSML(fi, LOGL_DEBUG, "%s: silent call still active\n", __func__);
 		return;
 	}
 
 	if (conn->received_cm_service_request) {
-		LOGPFSML(fi, LOGL_DEBUG, "bump: still awaiting first request after a CM Service Request\n");
+		LOGPFSML(fi, LOGL_DEBUG, "%s: still awaiting first request after a CM Service Request\n",
+			 __func__);
 		return;
 	}
 
@@ -152,8 +153,8 @@ static void subscr_conn_fsm_bump(struct osmo_fsm_inst *fi, uint32_t event, void 
 		struct subscr_request *sr;
 		if (!log_check_level(fi->fsm->log_subsys, LOGL_DEBUG)) {
 			llist_for_each_entry(sr, &conn->vsub->cs.requests, entry) {
-				LOGPFSML(fi, LOGL_DEBUG, "bump: still active: %s\n",
-					 sr->label);
+				LOGPFSML(fi, LOGL_DEBUG, "%s: still active: %s\n",
+					 __func__, sr->label);
 			}
 		}
 		return;
@@ -161,12 +162,12 @@ static void subscr_conn_fsm_bump(struct osmo_fsm_inst *fi, uint32_t event, void 
 
 	if ((trans = trans_has_conn(conn))) {
 		LOGPFSML(fi, LOGL_DEBUG,
-			 "bump: connection still has active transaction: %s\n",
-			 gsm48_pdisc_name(trans->protocol));
+			 "%s: connection still has active transaction: %s\n",
+			 __func__, gsm48_pdisc_name(trans->protocol));
 		return;
 	}
 
-	LOGPFSML(fi, LOGL_DEBUG, "bump: releasing conn\n");
+	LOGPFSML(fi, LOGL_DEBUG, "%s: releasing conn\n", __func__);
 	osmo_fsm_inst_state_chg(fi, SUBSCR_CONN_S_RELEASED, 0, 0);
 }
 
@@ -183,8 +184,8 @@ static void subscr_conn_fsm_accepted(struct osmo_fsm_inst *fi, uint32_t event, v
 		osmo_fsm_inst_state_chg(fi, SUBSCR_CONN_S_COMMUNICATING, 0, 0);
 		return;
 
-	case SUBSCR_CONN_E_BUMP:
-		subscr_conn_fsm_bump(fi, event, data);
+	case SUBSCR_CONN_E_RELEASE_WHEN_UNUSED:
+		subscr_conn_fsm_release_when_unused(fi, event, data);
 		return;
 
 	default:
@@ -203,8 +204,8 @@ static void subscr_conn_fsm_communicating(struct osmo_fsm_inst *fi, uint32_t eve
 		/* no-op */
 		return;
 
-	case SUBSCR_CONN_E_BUMP:
-		subscr_conn_fsm_bump(fi, event, data);
+	case SUBSCR_CONN_E_RELEASE_WHEN_UNUSED:
+		subscr_conn_fsm_release_when_unused(fi, event, data);
 		return;
 
 	default:
@@ -266,7 +267,7 @@ static const struct osmo_fsm_state subscr_conn_fsm_states[] = {
 		.name = OSMO_STRINGIFY(SUBSCR_CONN_S_ACCEPTED),
 		/* allow everything to release for any odd behavior */
 		.in_event_mask = S(SUBSCR_CONN_E_COMMUNICATING) |
-		                 S(SUBSCR_CONN_E_BUMP) |
+		                 S(SUBSCR_CONN_E_RELEASE_WHEN_UNUSED) |
 				 S(SUBSCR_CONN_E_ACCEPTED) |
 				 S(SUBSCR_CONN_E_MO_CLOSE) |
 				 S(SUBSCR_CONN_E_CN_CLOSE),
@@ -278,7 +279,7 @@ static const struct osmo_fsm_state subscr_conn_fsm_states[] = {
 	[SUBSCR_CONN_S_COMMUNICATING] = {
 		.name = OSMO_STRINGIFY(SUBSCR_CONN_S_COMMUNICATING),
 		/* allow everything to release for any odd behavior */
-		.in_event_mask = S(SUBSCR_CONN_E_BUMP) |
+		.in_event_mask = S(SUBSCR_CONN_E_RELEASE_WHEN_UNUSED) |
 				 S(SUBSCR_CONN_E_ACCEPTED) |
 				 S(SUBSCR_CONN_E_COMMUNICATING) |
 				 S(SUBSCR_CONN_E_MO_CLOSE) |
