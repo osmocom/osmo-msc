@@ -334,8 +334,177 @@ static void test_call_mt()
 	comment_end();
 }
 
+static void test_call_mo_to_unknown()
+{
+	struct gsm_mncc mncc = {
+		.imsi = IMSI,
+	};
+
+	comment_start();
+
+	fake_time_start();
+
+	standard_lu();
+
+	BTW("after a while, a new conn sends a CM Service Request. VLR responds with Auth Req, 2nd auth vector");
+	auth_request_sent = false;
+	auth_request_expect_rand = "c187a53a5e6b9d573cac7c74451fd46d";
+	auth_request_expect_autn = "1843a645b98d00005b2d666af46c45d9";
+	cm_service_result_sent = RES_NONE;
+	ms_sends_msg("052478"
+		     "03575886" /* classmark 2 */
+		     "089910070000106005" /* IMSI */);
+	OSMO_ASSERT(g_conn);
+	OSMO_ASSERT(g_conn->conn_fsm);
+	OSMO_ASSERT(g_conn->vsub);
+	VERBOSE_ASSERT(cm_service_result_sent, == RES_NONE, "%d");
+	VERBOSE_ASSERT(auth_request_sent, == true, "%d");
+
+	btw("needs auth, not yet accepted");
+	EXPECT_ACCEPTED(false);
+
+	/* On UTRAN */
+	btw("MS sends Authen Response, VLR accepts and sends SecurityModeControl");
+	expect_security_mode_ctrl(NULL, "1159ec926a50e98c034a6b7d7c9f418d");
+	ms_sends_msg("0554" "7db47cf7" "2104" "f81e4dc7"); /* 2nd vector's res, s.a. */
+	VERBOSE_ASSERT(security_mode_ctrl_sent, == true, "%d");
+	VERBOSE_ASSERT(cm_service_result_sent, == RES_NONE, "%d");
+
+	btw("MS sends SecurityModeControl acceptance, VLR accepts; above Ciphering is an implicit CM Service Accept");
+	ms_sends_security_mode_complete();
+	VERBOSE_ASSERT(cm_service_result_sent, == RES_NONE, "%d");
+
+	BTW("a call is initiated");
+
+	btw("SETUP gets forwarded to MNCC");
+	cc_to_mncc_expect_tx(IMSI, MNCC_SETUP_IND);
+	ms_sends_msg("0385" /* CC, seq = 2 -> 0x80 | CC Setup = 0x5 */
+		     "0406600402000581" /* Bearer Capability */
+		     "5e038121f3" /* Called Number BCD */
+		     "15020100" /* CC Capabilities */
+		     "4008" /* Supported Codec List */
+		       "04026000" /* UMTS: AMR 2 | AMR */
+		       "00021f00" /* GSM: HR AMR | FR AMR | GSM EFR | GSM HR | GSM FR */
+		    );
+	OSMO_ASSERT(cc_to_mncc_tx_confirmed);
+	mncc.callref = cc_to_mncc_tx_got_callref;
+
+	btw("MNCC says that's fine");
+	dtap_expect_tx("8302" /* CC: Call Proceeding */);
+	mncc_sends_to_cc(MNCC_CALL_PROC_REQ, &mncc);
+	OSMO_ASSERT(dtap_tx_confirmed);
+
+	btw("But the other side's MSISDN could not be resolved, MNCC tells us to cancel");
+	dtap_expect_tx("832d" /* CC: Release Request */);
+	mncc_sends_to_cc(MNCC_REL_REQ, &mncc);
+
+	dtap_expect_tx("832d" /* CC: Release Request */);
+	fake_time_passes(10, 23);
+
+	expect_iu_release();
+	cc_to_mncc_expect_tx("", MNCC_REL_CNF);
+	ms_sends_msg("036a" /* CC: Release Complete */);
+	OSMO_ASSERT(cc_to_mncc_tx_confirmed);
+	OSMO_ASSERT(iu_release_sent);
+	OSMO_ASSERT(cc_to_mncc_tx_confirmed);
+
+	EXPECT_CONN_COUNT(0);
+	clear_vlr();
+	comment_end();
+}
+
+static void test_call_mo_to_unknown_timeout()
+{
+	struct gsm_mncc mncc = {
+		.imsi = IMSI,
+	};
+
+	comment_start();
+
+	fake_time_start();
+
+	standard_lu();
+
+	BTW("after a while, a new conn sends a CM Service Request. VLR responds with Auth Req, 2nd auth vector");
+	auth_request_sent = false;
+	auth_request_expect_rand = "c187a53a5e6b9d573cac7c74451fd46d";
+	auth_request_expect_autn = "1843a645b98d00005b2d666af46c45d9";
+	cm_service_result_sent = RES_NONE;
+	ms_sends_msg("052478"
+		     "03575886" /* classmark 2 */
+		     "089910070000106005" /* IMSI */);
+	OSMO_ASSERT(g_conn);
+	OSMO_ASSERT(g_conn->conn_fsm);
+	OSMO_ASSERT(g_conn->vsub);
+	VERBOSE_ASSERT(cm_service_result_sent, == RES_NONE, "%d");
+	VERBOSE_ASSERT(auth_request_sent, == true, "%d");
+
+	btw("needs auth, not yet accepted");
+	EXPECT_ACCEPTED(false);
+
+	/* On UTRAN */
+	btw("MS sends Authen Response, VLR accepts and sends SecurityModeControl");
+	expect_security_mode_ctrl(NULL, "1159ec926a50e98c034a6b7d7c9f418d");
+	ms_sends_msg("0554" "7db47cf7" "2104" "f81e4dc7"); /* 2nd vector's res, s.a. */
+	VERBOSE_ASSERT(security_mode_ctrl_sent, == true, "%d");
+	VERBOSE_ASSERT(cm_service_result_sent, == RES_NONE, "%d");
+
+	btw("MS sends SecurityModeControl acceptance, VLR accepts; above Ciphering is an implicit CM Service Accept");
+	ms_sends_security_mode_complete();
+	VERBOSE_ASSERT(cm_service_result_sent, == RES_NONE, "%d");
+
+	BTW("a call is initiated");
+
+	btw("SETUP gets forwarded to MNCC");
+	cc_to_mncc_expect_tx(IMSI, MNCC_SETUP_IND);
+	ms_sends_msg("0385" /* CC, seq = 2 -> 0x80 | CC Setup = 0x5 */
+		     "0406600402000581" /* Bearer Capability */
+		     "5e038121f3" /* Called Number BCD */
+		     "15020100" /* CC Capabilities */
+		     "4008" /* Supported Codec List */
+		       "04026000" /* UMTS: AMR 2 | AMR */
+		       "00021f00" /* GSM: HR AMR | FR AMR | GSM EFR | GSM HR | GSM FR */
+		    );
+	OSMO_ASSERT(cc_to_mncc_tx_confirmed);
+	mncc.callref = cc_to_mncc_tx_got_callref;
+
+	btw("MNCC says that's fine");
+	dtap_expect_tx("8302" /* CC: Call Proceeding */);
+	mncc_sends_to_cc(MNCC_CALL_PROC_REQ, &mncc);
+	OSMO_ASSERT(dtap_tx_confirmed);
+
+	btw("But the other side's MSISDN could not be resolved, MNCC tells us to cancel");
+	dtap_expect_tx("832d" /* CC: Release Request */);
+	mncc_sends_to_cc(MNCC_REL_REQ, &mncc);
+
+	btw("Despite our repeated CC Release Requests, the MS does not respond anymore");
+	dtap_expect_tx("832d" /* CC: Release Request */);
+	fake_time_passes(10, 23);
+
+	btw("The CC Release times out and we still properly clear the conn");
+	btw("ERROR: currently this is broken and will be fixed in a subsequent commit");
+	cc_to_mncc_expect_tx("", MNCC_REL_CNF);
+	expect_iu_release(); /* <-- will currently not work out */
+	fake_time_passes(10, 23);
+	OSMO_ASSERT(cc_to_mncc_tx_confirmed);
+	/* EXPECTING ERROR: here, we should be able to do:
+	OSMO_ASSERT(iu_release_sent);
+	EXPECT_CONN_COUNT(0);
+	*/
+	BTW("This test is currently expecting erratic behavior:");
+	EXPECT_CONN_COUNT(1);
+	/* need to free manually for the sake of this test suite */
+	msc_subscr_conn_close(g_conn, 0);
+
+	clear_vlr();
+	comment_end();
+}
+
+
 msc_vlr_test_func_t msc_vlr_tests[] = {
 	test_call_mo,
 	test_call_mt,
+	test_call_mo_to_unknown,
+	test_call_mo_to_unknown_timeout,
 	NULL
 };
