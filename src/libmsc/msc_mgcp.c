@@ -197,10 +197,15 @@ static void _handle_error(struct mgcp_ctx *mgcp_ctx, enum msc_mgcp_cause_code ca
 		osmo_fsm_inst_dispatch(fi, EV_TEARDOWN_ERROR, mgcp_ctx);
 	}
 
-	/* Request the higher layers to release the call */
-	mncc_set_cause(&mncc, GSM48_CAUSE_LOC_TRANS_NET,
-		       GSM48_CC_CAUSE_RESOURCE_UNAVAIL);
-	mncc_tx_to_cc(mgcp_ctx->trans->net, MNCC_REL_REQ, &mncc);
+	/* Request the higher layers (gsm_04_08.c) to release the call. If the
+	 * problem occured after msc_mgcp_call_release() was calls, remain
+	 * silent because we already got informed and the higher layers might
+	 * already freed their context information (trans). */
+	if (!mgcp_ctx->free_ctx) {
+		mncc_set_cause(&mncc, GSM48_CAUSE_LOC_TRANS_NET,
+			       GSM48_CC_CAUSE_RESOURCE_UNAVAIL);
+		mncc_tx_to_cc(mgcp_ctx->trans->net, MNCC_REL_REQ, &mncc);
+	}
 }
 
 /* Timer callback to shut down in case of connectivity problems */
