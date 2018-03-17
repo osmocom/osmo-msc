@@ -274,7 +274,7 @@ static void fsm_crcx_ran_cb(struct osmo_fsm_inst *fi, uint32_t event, void *data
 	OSMO_ASSERT(mgcp);
 
 	LOGPFSML(fi, LOGL_DEBUG,
-		 "CRCX/RAN: creating connection for the RAN side on MGW endpoint:0x%x...\n", mgcp_ctx->rtp_endpoint);
+		 "CRCX/RAN: creating connection for the RAN side on MGW endpoint:%p...\n", mgcp_ctx->rtp_endpoint);
 
 	/* Generate MGCP message string */
 	mgcp_msg = (struct mgcp_msg) {
@@ -370,7 +370,7 @@ static void fsm_crcx_cn_cb(struct osmo_fsm_inst *fi, uint32_t event, void *data)
 	}
 
 	LOGPFSML(fi, LOGL_DEBUG,
-		 "CRCX/CN creating connection for the CN side on MGW endpoint:0x%x...\n", mgcp_ctx->rtp_endpoint);
+		 "CRCX/CN creating connection for the CN side on MGW endpoint:%p...\n", mgcp_ctx->rtp_endpoint);
 
 	/* Generate MGCP message string */
 	mgcp_msg = (struct mgcp_msg) {
@@ -528,7 +528,7 @@ static void fsm_mdcx_cn_cb(struct osmo_fsm_inst *fi, uint32_t event, void *data)
 	}
 
 	LOGPFSML(fi, LOGL_DEBUG,
-		 "MDCX/CN: completing connection for the CN side on MGW endpoint:0x%x, remote leg expects RTP input on address %s:%u\n",
+		 "MDCX/CN: completing connection for the CN side on MGW endpoint:%p, remote leg expects RTP input on address %s:%u\n",
 		 mgcp_ctx->rtp_endpoint, conn->rtp.remote_addr_cn, conn->rtp.remote_port_cn);
 
 	/* Generate MGCP message string */
@@ -645,7 +645,7 @@ static void fsm_mdcx_ran_cb(struct osmo_fsm_inst *fi, uint32_t event, void *data
 	}
 
 	LOGPFSML(fi, LOGL_DEBUG,
-		 "MDCX/RAN: completing connection for the CN side on MGW endpoint:0x%x, RAN expects RTP input on address %s:%u\n",
+		 "MDCX/RAN: completing connection for the CN side on MGW endpoint:%p, RAN expects RTP input on address %s:%u\n",
 		 mgcp_ctx->rtp_endpoint, conn->rtp.remote_addr_ran, conn->rtp.remote_port_ran);
 
 	/* Generate MGCP message string */
@@ -733,7 +733,7 @@ static void fsm_call_cb(struct osmo_fsm_inst *fi, uint32_t event, void *data)
 	OSMO_ASSERT(mgcp);
 
 	LOGPFSML(fi, LOGL_DEBUG,
-		 "DLCX: removing connection for the RAN and CN side on MGW endpoint:0x%x...\n", mgcp_ctx->rtp_endpoint);
+		 "DLCX: removing connection for the RAN and CN side on MGW endpoint:%p...\n", mgcp_ctx->rtp_endpoint);
 
 	/* Generate MGCP message string */
 	mgcp_msg = (struct mgcp_msg) {
