@@ -121,6 +121,10 @@ static void bssmap_rx_reset(struct osmo_sccp_user *scu, const struct a_conn_info
 
 	if (!a_conn_info->bsc->reset)
 		a_start_reset(a_conn_info->bsc, true);
+
+	/* Treat an incoming RESET like an ACK to any RESET request we may have just sent.
+	 * After all, what we wanted is the A interface to be reset, which we now know has happened. */
+	a_reset_ack_confirm(a_conn_info->bsc->reset);
 }
 
 /* Endpoint to handle BSSMAP reset acknowlegement */
