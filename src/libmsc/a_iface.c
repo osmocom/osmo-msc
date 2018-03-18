@@ -535,9 +535,19 @@ static int sccp_sap_up(struct osmo_prim_hdr *oph, void *_scu)
 				LOGP(DBSSAP, LOGL_DEBUG, "N-CONNECT.ind(%u, %s)\n",
 				     scu_prim->u.connect.conn_id, msgb_hexdump_l2(oph->msg));
 				rc = a_sccp_rx_dt(scu, &a_conn_info, oph->msg);
-			} else
+			} else {
 				LOGP(DBSSAP, LOGL_DEBUG, "N-CONNECT.ind(%u)\n", scu_prim->u.connect.conn_id);
-			record_bsc_con(scu, a_conn_info.bsc, scu_prim->u.connect.conn_id);
+				rc = -ENODATA;
+			}
+
+			if (rc < 0) {
+				/* initial message (COMPL L3) caused some error, we didn't allocate
+				 * a subscriber_conn and must close the connection again */
+				rc = osmo_sccp_tx_disconn(scu, a_conn_info.conn_id,
+							  &a_conn_info.bsc->msc_addr,
+							  SCCP_RETURN_CAUSE_UNQUALIFIED);
+			} else
+				record_bsc_con(scu, a_conn_info.bsc, scu_prim->u.connect.conn_id);
 		}
 		break;
 
