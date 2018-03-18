@@ -337,6 +337,12 @@ static int bssmap_rx_l3_compl(struct osmo_sccp_user *scu, const struct a_conn_in
 	msg->l3h = (uint8_t*)TLVP_VAL(tp, GSM0808_IE_LAYER_3_INFORMATION);
 	msgb_l3trim(msg, TLVP_LEN(tp, GSM0808_IE_LAYER_3_INFORMATION));
 
+	if (msgb_l3len(msg) < sizeof(struct gsm48_hdr)) {
+		LOGP(DBSSAP, LOGL_ERROR, "COMPL_L3 with too short L3 (%d) -- discarding\n",
+		     msgb_l3len(msg));
+		return -ENODATA;
+	}
+
 	/* Create new subscriber context */
 	conn = subscr_conn_allocate_a(a_conn_info, network, lac, scu, a_conn_info->conn_id);
 
