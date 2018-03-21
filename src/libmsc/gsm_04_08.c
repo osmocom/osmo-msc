@@ -82,12 +82,6 @@ static int gsm0408_loc_upd_acc(struct gsm_subscriber_connection *conn,
 static int gsm48_tx_simple(struct gsm_subscriber_connection *conn,
 			   uint8_t pdisc, uint8_t msg_type);
 
-struct gsm_lai {
-	uint16_t mcc;
-	uint16_t mnc;
-	uint16_t lac;
-};
-
 static uint32_t new_callref = 0x80000001;
 
 /* Determine if the given CLASSMARK (1/2/3) value permits a given A5/n cipher */
