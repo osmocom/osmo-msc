@@ -512,13 +512,9 @@ static int bssmap_rx_sapi_n_rej(struct gsm_subscriber_connection *conn, struct m
 static int bssmap_rx_ass_compl(struct gsm_subscriber_connection *conn, struct msgb *msg,
 			       struct tlv_parsed *tp)
 {
-	struct mgcp_client *mgcp;
 	struct sockaddr_storage rtp_addr;
 	struct sockaddr_in *rtp_addr_in;
 	int rc;
-
-	mgcp = conn->network->mgw.client;
-	OSMO_ASSERT(mgcp);
 
 	LOGPCONN(conn, LOGL_INFO, "Rx BSSMAP ASSIGNMENT COMPLETE message\n");
 
