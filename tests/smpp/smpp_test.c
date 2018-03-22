@@ -62,6 +62,19 @@ static void test_coding_scheme(void)
 	}
 }
 
+static const struct log_info_cat smpp_mirror_default_categories[] = {
+	[DSMPP] = {
+		.name = "DSMPP",
+		.description = "SMPP interface for external SMS apps",
+		.enabled = 1, .loglevel = LOGL_DEBUG,
+	},
+};
+
+const struct log_info log_info = {
+	.cat = smpp_mirror_default_categories,
+	.num_cat = ARRAY_SIZE(smpp_mirror_default_categories),
+};
+
 int main(int argc, char **argv)
 {
 	osmo_init_logging(&log_info);

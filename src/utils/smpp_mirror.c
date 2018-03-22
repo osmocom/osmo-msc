@@ -324,6 +324,18 @@ static int smpp_esme_init(struct esme *esme, const char *host, uint16_t port)
 	return bind_transceiver(esme);
 }
 
+static const struct log_info_cat smpp_mirror_default_categories[] = {
+	[DSMPP] = {
+		.name = "DSMPP",
+		.description = "SMPP interface for external SMS apps",
+		.enabled = 1, .loglevel = LOGL_DEBUG,
+	},
+};
+
+const struct log_info log_info = {
+	.cat = smpp_mirror_default_categories,
+	.num_cat = ARRAY_SIZE(smpp_mirror_default_categories),
+};
 
 int main(int argc, char **argv)
 {

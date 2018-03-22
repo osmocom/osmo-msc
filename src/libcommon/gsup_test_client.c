@@ -8,10 +8,10 @@
 #include <osmocom/core/select.h>
 #include <osmocom/core/application.h>
 #include <osmocom/core/utils.h>
+#include <osmocom/core/logging.h>
 #include <osmocom/gsm/gsup.h>
 
 #include <osmocom/msc/gsup_client.h>
-#include <osmocom/msc/debug.h>
 
 static struct gsup_client *g_gc;
 

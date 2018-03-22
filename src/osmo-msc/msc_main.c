@@ -401,6 +401,118 @@ static int ss7_setup(void *ctx)
 	return 0;
 }
 
+static const struct log_info_cat msc_default_categories[] = {
+	[DRLL] = {
+		.name = "DRLL",
+		.description = "A-bis Radio Link Layer (RLL)",
+		.color = "\033[1;31m",
+		.enabled = 1, .loglevel = LOGL_NOTICE,
+	},
+	[DCC] = {
+		.name = "DCC",
+		.description = "Layer3 Call Control (CC)",
+		.color = "\033[1;32m",
+		.enabled = 1, .loglevel = LOGL_NOTICE,
+	},
+	[DMM] = {
+		.name = "DMM",
+		.description = "Layer3 Mobility Management (MM)",
+		.color = "\033[1;33m",
+		.enabled = 1, .loglevel = LOGL_NOTICE,
+	},
+	[DRR] = {
+		.name = "DRR",
+		.description = "Layer3 Radio Resource (RR)",
+		.color = "\033[1;34m",
+		.enabled = 1, .loglevel = LOGL_NOTICE,
+	},
+	[DMNCC] = {
+		.name = "DMNCC",
+		.description = "MNCC API for Call Control application",
+		.color = "\033[1;39m",
+		.enabled = 1, .loglevel = LOGL_NOTICE,
+	},
+	[DPAG]	= {
+		.name = "DPAG",
+		.description = "Paging Subsystem",
+		.color = "\033[1;38m",
+		.enabled = 1, .loglevel = LOGL_NOTICE,
+	},
+	[DMSC] = {
+		.name = "DMSC",
+		.description = "Mobile Switching Center",
+		.enabled = 1, .loglevel = LOGL_NOTICE,
+	},
+	[DMGCP] = {
+		.name = "DMGCP",
+		.description = "Media Gateway Control Protocol",
+		.enabled = 1, .loglevel = LOGL_NOTICE,
+	},
+	[DHO] = {
+		.name = "DHO",
+		.description = "Hand-Over",
+		.enabled = 1, .loglevel = LOGL_NOTICE,
+	},
+	[DDB] = {
+		.name = "DDB",
+		.description = "Database Layer",
+		.enabled = 1, .loglevel = LOGL_NOTICE,
+	},
+	[DREF] = {
+		.name = "DREF",
+		.description = "Reference Counting",
+		.enabled = 0, .loglevel = LOGL_NOTICE,
+	},
+	[DCTRL] = {
+		.name = "DCTRL",
+		.description = "Control interface",
+		.enabled = 1, .loglevel = LOGL_NOTICE,
+	},
+	[DSMPP] = {
+		.name = "DSMPP",
+		.description = "SMPP interface for external SMS apps",
+		.enabled = 1, .loglevel = LOGL_DEBUG,
+	},
+	[DRANAP] = {
+		.name = "DRANAP",
+		.description = "Radio Access Network Application Part Protocol",
+		.enabled = 1, .loglevel = LOGL_DEBUG,
+	},
+	[DVLR] = {
+		.name = "DVLR",
+		.description = "Visitor Location Register",
+		.enabled = 1, .loglevel = LOGL_DEBUG,
+	},
+	[DIUCS] = {
+		.name = "DIUCS",
+		.description = "Iu-CS Protocol",
+		.enabled = 1, .loglevel = LOGL_DEBUG,
+	},
+	[DBSSAP] = {
+		.name = "DBSSAP",
+		.description = "BSSAP Protocol (A Interface)",
+		.enabled = 1, .loglevel = LOGL_NOTICE,
+	},
+
+};
+
+static int filter_fn(const struct log_context *ctx, struct log_target *tar)
+{
+	const struct vlr_subscr *vsub = ctx->ctx[LOG_CTX_VLR_SUBSCR];
+
+	if ((tar->filter_map & (1 << LOG_FLT_VLR_SUBSCR)) != 0
+	    && vsub && vsub == tar->filter_data[LOG_FLT_VLR_SUBSCR])
+		return 1;
+
+	return 0;
+}
+
+const struct log_info log_info = {
+	.filter_fn = filter_fn,
+	.cat = msc_default_categories,
+	.num_cat = ARRAY_SIZE(msc_default_categories),
+};
+
 int main(int argc, char **argv)
 {
 	int rc;

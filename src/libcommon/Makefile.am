@@ -20,7 +20,6 @@ noinst_LIBRARIES = \
 	$(NULL)
 
 libcommon_a_SOURCES = \
-	debug.c \
 	gsm_data.c \
 	gsup_client.c \
 	oap_client.c \

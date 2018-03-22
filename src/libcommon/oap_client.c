@@ -24,6 +24,7 @@
 #include <errno.h>
 
 #include <osmocom/core/utils.h>
+#include <osmocom/core/logging.h>
 #include <osmocom/crypt/auth.h>
 #include <osmocom/gsm/oap.h>
 
