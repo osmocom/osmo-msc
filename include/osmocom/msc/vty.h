@@ -25,10 +25,6 @@ enum bsc_vty_node {
 	HLR_NODE,
 };
 
-extern int bsc_vty_is_config_node(struct vty *vty, int node);
-
-struct log_info;
-int bsc_vty_init(struct gsm_network *network);
 int bsc_vty_init_extra(void);
 
 void msc_vty_init(struct gsm_network *msc_network);

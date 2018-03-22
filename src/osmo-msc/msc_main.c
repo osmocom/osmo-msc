@@ -267,13 +267,57 @@ static void db_sync_timer_cb(void *data)
 	osmo_timer_schedule(&db_sync_timer, DB_SYNC_INTERVAL);
 }
 
-extern int bsc_vty_go_parent(struct vty *vty);
+static int msc_vty_go_parent(struct vty *vty)
+{
+	switch (vty->node) {
+	case GSMNET_NODE:
+		vty->node = CONFIG_NODE;
+		vty->index = NULL;
+		break;
+	case SMPP_ESME_NODE:
+		vty->node = SMPP_NODE;
+		vty->index = NULL;
+		break;
+	case SMPP_NODE:
+	case MSC_NODE:
+	case MNCC_INT_NODE:
+		vty->node = CONFIG_NODE;
+		vty->index = NULL;
+		break;
+	case SUBSCR_NODE:
+		vty->node = ENABLE_NODE;
+		vty->index = NULL;
+		break;
+	default:
+		osmo_ss7_vty_go_parent(vty);
+	}
+
+	return vty->node;
+}
+
+static int msc_vty_is_config_node(struct vty *vty, int node)
+{
+	/* Check if libosmo-sccp declares the node in
+	 * question as config node */
+	if (osmo_ss7_is_config_node(vty, node))
+		return 1;
+
+	switch (node) {
+	/* add items that are not config */
+	case SUBSCR_NODE:
+	case CONFIG_NODE:
+		return 0;
+
+	default:
+		return 1;
+	}
+}
 
 static struct vty_app_info msc_vty_info = {
 	.name		= "OsmoMSC",
 	.version	= PACKAGE_VERSION,
-	.go_parent_cb	= bsc_vty_go_parent,
-	.is_config_node	= bsc_vty_is_config_node,
+	.go_parent_cb	= msc_vty_go_parent,
+	.is_config_node	= msc_vty_is_config_node,
 };
 
 #ifdef BUILD_IU
@@ -396,7 +440,6 @@ int main(int argc, char **argv)
 	logging_vty_add_cmds(&log_info);
 	osmo_talloc_vty_add_cmds();
 	msc_vty_init(msc_network);
-	bsc_vty_init_extra();
 
 #ifdef BUILD_SMPP
 	if (smpp_openbsc_alloc_init(tall_msc_ctx) < 0)

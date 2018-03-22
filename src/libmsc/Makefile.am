@@ -44,7 +44,6 @@ libmsc_a_SOURCES = \
 	silent_call.c \
 	sms_queue.c \
 	ussd.c \
-	vty_interface_layer3.c \
 	transaction.c \
 	osmo_msc.c \
 	ctrl_commands.c \

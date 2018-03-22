@@ -21,7 +21,6 @@ noinst_LIBRARIES = \
 
 libcommon_a_SOURCES = \
 	bsc_version.c \
-	common_vty.c \
 	debug.c \
 	gsm_data.c \
 	gsup_client.c \
