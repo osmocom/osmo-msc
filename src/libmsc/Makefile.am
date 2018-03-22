@@ -28,6 +28,7 @@ noinst_LIBRARIES = \
 libmsc_a_SOURCES = \
 	a_iface.c \
 	a_iface_bssap.c \
+	a_reset.c \
 	msc_vty.c \
 	db.c \
 	gsm_04_08.c \
