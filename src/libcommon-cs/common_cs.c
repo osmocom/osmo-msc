@@ -31,49 +31,6 @@
 #include <osmocom/msc/gsm_04_11.h>
 #include <osmocom/msc/gsm_04_08.h>
 
-/* Warning: if bsc_network_init() is not called, some of the members of
- * gsm_network are not initialized properly and must not be used! (In
- * particular the llist heads and stats counters.)
- * The long term aim should be to have entirely separate structs for libbsc and
- * libmsc with some common general items.
- */
-struct gsm_network *gsm_network_init(void *ctx, mncc_recv_cb_t mncc_recv)
-{
-	struct gsm_network *net;
-
-	net = talloc_zero(ctx, struct gsm_network);
-	if (!net)
-		return NULL;
-
-	net->plmn = (struct osmo_plmn_id){ .mcc=1, .mnc=1 };
-
-	/* Permit a compile-time default of A5/3 and A5/1 */
-	net->a5_encryption_mask = (1 << 3) | (1 << 1);
-
-	/* Use 30 min periodic update interval as sane default */
-	net->t3212 = 5;
-
-	net->paging_response_timer = MSC_PAGING_RESPONSE_TIMER_DEFAULT;
-
-	INIT_LLIST_HEAD(&net->trans_list);
-	INIT_LLIST_HEAD(&net->upqueue);
-	INIT_LLIST_HEAD(&net->subscr_conns);
-
-	/* init statistics */
-	net->msc_ctrs = rate_ctr_group_alloc(net, &msc_ctrg_desc, 0);
-	if (!net->msc_ctrs) {
-		talloc_free(net);
-		return NULL;
-	}
-	net->active_calls = osmo_counter_alloc("msc.active_calls");
-
-	net->mncc_recv = mncc_recv;
-
-	INIT_LLIST_HEAD(&net->a.bscs);
-
-	return net;
-}
-
 struct msgb *gsm48_create_mm_serv_rej(enum gsm48_reject_value value)
 {
 	struct msgb *msg;

@@ -38,6 +38,43 @@
 #include <osmocom/msc/iu_dummy.h>
 #endif
 
+struct gsm_network *gsm_network_init(void *ctx, mncc_recv_cb_t mncc_recv)
+{
+	struct gsm_network *net;
+
+	net = talloc_zero(ctx, struct gsm_network);
+	if (!net)
+		return NULL;
+
+	net->plmn = (struct osmo_plmn_id){ .mcc=1, .mnc=1 };
+
+	/* Permit a compile-time default of A5/3 and A5/1 */
+	net->a5_encryption_mask = (1 << 3) | (1 << 1);
+
+	/* Use 30 min periodic update interval as sane default */
+	net->t3212 = 5;
+
+	net->paging_response_timer = MSC_PAGING_RESPONSE_TIMER_DEFAULT;
+
+	INIT_LLIST_HEAD(&net->trans_list);
+	INIT_LLIST_HEAD(&net->upqueue);
+	INIT_LLIST_HEAD(&net->subscr_conns);
+
+	/* init statistics */
+	net->msc_ctrs = rate_ctr_group_alloc(net, &msc_ctrg_desc, 0);
+	if (!net->msc_ctrs) {
+		talloc_free(net);
+		return NULL;
+	}
+	net->active_calls = osmo_counter_alloc("msc.active_calls");
+
+	net->mncc_recv = mncc_recv;
+
+	INIT_LLIST_HEAD(&net->a.bscs);
+
+	return net;
+}
+
 /* Receive a SAPI-N-REJECT from BSC */
 void msc_sapi_n_reject(struct gsm_subscriber_connection *conn, int dlci)
 {
