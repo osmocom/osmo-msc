@@ -76,6 +76,33 @@ uint32_t vlr_timer(struct vlr_instance *vlr, uint32_t timer)
 	return vlr->cfg.timer[tidx];
 }
 
+/* return static buffer with printable name of VLR subscriber */
+const char *vlr_subscr_name(struct vlr_subscr *vsub)
+{
+	static char buf[32];
+	if (!vsub)
+		return "unknown";
+	if (vsub->msisdn[0])
+		snprintf(buf, sizeof(buf), "MSISDN:%s", vsub->msisdn);
+	else if (vsub->imsi[0])
+		snprintf(buf, sizeof(buf), "IMSI:%s", vsub->imsi);
+	else if (vsub->tmsi != GSM_RESERVED_TMSI)
+		snprintf(buf, sizeof(buf), "TMSI:0x%08x", vsub->tmsi);
+	else if (vsub->tmsi_new != GSM_RESERVED_TMSI)
+		snprintf(buf, sizeof(buf), "TMSI(new):0x%08x", vsub->tmsi_new);
+	else
+		return "unknown";
+	buf[sizeof(buf)-1] = '\0';
+	return buf;
+}
+
+const char *vlr_subscr_msisdn_or_name(struct vlr_subscr *vsub)
+{
+	if (!vsub || !vsub->msisdn[0])
+		return vlr_subscr_name(vsub);
+	return vsub->msisdn;
+}
+
 struct vlr_subscr *_vlr_subscr_find_by_imsi(struct vlr_instance *vlr,
 					    const char *imsi,
 					    const char *file, int line)
