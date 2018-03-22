@@ -54,20 +54,7 @@
 #include <osmocom/msc/signal.h>
 #include <osmocom/msc/mncc_int.h>
 
-static struct gsm_network *vty_global_gsm_network = NULL;
-
-struct gsm_network *gsmnet_from_vty(struct vty *v)
-{
-	/* It can't hurt to force callers to continue to pass the vty instance
-	 * to this function, in case we'd like to retrieve the global
-	 * gsm_network instance from the vty at some point in the future. But
-	 * until then, just return the global pointer, which should have been
-	 * initialized by common_cs_vty_init().
-	 */
-	OSMO_ASSERT(vty_global_gsm_network);
-	return vty_global_gsm_network;
-}
-
+static struct gsm_network *gsmnet = NULL;
 
 struct cmd_node net_node = {
 	GSMNET_NODE,
@@ -84,7 +71,7 @@ DEFUN(cfg_net,
       cfg_net_cmd,
       "network", NETWORK_STR)
 {
-	vty->index = gsmnet_from_vty(vty);
+	vty->index = gsmnet;
 	vty->node = GSMNET_NODE;
 
 	return CMD_SUCCESS;
@@ -98,8 +85,6 @@ DEFUN(cfg_net_ncc,
       CODE_CMD_STR
       "Network Country Code to use\n")
 {
-	struct gsm_network *gsmnet = gsmnet_from_vty(vty);
-
 	gsmnet->plmn.mcc = atoi(argv[0]);
 
 	return CMD_SUCCESS;
@@ -113,7 +98,6 @@ DEFUN(cfg_net_mnc,
       CODE_CMD_STR
       "Mobile Network Code to use\n")
 {
-	struct gsm_network *gsmnet = gsmnet_from_vty(vty);
 	uint16_t mnc;
 	bool mnc_3_digits;
 
@@ -133,8 +117,6 @@ DEFUN(cfg_net_name_short,
       "short name NAME",
       "Set the short GSM network name\n" NAME_CMD_STR NAME_STR)
 {
-	struct gsm_network *gsmnet = gsmnet_from_vty(vty);
-
 	osmo_talloc_replace_string(gsmnet, &gsmnet->name_short, argv[0]);
 	return CMD_SUCCESS;
 }
@@ -144,8 +126,6 @@ DEFUN(cfg_net_name_long,
       "long name NAME",
       "Set the long GSM network name\n" NAME_CMD_STR NAME_STR)
 {
-	struct gsm_network *gsmnet = gsmnet_from_vty(vty);
-
 	osmo_talloc_replace_string(gsmnet, &gsmnet->name_long, argv[0]);
 	return CMD_SUCCESS;
 }
@@ -160,7 +140,6 @@ DEFUN(cfg_net_encryption,
 	"A5/n Algorithm Number\n"
 	"A5/n Algorithm Number\n")
 {
-	struct gsm_network *gsmnet = gsmnet_from_vty(vty);
 	unsigned int i;
 
 	gsmnet->a5_encryption_mask = 0;
@@ -177,8 +156,6 @@ DEFUN(cfg_net_authentication,
 	"Allow MS to attach via 2G BSC without authentication\n"
 	"Always do authentication\n")
 {
-	struct gsm_network *gsmnet = gsmnet_from_vty(vty);
-
 	gsmnet->authentication_required = (argv[0][0] == 'r') ? true : false;
 
 	return CMD_SUCCESS;
@@ -193,8 +170,6 @@ DEFUN(cfg_net_rrlp_mode, cfg_net_rrlp_mode_cmd,
 	"Request any location, prefer MS-based\n"
 	"Request any location, prefer MS-assisted\n")
 {
-	struct gsm_network *gsmnet = gsmnet_from_vty(vty);
-
 	gsmnet->rrlp.mode = rrlp_mode_parse(argv[0]);
 
 	return CMD_SUCCESS;
@@ -206,8 +181,6 @@ DEFUN(cfg_net_mm_info, cfg_net_mm_info_cmd,
 	"Send MM INFO after LOC UPD ACCEPT\n"
 	"Disable\n" "Enable\n")
 {
-	struct gsm_network *gsmnet = gsmnet_from_vty(vty);
-
 	gsmnet->send_mm_info = atoi(argv[0]);
 
 	return CMD_SUCCESS;
@@ -304,7 +277,6 @@ DEFUN(cfg_net_no_per_loc_upd, cfg_net_no_per_loc_upd_cmd,
 
 static int config_write_net(struct vty *vty)
 {
-	struct gsm_network *gsmnet = gsmnet_from_vty(vty);
 	int i;
 
 	vty_out(vty, "network%s", VTY_NEWLINE);
@@ -364,7 +336,6 @@ DEFUN(cfg_msc_assign_tmsi, cfg_msc_assign_tmsi_cmd,
       "assign-tmsi",
       "Assign TMSI during Location Updating.\n")
 {
-	struct gsm_network *gsmnet = gsmnet_from_vty(vty);
 	gsmnet->vlr->cfg.assign_tmsi = true;
 	return CMD_SUCCESS;
 }
@@ -373,7 +344,6 @@ DEFUN(cfg_msc_no_assign_tmsi, cfg_msc_no_assign_tmsi_cmd,
       "no assign-tmsi",
       NO_STR "Assign TMSI during Location Updating.\n")
 {
-	struct gsm_network *gsmnet = gsmnet_from_vty(vty);
 	gsmnet->vlr->cfg.assign_tmsi = false;
 	return CMD_SUCCESS;
 }
@@ -383,7 +353,6 @@ DEFUN(cfg_msc_cs7_instance_a,
       "cs7-instance-a <0-15>",
       "Set SS7 to be used by the A-Interface.\n" "SS7 instance reference number\n")
 {
-	struct gsm_network *gsmnet = gsmnet_from_vty(vty);
 	gsmnet->a.cs7_instance = atoi(argv[0]);
 	return CMD_SUCCESS;
 }
@@ -393,7 +362,6 @@ DEFUN(cfg_msc_cs7_instance_iu,
       "cs7-instance-iu <0-15>",
       "Set SS7 to be used by the Iu-Interface.\n" "SS7 instance reference number\n")
 {
-	struct gsm_network *gsmnet = gsmnet_from_vty(vty);
 	gsmnet->iu.cs7_instance = atoi(argv[0]);
 	return CMD_SUCCESS;
 }
@@ -403,7 +371,6 @@ DEFUN(cfg_msc_auth_tuple_max_reuse_count, cfg_msc_auth_tuple_max_reuse_count_cmd
       "Configure authentication tuple re-use\n"
       "0 to use each auth tuple at most once (default), >0 to limit re-use, -1 to re-use infinitely (vulnerable!).\n")
 {
-	struct gsm_network *gsmnet = gsmnet_from_vty(vty);
 	gsmnet->vlr->cfg.auth_tuple_max_reuse_count = atoi(argv[0]);
 	return CMD_SUCCESS;
 }
@@ -414,7 +381,6 @@ DEFUN(cfg_msc_auth_tuple_reuse_on_error, cfg_msc_auth_tuple_reuse_on_error_cmd,
       "0 = never re-use auth tuples beyond auth-tuple-max-reuse-count (default)\n"
       "1 = if the HLR does not deliver new tuples, do re-use already available old ones.\n")
 {
-	struct gsm_network *gsmnet = gsmnet_from_vty(vty);
 	gsmnet->vlr->cfg.auth_reuse_old_sets_on_error = atoi(argv[0]) ? true : false;
 	return CMD_SUCCESS;
 }
@@ -427,7 +393,6 @@ DEFUN(cfg_msc_paging_response_timer, cfg_msc_paging_response_timer_cmd,
       "Set to default timeout (" OSMO_STRINGIFY_VAL(MSC_PAGING_RESPONSE_TIMER_DEFAULT) " seconds)\n"
       "Set paging timeout in seconds\n")
 {
-	struct gsm_network *gsmnet = gsmnet_from_vty(vty);
 	if (!strcmp(argv[1], "default"))
 		gsmnet->paging_response_timer = MSC_PAGING_RESPONSE_TIMER_DEFAULT;
 	else
@@ -441,8 +406,6 @@ DEFUN(cfg_msc_emergency_msisdn, cfg_msc_emergency_msisdn_cmd,
       "MSISDN to which Emergency Calls are Dispatched\n"
       "MSISDN (E.164 Phone Number)\n")
 {
-	struct gsm_network *gsmnet = gsmnet_from_vty(vty);
-
 	osmo_talloc_replace_string(gsmnet, &gsmnet->emergency.route_to_msisdn, argv[0]);
 
 	return CMD_SUCCESS;
@@ -450,8 +413,6 @@ DEFUN(cfg_msc_emergency_msisdn, cfg_msc_emergency_msisdn_cmd,
 
 static int config_write_msc(struct vty *vty)
 {
-	struct gsm_network *gsmnet = gsmnet_from_vty(vty);
-
 	vty_out(vty, "msc%s", VTY_NEWLINE);
 	vty_out(vty, " %sassign-tmsi%s",
 		gsmnet->vlr->cfg.assign_tmsi? "" : "no ", VTY_NEWLINE);
@@ -509,7 +470,6 @@ static void vty_dump_one_conn(struct vty *vty, const struct gsm_subscriber_conne
 DEFUN(show_msc_conn, show_msc_conn_cmd,
 	"show connection", SHOW_STR "Subscriber Connections\n")
 {
-	struct gsm_network *gsmnet = gsmnet_from_vty(vty);
 	struct gsm_subscriber_connection *conn;
 
 	vty_conn_hdr(vty);
@@ -563,7 +523,6 @@ static void vty_dump_one_trans(struct vty *vty, const struct gsm_trans *trans)
 DEFUN(show_msc_transaction, show_msc_transaction_cmd,
 	"show transaction", SHOW_STR "Transactions\n")
 {
-	struct gsm_network *gsmnet = gsmnet_from_vty(vty);
 	struct gsm_trans *trans;
 
 	vty_trans_hdr(vty);
@@ -575,7 +534,6 @@ DEFUN(show_msc_transaction, show_msc_transaction_cmd,
 
 static void subscr_dump_full_vty(struct vty *vty, struct vlr_subscr *vsub)
 {
-	struct gsm_network *gsmnet = gsmnet_from_vty(vty);
 	struct gsm_trans *trans;
 	int reqs;
 	struct llist_head *entry;
@@ -654,7 +612,6 @@ DEFUN(show_subscr_cache,
 	SHOW_STR "Show information about subscribers\n"
 	"Display contents of subscriber cache\n")
 {
-	struct gsm_network *gsmnet = gsmnet_from_vty(vty);
 	struct vlr_subscr *vsub;
 	int count = 0;
 
@@ -677,7 +634,6 @@ DEFUN(sms_send_pend,
       "SMS related commands\n" "SMS Sending related commands\n"
       "Send all pending SMS")
 {
-	struct gsm_network *gsmnet = gsmnet_from_vty(vty);
 	struct gsm_sms *sms;
 	unsigned long long sms_id = 0;
 
@@ -701,7 +657,6 @@ DEFUN(sms_delete_expired,
       "SMS related commands\n" "SMS Database related commands\n"
       "Delete all expired SMS")
 {
-	struct gsm_network *gsmnet = gsmnet_from_vty(vty);
 	struct gsm_sms *sms;
 	unsigned long long sms_id = 0;
 	long long num_deleted = 0;
@@ -781,7 +736,6 @@ DEFUN(show_subscr,
       "show subscriber " SUBSCR_TYPES " ID",
 	SHOW_STR SUBSCR_HELP)
 {
-	struct gsm_network *gsmnet = gsmnet_from_vty(vty);
 	struct vlr_subscr *vsub = get_vsub_by_argv(gsmnet, argv[0],
 						       argv[1]);
 
@@ -816,7 +770,6 @@ DEFUN(subscriber_send_pending_sms,
       "subscriber " SUBSCR_TYPES " ID sms pending-send",
 	SUBSCR_HELP "SMS Operations\n" "Send pending SMS\n")
 {
-	struct gsm_network *gsmnet = gsmnet_from_vty(vty);
 	struct vlr_subscr *vsub;
 	struct gsm_sms *sms;
 
@@ -841,7 +794,6 @@ DEFUN(subscriber_send_sms,
       "subscriber " SUBSCR_TYPES " ID sms sender " SUBSCR_TYPES " SENDER_ID send .LINE",
 	SUBSCR_HELP "SMS Operations\n" SUBSCR_HELP "Send SMS\n" "Actual SMS Text\n")
 {
-	struct gsm_network *gsmnet = gsmnet_from_vty(vty);
 	struct vlr_subscr *vsub = get_vsub_by_argv(gsmnet, argv[0], argv[1]);
 	struct vlr_subscr *sender = get_vsub_by_argv(gsmnet, argv[2], argv[3]);
 	char *str;
@@ -881,7 +833,6 @@ DEFUN(subscriber_silent_sms,
       "subscriber " SUBSCR_TYPES " ID silent-sms sender " SUBSCR_TYPES " SENDER_ID send .LINE",
 	SUBSCR_HELP "Silent SMS Operations\n" SUBSCR_HELP "Send SMS\n" "Actual SMS Text\n")
 {
-	struct gsm_network *gsmnet = gsmnet_from_vty(vty);
 	struct vlr_subscr *vsub = get_vsub_by_argv(gsmnet, argv[0], argv[1]);
 	struct vlr_subscr *sender = get_vsub_by_argv(gsmnet, argv[2], argv[3]);
 	char *str;
@@ -928,7 +879,6 @@ DEFUN(subscriber_silent_call_start,
 	SUBSCR_HELP "Silent call operation\n" "Start silent call\n"
 	CHAN_TYPE_HELP)
 {
-	struct gsm_network *gsmnet = gsmnet_from_vty(vty);
 	struct vlr_subscr *vsub = get_vsub_by_argv(gsmnet, argv[0], argv[1]);
 	int rc, type;
 
@@ -970,7 +920,6 @@ DEFUN(subscriber_silent_call_stop,
 	SUBSCR_HELP "Silent call operation\n" "Stop silent call\n"
 	CHAN_TYPE_HELP)
 {
-	struct gsm_network *gsmnet = gsmnet_from_vty(vty);
 	struct vlr_subscr *vsub = get_vsub_by_argv(gsmnet, argv[0], argv[1]);
 	int rc;
 
@@ -1012,7 +961,6 @@ DEFUN(subscriber_ussd_notify,
 {
 	char *text;
 	struct gsm_subscriber_connection *conn;
-	struct gsm_network *gsmnet = gsmnet_from_vty(vty);
 	struct vlr_subscr *vsub = get_vsub_by_argv(gsmnet, argv[0], argv[1]);
 	int level;
 
@@ -1051,7 +999,6 @@ DEFUN(subscriber_paging,
       "subscriber " SUBSCR_TYPES " ID paging",
       SUBSCR_HELP "Issue an empty Paging for the subscriber (for debugging)\n")
 {
-	struct gsm_network *gsmnet = gsmnet_from_vty(vty);
 	struct vlr_subscr *vsub = get_vsub_by_argv(gsmnet, argv[0], argv[1]);
 	struct subscr_request *req;
 
@@ -1106,7 +1053,6 @@ DEFUN(subscriber_mstest_close,
       "Loop Type I\n")
 {
 	struct gsm_subscriber_connection *conn;
-	struct gsm_network *gsmnet = gsmnet_from_vty(vty);
 	struct vlr_subscr *vsub = get_vsub_by_argv(gsmnet, argv[0], argv[1]);
 	const char *loop_str;
 	int loop_mode;
@@ -1140,7 +1086,6 @@ DEFUN(subscriber_mstest_open,
       "Open a TCH Loop inside the MS\n")
 {
 	struct gsm_subscriber_connection *conn;
-	struct gsm_network *gsmnet = gsmnet_from_vty(vty);
 	struct vlr_subscr *vsub = get_vsub_by_argv(gsmnet, argv[0], argv[1]);
 
 	if (!vsub) {
@@ -1167,7 +1112,6 @@ DEFUN(ena_subscr_expire,
       "subscriber " SUBSCR_TYPES " ID expire",
 	SUBSCR_HELP "Expire the subscriber Now\n")
 {
-	struct gsm_network *gsmnet = gsmnet_from_vty(vty);
 	struct vlr_subscr *vsub = get_vsub_by_argv(gsmnet, argv[0],
 						       argv[1]);
 
@@ -1212,36 +1156,34 @@ DEFUN(show_stats,
       "show statistics",
 	SHOW_STR "Display network statistics\n")
 {
-	struct gsm_network *net = gsmnet_from_vty(vty);
-
 	vty_out(vty, "Location Update         : %lu attach, %lu normal, %lu periodic%s",
-		net->msc_ctrs->ctr[MSC_CTR_LOC_UPDATE_TYPE_ATTACH].current,
-		net->msc_ctrs->ctr[MSC_CTR_LOC_UPDATE_TYPE_NORMAL].current,
-		net->msc_ctrs->ctr[MSC_CTR_LOC_UPDATE_TYPE_PERIODIC].current,
+		gsmnet->msc_ctrs->ctr[MSC_CTR_LOC_UPDATE_TYPE_ATTACH].current,
+		gsmnet->msc_ctrs->ctr[MSC_CTR_LOC_UPDATE_TYPE_NORMAL].current,
+		gsmnet->msc_ctrs->ctr[MSC_CTR_LOC_UPDATE_TYPE_PERIODIC].current,
 		VTY_NEWLINE);
 	vty_out(vty, "IMSI Detach Indications : %lu%s",
-		net->msc_ctrs->ctr[MSC_CTR_LOC_UPDATE_TYPE_DETACH].current,
+		gsmnet->msc_ctrs->ctr[MSC_CTR_LOC_UPDATE_TYPE_DETACH].current,
 		VTY_NEWLINE);
 	vty_out(vty, "Location Updating Results: %lu completed, %lu failed%s",
-		net->msc_ctrs->ctr[MSC_CTR_LOC_UPDATE_COMPLETED].current,
-		net->msc_ctrs->ctr[MSC_CTR_LOC_UPDATE_FAILED].current,
+		gsmnet->msc_ctrs->ctr[MSC_CTR_LOC_UPDATE_COMPLETED].current,
+		gsmnet->msc_ctrs->ctr[MSC_CTR_LOC_UPDATE_FAILED].current,
 		VTY_NEWLINE);
 	vty_out(vty, "SMS MO                  : %lu submitted, %lu no receiver%s",
-		net->msc_ctrs->ctr[MSC_CTR_SMS_SUBMITTED].current,
-		net->msc_ctrs->ctr[MSC_CTR_SMS_NO_RECEIVER].current,
+		gsmnet->msc_ctrs->ctr[MSC_CTR_SMS_SUBMITTED].current,
+		gsmnet->msc_ctrs->ctr[MSC_CTR_SMS_NO_RECEIVER].current,
 		VTY_NEWLINE);
 	vty_out(vty, "SMS MT                  : %lu delivered, %lu no memory, %lu other error%s",
-		net->msc_ctrs->ctr[MSC_CTR_SMS_DELIVERED].current,
-		net->msc_ctrs->ctr[MSC_CTR_SMS_RP_ERR_MEM].current,
-		net->msc_ctrs->ctr[MSC_CTR_SMS_RP_ERR_OTHER].current,
+		gsmnet->msc_ctrs->ctr[MSC_CTR_SMS_DELIVERED].current,
+		gsmnet->msc_ctrs->ctr[MSC_CTR_SMS_RP_ERR_MEM].current,
+		gsmnet->msc_ctrs->ctr[MSC_CTR_SMS_RP_ERR_OTHER].current,
 		VTY_NEWLINE);
 	vty_out(vty, "MO Calls                : %lu setup, %lu connect ack%s",
-		net->msc_ctrs->ctr[MSC_CTR_CALL_MO_SETUP].current,
-		net->msc_ctrs->ctr[MSC_CTR_CALL_MO_CONNECT_ACK].current,
+		gsmnet->msc_ctrs->ctr[MSC_CTR_CALL_MO_SETUP].current,
+		gsmnet->msc_ctrs->ctr[MSC_CTR_CALL_MO_CONNECT_ACK].current,
 		VTY_NEWLINE);
 	vty_out(vty, "MT Calls                : %lu setup, %lu connect%s",
-		net->msc_ctrs->ctr[MSC_CTR_CALL_MT_SETUP].current,
-		net->msc_ctrs->ctr[MSC_CTR_CALL_MT_CONNECT].current,
+		gsmnet->msc_ctrs->ctr[MSC_CTR_CALL_MT_SETUP].current,
+		gsmnet->msc_ctrs->ctr[MSC_CTR_CALL_MT_CONNECT].current,
 		VTY_NEWLINE);
 	return CMD_SUCCESS;
 }
@@ -1251,9 +1193,7 @@ DEFUN(show_smsqueue,
       "show sms-queue",
       SHOW_STR "Display SMSqueue statistics\n")
 {
-	struct gsm_network *net = gsmnet_from_vty(vty);
-
-	sms_queue_stats(net->sms_queue, vty);
+	sms_queue_stats(gsmnet->sms_queue, vty);
 	return CMD_SUCCESS;
 }
 
@@ -1262,9 +1202,7 @@ DEFUN(smsqueue_trigger,
       "sms-queue trigger",
       "SMS Queue\n" "Trigger sending messages\n")
 {
-	struct gsm_network *net = gsmnet_from_vty(vty);
-
-	sms_queue_trigger(net->sms_queue);
+	sms_queue_trigger(gsmnet->sms_queue);
 	return CMD_SUCCESS;
 }
 
@@ -1273,9 +1211,7 @@ DEFUN(smsqueue_max,
       "sms-queue max-pending <1-500>",
       "SMS Queue\n" "SMS to deliver in parallel\n" "Amount\n")
 {
-	struct gsm_network *net = gsmnet_from_vty(vty);
-
-	sms_queue_set_max_pending(net->sms_queue, atoi(argv[0]));
+	sms_queue_set_max_pending(gsmnet->sms_queue, atoi(argv[0]));
 	return CMD_SUCCESS;
 }
 
@@ -1284,9 +1220,7 @@ DEFUN(smsqueue_clear,
       "sms-queue clear",
       "SMS Queue\n" "Clear the queue of pending SMS\n")
 {
-	struct gsm_network *net = gsmnet_from_vty(vty);
-
-	sms_queue_clear(net->sms_queue);
+	sms_queue_clear(gsmnet->sms_queue);
 	return CMD_SUCCESS;
 }
 
@@ -1295,9 +1229,7 @@ DEFUN(smsqueue_fail,
       "sms-queue max-failure <1-500>",
       "SMS Queue\n" "Maximum amount of delivery failures\n" "Amount\n")
 {
-	struct gsm_network *net = gsmnet_from_vty(vty);
-
-	sms_queue_set_max_failure(net->sms_queue, atoi(argv[0]));
+	sms_queue_set_max_failure(gsmnet->sms_queue, atoi(argv[0]));
 	return CMD_SUCCESS;
 }
 
@@ -1372,7 +1304,6 @@ DEFUN(logging_fltr_imsi,
       "Filter log messages by IMSI\n" "IMSI to be used as filter\n")
 {
 	struct vlr_subscr *vlr_subscr;
-	struct gsm_network *gsmnet = gsmnet_from_vty(vty);
 	struct log_target *tgt = osmo_log_vty2tgt(vty);
 	const char *imsi = argv[0];
 
@@ -1408,7 +1339,6 @@ DEFUN(cfg_hlr_remote_ip, cfg_hlr_remote_ip_cmd, "remote-ip A.B.C.D",
       "Remote GSUP address of the HLR\n"
       "Remote GSUP address (default: " MSC_HLR_REMOTE_IP_DEFAULT ")")
 {
-	struct gsm_network *gsmnet = gsmnet_from_vty(vty);
 	talloc_free((void*)gsmnet->gsup_server_addr_str);
 	gsmnet->gsup_server_addr_str = talloc_strdup(gsmnet, argv[0]);
 	return CMD_SUCCESS;
@@ -1418,15 +1348,12 @@ DEFUN(cfg_hlr_remote_port, cfg_hlr_remote_port_cmd, "remote-port <1-65535>",
       "Remote GSUP port of the HLR\n"
       "Remote GSUP port (default: " OSMO_STRINGIFY(MSC_HLR_REMOTE_PORT_DEFAULT) ")")
 {
-	struct gsm_network *gsmnet = gsmnet_from_vty(vty);
 	gsmnet->gsup_server_port = atoi(argv[0]);
 	return CMD_SUCCESS;
 }
 
 static int config_write_hlr(struct vty *vty)
 {
-	struct gsm_network *gsmnet = gsmnet_from_vty(vty);
-
 	vty_out(vty, "hlr%s", VTY_NEWLINE);
 	vty_out(vty, " remote-ip %s%s",
 		gsmnet->gsup_server_addr_str, VTY_NEWLINE);
@@ -1437,8 +1364,8 @@ static int config_write_hlr(struct vty *vty)
 
 void msc_vty_init(struct gsm_network *msc_network)
 {
-	OSMO_ASSERT(vty_global_gsm_network == NULL);
-	vty_global_gsm_network = msc_network;
+	OSMO_ASSERT(gsmnet == NULL);
+	gsmnet = msc_network;
 
 	osmo_stats_vty_add_cmds();
 
