@@ -362,16 +362,11 @@ struct gsm_sms {
 extern void *tall_bsc_ctx;
 extern int ipacc_rtp_direct;
 
-enum rrlp_mode rrlp_mode_parse(const char *arg);
-const char *rrlp_mode_name(enum rrlp_mode mode);
-
 struct gsm_subscriber_connection *msc_subscr_con_allocate(struct gsm_network *network);
 void msc_subscr_con_free(struct gsm_subscriber_connection *conn);
 
 /* control interface handling */
 int bsc_base_ctrl_cmds_install(void);
 int msc_ctrl_cmds_install(struct gsm_network *net);
-
-bool classmark_is_r99(struct gsm_classmark *cm);
 
 #endif /* _GSM_DATA_H */

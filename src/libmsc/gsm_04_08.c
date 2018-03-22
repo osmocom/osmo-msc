@@ -84,6 +84,16 @@ static int gsm48_tx_simple(struct gsm_subscriber_connection *conn,
 
 static uint32_t new_callref = 0x80000001;
 
+static bool classmark_is_r99(struct gsm_classmark *cm)
+{
+	int rev_lev = 0;
+	if (cm->classmark1_set)
+		rev_lev = cm->classmark1.rev_lev;
+	else if (cm->classmark2_len > 0)
+		rev_lev = (cm->classmark2[0] >> 5) & 0x3;
+	return rev_lev >= 2;
+}
+
 /* Determine if the given CLASSMARK (1/2/3) value permits a given A5/n cipher */
 static bool classmark_supports_a5(const struct gsm_classmark *cm, uint8_t a5)
 {

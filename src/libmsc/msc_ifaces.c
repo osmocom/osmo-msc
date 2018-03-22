@@ -39,6 +39,13 @@
 #include <osmocom/msc/iu_dummy.h>
 #endif /* BUILD_IU */
 
+const struct value_string ran_type_names[] = {
+	OSMO_VALUE_STRING(RAN_UNKNOWN),
+	OSMO_VALUE_STRING(RAN_GERAN_A),
+	OSMO_VALUE_STRING(RAN_UTRAN_IU),
+	{ 0, NULL }
+};
+
 static int msc_tx(struct gsm_subscriber_connection *conn, struct msgb *msg)
 {
 	if (!msg)

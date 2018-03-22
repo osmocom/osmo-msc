@@ -161,6 +161,24 @@ DEFUN(cfg_net_authentication,
 	return CMD_SUCCESS;
 }
 
+static const struct value_string rrlp_mode_names[] = {
+	{ RRLP_MODE_NONE,	"none" },
+	{ RRLP_MODE_MS_BASED,	"ms-based" },
+	{ RRLP_MODE_MS_PREF,	"ms-preferred" },
+	{ RRLP_MODE_ASS_PREF,	"ass-preferred" },
+	{ 0,			NULL }
+};
+
+static enum rrlp_mode rrlp_mode_parse(const char *arg)
+{
+	return get_string_value(rrlp_mode_names, arg);
+}
+
+static const char *rrlp_mode_name(enum rrlp_mode mode)
+{
+	return get_value_string(rrlp_mode_names, mode);
+}
+
 DEFUN(cfg_net_rrlp_mode, cfg_net_rrlp_mode_cmd,
       "rrlp mode (none|ms-based|ms-preferred|ass-preferred)",
 	"Radio Resource Location Protocol\n"
