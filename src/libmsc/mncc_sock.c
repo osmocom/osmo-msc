@@ -284,7 +284,7 @@ int mncc_sock_init(struct gsm_network *net, const char *sock_path)
 	struct osmo_fd *bfd;
 	int rc;
 
-	state = talloc_zero(tall_bsc_ctx, struct mncc_sock_state);
+	state = talloc_zero(net, struct mncc_sock_state);
 	if (!state)
 		return -ENOMEM;
 

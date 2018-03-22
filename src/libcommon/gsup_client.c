@@ -265,7 +265,8 @@ static void start_test_procedure(struct gsup_client *gsupc)
 	gsup_client_send_ping(gsupc);
 }
 
-struct gsup_client *gsup_client_create(const char *unit_name,
+struct gsup_client *gsup_client_create(void *talloc_ctx,
+				       const char *unit_name,
 				       const char *ip_addr,
 				       unsigned int tcp_port,
 				       gsup_client_read_cb_t read_cb,
@@ -274,7 +275,7 @@ struct gsup_client *gsup_client_create(const char *unit_name,
 	struct gsup_client *gsupc;
 	int rc;
 
-	gsupc = talloc_zero(tall_bsc_ctx, struct gsup_client);
+	gsupc = talloc_zero(talloc_ctx, struct gsup_client);
 	OSMO_ASSERT(gsupc);
 
 	/* struct ipaccess_unit has a non-const unit_name, so let's copy to be

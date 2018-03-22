@@ -359,8 +359,6 @@ struct gsm_sms {
 	char text[SMS_TEXT_SIZE];
 };
 
-extern void talloc_ctx_init(void *ctx_root);
-
 extern void *tall_bsc_ctx;
 extern int ipacc_rtp_direct;
 

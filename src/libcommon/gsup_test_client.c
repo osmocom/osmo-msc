@@ -275,8 +275,6 @@ static void sig_cb(int sig)
 	}
 }
 
-void *tall_bsc_ctx = NULL;
-
 /* default categories */
 static struct log_info_cat default_categories[] = {
 };
@@ -294,7 +292,7 @@ int main(int argc, char **argv)
 
 	osmo_init_logging(&gsup_test_client_log_info);
 
-	g_gc = gsup_client_create("GSUPTEST", server_host, server_port,
+	g_gc = gsup_client_create(NULL, "GSUPTEST", server_host, server_port,
 				  gsupc_read_cb, NULL);
 
 

@@ -513,6 +513,10 @@ const struct log_info log_info = {
 	.num_cat = ARRAY_SIZE(msc_default_categories),
 };
 
+extern void *tall_gsms_ctx;
+extern void *tall_call_ctx;
+extern void *tall_trans_ctx;
+
 int main(int argc, char **argv)
 {
 	int rc;
@@ -520,8 +524,12 @@ int main(int argc, char **argv)
 	msc_vty_info.copyright	= osmomsc_copyright;
 
 	tall_msc_ctx = talloc_named_const(NULL, 1, "osmo_msc");
-	talloc_ctx_init(tall_msc_ctx);
 	msc_vty_info.tall_ctx = tall_msc_ctx;
+
+	msgb_talloc_ctx_init(tall_msc_ctx, 0);
+	tall_gsms_ctx = talloc_named_const(tall_msc_ctx, 0, "sms");
+	tall_call_ctx = talloc_named_const(tall_msc_ctx, 0, "gsm_call");
+	tall_trans_ctx = talloc_named_const(tall_msc_ctx, 0, "transaction");
 
 	osmo_init_logging(&log_info);
 	osmo_stats_init(tall_msc_ctx);

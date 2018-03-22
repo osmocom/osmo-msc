@@ -1040,7 +1040,7 @@ int vlr_start(const char *gsup_unit_name, struct vlr_instance *vlr,
 {
 	OSMO_ASSERT(vlr);
 
-	vlr->gsup_client = gsup_client_create(gsup_unit_name,
+	vlr->gsup_client = gsup_client_create(vlr, gsup_unit_name,
 					      gsup_server_addr_str,
 					      gsup_server_port,
 					      &vlr_gsupc_read_cb, NULL);

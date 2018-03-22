@@ -54,7 +54,8 @@ struct gsup_client {
 	int got_ipa_pong;
 };
 
-struct gsup_client *gsup_client_create(const char *unit_name,
+struct gsup_client *gsup_client_create(void *talloc_ctx,
+				       const char *unit_name,
 				       const char *ip_addr,
 				       unsigned int tcp_port,
 				       gsup_client_read_cb_t read_cb,

@@ -45,6 +45,8 @@
 
 #include "msc_vlr_tests.h"
 
+void *msc_vlr_tests_ctx = NULL;
+
 bool _log_lines = false;
 
 struct gsm_network *net = NULL;
@@ -472,8 +474,6 @@ static struct log_info info = {
 	.num_cat = ARRAY_SIZE(test_categories),
 };
 
-extern void *tall_bsc_ctx;
-
 int mncc_recv(struct gsm_network *net, struct msgb *msg)
 {
 	struct gsm_mncc *mncc = (void*)msg->data;
@@ -513,7 +513,7 @@ __wrap_gsup_client_create(const char *ip_addr, unsigned int tcp_port,
 			  struct oap_client_config *oap_config)
 {
 	struct gsup_client *gsupc;
-	gsupc = talloc_zero(tall_bsc_ctx, struct gsup_client);
+	gsupc = talloc_zero(msc_vlr_tests_ctx, struct gsup_client);
 	OSMO_ASSERT(gsupc);
 	return gsupc;
 }
@@ -805,12 +805,12 @@ void fake_time_start()
 	fake_time_passes(0, 0);
 }
 
-static void check_talloc(void *msgb_ctx, void *tall_bsc_ctx, int expected_blocks)
+static void check_talloc(void *msgb_ctx, void *msc_vlr_tests_ctx, int expected_blocks)
 {
 	talloc_report_full(msgb_ctx, stderr);
-	/* Expecting these to stick around in tall_bsc_ctx:
+	/* Expecting these to stick around in msc_vlr_tests_ctx:
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 7
+talloc_total_blocks(msc_vlr_tests_ctx) == 7
 full talloc report on 'subscr_conn_test_ctx' (total   2642 bytes in   8 blocks)
     struct gsup_client             contains    248 bytes in   1 blocks (ref 0) 0x61300000dee0
     struct gsm_network             contains   2023 bytes in   6 blocks (ref 0) 0x61700000fce0
@@ -820,9 +820,9 @@ full talloc report on 'subscr_conn_test_ctx' (total   2642 bytes in   8 blocks)
     msgb                           contains      0 bytes in   1 blocks (ref 0) 0x60800000bf80
 	*/
 	fprintf(stderr, "talloc_total_blocks(tall_bsc_ctx) == %zu\n",
-		talloc_total_blocks(tall_bsc_ctx));
-	if (talloc_total_blocks(tall_bsc_ctx) != expected_blocks)
-		talloc_report_full(tall_bsc_ctx, stderr);
+		talloc_total_blocks(msc_vlr_tests_ctx));
+	if (talloc_total_blocks(msc_vlr_tests_ctx) != expected_blocks)
+		talloc_report_full(msc_vlr_tests_ctx, stderr);
 	fprintf(stderr, "\n");
 }
 
@@ -895,7 +895,7 @@ static void run_tests(int nr)
 		if (cmdline_opts.verbose)
 			fprintf(stderr, "(test nr %d)\n", test_nr + 1);
 
-		check_talloc(msgb_ctx, tall_bsc_ctx, 7);
+		check_talloc(msgb_ctx, msc_vlr_tests_ctx, 7);
 	}
 }
 
@@ -926,8 +926,8 @@ int main(int argc, char **argv)
 {
 	handle_options(argc, argv);
 
-	tall_bsc_ctx = talloc_named_const(NULL, 0, "subscr_conn_test_ctx");
-	msgb_ctx = msgb_talloc_ctx_init(tall_bsc_ctx, 0);
+	msc_vlr_tests_ctx = talloc_named_const(NULL, 0, "msc_vlr_tests_ctx");
+	msgb_ctx = msgb_talloc_ctx_init(msc_vlr_tests_ctx, 0);
 	osmo_init_logging(&info);
 
 	_log_lines = cmdline_opts.verbose;
@@ -941,7 +941,7 @@ int main(int argc, char **argv)
 	if (cmdline_opts.verbose)
 		log_set_category_filter(osmo_stderr_target, DLSMS, 1, LOGL_DEBUG);
 
-	net = test_net(tall_bsc_ctx);
+	net = test_net(msc_vlr_tests_ctx);
 
 	osmo_fsm_log_addr(false);
 
@@ -969,6 +969,6 @@ int main(int argc, char **argv)
 
 	printf("Done\n");
 
-	check_talloc(msgb_ctx, tall_bsc_ctx, 7);
+	check_talloc(msgb_ctx, msc_vlr_tests_ctx, 7);
 	return 0;
 }
