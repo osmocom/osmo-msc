@@ -207,7 +207,6 @@ AC_OUTPUT(
     src/libmsc/Makefile
     src/libvlr/Makefile
     src/libgsupclient/Makefile
-    src/libcommon-cs/Makefile
     src/osmo-msc/Makefile
     src/utils/Makefile
     tests/Makefile

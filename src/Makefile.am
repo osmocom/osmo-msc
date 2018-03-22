@@ -24,7 +24,6 @@ SUBDIRS = \
 	libgsupclient \
 	libvlr \
 	libmsc \
-	libcommon-cs \
 	$(NULL)
 
 # Programs
