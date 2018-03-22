@@ -34,7 +34,6 @@ smpp_test_SOURCES = \
 	$(NULL)
 
 smpp_test_LDADD = \
-	$(top_builddir)/src/libcommon/libcommon.a \
 	$(LIBOSMOCORE_LIBS) \
 	$(LIBOSMOGSM_LIBS) \
 	$(NULL)

@@ -40,7 +40,6 @@ smpp_mirror_CFLAGS = \
 	$(NULL)
 
 smpp_mirror_LDADD = \
-	$(top_builddir)/src/libcommon/libcommon.a \
 	$(LIBOSMOCORE_LIBS) \
 	$(LIBOSMOGSM_LIBS) \
 	$(LIBSMPP34_LIBS) \

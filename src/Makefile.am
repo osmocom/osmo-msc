@@ -21,7 +21,7 @@ AM_LDFLAGS = \
 
 # Libraries
 SUBDIRS = \
-	libcommon \
+	libgsupclient \
 	libvlr \
 	libmsc \
 	libcommon-cs \

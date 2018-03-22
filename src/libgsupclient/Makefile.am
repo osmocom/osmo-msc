@@ -10,16 +10,14 @@ AM_CFLAGS = \
 	$(LIBOSMOGSM_CFLAGS) \
 	$(LIBOSMOVTY_CFLAGS) \
 	$(LIBOSMOABIS_CFLAGS) \
-	$(LIBOSMOSCCP_CFLAGS) \
-	$(LIBOSMOMGCPCLIENT_CFLAGS) \
 	$(COVERAGE_CFLAGS) \
 	$(NULL)
 
 noinst_LIBRARIES = \
-	libcommon.a \
+	libgsupclient.a \
 	$(NULL)
 
-libcommon_a_SOURCES = \
+libgsupclient_a_SOURCES = \
 	gsup_client.c \
 	oap_client.c \
 	$(NULL)
@@ -32,7 +30,7 @@ gsup_test_client_SOURCES = \
 	gsup_test_client.c \
 	$(NULL)
 gsup_test_client_LDADD = \
-	libcommon.a \
+	libgsupclient.a \
 	$(LIBOSMOCORE_LIBS) \
 	$(LIBOSMOGSM_LIBS) \
 	$(LIBOSMOVTY_LIBS) \
