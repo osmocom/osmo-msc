@@ -217,7 +217,7 @@ static int op_type_by_gsup_msgt(enum osmo_gsup_message_type msg_type)
 static int gsupc_read_cb(struct gsup_client *gsupc, struct msgb *msg)
 {
 	struct osmo_gsup_message gsup_msg = {0};
-	struct imsi_op *io;
+	struct imsi_op *io = NULL;
 	int rc;
 
 	DEBUGP(DLGSUP, "Rx GSUP %s\n", msgb_hexdump(msg));
@@ -237,14 +237,14 @@ static int gsupc_read_cb(struct gsup_client *gsupc, struct msgb *msg)
 	case IMSI_OP_SAI:
 	case IMSI_OP_LU:
 		io = imsi_op_find(gsup_msg.imsi, rc);
-		if (!io)
-			return -1;
 		break;
 	case IMSI_OP_ISD:
 		/* ISD is an inbound transaction */
 		io = imsi_op_alloc(g_gc, gsup_msg.imsi, IMSI_OP_ISD);
 		break;
 	}
+	if (!io)
+		return -1;
 
 	imsi_op_rx_gsup(io, &gsup_msg);
 	msgb_free(msg);
