@@ -531,7 +531,7 @@ int main(int argc, char **argv)
 	tall_call_ctx = talloc_named_const(tall_msc_ctx, 0, "gsm_call");
 	tall_trans_ctx = talloc_named_const(tall_msc_ctx, 0, "transaction");
 
-	osmo_init_logging(&log_info);
+	osmo_init_logging2(tall_msc_ctx, &log_info);
 	osmo_stats_init(tall_msc_ctx);
 
 	/* For --version, vty_init() must be called before handling options */

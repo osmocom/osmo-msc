@@ -1,3 +1,6 @@
+full talloc report on 'msgb' (total      0 bytes in   1 blocks)
+talloc_total_blocks(tall_bsc_ctx) == 12
+
 ===== test_call_mo
 - Total time passed: 0.000000 s
 - Location Update request causes a GSUP Send Auth Info request to HLR
@@ -370,7 +373,7 @@ DREF freeing VLR subscr MSISDN:42342
 ===== test_call_mo: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 7
+talloc_total_blocks(tall_bsc_ctx) == 12
 
 ===== test_call_mt
 - Total time passed: 0.000000 s
@@ -752,7 +755,7 @@ DREF freeing VLR subscr MSISDN:42342
 ===== test_call_mt: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 7
+talloc_total_blocks(tall_bsc_ctx) == 12
 
 ===== test_call_mo_to_unknown
 - Total time passed: 0.000000 s
@@ -1088,7 +1091,7 @@ DREF freeing VLR subscr MSISDN:42342
 ===== test_call_mo_to_unknown: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 7
+talloc_total_blocks(tall_bsc_ctx) == 12
 
 ===== test_call_mo_to_unknown_timeout
 - Total time passed: 0.000000 s
@@ -1422,8 +1425,8 @@ DREF freeing VLR subscr MSISDN:42342
 ===== test_call_mo_to_unknown_timeout: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 7
+talloc_total_blocks(tall_bsc_ctx) == 12
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 7
+talloc_total_blocks(tall_bsc_ctx) == 12
 

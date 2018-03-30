@@ -805,23 +805,29 @@ void fake_time_start()
 	fake_time_passes(0, 0);
 }
 
-static void check_talloc(void *msgb_ctx, void *msc_vlr_tests_ctx, int expected_blocks)
+static void check_talloc(void *msgb_ctx, void *msc_vlr_tests_ctx)
 {
+	/* Verifying that the msgb context is empty */
 	talloc_report_full(msgb_ctx, stderr);
 	/* Expecting these to stick around in msc_vlr_tests_ctx:
-full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(msc_vlr_tests_ctx) == 7
-full talloc report on 'subscr_conn_test_ctx' (total   2642 bytes in   8 blocks)
-    struct gsup_client             contains    248 bytes in   1 blocks (ref 0) 0x61300000dee0
-    struct gsm_network             contains   2023 bytes in   6 blocks (ref 0) 0x61700000fce0
-        struct vlr_instance            contains    160 bytes in   1 blocks (ref 0) 0x611000009a60
-        no_gsup_server                 contains     15 bytes in   1 blocks (ref 0) 0x60b00000ade0
-        ../../../src/libosmocore/src/rate_ctr.c:199 contains   1552 bytes in   1 blocks (ref 0) 0x61b00001eae0
-    msgb                           contains      0 bytes in   1 blocks (ref 0) 0x60800000bf80
-	*/
+	 * talloc_total_blocks(tall_bsc_ctx) == 12
+	 * full talloc report on 'msc_vlr_tests_ctx' (total   3636 bytes in  12 blocks)
+	 *     struct gsup_client             contains    248 bytes in   1 blocks (ref 0) 0x563a489c05f0
+	 *     struct gsm_network             contains   2031 bytes in   4 blocks (ref 0) 0x563a489bfbb0
+	 *         struct vlr_instance            contains    168 bytes in   1 blocks (ref 0) 0x563a489c04e0
+	 *         no_gsup_server                 contains     15 bytes in   1 blocks (ref 0) 0x563a489c0460
+	 *         ../../../src/libosmocore/src/rate_ctr.c:228 contains   1552 bytes in   1 blocks (ref 0) 0x563a489bfd40
+	 *     logging                        contains   1357 bytes in   5 blocks (ref 0) 0x563a489bf440
+	 *         struct log_target              contains    228 bytes in   2 blocks (ref 0) 0x563a489bf9f0
+	 *             struct log_category            contains     68 bytes in   1 blocks (ref 0) 0x563a489bfb00
+	 *         struct log_info                contains   1128 bytes in   2 blocks (ref 0) 0x563a489bf4b0
+	 *             struct log_info_cat            contains   1088 bytes in   1 blocks (ref 0) 0x563a489bf540
+	 *     msgb                           contains      0 bytes in   1 blocks (ref 0) 0x563a489bf3d0
+	 * (That's 12 counting the root ctx)
+	 */
 	fprintf(stderr, "talloc_total_blocks(tall_bsc_ctx) == %zu\n",
 		talloc_total_blocks(msc_vlr_tests_ctx));
-	if (talloc_total_blocks(msc_vlr_tests_ctx) != expected_blocks)
+	if (talloc_total_blocks(msc_vlr_tests_ctx) != 12)
 		talloc_report_full(msc_vlr_tests_ctx, stderr);
 	fprintf(stderr, "\n");
 }
@@ -882,6 +888,9 @@ void *msgb_ctx = NULL;
 static void run_tests(int nr)
 {
 	int test_nr;
+
+	check_talloc(msgb_ctx, msc_vlr_tests_ctx);
+
 	nr--; /* arg's first test is 1, in here it's 0 */
 	for (test_nr = 0; msc_vlr_tests[test_nr]; test_nr++) {
 		if (nr >= 0 && test_nr != nr)
@@ -895,7 +904,7 @@ static void run_tests(int nr)
 		if (cmdline_opts.verbose)
 			fprintf(stderr, "(test nr %d)\n", test_nr + 1);
 
-		check_talloc(msgb_ctx, msc_vlr_tests_ctx, 7);
+		check_talloc(msgb_ctx, msc_vlr_tests_ctx);
 	}
 }
 
@@ -928,7 +937,7 @@ int main(int argc, char **argv)
 
 	msc_vlr_tests_ctx = talloc_named_const(NULL, 0, "msc_vlr_tests_ctx");
 	msgb_ctx = msgb_talloc_ctx_init(msc_vlr_tests_ctx, 0);
-	osmo_init_logging(&info);
+	osmo_init_logging2(msc_vlr_tests_ctx, &info);
 
 	_log_lines = cmdline_opts.verbose;
 
@@ -969,6 +978,6 @@ int main(int argc, char **argv)
 
 	printf("Done\n");
 
-	check_talloc(msgb_ctx, msc_vlr_tests_ctx, 7);
+	check_talloc(msgb_ctx, msc_vlr_tests_ctx);
 	return 0;
 }

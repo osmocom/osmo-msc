@@ -1,3 +1,6 @@
+full talloc report on 'msgb' (total      0 bytes in   1 blocks)
+talloc_total_blocks(tall_bsc_ctx) == 12
+
 ===== test_early_stage
 - NULL conn
 msc_subscr_conn_is_accepted() == false
@@ -40,7 +43,7 @@ DMM Subscr_Conn(test){SUBSCR_CONN_S_RELEASED}: Deallocated
 ===== test_early_stage: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 7
+talloc_total_blocks(tall_bsc_ctx) == 12
 
 ===== test_cm_service_without_lu
 - CM Service Request without a prior Location Updating
@@ -83,7 +86,7 @@ DRLL Freeing subscriber connection with NULL subscriber
 ===== test_cm_service_without_lu: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 7
+talloc_total_blocks(tall_bsc_ctx) == 12
 
 ===== test_two_lu
 - Location Update request causes a GSUP LU request to HLR
@@ -340,7 +343,7 @@ DRLL Freeing subscriber connection with NULL subscriber
 ===== test_two_lu: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 7
+talloc_total_blocks(tall_bsc_ctx) == 12
 
 ===== test_lu_unknown_tmsi
 - Location Update request with unknown TMSI sends ID Request for IMSI
@@ -489,8 +492,8 @@ DREF freeing VLR subscr MSISDN:46071
 ===== test_lu_unknown_tmsi: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 7
+talloc_total_blocks(tall_bsc_ctx) == 12
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 7
+talloc_total_blocks(tall_bsc_ctx) == 12
 

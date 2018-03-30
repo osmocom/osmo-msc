@@ -289,10 +289,11 @@ int main(int argc, char **argv)
 	unsigned long long i;
 	char *server_host = "127.0.0.1";
 	uint16_t server_port = OSMO_GSUP_PORT;
+	void *ctx = talloc_named_const(NULL, 0, "gsup_test_client");
 
-	osmo_init_logging(&gsup_test_client_log_info);
+	osmo_init_logging2(ctx, &gsup_test_client_log_info);
 
-	g_gc = gsup_client_create(NULL, "GSUPTEST", server_host, server_port,
+	g_gc = gsup_client_create(ctx, "GSUPTEST", server_host, server_port,
 				  gsupc_read_cb, NULL);
 
 

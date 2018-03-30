@@ -343,12 +343,13 @@ int main(int argc, char **argv)
 	char *host = "localhost";
 	int port = 0;
 	int rc;
+	void *ctx = talloc_named_const(NULL, 0, "smpp_mirror");
 
-	msgb_talloc_ctx_init(NULL, 0);
+	msgb_talloc_ctx_init(ctx, 0);
 
 	memset(&esme, 0, sizeof(esme));
 
-	osmo_init_logging(&log_info);
+	osmo_init_logging2(ctx, &log_info);
 
 	snprintf((char *) esme.system_id, sizeof(esme.system_id), "mirror");
 	snprintf((char *) esme.password, sizeof(esme.password), "mirror");
