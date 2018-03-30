@@ -206,8 +206,6 @@ struct gsm_subscriber_connection *g_conn = NULL;
 
 void rx_from_ms(struct msgb *msg)
 {
-	int rc;
-
 	struct gsm48_hdr *gh = msgb_l3(msg);
 
 	log("MSC <--%s-- MS: %s",
@@ -222,11 +220,7 @@ void rx_from_ms(struct msgb *msg)
 		g_conn = conn_new();
 		reset_l3_seq_nr();
 		patch_l3_seq_nr(msg);
-		rc = msc_compl_l3(g_conn, msg, 23);
-		if (rc != MSC_CONN_ACCEPT) {
-			msc_subscr_con_free(g_conn);
-			g_conn = NULL;
-		}
+		msc_compl_l3(g_conn, msg, 23);
 	} else {
 		patch_l3_seq_nr(msg);
 		if ((gsm48_hdr_pdisc(gh) == GSM48_PDISC_RR)

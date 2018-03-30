@@ -35,7 +35,6 @@ static void test_early_stage()
 	EXPECT_ACCEPTED(false);
 
 	btw("conn_fsm present, in state NEW");
-	OSMO_ASSERT(msc_create_conn_fsm(g_conn, "test") == 0);
 	OSMO_ASSERT(g_conn->fi);
 	OSMO_ASSERT(g_conn->fi->state == SUBSCR_CONN_S_NEW);
 	EXPECT_ACCEPTED(false);

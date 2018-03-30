@@ -14,8 +14,8 @@
 enum subscr_conn_fsm_event {
 	/* Mark 0 as invalid to catch uninitialized vars */
 	SUBSCR_CONN_E_INVALID = 0,
-	/* Timeout on connection establishment starts */
-	SUBSCR_CONN_E_START,
+	/* Accepted the initial Complete Layer 3 (starting to evaluate Authentication and Ciphering) */
+	SUBSCR_CONN_E_COMPLETE_LAYER_3,
 	/* LU or Process Access FSM has determined that this conn is good */
 	SUBSCR_CONN_E_ACCEPTED,
 	/* received first reply from MS in "real" CC, SMS, USSD communication */
@@ -26,13 +26,16 @@ enum subscr_conn_fsm_event {
 	SUBSCR_CONN_E_MO_CLOSE,
 	/* MSC originated close request, e.g. failed authentication */
 	SUBSCR_CONN_E_CN_CLOSE,
+	/* The usage count for the conn has reached zero */
+	SUBSCR_CONN_E_UNUSED,
 };
 
 enum subscr_conn_fsm_state {
-	SUBSCR_CONN_S_INIT,
 	SUBSCR_CONN_S_NEW,
+	SUBSCR_CONN_S_AUTH_CIPH,
 	SUBSCR_CONN_S_ACCEPTED,
 	SUBSCR_CONN_S_COMMUNICATING,
+	SUBSCR_CONN_S_RELEASING,
 	SUBSCR_CONN_S_RELEASED,
 };
 
@@ -47,7 +50,8 @@ struct gsm_subscriber_connection *msc_subscr_conn_alloc(struct gsm_network *netw
 void msc_subscr_conn_update_id(struct gsm_subscriber_connection *conn,
 			       enum complete_layer3_type from, const char *id);
 char *msc_subscr_conn_get_conn_id(struct gsm_subscriber_connection *conn);
-int msc_create_conn_fsm(struct gsm_subscriber_connection *conn, const char *id);
+
+void msc_subscr_conn_complete_layer_3(struct gsm_subscriber_connection *conn);
 
 int msc_vlr_alloc(struct gsm_network *net);
 int msc_vlr_start(struct gsm_network *net);
@@ -69,19 +73,23 @@ void msc_assign_fail(struct gsm_subscriber_connection *conn,
 
 void msc_subscr_conn_init(void);
 bool msc_subscr_conn_is_accepted(const struct gsm_subscriber_connection *conn);
+bool msc_subscr_conn_is_establishing_auth_ciph(const struct gsm_subscriber_connection *conn);
 void msc_subscr_conn_communicating(struct gsm_subscriber_connection *conn);
 void msc_subscr_conn_close(struct gsm_subscriber_connection *conn,
 			   uint32_t cause);
+bool msc_subscr_conn_in_release(struct gsm_subscriber_connection *conn);
 
 enum msc_subscr_conn_use {
 	MSC_CONN_USE_UNTRACKED = -1,
 	MSC_CONN_USE_COMPL_L3,
 	MSC_CONN_USE_DTAP,
-	MSC_CONN_USE_FSM,
+	MSC_CONN_USE_AUTH_CIPH,
+	MSC_CONN_USE_CM_SERVICE,
 	MSC_CONN_USE_TRANS_CC,
 	MSC_CONN_USE_TRANS_SMS,
 	MSC_CONN_USE_TRANS_USSD,
 	MSC_CONN_USE_SILENT_CALL,
+	MSC_CONN_USE_RELEASE,
 };
 
 extern const struct value_string msc_subscr_conn_use_names[];
@@ -101,7 +109,5 @@ void _msc_subscr_conn_put(struct gsm_subscriber_connection *conn,
 			  const char *file, int line);
 
 void msc_stop_paging(struct vlr_subscr *vsub);
-
-void subscr_conn_release_when_unused(struct gsm_subscriber_connection *conn);
 
 #endif

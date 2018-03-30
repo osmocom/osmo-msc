@@ -329,7 +329,6 @@ int mm_rx_loc_upd_req(struct gsm_subscriber_connection *conn, struct msgb *msg)
 	struct osmo_location_area_id old_lai, new_lai;
 	struct osmo_fsm_inst *lu_fsm;
 	bool is_utran;
-	int rc;
 
  	lu = (struct gsm48_loc_upd_req *) gh->data;
 
@@ -337,10 +336,21 @@ int mm_rx_loc_upd_req(struct gsm_subscriber_connection *conn, struct msgb *msg)
 
 	gsm48_mi_to_string(mi_string, sizeof(mi_string), lu->mi, lu->mi_len);
 
-	rc = msc_create_conn_fsm(conn, mi_string);
-	if (rc)
-		/* logging already happened in msc_create_conn_fsm() */
-		return rc;
+	if (msc_subscr_conn_is_establishing_auth_ciph(conn)) {
+		LOGP(DMM, LOGL_ERROR,
+		     "Cannot accept another LU, conn already busy establishing authenticity;"
+		     " extraneous LOCATION UPDATING REQUEST: MI(%s)=%s type=%s\n",
+		     gsm48_mi_type_name(mi_type), mi_string, get_value_string(lupd_names, lu->type));
+		return -EINVAL;
+	}
+
+	if (msc_subscr_conn_is_accepted(conn)) {
+		LOGP(DMM, LOGL_ERROR,
+		     "Cannot accept another LU, conn already established;"
+		     " extraneous LOCATION UPDATING REQUEST: MI(%s)=%s type=%s\n",
+		     gsm48_mi_type_name(mi_type), mi_string, get_value_string(lupd_names, lu->type));
+		return -EINVAL;
+	}
 
 	msc_subscr_conn_update_id(conn, COMPLETE_LAYER3_LU, mi_string);
 
@@ -420,6 +430,7 @@ int mm_rx_loc_upd_req(struct gsm_subscriber_connection *conn, struct msgb *msg)
 		return -EIO;
 	}
 
+	msc_subscr_conn_complete_layer_3(conn);
 	return 0;
 }
 
@@ -670,7 +681,11 @@ static int cm_serv_reuse_conn(struct gsm_subscriber_connection *conn, const uint
 accept_reuse:
 	DEBUGP(DMM, "%s: re-using already accepted connection\n",
 	       vlr_subscr_name(conn->vsub));
-	conn->received_cm_service_request = true;
+
+	if (!conn->received_cm_service_request) {
+		conn->received_cm_service_request = true;
+		msc_subscr_conn_get(conn, MSC_CONN_USE_CM_SERVICE);
+	}
 	msc_subscr_conn_update_id(conn, conn->complete_layer3_type, mi_string);
 	return conn->network->vlr->ops.tx_cm_serv_acc(conn);
 }
@@ -698,32 +713,31 @@ int gsm48_rx_mm_serv_req(struct gsm_subscriber_connection *conn, struct msgb *ms
 	/* unfortunately in Phase1 the classmark2 length is variable */
 	uint8_t classmark2_len = gh->data[1];
 	uint8_t *classmark2 = gh->data+2;
-	uint8_t mi_len = *(classmark2 + classmark2_len);
-	uint8_t *mi = (classmark2 + classmark2_len + 1);
+	uint8_t *mi_p = classmark2 + classmark2_len;
+	uint8_t mi_len = *mi_p;
+	uint8_t *mi = mi_p + 1;
 	struct osmo_location_area_id lai;
 	bool is_utran;
-	int rc;
 
 	lai.plmn = conn->network->plmn;
 	lai.lac = conn->lac;
 
-	DEBUGP(DMM, "<- CM SERVICE REQUEST ");
 	if (msg->data_len < sizeof(struct gsm48_service_request*)) {
-		DEBUGPC(DMM, "wrong sized message\n");
+		LOGP(DMM, LOGL_ERROR, "<- CM SERVICE REQUEST wrong sized message\n");
 		return msc_gsm48_tx_mm_serv_rej(conn,
 						GSM48_REJECT_INCORRECT_MESSAGE);
 	}
 
 	if (msg->data_len < req->mi_len + 6) {
-		DEBUGPC(DMM, "does not fit in packet\n");
+		LOGP(DMM, LOGL_ERROR, "<- CM SERVICE REQUEST does not fit in packet\n");
 		return msc_gsm48_tx_mm_serv_rej(conn,
 						GSM48_REJECT_INCORRECT_MESSAGE);
 	}
 
 	gsm48_mi_to_string(mi_string, sizeof(mi_string), mi, mi_len);
 	mi_type = mi[0] & GSM_MI_TYPE_MASK;
-	DEBUGPC(DMM, "serv_type=0x%02x MI(%s)=%s\n",
-		req->cm_service_type, gsm48_mi_type_name(mi_type), mi_string);
+	DEBUGP(DMM, "<- CM SERVICE REQUEST serv_type=0x%02x MI(%s)=%s\n",
+	       req->cm_service_type, gsm48_mi_type_name(mi_type), mi_string);
 
 	switch (mi_type) {
 	case GSM_MI_TYPE_IMSI:
@@ -754,26 +768,22 @@ int gsm48_rx_mm_serv_req(struct gsm_subscriber_connection *conn, struct msgb *ms
 		return msc_gsm48_tx_mm_serv_rej(conn, GSM48_REJECT_SRV_OPT_NOT_SUPPORTED);
 	}
 
-	osmo_signal_dispatch(SS_SUBSCR, S_SUBSCR_IDENTITY, (classmark2 + classmark2_len));
-	memcpy(conn->classmark.classmark2, classmark2, classmark2_len);
-	conn->classmark.classmark2_len = classmark2_len;
+	if (msc_subscr_conn_is_accepted(conn))
+		return cm_serv_reuse_conn(conn, mi_p);
 
-	if (conn->fi) {
-		if (msc_subscr_conn_is_accepted(conn))
-			return cm_serv_reuse_conn(conn, mi-1);
-		LOGP(DMM, LOGL_ERROR, "%s: connection already in use\n",
-		     vlr_subscr_name(conn->vsub));
+	if (msc_subscr_conn_is_establishing_auth_ciph(conn)) {
+		LOGP(DMM, LOGL_ERROR,
+		     "Cannot accept CM Service Request, conn already busy establishing authenticity\n");
 		msc_vlr_tx_cm_serv_rej(conn, VLR_PR_ARQ_RES_UNKNOWN_ERROR);
 		return -EINVAL;
+		/* or should we accept and note down the service request anyway? */
 	}
 
-	rc = msc_create_conn_fsm(conn, mi_string);
-	if (rc) {
-		msc_vlr_tx_cm_serv_rej(conn, VLR_PR_ARQ_RES_UNKNOWN_ERROR);
-		/* logging already happened in msc_create_conn_fsm() */
-		return rc;
-	}
 	msc_subscr_conn_update_id(conn, COMPLETE_LAYER3_CM_SERVICE_REQ, mi_string);
+
+	osmo_signal_dispatch(SS_SUBSCR, S_SUBSCR_IDENTITY, mi_p);
+	memcpy(conn->classmark.classmark2, classmark2, classmark2_len);
+	conn->classmark.classmark2_len = classmark2_len;
 
 	is_utran = (conn->via_ran == RAN_UTRAN_IU);
 	vlr_proc_acc_req(conn->fi,
@@ -785,6 +795,7 @@ int gsm48_rx_mm_serv_req(struct gsm_subscriber_connection *conn, struct msgb *ms
 			 classmark_is_r99(&conn->classmark),
 			 is_utran);
 
+	msc_subscr_conn_complete_layer_3(conn);
 	return 0;
 }
 
@@ -1149,7 +1160,6 @@ static int gsm48_rx_rr_pag_resp(struct gsm_subscriber_connection *conn, struct m
 	uint8_t *mi_lv;
 	uint8_t mi_type;
 	char mi_string[GSM48_MI_SIZE];
-	int rc = 0;
 	struct osmo_location_area_id lai;
 	bool is_utran;
 
@@ -1159,19 +1169,26 @@ static int gsm48_rx_rr_pag_resp(struct gsm_subscriber_connection *conn, struct m
 	resp = (struct gsm48_pag_resp *) &gh->data[0];
 	gsm48_paging_extract_mi(resp, msgb_l3len(msg) - sizeof(*gh),
 				mi_string, &mi_type);
-	DEBUGP(DRR, "PAGING RESPONSE: MI(%s)=%s\n",
-		gsm48_mi_type_name(mi_type), mi_string);
+
+	if (msc_subscr_conn_is_establishing_auth_ciph(conn)) {
+		LOGP(DMM, LOGL_ERROR,
+		     "Ignoring Paging Response, conn already busy establishing authenticity\n");
+		return 0;
+	}
+
+	if (msc_subscr_conn_is_accepted(conn)) {
+		LOGP(DMM, LOGL_ERROR, "Ignoring Paging Response, conn already established\n");
+		return 0;
+	}
+
+	DEBUGP(DRR, "PAGING RESPONSE: MI(%s)=%s\n", gsm48_mi_type_name(mi_type), mi_string);
 
 	mi_lv = gsm48_cm2_get_mi(classmark2_lv, msgb_l3len(msg) - sizeof(*gh));
 	if (!mi_lv) {
-		/* FIXME */
+		LOGP(DRR, LOGL_ERROR, "PAGING RESPONSE: invalid Mobile Identity\n");
 		return -1;
 	}
 
-	rc = msc_create_conn_fsm(conn, mi_string);
-	if (rc)
-		/* logging already happened in msc_create_conn_fsm() */
-		return rc;
 	msc_subscr_conn_update_id(conn, COMPLETE_LAYER3_PAGING_RESP, mi_string);
 
 	memcpy(conn->classmark.classmark2, classmark2_lv+1, *classmark2_lv);
@@ -1187,6 +1204,7 @@ static int gsm48_rx_rr_pag_resp(struct gsm_subscriber_connection *conn, struct m
 			 classmark_is_r99(&conn->classmark),
 			 is_utran);
 
+	msc_subscr_conn_complete_layer_3(conn);
 	return 0;
 }
 
@@ -3347,6 +3365,7 @@ void cm_service_request_concludes(struct gsm_subscriber_connection *conn,
 		       gsm48_pdisc_msgtype_name(pdisc, msg_type));
 	}
 	conn->received_cm_service_request = false;
+	msc_subscr_conn_put(conn, MSC_CONN_USE_CM_SERVICE);
 }
 
 /* TS 24.007 11.2.3.2.3 Message Type Octet / Duplicate Detection */
@@ -3590,7 +3609,7 @@ static int msc_vlr_tx_cm_serv_rej(void *msc_conn_ref, enum vlr_proc_arq_result r
 {
 	uint8_t cause;
 	struct gsm_subscriber_connection *conn = msc_conn_ref;
-	conn->received_cm_service_request = false;
+	int rc;
 
 	switch (result) {
 	default:
@@ -3616,7 +3635,14 @@ static int msc_vlr_tx_cm_serv_rej(void *msc_conn_ref, enum vlr_proc_arq_result r
 		break;
 	};
 
-	return msc_gsm48_tx_mm_serv_rej(conn, cause);
+	rc = msc_gsm48_tx_mm_serv_rej(conn, cause);
+
+	if (conn->received_cm_service_request) {
+		conn->received_cm_service_request = false;
+		msc_subscr_conn_put(conn, MSC_CONN_USE_CM_SERVICE);
+	}
+
+	return rc;
 }
 
 /* For msc_vlr_set_ciph_mode() */

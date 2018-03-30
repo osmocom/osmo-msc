@@ -114,8 +114,6 @@ int msc_gsm48_tx_mm_serv_rej(struct gsm_subscriber_connection *conn,
 	if (!conn)
 		return -EINVAL;
 
-	conn->received_cm_service_request = false;
-
 	msg = gsm48_create_mm_serv_rej(value);
 	if (!msg) {
 		LOGP(DMM, LOGL_ERROR, "Failed to allocate CM Service Reject.\n");

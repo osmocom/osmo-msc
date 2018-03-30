@@ -84,22 +84,6 @@ void msc_sapi_n_reject(struct gsm_subscriber_connection *conn, int dlci)
 		gsm411_sapi_n_reject(conn);
 }
 
-void subscr_conn_release_when_unused(struct gsm_subscriber_connection *conn)
-{
-	if (!conn)
-		return;
-	if (!conn->fi)
-		return;
-	if (!(conn->fi->state == SUBSCR_CONN_S_ACCEPTED
-	      || conn->fi->state == SUBSCR_CONN_S_COMMUNICATING)) {
-		DEBUGP(DMM, "%s: %s: conn still being established (%s)\n",
-		       vlr_subscr_name(conn->vsub), __func__,
-		       osmo_fsm_inst_state_name(conn->fi));
-		return;
-	}
-	osmo_fsm_inst_dispatch(conn->fi, SUBSCR_CONN_E_RELEASE_WHEN_UNUSED, NULL);
-}
-
 /* receive a Level 3 Complete message and return MSC_CONN_ACCEPT or
  * MSC_CONN_REJECT */
 int msc_compl_l3(struct gsm_subscriber_connection *conn,
@@ -108,9 +92,6 @@ int msc_compl_l3(struct gsm_subscriber_connection *conn,
 	msc_subscr_conn_get(conn, MSC_CONN_USE_COMPL_L3);
 	gsm0408_dispatch(conn, msg);
 
-	subscr_conn_release_when_unused(conn);
-
-	/* If this should be kept, the conn->fi has placed a use_count */
 	msc_subscr_conn_put(conn, MSC_CONN_USE_COMPL_L3);
 
 	/* Always return acceptance, because even if the conn was not accepted,
@@ -142,7 +123,6 @@ void msc_dtap(struct gsm_subscriber_connection *conn, uint8_t link_id, struct ms
 	msc_subscr_conn_get(conn, MSC_CONN_USE_DTAP);
 	gsm0408_dispatch(conn, msg);
 
-	subscr_conn_release_when_unused(conn);
 	msc_subscr_conn_put(conn, MSC_CONN_USE_DTAP);
 }
 
@@ -232,128 +212,11 @@ void msc_cipher_mode_compl(struct gsm_subscriber_connection *conn,
 	vlr_subscr_rx_ciph_res(conn->vsub, &ciph_res);
 }
 
-struct gsm_subscriber_connection *msc_subscr_con_allocate(struct gsm_network *network)
-{
-	struct gsm_subscriber_connection *conn;
-
-	conn = talloc_zero(network, struct gsm_subscriber_connection);
-	if (!conn)
-		return NULL;
-
-	conn->network = network;
-	llist_add_tail(&conn->entry, &network->subscr_conns);
-	return conn;
-}
-
-void msc_subscr_cleanup(struct vlr_subscr *vsub)
-{
-	if (!vsub)
-		return;
-	vsub->lu_fsm = NULL;
-}
-
-void msc_subscr_con_cleanup(struct gsm_subscriber_connection *conn)
-{
-	if (!conn)
-		return;
-
-	if (conn->vsub) {
-		DEBUGP(DRLL, "subscr %s: Freeing subscriber connection\n",
-		       vlr_subscr_name(conn->vsub));
-		msc_subscr_cleanup(conn->vsub);
-		conn->vsub->msc_conn_ref = NULL;
-		vlr_subscr_put(conn->vsub);
-		conn->vsub = NULL;
-	} else
-		DEBUGP(DRLL, "Freeing subscriber connection"
-		       " with NULL subscriber\n");
-
-	if (!conn->fi)
-		return;
-
-	osmo_fsm_inst_term(conn->fi,
-			   (conn->fi->state == SUBSCR_CONN_S_RELEASED)
-				? OSMO_FSM_TERM_REGULAR
-				: OSMO_FSM_TERM_ERROR,
-			   NULL);
-}
-
-void msc_subscr_con_free(struct gsm_subscriber_connection *conn)
-{
-	if (!conn)
-		return;
-
-	msc_subscr_con_cleanup(conn);
-
-	llist_del(&conn->entry);
-	talloc_free(conn);
-}
-
 /* Receive a CLEAR REQUEST from BSC */
 int msc_clear_request(struct gsm_subscriber_connection *conn, uint32_t cause)
 {
 	msc_subscr_conn_close(conn, cause);
 	return 1;
-}
-
-static void msc_subscr_conn_release_all(struct gsm_subscriber_connection *conn, uint32_t cause)
-{
-	if (conn->in_release)
-		return;
-	conn->in_release = true;
-
-	/* If we're closing in a middle of a trans, we need to clean up */
-	trans_conn_closed(conn);
-
-	switch (conn->via_ran) {
-	case RAN_UTRAN_IU:
-		ranap_iu_tx_release(conn->iu.ue_ctx, NULL);
-		/* FIXME: keep the conn until the Iu Release Outcome is
-		 * received from the UE, or a timeout expires. For now, the log
-		 * says "unknown UE" for each release outcome. */
-		break;
-	case RAN_GERAN_A:
-		a_iface_tx_clear_cmd(conn);
-		break;
-	default:
-		LOGP(DMM, LOGL_ERROR, "%s: Unknown RAN type, cannot tx release/clear\n",
-		     vlr_subscr_name(conn->vsub));
-		break;
-	}
-}
-
-/* If the conn->fi is still present, dispatch SUBSCR_CONN_E_CN_CLOSE
- * event to gracefully terminate the connection. If the fi is already
- * cleared, call msc_subscr_conn_release_all() to take release actions.
- * \param cause  a GSM_CAUSE_* constant, e.g. GSM_CAUSE_AUTH_FAILED.
- */
-void msc_subscr_conn_close(struct gsm_subscriber_connection *conn,
-			   uint32_t cause)
-{
-	if (!conn)
-		return;
-	if (conn->in_release) {
-		DEBUGP(DMM, "msc_subscr_conn_close(vsub=%s, cause=%u):"
-		       " already dispatching release, ignore.\n",
-		       vlr_subscr_name(conn->vsub), cause);
-		return;
-	}
-	if (!conn->fi) {
-		DEBUGP(DMM, "msc_subscr_conn_close(vsub=%s, cause=%u): no conn fsm,"
-		       " releasing directly without release event.\n",
-		       vlr_subscr_name(conn->vsub), cause);
-		/* In case of an IMSI Detach, we don't have fi. Release
-		 * anyway to ensure a timely Iu Release / BSSMAP Clear. */
-		msc_subscr_conn_release_all(conn, cause);
-		return;
-	}
-	if (conn->fi->state == SUBSCR_CONN_S_RELEASED) {
-		DEBUGP(DMM, "msc_subscr_conn_close(vsub=%s, cause=%u):"
-		       " conn fsm already releasing, ignore.\n",
-		       vlr_subscr_name(conn->vsub), cause);
-		return;
-	}
-	osmo_fsm_inst_dispatch(conn->fi, SUBSCR_CONN_E_CN_CLOSE, &cause);
 }
 
 /* increment the ref-count. Needs to be called by every user */
@@ -363,12 +226,6 @@ _msc_subscr_conn_get(struct gsm_subscriber_connection *conn,
 		     const char *file, int line)
 {
 	OSMO_ASSERT(conn);
-
-	if (conn->in_release)
-		LOGPSRC(DREF, LOGL_ERROR, file, line,
-			"%s: MSC conn use error: using conn that is already in release (%s)\n",
-			vlr_subscr_name(conn->vsub),
-			msc_subscr_conn_use_name(balance_token));
 
 	if (balance_token != MSC_CONN_USE_UNTRACKED) {
 		uint32_t flag = 1 << balance_token;
@@ -423,18 +280,20 @@ void _msc_subscr_conn_put(struct gsm_subscriber_connection *conn,
 		conn->use_count, conn->use_tokens);
 
 	if (conn->use_count == 0)
-		msc_subscr_con_free(conn);
+		osmo_fsm_inst_dispatch(conn->fi, SUBSCR_CONN_E_UNUSED, NULL);
 }
 
 const struct value_string msc_subscr_conn_use_names[] = {
 	{MSC_CONN_USE_UNTRACKED,	"UNTRACKED"},
 	{MSC_CONN_USE_COMPL_L3,		"compl_l3"},
 	{MSC_CONN_USE_DTAP,		"dtap"},
-	{MSC_CONN_USE_FSM,		"fsm"},
+	{MSC_CONN_USE_AUTH_CIPH,	"auth+ciph"},
+	{MSC_CONN_USE_CM_SERVICE,	"cm_service"},
 	{MSC_CONN_USE_TRANS_CC,		"trans_cc"},
 	{MSC_CONN_USE_TRANS_SMS,	"trans_sms"},
 	{MSC_CONN_USE_TRANS_USSD,	"trans_ussd"},
 	{MSC_CONN_USE_SILENT_CALL,	"silent_call"},
+	{MSC_CONN_USE_RELEASE,		"release"},
 	{0, NULL},
 };
 

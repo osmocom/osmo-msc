@@ -140,17 +140,13 @@ void trans_free(struct gsm_trans *trans)
 		trans->vsub = NULL;
 	}
 
-	llist_del(&trans->entry);
-
-	if (trans->conn)
-		msc_subscr_conn_put(trans->conn, conn_usage_token);
-
 	conn = trans->conn;
 	trans->conn = NULL;
+	llist_del(&trans->entry);
 	talloc_free(trans);
 
-	/* Possibly this was the last transaction used by this conn. */
-	subscr_conn_release_when_unused(conn);
+	if (conn)
+		msc_subscr_conn_put(conn, conn_usage_token);
 }
 
 /*! allocate an unused transaction ID for the given subscriber

@@ -119,8 +119,6 @@ struct gsm_subscriber_connection {
 	/* back pointers */
 	struct gsm_network *network;
 
-	bool in_release;
-
 	/* connected via 2G or 3G? */
 	enum ran_type via_ran;
 
@@ -177,6 +175,10 @@ enum {
 	MSC_CTR_LOC_UPDATE_TYPE_DETACH,
 	MSC_CTR_LOC_UPDATE_FAILED,
 	MSC_CTR_LOC_UPDATE_COMPLETED,
+	MSC_CTR_CM_SERVICE_REQUEST_REJECTED,
+	MSC_CTR_CM_SERVICE_REQUEST_ACCEPTED,
+	MSC_CTR_PAGING_RESP_REJECTED,
+	MSC_CTR_PAGING_RESP_ACCEPTED,
 	MSC_CTR_SMS_SUBMITTED,
 	MSC_CTR_SMS_NO_RECEIVER,
 	MSC_CTR_SMS_DELIVERED,
@@ -199,6 +201,10 @@ static const struct rate_ctr_desc msc_ctr_description[] = {
 	[MSC_CTR_LOC_UPDATE_TYPE_DETACH] = 		{"loc_update_type:detach", "Received location update detach indication."},
 	[MSC_CTR_LOC_UPDATE_FAILED] = 		{"loc_update_resp:failed", "Rejected location updates."},
 	[MSC_CTR_LOC_UPDATE_COMPLETED] = 	{"loc_update_resp:completed", "Successful location updates."},
+	[MSC_CTR_CM_SERVICE_REQUEST_REJECTED] = {"cm_service_request:rejected", "Rejected CM Service Request."},
+	[MSC_CTR_CM_SERVICE_REQUEST_ACCEPTED] = {"cm_service_request:accepted", "Accepted CM Service Request."},
+	[MSC_CTR_PAGING_RESP_REJECTED] = 	{"paging_resp:rejected", "Rejected Paging Response."},
+	[MSC_CTR_PAGING_RESP_ACCEPTED] = 	{"paging_resp:accepted", "Accepted Paging Response."},
 	[MSC_CTR_SMS_SUBMITTED] = 		{"sms:submitted", "Received a RPDU from a MS (MO)."},
 	[MSC_CTR_SMS_NO_RECEIVER] = 		{"sms:no_receiver", "Counts SMS which couldn't routed because no receiver found."},
 	[MSC_CTR_SMS_DELIVERED] = 		{"sms:delivered", "Global SMS Deliver attempts."},
@@ -374,8 +380,6 @@ struct gsm_sms {
 
 	char text[SMS_TEXT_SIZE];
 };
-
-void msc_subscr_con_free(struct gsm_subscriber_connection *conn);
 
 /* control interface handling */
 int bsc_base_ctrl_cmds_install(void);

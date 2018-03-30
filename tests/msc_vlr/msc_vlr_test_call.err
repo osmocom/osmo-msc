@@ -6,12 +6,9 @@ talloc_total_blocks(tall_bsc_ctx) == 12
 - Location Update request causes a GSUP Send Auth Info request to HLR
   MSC <--RAN_UTRAN_IU-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
   new conn
+DMM Subscr_Conn{SUBSCR_CONN_S_NEW}: Allocated
 DREF unknown: MSC conn use + compl_l3 == 1 (0x1)
 DRLL Dispatching 04.08 message GSM48_MT_MM_LOC_UPD_REQUEST (0x5:0x8)
-DREF unknown: MSC conn use + fsm == 2 (0x5)
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_INIT}: Allocated
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_INIT}: Received Event SUBSCR_CONN_E_START
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_INIT}: state_chg to SUBSCR_CONN_S_NEW
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_NEW}: Updated ID from LU
 DMM LOCATION UPDATING REQUEST: MI(IMSI)=901700000010650 type=NORMAL
 DMM LU/new-LAC: 23/23
@@ -32,8 +29,11 @@ DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_NEEDS_AUTH}: Received Event VL
 DVLR GSUP tx: 08010809710000000156f0
 GSUP --> HLR: OSMO_GSUP_MSGT_SEND_AUTH_INFO_REQUEST: 08010809710000000156f0
 DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_NEEDS_AUTH}: state_chg to VLR_SUB_AS_NEEDS_AUTH_WAIT_AI
-DMM IMSI:901700000010650: subscr_conn_release_when_unused: conn still being established (SUBSCR_CONN_S_NEW)
-DREF IMSI:901700000010650: MSC conn use - compl_l3 == 1 (0x4)
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_NEW}: Received Event SUBSCR_CONN_E_COMPLETE_LAYER_3
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_NEW}: state_chg to SUBSCR_CONN_S_AUTH_CIPH
+DREF IMSI:901700000010650: MSC conn use - compl_l3 == 0 (0x0)
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_AUTH_CIPH}: Received Event SUBSCR_CONN_E_UNUSED
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_AUTH_CIPH}: Awaiting results for Auth+Ciph, overruling event SUBSCR_CONN_E_UNUSED
   lu_result_sent == 0
 - from HLR, rx _SEND_AUTH_INFO_RESULT; VLR sends Auth Req to MS
 <-- GSUP rx OSMO_GSUP_MSGT_SEND_AUTH_INFO_RESULT: 0a010809710000000156f00362201039fa2f4e3d523d8619a73b4f65c3e14d21049b36efdf2208059a4f668f6fbe39231027497388b6cb044648f396aa155b95ef2410f64735036e5871319c679f4742a75ea125108704f5ba55f30000d2ee44b22c8ea9192708e229c19e791f2e4103622010c187a53a5e6b9d573cac7c74451fd46d210485aa31302208d3d50a000bf04f6e23101159ec926a50e98c034a6b7d7c9f418d2410df3a03d9ca5335641efc8e36d76cd20b25101843a645b98d00005b2d666af46c45d927087db47cf7f81e4dc703622010efa9c29a9742148d5c9070348716e1bb210469d5f9fb22083df176f0c29f1a3d2310eb50e770ddcc3060101d2f43b6c2b884241076542abce5ff9345b0e8947f4c6e019c2510f9375e6d41e1000096e7fe4ff1c27e392708706f996719ba609c03622010f023d5a3b24726e0631b64b3840f82532104d570c03f2208ec011be8919883d62310c4e58af4ba43f3bcd904e16984f086d724100593f65e752e5cb7f473862bda05aa0a2510541ff1f077270000c5ea00d658bc7e9a27083fd26072eaa2a04d036220102f8f90c780d6a9c0c53da7ac57b6707e2104b072446f220823f39f9f425ad6e6231065af0527fda95b0dc5ae4aa515cdf32f2410537c3b35a3b13b08d08eeb28098f45cc25104bf4e564f75300009bc796706bc6574427080edb0eadbea94ac2
@@ -53,7 +53,7 @@ DREF VLR subscr IMSI:901700000010650 usage decreases to: 1
   lu_result_sent == 0
 - MS sends Authen Response, VLR accepts and sends SecurityModeControl
   MSC <--RAN_UTRAN_IU-- MS: GSM48_MT_MM_AUTH_RESP
-DREF IMSI:901700000010650: MSC conn use + dtap == 2 (0x6)
+DREF IMSI:901700000010650: MSC conn use + dtap == 1 (0x2)
 DRLL Dispatching 04.08 message GSM48_MT_MM_AUTH_RESP (0x5:0x14)
 DMM IMSI:901700000010650: MM UMTS AUTHENTICATION RESPONSE (res = e229c19e791f2e41)
 DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_WAIT_RESP}: Received Event VLR_AUTH_E_MS_AUTH_RESP
@@ -72,8 +72,9 @@ DMM -> SECURITY MODE CONTROL IMSI:901700000010650
 - sending SecurityModeControl for UE ctx 42 send_ck=0 new_key=1
 - ...ik=27497388b6cb044648f396aa155b95ef
 DVLR vlr_lu_fsm(901700000010650){VLR_ULA_S_WAIT_AUTH}: state_chg to VLR_ULA_S_WAIT_CIPH
-DMM IMSI:901700000010650: subscr_conn_release_when_unused: conn still being established (SUBSCR_CONN_S_NEW)
-DREF IMSI:901700000010650: MSC conn use - dtap == 1 (0x4)
+DREF IMSI:901700000010650: MSC conn use - dtap == 0 (0x0)
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_AUTH_CIPH}: Received Event SUBSCR_CONN_E_UNUSED
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_AUTH_CIPH}: Awaiting results for Auth+Ciph, overruling event SUBSCR_CONN_E_UNUSED
   security_mode_ctrl_sent == 1
   lu_result_sent == 0
 - MS sends SecurityModeControl acceptance, VLR accepts and sends GSUP LU Req to HLR
@@ -140,7 +141,7 @@ DREF VLR subscr MSISDN:42342 usage decreases to: 1
 msc_subscr_conn_is_accepted() == false
 - MS sends TMSI Realloc Complete
   MSC <--RAN_UTRAN_IU-- MS: GSM48_MT_MM_TMSI_REALL_COMPL
-DREF MSISDN:42342: MSC conn use + dtap == 2 (0x6)
+DREF MSISDN:42342: MSC conn use + dtap == 1 (0x2)
 DRLL Dispatching 04.08 message GSM48_MT_MM_TMSI_REALL_COMPL (0x5:0x1b)
 DMM TMSI Reallocation Completed. Subscriber: MSISDN:42342
 DVLR vlr_lu_fsm(901700000010650){VLR_ULA_S_WAIT_LU_COMPL}: Received Event VLR_ULA_E_NEW_TMSI_ACK
@@ -153,25 +154,28 @@ DVLR lu_compl_vlr_fsm(901700000010650){LU_COMPL_VLR_S_DONE}: Removing from paren
 DVLR lu_compl_vlr_fsm(901700000010650){LU_COMPL_VLR_S_DONE}: Freeing instance
 DVLR lu_compl_vlr_fsm(901700000010650){LU_COMPL_VLR_S_DONE}: Deallocated
 DVLR vlr_lu_fsm(901700000010650){VLR_ULA_S_WAIT_LU_COMPL}: state_chg to VLR_ULA_S_DONE
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_NEW}: Received Event SUBSCR_CONN_E_ACCEPTED
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_NEW}: state_chg to SUBSCR_CONN_S_ACCEPTED
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_ACCEPTED}: Received Event SUBSCR_CONN_E_RELEASE_WHEN_UNUSED
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_ACCEPTED}: subscr_conn_fsm_release_when_unused: releasing conn
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_ACCEPTED}: state_chg to SUBSCR_CONN_S_RELEASED
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_AUTH_CIPH}: Received Event SUBSCR_CONN_E_ACCEPTED
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_AUTH_CIPH}: state_chg to SUBSCR_CONN_S_ACCEPTED
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_ACCEPTED}: Received Event SUBSCR_CONN_E_UNUSED
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_ACCEPTED}: state_chg to SUBSCR_CONN_S_RELEASING
+DREF MSISDN:42342: MSC conn use + release == 2 (0x102)
+DREF VLR subscr MSISDN:42342 usage increases to: 3
+DREF VLR subscr MSISDN:42342 usage decreases to: 2
+- Iu Release --RAN_UTRAN_IU--> MS
+DREF MSISDN:42342: MSC conn use - release == 1 (0x2)
+DREF MSISDN:42342: MSC conn use - dtap == 0 (0x0)
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_RELEASING}: Received Event SUBSCR_CONN_E_UNUSED
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_RELEASING}: state_chg to SUBSCR_CONN_S_RELEASED
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_RELEASED}: Terminating (cause = OSMO_FSM_TERM_REGULAR)
 DVLR vlr_lu_fsm(901700000010650){VLR_ULA_S_DONE}: Terminating (cause = OSMO_FSM_TERM_PARENT)
 DVLR vlr_lu_fsm(901700000010650){VLR_ULA_S_DONE}: Removing from parent Subscr_Conn(901700000010650)
 DVLR vlr_lu_fsm(901700000010650){VLR_ULA_S_DONE}: fsm_lu_cleanup called with cause OSMO_FSM_TERM_PARENT
 DVLR vlr_lu_fsm(901700000010650){VLR_ULA_S_DONE}: Freeing instance
 DVLR vlr_lu_fsm(901700000010650){VLR_ULA_S_DONE}: Deallocated
-DMM msc_subscr_conn_close(vsub=MSISDN:42342, cause=2): no conn fsm, releasing directly without release event.
-- Iu Release --RAN_UTRAN_IU--> MS
-DREF MSISDN:42342: MSC conn use - fsm == 1 (0x2)
+DRLL MSISDN:42342: Freeing subscriber connection
+DREF VLR subscr MSISDN:42342 usage decreases to: 1
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_RELEASED}: Freeing instance
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_RELEASED}: Deallocated
-DREF MSISDN:42342: MSC conn use - dtap == 0 (0x0)
-DRLL subscr MSISDN:42342: Freeing subscriber connection
-DREF VLR subscr MSISDN:42342 usage decreases to: 1
   iu_release_sent == 1
 - LU was successful, and the conn has already been closed
   llist_count(&net->subscr_conns) == 0
@@ -184,13 +188,10 @@ DREF VLR subscr MSISDN:42342 usage decreases to: 1
 - after a while, a new conn sends a CM Service Request. VLR responds with Auth Req, 2nd auth vector
   MSC <--RAN_UTRAN_IU-- MS: GSM48_MT_MM_CM_SERV_REQ
   new conn
+DMM Subscr_Conn{SUBSCR_CONN_S_NEW}: Allocated
 DREF unknown: MSC conn use + compl_l3 == 1 (0x1)
 DRLL Dispatching 04.08 message GSM48_MT_MM_CM_SERV_REQ (0x5:0x24)
 DMM <- CM SERVICE REQUEST serv_type=0x08 MI(IMSI)=901700000010650
-DREF unknown: MSC conn use + fsm == 2 (0x5)
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_INIT}: Allocated
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_INIT}: Received Event SUBSCR_CONN_E_START
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_INIT}: state_chg to SUBSCR_CONN_S_NEW
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_NEW}: Updated ID from CM_SERVICE_REQ
 DVLR Process_Access_Request_VLR(901700000010650){PR_ARQ_S_INIT}: Allocated
 DVLR Process_Access_Request_VLR(901700000010650){PR_ARQ_S_INIT}: is child of Subscr_Conn(901700000010650)
@@ -210,15 +211,18 @@ DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_WAIT_RESP}: got auth tuple: us
 - ...autn=1843a645b98d00005b2d666af46c45d9
 - ...expecting res=7db47cf7f81e4dc7
 DREF VLR subscr MSISDN:42342 usage decreases to: 2
-DMM MSISDN:42342: subscr_conn_release_when_unused: conn still being established (SUBSCR_CONN_S_NEW)
-DREF MSISDN:42342: MSC conn use - compl_l3 == 1 (0x4)
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_NEW}: Received Event SUBSCR_CONN_E_COMPLETE_LAYER_3
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_NEW}: state_chg to SUBSCR_CONN_S_AUTH_CIPH
+DREF MSISDN:42342: MSC conn use - compl_l3 == 0 (0x0)
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_AUTH_CIPH}: Received Event SUBSCR_CONN_E_UNUSED
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_AUTH_CIPH}: Awaiting results for Auth+Ciph, overruling event SUBSCR_CONN_E_UNUSED
   cm_service_result_sent == 0
   auth_request_sent == 1
 - needs auth, not yet accepted
 msc_subscr_conn_is_accepted() == false
 - MS sends Authen Response, VLR accepts and sends SecurityModeControl
   MSC <--RAN_UTRAN_IU-- MS: GSM48_MT_MM_AUTH_RESP
-DREF MSISDN:42342: MSC conn use + dtap == 2 (0x6)
+DREF MSISDN:42342: MSC conn use + dtap == 1 (0x2)
 DRLL Dispatching 04.08 message GSM48_MT_MM_AUTH_RESP (0x5:0x14)
 DMM MSISDN:42342: MM UMTS AUTHENTICATION RESPONSE (res = 7db47cf7f81e4dc7)
 DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_WAIT_RESP}: Received Event VLR_AUTH_E_MS_AUTH_RESP
@@ -238,8 +242,9 @@ DMM -> SECURITY MODE CONTROL MSISDN:42342
 - sending SecurityModeControl for UE ctx 42 send_ck=0 new_key=1
 - ...ik=1159ec926a50e98c034a6b7d7c9f418d
 DVLR Process_Access_Request_VLR(901700000010650){PR_ARQ_S_WAIT_AUTH}: state_chg to PR_ARQ_S_WAIT_CIPH
-DMM MSISDN:42342: subscr_conn_release_when_unused: conn still being established (SUBSCR_CONN_S_NEW)
-DREF MSISDN:42342: MSC conn use - dtap == 1 (0x4)
+DREF MSISDN:42342: MSC conn use - dtap == 0 (0x0)
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_AUTH_CIPH}: Received Event SUBSCR_CONN_E_UNUSED
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_AUTH_CIPH}: Awaiting results for Auth+Ciph, overruling event SUBSCR_CONN_E_UNUSED
   security_mode_ctrl_sent == 1
   cm_service_result_sent == 0
 - MS sends SecurityModeControl acceptance, VLR accepts; above Ciphering is an implicit CM Service Accept
@@ -255,23 +260,23 @@ DVLR Process_Access_Request_VLR(901700000010650){PR_ARQ_S_WAIT_CIPH}: _proc_arq_
 DVLR Process_Access_Request_VLR(901700000010650){PR_ARQ_S_WAIT_CIPH}: proc_arq_fsm_done(VLR_PR_ARQ_RES_PASSED)
 DVLR Process_Access_Request_VLR(901700000010650){PR_ARQ_S_WAIT_CIPH}: state_chg to PR_ARQ_S_DONE
 DVLR Process_Access_Request_VLR(901700000010650){PR_ARQ_S_DONE}: Process Access Request result: VLR_PR_ARQ_RES_PASSED
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_NEW}: Received Event SUBSCR_CONN_E_ACCEPTED
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_NEW}: state_chg to SUBSCR_CONN_S_ACCEPTED
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_ACCEPTED}: received_cm_service_request = true
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_ACCEPTED}: Received Event SUBSCR_CONN_E_RELEASE_WHEN_UNUSED
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_ACCEPTED}: subscr_conn_fsm_release_when_unused: still awaiting first request after a CM Service Request
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_AUTH_CIPH}: Received Event SUBSCR_CONN_E_ACCEPTED
+DREF MSISDN:42342: MSC conn use + cm_service == 1 (0x8)
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_AUTH_CIPH}: state_chg to SUBSCR_CONN_S_ACCEPTED
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_ACCEPTED}: subscr_conn_fsm_has_active_transactions: still awaiting first request after a CM Service Request
   cm_service_result_sent == 0
 ---
 - a call is initiated
 - SETUP gets forwarded to MNCC
   MSC <--RAN_UTRAN_IU-- MS: GSM48_MT_CC_SETUP
-DREF MSISDN:42342: MSC conn use + dtap == 2 (0x6)
+DREF MSISDN:42342: MSC conn use + dtap == 2 (0xa)
 DRLL Dispatching 04.08 message GSM48_MT_CC_SETUP (0x3:0x5)
 DCC Unknown transaction ID 8, creating new trans.
 DCC (ti 08 sub MSISDN:42342 callref 80000001) New transaction
 DREF VLR subscr MSISDN:42342 usage increases to: 3
-DREF MSISDN:42342: MSC conn use + trans_cc == 3 (0xe)
+DREF MSISDN:42342: MSC conn use + trans_cc == 3 (0x1a)
 DMM MSISDN:42342: rx msg GSM48_MT_CC_SETUP: received_cm_service_request changes to false
+DREF MSISDN:42342: MSC conn use - cm_service == 2 (0x12)
 DCC (ti 08 sub MSISDN:42342) new state NULL -> INITIATED
 DCC Subscriber MSISDN:42342 (42342) sends SETUP to 123
 DMNCC transmit message MNCC_SETUP_IND
@@ -279,9 +284,7 @@ DCC Sending 'MNCC_SETUP_IND' to MNCC.
   MSC --> MNCC: callref 0x80000001: MNCC_SETUP_IND
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_ACCEPTED}: Received Event SUBSCR_CONN_E_COMMUNICATING
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_ACCEPTED}: state_chg to SUBSCR_CONN_S_COMMUNICATING
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: Received Event SUBSCR_CONN_E_RELEASE_WHEN_UNUSED
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: subscr_conn_fsm_release_when_unused: connection still has active transaction: CC
-DREF MSISDN:42342: MSC conn use - dtap == 2 (0xc)
+DREF MSISDN:42342: MSC conn use - dtap == 1 (0x10)
 - MNCC says that's fine
 DMNCC receive message MNCC_CALL_PROC_REQ
 DCC (ti 08 sub 42342) Received 'MNCC_CALL_PROC_REQ' from MNCC in state 1 (INITIATED)
@@ -307,7 +310,7 @@ DMSC msc_tx 2 bytes to MSISDN:42342 via RAN_UTRAN_IU
 - DTAP matches expected message
 - Total time passed: 2.000046 s
   MSC <--RAN_UTRAN_IU-- MS: GSM48_MT_CC_CONNECT_ACK
-DREF MSISDN:42342: MSC conn use + dtap == 3 (0xe)
+DREF MSISDN:42342: MSC conn use + dtap == 2 (0x12)
 DRLL Dispatching 04.08 message GSM48_MT_CC_CONNECT_ACK (0x3:0xf)
 DCC stopping pending timer T313
 DCC (ti 08 sub MSISDN:42342) new state CONNECT_IND -> ACTIVE
@@ -315,25 +318,21 @@ DMNCC transmit message MNCC_SETUP_COMPL_IND
 DCC Sending 'MNCC_SETUP_COMPL_IND' to MNCC.
   MSC --> MNCC: callref 0x80000001: MNCC_SETUP_COMPL_IND
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: Received Event SUBSCR_CONN_E_COMMUNICATING
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: Received Event SUBSCR_CONN_E_RELEASE_WHEN_UNUSED
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: subscr_conn_fsm_release_when_unused: connection still has active transaction: CC
-DREF MSISDN:42342: MSC conn use - dtap == 2 (0xc)
+DREF MSISDN:42342: MSC conn use - dtap == 1 (0x10)
 ---
 - RTP stream goes ahead, not shown here.
 - Total time passed: 125.000091 s
 ---
 - Call ends
   MSC <--RAN_UTRAN_IU-- MS: GSM48_MT_CC_DISCONNECT
-DREF MSISDN:42342: MSC conn use + dtap == 3 (0xe)
+DREF MSISDN:42342: MSC conn use + dtap == 2 (0x12)
 DRLL Dispatching 04.08 message GSM48_MT_CC_DISCONNECT (0x3:0x25)
 DCC (ti 08 sub MSISDN:42342) new state ACTIVE -> DISCONNECT_IND
 DMNCC transmit message MNCC_DISC_IND
 DCC Sending 'MNCC_DISC_IND' to MNCC.
   MSC --> MNCC: callref 0x80000001: MNCC_DISC_IND
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: Received Event SUBSCR_CONN_E_COMMUNICATING
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: Received Event SUBSCR_CONN_E_RELEASE_WHEN_UNUSED
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: subscr_conn_fsm_release_when_unused: connection still has active transaction: CC
-DREF MSISDN:42342: MSC conn use - dtap == 2 (0xc)
+DREF MSISDN:42342: MSC conn use - dtap == 1 (0x10)
 DMNCC receive message MNCC_REL_REQ
 DCC (ti 08 sub 42342) Received 'MNCC_REL_REQ' from MNCC in state 12 (DISCONNECT_IND)
 DCC starting timer T308 with 10 seconds
@@ -342,7 +341,7 @@ DMSC msc_tx 2 bytes to MSISDN:42342 via RAN_UTRAN_IU
 - DTAP --RAN_UTRAN_IU--> MS: GSM48_MT_CC_RELEASE: 832d
 - DTAP matches expected message
   MSC <--RAN_UTRAN_IU-- MS: GSM48_MT_CC_RELEASE_COMPL
-DREF MSISDN:42342: MSC conn use + dtap == 3 (0xe)
+DREF MSISDN:42342: MSC conn use + dtap == 2 (0x12)
 DRLL Dispatching 04.08 message GSM48_MT_CC_RELEASE_COMPL (0x3:0x2a)
 DCC stopping pending timer T308
 DMNCC transmit message MNCC_REL_CNF
@@ -351,23 +350,27 @@ DCC Sending 'MNCC_REL_CNF' to MNCC.
   MS <--Call Release-- MSC: subscr=MSISDN:42342 callref=0x0
 DCC (ti 08 sub MSISDN:42342) new state RELEASE_REQ -> NULL
 DREF VLR subscr MSISDN:42342 usage decreases to: 2
-DREF MSISDN:42342: MSC conn use - trans_cc == 2 (0x6)
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: Received Event SUBSCR_CONN_E_RELEASE_WHEN_UNUSED
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: subscr_conn_fsm_release_when_unused: releasing conn
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: state_chg to SUBSCR_CONN_S_RELEASED
+DREF MSISDN:42342: MSC conn use - trans_cc == 1 (0x2)
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: Received Event SUBSCR_CONN_E_COMMUNICATING
+DREF MSISDN:42342: MSC conn use - dtap == 0 (0x0)
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: Received Event SUBSCR_CONN_E_UNUSED
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: state_chg to SUBSCR_CONN_S_RELEASING
+DREF MSISDN:42342: MSC conn use + release == 1 (0x100)
+DREF VLR subscr MSISDN:42342 usage increases to: 3
+DREF VLR subscr MSISDN:42342 usage decreases to: 2
+- Iu Release --RAN_UTRAN_IU--> MS
+DREF MSISDN:42342: MSC conn use - release == 0 (0x0)
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_RELEASING}: Received Event SUBSCR_CONN_E_UNUSED
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_RELEASING}: state_chg to SUBSCR_CONN_S_RELEASED
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_RELEASED}: Terminating (cause = OSMO_FSM_TERM_REGULAR)
 DVLR Process_Access_Request_VLR(901700000010650){PR_ARQ_S_DONE}: Terminating (cause = OSMO_FSM_TERM_PARENT)
 DVLR Process_Access_Request_VLR(901700000010650){PR_ARQ_S_DONE}: Removing from parent Subscr_Conn(901700000010650)
 DVLR Process_Access_Request_VLR(901700000010650){PR_ARQ_S_DONE}: Freeing instance
 DVLR Process_Access_Request_VLR(901700000010650){PR_ARQ_S_DONE}: Deallocated
-DMM msc_subscr_conn_close(vsub=MSISDN:42342, cause=2): no conn fsm, releasing directly without release event.
-- Iu Release --RAN_UTRAN_IU--> MS
-DREF MSISDN:42342: MSC conn use - fsm == 1 (0x2)
+DRLL MSISDN:42342: Freeing subscriber connection
+DREF VLR subscr MSISDN:42342 usage decreases to: 1
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_RELEASED}: Freeing instance
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_RELEASED}: Deallocated
-DREF MSISDN:42342: MSC conn use - dtap == 0 (0x0)
-DRLL subscr MSISDN:42342: Freeing subscriber connection
-DREF VLR subscr MSISDN:42342 usage decreases to: 1
   llist_count(&net->subscr_conns) == 0
 DREF freeing VLR subscr MSISDN:42342
 ===== test_call_mo: SUCCESS
@@ -380,12 +383,9 @@ talloc_total_blocks(tall_bsc_ctx) == 12
 - Location Update request causes a GSUP Send Auth Info request to HLR
   MSC <--RAN_UTRAN_IU-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
   new conn
+DMM Subscr_Conn{SUBSCR_CONN_S_NEW}: Allocated
 DREF unknown: MSC conn use + compl_l3 == 1 (0x1)
 DRLL Dispatching 04.08 message GSM48_MT_MM_LOC_UPD_REQUEST (0x5:0x8)
-DREF unknown: MSC conn use + fsm == 2 (0x5)
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_INIT}: Allocated
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_INIT}: Received Event SUBSCR_CONN_E_START
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_INIT}: state_chg to SUBSCR_CONN_S_NEW
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_NEW}: Updated ID from LU
 DMM LOCATION UPDATING REQUEST: MI(IMSI)=901700000010650 type=NORMAL
 DMM LU/new-LAC: 23/23
@@ -406,8 +406,11 @@ DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_NEEDS_AUTH}: Received Event VL
 DVLR GSUP tx: 08010809710000000156f0
 GSUP --> HLR: OSMO_GSUP_MSGT_SEND_AUTH_INFO_REQUEST: 08010809710000000156f0
 DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_NEEDS_AUTH}: state_chg to VLR_SUB_AS_NEEDS_AUTH_WAIT_AI
-DMM IMSI:901700000010650: subscr_conn_release_when_unused: conn still being established (SUBSCR_CONN_S_NEW)
-DREF IMSI:901700000010650: MSC conn use - compl_l3 == 1 (0x4)
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_NEW}: Received Event SUBSCR_CONN_E_COMPLETE_LAYER_3
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_NEW}: state_chg to SUBSCR_CONN_S_AUTH_CIPH
+DREF IMSI:901700000010650: MSC conn use - compl_l3 == 0 (0x0)
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_AUTH_CIPH}: Received Event SUBSCR_CONN_E_UNUSED
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_AUTH_CIPH}: Awaiting results for Auth+Ciph, overruling event SUBSCR_CONN_E_UNUSED
   lu_result_sent == 0
 - from HLR, rx _SEND_AUTH_INFO_RESULT; VLR sends Auth Req to MS
 <-- GSUP rx OSMO_GSUP_MSGT_SEND_AUTH_INFO_RESULT: 0a010809710000000156f00362201039fa2f4e3d523d8619a73b4f65c3e14d21049b36efdf2208059a4f668f6fbe39231027497388b6cb044648f396aa155b95ef2410f64735036e5871319c679f4742a75ea125108704f5ba55f30000d2ee44b22c8ea9192708e229c19e791f2e4103622010c187a53a5e6b9d573cac7c74451fd46d210485aa31302208d3d50a000bf04f6e23101159ec926a50e98c034a6b7d7c9f418d2410df3a03d9ca5335641efc8e36d76cd20b25101843a645b98d00005b2d666af46c45d927087db47cf7f81e4dc703622010efa9c29a9742148d5c9070348716e1bb210469d5f9fb22083df176f0c29f1a3d2310eb50e770ddcc3060101d2f43b6c2b884241076542abce5ff9345b0e8947f4c6e019c2510f9375e6d41e1000096e7fe4ff1c27e392708706f996719ba609c03622010f023d5a3b24726e0631b64b3840f82532104d570c03f2208ec011be8919883d62310c4e58af4ba43f3bcd904e16984f086d724100593f65e752e5cb7f473862bda05aa0a2510541ff1f077270000c5ea00d658bc7e9a27083fd26072eaa2a04d036220102f8f90c780d6a9c0c53da7ac57b6707e2104b072446f220823f39f9f425ad6e6231065af0527fda95b0dc5ae4aa515cdf32f2410537c3b35a3b13b08d08eeb28098f45cc25104bf4e564f75300009bc796706bc6574427080edb0eadbea94ac2
@@ -427,7 +430,7 @@ DREF VLR subscr IMSI:901700000010650 usage decreases to: 1
   lu_result_sent == 0
 - MS sends Authen Response, VLR accepts and sends SecurityModeControl
   MSC <--RAN_UTRAN_IU-- MS: GSM48_MT_MM_AUTH_RESP
-DREF IMSI:901700000010650: MSC conn use + dtap == 2 (0x6)
+DREF IMSI:901700000010650: MSC conn use + dtap == 1 (0x2)
 DRLL Dispatching 04.08 message GSM48_MT_MM_AUTH_RESP (0x5:0x14)
 DMM IMSI:901700000010650: MM UMTS AUTHENTICATION RESPONSE (res = e229c19e791f2e41)
 DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_WAIT_RESP}: Received Event VLR_AUTH_E_MS_AUTH_RESP
@@ -446,8 +449,9 @@ DMM -> SECURITY MODE CONTROL IMSI:901700000010650
 - sending SecurityModeControl for UE ctx 42 send_ck=0 new_key=1
 - ...ik=27497388b6cb044648f396aa155b95ef
 DVLR vlr_lu_fsm(901700000010650){VLR_ULA_S_WAIT_AUTH}: state_chg to VLR_ULA_S_WAIT_CIPH
-DMM IMSI:901700000010650: subscr_conn_release_when_unused: conn still being established (SUBSCR_CONN_S_NEW)
-DREF IMSI:901700000010650: MSC conn use - dtap == 1 (0x4)
+DREF IMSI:901700000010650: MSC conn use - dtap == 0 (0x0)
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_AUTH_CIPH}: Received Event SUBSCR_CONN_E_UNUSED
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_AUTH_CIPH}: Awaiting results for Auth+Ciph, overruling event SUBSCR_CONN_E_UNUSED
   security_mode_ctrl_sent == 1
   lu_result_sent == 0
 - MS sends SecurityModeControl acceptance, VLR accepts and sends GSUP LU Req to HLR
@@ -514,7 +518,7 @@ DREF VLR subscr MSISDN:42342 usage decreases to: 1
 msc_subscr_conn_is_accepted() == false
 - MS sends TMSI Realloc Complete
   MSC <--RAN_UTRAN_IU-- MS: GSM48_MT_MM_TMSI_REALL_COMPL
-DREF MSISDN:42342: MSC conn use + dtap == 2 (0x6)
+DREF MSISDN:42342: MSC conn use + dtap == 1 (0x2)
 DRLL Dispatching 04.08 message GSM48_MT_MM_TMSI_REALL_COMPL (0x5:0x1b)
 DMM TMSI Reallocation Completed. Subscriber: MSISDN:42342
 DVLR vlr_lu_fsm(901700000010650){VLR_ULA_S_WAIT_LU_COMPL}: Received Event VLR_ULA_E_NEW_TMSI_ACK
@@ -527,25 +531,28 @@ DVLR lu_compl_vlr_fsm(901700000010650){LU_COMPL_VLR_S_DONE}: Removing from paren
 DVLR lu_compl_vlr_fsm(901700000010650){LU_COMPL_VLR_S_DONE}: Freeing instance
 DVLR lu_compl_vlr_fsm(901700000010650){LU_COMPL_VLR_S_DONE}: Deallocated
 DVLR vlr_lu_fsm(901700000010650){VLR_ULA_S_WAIT_LU_COMPL}: state_chg to VLR_ULA_S_DONE
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_NEW}: Received Event SUBSCR_CONN_E_ACCEPTED
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_NEW}: state_chg to SUBSCR_CONN_S_ACCEPTED
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_ACCEPTED}: Received Event SUBSCR_CONN_E_RELEASE_WHEN_UNUSED
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_ACCEPTED}: subscr_conn_fsm_release_when_unused: releasing conn
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_ACCEPTED}: state_chg to SUBSCR_CONN_S_RELEASED
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_AUTH_CIPH}: Received Event SUBSCR_CONN_E_ACCEPTED
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_AUTH_CIPH}: state_chg to SUBSCR_CONN_S_ACCEPTED
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_ACCEPTED}: Received Event SUBSCR_CONN_E_UNUSED
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_ACCEPTED}: state_chg to SUBSCR_CONN_S_RELEASING
+DREF MSISDN:42342: MSC conn use + release == 2 (0x102)
+DREF VLR subscr MSISDN:42342 usage increases to: 3
+DREF VLR subscr MSISDN:42342 usage decreases to: 2
+- Iu Release --RAN_UTRAN_IU--> MS
+DREF MSISDN:42342: MSC conn use - release == 1 (0x2)
+DREF MSISDN:42342: MSC conn use - dtap == 0 (0x0)
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_RELEASING}: Received Event SUBSCR_CONN_E_UNUSED
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_RELEASING}: state_chg to SUBSCR_CONN_S_RELEASED
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_RELEASED}: Terminating (cause = OSMO_FSM_TERM_REGULAR)
 DVLR vlr_lu_fsm(901700000010650){VLR_ULA_S_DONE}: Terminating (cause = OSMO_FSM_TERM_PARENT)
 DVLR vlr_lu_fsm(901700000010650){VLR_ULA_S_DONE}: Removing from parent Subscr_Conn(901700000010650)
 DVLR vlr_lu_fsm(901700000010650){VLR_ULA_S_DONE}: fsm_lu_cleanup called with cause OSMO_FSM_TERM_PARENT
 DVLR vlr_lu_fsm(901700000010650){VLR_ULA_S_DONE}: Freeing instance
 DVLR vlr_lu_fsm(901700000010650){VLR_ULA_S_DONE}: Deallocated
-DMM msc_subscr_conn_close(vsub=MSISDN:42342, cause=2): no conn fsm, releasing directly without release event.
-- Iu Release --RAN_UTRAN_IU--> MS
-DREF MSISDN:42342: MSC conn use - fsm == 1 (0x2)
+DRLL MSISDN:42342: Freeing subscriber connection
+DREF VLR subscr MSISDN:42342 usage decreases to: 1
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_RELEASED}: Freeing instance
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_RELEASED}: Deallocated
-DREF MSISDN:42342: MSC conn use - dtap == 0 (0x0)
-DRLL subscr MSISDN:42342: Freeing subscriber connection
-DREF VLR subscr MSISDN:42342 usage decreases to: 1
   iu_release_sent == 1
 - LU was successful, and the conn has already been closed
   llist_count(&net->subscr_conns) == 0
@@ -570,13 +577,10 @@ DREF VLR subscr MSISDN:42342 usage decreases to: 3
 - MS replies with Paging Response, and VLR sends Auth Request
   MSC <--RAN_UTRAN_IU-- MS: GSM48_MT_RR_PAG_RESP
   new conn
+DMM Subscr_Conn{SUBSCR_CONN_S_NEW}: Allocated
 DREF unknown: MSC conn use + compl_l3 == 1 (0x1)
 DRLL Dispatching 04.08 message GSM48_MT_RR_PAG_RESP (0x6:0x27)
 DRR PAGING RESPONSE: MI(IMSI)=901700000010650
-DREF unknown: MSC conn use + fsm == 2 (0x5)
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_INIT}: Allocated
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_INIT}: Received Event SUBSCR_CONN_E_START
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_INIT}: state_chg to SUBSCR_CONN_S_NEW
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_NEW}: Updated ID from PAGING_RESP
 DVLR Process_Access_Request_VLR(901700000010650){PR_ARQ_S_INIT}: Allocated
 DVLR Process_Access_Request_VLR(901700000010650){PR_ARQ_S_INIT}: is child of Subscr_Conn(901700000010650)
@@ -596,12 +600,15 @@ DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_WAIT_RESP}: got auth tuple: us
 - ...autn=1843a645b98d00005b2d666af46c45d9
 - ...expecting res=7db47cf7f81e4dc7
 DREF VLR subscr MSISDN:42342 usage decreases to: 4
-DMM MSISDN:42342: subscr_conn_release_when_unused: conn still being established (SUBSCR_CONN_S_NEW)
-DREF MSISDN:42342: MSC conn use - compl_l3 == 1 (0x4)
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_NEW}: Received Event SUBSCR_CONN_E_COMPLETE_LAYER_3
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_NEW}: state_chg to SUBSCR_CONN_S_AUTH_CIPH
+DREF MSISDN:42342: MSC conn use - compl_l3 == 0 (0x0)
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_AUTH_CIPH}: Received Event SUBSCR_CONN_E_UNUSED
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_AUTH_CIPH}: Awaiting results for Auth+Ciph, overruling event SUBSCR_CONN_E_UNUSED
   auth_request_sent == 1
 - MS sends Authen Response, VLR accepts and sends SecurityModeControl
   MSC <--RAN_UTRAN_IU-- MS: GSM48_MT_MM_AUTH_RESP
-DREF MSISDN:42342: MSC conn use + dtap == 2 (0x6)
+DREF MSISDN:42342: MSC conn use + dtap == 1 (0x2)
 DRLL Dispatching 04.08 message GSM48_MT_MM_AUTH_RESP (0x5:0x14)
 DMM MSISDN:42342: MM UMTS AUTHENTICATION RESPONSE (res = 7db47cf7f81e4dc7)
 DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_WAIT_RESP}: Received Event VLR_AUTH_E_MS_AUTH_RESP
@@ -621,8 +628,9 @@ DMM -> SECURITY MODE CONTROL MSISDN:42342
 - sending SecurityModeControl for UE ctx 42 send_ck=0 new_key=1
 - ...ik=1159ec926a50e98c034a6b7d7c9f418d
 DVLR Process_Access_Request_VLR(901700000010650){PR_ARQ_S_WAIT_AUTH}: state_chg to PR_ARQ_S_WAIT_CIPH
-DMM MSISDN:42342: subscr_conn_release_when_unused: conn still being established (SUBSCR_CONN_S_NEW)
-DREF MSISDN:42342: MSC conn use - dtap == 1 (0x4)
+DREF MSISDN:42342: MSC conn use - dtap == 0 (0x0)
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_AUTH_CIPH}: Received Event SUBSCR_CONN_E_UNUSED
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_AUTH_CIPH}: Awaiting results for Auth+Ciph, overruling event SUBSCR_CONN_E_UNUSED
   security_mode_ctrl_sent == 1
 - MS sends SecurityModeControl acceptance, VLR accepts, sends CC Setup
 DMM <- SECURITY MODE COMPLETE MSISDN:42342
@@ -637,23 +645,22 @@ DVLR Process_Access_Request_VLR(901700000010650){PR_ARQ_S_WAIT_CIPH}: _proc_arq_
 DVLR Process_Access_Request_VLR(901700000010650){PR_ARQ_S_WAIT_CIPH}: proc_arq_fsm_done(VLR_PR_ARQ_RES_PASSED)
 DVLR Process_Access_Request_VLR(901700000010650){PR_ARQ_S_WAIT_CIPH}: state_chg to PR_ARQ_S_DONE
 DVLR Process_Access_Request_VLR(901700000010650){PR_ARQ_S_DONE}: Process Access Request result: VLR_PR_ARQ_RES_PASSED
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_NEW}: Received Event SUBSCR_CONN_E_ACCEPTED
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_NEW}: state_chg to SUBSCR_CONN_S_ACCEPTED
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_AUTH_CIPH}: Received Event SUBSCR_CONN_E_ACCEPTED
 DPAG Paging success for MSISDN:42342 (event=0)
 DPAG Calling paging cbfn.
 DCC Paging subscr 42342 succeeded!
-DREF MSISDN:42342: MSC conn use + trans_cc == 2 (0xc)
+DREF MSISDN:42342: MSC conn use + trans_cc == 1 (0x10)
 DCC starting timer T303 with 30 seconds
 DCC (ti 00 sub MSISDN:42342) new state NULL -> CALL_PRESENT
 DMSC msc_tx 2 bytes to MSISDN:42342 via RAN_UTRAN_IU
 - DTAP --RAN_UTRAN_IU--> MS: GSM48_MT_CC_SETUP: 0305
 - DTAP matches expected message
 DREF VLR subscr MSISDN:42342 usage decreases to: 3
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_ACCEPTED}: Received Event SUBSCR_CONN_E_RELEASE_WHEN_UNUSED
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_ACCEPTED}: subscr_conn_fsm_release_when_unused: connection still has active transaction: CC
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_AUTH_CIPH}: state_chg to SUBSCR_CONN_S_ACCEPTED
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_ACCEPTED}: subscr_conn_fsm_has_active_transactions: connection still has active transaction: CC
   paging_stopped == 1
   MSC <--RAN_UTRAN_IU-- MS: GSM48_MT_CC_CALL_CONF
-DREF MSISDN:42342: MSC conn use + dtap == 3 (0xe)
+DREF MSISDN:42342: MSC conn use + dtap == 2 (0x12)
 DRLL Dispatching 04.08 message GSM48_MT_CC_CALL_CONF (0x3:0x8)
 DCC stopping pending timer T303
 DCC starting timer T310 with 30 seconds
@@ -664,12 +671,10 @@ DCC Sending 'MNCC_CALL_CONF_IND' to MNCC.
   MSC --> MNCC: callref 0x423: MNCC_CALL_CONF_IND
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_ACCEPTED}: Received Event SUBSCR_CONN_E_COMMUNICATING
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_ACCEPTED}: state_chg to SUBSCR_CONN_S_COMMUNICATING
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: Received Event SUBSCR_CONN_E_RELEASE_WHEN_UNUSED
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: subscr_conn_fsm_release_when_unused: connection still has active transaction: CC
-DREF MSISDN:42342: MSC conn use - dtap == 2 (0xc)
+DREF MSISDN:42342: MSC conn use - dtap == 1 (0x10)
 - Total time passed: 1.000023 s
   MSC <--RAN_UTRAN_IU-- MS: GSM48_MT_CC_ALERTING
-DREF MSISDN:42342: MSC conn use + dtap == 3 (0xe)
+DREF MSISDN:42342: MSC conn use + dtap == 2 (0x12)
 DRLL Dispatching 04.08 message GSM48_MT_CC_ALERTING (0x3:0x1)
 DCC stopping pending timer T310
 DCC starting timer T301 with 180 seconds
@@ -678,12 +683,10 @@ DMNCC transmit message MNCC_ALERT_IND
 DCC Sending 'MNCC_ALERT_IND' to MNCC.
   MSC --> MNCC: callref 0x423: MNCC_ALERT_IND
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: Received Event SUBSCR_CONN_E_COMMUNICATING
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: Received Event SUBSCR_CONN_E_RELEASE_WHEN_UNUSED
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: subscr_conn_fsm_release_when_unused: connection still has active transaction: CC
-DREF MSISDN:42342: MSC conn use - dtap == 2 (0xc)
+DREF MSISDN:42342: MSC conn use - dtap == 1 (0x10)
 - Total time passed: 2.000046 s
   MSC <--RAN_UTRAN_IU-- MS: GSM48_MT_CC_CONNECT
-DREF MSISDN:42342: MSC conn use + dtap == 3 (0xe)
+DREF MSISDN:42342: MSC conn use + dtap == 2 (0x12)
 DRLL Dispatching 04.08 message GSM48_MT_CC_CONNECT (0x3:0x7)
 DCC stopping pending timer T301
 DCC (ti 00 sub MSISDN:42342) new state CALL_RECEIVED -> CONNECT_REQUEST
@@ -691,9 +694,7 @@ DMNCC transmit message MNCC_SETUP_CNF
 DCC Sending 'MNCC_SETUP_CNF' to MNCC.
   MSC --> MNCC: callref 0x423: MNCC_SETUP_CNF
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: Received Event SUBSCR_CONN_E_COMMUNICATING
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: Received Event SUBSCR_CONN_E_RELEASE_WHEN_UNUSED
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: subscr_conn_fsm_release_when_unused: connection still has active transaction: CC
-DREF MSISDN:42342: MSC conn use - dtap == 2 (0xc)
+DREF MSISDN:42342: MSC conn use - dtap == 1 (0x10)
 DMNCC receive message MNCC_SETUP_COMPL_REQ
 DCC (ti 00 sub 42342) Received 'MNCC_SETUP_COMPL_REQ' from MNCC in state 8 (CONNECT_REQUEST)
 DCC (ti 00 sub MSISDN:42342) new state CONNECT_REQUEST -> ACTIVE
@@ -706,16 +707,14 @@ DMSC msc_tx 2 bytes to MSISDN:42342 via RAN_UTRAN_IU
 ---
 - Call ends
   MSC <--RAN_UTRAN_IU-- MS: GSM48_MT_CC_DISCONNECT
-DREF MSISDN:42342: MSC conn use + dtap == 3 (0xe)
+DREF MSISDN:42342: MSC conn use + dtap == 2 (0x12)
 DRLL Dispatching 04.08 message GSM48_MT_CC_DISCONNECT (0x3:0x25)
 DCC (ti 00 sub MSISDN:42342) new state ACTIVE -> DISCONNECT_IND
 DMNCC transmit message MNCC_DISC_IND
 DCC Sending 'MNCC_DISC_IND' to MNCC.
   MSC --> MNCC: callref 0x423: MNCC_DISC_IND
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: Received Event SUBSCR_CONN_E_COMMUNICATING
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: Received Event SUBSCR_CONN_E_RELEASE_WHEN_UNUSED
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: subscr_conn_fsm_release_when_unused: connection still has active transaction: CC
-DREF MSISDN:42342: MSC conn use - dtap == 2 (0xc)
+DREF MSISDN:42342: MSC conn use - dtap == 1 (0x10)
 DMNCC receive message MNCC_REL_REQ
 DCC (ti 00 sub 42342) Received 'MNCC_REL_REQ' from MNCC in state 12 (DISCONNECT_IND)
 DCC starting timer T308 with 10 seconds
@@ -724,7 +723,7 @@ DMSC msc_tx 2 bytes to MSISDN:42342 via RAN_UTRAN_IU
 - DTAP --RAN_UTRAN_IU--> MS: GSM48_MT_CC_RELEASE: 032d
 - DTAP matches expected message
   MSC <--RAN_UTRAN_IU-- MS: GSM48_MT_CC_RELEASE_COMPL
-DREF MSISDN:42342: MSC conn use + dtap == 3 (0xe)
+DREF MSISDN:42342: MSC conn use + dtap == 2 (0x12)
 DRLL Dispatching 04.08 message GSM48_MT_CC_RELEASE_COMPL (0x3:0x2a)
 DCC stopping pending timer T308
 DMNCC transmit message MNCC_REL_CNF
@@ -733,23 +732,27 @@ DCC Sending 'MNCC_REL_CNF' to MNCC.
   MS <--Call Release-- MSC: subscr=MSISDN:42342 callref=0x0
 DCC (ti 00 sub MSISDN:42342) new state RELEASE_REQ -> NULL
 DREF VLR subscr MSISDN:42342 usage decreases to: 2
-DREF MSISDN:42342: MSC conn use - trans_cc == 2 (0x6)
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: Received Event SUBSCR_CONN_E_RELEASE_WHEN_UNUSED
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: subscr_conn_fsm_release_when_unused: releasing conn
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: state_chg to SUBSCR_CONN_S_RELEASED
+DREF MSISDN:42342: MSC conn use - trans_cc == 1 (0x2)
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: Received Event SUBSCR_CONN_E_COMMUNICATING
+DREF MSISDN:42342: MSC conn use - dtap == 0 (0x0)
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: Received Event SUBSCR_CONN_E_UNUSED
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: state_chg to SUBSCR_CONN_S_RELEASING
+DREF MSISDN:42342: MSC conn use + release == 1 (0x100)
+DREF VLR subscr MSISDN:42342 usage increases to: 3
+DREF VLR subscr MSISDN:42342 usage decreases to: 2
+- Iu Release --RAN_UTRAN_IU--> MS
+DREF MSISDN:42342: MSC conn use - release == 0 (0x0)
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_RELEASING}: Received Event SUBSCR_CONN_E_UNUSED
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_RELEASING}: state_chg to SUBSCR_CONN_S_RELEASED
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_RELEASED}: Terminating (cause = OSMO_FSM_TERM_REGULAR)
 DVLR Process_Access_Request_VLR(901700000010650){PR_ARQ_S_DONE}: Terminating (cause = OSMO_FSM_TERM_PARENT)
 DVLR Process_Access_Request_VLR(901700000010650){PR_ARQ_S_DONE}: Removing from parent Subscr_Conn(901700000010650)
 DVLR Process_Access_Request_VLR(901700000010650){PR_ARQ_S_DONE}: Freeing instance
 DVLR Process_Access_Request_VLR(901700000010650){PR_ARQ_S_DONE}: Deallocated
-DMM msc_subscr_conn_close(vsub=MSISDN:42342, cause=2): no conn fsm, releasing directly without release event.
-- Iu Release --RAN_UTRAN_IU--> MS
-DREF MSISDN:42342: MSC conn use - fsm == 1 (0x2)
+DRLL MSISDN:42342: Freeing subscriber connection
+DREF VLR subscr MSISDN:42342 usage decreases to: 1
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_RELEASED}: Freeing instance
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_RELEASED}: Deallocated
-DREF MSISDN:42342: MSC conn use - dtap == 0 (0x0)
-DRLL subscr MSISDN:42342: Freeing subscriber connection
-DREF VLR subscr MSISDN:42342 usage decreases to: 1
   llist_count(&net->subscr_conns) == 0
 DREF freeing VLR subscr MSISDN:42342
 ===== test_call_mt: SUCCESS
@@ -762,12 +765,9 @@ talloc_total_blocks(tall_bsc_ctx) == 12
 - Location Update request causes a GSUP Send Auth Info request to HLR
   MSC <--RAN_UTRAN_IU-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
   new conn
+DMM Subscr_Conn{SUBSCR_CONN_S_NEW}: Allocated
 DREF unknown: MSC conn use + compl_l3 == 1 (0x1)
 DRLL Dispatching 04.08 message GSM48_MT_MM_LOC_UPD_REQUEST (0x5:0x8)
-DREF unknown: MSC conn use + fsm == 2 (0x5)
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_INIT}: Allocated
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_INIT}: Received Event SUBSCR_CONN_E_START
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_INIT}: state_chg to SUBSCR_CONN_S_NEW
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_NEW}: Updated ID from LU
 DMM LOCATION UPDATING REQUEST: MI(IMSI)=901700000010650 type=NORMAL
 DMM LU/new-LAC: 23/23
@@ -788,8 +788,11 @@ DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_NEEDS_AUTH}: Received Event VL
 DVLR GSUP tx: 08010809710000000156f0
 GSUP --> HLR: OSMO_GSUP_MSGT_SEND_AUTH_INFO_REQUEST: 08010809710000000156f0
 DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_NEEDS_AUTH}: state_chg to VLR_SUB_AS_NEEDS_AUTH_WAIT_AI
-DMM IMSI:901700000010650: subscr_conn_release_when_unused: conn still being established (SUBSCR_CONN_S_NEW)
-DREF IMSI:901700000010650: MSC conn use - compl_l3 == 1 (0x4)
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_NEW}: Received Event SUBSCR_CONN_E_COMPLETE_LAYER_3
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_NEW}: state_chg to SUBSCR_CONN_S_AUTH_CIPH
+DREF IMSI:901700000010650: MSC conn use - compl_l3 == 0 (0x0)
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_AUTH_CIPH}: Received Event SUBSCR_CONN_E_UNUSED
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_AUTH_CIPH}: Awaiting results for Auth+Ciph, overruling event SUBSCR_CONN_E_UNUSED
   lu_result_sent == 0
 - from HLR, rx _SEND_AUTH_INFO_RESULT; VLR sends Auth Req to MS
 <-- GSUP rx OSMO_GSUP_MSGT_SEND_AUTH_INFO_RESULT: 0a010809710000000156f00362201039fa2f4e3d523d8619a73b4f65c3e14d21049b36efdf2208059a4f668f6fbe39231027497388b6cb044648f396aa155b95ef2410f64735036e5871319c679f4742a75ea125108704f5ba55f30000d2ee44b22c8ea9192708e229c19e791f2e4103622010c187a53a5e6b9d573cac7c74451fd46d210485aa31302208d3d50a000bf04f6e23101159ec926a50e98c034a6b7d7c9f418d2410df3a03d9ca5335641efc8e36d76cd20b25101843a645b98d00005b2d666af46c45d927087db47cf7f81e4dc703622010efa9c29a9742148d5c9070348716e1bb210469d5f9fb22083df176f0c29f1a3d2310eb50e770ddcc3060101d2f43b6c2b884241076542abce5ff9345b0e8947f4c6e019c2510f9375e6d41e1000096e7fe4ff1c27e392708706f996719ba609c03622010f023d5a3b24726e0631b64b3840f82532104d570c03f2208ec011be8919883d62310c4e58af4ba43f3bcd904e16984f086d724100593f65e752e5cb7f473862bda05aa0a2510541ff1f077270000c5ea00d658bc7e9a27083fd26072eaa2a04d036220102f8f90c780d6a9c0c53da7ac57b6707e2104b072446f220823f39f9f425ad6e6231065af0527fda95b0dc5ae4aa515cdf32f2410537c3b35a3b13b08d08eeb28098f45cc25104bf4e564f75300009bc796706bc6574427080edb0eadbea94ac2
@@ -809,7 +812,7 @@ DREF VLR subscr IMSI:901700000010650 usage decreases to: 1
   lu_result_sent == 0
 - MS sends Authen Response, VLR accepts and sends SecurityModeControl
   MSC <--RAN_UTRAN_IU-- MS: GSM48_MT_MM_AUTH_RESP
-DREF IMSI:901700000010650: MSC conn use + dtap == 2 (0x6)
+DREF IMSI:901700000010650: MSC conn use + dtap == 1 (0x2)
 DRLL Dispatching 04.08 message GSM48_MT_MM_AUTH_RESP (0x5:0x14)
 DMM IMSI:901700000010650: MM UMTS AUTHENTICATION RESPONSE (res = e229c19e791f2e41)
 DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_WAIT_RESP}: Received Event VLR_AUTH_E_MS_AUTH_RESP
@@ -828,8 +831,9 @@ DMM -> SECURITY MODE CONTROL IMSI:901700000010650
 - sending SecurityModeControl for UE ctx 42 send_ck=0 new_key=1
 - ...ik=27497388b6cb044648f396aa155b95ef
 DVLR vlr_lu_fsm(901700000010650){VLR_ULA_S_WAIT_AUTH}: state_chg to VLR_ULA_S_WAIT_CIPH
-DMM IMSI:901700000010650: subscr_conn_release_when_unused: conn still being established (SUBSCR_CONN_S_NEW)
-DREF IMSI:901700000010650: MSC conn use - dtap == 1 (0x4)
+DREF IMSI:901700000010650: MSC conn use - dtap == 0 (0x0)
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_AUTH_CIPH}: Received Event SUBSCR_CONN_E_UNUSED
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_AUTH_CIPH}: Awaiting results for Auth+Ciph, overruling event SUBSCR_CONN_E_UNUSED
   security_mode_ctrl_sent == 1
   lu_result_sent == 0
 - MS sends SecurityModeControl acceptance, VLR accepts and sends GSUP LU Req to HLR
@@ -896,7 +900,7 @@ DREF VLR subscr MSISDN:42342 usage decreases to: 1
 msc_subscr_conn_is_accepted() == false
 - MS sends TMSI Realloc Complete
   MSC <--RAN_UTRAN_IU-- MS: GSM48_MT_MM_TMSI_REALL_COMPL
-DREF MSISDN:42342: MSC conn use + dtap == 2 (0x6)
+DREF MSISDN:42342: MSC conn use + dtap == 1 (0x2)
 DRLL Dispatching 04.08 message GSM48_MT_MM_TMSI_REALL_COMPL (0x5:0x1b)
 DMM TMSI Reallocation Completed. Subscriber: MSISDN:42342
 DVLR vlr_lu_fsm(901700000010650){VLR_ULA_S_WAIT_LU_COMPL}: Received Event VLR_ULA_E_NEW_TMSI_ACK
@@ -909,25 +913,28 @@ DVLR lu_compl_vlr_fsm(901700000010650){LU_COMPL_VLR_S_DONE}: Removing from paren
 DVLR lu_compl_vlr_fsm(901700000010650){LU_COMPL_VLR_S_DONE}: Freeing instance
 DVLR lu_compl_vlr_fsm(901700000010650){LU_COMPL_VLR_S_DONE}: Deallocated
 DVLR vlr_lu_fsm(901700000010650){VLR_ULA_S_WAIT_LU_COMPL}: state_chg to VLR_ULA_S_DONE
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_NEW}: Received Event SUBSCR_CONN_E_ACCEPTED
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_NEW}: state_chg to SUBSCR_CONN_S_ACCEPTED
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_ACCEPTED}: Received Event SUBSCR_CONN_E_RELEASE_WHEN_UNUSED
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_ACCEPTED}: subscr_conn_fsm_release_when_unused: releasing conn
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_ACCEPTED}: state_chg to SUBSCR_CONN_S_RELEASED
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_AUTH_CIPH}: Received Event SUBSCR_CONN_E_ACCEPTED
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_AUTH_CIPH}: state_chg to SUBSCR_CONN_S_ACCEPTED
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_ACCEPTED}: Received Event SUBSCR_CONN_E_UNUSED
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_ACCEPTED}: state_chg to SUBSCR_CONN_S_RELEASING
+DREF MSISDN:42342: MSC conn use + release == 2 (0x102)
+DREF VLR subscr MSISDN:42342 usage increases to: 3
+DREF VLR subscr MSISDN:42342 usage decreases to: 2
+- Iu Release --RAN_UTRAN_IU--> MS
+DREF MSISDN:42342: MSC conn use - release == 1 (0x2)
+DREF MSISDN:42342: MSC conn use - dtap == 0 (0x0)
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_RELEASING}: Received Event SUBSCR_CONN_E_UNUSED
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_RELEASING}: state_chg to SUBSCR_CONN_S_RELEASED
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_RELEASED}: Terminating (cause = OSMO_FSM_TERM_REGULAR)
 DVLR vlr_lu_fsm(901700000010650){VLR_ULA_S_DONE}: Terminating (cause = OSMO_FSM_TERM_PARENT)
 DVLR vlr_lu_fsm(901700000010650){VLR_ULA_S_DONE}: Removing from parent Subscr_Conn(901700000010650)
 DVLR vlr_lu_fsm(901700000010650){VLR_ULA_S_DONE}: fsm_lu_cleanup called with cause OSMO_FSM_TERM_PARENT
 DVLR vlr_lu_fsm(901700000010650){VLR_ULA_S_DONE}: Freeing instance
 DVLR vlr_lu_fsm(901700000010650){VLR_ULA_S_DONE}: Deallocated
-DMM msc_subscr_conn_close(vsub=MSISDN:42342, cause=2): no conn fsm, releasing directly without release event.
-- Iu Release --RAN_UTRAN_IU--> MS
-DREF MSISDN:42342: MSC conn use - fsm == 1 (0x2)
+DRLL MSISDN:42342: Freeing subscriber connection
+DREF VLR subscr MSISDN:42342 usage decreases to: 1
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_RELEASED}: Freeing instance
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_RELEASED}: Deallocated
-DREF MSISDN:42342: MSC conn use - dtap == 0 (0x0)
-DRLL subscr MSISDN:42342: Freeing subscriber connection
-DREF VLR subscr MSISDN:42342 usage decreases to: 1
   iu_release_sent == 1
 - LU was successful, and the conn has already been closed
   llist_count(&net->subscr_conns) == 0
@@ -952,13 +959,10 @@ DREF VLR subscr MSISDN:42342 usage decreases to: 3
 - MS replies with Paging Response, and VLR sends Auth Request
   MSC <--RAN_UTRAN_IU-- MS: GSM48_MT_RR_PAG_RESP
   new conn
+DMM Subscr_Conn{SUBSCR_CONN_S_NEW}: Allocated
 DREF unknown: MSC conn use + compl_l3 == 1 (0x1)
 DRLL Dispatching 04.08 message GSM48_MT_RR_PAG_RESP (0x6:0x27)
 DRR PAGING RESPONSE: MI(IMSI)=901700000010650
-DREF unknown: MSC conn use + fsm == 2 (0x5)
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_INIT}: Allocated
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_INIT}: Received Event SUBSCR_CONN_E_START
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_INIT}: state_chg to SUBSCR_CONN_S_NEW
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_NEW}: Updated ID from PAGING_RESP
 DVLR Process_Access_Request_VLR(901700000010650){PR_ARQ_S_INIT}: Allocated
 DVLR Process_Access_Request_VLR(901700000010650){PR_ARQ_S_INIT}: is child of Subscr_Conn(901700000010650)
@@ -978,12 +982,15 @@ DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_WAIT_RESP}: got auth tuple: us
 - ...autn=1843a645b98d00005b2d666af46c45d9
 - ...expecting res=7db47cf7f81e4dc7
 DREF VLR subscr MSISDN:42342 usage decreases to: 4
-DMM MSISDN:42342: subscr_conn_release_when_unused: conn still being established (SUBSCR_CONN_S_NEW)
-DREF MSISDN:42342: MSC conn use - compl_l3 == 1 (0x4)
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_NEW}: Received Event SUBSCR_CONN_E_COMPLETE_LAYER_3
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_NEW}: state_chg to SUBSCR_CONN_S_AUTH_CIPH
+DREF MSISDN:42342: MSC conn use - compl_l3 == 0 (0x0)
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_AUTH_CIPH}: Received Event SUBSCR_CONN_E_UNUSED
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_AUTH_CIPH}: Awaiting results for Auth+Ciph, overruling event SUBSCR_CONN_E_UNUSED
   auth_request_sent == 1
 - MS sends Authen Response, VLR accepts and sends SecurityModeControl
   MSC <--RAN_UTRAN_IU-- MS: GSM48_MT_MM_AUTH_RESP
-DREF MSISDN:42342: MSC conn use + dtap == 2 (0x6)
+DREF MSISDN:42342: MSC conn use + dtap == 1 (0x2)
 DRLL Dispatching 04.08 message GSM48_MT_MM_AUTH_RESP (0x5:0x14)
 DMM MSISDN:42342: MM UMTS AUTHENTICATION RESPONSE (res = 7db47cf7f81e4dc7)
 DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_WAIT_RESP}: Received Event VLR_AUTH_E_MS_AUTH_RESP
@@ -1003,8 +1010,9 @@ DMM -> SECURITY MODE CONTROL MSISDN:42342
 - sending SecurityModeControl for UE ctx 42 send_ck=0 new_key=1
 - ...ik=1159ec926a50e98c034a6b7d7c9f418d
 DVLR Process_Access_Request_VLR(901700000010650){PR_ARQ_S_WAIT_AUTH}: state_chg to PR_ARQ_S_WAIT_CIPH
-DMM MSISDN:42342: subscr_conn_release_when_unused: conn still being established (SUBSCR_CONN_S_NEW)
-DREF MSISDN:42342: MSC conn use - dtap == 1 (0x4)
+DREF MSISDN:42342: MSC conn use - dtap == 0 (0x0)
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_AUTH_CIPH}: Received Event SUBSCR_CONN_E_UNUSED
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_AUTH_CIPH}: Awaiting results for Auth+Ciph, overruling event SUBSCR_CONN_E_UNUSED
   security_mode_ctrl_sent == 1
 - MS sends SecurityModeControl acceptance, VLR accepts, sends CC Setup
 DMM <- SECURITY MODE COMPLETE MSISDN:42342
@@ -1019,23 +1027,22 @@ DVLR Process_Access_Request_VLR(901700000010650){PR_ARQ_S_WAIT_CIPH}: _proc_arq_
 DVLR Process_Access_Request_VLR(901700000010650){PR_ARQ_S_WAIT_CIPH}: proc_arq_fsm_done(VLR_PR_ARQ_RES_PASSED)
 DVLR Process_Access_Request_VLR(901700000010650){PR_ARQ_S_WAIT_CIPH}: state_chg to PR_ARQ_S_DONE
 DVLR Process_Access_Request_VLR(901700000010650){PR_ARQ_S_DONE}: Process Access Request result: VLR_PR_ARQ_RES_PASSED
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_NEW}: Received Event SUBSCR_CONN_E_ACCEPTED
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_NEW}: state_chg to SUBSCR_CONN_S_ACCEPTED
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_AUTH_CIPH}: Received Event SUBSCR_CONN_E_ACCEPTED
 DPAG Paging success for MSISDN:42342 (event=0)
 DPAG Calling paging cbfn.
 DCC Paging subscr 42342 succeeded!
-DREF MSISDN:42342: MSC conn use + trans_cc == 2 (0xc)
+DREF MSISDN:42342: MSC conn use + trans_cc == 1 (0x10)
 DCC starting timer T303 with 30 seconds
 DCC (ti 00 sub MSISDN:42342) new state NULL -> CALL_PRESENT
 DMSC msc_tx 2 bytes to MSISDN:42342 via RAN_UTRAN_IU
 - DTAP --RAN_UTRAN_IU--> MS: GSM48_MT_CC_SETUP: 0305
 - DTAP matches expected message
 DREF VLR subscr MSISDN:42342 usage decreases to: 3
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_ACCEPTED}: Received Event SUBSCR_CONN_E_RELEASE_WHEN_UNUSED
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_ACCEPTED}: subscr_conn_fsm_release_when_unused: connection still has active transaction: CC
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_AUTH_CIPH}: state_chg to SUBSCR_CONN_S_ACCEPTED
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_ACCEPTED}: subscr_conn_fsm_has_active_transactions: connection still has active transaction: CC
   paging_stopped == 1
   MSC <--RAN_UTRAN_IU-- MS: GSM48_MT_CC_CALL_CONF
-DREF MSISDN:42342: MSC conn use + dtap == 3 (0xe)
+DREF MSISDN:42342: MSC conn use + dtap == 2 (0x12)
 DRLL Dispatching 04.08 message GSM48_MT_CC_CALL_CONF (0x3:0x8)
 DCC stopping pending timer T303
 DCC starting timer T310 with 30 seconds
@@ -1046,12 +1053,10 @@ DCC Sending 'MNCC_CALL_CONF_IND' to MNCC.
   MSC --> MNCC: callref 0x423: MNCC_CALL_CONF_IND
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_ACCEPTED}: Received Event SUBSCR_CONN_E_COMMUNICATING
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_ACCEPTED}: state_chg to SUBSCR_CONN_S_COMMUNICATING
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: Received Event SUBSCR_CONN_E_RELEASE_WHEN_UNUSED
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: subscr_conn_fsm_release_when_unused: connection still has active transaction: CC
-DREF MSISDN:42342: MSC conn use - dtap == 2 (0xc)
+DREF MSISDN:42342: MSC conn use - dtap == 1 (0x10)
 - Total time passed: 1.000023 s
   MSC <--RAN_UTRAN_IU-- MS: GSM48_MT_CC_ALERTING
-DREF MSISDN:42342: MSC conn use + dtap == 3 (0xe)
+DREF MSISDN:42342: MSC conn use + dtap == 2 (0x12)
 DRLL Dispatching 04.08 message GSM48_MT_CC_ALERTING (0x3:0x1)
 DCC stopping pending timer T310
 DCC starting timer T301 with 180 seconds
@@ -1060,19 +1065,15 @@ DMNCC transmit message MNCC_ALERT_IND
 DCC Sending 'MNCC_ALERT_IND' to MNCC.
   MSC --> MNCC: callref 0x423: MNCC_ALERT_IND
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: Received Event SUBSCR_CONN_E_COMMUNICATING
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: Received Event SUBSCR_CONN_E_RELEASE_WHEN_UNUSED
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: subscr_conn_fsm_release_when_unused: connection still has active transaction: CC
-DREF MSISDN:42342: MSC conn use - dtap == 2 (0xc)
+DREF MSISDN:42342: MSC conn use - dtap == 1 (0x10)
 - Total time passed: 16.000046 s
 - The call failed, the BSC sends a BSSMAP Clear Request
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: Received Event SUBSCR_CONN_E_CN_CLOSE
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: state_chg to SUBSCR_CONN_S_RELEASED
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_RELEASED}: Terminating (cause = OSMO_FSM_TERM_REGULAR)
-DVLR Process_Access_Request_VLR(901700000010650){PR_ARQ_S_DONE}: Terminating (cause = OSMO_FSM_TERM_PARENT)
-DVLR Process_Access_Request_VLR(901700000010650){PR_ARQ_S_DONE}: Removing from parent Subscr_Conn(901700000010650)
-DVLR Process_Access_Request_VLR(901700000010650){PR_ARQ_S_DONE}: Freeing instance
-DVLR Process_Access_Request_VLR(901700000010650){PR_ARQ_S_DONE}: Deallocated
-DMM msc_subscr_conn_close(vsub=MSISDN:42342, cause=2): no conn fsm, releasing directly without release event.
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: Close event, cause 0
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: state_chg to SUBSCR_CONN_S_RELEASING
+DREF MSISDN:42342: MSC conn use + release == 2 (0x110)
+DREF VLR subscr MSISDN:42342 usage increases to: 4
+DREF VLR subscr MSISDN:42342 usage decreases to: 3
 DCC stopping pending timer T301
   MS <--Call Release-- MSC: subscr=MSISDN:42342 callref=0x423
 DMNCC receive message MNCC_REL_REQ
@@ -1088,10 +1089,17 @@ DCC Sending 'MNCC_REL_CNF' to MNCC.
 DCC stopping pending timer T308
 DCC (ti 00 sub MSISDN:42342) new state RELEASE_REQ -> NULL
 DREF VLR subscr MSISDN:42342 usage decreases to: 2
-DREF MSISDN:42342: MSC conn use - trans_cc == 1 (0x4)
+DREF MSISDN:42342: MSC conn use - trans_cc == 1 (0x100)
 - Iu Release --RAN_UTRAN_IU--> MS
-DREF MSISDN:42342: MSC conn use - fsm == 0 (0x0)
-DRLL subscr MSISDN:42342: Freeing subscriber connection
+DREF MSISDN:42342: MSC conn use - release == 0 (0x0)
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_RELEASING}: Received Event SUBSCR_CONN_E_UNUSED
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_RELEASING}: state_chg to SUBSCR_CONN_S_RELEASED
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_RELEASED}: Terminating (cause = OSMO_FSM_TERM_REGULAR)
+DVLR Process_Access_Request_VLR(901700000010650){PR_ARQ_S_DONE}: Terminating (cause = OSMO_FSM_TERM_PARENT)
+DVLR Process_Access_Request_VLR(901700000010650){PR_ARQ_S_DONE}: Removing from parent Subscr_Conn(901700000010650)
+DVLR Process_Access_Request_VLR(901700000010650){PR_ARQ_S_DONE}: Freeing instance
+DVLR Process_Access_Request_VLR(901700000010650){PR_ARQ_S_DONE}: Deallocated
+DRLL MSISDN:42342: Freeing subscriber connection
 DREF VLR subscr MSISDN:42342 usage decreases to: 1
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_RELEASED}: Freeing instance
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_RELEASED}: Deallocated
@@ -1108,12 +1116,9 @@ talloc_total_blocks(tall_bsc_ctx) == 12
 - Location Update request causes a GSUP Send Auth Info request to HLR
   MSC <--RAN_UTRAN_IU-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
   new conn
+DMM Subscr_Conn{SUBSCR_CONN_S_NEW}: Allocated
 DREF unknown: MSC conn use + compl_l3 == 1 (0x1)
 DRLL Dispatching 04.08 message GSM48_MT_MM_LOC_UPD_REQUEST (0x5:0x8)
-DREF unknown: MSC conn use + fsm == 2 (0x5)
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_INIT}: Allocated
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_INIT}: Received Event SUBSCR_CONN_E_START
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_INIT}: state_chg to SUBSCR_CONN_S_NEW
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_NEW}: Updated ID from LU
 DMM LOCATION UPDATING REQUEST: MI(IMSI)=901700000010650 type=NORMAL
 DMM LU/new-LAC: 23/23
@@ -1134,8 +1139,11 @@ DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_NEEDS_AUTH}: Received Event VL
 DVLR GSUP tx: 08010809710000000156f0
 GSUP --> HLR: OSMO_GSUP_MSGT_SEND_AUTH_INFO_REQUEST: 08010809710000000156f0
 DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_NEEDS_AUTH}: state_chg to VLR_SUB_AS_NEEDS_AUTH_WAIT_AI
-DMM IMSI:901700000010650: subscr_conn_release_when_unused: conn still being established (SUBSCR_CONN_S_NEW)
-DREF IMSI:901700000010650: MSC conn use - compl_l3 == 1 (0x4)
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_NEW}: Received Event SUBSCR_CONN_E_COMPLETE_LAYER_3
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_NEW}: state_chg to SUBSCR_CONN_S_AUTH_CIPH
+DREF IMSI:901700000010650: MSC conn use - compl_l3 == 0 (0x0)
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_AUTH_CIPH}: Received Event SUBSCR_CONN_E_UNUSED
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_AUTH_CIPH}: Awaiting results for Auth+Ciph, overruling event SUBSCR_CONN_E_UNUSED
   lu_result_sent == 0
 - from HLR, rx _SEND_AUTH_INFO_RESULT; VLR sends Auth Req to MS
 <-- GSUP rx OSMO_GSUP_MSGT_SEND_AUTH_INFO_RESULT: 0a010809710000000156f00362201039fa2f4e3d523d8619a73b4f65c3e14d21049b36efdf2208059a4f668f6fbe39231027497388b6cb044648f396aa155b95ef2410f64735036e5871319c679f4742a75ea125108704f5ba55f30000d2ee44b22c8ea9192708e229c19e791f2e4103622010c187a53a5e6b9d573cac7c74451fd46d210485aa31302208d3d50a000bf04f6e23101159ec926a50e98c034a6b7d7c9f418d2410df3a03d9ca5335641efc8e36d76cd20b25101843a645b98d00005b2d666af46c45d927087db47cf7f81e4dc703622010efa9c29a9742148d5c9070348716e1bb210469d5f9fb22083df176f0c29f1a3d2310eb50e770ddcc3060101d2f43b6c2b884241076542abce5ff9345b0e8947f4c6e019c2510f9375e6d41e1000096e7fe4ff1c27e392708706f996719ba609c03622010f023d5a3b24726e0631b64b3840f82532104d570c03f2208ec011be8919883d62310c4e58af4ba43f3bcd904e16984f086d724100593f65e752e5cb7f473862bda05aa0a2510541ff1f077270000c5ea00d658bc7e9a27083fd26072eaa2a04d036220102f8f90c780d6a9c0c53da7ac57b6707e2104b072446f220823f39f9f425ad6e6231065af0527fda95b0dc5ae4aa515cdf32f2410537c3b35a3b13b08d08eeb28098f45cc25104bf4e564f75300009bc796706bc6574427080edb0eadbea94ac2
@@ -1155,7 +1163,7 @@ DREF VLR subscr IMSI:901700000010650 usage decreases to: 1
   lu_result_sent == 0
 - MS sends Authen Response, VLR accepts and sends SecurityModeControl
   MSC <--RAN_UTRAN_IU-- MS: GSM48_MT_MM_AUTH_RESP
-DREF IMSI:901700000010650: MSC conn use + dtap == 2 (0x6)
+DREF IMSI:901700000010650: MSC conn use + dtap == 1 (0x2)
 DRLL Dispatching 04.08 message GSM48_MT_MM_AUTH_RESP (0x5:0x14)
 DMM IMSI:901700000010650: MM UMTS AUTHENTICATION RESPONSE (res = e229c19e791f2e41)
 DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_WAIT_RESP}: Received Event VLR_AUTH_E_MS_AUTH_RESP
@@ -1174,8 +1182,9 @@ DMM -> SECURITY MODE CONTROL IMSI:901700000010650
 - sending SecurityModeControl for UE ctx 42 send_ck=0 new_key=1
 - ...ik=27497388b6cb044648f396aa155b95ef
 DVLR vlr_lu_fsm(901700000010650){VLR_ULA_S_WAIT_AUTH}: state_chg to VLR_ULA_S_WAIT_CIPH
-DMM IMSI:901700000010650: subscr_conn_release_when_unused: conn still being established (SUBSCR_CONN_S_NEW)
-DREF IMSI:901700000010650: MSC conn use - dtap == 1 (0x4)
+DREF IMSI:901700000010650: MSC conn use - dtap == 0 (0x0)
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_AUTH_CIPH}: Received Event SUBSCR_CONN_E_UNUSED
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_AUTH_CIPH}: Awaiting results for Auth+Ciph, overruling event SUBSCR_CONN_E_UNUSED
   security_mode_ctrl_sent == 1
   lu_result_sent == 0
 - MS sends SecurityModeControl acceptance, VLR accepts and sends GSUP LU Req to HLR
@@ -1242,7 +1251,7 @@ DREF VLR subscr MSISDN:42342 usage decreases to: 1
 msc_subscr_conn_is_accepted() == false
 - MS sends TMSI Realloc Complete
   MSC <--RAN_UTRAN_IU-- MS: GSM48_MT_MM_TMSI_REALL_COMPL
-DREF MSISDN:42342: MSC conn use + dtap == 2 (0x6)
+DREF MSISDN:42342: MSC conn use + dtap == 1 (0x2)
 DRLL Dispatching 04.08 message GSM48_MT_MM_TMSI_REALL_COMPL (0x5:0x1b)
 DMM TMSI Reallocation Completed. Subscriber: MSISDN:42342
 DVLR vlr_lu_fsm(901700000010650){VLR_ULA_S_WAIT_LU_COMPL}: Received Event VLR_ULA_E_NEW_TMSI_ACK
@@ -1255,25 +1264,28 @@ DVLR lu_compl_vlr_fsm(901700000010650){LU_COMPL_VLR_S_DONE}: Removing from paren
 DVLR lu_compl_vlr_fsm(901700000010650){LU_COMPL_VLR_S_DONE}: Freeing instance
 DVLR lu_compl_vlr_fsm(901700000010650){LU_COMPL_VLR_S_DONE}: Deallocated
 DVLR vlr_lu_fsm(901700000010650){VLR_ULA_S_WAIT_LU_COMPL}: state_chg to VLR_ULA_S_DONE
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_NEW}: Received Event SUBSCR_CONN_E_ACCEPTED
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_NEW}: state_chg to SUBSCR_CONN_S_ACCEPTED
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_ACCEPTED}: Received Event SUBSCR_CONN_E_RELEASE_WHEN_UNUSED
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_ACCEPTED}: subscr_conn_fsm_release_when_unused: releasing conn
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_ACCEPTED}: state_chg to SUBSCR_CONN_S_RELEASED
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_AUTH_CIPH}: Received Event SUBSCR_CONN_E_ACCEPTED
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_AUTH_CIPH}: state_chg to SUBSCR_CONN_S_ACCEPTED
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_ACCEPTED}: Received Event SUBSCR_CONN_E_UNUSED
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_ACCEPTED}: state_chg to SUBSCR_CONN_S_RELEASING
+DREF MSISDN:42342: MSC conn use + release == 2 (0x102)
+DREF VLR subscr MSISDN:42342 usage increases to: 3
+DREF VLR subscr MSISDN:42342 usage decreases to: 2
+- Iu Release --RAN_UTRAN_IU--> MS
+DREF MSISDN:42342: MSC conn use - release == 1 (0x2)
+DREF MSISDN:42342: MSC conn use - dtap == 0 (0x0)
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_RELEASING}: Received Event SUBSCR_CONN_E_UNUSED
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_RELEASING}: state_chg to SUBSCR_CONN_S_RELEASED
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_RELEASED}: Terminating (cause = OSMO_FSM_TERM_REGULAR)
 DVLR vlr_lu_fsm(901700000010650){VLR_ULA_S_DONE}: Terminating (cause = OSMO_FSM_TERM_PARENT)
 DVLR vlr_lu_fsm(901700000010650){VLR_ULA_S_DONE}: Removing from parent Subscr_Conn(901700000010650)
 DVLR vlr_lu_fsm(901700000010650){VLR_ULA_S_DONE}: fsm_lu_cleanup called with cause OSMO_FSM_TERM_PARENT
 DVLR vlr_lu_fsm(901700000010650){VLR_ULA_S_DONE}: Freeing instance
 DVLR vlr_lu_fsm(901700000010650){VLR_ULA_S_DONE}: Deallocated
-DMM msc_subscr_conn_close(vsub=MSISDN:42342, cause=2): no conn fsm, releasing directly without release event.
-- Iu Release --RAN_UTRAN_IU--> MS
-DREF MSISDN:42342: MSC conn use - fsm == 1 (0x2)
+DRLL MSISDN:42342: Freeing subscriber connection
+DREF VLR subscr MSISDN:42342 usage decreases to: 1
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_RELEASED}: Freeing instance
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_RELEASED}: Deallocated
-DREF MSISDN:42342: MSC conn use - dtap == 0 (0x0)
-DRLL subscr MSISDN:42342: Freeing subscriber connection
-DREF VLR subscr MSISDN:42342 usage decreases to: 1
   iu_release_sent == 1
 - LU was successful, and the conn has already been closed
   llist_count(&net->subscr_conns) == 0
@@ -1286,13 +1298,10 @@ DREF VLR subscr MSISDN:42342 usage decreases to: 1
 - after a while, a new conn sends a CM Service Request. VLR responds with Auth Req, 2nd auth vector
   MSC <--RAN_UTRAN_IU-- MS: GSM48_MT_MM_CM_SERV_REQ
   new conn
+DMM Subscr_Conn{SUBSCR_CONN_S_NEW}: Allocated
 DREF unknown: MSC conn use + compl_l3 == 1 (0x1)
 DRLL Dispatching 04.08 message GSM48_MT_MM_CM_SERV_REQ (0x5:0x24)
 DMM <- CM SERVICE REQUEST serv_type=0x08 MI(IMSI)=901700000010650
-DREF unknown: MSC conn use + fsm == 2 (0x5)
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_INIT}: Allocated
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_INIT}: Received Event SUBSCR_CONN_E_START
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_INIT}: state_chg to SUBSCR_CONN_S_NEW
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_NEW}: Updated ID from CM_SERVICE_REQ
 DVLR Process_Access_Request_VLR(901700000010650){PR_ARQ_S_INIT}: Allocated
 DVLR Process_Access_Request_VLR(901700000010650){PR_ARQ_S_INIT}: is child of Subscr_Conn(901700000010650)
@@ -1312,15 +1321,18 @@ DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_WAIT_RESP}: got auth tuple: us
 - ...autn=1843a645b98d00005b2d666af46c45d9
 - ...expecting res=7db47cf7f81e4dc7
 DREF VLR subscr MSISDN:42342 usage decreases to: 2
-DMM MSISDN:42342: subscr_conn_release_when_unused: conn still being established (SUBSCR_CONN_S_NEW)
-DREF MSISDN:42342: MSC conn use - compl_l3 == 1 (0x4)
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_NEW}: Received Event SUBSCR_CONN_E_COMPLETE_LAYER_3
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_NEW}: state_chg to SUBSCR_CONN_S_AUTH_CIPH
+DREF MSISDN:42342: MSC conn use - compl_l3 == 0 (0x0)
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_AUTH_CIPH}: Received Event SUBSCR_CONN_E_UNUSED
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_AUTH_CIPH}: Awaiting results for Auth+Ciph, overruling event SUBSCR_CONN_E_UNUSED
   cm_service_result_sent == 0
   auth_request_sent == 1
 - needs auth, not yet accepted
 msc_subscr_conn_is_accepted() == false
 - MS sends Authen Response, VLR accepts and sends SecurityModeControl
   MSC <--RAN_UTRAN_IU-- MS: GSM48_MT_MM_AUTH_RESP
-DREF MSISDN:42342: MSC conn use + dtap == 2 (0x6)
+DREF MSISDN:42342: MSC conn use + dtap == 1 (0x2)
 DRLL Dispatching 04.08 message GSM48_MT_MM_AUTH_RESP (0x5:0x14)
 DMM MSISDN:42342: MM UMTS AUTHENTICATION RESPONSE (res = 7db47cf7f81e4dc7)
 DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_WAIT_RESP}: Received Event VLR_AUTH_E_MS_AUTH_RESP
@@ -1340,8 +1352,9 @@ DMM -> SECURITY MODE CONTROL MSISDN:42342
 - sending SecurityModeControl for UE ctx 42 send_ck=0 new_key=1
 - ...ik=1159ec926a50e98c034a6b7d7c9f418d
 DVLR Process_Access_Request_VLR(901700000010650){PR_ARQ_S_WAIT_AUTH}: state_chg to PR_ARQ_S_WAIT_CIPH
-DMM MSISDN:42342: subscr_conn_release_when_unused: conn still being established (SUBSCR_CONN_S_NEW)
-DREF MSISDN:42342: MSC conn use - dtap == 1 (0x4)
+DREF MSISDN:42342: MSC conn use - dtap == 0 (0x0)
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_AUTH_CIPH}: Received Event SUBSCR_CONN_E_UNUSED
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_AUTH_CIPH}: Awaiting results for Auth+Ciph, overruling event SUBSCR_CONN_E_UNUSED
   security_mode_ctrl_sent == 1
   cm_service_result_sent == 0
 - MS sends SecurityModeControl acceptance, VLR accepts; above Ciphering is an implicit CM Service Accept
@@ -1357,23 +1370,23 @@ DVLR Process_Access_Request_VLR(901700000010650){PR_ARQ_S_WAIT_CIPH}: _proc_arq_
 DVLR Process_Access_Request_VLR(901700000010650){PR_ARQ_S_WAIT_CIPH}: proc_arq_fsm_done(VLR_PR_ARQ_RES_PASSED)
 DVLR Process_Access_Request_VLR(901700000010650){PR_ARQ_S_WAIT_CIPH}: state_chg to PR_ARQ_S_DONE
 DVLR Process_Access_Request_VLR(901700000010650){PR_ARQ_S_DONE}: Process Access Request result: VLR_PR_ARQ_RES_PASSED
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_NEW}: Received Event SUBSCR_CONN_E_ACCEPTED
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_NEW}: state_chg to SUBSCR_CONN_S_ACCEPTED
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_ACCEPTED}: received_cm_service_request = true
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_ACCEPTED}: Received Event SUBSCR_CONN_E_RELEASE_WHEN_UNUSED
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_ACCEPTED}: subscr_conn_fsm_release_when_unused: still awaiting first request after a CM Service Request
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_AUTH_CIPH}: Received Event SUBSCR_CONN_E_ACCEPTED
+DREF MSISDN:42342: MSC conn use + cm_service == 1 (0x8)
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_AUTH_CIPH}: state_chg to SUBSCR_CONN_S_ACCEPTED
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_ACCEPTED}: subscr_conn_fsm_has_active_transactions: still awaiting first request after a CM Service Request
   cm_service_result_sent == 0
 ---
 - a call is initiated
 - SETUP gets forwarded to MNCC
   MSC <--RAN_UTRAN_IU-- MS: GSM48_MT_CC_SETUP
-DREF MSISDN:42342: MSC conn use + dtap == 2 (0x6)
+DREF MSISDN:42342: MSC conn use + dtap == 2 (0xa)
 DRLL Dispatching 04.08 message GSM48_MT_CC_SETUP (0x3:0x5)
 DCC Unknown transaction ID 8, creating new trans.
 DCC (ti 08 sub MSISDN:42342 callref 80000002) New transaction
 DREF VLR subscr MSISDN:42342 usage increases to: 3
-DREF MSISDN:42342: MSC conn use + trans_cc == 3 (0xe)
+DREF MSISDN:42342: MSC conn use + trans_cc == 3 (0x1a)
 DMM MSISDN:42342: rx msg GSM48_MT_CC_SETUP: received_cm_service_request changes to false
+DREF MSISDN:42342: MSC conn use - cm_service == 2 (0x12)
 DCC (ti 08 sub MSISDN:42342) new state NULL -> INITIATED
 DCC Subscriber MSISDN:42342 (42342) sends SETUP to 123
 DMNCC transmit message MNCC_SETUP_IND
@@ -1381,9 +1394,7 @@ DCC Sending 'MNCC_SETUP_IND' to MNCC.
   MSC --> MNCC: callref 0x80000002: MNCC_SETUP_IND
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_ACCEPTED}: Received Event SUBSCR_CONN_E_COMMUNICATING
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_ACCEPTED}: state_chg to SUBSCR_CONN_S_COMMUNICATING
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: Received Event SUBSCR_CONN_E_RELEASE_WHEN_UNUSED
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: subscr_conn_fsm_release_when_unused: connection still has active transaction: CC
-DREF MSISDN:42342: MSC conn use - dtap == 2 (0xc)
+DREF MSISDN:42342: MSC conn use - dtap == 1 (0x10)
 - MNCC says that's fine
 DMNCC receive message MNCC_CALL_PROC_REQ
 DCC (ti 08 sub 42342) Received 'MNCC_CALL_PROC_REQ' from MNCC in state 1 (INITIATED)
@@ -1406,7 +1417,7 @@ DMSC msc_tx 2 bytes to MSISDN:42342 via RAN_UTRAN_IU
 - DTAP --RAN_UTRAN_IU--> MS: GSM48_MT_CC_RELEASE: 832d
 - DTAP matches expected message
   MSC <--RAN_UTRAN_IU-- MS: GSM48_MT_CC_RELEASE_COMPL
-DREF MSISDN:42342: MSC conn use + dtap == 3 (0xe)
+DREF MSISDN:42342: MSC conn use + dtap == 2 (0x12)
 DRLL Dispatching 04.08 message GSM48_MT_CC_RELEASE_COMPL (0x3:0x2a)
 DCC stopping pending timer T308
 DMNCC transmit message MNCC_REL_CNF
@@ -1415,23 +1426,27 @@ DCC Sending 'MNCC_REL_CNF' to MNCC.
   MS <--Call Release-- MSC: subscr=MSISDN:42342 callref=0x0
 DCC (ti 08 sub MSISDN:42342) new state RELEASE_REQ -> NULL
 DREF VLR subscr MSISDN:42342 usage decreases to: 2
-DREF MSISDN:42342: MSC conn use - trans_cc == 2 (0x6)
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: Received Event SUBSCR_CONN_E_RELEASE_WHEN_UNUSED
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: subscr_conn_fsm_release_when_unused: releasing conn
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: state_chg to SUBSCR_CONN_S_RELEASED
+DREF MSISDN:42342: MSC conn use - trans_cc == 1 (0x2)
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: Received Event SUBSCR_CONN_E_COMMUNICATING
+DREF MSISDN:42342: MSC conn use - dtap == 0 (0x0)
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: Received Event SUBSCR_CONN_E_UNUSED
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: state_chg to SUBSCR_CONN_S_RELEASING
+DREF MSISDN:42342: MSC conn use + release == 1 (0x100)
+DREF VLR subscr MSISDN:42342 usage increases to: 3
+DREF VLR subscr MSISDN:42342 usage decreases to: 2
+- Iu Release --RAN_UTRAN_IU--> MS
+DREF MSISDN:42342: MSC conn use - release == 0 (0x0)
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_RELEASING}: Received Event SUBSCR_CONN_E_UNUSED
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_RELEASING}: state_chg to SUBSCR_CONN_S_RELEASED
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_RELEASED}: Terminating (cause = OSMO_FSM_TERM_REGULAR)
 DVLR Process_Access_Request_VLR(901700000010650){PR_ARQ_S_DONE}: Terminating (cause = OSMO_FSM_TERM_PARENT)
 DVLR Process_Access_Request_VLR(901700000010650){PR_ARQ_S_DONE}: Removing from parent Subscr_Conn(901700000010650)
 DVLR Process_Access_Request_VLR(901700000010650){PR_ARQ_S_DONE}: Freeing instance
 DVLR Process_Access_Request_VLR(901700000010650){PR_ARQ_S_DONE}: Deallocated
-DMM msc_subscr_conn_close(vsub=MSISDN:42342, cause=2): no conn fsm, releasing directly without release event.
-- Iu Release --RAN_UTRAN_IU--> MS
-DREF MSISDN:42342: MSC conn use - fsm == 1 (0x2)
+DRLL MSISDN:42342: Freeing subscriber connection
+DREF VLR subscr MSISDN:42342 usage decreases to: 1
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_RELEASED}: Freeing instance
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_RELEASED}: Deallocated
-DREF MSISDN:42342: MSC conn use - dtap == 0 (0x0)
-DRLL subscr MSISDN:42342: Freeing subscriber connection
-DREF VLR subscr MSISDN:42342 usage decreases to: 1
   llist_count(&net->subscr_conns) == 0
 DREF freeing VLR subscr MSISDN:42342
 ===== test_call_mo_to_unknown: SUCCESS
@@ -1444,12 +1459,9 @@ talloc_total_blocks(tall_bsc_ctx) == 12
 - Location Update request causes a GSUP Send Auth Info request to HLR
   MSC <--RAN_UTRAN_IU-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
   new conn
+DMM Subscr_Conn{SUBSCR_CONN_S_NEW}: Allocated
 DREF unknown: MSC conn use + compl_l3 == 1 (0x1)
 DRLL Dispatching 04.08 message GSM48_MT_MM_LOC_UPD_REQUEST (0x5:0x8)
-DREF unknown: MSC conn use + fsm == 2 (0x5)
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_INIT}: Allocated
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_INIT}: Received Event SUBSCR_CONN_E_START
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_INIT}: state_chg to SUBSCR_CONN_S_NEW
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_NEW}: Updated ID from LU
 DMM LOCATION UPDATING REQUEST: MI(IMSI)=901700000010650 type=NORMAL
 DMM LU/new-LAC: 23/23
@@ -1470,8 +1482,11 @@ DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_NEEDS_AUTH}: Received Event VL
 DVLR GSUP tx: 08010809710000000156f0
 GSUP --> HLR: OSMO_GSUP_MSGT_SEND_AUTH_INFO_REQUEST: 08010809710000000156f0
 DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_NEEDS_AUTH}: state_chg to VLR_SUB_AS_NEEDS_AUTH_WAIT_AI
-DMM IMSI:901700000010650: subscr_conn_release_when_unused: conn still being established (SUBSCR_CONN_S_NEW)
-DREF IMSI:901700000010650: MSC conn use - compl_l3 == 1 (0x4)
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_NEW}: Received Event SUBSCR_CONN_E_COMPLETE_LAYER_3
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_NEW}: state_chg to SUBSCR_CONN_S_AUTH_CIPH
+DREF IMSI:901700000010650: MSC conn use - compl_l3 == 0 (0x0)
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_AUTH_CIPH}: Received Event SUBSCR_CONN_E_UNUSED
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_AUTH_CIPH}: Awaiting results for Auth+Ciph, overruling event SUBSCR_CONN_E_UNUSED
   lu_result_sent == 0
 - from HLR, rx _SEND_AUTH_INFO_RESULT; VLR sends Auth Req to MS
 <-- GSUP rx OSMO_GSUP_MSGT_SEND_AUTH_INFO_RESULT: 0a010809710000000156f00362201039fa2f4e3d523d8619a73b4f65c3e14d21049b36efdf2208059a4f668f6fbe39231027497388b6cb044648f396aa155b95ef2410f64735036e5871319c679f4742a75ea125108704f5ba55f30000d2ee44b22c8ea9192708e229c19e791f2e4103622010c187a53a5e6b9d573cac7c74451fd46d210485aa31302208d3d50a000bf04f6e23101159ec926a50e98c034a6b7d7c9f418d2410df3a03d9ca5335641efc8e36d76cd20b25101843a645b98d00005b2d666af46c45d927087db47cf7f81e4dc703622010efa9c29a9742148d5c9070348716e1bb210469d5f9fb22083df176f0c29f1a3d2310eb50e770ddcc3060101d2f43b6c2b884241076542abce5ff9345b0e8947f4c6e019c2510f9375e6d41e1000096e7fe4ff1c27e392708706f996719ba609c03622010f023d5a3b24726e0631b64b3840f82532104d570c03f2208ec011be8919883d62310c4e58af4ba43f3bcd904e16984f086d724100593f65e752e5cb7f473862bda05aa0a2510541ff1f077270000c5ea00d658bc7e9a27083fd26072eaa2a04d036220102f8f90c780d6a9c0c53da7ac57b6707e2104b072446f220823f39f9f425ad6e6231065af0527fda95b0dc5ae4aa515cdf32f2410537c3b35a3b13b08d08eeb28098f45cc25104bf4e564f75300009bc796706bc6574427080edb0eadbea94ac2
@@ -1491,7 +1506,7 @@ DREF VLR subscr IMSI:901700000010650 usage decreases to: 1
   lu_result_sent == 0
 - MS sends Authen Response, VLR accepts and sends SecurityModeControl
   MSC <--RAN_UTRAN_IU-- MS: GSM48_MT_MM_AUTH_RESP
-DREF IMSI:901700000010650: MSC conn use + dtap == 2 (0x6)
+DREF IMSI:901700000010650: MSC conn use + dtap == 1 (0x2)
 DRLL Dispatching 04.08 message GSM48_MT_MM_AUTH_RESP (0x5:0x14)
 DMM IMSI:901700000010650: MM UMTS AUTHENTICATION RESPONSE (res = e229c19e791f2e41)
 DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_WAIT_RESP}: Received Event VLR_AUTH_E_MS_AUTH_RESP
@@ -1510,8 +1525,9 @@ DMM -> SECURITY MODE CONTROL IMSI:901700000010650
 - sending SecurityModeControl for UE ctx 42 send_ck=0 new_key=1
 - ...ik=27497388b6cb044648f396aa155b95ef
 DVLR vlr_lu_fsm(901700000010650){VLR_ULA_S_WAIT_AUTH}: state_chg to VLR_ULA_S_WAIT_CIPH
-DMM IMSI:901700000010650: subscr_conn_release_when_unused: conn still being established (SUBSCR_CONN_S_NEW)
-DREF IMSI:901700000010650: MSC conn use - dtap == 1 (0x4)
+DREF IMSI:901700000010650: MSC conn use - dtap == 0 (0x0)
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_AUTH_CIPH}: Received Event SUBSCR_CONN_E_UNUSED
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_AUTH_CIPH}: Awaiting results for Auth+Ciph, overruling event SUBSCR_CONN_E_UNUSED
   security_mode_ctrl_sent == 1
   lu_result_sent == 0
 - MS sends SecurityModeControl acceptance, VLR accepts and sends GSUP LU Req to HLR
@@ -1578,7 +1594,7 @@ DREF VLR subscr MSISDN:42342 usage decreases to: 1
 msc_subscr_conn_is_accepted() == false
 - MS sends TMSI Realloc Complete
   MSC <--RAN_UTRAN_IU-- MS: GSM48_MT_MM_TMSI_REALL_COMPL
-DREF MSISDN:42342: MSC conn use + dtap == 2 (0x6)
+DREF MSISDN:42342: MSC conn use + dtap == 1 (0x2)
 DRLL Dispatching 04.08 message GSM48_MT_MM_TMSI_REALL_COMPL (0x5:0x1b)
 DMM TMSI Reallocation Completed. Subscriber: MSISDN:42342
 DVLR vlr_lu_fsm(901700000010650){VLR_ULA_S_WAIT_LU_COMPL}: Received Event VLR_ULA_E_NEW_TMSI_ACK
@@ -1591,25 +1607,28 @@ DVLR lu_compl_vlr_fsm(901700000010650){LU_COMPL_VLR_S_DONE}: Removing from paren
 DVLR lu_compl_vlr_fsm(901700000010650){LU_COMPL_VLR_S_DONE}: Freeing instance
 DVLR lu_compl_vlr_fsm(901700000010650){LU_COMPL_VLR_S_DONE}: Deallocated
 DVLR vlr_lu_fsm(901700000010650){VLR_ULA_S_WAIT_LU_COMPL}: state_chg to VLR_ULA_S_DONE
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_NEW}: Received Event SUBSCR_CONN_E_ACCEPTED
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_NEW}: state_chg to SUBSCR_CONN_S_ACCEPTED
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_ACCEPTED}: Received Event SUBSCR_CONN_E_RELEASE_WHEN_UNUSED
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_ACCEPTED}: subscr_conn_fsm_release_when_unused: releasing conn
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_ACCEPTED}: state_chg to SUBSCR_CONN_S_RELEASED
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_AUTH_CIPH}: Received Event SUBSCR_CONN_E_ACCEPTED
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_AUTH_CIPH}: state_chg to SUBSCR_CONN_S_ACCEPTED
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_ACCEPTED}: Received Event SUBSCR_CONN_E_UNUSED
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_ACCEPTED}: state_chg to SUBSCR_CONN_S_RELEASING
+DREF MSISDN:42342: MSC conn use + release == 2 (0x102)
+DREF VLR subscr MSISDN:42342 usage increases to: 3
+DREF VLR subscr MSISDN:42342 usage decreases to: 2
+- Iu Release --RAN_UTRAN_IU--> MS
+DREF MSISDN:42342: MSC conn use - release == 1 (0x2)
+DREF MSISDN:42342: MSC conn use - dtap == 0 (0x0)
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_RELEASING}: Received Event SUBSCR_CONN_E_UNUSED
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_RELEASING}: state_chg to SUBSCR_CONN_S_RELEASED
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_RELEASED}: Terminating (cause = OSMO_FSM_TERM_REGULAR)
 DVLR vlr_lu_fsm(901700000010650){VLR_ULA_S_DONE}: Terminating (cause = OSMO_FSM_TERM_PARENT)
 DVLR vlr_lu_fsm(901700000010650){VLR_ULA_S_DONE}: Removing from parent Subscr_Conn(901700000010650)
 DVLR vlr_lu_fsm(901700000010650){VLR_ULA_S_DONE}: fsm_lu_cleanup called with cause OSMO_FSM_TERM_PARENT
 DVLR vlr_lu_fsm(901700000010650){VLR_ULA_S_DONE}: Freeing instance
 DVLR vlr_lu_fsm(901700000010650){VLR_ULA_S_DONE}: Deallocated
-DMM msc_subscr_conn_close(vsub=MSISDN:42342, cause=2): no conn fsm, releasing directly without release event.
-- Iu Release --RAN_UTRAN_IU--> MS
-DREF MSISDN:42342: MSC conn use - fsm == 1 (0x2)
+DRLL MSISDN:42342: Freeing subscriber connection
+DREF VLR subscr MSISDN:42342 usage decreases to: 1
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_RELEASED}: Freeing instance
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_RELEASED}: Deallocated
-DREF MSISDN:42342: MSC conn use - dtap == 0 (0x0)
-DRLL subscr MSISDN:42342: Freeing subscriber connection
-DREF VLR subscr MSISDN:42342 usage decreases to: 1
   iu_release_sent == 1
 - LU was successful, and the conn has already been closed
   llist_count(&net->subscr_conns) == 0
@@ -1622,13 +1641,10 @@ DREF VLR subscr MSISDN:42342 usage decreases to: 1
 - after a while, a new conn sends a CM Service Request. VLR responds with Auth Req, 2nd auth vector
   MSC <--RAN_UTRAN_IU-- MS: GSM48_MT_MM_CM_SERV_REQ
   new conn
+DMM Subscr_Conn{SUBSCR_CONN_S_NEW}: Allocated
 DREF unknown: MSC conn use + compl_l3 == 1 (0x1)
 DRLL Dispatching 04.08 message GSM48_MT_MM_CM_SERV_REQ (0x5:0x24)
 DMM <- CM SERVICE REQUEST serv_type=0x08 MI(IMSI)=901700000010650
-DREF unknown: MSC conn use + fsm == 2 (0x5)
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_INIT}: Allocated
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_INIT}: Received Event SUBSCR_CONN_E_START
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_INIT}: state_chg to SUBSCR_CONN_S_NEW
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_NEW}: Updated ID from CM_SERVICE_REQ
 DVLR Process_Access_Request_VLR(901700000010650){PR_ARQ_S_INIT}: Allocated
 DVLR Process_Access_Request_VLR(901700000010650){PR_ARQ_S_INIT}: is child of Subscr_Conn(901700000010650)
@@ -1648,15 +1664,18 @@ DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_WAIT_RESP}: got auth tuple: us
 - ...autn=1843a645b98d00005b2d666af46c45d9
 - ...expecting res=7db47cf7f81e4dc7
 DREF VLR subscr MSISDN:42342 usage decreases to: 2
-DMM MSISDN:42342: subscr_conn_release_when_unused: conn still being established (SUBSCR_CONN_S_NEW)
-DREF MSISDN:42342: MSC conn use - compl_l3 == 1 (0x4)
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_NEW}: Received Event SUBSCR_CONN_E_COMPLETE_LAYER_3
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_NEW}: state_chg to SUBSCR_CONN_S_AUTH_CIPH
+DREF MSISDN:42342: MSC conn use - compl_l3 == 0 (0x0)
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_AUTH_CIPH}: Received Event SUBSCR_CONN_E_UNUSED
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_AUTH_CIPH}: Awaiting results for Auth+Ciph, overruling event SUBSCR_CONN_E_UNUSED
   cm_service_result_sent == 0
   auth_request_sent == 1
 - needs auth, not yet accepted
 msc_subscr_conn_is_accepted() == false
 - MS sends Authen Response, VLR accepts and sends SecurityModeControl
   MSC <--RAN_UTRAN_IU-- MS: GSM48_MT_MM_AUTH_RESP
-DREF MSISDN:42342: MSC conn use + dtap == 2 (0x6)
+DREF MSISDN:42342: MSC conn use + dtap == 1 (0x2)
 DRLL Dispatching 04.08 message GSM48_MT_MM_AUTH_RESP (0x5:0x14)
 DMM MSISDN:42342: MM UMTS AUTHENTICATION RESPONSE (res = 7db47cf7f81e4dc7)
 DVLR VLR_Authenticate(901700000010650){VLR_SUB_AS_WAIT_RESP}: Received Event VLR_AUTH_E_MS_AUTH_RESP
@@ -1676,8 +1695,9 @@ DMM -> SECURITY MODE CONTROL MSISDN:42342
 - sending SecurityModeControl for UE ctx 42 send_ck=0 new_key=1
 - ...ik=1159ec926a50e98c034a6b7d7c9f418d
 DVLR Process_Access_Request_VLR(901700000010650){PR_ARQ_S_WAIT_AUTH}: state_chg to PR_ARQ_S_WAIT_CIPH
-DMM MSISDN:42342: subscr_conn_release_when_unused: conn still being established (SUBSCR_CONN_S_NEW)
-DREF MSISDN:42342: MSC conn use - dtap == 1 (0x4)
+DREF MSISDN:42342: MSC conn use - dtap == 0 (0x0)
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_AUTH_CIPH}: Received Event SUBSCR_CONN_E_UNUSED
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_AUTH_CIPH}: Awaiting results for Auth+Ciph, overruling event SUBSCR_CONN_E_UNUSED
   security_mode_ctrl_sent == 1
   cm_service_result_sent == 0
 - MS sends SecurityModeControl acceptance, VLR accepts; above Ciphering is an implicit CM Service Accept
@@ -1693,23 +1713,23 @@ DVLR Process_Access_Request_VLR(901700000010650){PR_ARQ_S_WAIT_CIPH}: _proc_arq_
 DVLR Process_Access_Request_VLR(901700000010650){PR_ARQ_S_WAIT_CIPH}: proc_arq_fsm_done(VLR_PR_ARQ_RES_PASSED)
 DVLR Process_Access_Request_VLR(901700000010650){PR_ARQ_S_WAIT_CIPH}: state_chg to PR_ARQ_S_DONE
 DVLR Process_Access_Request_VLR(901700000010650){PR_ARQ_S_DONE}: Process Access Request result: VLR_PR_ARQ_RES_PASSED
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_NEW}: Received Event SUBSCR_CONN_E_ACCEPTED
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_NEW}: state_chg to SUBSCR_CONN_S_ACCEPTED
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_ACCEPTED}: received_cm_service_request = true
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_ACCEPTED}: Received Event SUBSCR_CONN_E_RELEASE_WHEN_UNUSED
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_ACCEPTED}: subscr_conn_fsm_release_when_unused: still awaiting first request after a CM Service Request
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_AUTH_CIPH}: Received Event SUBSCR_CONN_E_ACCEPTED
+DREF MSISDN:42342: MSC conn use + cm_service == 1 (0x8)
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_AUTH_CIPH}: state_chg to SUBSCR_CONN_S_ACCEPTED
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_ACCEPTED}: subscr_conn_fsm_has_active_transactions: still awaiting first request after a CM Service Request
   cm_service_result_sent == 0
 ---
 - a call is initiated
 - SETUP gets forwarded to MNCC
   MSC <--RAN_UTRAN_IU-- MS: GSM48_MT_CC_SETUP
-DREF MSISDN:42342: MSC conn use + dtap == 2 (0x6)
+DREF MSISDN:42342: MSC conn use + dtap == 2 (0xa)
 DRLL Dispatching 04.08 message GSM48_MT_CC_SETUP (0x3:0x5)
 DCC Unknown transaction ID 8, creating new trans.
 DCC (ti 08 sub MSISDN:42342 callref 80000003) New transaction
 DREF VLR subscr MSISDN:42342 usage increases to: 3
-DREF MSISDN:42342: MSC conn use + trans_cc == 3 (0xe)
+DREF MSISDN:42342: MSC conn use + trans_cc == 3 (0x1a)
 DMM MSISDN:42342: rx msg GSM48_MT_CC_SETUP: received_cm_service_request changes to false
+DREF MSISDN:42342: MSC conn use - cm_service == 2 (0x12)
 DCC (ti 08 sub MSISDN:42342) new state NULL -> INITIATED
 DCC Subscriber MSISDN:42342 (42342) sends SETUP to 123
 DMNCC transmit message MNCC_SETUP_IND
@@ -1717,9 +1737,7 @@ DCC Sending 'MNCC_SETUP_IND' to MNCC.
   MSC --> MNCC: callref 0x80000003: MNCC_SETUP_IND
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_ACCEPTED}: Received Event SUBSCR_CONN_E_COMMUNICATING
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_ACCEPTED}: state_chg to SUBSCR_CONN_S_COMMUNICATING
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: Received Event SUBSCR_CONN_E_RELEASE_WHEN_UNUSED
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: subscr_conn_fsm_release_when_unused: connection still has active transaction: CC
-DREF MSISDN:42342: MSC conn use - dtap == 2 (0xc)
+DREF MSISDN:42342: MSC conn use - dtap == 1 (0x10)
 - MNCC says that's fine
 DMNCC receive message MNCC_CALL_PROC_REQ
 DCC (ti 08 sub 42342) Received 'MNCC_CALL_PROC_REQ' from MNCC in state 1 (INITIATED)
@@ -1750,19 +1768,22 @@ DCC Sending 'MNCC_REL_CNF' to MNCC.
   MSC --> MNCC: callref 0x80000003: MNCC_REL_CNF
 DCC (ti 08 sub MSISDN:42342) new state RELEASE_REQ -> NULL
 DREF VLR subscr MSISDN:42342 usage decreases to: 2
-DREF MSISDN:42342: MSC conn use - trans_cc == 1 (0x4)
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: Received Event SUBSCR_CONN_E_RELEASE_WHEN_UNUSED
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: subscr_conn_fsm_release_when_unused: releasing conn
-DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: state_chg to SUBSCR_CONN_S_RELEASED
+DREF MSISDN:42342: MSC conn use - trans_cc == 0 (0x0)
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: Received Event SUBSCR_CONN_E_UNUSED
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_COMMUNICATING}: state_chg to SUBSCR_CONN_S_RELEASING
+DREF MSISDN:42342: MSC conn use + release == 1 (0x100)
+DREF VLR subscr MSISDN:42342 usage increases to: 3
+DREF VLR subscr MSISDN:42342 usage decreases to: 2
+- Iu Release --RAN_UTRAN_IU--> MS
+DREF MSISDN:42342: MSC conn use - release == 0 (0x0)
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_RELEASING}: Received Event SUBSCR_CONN_E_UNUSED
+DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_RELEASING}: state_chg to SUBSCR_CONN_S_RELEASED
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_RELEASED}: Terminating (cause = OSMO_FSM_TERM_REGULAR)
 DVLR Process_Access_Request_VLR(901700000010650){PR_ARQ_S_DONE}: Terminating (cause = OSMO_FSM_TERM_PARENT)
 DVLR Process_Access_Request_VLR(901700000010650){PR_ARQ_S_DONE}: Removing from parent Subscr_Conn(901700000010650)
 DVLR Process_Access_Request_VLR(901700000010650){PR_ARQ_S_DONE}: Freeing instance
 DVLR Process_Access_Request_VLR(901700000010650){PR_ARQ_S_DONE}: Deallocated
-DMM msc_subscr_conn_close(vsub=MSISDN:42342, cause=2): no conn fsm, releasing directly without release event.
-- Iu Release --RAN_UTRAN_IU--> MS
-DREF MSISDN:42342: MSC conn use - fsm == 0 (0x0)
-DRLL subscr MSISDN:42342: Freeing subscriber connection
+DRLL MSISDN:42342: Freeing subscriber connection
 DREF VLR subscr MSISDN:42342 usage decreases to: 1
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_RELEASED}: Freeing instance
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_RELEASED}: Deallocated
