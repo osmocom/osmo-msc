@@ -225,7 +225,7 @@ static void subscr_conn_fsm_cleanup(struct osmo_fsm_inst *fi,
 
 	if (!conn)
 		return;
-	conn->conn_fsm = NULL;
+	conn->fi = NULL;
  	msc_subscr_conn_close(conn, cause);
 	msc_subscr_conn_put(conn, MSC_CONN_USE_FSM);
 }
@@ -329,7 +329,7 @@ int msc_create_conn_fsm(struct gsm_subscriber_connection *conn, const char *id)
 	struct osmo_fsm_inst *fi;
 	OSMO_ASSERT(conn);
 
-	if (conn->conn_fsm) {
+	if (conn->fi) {
 		LOGP(DMM, LOGL_ERROR,
 		     "%s: Error: connection already in use\n", id);
 		return -EINVAL;
@@ -349,8 +349,8 @@ int msc_create_conn_fsm(struct gsm_subscriber_connection *conn, const char *id)
 		     "%s: Failed to allocate subscr conn master FSM\n", id);
 		return -ENOMEM;
 	}
-	conn->conn_fsm = fi;
-	osmo_fsm_inst_dispatch(conn->conn_fsm, SUBSCR_CONN_E_START, NULL);
+	conn->fi = fi;
+	osmo_fsm_inst_dispatch(conn->fi, SUBSCR_CONN_E_START, NULL);
 	return 0;
 }
 
@@ -360,10 +360,10 @@ bool msc_subscr_conn_is_accepted(const struct gsm_subscriber_connection *conn)
 		return false;
 	if (!conn->vsub)
 		return false;
-	if (!conn->conn_fsm)
+	if (!conn->fi)
 		return false;
-	if (!(conn->conn_fsm->state == SUBSCR_CONN_S_ACCEPTED
-	      || conn->conn_fsm->state == SUBSCR_CONN_S_COMMUNICATING))
+	if (!(conn->fi->state == SUBSCR_CONN_S_ACCEPTED
+	      || conn->fi->state == SUBSCR_CONN_S_COMMUNICATING))
 		return false;
 	return true;
 }
@@ -374,8 +374,8 @@ void msc_subscr_conn_communicating(struct gsm_subscriber_connection *conn)
 	/* This function is called to indicate that *some* communication is happening with the phone.
 	 * Late in the process, that may be a Release Confirm and the FSM and conn are already in
 	 * teardown. No need to signal SUBSCR_CONN_E_COMMUNICATING then. */
-	if (conn->conn_fsm)
-		osmo_fsm_inst_dispatch(conn->conn_fsm, SUBSCR_CONN_E_COMMUNICATING, NULL);
+	if (conn->fi)
+		osmo_fsm_inst_dispatch(conn->fi, SUBSCR_CONN_E_COMMUNICATING, NULL);
 }
 
 void msc_subscr_conn_init(void)

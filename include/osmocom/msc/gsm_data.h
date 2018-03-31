@@ -75,6 +75,9 @@ struct gsm_subscriber_connection {
 	/* global linked list of subscriber_connections */
 	struct llist_head entry;
 
+	/* FSM instance to control the subscriber connection's permissions and lifetime. */
+	struct osmo_fsm_inst *fi;
+
 	/* usage count. If this drops to zero, we start the release
 	 * towards A/Iu */
 	uint32_t use_count;
@@ -91,8 +94,6 @@ struct gsm_subscriber_connection {
 	uint8_t expire_timer_stopped;
 	/* SMS helpers for libmsc */
 	uint8_t next_rp_ref;
-
-	struct osmo_fsm_inst *conn_fsm;
 
 	/* Are we part of a special "silent" call */
 	int silent_call;

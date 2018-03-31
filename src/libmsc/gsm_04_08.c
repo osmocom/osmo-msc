@@ -393,7 +393,7 @@ int mm_rx_loc_upd_req(struct gsm_subscriber_connection *conn, struct msgb *msg)
 	DEBUGP(DMM, "LU/new-LAC: %u/%u\n", old_lai.lac, new_lai.lac);
 
 	is_utran = (conn->via_ran == RAN_UTRAN_IU);
-	lu_fsm = vlr_loc_update(conn->conn_fsm,
+	lu_fsm = vlr_loc_update(conn->fi,
 				SUBSCR_CONN_E_ACCEPTED,
 				SUBSCR_CONN_E_CN_CLOSE,
 				(void*)&conn_from_lu,
@@ -759,7 +759,7 @@ int gsm48_rx_mm_serv_req(struct gsm_subscriber_connection *conn, struct msgb *ms
 	memcpy(conn->classmark.classmark2, classmark2, classmark2_len);
 	conn->classmark.classmark2_len = classmark2_len;
 
-	if (conn->conn_fsm) {
+	if (conn->fi) {
 		if (msc_subscr_conn_is_accepted(conn))
 			return cm_serv_reuse_conn(conn, mi-1);
 		LOGP(DMM, LOGL_ERROR, "%s: connection already in use\n",
@@ -776,7 +776,7 @@ int gsm48_rx_mm_serv_req(struct gsm_subscriber_connection *conn, struct msgb *ms
 	}
 
 	is_utran = (conn->via_ran == RAN_UTRAN_IU);
-	vlr_proc_acc_req(conn->conn_fsm,
+	vlr_proc_acc_req(conn->fi,
 			 SUBSCR_CONN_E_ACCEPTED,
 			 SUBSCR_CONN_E_CN_CLOSE,
 			 (void*)&conn_from_cm_service_req,
@@ -1181,7 +1181,7 @@ static int gsm48_rx_rr_pag_resp(struct gsm_subscriber_connection *conn, struct m
 	conn->classmark.classmark2_len = *classmark2_lv;
 
 	is_utran = (conn->via_ran == RAN_UTRAN_IU);
-	vlr_proc_acc_req(conn->conn_fsm,
+	vlr_proc_acc_req(conn->fi,
 			 SUBSCR_CONN_E_ACCEPTED,
 			 SUBSCR_CONN_E_CN_CLOSE,
 			 (void*)&conn_from_paging_resp,

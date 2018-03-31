@@ -36,8 +36,8 @@ static void test_early_stage()
 
 	btw("conn_fsm present, in state NEW");
 	OSMO_ASSERT(msc_create_conn_fsm(g_conn, "test") == 0);
-	OSMO_ASSERT(g_conn->conn_fsm);
-	OSMO_ASSERT(g_conn->conn_fsm->state == SUBSCR_CONN_S_NEW);
+	OSMO_ASSERT(g_conn->fi);
+	OSMO_ASSERT(g_conn->fi->state == SUBSCR_CONN_S_NEW);
 	EXPECT_ACCEPTED(false);
 
 	thwart_rx_non_initial_requests();
@@ -48,13 +48,13 @@ static void test_early_stage()
 	OSMO_ASSERT(g_conn->vsub);
 	/* mark as silent call so it sticks around */
 	g_conn->silent_call = 1;
-	osmo_fsm_inst_state_chg(g_conn->conn_fsm, SUBSCR_CONN_S_ACCEPTED, 0, 0);
+	osmo_fsm_inst_state_chg(g_conn->fi, SUBSCR_CONN_S_ACCEPTED, 0, 0);
 	EXPECT_CONN_COUNT(1);
 	EXPECT_ACCEPTED(true);
 
 	btw("CLOSE event marks conn_fsm as released and frees the conn");
 	expect_bssap_clear();
-	osmo_fsm_inst_dispatch(g_conn->conn_fsm, SUBSCR_CONN_E_CN_CLOSE, NULL);
+	osmo_fsm_inst_dispatch(g_conn->fi, SUBSCR_CONN_E_CN_CLOSE, NULL);
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 	EXPECT_CONN_COUNT(0);
 

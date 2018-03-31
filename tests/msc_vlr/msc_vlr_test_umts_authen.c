@@ -196,7 +196,7 @@ static void _test_umts_authen(enum ran_type via_ran)
 		     "03575886" /* classmark 2 */
 		     "089910070000106005" /* IMSI */);
 	OSMO_ASSERT(g_conn);
-	OSMO_ASSERT(g_conn->conn_fsm);
+	OSMO_ASSERT(g_conn->fi);
 	OSMO_ASSERT(g_conn->vsub);
 	VERBOSE_ASSERT(cm_service_result_sent, == RES_NONE, "%d");
 	VERBOSE_ASSERT(auth_request_sent, == true, "%d");

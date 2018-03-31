@@ -88,16 +88,16 @@ void subscr_conn_release_when_unused(struct gsm_subscriber_connection *conn)
 {
 	if (!conn)
 		return;
-	if (!conn->conn_fsm)
+	if (!conn->fi)
 		return;
-	if (!(conn->conn_fsm->state == SUBSCR_CONN_S_ACCEPTED
-	      || conn->conn_fsm->state == SUBSCR_CONN_S_COMMUNICATING)) {
+	if (!(conn->fi->state == SUBSCR_CONN_S_ACCEPTED
+	      || conn->fi->state == SUBSCR_CONN_S_COMMUNICATING)) {
 		DEBUGP(DMM, "%s: %s: conn still being established (%s)\n",
 		       vlr_subscr_name(conn->vsub), __func__,
-		       osmo_fsm_inst_state_name(conn->conn_fsm));
+		       osmo_fsm_inst_state_name(conn->fi));
 		return;
 	}
-	osmo_fsm_inst_dispatch(conn->conn_fsm, SUBSCR_CONN_E_RELEASE_WHEN_UNUSED, NULL);
+	osmo_fsm_inst_dispatch(conn->fi, SUBSCR_CONN_E_RELEASE_WHEN_UNUSED, NULL);
 }
 
 /* receive a Level 3 Complete message and return MSC_CONN_ACCEPT or
@@ -110,7 +110,7 @@ int msc_compl_l3(struct gsm_subscriber_connection *conn,
 
 	subscr_conn_release_when_unused(conn);
 
-	/* If this should be kept, the conn->conn_fsm has placed a use_count */
+	/* If this should be kept, the conn->fi has placed a use_count */
 	msc_subscr_conn_put(conn, MSC_CONN_USE_COMPL_L3);
 
 	/* Always return acceptance, because even if the conn was not accepted,
@@ -268,11 +268,11 @@ void msc_subscr_con_cleanup(struct gsm_subscriber_connection *conn)
 		DEBUGP(DRLL, "Freeing subscriber connection"
 		       " with NULL subscriber\n");
 
-	if (!conn->conn_fsm)
+	if (!conn->fi)
 		return;
 
-	osmo_fsm_inst_term(conn->conn_fsm,
-			   (conn->conn_fsm->state == SUBSCR_CONN_S_RELEASED)
+	osmo_fsm_inst_term(conn->fi,
+			   (conn->fi->state == SUBSCR_CONN_S_RELEASED)
 				? OSMO_FSM_TERM_REGULAR
 				: OSMO_FSM_TERM_ERROR,
 			   NULL);
@@ -322,8 +322,8 @@ static void msc_subscr_conn_release_all(struct gsm_subscriber_connection *conn, 
 	}
 }
 
-/* If the conn->conn_fsm is still present, dispatch SUBSCR_CONN_E_CN_CLOSE
- * event to gracefully terminate the connection. If the conn_fsm is already
+/* If the conn->fi is still present, dispatch SUBSCR_CONN_E_CN_CLOSE
+ * event to gracefully terminate the connection. If the fi is already
  * cleared, call msc_subscr_conn_release_all() to take release actions.
  * \param cause  a GSM_CAUSE_* constant, e.g. GSM_CAUSE_AUTH_FAILED.
  */
@@ -338,22 +338,22 @@ void msc_subscr_conn_close(struct gsm_subscriber_connection *conn,
 		       vlr_subscr_name(conn->vsub), cause);
 		return;
 	}
-	if (!conn->conn_fsm) {
+	if (!conn->fi) {
 		DEBUGP(DMM, "msc_subscr_conn_close(vsub=%s, cause=%u): no conn fsm,"
 		       " releasing directly without release event.\n",
 		       vlr_subscr_name(conn->vsub), cause);
-		/* In case of an IMSI Detach, we don't have conn_fsm. Release
+		/* In case of an IMSI Detach, we don't have fi. Release
 		 * anyway to ensure a timely Iu Release / BSSMAP Clear. */
 		msc_subscr_conn_release_all(conn, cause);
 		return;
 	}
-	if (conn->conn_fsm->state == SUBSCR_CONN_S_RELEASED) {
+	if (conn->fi->state == SUBSCR_CONN_S_RELEASED) {
 		DEBUGP(DMM, "msc_subscr_conn_close(vsub=%s, cause=%u):"
 		       " conn fsm already releasing, ignore.\n",
 		       vlr_subscr_name(conn->vsub), cause);
 		return;
 	}
-	osmo_fsm_inst_dispatch(conn->conn_fsm, SUBSCR_CONN_E_CN_CLOSE, &cause);
+	osmo_fsm_inst_dispatch(conn->fi, SUBSCR_CONN_E_CN_CLOSE, &cause);
 }
 
 /* increment the ref-count. Needs to be called by every user */

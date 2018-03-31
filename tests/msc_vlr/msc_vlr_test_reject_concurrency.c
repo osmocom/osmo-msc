@@ -109,7 +109,7 @@ static void _normal_cm_service_req()
 	cm_service_result_sent = RES_NONE;
 	ms_sends_msg("05247803305886089910070000006402");
 	OSMO_ASSERT(g_conn);
-	OSMO_ASSERT(g_conn->conn_fsm);
+	OSMO_ASSERT(g_conn->fi);
 	OSMO_ASSERT(g_conn->vsub);
 	VERBOSE_ASSERT(cm_service_result_sent, == RES_ACCEPT, "%d");
 	EXPECT_ACCEPTED(true);

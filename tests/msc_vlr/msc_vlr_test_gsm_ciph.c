@@ -101,7 +101,7 @@ static void test_ciph()
 	auth_request_expect_rand = "12aca96fb4ffdea5c985cbafa9b6e18b";
 	ms_sends_msg("05247803305886089910070000006402");
 	OSMO_ASSERT(g_conn);
-	OSMO_ASSERT(g_conn->conn_fsm);
+	OSMO_ASSERT(g_conn->fi);
 	OSMO_ASSERT(g_conn->vsub);
 	VERBOSE_ASSERT(auth_request_sent, == true, "%d");
 	VERBOSE_ASSERT(cm_service_result_sent, == RES_NONE, "%d");
@@ -340,7 +340,7 @@ static void test_ciph_tmsi()
 	auth_request_expect_autn = NULL;
 	ms_sends_msg("05247803305886" "05f4" "03020100");
 	OSMO_ASSERT(g_conn);
-	OSMO_ASSERT(g_conn->conn_fsm);
+	OSMO_ASSERT(g_conn->fi);
 	OSMO_ASSERT(g_conn->vsub);
 	VERBOSE_ASSERT(auth_request_sent, == true, "%d");
 	VERBOSE_ASSERT(cm_service_result_sent, == RES_NONE, "%d");
@@ -934,7 +934,7 @@ static void test_gsm_ciph_in_umts_env()
 		     "03575886" /* classmark 2 */
 		     "089910070000106005" /* IMSI */);
 	OSMO_ASSERT(g_conn);
-	OSMO_ASSERT(g_conn->conn_fsm);
+	OSMO_ASSERT(g_conn->fi);
 	OSMO_ASSERT(g_conn->vsub);
 	VERBOSE_ASSERT(cm_service_result_sent, == RES_NONE, "%d");
 	VERBOSE_ASSERT(auth_request_sent, == true, "%d");

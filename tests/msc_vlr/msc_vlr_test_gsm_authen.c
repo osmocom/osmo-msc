@@ -99,7 +99,7 @@ static void test_gsm_authen()
 	cm_service_result_sent = RES_NONE;
 	ms_sends_msg("05247803305886089910070000006402");
 	OSMO_ASSERT(g_conn);
-	OSMO_ASSERT(g_conn->conn_fsm);
+	OSMO_ASSERT(g_conn->fi);
 	OSMO_ASSERT(g_conn->vsub);
 	VERBOSE_ASSERT(cm_service_result_sent, == RES_NONE, "%d");
 	VERBOSE_ASSERT(auth_request_sent, == true, "%d");
@@ -316,7 +316,7 @@ static void test_gsm_authen_tmsi()
 	cm_service_result_sent = RES_NONE;
 	ms_sends_msg("05247803305886" "05f4" "03020100");
 	OSMO_ASSERT(g_conn);
-	OSMO_ASSERT(g_conn->conn_fsm);
+	OSMO_ASSERT(g_conn->fi);
 	OSMO_ASSERT(g_conn->vsub);
 	VERBOSE_ASSERT(cm_service_result_sent, == RES_NONE, "%d");
 	VERBOSE_ASSERT(auth_request_sent, == true, "%d");
@@ -804,7 +804,7 @@ static void test_gsm_milenage_authen()
 		     "03305886" /* classmark 2: GSM phase 2 */
 		     "089910070000106005" /* IMSI */);
 	OSMO_ASSERT(g_conn);
-	OSMO_ASSERT(g_conn->conn_fsm);
+	OSMO_ASSERT(g_conn->fi);
 	OSMO_ASSERT(g_conn->vsub);
 	VERBOSE_ASSERT(cm_service_result_sent, == RES_NONE, "%d");
 	VERBOSE_ASSERT(auth_request_sent, == true, "%d");
