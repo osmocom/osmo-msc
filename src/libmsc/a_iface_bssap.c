@@ -554,11 +554,13 @@ static int rx_bssmap(struct osmo_sccp_user *scu, const struct a_conn_info *a_con
 	struct gsm_subscriber_connection *conn;
 	struct tlv_parsed tp;
 	int rc;
+	uint8_t msg_type;
 
 	if (msgb_l3len(msg) < 1) {
 		LOGP(DBSSAP, LOGL_NOTICE, "Error: No data received -- discarding message!\n");
 		return -1;
 	}
+	msg_type = msg->l3h[0];
 
 	rc = tlv_parse(&tp, gsm0808_att_tlvdef(), msg->l3h + 1, msgb_l3len(msg) - 1, 0, 0);
 	if (rc < 0) {
@@ -568,7 +570,7 @@ static int rx_bssmap(struct osmo_sccp_user *scu, const struct a_conn_info *a_con
 	}
 
 	/* Only message types allowed without a 'conn' */
-	switch (msg->l3h[0]) {
+	switch (msg_type) {
 	case BSS_MAP_MSG_COMPLETE_LAYER_3:
 		return bssmap_rx_l3_compl(scu, a_conn_info, msg, &tp);
 	case BSS_MAP_MSG_CLEAR_COMPLETE:
@@ -583,9 +585,9 @@ static int rx_bssmap(struct osmo_sccp_user *scu, const struct a_conn_info *a_con
 		return -EINVAL;
 	}
 
-	LOGPCONN(conn, LOGL_DEBUG, "Rx BSSMAP DT1 %s\n", gsm0808_bssmap_name(msg->l3h[0]));
+	LOGPCONN(conn, LOGL_DEBUG, "Rx BSSMAP DT1 %s\n", gsm0808_bssmap_name(msg_type));
 
-	switch (msg->l3h[0]) {
+	switch (msg_type) {
 	case BSS_MAP_MSG_CLEAR_RQST:
 		return bssmap_rx_clear_rqst(conn, msg, &tp);
 	case BSS_MAP_MSG_CLASSMARK_UPDATE:
@@ -601,7 +603,7 @@ static int rx_bssmap(struct osmo_sccp_user *scu, const struct a_conn_info *a_con
 	case BSS_MAP_MSG_ASSIGMENT_COMPLETE:
 		return bssmap_rx_ass_compl(conn, msg, &tp);
 	default:
-		LOGPCONN(conn, LOGL_ERROR, "Unimplemented msg type: %s\n", gsm0808_bssmap_name(msg->l3h[0]));
+		LOGPCONN(conn, LOGL_ERROR, "Unimplemented msg type: %s\n", gsm0808_bssmap_name(msg_type));
 		return -EINVAL;
 	}
 
