@@ -148,6 +148,7 @@ struct gsm_subscriber_connection {
 	struct {
 		struct ranap_ue_conn_ctx *ue_ctx;
 		uint8_t rab_id;
+		bool waiting_for_release_complete;
 	} iu;
 
 	struct {
@@ -164,6 +165,8 @@ struct gsm_subscriber_connection {
 		 * to reference the SCCP connection that is
 		 * associated with this subscriber connection */
 		uint32_t conn_id;
+
+		bool waiting_for_clear_complete;
 	} a;
 };
 

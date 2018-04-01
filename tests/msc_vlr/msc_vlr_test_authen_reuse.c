@@ -25,19 +25,6 @@
 
 #include "msc_vlr_tests.h"
 
-#define ASSERT_RELEASE_CLEAR(via_ran) \
-	switch (via_ran) { \
-	case RAN_GERAN_A: \
-		VERBOSE_ASSERT(bssap_clear_sent, == true, "%d"); \
-		break; \
-	case RAN_UTRAN_IU: \
-		VERBOSE_ASSERT(iu_release_sent, == true, "%d"); \
-		break; \
-	default: \
-		OSMO_ASSERT(false); \
-		break; \
-	}
-
 static void _test_auth_reuse(enum ran_type via_ran,
 			     int set_max_reuse_count,
 			     int loop_requests_without_hlr,
@@ -144,6 +131,7 @@ static void _test_auth_reuse(enum ran_type via_ran,
 	expect_release_clear(via_ran);
 	ms_sends_msg("055b");
 	ASSERT_RELEASE_CLEAR(via_ran);
+	bss_rnc_sends_release_clear_complete(via_ran);
 
 	btw("LU was successful, and the conn has already been closed");
 	EXPECT_CONN_COUNT(0);
@@ -195,6 +183,7 @@ static void _test_auth_reuse(enum ran_type via_ran,
 		ms_sends_msg("0b3b1c15a11302010002013b300b04010f0406aa510c061b017f0100");
 		OSMO_ASSERT(dtap_tx_confirmed);
 		ASSERT_RELEASE_CLEAR(via_ran);
+		bss_rnc_sends_release_clear_complete(via_ran);
 
 		btw("all requests serviced, conn has been released");
 		EXPECT_CONN_COUNT(0);
@@ -269,6 +258,7 @@ static void _test_auth_reuse(enum ran_type via_ran,
 		ms_sends_msg("0b3b1c15a11302010002013b300b04010f0406aa510c061b017f0100");
 		OSMO_ASSERT(dtap_tx_confirmed);
 		ASSERT_RELEASE_CLEAR(via_ran);
+		bss_rnc_sends_release_clear_complete(via_ran);
 
 		btw("all requests serviced, conn has been released");
 		EXPECT_CONN_COUNT(0);
@@ -279,6 +269,7 @@ static void _test_auth_reuse(enum ran_type via_ran,
 	ms_sends_msg("050130"
 		     "089910070000106005" /* IMSI */);
 	ASSERT_RELEASE_CLEAR(via_ran);
+	bss_rnc_sends_release_clear_complete(via_ran);
 
 	EXPECT_CONN_COUNT(0);
 	clear_vlr();

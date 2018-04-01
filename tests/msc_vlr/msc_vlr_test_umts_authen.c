@@ -23,19 +23,6 @@
 
 #include "msc_vlr_tests.h"
 
-#define ASSERT_RELEASE_CLEAR(via_ran) \
-	switch (via_ran) { \
-	case RAN_GERAN_A: \
-		VERBOSE_ASSERT(bssap_clear_sent, == true, "%d"); \
-		break; \
-	case RAN_UTRAN_IU: \
-		VERBOSE_ASSERT(iu_release_sent, == true, "%d"); \
-		break; \
-	default: \
-		OSMO_ASSERT(false); \
-		break; \
-	}
-
 static void _test_umts_authen(enum ran_type via_ran)
 {
 	struct vlr_subscr *vsub;
@@ -183,6 +170,7 @@ static void _test_umts_authen(enum ran_type via_ran)
 	expect_release_clear(via_ran);
 	ms_sends_msg("055b");
 	ASSERT_RELEASE_CLEAR(via_ran);
+	bss_rnc_sends_release_clear_complete(via_ran);
 
 	btw("LU was successful, and the conn has already been closed");
 	EXPECT_CONN_COUNT(0);
@@ -229,6 +217,7 @@ static void _test_umts_authen(enum ran_type via_ran)
 	ms_sends_msg("0b3b1c15a11302010002013b300b04010f0406aa510c061b017f0100");
 	OSMO_ASSERT(dtap_tx_confirmed);
 	ASSERT_RELEASE_CLEAR(via_ran);
+	bss_rnc_sends_release_clear_complete(via_ran);
 
 	btw("all requests serviced, conn has been released");
 	EXPECT_CONN_COUNT(0);
@@ -308,6 +297,7 @@ static void _test_umts_authen(enum ran_type via_ran)
 	ms_sends_msg("890106020041020000");
 	VERBOSE_ASSERT(dtap_tx_confirmed, == true, "%d");
 	ASSERT_RELEASE_CLEAR(via_ran);
+	bss_rnc_sends_release_clear_complete(via_ran);
 
 	btw("SMS is done, conn is gone");
 	EXPECT_CONN_COUNT(0);
@@ -317,6 +307,7 @@ static void _test_umts_authen(enum ran_type via_ran)
 	ms_sends_msg("050130"
 		     "089910070000106005" /* IMSI */);
 	ASSERT_RELEASE_CLEAR(via_ran);
+	bss_rnc_sends_release_clear_complete(via_ran);
 
 	EXPECT_CONN_COUNT(0);
 	clear_vlr();
@@ -551,6 +542,7 @@ static void _test_umts_authen_resync(enum ran_type via_ran)
 	expect_release_clear(via_ran);
 	ms_sends_msg("055b");
 	ASSERT_RELEASE_CLEAR(via_ran);
+	bss_rnc_sends_release_clear_complete(via_ran);
 
 	btw("LU was successful, and the conn has already been closed");
 	EXPECT_CONN_COUNT(0);
@@ -652,6 +644,7 @@ static void _test_umts_authen_too_short_res(enum ran_type via_ran)
 	ms_sends_msg("0554" "e229c19e" "2103" "791f2e" /* nipped one byte */);
 	VERBOSE_ASSERT(lu_result_sent, == RES_REJECT, "%d");
 	ASSERT_RELEASE_CLEAR(via_ran);
+	bss_rnc_sends_release_clear_complete(via_ran);
 
 	EXPECT_CONN_COUNT(0);
 	clear_vlr();
@@ -751,6 +744,7 @@ static void _test_umts_authen_too_long_res(enum ran_type via_ran)
 	ms_sends_msg("0554" "e229c19e" "2105" "791f2e4123" /* added one byte */);
 	VERBOSE_ASSERT(lu_result_sent, == RES_REJECT, "%d");
 	ASSERT_RELEASE_CLEAR(via_ran);
+	bss_rnc_sends_release_clear_complete(via_ran);
 
 	EXPECT_CONN_COUNT(0);
 	clear_vlr();
@@ -855,6 +849,7 @@ static void _test_umts_authen_only_sres(enum ran_type via_ran)
 	ms_sends_msg("0554" "e229c19e" /* Only the SRES half of the RES */);
 	VERBOSE_ASSERT(lu_result_sent, == RES_REJECT, "%d");
 	ASSERT_RELEASE_CLEAR(via_ran);
+	bss_rnc_sends_release_clear_complete(via_ran);
 
 	EXPECT_CONN_COUNT(0);
 	clear_vlr();

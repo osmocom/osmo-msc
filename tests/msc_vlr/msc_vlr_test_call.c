@@ -148,6 +148,7 @@ static void standard_lu()
 	VERBOSE_ASSERT(iu_release_sent, == true, "%d"); \
 
 	btw("LU was successful, and the conn has already been closed");
+	rnc_sends_release_complete();
 	EXPECT_CONN_COUNT(0);
 
 	vsub = vlr_subscr_find_by_imsi(net->vlr, IMSI);
@@ -252,6 +253,7 @@ static void test_call_mo()
 	OSMO_ASSERT(cc_to_mncc_tx_confirmed);
 	OSMO_ASSERT(iu_release_sent);
 
+	rnc_sends_release_complete();
 	EXPECT_CONN_COUNT(0);
 	clear_vlr();
 	comment_end();
@@ -335,6 +337,7 @@ static void test_call_mt()
 	OSMO_ASSERT(cc_to_mncc_tx_confirmed);
 	OSMO_ASSERT(iu_release_sent);
 
+	rnc_sends_release_complete();
 	EXPECT_CONN_COUNT(0);
 	clear_vlr();
 	comment_end();
@@ -405,6 +408,7 @@ static void test_call_mt2()
 	OSMO_ASSERT(cc_to_mncc_tx_confirmed);
 	OSMO_ASSERT(iu_release_sent);
 
+	rnc_sends_release_complete();
 	EXPECT_CONN_COUNT(0);
 
 	/* Make sure a pending release timer doesn't fire later to access freed data */
@@ -488,6 +492,7 @@ static void test_call_mo_to_unknown()
 	OSMO_ASSERT(iu_release_sent);
 	OSMO_ASSERT(cc_to_mncc_tx_confirmed);
 
+	rnc_sends_release_complete();
 	EXPECT_CONN_COUNT(0);
 	clear_vlr();
 	comment_end();
@@ -568,6 +573,7 @@ static void test_call_mo_to_unknown_timeout()
 	OSMO_ASSERT(cc_to_mncc_tx_confirmed);
 	OSMO_ASSERT(iu_release_sent);
 
+	rnc_sends_release_complete();
 	EXPECT_CONN_COUNT(0);
 	clear_vlr();
 	comment_end();

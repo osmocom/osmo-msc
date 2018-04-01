@@ -55,6 +55,7 @@ static void test_early_stage()
 	expect_bssap_clear();
 	osmo_fsm_inst_dispatch(g_conn->fi, SUBSCR_CONN_E_CN_CLOSE, NULL);
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
+	bss_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 
 	clear_vlr();
@@ -71,6 +72,7 @@ static void test_cm_service_without_lu()
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
 	btw("conn was released");
+	bss_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 
 	clear_vlr();
@@ -107,6 +109,7 @@ static void test_two_lu()
 
 	btw("LU was successful, and the conn has already been closed");
 	VERBOSE_ASSERT(lu_result_sent, == RES_ACCEPT, "%d");
+	bss_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 
 
@@ -137,6 +140,7 @@ static void test_two_lu()
 
 	btw("LU was successful, and the conn has already been closed");
 	VERBOSE_ASSERT(lu_result_sent, == RES_ACCEPT, "%d");
+	bss_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 
 	BTW("subscriber detaches");
@@ -144,6 +148,7 @@ static void test_two_lu()
 	ms_sends_msg("050130089910070000006402");
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
+	bss_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 	clear_vlr();
 	comment_end();
@@ -185,6 +190,7 @@ static void test_lu_unknown_tmsi()
 
 	btw("LU was successful, and the conn has already been closed");
 	VERBOSE_ASSERT(lu_result_sent, == RES_ACCEPT, "%d");
+	bss_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 	clear_vlr();
 	comment_end();

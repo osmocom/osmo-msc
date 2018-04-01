@@ -59,6 +59,8 @@ static void test_no_authen()
 	btw("LU was successful, and the conn has already been closed");
 	VERBOSE_ASSERT(lu_result_sent, == RES_ACCEPT, "%d");
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
+
+	bss_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 
 	BTW("after a while, a new conn sends a CM Service Request");
@@ -78,6 +80,7 @@ static void test_no_authen()
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
 	btw("all requests serviced, conn has been released");
+	bss_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 
 	BTW("an SMS is sent, MS is paged");
@@ -150,6 +153,7 @@ static void test_no_authen()
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
 	btw("SMS is done, conn is gone");
+	bss_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 
 	BTW("subscriber detaches");
@@ -157,6 +161,7 @@ static void test_no_authen()
 	ms_sends_msg("050130089910070000006402");
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
+	bss_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 	clear_vlr();
 	comment_end();
@@ -213,6 +218,7 @@ static void test_no_authen_tmsi()
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
 	btw("LU was successful, and the conn has already been closed");
+	bss_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 
 	btw("Subscriber has the new TMSI");
@@ -239,6 +245,7 @@ static void test_no_authen_tmsi()
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
 	btw("all requests serviced, conn has been released");
+	bss_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 
 	BTW("an SMS is sent, MS is paged using above TMSI");
@@ -311,6 +318,7 @@ static void test_no_authen_tmsi()
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
 	btw("SMS is done, conn is gone");
+	bss_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 
 	/* TODO: when the subscriber detaches, the vlr_subscr gets
@@ -362,6 +370,7 @@ static void test_no_authen_tmsi()
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
 	btw("LU was successful, and the conn has already been closed");
+	bss_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 
 	btw("subscriber has the new TMSI");
@@ -377,6 +386,7 @@ static void test_no_authen_tmsi()
 	ms_sends_msg("050130" "05f4" "07060504");
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
+	bss_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 	clear_vlr();
 	comment_end();
@@ -432,6 +442,7 @@ static void test_no_authen_imei()
 
 	btw("LU was successful, and the conn has already been closed");
 	VERBOSE_ASSERT(lu_result_sent, == RES_ACCEPT, "%d");
+	bss_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 
 	btw("Subscriber has the IMEI");
@@ -445,6 +456,7 @@ static void test_no_authen_imei()
 	ms_sends_msg("050130089910070000006402");
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
+	bss_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 	clear_vlr();
 	comment_end();
@@ -508,6 +520,7 @@ static void test_no_authen_tmsi_imei()
 
 	btw("LU was successful, and the conn has already been closed");
 	VERBOSE_ASSERT(lu_result_sent, == RES_ACCEPT, "%d");
+	bss_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 
 	btw("Subscriber has the IMEI and TMSI");
@@ -522,6 +535,7 @@ static void test_no_authen_tmsi_imei()
 	ms_sends_msg("050130089910070000006402");
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
+	bss_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 	clear_vlr();
 	comment_end();
@@ -576,6 +590,7 @@ static void test_no_authen_imeisv()
 	btw("LU was successful, and the conn has already been closed");
 	VERBOSE_ASSERT(lu_result_sent, == RES_ACCEPT, "%d");
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
+	bss_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 
 	BTW("subscriber detaches");
@@ -583,6 +598,7 @@ static void test_no_authen_imeisv()
 	ms_sends_msg("050130089910070000006402");
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
+	bss_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 	clear_vlr();
 	comment_end();
@@ -648,6 +664,7 @@ static void test_no_authen_imeisv_imei()
 
 	btw("LU was successful, and the conn has already been closed");
 	VERBOSE_ASSERT(lu_result_sent, == RES_ACCEPT, "%d");
+	bss_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 
 	btw("Subscriber has the IMEI");
@@ -661,6 +678,7 @@ static void test_no_authen_imeisv_imei()
 	ms_sends_msg("050130089910070000006402");
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
+	bss_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 	clear_vlr();
 	comment_end();
@@ -729,6 +747,7 @@ static void test_no_authen_imeisv_tmsi()
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
 	btw("LU was successful, and the conn has already been closed");
+	bss_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 
 
@@ -784,6 +803,7 @@ static void test_no_authen_imeisv_tmsi()
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
 	btw("LU was successful, and the conn has already been closed");
+	bss_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 
 	btw("subscriber has the new TMSI");
@@ -799,6 +819,7 @@ static void test_no_authen_imeisv_tmsi()
 	ms_sends_msg("050130" "05f4" "07060504");
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
+	bss_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 	clear_vlr();
 	comment_end();
@@ -874,6 +895,7 @@ static void test_no_authen_imeisv_tmsi_imei()
 
 	btw("LU was successful, and the conn has already been closed");
 	VERBOSE_ASSERT(lu_result_sent, == RES_ACCEPT, "%d");
+	bss_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 
 	btw("Subscriber has the IMEISV, IMEI and TMSI");
@@ -889,6 +911,7 @@ static void test_no_authen_imeisv_tmsi_imei()
 	ms_sends_msg("050130089910070000006402");
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
+	bss_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 	clear_vlr();
 	comment_end();

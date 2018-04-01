@@ -43,6 +43,7 @@ static void test_reject_2nd_conn()
 	ms_sends_msg("050802008168000130089910070000006402");
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 	VERBOSE_ASSERT(lu_result_sent, == RES_REJECT, "%d");
+	bss_sends_clear_complete();
 	EXPECT_CONN_COUNT(1);
 
 
@@ -61,6 +62,7 @@ static void test_reject_2nd_conn()
 
 	btw("LU was successful, and the conn has already been closed");
 	VERBOSE_ASSERT(lu_result_sent, == RES_ACCEPT, "%d");
+	bss_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 
 	clear_vlr();
@@ -93,6 +95,7 @@ static void _normal_lu_part2()
 
 	btw("LU was successful, and the conn has already been closed");
 	VERBOSE_ASSERT(lu_result_sent, == RES_ACCEPT, "%d");
+	bss_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 }
 
@@ -182,8 +185,10 @@ static void _paging_resp_part2(int expect_conn_count, bool expect_clear)
 		expect_bssap_clear();
 	ms_sends_msg("890106020041020000");
 	VERBOSE_ASSERT(dtap_tx_confirmed, == true, "%d");
-	if (expect_clear)
+	if (expect_clear) {
 		VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
+		bss_sends_clear_complete();
+	}
 
 	btw("SMS is done");
 	EXPECT_CONN_COUNT(expect_conn_count);
@@ -265,6 +270,7 @@ static void test_reject_lu_during_cm()
 	expect_bssap_clear();
 	ms_sends_msg("050130089910070000006402");
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
+	bss_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 
 	clear_vlr();
@@ -288,6 +294,7 @@ static void test_reject_cm_during_cm()
 	expect_bssap_clear();
 	ms_sends_msg("050130089910070000006402");
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
+	bss_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 
 	clear_vlr();
@@ -313,6 +320,7 @@ static void test_reject_paging_resp_during_cm()
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
 	btw("all requests serviced, conn has been released");
+	bss_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 
 	clear_vlr();
@@ -377,6 +385,7 @@ static void test_accept_cm_during_paging_resp()
 	expect_bssap_clear();
 	ms_sends_msg("050130089910070000006402");
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
+	bss_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 
 	clear_vlr();

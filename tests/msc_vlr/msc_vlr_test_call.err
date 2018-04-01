@@ -162,8 +162,11 @@ DREF MSISDN:42342: MSC conn use + release == 2 (0x102)
 DREF VLR subscr MSISDN:42342 usage increases to: 3
 DREF VLR subscr MSISDN:42342 usage decreases to: 2
 - Iu Release --RAN_UTRAN_IU--> MS
-DREF MSISDN:42342: MSC conn use - release == 1 (0x2)
-DREF MSISDN:42342: MSC conn use - dtap == 0 (0x0)
+DREF MSISDN:42342: MSC conn use - dtap == 1 (0x100)
+  iu_release_sent == 1
+- LU was successful, and the conn has already been closed
+- RNC sends Iu Release Complete
+DREF MSISDN:42342: MSC conn use - release == 0 (0x0)
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_RELEASING}: Received Event SUBSCR_CONN_E_UNUSED
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_RELEASING}: state_chg to SUBSCR_CONN_S_RELEASED
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_RELEASED}: Terminating (cause = OSMO_FSM_TERM_REGULAR)
@@ -176,8 +179,6 @@ DRLL MSISDN:42342: Freeing subscriber connection
 DREF VLR subscr MSISDN:42342 usage decreases to: 1
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_RELEASED}: Freeing instance
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_RELEASED}: Deallocated
-  iu_release_sent == 1
-- LU was successful, and the conn has already been closed
   llist_count(&net->subscr_conns) == 0
 DREF VLR subscr MSISDN:42342 usage increases to: 2
   vsub != NULL == 1
@@ -359,6 +360,7 @@ DREF MSISDN:42342: MSC conn use + release == 1 (0x100)
 DREF VLR subscr MSISDN:42342 usage increases to: 3
 DREF VLR subscr MSISDN:42342 usage decreases to: 2
 - Iu Release --RAN_UTRAN_IU--> MS
+- RNC sends Iu Release Complete
 DREF MSISDN:42342: MSC conn use - release == 0 (0x0)
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_RELEASING}: Received Event SUBSCR_CONN_E_UNUSED
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_RELEASING}: state_chg to SUBSCR_CONN_S_RELEASED
@@ -539,8 +541,11 @@ DREF MSISDN:42342: MSC conn use + release == 2 (0x102)
 DREF VLR subscr MSISDN:42342 usage increases to: 3
 DREF VLR subscr MSISDN:42342 usage decreases to: 2
 - Iu Release --RAN_UTRAN_IU--> MS
-DREF MSISDN:42342: MSC conn use - release == 1 (0x2)
-DREF MSISDN:42342: MSC conn use - dtap == 0 (0x0)
+DREF MSISDN:42342: MSC conn use - dtap == 1 (0x100)
+  iu_release_sent == 1
+- LU was successful, and the conn has already been closed
+- RNC sends Iu Release Complete
+DREF MSISDN:42342: MSC conn use - release == 0 (0x0)
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_RELEASING}: Received Event SUBSCR_CONN_E_UNUSED
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_RELEASING}: state_chg to SUBSCR_CONN_S_RELEASED
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_RELEASED}: Terminating (cause = OSMO_FSM_TERM_REGULAR)
@@ -553,8 +558,6 @@ DRLL MSISDN:42342: Freeing subscriber connection
 DREF VLR subscr MSISDN:42342 usage decreases to: 1
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_RELEASED}: Freeing instance
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_RELEASED}: Deallocated
-  iu_release_sent == 1
-- LU was successful, and the conn has already been closed
   llist_count(&net->subscr_conns) == 0
 DREF VLR subscr MSISDN:42342 usage increases to: 2
   vsub != NULL == 1
@@ -741,6 +744,7 @@ DREF MSISDN:42342: MSC conn use + release == 1 (0x100)
 DREF VLR subscr MSISDN:42342 usage increases to: 3
 DREF VLR subscr MSISDN:42342 usage decreases to: 2
 - Iu Release --RAN_UTRAN_IU--> MS
+- RNC sends Iu Release Complete
 DREF MSISDN:42342: MSC conn use - release == 0 (0x0)
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_RELEASING}: Received Event SUBSCR_CONN_E_UNUSED
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_RELEASING}: state_chg to SUBSCR_CONN_S_RELEASED
@@ -921,8 +925,11 @@ DREF MSISDN:42342: MSC conn use + release == 2 (0x102)
 DREF VLR subscr MSISDN:42342 usage increases to: 3
 DREF VLR subscr MSISDN:42342 usage decreases to: 2
 - Iu Release --RAN_UTRAN_IU--> MS
-DREF MSISDN:42342: MSC conn use - release == 1 (0x2)
-DREF MSISDN:42342: MSC conn use - dtap == 0 (0x0)
+DREF MSISDN:42342: MSC conn use - dtap == 1 (0x100)
+  iu_release_sent == 1
+- LU was successful, and the conn has already been closed
+- RNC sends Iu Release Complete
+DREF MSISDN:42342: MSC conn use - release == 0 (0x0)
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_RELEASING}: Received Event SUBSCR_CONN_E_UNUSED
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_RELEASING}: state_chg to SUBSCR_CONN_S_RELEASED
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_RELEASED}: Terminating (cause = OSMO_FSM_TERM_REGULAR)
@@ -935,8 +942,6 @@ DRLL MSISDN:42342: Freeing subscriber connection
 DREF VLR subscr MSISDN:42342 usage decreases to: 1
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_RELEASED}: Freeing instance
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_RELEASED}: Deallocated
-  iu_release_sent == 1
-- LU was successful, and the conn has already been closed
   llist_count(&net->subscr_conns) == 0
 DREF VLR subscr MSISDN:42342 usage increases to: 2
   vsub != NULL == 1
@@ -1091,6 +1096,7 @@ DCC (ti 00 sub MSISDN:42342) new state RELEASE_REQ -> NULL
 DREF VLR subscr MSISDN:42342 usage decreases to: 2
 DREF MSISDN:42342: MSC conn use - trans_cc == 1 (0x100)
 - Iu Release --RAN_UTRAN_IU--> MS
+- RNC sends Iu Release Complete
 DREF MSISDN:42342: MSC conn use - release == 0 (0x0)
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_RELEASING}: Received Event SUBSCR_CONN_E_UNUSED
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_RELEASING}: state_chg to SUBSCR_CONN_S_RELEASED
@@ -1272,8 +1278,11 @@ DREF MSISDN:42342: MSC conn use + release == 2 (0x102)
 DREF VLR subscr MSISDN:42342 usage increases to: 3
 DREF VLR subscr MSISDN:42342 usage decreases to: 2
 - Iu Release --RAN_UTRAN_IU--> MS
-DREF MSISDN:42342: MSC conn use - release == 1 (0x2)
-DREF MSISDN:42342: MSC conn use - dtap == 0 (0x0)
+DREF MSISDN:42342: MSC conn use - dtap == 1 (0x100)
+  iu_release_sent == 1
+- LU was successful, and the conn has already been closed
+- RNC sends Iu Release Complete
+DREF MSISDN:42342: MSC conn use - release == 0 (0x0)
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_RELEASING}: Received Event SUBSCR_CONN_E_UNUSED
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_RELEASING}: state_chg to SUBSCR_CONN_S_RELEASED
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_RELEASED}: Terminating (cause = OSMO_FSM_TERM_REGULAR)
@@ -1286,8 +1295,6 @@ DRLL MSISDN:42342: Freeing subscriber connection
 DREF VLR subscr MSISDN:42342 usage decreases to: 1
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_RELEASED}: Freeing instance
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_RELEASED}: Deallocated
-  iu_release_sent == 1
-- LU was successful, and the conn has already been closed
   llist_count(&net->subscr_conns) == 0
 DREF VLR subscr MSISDN:42342 usage increases to: 2
   vsub != NULL == 1
@@ -1435,6 +1442,7 @@ DREF MSISDN:42342: MSC conn use + release == 1 (0x100)
 DREF VLR subscr MSISDN:42342 usage increases to: 3
 DREF VLR subscr MSISDN:42342 usage decreases to: 2
 - Iu Release --RAN_UTRAN_IU--> MS
+- RNC sends Iu Release Complete
 DREF MSISDN:42342: MSC conn use - release == 0 (0x0)
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_RELEASING}: Received Event SUBSCR_CONN_E_UNUSED
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_RELEASING}: state_chg to SUBSCR_CONN_S_RELEASED
@@ -1615,8 +1623,11 @@ DREF MSISDN:42342: MSC conn use + release == 2 (0x102)
 DREF VLR subscr MSISDN:42342 usage increases to: 3
 DREF VLR subscr MSISDN:42342 usage decreases to: 2
 - Iu Release --RAN_UTRAN_IU--> MS
-DREF MSISDN:42342: MSC conn use - release == 1 (0x2)
-DREF MSISDN:42342: MSC conn use - dtap == 0 (0x0)
+DREF MSISDN:42342: MSC conn use - dtap == 1 (0x100)
+  iu_release_sent == 1
+- LU was successful, and the conn has already been closed
+- RNC sends Iu Release Complete
+DREF MSISDN:42342: MSC conn use - release == 0 (0x0)
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_RELEASING}: Received Event SUBSCR_CONN_E_UNUSED
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_RELEASING}: state_chg to SUBSCR_CONN_S_RELEASED
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_RELEASED}: Terminating (cause = OSMO_FSM_TERM_REGULAR)
@@ -1629,8 +1640,6 @@ DRLL MSISDN:42342: Freeing subscriber connection
 DREF VLR subscr MSISDN:42342 usage decreases to: 1
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_RELEASED}: Freeing instance
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_RELEASED}: Deallocated
-  iu_release_sent == 1
-- LU was successful, and the conn has already been closed
   llist_count(&net->subscr_conns) == 0
 DREF VLR subscr MSISDN:42342 usage increases to: 2
   vsub != NULL == 1
@@ -1775,6 +1784,7 @@ DREF MSISDN:42342: MSC conn use + release == 1 (0x100)
 DREF VLR subscr MSISDN:42342 usage increases to: 3
 DREF VLR subscr MSISDN:42342 usage decreases to: 2
 - Iu Release --RAN_UTRAN_IU--> MS
+- RNC sends Iu Release Complete
 DREF MSISDN:42342: MSC conn use - release == 0 (0x0)
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_RELEASING}: Received Event SUBSCR_CONN_E_UNUSED
 DMM Subscr_Conn(901700000010650){SUBSCR_CONN_S_RELEASING}: state_chg to SUBSCR_CONN_S_RELEASED

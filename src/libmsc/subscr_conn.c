@@ -260,8 +260,11 @@ static void subscr_conn_fsm_releasing_onenter(struct osmo_fsm_inst *fi, uint32_t
 {
 	struct gsm_subscriber_connection *conn = fi->priv;
 
-	/* While we're still checking on release, prevent a last use count decrement from deallocating */
-	msc_subscr_conn_get(conn, MSC_CONN_USE_RELEASE);
+	/* Use count for either conn->a.waiting_for_clear_complete or
+	 * conn->iu.waiting_for_release_complete. 'get' it early, so we don't deallocate after tearing
+	 * down active transactions. Safeguard against double-get (though it shouldn't happen). */
+	if (!msc_subscr_conn_used_by(conn, MSC_CONN_USE_RELEASE))
+		msc_subscr_conn_get(conn, MSC_CONN_USE_RELEASE);
 
 	/* Cancel pending CM Service Requests */
 	if (conn->received_cm_service_request) {
@@ -278,20 +281,27 @@ static void subscr_conn_fsm_releasing_onenter(struct osmo_fsm_inst *fi, uint32_t
 	switch (conn->via_ran) {
 	case RAN_GERAN_A:
 		a_iface_tx_clear_cmd(conn);
+		if (conn->a.waiting_for_clear_complete) {
+			LOGPFSML(fi, LOGL_ERROR,
+				 "Unexpected: conn is already waiting for BSSMAP Clear Complete\n");
+			break;
+		}
+		conn->a.waiting_for_clear_complete = true;
 		break;
 	case RAN_UTRAN_IU:
 		ranap_iu_tx_release(conn->iu.ue_ctx, NULL);
+		if (conn->iu.waiting_for_release_complete) {
+			LOGPFSML(fi, LOGL_ERROR,
+				 "Unexpected: conn is already waiting for Iu Release Complete\n");
+			break;
+		}
+		conn->iu.waiting_for_release_complete = true;
 		break;
 	default:
 		LOGP(DMM, LOGL_ERROR, "%s: Unknown RAN type, cannot tx release/clear\n",
 		     vlr_subscr_name(conn->vsub));
 		break;
 	}
-
-	/* FIXME: keep the conn until the Iu Release Outcome is
-	 * received from the UE, or a timeout expires. For now, the log
-	 * says "unknown UE" for each release outcome. */
-	msc_subscr_conn_put(conn, MSC_CONN_USE_RELEASE);
 }
 
 static void subscr_conn_fsm_releasing(struct osmo_fsm_inst *fi, uint32_t event, void *data)
@@ -456,7 +466,7 @@ void subscr_conn_release_when_unused(struct gsm_subscriber_connection *conn)
 	osmo_fsm_inst_dispatch(conn->fi, SUBSCR_CONN_E_RELEASE_WHEN_UNUSED, NULL);
 }
 
-void msc_subscr_conn_close(struct gsm_subscriber_connection *conn, uint32_t cause)
+static void conn_close(struct gsm_subscriber_connection *conn, uint32_t cause, uint32_t event)
 {
 	if (!conn) {
 		LOGP(DMM, LOGL_ERROR, "Cannot release NULL connection\n");
@@ -467,11 +477,23 @@ void msc_subscr_conn_close(struct gsm_subscriber_connection *conn, uint32_t caus
 		       __func__, vlr_subscr_name(conn->vsub), cause);
 		return;
 	}
-	osmo_fsm_inst_dispatch(conn->fi, SUBSCR_CONN_E_CN_CLOSE, &cause);
+	osmo_fsm_inst_dispatch(conn->fi, event, &cause);
+}
+
+void msc_subscr_conn_close(struct gsm_subscriber_connection *conn, uint32_t cause)
+{
+	return conn_close(conn, cause, SUBSCR_CONN_E_CN_CLOSE);
+}
+
+void msc_subscr_conn_mo_close(struct gsm_subscriber_connection *conn, uint32_t cause)
+{
+	return conn_close(conn, cause, SUBSCR_CONN_E_MO_CLOSE);
 }
 
 bool msc_subscr_conn_in_release(struct gsm_subscriber_connection *conn)
 {
+	if (!conn || !conn->fi)
+		return true;
 	if (conn->fi->state == SUBSCR_CONN_S_RELEASING)
 		return true;
 	if (conn->fi->state == SUBSCR_CONN_S_RELEASED)
@@ -491,7 +513,8 @@ bool msc_subscr_conn_is_accepted(const struct gsm_subscriber_connection *conn)
 	return true;
 }
 
-/* Indicate that *some* communication is happening with the phone. */
+/* Indicate that *some* communication is happening with the phone, so that the conn FSM no longer times
+ * out to release within a few seconds. */
 void msc_subscr_conn_communicating(struct gsm_subscriber_connection *conn)
 {
 	osmo_fsm_inst_dispatch(conn->fi, SUBSCR_CONN_E_COMMUNICATING, NULL);
@@ -544,6 +567,7 @@ bool msc_subscr_conn_is_establishing_auth_ciph(const struct gsm_subscriber_conne
 	return conn->fi->state == SUBSCR_CONN_S_AUTH_CIPH;
 }
 
+
 const struct value_string complete_layer3_type_names[] = {
 	{ COMPLETE_LAYER3_NONE, "NONE" },
 	{ COMPLETE_LAYER3_LU, "LU" },
@@ -558,4 +582,31 @@ void msc_subscr_conn_update_id(struct gsm_subscriber_connection *conn,
        conn->complete_layer3_type = from;
        osmo_fsm_inst_update_id(conn->fi, id);
        LOGPFSML(conn->fi, LOGL_DEBUG, "Updated ID from %s\n", complete_layer3_type_name(from));
+}
+
+static void rx_close_complete(struct gsm_subscriber_connection *conn, const char *label, bool *flag)
+{
+	if (!conn)
+		return;
+	if (!msc_subscr_conn_in_release(conn)) {
+		LOGPFSML(conn->fi, LOGL_ERROR, "Received unexpected %s, discarding right now\n",
+			 label);
+		trans_conn_closed(conn);
+		osmo_fsm_inst_term(conn->fi, OSMO_FSM_TERM_ERROR, NULL);
+		return;
+	}
+	if (*flag) {
+		*flag = false;
+		msc_subscr_conn_put(conn, MSC_CONN_USE_RELEASE);
+	}
+}
+
+void msc_subscr_conn_rx_bssmap_clear_complete(struct gsm_subscriber_connection *conn)
+{
+	rx_close_complete(conn, "BSSMAP Clear Complete", &conn->a.waiting_for_clear_complete);
+}
+
+void msc_subscr_conn_rx_iu_release_complete(struct gsm_subscriber_connection *conn)
+{
+	rx_close_complete(conn, "Iu Release Complete", &conn->iu.waiting_for_release_complete);
 }

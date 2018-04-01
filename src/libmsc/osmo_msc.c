@@ -283,6 +283,11 @@ void _msc_subscr_conn_put(struct gsm_subscriber_connection *conn,
 		osmo_fsm_inst_dispatch(conn->fi, SUBSCR_CONN_E_UNUSED, NULL);
 }
 
+bool msc_subscr_conn_used_by(struct gsm_subscriber_connection *conn, enum msc_subscr_conn_use token)
+{
+	return conn && (conn->use_tokens & (1 << token));
+}
+
 const struct value_string msc_subscr_conn_use_names[] = {
 	{MSC_CONN_USE_UNTRACKED,	"UNTRACKED"},
 	{MSC_CONN_USE_COMPL_L3,		"compl_l3"},

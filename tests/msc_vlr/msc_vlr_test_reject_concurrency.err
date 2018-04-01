@@ -59,10 +59,13 @@ DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_NEW}: Received Event SUBSCR_CONN_
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_NEW}: state_chg to SUBSCR_CONN_S_RELEASING
 DREF unknown: MSC conn use + release == 2 (0x101)
 - BSSAP Clear --RAN_GERAN_A--> MS
-DREF unknown: MSC conn use - release == 1 (0x1)
 DREF VLR subscr IMSI:901700000004620 usage decreases to: 1
 DRR 901700000004620: internal error during Location Updating attempt
-DREF unknown: MSC conn use - compl_l3 == 0 (0x0)
+DREF unknown: MSC conn use - compl_l3 == 1 (0x100)
+  bssap_clear_sent == 1
+  lu_result_sent == 2
+- BSS sends BSSMAP Clear Complete
+DREF unknown: MSC conn use - release == 0 (0x0)
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASING}: Received Event SUBSCR_CONN_E_UNUSED
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASING}: state_chg to SUBSCR_CONN_S_RELEASED
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Terminating (cause = OSMO_FSM_TERM_REGULAR)
@@ -74,8 +77,6 @@ DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_DONE}: Deallocated
 DRLL Freeing subscriber connection with NULL subscriber
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Freeing instance
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Deallocated
-  bssap_clear_sent == 1
-  lu_result_sent == 2
   llist_count(&net->subscr_conns) == 1
 ---
 - The first connection can still complete its LU
@@ -133,6 +134,12 @@ DREF MSISDN:46071: MSC conn use + release == 1 (0x100)
 DREF VLR subscr MSISDN:46071 usage increases to: 4
 DREF VLR subscr MSISDN:46071 usage decreases to: 3
 - BSSAP Clear --RAN_GERAN_A--> MS
+DREF VLR subscr MSISDN:46071 usage decreases to: 2
+<-- GSUP rx OSMO_GSUP_MSGT_UPDATE_LOCATION_RESULT: vlr_gsupc_read_cb() returns 0
+  bssap_clear_sent == 1
+- LU was successful, and the conn has already been closed
+  lu_result_sent == 1
+- BSS sends BSSMAP Clear Complete
 DREF MSISDN:46071: MSC conn use - release == 0 (0x0)
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASING}: Received Event SUBSCR_CONN_E_UNUSED
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASING}: state_chg to SUBSCR_CONN_S_RELEASED
@@ -143,14 +150,9 @@ DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_DONE}: fsm_lu_cleanup called with cau
 DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_DONE}: Freeing instance
 DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_DONE}: Deallocated
 DRLL MSISDN:46071: Freeing subscriber connection
-DREF VLR subscr MSISDN:46071 usage decreases to: 2
+DREF VLR subscr MSISDN:46071 usage decreases to: 1
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Freeing instance
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Deallocated
-DREF VLR subscr MSISDN:46071 usage decreases to: 1
-<-- GSUP rx OSMO_GSUP_MSGT_UPDATE_LOCATION_RESULT: vlr_gsupc_read_cb() returns 0
-  bssap_clear_sent == 1
-- LU was successful, and the conn has already been closed
-  lu_result_sent == 1
   llist_count(&net->subscr_conns) == 0
 DREF freeing VLR subscr MSISDN:46071
 ===== test_reject_2nd_conn: SUCCESS
@@ -262,6 +264,12 @@ DREF MSISDN:46071: MSC conn use + release == 1 (0x100)
 DREF VLR subscr MSISDN:46071 usage increases to: 4
 DREF VLR subscr MSISDN:46071 usage decreases to: 3
 - BSSAP Clear --RAN_GERAN_A--> MS
+DREF VLR subscr MSISDN:46071 usage decreases to: 2
+<-- GSUP rx OSMO_GSUP_MSGT_UPDATE_LOCATION_RESULT: vlr_gsupc_read_cb() returns 0
+  bssap_clear_sent == 1
+- LU was successful, and the conn has already been closed
+  lu_result_sent == 1
+- BSS sends BSSMAP Clear Complete
 DREF MSISDN:46071: MSC conn use - release == 0 (0x0)
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASING}: Received Event SUBSCR_CONN_E_UNUSED
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASING}: state_chg to SUBSCR_CONN_S_RELEASED
@@ -272,14 +280,9 @@ DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_DONE}: fsm_lu_cleanup called with cau
 DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_DONE}: Freeing instance
 DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_DONE}: Deallocated
 DRLL MSISDN:46071: Freeing subscriber connection
-DREF VLR subscr MSISDN:46071 usage decreases to: 2
+DREF VLR subscr MSISDN:46071 usage decreases to: 1
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Freeing instance
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Deallocated
-DREF VLR subscr MSISDN:46071 usage decreases to: 1
-<-- GSUP rx OSMO_GSUP_MSGT_UPDATE_LOCATION_RESULT: vlr_gsupc_read_cb() returns 0
-  bssap_clear_sent == 1
-- LU was successful, and the conn has already been closed
-  lu_result_sent == 1
   llist_count(&net->subscr_conns) == 0
 DREF freeing VLR subscr MSISDN:46071
 ===== test_reject_lu_during_lu: SUCCESS
@@ -398,6 +401,12 @@ DREF MSISDN:46071: MSC conn use + release == 1 (0x100)
 DREF VLR subscr MSISDN:46071 usage increases to: 4
 DREF VLR subscr MSISDN:46071 usage decreases to: 3
 - BSSAP Clear --RAN_GERAN_A--> MS
+DREF VLR subscr MSISDN:46071 usage decreases to: 2
+<-- GSUP rx OSMO_GSUP_MSGT_UPDATE_LOCATION_RESULT: vlr_gsupc_read_cb() returns 0
+  bssap_clear_sent == 1
+- LU was successful, and the conn has already been closed
+  lu_result_sent == 1
+- BSS sends BSSMAP Clear Complete
 DREF MSISDN:46071: MSC conn use - release == 0 (0x0)
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASING}: Received Event SUBSCR_CONN_E_UNUSED
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASING}: state_chg to SUBSCR_CONN_S_RELEASED
@@ -408,14 +417,9 @@ DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_DONE}: fsm_lu_cleanup called with cau
 DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_DONE}: Freeing instance
 DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_DONE}: Deallocated
 DRLL MSISDN:46071: Freeing subscriber connection
-DREF VLR subscr MSISDN:46071 usage decreases to: 2
+DREF VLR subscr MSISDN:46071 usage decreases to: 1
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Freeing instance
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Deallocated
-DREF VLR subscr MSISDN:46071 usage decreases to: 1
-<-- GSUP rx OSMO_GSUP_MSGT_UPDATE_LOCATION_RESULT: vlr_gsupc_read_cb() returns 0
-  bssap_clear_sent == 1
-- LU was successful, and the conn has already been closed
-  lu_result_sent == 1
   llist_count(&net->subscr_conns) == 0
 DREF freeing VLR subscr MSISDN:46071
 ===== test_reject_cm_during_lu: SUCCESS
@@ -527,6 +531,12 @@ DREF MSISDN:46071: MSC conn use + release == 1 (0x100)
 DREF VLR subscr MSISDN:46071 usage increases to: 4
 DREF VLR subscr MSISDN:46071 usage decreases to: 3
 - BSSAP Clear --RAN_GERAN_A--> MS
+DREF VLR subscr MSISDN:46071 usage decreases to: 2
+<-- GSUP rx OSMO_GSUP_MSGT_UPDATE_LOCATION_RESULT: vlr_gsupc_read_cb() returns 0
+  bssap_clear_sent == 1
+- LU was successful, and the conn has already been closed
+  lu_result_sent == 1
+- BSS sends BSSMAP Clear Complete
 DREF MSISDN:46071: MSC conn use - release == 0 (0x0)
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASING}: Received Event SUBSCR_CONN_E_UNUSED
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASING}: state_chg to SUBSCR_CONN_S_RELEASED
@@ -537,14 +547,9 @@ DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_DONE}: fsm_lu_cleanup called with cau
 DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_DONE}: Freeing instance
 DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_DONE}: Deallocated
 DRLL MSISDN:46071: Freeing subscriber connection
-DREF VLR subscr MSISDN:46071 usage decreases to: 2
+DREF VLR subscr MSISDN:46071 usage decreases to: 1
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Freeing instance
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Deallocated
-DREF VLR subscr MSISDN:46071 usage decreases to: 1
-<-- GSUP rx OSMO_GSUP_MSGT_UPDATE_LOCATION_RESULT: vlr_gsupc_read_cb() returns 0
-  bssap_clear_sent == 1
-- LU was successful, and the conn has already been closed
-  lu_result_sent == 1
   llist_count(&net->subscr_conns) == 0
 DREF freeing VLR subscr MSISDN:46071
 ===== test_reject_paging_resp_during_lu: SUCCESS
@@ -645,6 +650,12 @@ DREF MSISDN:46071: MSC conn use + release == 1 (0x100)
 DREF VLR subscr MSISDN:46071 usage increases to: 4
 DREF VLR subscr MSISDN:46071 usage decreases to: 3
 - BSSAP Clear --RAN_GERAN_A--> MS
+DREF VLR subscr MSISDN:46071 usage decreases to: 2
+<-- GSUP rx OSMO_GSUP_MSGT_UPDATE_LOCATION_RESULT: vlr_gsupc_read_cb() returns 0
+  bssap_clear_sent == 1
+- LU was successful, and the conn has already been closed
+  lu_result_sent == 1
+- BSS sends BSSMAP Clear Complete
 DREF MSISDN:46071: MSC conn use - release == 0 (0x0)
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASING}: Received Event SUBSCR_CONN_E_UNUSED
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASING}: state_chg to SUBSCR_CONN_S_RELEASED
@@ -655,14 +666,9 @@ DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_DONE}: fsm_lu_cleanup called with cau
 DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_DONE}: Freeing instance
 DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_DONE}: Deallocated
 DRLL MSISDN:46071: Freeing subscriber connection
-DREF VLR subscr MSISDN:46071 usage decreases to: 2
+DREF VLR subscr MSISDN:46071 usage decreases to: 1
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Freeing instance
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Deallocated
-DREF VLR subscr MSISDN:46071 usage decreases to: 1
-<-- GSUP rx OSMO_GSUP_MSGT_UPDATE_LOCATION_RESULT: vlr_gsupc_read_cb() returns 0
-  bssap_clear_sent == 1
-- LU was successful, and the conn has already been closed
-  lu_result_sent == 1
   llist_count(&net->subscr_conns) == 0
 ---
 - Subscriber does a normal CM Service Request
@@ -727,11 +733,13 @@ DREF MSISDN:46071: MSC conn use - cm_service == 2 (0x102)
 DREF VLR subscr MSISDN:46071 usage increases to: 4
 DREF VLR subscr MSISDN:46071 usage decreases to: 3
 - BSSAP Clear --RAN_GERAN_A--> MS
-DREF MSISDN:46071: MSC conn use - release == 1 (0x2)
 DREF VLR subscr MSISDN:46071 usage decreases to: 2
 DREF VLR subscr MSISDN:46071 usage decreases to: 1
-DMM msc_subscr_conn_close(vsub=MSISDN:46071, cause=0): already in release, ignore.
-DREF MSISDN:46071: MSC conn use - dtap == 0 (0x0)
+DMM conn_close(vsub=MSISDN:46071, cause=0): already in release, ignore.
+DREF MSISDN:46071: MSC conn use - dtap == 1 (0x100)
+  bssap_clear_sent == 1
+- BSS sends BSSMAP Clear Complete
+DREF MSISDN:46071: MSC conn use - release == 0 (0x0)
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASING}: Received Event SUBSCR_CONN_E_UNUSED
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASING}: state_chg to SUBSCR_CONN_S_RELEASED
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Terminating (cause = OSMO_FSM_TERM_REGULAR)
@@ -740,7 +748,6 @@ DREF VLR subscr MSISDN:46071 usage decreases to: 0
 DREF freeing VLR subscr MSISDN:46071
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Freeing instance
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Deallocated
-  bssap_clear_sent == 1
   llist_count(&net->subscr_conns) == 0
 ===== test_reject_lu_during_cm: SUCCESS
 
@@ -840,6 +847,12 @@ DREF MSISDN:46071: MSC conn use + release == 1 (0x100)
 DREF VLR subscr MSISDN:46071 usage increases to: 4
 DREF VLR subscr MSISDN:46071 usage decreases to: 3
 - BSSAP Clear --RAN_GERAN_A--> MS
+DREF VLR subscr MSISDN:46071 usage decreases to: 2
+<-- GSUP rx OSMO_GSUP_MSGT_UPDATE_LOCATION_RESULT: vlr_gsupc_read_cb() returns 0
+  bssap_clear_sent == 1
+- LU was successful, and the conn has already been closed
+  lu_result_sent == 1
+- BSS sends BSSMAP Clear Complete
 DREF MSISDN:46071: MSC conn use - release == 0 (0x0)
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASING}: Received Event SUBSCR_CONN_E_UNUSED
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASING}: state_chg to SUBSCR_CONN_S_RELEASED
@@ -850,14 +863,9 @@ DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_DONE}: fsm_lu_cleanup called with cau
 DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_DONE}: Freeing instance
 DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_DONE}: Deallocated
 DRLL MSISDN:46071: Freeing subscriber connection
-DREF VLR subscr MSISDN:46071 usage decreases to: 2
+DREF VLR subscr MSISDN:46071 usage decreases to: 1
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Freeing instance
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Deallocated
-DREF VLR subscr MSISDN:46071 usage decreases to: 1
-<-- GSUP rx OSMO_GSUP_MSGT_UPDATE_LOCATION_RESULT: vlr_gsupc_read_cb() returns 0
-  bssap_clear_sent == 1
-- LU was successful, and the conn has already been closed
-  lu_result_sent == 1
   llist_count(&net->subscr_conns) == 0
 ---
 - Subscriber does a normal CM Service Request
@@ -925,11 +933,13 @@ DREF MSISDN:46071: MSC conn use - cm_service == 2 (0x102)
 DREF VLR subscr MSISDN:46071 usage increases to: 4
 DREF VLR subscr MSISDN:46071 usage decreases to: 3
 - BSSAP Clear --RAN_GERAN_A--> MS
-DREF MSISDN:46071: MSC conn use - release == 1 (0x2)
 DREF VLR subscr MSISDN:46071 usage decreases to: 2
 DREF VLR subscr MSISDN:46071 usage decreases to: 1
-DMM msc_subscr_conn_close(vsub=MSISDN:46071, cause=0): already in release, ignore.
-DREF MSISDN:46071: MSC conn use - dtap == 0 (0x0)
+DMM conn_close(vsub=MSISDN:46071, cause=0): already in release, ignore.
+DREF MSISDN:46071: MSC conn use - dtap == 1 (0x100)
+  bssap_clear_sent == 1
+- BSS sends BSSMAP Clear Complete
+DREF MSISDN:46071: MSC conn use - release == 0 (0x0)
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASING}: Received Event SUBSCR_CONN_E_UNUSED
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASING}: state_chg to SUBSCR_CONN_S_RELEASED
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Terminating (cause = OSMO_FSM_TERM_REGULAR)
@@ -938,7 +948,6 @@ DREF VLR subscr MSISDN:46071 usage decreases to: 0
 DREF freeing VLR subscr MSISDN:46071
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Freeing instance
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Deallocated
-  bssap_clear_sent == 1
   llist_count(&net->subscr_conns) == 0
 ===== test_reject_cm_during_cm: SUCCESS
 
@@ -1038,6 +1047,12 @@ DREF MSISDN:46071: MSC conn use + release == 1 (0x100)
 DREF VLR subscr MSISDN:46071 usage increases to: 4
 DREF VLR subscr MSISDN:46071 usage decreases to: 3
 - BSSAP Clear --RAN_GERAN_A--> MS
+DREF VLR subscr MSISDN:46071 usage decreases to: 2
+<-- GSUP rx OSMO_GSUP_MSGT_UPDATE_LOCATION_RESULT: vlr_gsupc_read_cb() returns 0
+  bssap_clear_sent == 1
+- LU was successful, and the conn has already been closed
+  lu_result_sent == 1
+- BSS sends BSSMAP Clear Complete
 DREF MSISDN:46071: MSC conn use - release == 0 (0x0)
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASING}: Received Event SUBSCR_CONN_E_UNUSED
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASING}: state_chg to SUBSCR_CONN_S_RELEASED
@@ -1048,14 +1063,9 @@ DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_DONE}: fsm_lu_cleanup called with cau
 DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_DONE}: Freeing instance
 DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_DONE}: Deallocated
 DRLL MSISDN:46071: Freeing subscriber connection
-DREF VLR subscr MSISDN:46071 usage decreases to: 2
+DREF VLR subscr MSISDN:46071 usage decreases to: 1
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Freeing instance
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Deallocated
-DREF VLR subscr MSISDN:46071 usage decreases to: 1
-<-- GSUP rx OSMO_GSUP_MSGT_UPDATE_LOCATION_RESULT: vlr_gsupc_read_cb() returns 0
-  bssap_clear_sent == 1
-- LU was successful, and the conn has already been closed
-  lu_result_sent == 1
   llist_count(&net->subscr_conns) == 0
 ---
 - Subscriber does a normal CM Service Request
@@ -1125,6 +1135,9 @@ DREF MSISDN:46071: MSC conn use + release == 1 (0x100)
 DREF VLR subscr MSISDN:46071 usage increases to: 3
 DREF VLR subscr MSISDN:46071 usage decreases to: 2
 - BSSAP Clear --RAN_GERAN_A--> MS
+  bssap_clear_sent == 1
+- all requests serviced, conn has been released
+- BSS sends BSSMAP Clear Complete
 DREF MSISDN:46071: MSC conn use - release == 0 (0x0)
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASING}: Received Event SUBSCR_CONN_E_UNUSED
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASING}: state_chg to SUBSCR_CONN_S_RELEASED
@@ -1137,8 +1150,6 @@ DRLL MSISDN:46071: Freeing subscriber connection
 DREF VLR subscr MSISDN:46071 usage decreases to: 1
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Freeing instance
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Deallocated
-  bssap_clear_sent == 1
-- all requests serviced, conn has been released
   llist_count(&net->subscr_conns) == 0
 DREF freeing VLR subscr MSISDN:46071
 ===== test_reject_paging_resp_during_cm: SUCCESS
@@ -1239,6 +1250,12 @@ DREF MSISDN:46071: MSC conn use + release == 1 (0x100)
 DREF VLR subscr MSISDN:46071 usage increases to: 4
 DREF VLR subscr MSISDN:46071 usage decreases to: 3
 - BSSAP Clear --RAN_GERAN_A--> MS
+DREF VLR subscr MSISDN:46071 usage decreases to: 2
+<-- GSUP rx OSMO_GSUP_MSGT_UPDATE_LOCATION_RESULT: vlr_gsupc_read_cb() returns 0
+  bssap_clear_sent == 1
+- LU was successful, and the conn has already been closed
+  lu_result_sent == 1
+- BSS sends BSSMAP Clear Complete
 DREF MSISDN:46071: MSC conn use - release == 0 (0x0)
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASING}: Received Event SUBSCR_CONN_E_UNUSED
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASING}: state_chg to SUBSCR_CONN_S_RELEASED
@@ -1249,14 +1266,9 @@ DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_DONE}: fsm_lu_cleanup called with cau
 DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_DONE}: Freeing instance
 DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_DONE}: Deallocated
 DRLL MSISDN:46071: Freeing subscriber connection
-DREF VLR subscr MSISDN:46071 usage decreases to: 2
+DREF VLR subscr MSISDN:46071 usage decreases to: 1
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Freeing instance
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Deallocated
-DREF VLR subscr MSISDN:46071 usage decreases to: 1
-<-- GSUP rx OSMO_GSUP_MSGT_UPDATE_LOCATION_RESULT: vlr_gsupc_read_cb() returns 0
-  bssap_clear_sent == 1
-- LU was successful, and the conn has already been closed
-  lu_result_sent == 1
   llist_count(&net->subscr_conns) == 0
 ---
 - an SMS is sent, MS is paged
@@ -1350,6 +1362,9 @@ DREF MSISDN:46071: MSC conn use + release == 1 (0x100)
 DREF VLR subscr MSISDN:46071 usage increases to: 3
 DREF VLR subscr MSISDN:46071 usage decreases to: 2
 - BSSAP Clear --RAN_GERAN_A--> MS
+  dtap_tx_confirmed == 1
+  bssap_clear_sent == 1
+- BSS sends BSSMAP Clear Complete
 DREF MSISDN:46071: MSC conn use - release == 0 (0x0)
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASING}: Received Event SUBSCR_CONN_E_UNUSED
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASING}: state_chg to SUBSCR_CONN_S_RELEASED
@@ -1362,8 +1377,6 @@ DRLL MSISDN:46071: Freeing subscriber connection
 DREF VLR subscr MSISDN:46071 usage decreases to: 1
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Freeing instance
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Deallocated
-  dtap_tx_confirmed == 1
-  bssap_clear_sent == 1
 - SMS is done
   llist_count(&net->subscr_conns) == 0
 DREF freeing VLR subscr MSISDN:46071
@@ -1465,6 +1478,12 @@ DREF MSISDN:46071: MSC conn use + release == 1 (0x100)
 DREF VLR subscr MSISDN:46071 usage increases to: 4
 DREF VLR subscr MSISDN:46071 usage decreases to: 3
 - BSSAP Clear --RAN_GERAN_A--> MS
+DREF VLR subscr MSISDN:46071 usage decreases to: 2
+<-- GSUP rx OSMO_GSUP_MSGT_UPDATE_LOCATION_RESULT: vlr_gsupc_read_cb() returns 0
+  bssap_clear_sent == 1
+- LU was successful, and the conn has already been closed
+  lu_result_sent == 1
+- BSS sends BSSMAP Clear Complete
 DREF MSISDN:46071: MSC conn use - release == 0 (0x0)
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASING}: Received Event SUBSCR_CONN_E_UNUSED
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASING}: state_chg to SUBSCR_CONN_S_RELEASED
@@ -1475,14 +1494,9 @@ DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_DONE}: fsm_lu_cleanup called with cau
 DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_DONE}: Freeing instance
 DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_DONE}: Deallocated
 DRLL MSISDN:46071: Freeing subscriber connection
-DREF VLR subscr MSISDN:46071 usage decreases to: 2
+DREF VLR subscr MSISDN:46071 usage decreases to: 1
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Freeing instance
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Deallocated
-DREF VLR subscr MSISDN:46071 usage decreases to: 1
-<-- GSUP rx OSMO_GSUP_MSGT_UPDATE_LOCATION_RESULT: vlr_gsupc_read_cb() returns 0
-  bssap_clear_sent == 1
-- LU was successful, and the conn has already been closed
-  lu_result_sent == 1
   llist_count(&net->subscr_conns) == 0
 ---
 - an SMS is sent, MS is paged
@@ -1597,11 +1611,13 @@ DREF MSISDN:46071: MSC conn use - cm_service == 2 (0x102)
 DREF VLR subscr MSISDN:46071 usage increases to: 4
 DREF VLR subscr MSISDN:46071 usage decreases to: 3
 - BSSAP Clear --RAN_GERAN_A--> MS
-DREF MSISDN:46071: MSC conn use - release == 1 (0x2)
 DREF VLR subscr MSISDN:46071 usage decreases to: 2
 DREF VLR subscr MSISDN:46071 usage decreases to: 1
-DMM msc_subscr_conn_close(vsub=MSISDN:46071, cause=0): already in release, ignore.
-DREF MSISDN:46071: MSC conn use - dtap == 0 (0x0)
+DMM conn_close(vsub=MSISDN:46071, cause=0): already in release, ignore.
+DREF MSISDN:46071: MSC conn use - dtap == 1 (0x100)
+  bssap_clear_sent == 1
+- BSS sends BSSMAP Clear Complete
+DREF MSISDN:46071: MSC conn use - release == 0 (0x0)
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASING}: Received Event SUBSCR_CONN_E_UNUSED
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASING}: state_chg to SUBSCR_CONN_S_RELEASED
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Terminating (cause = OSMO_FSM_TERM_REGULAR)
@@ -1610,7 +1626,6 @@ DREF VLR subscr MSISDN:46071 usage decreases to: 0
 DREF freeing VLR subscr MSISDN:46071
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Freeing instance
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Deallocated
-  bssap_clear_sent == 1
   llist_count(&net->subscr_conns) == 0
 ===== test_accept_cm_during_paging_resp: SUCCESS
 
@@ -1710,6 +1725,12 @@ DREF MSISDN:46071: MSC conn use + release == 1 (0x100)
 DREF VLR subscr MSISDN:46071 usage increases to: 4
 DREF VLR subscr MSISDN:46071 usage decreases to: 3
 - BSSAP Clear --RAN_GERAN_A--> MS
+DREF VLR subscr MSISDN:46071 usage decreases to: 2
+<-- GSUP rx OSMO_GSUP_MSGT_UPDATE_LOCATION_RESULT: vlr_gsupc_read_cb() returns 0
+  bssap_clear_sent == 1
+- LU was successful, and the conn has already been closed
+  lu_result_sent == 1
+- BSS sends BSSMAP Clear Complete
 DREF MSISDN:46071: MSC conn use - release == 0 (0x0)
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASING}: Received Event SUBSCR_CONN_E_UNUSED
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASING}: state_chg to SUBSCR_CONN_S_RELEASED
@@ -1720,14 +1741,9 @@ DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_DONE}: fsm_lu_cleanup called with cau
 DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_DONE}: Freeing instance
 DVLR vlr_lu_fsm(901700000004620){VLR_ULA_S_DONE}: Deallocated
 DRLL MSISDN:46071: Freeing subscriber connection
-DREF VLR subscr MSISDN:46071 usage decreases to: 2
+DREF VLR subscr MSISDN:46071 usage decreases to: 1
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Freeing instance
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Deallocated
-DREF VLR subscr MSISDN:46071 usage decreases to: 1
-<-- GSUP rx OSMO_GSUP_MSGT_UPDATE_LOCATION_RESULT: vlr_gsupc_read_cb() returns 0
-  bssap_clear_sent == 1
-- LU was successful, and the conn has already been closed
-  lu_result_sent == 1
   llist_count(&net->subscr_conns) == 0
 ---
 - an SMS is sent, MS is paged
@@ -1819,6 +1835,9 @@ DREF MSISDN:46071: MSC conn use + release == 1 (0x100)
 DREF VLR subscr MSISDN:46071 usage increases to: 3
 DREF VLR subscr MSISDN:46071 usage decreases to: 2
 - BSSAP Clear --RAN_GERAN_A--> MS
+  dtap_tx_confirmed == 1
+  bssap_clear_sent == 1
+- BSS sends BSSMAP Clear Complete
 DREF MSISDN:46071: MSC conn use - release == 0 (0x0)
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASING}: Received Event SUBSCR_CONN_E_UNUSED
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASING}: state_chg to SUBSCR_CONN_S_RELEASED
@@ -1831,8 +1850,6 @@ DRLL MSISDN:46071: Freeing subscriber connection
 DREF VLR subscr MSISDN:46071 usage decreases to: 1
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Freeing instance
 DMM Subscr_Conn(901700000004620){SUBSCR_CONN_S_RELEASED}: Deallocated
-  dtap_tx_confirmed == 1
-  bssap_clear_sent == 1
 - SMS is done
   llist_count(&net->subscr_conns) == 0
 DREF freeing VLR subscr MSISDN:46071

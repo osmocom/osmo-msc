@@ -117,7 +117,7 @@ int iucs_rx_ranap_event(struct gsm_network *network,
 	case RANAP_IU_EVENT_LINK_INVALIDATED:
 		LOGP(DIUCS, LOGL_INFO, "IuCS release for %s\n",
 		     vlr_subscr_name(conn->vsub));
-		msc_subscr_conn_close(conn, 0);
+		msc_subscr_conn_rx_iu_release_complete(conn);
 		return 0;
 
 	case RANAP_IU_EVENT_SECURITY_MODE_COMPLETE:

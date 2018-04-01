@@ -93,6 +93,7 @@ static void test_ciph()
 
 	btw("LU was successful, and the conn has already been closed");
 	VERBOSE_ASSERT(lu_result_sent, == RES_ACCEPT, "%d");
+	bss_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 
 	BTW("after a while, a new conn sends a CM Service Request. VLR responds with Auth Req, 2nd auth vector");
@@ -132,6 +133,7 @@ static void test_ciph()
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
 	btw("all requests serviced, conn has been released");
+	bss_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 
 	BTW("an SMS is sent, MS is paged");
@@ -223,6 +225,7 @@ static void test_ciph()
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
 	btw("SMS is done, conn is gone");
+	bss_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 
 	BTW("subscriber detaches");
@@ -230,6 +233,7 @@ static void test_ciph()
 	ms_sends_msg("050130089910070000006402");
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
+	bss_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 	clear_vlr();
 	comment_end();
@@ -323,6 +327,7 @@ static void test_ciph_tmsi()
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
 	btw("LU was successful, and the conn has already been closed");
+	bss_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 
 	btw("Subscriber has the new TMSI");
@@ -371,6 +376,7 @@ static void test_ciph_tmsi()
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
 	btw("all requests serviced, conn has been released");
+	bss_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 
 	BTW("an SMS is sent, MS is paged");
@@ -462,6 +468,7 @@ static void test_ciph_tmsi()
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
 	btw("SMS is done, conn is gone");
+	bss_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 
 	BTW("subscriber detaches, using TMSI");
@@ -469,6 +476,7 @@ static void test_ciph_tmsi()
 	ms_sends_msg("050130" "05f4" "03020100");
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
+	bss_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 	clear_vlr();
 	comment_end();
@@ -558,6 +566,7 @@ static void test_ciph_imei()
 
 	btw("LU was successful, and the conn has already been closed");
 	VERBOSE_ASSERT(lu_result_sent, == RES_ACCEPT, "%d");
+	bss_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 
 	btw("Subscriber has the IMEI");
@@ -571,6 +580,7 @@ static void test_ciph_imei()
 	ms_sends_msg("050130089910070000006402");
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
+	bss_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 	clear_vlr();
 	comment_end();
@@ -662,6 +672,7 @@ static void test_ciph_imeisv()
 
 	btw("LU was successful, and the conn has already been closed");
 	VERBOSE_ASSERT(lu_result_sent, == RES_ACCEPT, "%d");
+	bss_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 
 	BTW("subscriber detaches");
@@ -669,6 +680,7 @@ static void test_ciph_imeisv()
 	ms_sends_msg("050130089910070000006402");
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
+	bss_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 	clear_vlr();
 	comment_end();
@@ -775,6 +787,7 @@ static void test_ciph_tmsi_imei()
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
 	btw("LU was successful, and the conn has already been closed");
+	bss_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 
 	btw("Subscriber has the IMEI and TMSI");
@@ -789,6 +802,7 @@ static void test_ciph_tmsi_imei()
 	ms_sends_msg("050130" "05f4" "03020100");
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
+	bss_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 	clear_vlr();
 	comment_end();
@@ -923,6 +937,7 @@ static void test_gsm_ciph_in_umts_env()
 
 	btw("LU was successful, and the conn has already been closed");
 	VERBOSE_ASSERT(lu_result_sent, == RES_ACCEPT, "%d");
+	bss_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 
 	BTW("after a while, a new conn sends a CM Service Request. VLR responds with *UMTS AKA* Auth Req, 2nd auth vector");
@@ -961,6 +976,7 @@ static void test_gsm_ciph_in_umts_env()
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
 	btw("all requests serviced, conn has been released");
+	bss_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 
 	BTW("an SMS is sent, MS is paged");
@@ -1031,6 +1047,7 @@ static void test_gsm_ciph_in_umts_env()
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
 	btw("SMS is done, conn is gone");
+	bss_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 
 	BTW("subscriber detaches");
@@ -1039,6 +1056,7 @@ static void test_gsm_ciph_in_umts_env()
 		     "089910070000106005" /* IMSI */);
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
+	bss_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 	clear_vlr();
 	comment_end();
@@ -1091,6 +1109,7 @@ static void test_a5_3_not_supported()
 	OSMO_ASSERT(!cipher_mode_cmd_sent);
 	VERBOSE_ASSERT(lu_result_sent, == RES_REJECT, "%d");
 
+	bss_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 	clear_vlr();
 	comment_end();

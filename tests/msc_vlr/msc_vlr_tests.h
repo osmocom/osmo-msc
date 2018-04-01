@@ -166,6 +166,9 @@ void send_sms(struct vlr_subscr *receiver,
 	      struct vlr_subscr *sender,
 	      char *str);
 
+void bss_sends_clear_complete();
+void rnc_sends_release_complete();
+
 void thwart_rx_non_initial_requests();
 
 #define EXPECT_ACCEPTED(expect_accepted) do { \
@@ -223,3 +226,31 @@ void fake_time_start();
 } while (0)
 
 extern const struct timeval fake_time_start_time;
+
+#define ASSERT_RELEASE_CLEAR(via_ran) \
+	switch (via_ran) { \
+	case RAN_GERAN_A: \
+		VERBOSE_ASSERT(bssap_clear_sent, == true, "%d"); \
+		break; \
+	case RAN_UTRAN_IU: \
+		VERBOSE_ASSERT(iu_release_sent, == true, "%d"); \
+		break; \
+	default: \
+		OSMO_ASSERT(false); \
+		break; \
+	}
+
+static inline void bss_rnc_sends_release_clear_complete(enum ran_type via_ran)
+{
+	switch (via_ran) {
+	case RAN_GERAN_A:
+		bss_sends_clear_complete();
+		return;
+	case RAN_UTRAN_IU:
+		rnc_sends_release_complete();
+		return;
+	default:
+		OSMO_ASSERT(false);
+		break;
+	}
+}

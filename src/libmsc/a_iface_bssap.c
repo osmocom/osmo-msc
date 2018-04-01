@@ -239,11 +239,16 @@ static int bssmap_rx_clear_rqst(struct gsm_subscriber_connection *conn,
 
 /* Endpoint to handle BSSMAP clear complete */
 static int bssmap_rx_clear_complete(struct osmo_sccp_user *scu,
-				    const struct a_conn_info *a_conn_info, struct msgb *msg)
+				    const struct a_conn_info *a_conn_info,
+				    struct gsm_subscriber_connection *conn)
 {
 	int rc;
 
-	LOGP(DMSC, LOGL_INFO, "Rx BSSMAP CLEAR COMPLETE, releasing SCCP connection\n");
+	LOGPCONN(conn, LOGL_INFO, "Rx BSSMAP CLEAR COMPLETE, releasing SCCP connection\n");
+
+	if (conn)
+		msc_subscr_conn_rx_bssmap_clear_complete(conn);
+
 	rc = osmo_sccp_tx_disconn(scu, a_conn_info->conn_id,
 				  NULL, SCCP_RELEASE_CAUSE_END_USER_ORIGINATED);
 
@@ -568,8 +573,6 @@ static int rx_bssmap(struct osmo_sccp_user *scu, const struct a_conn_info *a_con
 	switch (msg_type) {
 	case BSS_MAP_MSG_COMPLETE_LAYER_3:
 		return bssmap_rx_l3_compl(scu, a_conn_info, msg, &tp);
-	case BSS_MAP_MSG_CLEAR_COMPLETE:
-		return bssmap_rx_clear_complete(scu, a_conn_info, msg);
 	default:
 		break;
 	}
@@ -577,6 +580,13 @@ static int rx_bssmap(struct osmo_sccp_user *scu, const struct a_conn_info *a_con
 	conn = subscr_conn_lookup_a(a_conn_info->network, a_conn_info->conn_id);
 	if (!conn) {
 		LOGP(DBSSAP, LOGL_ERROR, "Couldn't find subscr_conn for conn_id=%d\n", a_conn_info->conn_id);
+		/* We expect a Clear Complete to come in on a valid conn. But if for some reason we still
+		 * have the SCCP connection while the subscriber connection data is already gone, at
+		 * least close the SCCP conn. */
+
+		if (msg_type == BSS_MAP_MSG_CLEAR_COMPLETE)
+			return bssmap_rx_clear_complete(scu, a_conn_info, NULL);
+
 		return -EINVAL;
 	}
 
@@ -585,6 +595,8 @@ static int rx_bssmap(struct osmo_sccp_user *scu, const struct a_conn_info *a_con
 	switch (msg_type) {
 	case BSS_MAP_MSG_CLEAR_RQST:
 		return bssmap_rx_clear_rqst(conn, msg, &tp);
+	case BSS_MAP_MSG_CLEAR_COMPLETE:
+		return bssmap_rx_clear_complete(scu, a_conn_info, conn);
 	case BSS_MAP_MSG_CLASSMARK_UPDATE:
 		return bssmap_rx_classmark_upd(conn, msg, &tp);
 	case BSS_MAP_MSG_CIPHER_MODE_COMPLETE:

@@ -77,6 +77,7 @@ static void test_ms_timeout_lu_auth_resp()
 	fake_time_passes(1, 235);
 	btw("SUBSCR_CONN_TIMEOUT has passed, conn is gone.");
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
+	bss_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 	VERBOSE_ASSERT(lu_result_sent, == RES_REJECT, "%d");
 
@@ -140,6 +141,7 @@ static void test_ms_timeout_cm_auth_resp()
 
 	btw("LU was successful, and the conn has already been closed");
 	VERBOSE_ASSERT(lu_result_sent, == RES_ACCEPT, "%d");
+	bss_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 
 	BTW("after a while, a new conn sends a CM Service Request. VLR responds with Auth Req, 2nd auth vector");
@@ -175,6 +177,7 @@ static void test_ms_timeout_cm_auth_resp()
 	fake_time_passes(1, 235);
 	btw("SUBSCR_CONN_TIMEOUT has passed, conn is gone.");
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
+	bss_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 	VERBOSE_ASSERT(cm_service_result_sent, == RES_REJECT, "%d");
 
@@ -212,6 +215,7 @@ static void test_ms_timeout_paging()
 	btw("LU was successful, and the conn has already been closed");
 	VERBOSE_ASSERT(lu_result_sent, == RES_ACCEPT, "%d");
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
+	bss_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 
 	BTW("an SMS is sent, MS is paged");
@@ -282,6 +286,7 @@ static void test_ms_timeout_paging()
 	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi);
 	OSMO_ASSERT(!vsub);
 
+	bss_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 	clear_vlr();
 	comment_end();

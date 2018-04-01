@@ -44,6 +44,7 @@ static void test_hlr_rej_auth_info_unknown_imsi()
 	VERBOSE_ASSERT(lu_result_sent, == RES_REJECT, "%d");
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
+	bss_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 	clear_vlr();
 	comment_end();
@@ -70,6 +71,7 @@ static void test_hlr_rej_auth_info_net_fail()
 	VERBOSE_ASSERT(lu_result_sent, == RES_REJECT, "%d");
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
+	bss_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 	clear_vlr();
 	comment_end();
@@ -128,6 +130,7 @@ static void test_hlr_rej_auth_info_net_fail_no_reuse_tuples()
 
 	btw("LU was successful, and the conn has already been closed");
 	VERBOSE_ASSERT(lu_result_sent, == RES_ACCEPT, "%d");
+	bss_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 
 
@@ -157,6 +160,7 @@ static void test_hlr_rej_auth_info_net_fail_no_reuse_tuples()
 	VERBOSE_ASSERT(lu_result_sent, == RES_REJECT, "%d");
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
+	bss_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 	clear_vlr();
 	comment_end();
@@ -215,6 +219,7 @@ static void test_hlr_rej_auth_info_unkown_imsi_no_reuse_tuples()
 
 	btw("LU was successful, and the conn has already been closed");
 	VERBOSE_ASSERT(lu_result_sent, == RES_ACCEPT, "%d");
+	bss_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 
 
@@ -245,6 +250,7 @@ static void test_hlr_rej_auth_info_unkown_imsi_no_reuse_tuples()
 	VERBOSE_ASSERT(lu_result_sent, == RES_REJECT, "%d");
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
+	bss_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 	clear_vlr();
 	comment_end();
@@ -277,6 +283,7 @@ static void test_hlr_acc_but_no_auth_tuples()
 	VERBOSE_ASSERT(lu_result_sent, == RES_REJECT, "%d");
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
+	bss_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 	clear_vlr();
 	comment_end();
@@ -335,6 +342,7 @@ static void test_hlr_rej_auth_info_net_fail_reuse_tuples()
 
 	btw("LU was successful, and the conn has already been closed");
 	VERBOSE_ASSERT(lu_result_sent, == RES_ACCEPT, "%d");
+	bss_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 
 
@@ -379,6 +387,7 @@ static void test_hlr_rej_auth_info_net_fail_reuse_tuples()
 
 	btw("LU was successful, and the conn has already been closed");
 	VERBOSE_ASSERT(lu_result_sent, == RES_ACCEPT, "%d");
+	bss_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 
 	clear_vlr();
@@ -402,6 +411,7 @@ static void test_hlr_rej_lu()
 		NULL);
 	VERBOSE_ASSERT(lu_result_sent, == RES_REJECT, "%d");
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
+	bss_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 
 	clear_vlr();
@@ -429,6 +439,7 @@ static void test_hlr_no_insert_data()
 	btw("LU was successful, and the conn has already been closed");
 	VERBOSE_ASSERT(lu_result_sent, == RES_ACCEPT, "%d");
 
+	bss_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 	clear_vlr();
 	comment_end();

@@ -795,6 +795,22 @@ void ms_sends_security_mode_complete()
 	msc_rx_sec_mode_compl(g_conn);
 }
 
+void bss_sends_clear_complete()
+{
+	btw("BSS sends BSSMAP Clear Complete");
+	OSMO_ASSERT(g_conn);
+	OSMO_ASSERT(g_conn->via_ran == RAN_GERAN_A);
+	msc_subscr_conn_rx_bssmap_clear_complete(g_conn);
+}
+
+void rnc_sends_release_complete()
+{
+	btw("RNC sends Iu Release Complete");
+	OSMO_ASSERT(g_conn);
+	OSMO_ASSERT(g_conn->via_ran == RAN_UTRAN_IU);
+	msc_subscr_conn_rx_iu_release_complete(g_conn);
+}
+
 const struct timeval fake_time_start_time = { 123, 456 };
 
 void fake_time_start()

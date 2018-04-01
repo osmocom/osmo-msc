@@ -77,7 +77,11 @@ bool msc_subscr_conn_is_establishing_auth_ciph(const struct gsm_subscriber_conne
 void msc_subscr_conn_communicating(struct gsm_subscriber_connection *conn);
 void msc_subscr_conn_close(struct gsm_subscriber_connection *conn,
 			   uint32_t cause);
+void msc_subscr_conn_mo_close(struct gsm_subscriber_connection *conn, uint32_t cause);
 bool msc_subscr_conn_in_release(struct gsm_subscriber_connection *conn);
+
+void msc_subscr_conn_rx_bssmap_clear_complete(struct gsm_subscriber_connection *conn);
+void msc_subscr_conn_rx_iu_release_complete(struct gsm_subscriber_connection *conn);
 
 enum msc_subscr_conn_use {
 	MSC_CONN_USE_UNTRACKED = -1,
@@ -107,6 +111,8 @@ _msc_subscr_conn_get(struct gsm_subscriber_connection *conn,
 void _msc_subscr_conn_put(struct gsm_subscriber_connection *conn,
 			  enum msc_subscr_conn_use balance_token,
 			  const char *file, int line);
+bool msc_subscr_conn_used_by(struct gsm_subscriber_connection *conn,
+			     enum msc_subscr_conn_use token);
 
 void msc_stop_paging(struct vlr_subscr *vsub);
 
