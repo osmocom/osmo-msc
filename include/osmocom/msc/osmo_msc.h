@@ -36,17 +36,17 @@ enum subscr_conn_fsm_state {
 	SUBSCR_CONN_S_RELEASED,
 };
 
-enum subscr_conn_from {
+enum complete_layer3_type {
 	SUBSCR_CONN_FROM_INVALID,
 	SUBSCR_CONN_FROM_LU,
 	SUBSCR_CONN_FROM_CM_SERVICE_REQ,
 	SUBSCR_CONN_FROM_PAGING_RESP,
 };
 
-extern const struct value_string subscr_conn_from_names[];
-static inline const char *subscr_conn_from_name(enum subscr_conn_from val)
+extern const struct value_string complete_layer3_type_names[];
+static inline const char *complete_layer3_type_name(enum complete_layer3_type val)
 {
-	return get_value_string(subscr_conn_from_names, val);
+	return get_value_string(complete_layer3_type_names, val);
 }
 
 enum msc_compl_l3_rc {

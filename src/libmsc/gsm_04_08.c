@@ -317,7 +317,7 @@ static const struct value_string lupd_names[] = {
  * Keep this function non-static for direct invocation by unit tests. */
 int mm_rx_loc_upd_req(struct gsm_subscriber_connection *conn, struct msgb *msg)
 {
-	static const enum subscr_conn_from conn_from_lu = SUBSCR_CONN_FROM_LU;
+	static const enum complete_layer3_type conn_from_lu = SUBSCR_CONN_FROM_LU;
 	struct gsm_network *net = conn->network;
 	struct gsm48_hdr *gh = msgb_l3(msg);
 	struct gsm48_loc_upd_req *lu;
@@ -687,7 +687,7 @@ accept_reuse:
  */
 int gsm48_rx_mm_serv_req(struct gsm_subscriber_connection *conn, struct msgb *msg)
 {
-	static const enum subscr_conn_from conn_from_cm_service_req =
+	static const enum complete_layer3_type conn_from_cm_service_req =
 		SUBSCR_CONN_FROM_CM_SERVICE_REQ;
 	struct gsm_network *net = conn->network;
 	uint8_t mi_type;
@@ -1144,7 +1144,7 @@ static uint8_t *gsm48_cm2_get_mi(uint8_t *classmark2_lv, unsigned int tot_len)
 /* Receive a PAGING RESPONSE message from the MS */
 static int gsm48_rx_rr_pag_resp(struct gsm_subscriber_connection *conn, struct msgb *msg)
 {
-	static const enum subscr_conn_from conn_from_paging_resp =
+	static const enum complete_layer3_type conn_from_paging_resp =
 		SUBSCR_CONN_FROM_PAGING_RESP;
 	struct gsm_network *net = conn->network;
 	struct gsm48_hdr *gh = msgb_l3(msg);

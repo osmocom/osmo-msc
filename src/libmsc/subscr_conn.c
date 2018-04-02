@@ -46,7 +46,7 @@ static const struct value_string subscr_conn_fsm_event_names[] = {
 	{ 0, NULL }
 };
 
-const struct value_string subscr_conn_from_names[] = {
+const struct value_string complete_layer3_type_names[] = {
 	OSMO_VALUE_STRING(SUBSCR_CONN_FROM_INVALID),
 	OSMO_VALUE_STRING(SUBSCR_CONN_FROM_LU),
 	OSMO_VALUE_STRING(SUBSCR_CONN_FROM_CM_SERVICE_REQ),
@@ -70,12 +70,12 @@ void subscr_conn_fsm_init(struct osmo_fsm_inst *fi, uint32_t event, void *data)
 void subscr_conn_fsm_new(struct osmo_fsm_inst *fi, uint32_t event, void *data)
 {
 	struct gsm_subscriber_connection *conn = fi->priv;
-	enum subscr_conn_from from = SUBSCR_CONN_FROM_INVALID;
+	enum complete_layer3_type from = SUBSCR_CONN_FROM_INVALID;
 	bool success;
 
 	if (data) {
-		from = *(enum subscr_conn_from*)data;
-		LOGPFSM(fi, "%s\n", subscr_conn_from_name(from));
+		from = *(enum complete_layer3_type*)data;
+		LOGPFSM(fi, "%s\n", complete_layer3_type_name(from));
 	}
 
 	/* If accepted, transition the state, all other cases mean failure. */
