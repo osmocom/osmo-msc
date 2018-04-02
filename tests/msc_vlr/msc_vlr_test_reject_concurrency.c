@@ -219,6 +219,7 @@ static void test_reject_cm_during_lu()
 	ms_sends_msg("05247803305886089910070000006402");
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 	VERBOSE_ASSERT(cm_service_result_sent, == RES_NONE, "%d");
+	VERBOSE_ASSERT(dtap_tx_confirmed, == true, "%d");
 	EXPECT_CONN_COUNT(1);
 
 	BTW("The first LU can still complete");

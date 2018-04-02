@@ -333,6 +333,7 @@ DMM IMSI:901700000004620: subscr_conn_release_when_unused: conn still being esta
 DREF IMSI:901700000004620: MSC conn use - dtap == 1 (0x4)
   lu_result_sent == 0
   cm_service_result_sent == 0
+  dtap_tx_confirmed == 1
   llist_count(&net->subscr_conns) == 1
 ---
 - The first LU can still complete
