@@ -359,9 +359,6 @@ struct gsm_sms {
 	char text[SMS_TEXT_SIZE];
 };
 
-extern void *tall_bsc_ctx;
-extern int ipacc_rtp_direct;
-
 struct gsm_subscriber_connection *msc_subscr_con_allocate(struct gsm_network *network);
 void msc_subscr_con_free(struct gsm_subscriber_connection *conn);
 

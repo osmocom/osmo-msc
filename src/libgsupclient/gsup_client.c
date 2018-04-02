@@ -33,8 +33,6 @@
 #include <errno.h>
 #include <string.h>
 
-extern void *tall_bsc_ctx;
-
 static void start_test_procedure(struct gsup_client *gsupc);
 
 static void gsup_client_send_ping(struct gsup_client *gsupc)
