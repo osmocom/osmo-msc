@@ -580,8 +580,8 @@ void msc_subscr_conn_update_id(struct gsm_subscriber_connection *conn,
 			       enum complete_layer3_type from, const char *id)
 {
        conn->complete_layer3_type = from;
-       osmo_fsm_inst_update_id(conn->fi, id);
-       LOGPFSML(conn->fi, LOGL_DEBUG, "Updated ID from %s\n", complete_layer3_type_name(from));
+       osmo_fsm_inst_update_id_f(conn->fi, "%s:%s", complete_layer3_type_name(from), id);
+       LOGPFSML(conn->fi, LOGL_DEBUG, "Updated ID\n");
 }
 
 static void rx_close_complete(struct gsm_subscriber_connection *conn, const char *label, bool *flag)
