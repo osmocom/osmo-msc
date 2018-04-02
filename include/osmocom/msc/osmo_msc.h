@@ -41,6 +41,9 @@ enum msc_compl_l3_rc {
 	MSC_CONN_REJECT = 1,
 };
 
+struct gsm_subscriber_connection *msc_subscr_conn_alloc(struct gsm_network *network,
+							enum ran_type via_ran, uint16_t lac);
+
 void msc_subscr_conn_update_id(struct gsm_subscriber_connection *conn,
 			       enum complete_layer3_type from, const char *id);
 char *msc_subscr_conn_get_conn_id(struct gsm_subscriber_connection *conn);

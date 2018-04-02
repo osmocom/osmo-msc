@@ -31,7 +31,7 @@ static void test_early_stage()
 	EXPECT_ACCEPTED(false);
 
 	btw("freshly allocated conn");
-	g_conn = msc_subscr_con_allocate(net);
+	g_conn = msc_subscr_conn_alloc(net, RAN_GERAN_A, 123);
 	EXPECT_ACCEPTED(false);
 
 	btw("conn_fsm present, in state NEW");

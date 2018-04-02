@@ -369,6 +369,26 @@ void msc_subscr_conn_init(void)
 	osmo_fsm_register(&subscr_conn_fsm);
 }
 
+/* Allocate a new subscriber conn. */
+struct gsm_subscriber_connection *msc_subscr_conn_alloc(struct gsm_network *network,
+							enum ran_type via_ran, uint16_t lac)
+{
+	struct gsm_subscriber_connection *conn;
+
+	conn = talloc_zero(network, struct gsm_subscriber_connection);
+	if (!conn)
+		return NULL;
+
+	*conn = (struct gsm_subscriber_connection){
+		.network = network,
+		.via_ran = via_ran,
+		.lac = lac,
+	};
+
+	llist_add_tail(&conn->entry, &network->subscr_conns);
+	return conn;
+}
+
 const struct value_string complete_layer3_type_names[] = {
 	{ COMPLETE_LAYER3_NONE, "NONE" },
 	{ COMPLETE_LAYER3_LU, "LU" },

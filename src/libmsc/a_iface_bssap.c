@@ -54,13 +54,9 @@ static struct gsm_subscriber_connection *subscr_conn_allocate_a(const struct a_c
 
 	LOGP(DMSC, LOGL_DEBUG, "Allocating A-Interface subscriber conn: lac %i, conn_id %i\n", lac, conn_id);
 
-	conn = talloc_zero(network, struct gsm_subscriber_connection);
+	conn = msc_subscr_conn_alloc(network, RAN_GERAN_A, lac);
 	if (!conn)
 		return NULL;
-
-	conn->network = network;
-	conn->via_ran = RAN_GERAN_A;
-	conn->lac = lac;
 
 	conn->a.conn_id = conn_id;
 	conn->a.scu = scu;
@@ -69,7 +65,6 @@ static struct gsm_subscriber_connection *subscr_conn_allocate_a(const struct a_c
 	 * identify later which BSC is responsible for this subscriber connection */
 	memcpy(&conn->a.bsc_addr, &a_conn_info->bsc->bsc_addr, sizeof(conn->a.bsc_addr));
 
-	llist_add_tail(&conn->entry, &network->subscr_conns);
 	LOGPCONN(conn, LOGL_DEBUG, "A-Interface subscriber connection successfully allocated!\n");
 	return conn;
 }

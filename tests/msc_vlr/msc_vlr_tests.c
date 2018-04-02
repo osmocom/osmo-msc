@@ -191,9 +191,7 @@ enum ran_type rx_from_ran = RAN_GERAN_A;
 struct gsm_subscriber_connection *conn_new(void)
 {
 	struct gsm_subscriber_connection *conn;
-	conn = msc_subscr_con_allocate(net);
-	conn->via_ran = rx_from_ran;
-	conn->lac = 23;
+	conn = msc_subscr_conn_alloc(net, rx_from_ran, 23);
 	if (conn->via_ran == RAN_UTRAN_IU) {
 		struct ranap_ue_conn_ctx *ue_ctx = talloc_zero(conn, struct ranap_ue_conn_ctx);
 		*ue_ctx = (struct ranap_ue_conn_ctx){

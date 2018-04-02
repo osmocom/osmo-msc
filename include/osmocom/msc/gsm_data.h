@@ -374,7 +374,6 @@ struct gsm_sms {
 	char text[SMS_TEXT_SIZE];
 };
 
-struct gsm_subscriber_connection *msc_subscr_con_allocate(struct gsm_network *network);
 void msc_subscr_con_free(struct gsm_subscriber_connection *conn);
 
 /* control interface handling */
