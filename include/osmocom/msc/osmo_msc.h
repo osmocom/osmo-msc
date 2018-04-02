@@ -36,24 +36,13 @@ enum subscr_conn_fsm_state {
 	SUBSCR_CONN_S_RELEASED,
 };
 
-enum complete_layer3_type {
-	SUBSCR_CONN_FROM_INVALID,
-	SUBSCR_CONN_FROM_LU,
-	SUBSCR_CONN_FROM_CM_SERVICE_REQ,
-	SUBSCR_CONN_FROM_PAGING_RESP,
-};
-
-extern const struct value_string complete_layer3_type_names[];
-static inline const char *complete_layer3_type_name(enum complete_layer3_type val)
-{
-	return get_value_string(complete_layer3_type_names, val);
-}
-
 enum msc_compl_l3_rc {
 	MSC_CONN_ACCEPT = 0,
 	MSC_CONN_REJECT = 1,
 };
 
+void msc_subscr_conn_update_id(struct gsm_subscriber_connection *conn,
+			       enum complete_layer3_type from, const char *id);
 char *msc_subscr_conn_get_conn_id(struct gsm_subscriber_connection *conn);
 int msc_create_conn_fsm(struct gsm_subscriber_connection *conn, const char *id);
 

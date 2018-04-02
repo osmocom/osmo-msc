@@ -317,7 +317,6 @@ static const struct value_string lupd_names[] = {
  * Keep this function non-static for direct invocation by unit tests. */
 int mm_rx_loc_upd_req(struct gsm_subscriber_connection *conn, struct msgb *msg)
 {
-	static const enum complete_layer3_type conn_from_lu = SUBSCR_CONN_FROM_LU;
 	struct gsm_network *net = conn->network;
 	struct gsm48_hdr *gh = msgb_l3(msg);
 	struct gsm48_loc_upd_req *lu;
@@ -341,6 +340,8 @@ int mm_rx_loc_upd_req(struct gsm_subscriber_connection *conn, struct msgb *msg)
 	if (rc)
 		/* logging already happened in msc_create_conn_fsm() */
 		return rc;
+
+	msc_subscr_conn_update_id(conn, COMPLETE_LAYER3_LU, mi_string);
 
 	conn->classmark.classmark1 = lu->classmark1;
 	conn->classmark.classmark1_set = true;
@@ -394,9 +395,7 @@ int mm_rx_loc_upd_req(struct gsm_subscriber_connection *conn, struct msgb *msg)
 
 	is_utran = (conn->via_ran == RAN_UTRAN_IU);
 	lu_fsm = vlr_loc_update(conn->fi,
-				SUBSCR_CONN_E_ACCEPTED,
-				SUBSCR_CONN_E_CN_CLOSE,
-				(void*)&conn_from_lu,
+				SUBSCR_CONN_E_ACCEPTED, SUBSCR_CONN_E_CN_CLOSE, NULL,
 				net->vlr, conn, vlr_lu_type, tmsi, imsi,
 				&old_lai, &new_lai,
 				is_utran || conn->network->authentication_required,
@@ -671,6 +670,7 @@ accept_reuse:
 	DEBUGP(DMM, "%s: re-using already accepted connection\n",
 	       vlr_subscr_name(conn->vsub));
 	conn->received_cm_service_request = true;
+	msc_subscr_conn_update_id(conn, conn->complete_layer3_type, mi_string);
 	return conn->network->vlr->ops.tx_cm_serv_acc(conn);
 }
 
@@ -687,8 +687,6 @@ accept_reuse:
  */
 int gsm48_rx_mm_serv_req(struct gsm_subscriber_connection *conn, struct msgb *msg)
 {
-	static const enum complete_layer3_type conn_from_cm_service_req =
-		SUBSCR_CONN_FROM_CM_SERVICE_REQ;
 	struct gsm_network *net = conn->network;
 	uint8_t mi_type;
 	char mi_string[GSM48_MI_SIZE];
@@ -774,12 +772,11 @@ int gsm48_rx_mm_serv_req(struct gsm_subscriber_connection *conn, struct msgb *ms
 		/* logging already happened in msc_create_conn_fsm() */
 		return rc;
 	}
+	msc_subscr_conn_update_id(conn, COMPLETE_LAYER3_CM_SERVICE_REQ, mi_string);
 
 	is_utran = (conn->via_ran == RAN_UTRAN_IU);
 	vlr_proc_acc_req(conn->fi,
-			 SUBSCR_CONN_E_ACCEPTED,
-			 SUBSCR_CONN_E_CN_CLOSE,
-			 (void*)&conn_from_cm_service_req,
+			 SUBSCR_CONN_E_ACCEPTED, SUBSCR_CONN_E_CN_CLOSE, NULL,
 			 net->vlr, conn,
 			 VLR_PR_ARQ_T_CM_SERV_REQ, mi-1, &lai,
 			 is_utran || conn->network->authentication_required,
@@ -1144,8 +1141,6 @@ static uint8_t *gsm48_cm2_get_mi(uint8_t *classmark2_lv, unsigned int tot_len)
 /* Receive a PAGING RESPONSE message from the MS */
 static int gsm48_rx_rr_pag_resp(struct gsm_subscriber_connection *conn, struct msgb *msg)
 {
-	static const enum complete_layer3_type conn_from_paging_resp =
-		SUBSCR_CONN_FROM_PAGING_RESP;
 	struct gsm_network *net = conn->network;
 	struct gsm48_hdr *gh = msgb_l3(msg);
 	struct gsm48_pag_resp *resp;
@@ -1176,15 +1171,14 @@ static int gsm48_rx_rr_pag_resp(struct gsm_subscriber_connection *conn, struct m
 	if (rc)
 		/* logging already happened in msc_create_conn_fsm() */
 		return rc;
+	msc_subscr_conn_update_id(conn, COMPLETE_LAYER3_PAGING_RESP, mi_string);
 
 	memcpy(conn->classmark.classmark2, classmark2_lv+1, *classmark2_lv);
 	conn->classmark.classmark2_len = *classmark2_lv;
 
 	is_utran = (conn->via_ran == RAN_UTRAN_IU);
 	vlr_proc_acc_req(conn->fi,
-			 SUBSCR_CONN_E_ACCEPTED,
-			 SUBSCR_CONN_E_CN_CLOSE,
-			 (void*)&conn_from_paging_resp,
+			 SUBSCR_CONN_E_ACCEPTED, SUBSCR_CONN_E_CN_CLOSE, NULL,
 			 net->vlr, conn,
 			 VLR_PR_ARQ_T_PAGING_RESP, mi_lv, &lai,
 			 is_utran || conn->network->authentication_required,

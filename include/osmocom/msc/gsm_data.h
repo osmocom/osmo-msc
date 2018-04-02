@@ -70,6 +70,19 @@ enum integrity_protection_state {
 	INTEGRITY_PROTECTION_IK_CK	= 2,
 };
 
+enum complete_layer3_type {
+	COMPLETE_LAYER3_NONE,
+	COMPLETE_LAYER3_LU,
+	COMPLETE_LAYER3_CM_SERVICE_REQ,
+	COMPLETE_LAYER3_PAGING_RESP,
+};
+
+extern const struct value_string complete_layer3_type_names[];
+static inline const char *complete_layer3_type_name(enum complete_layer3_type val)
+{
+	return get_value_string(complete_layer3_type_names, val);
+}
+
 /* active radio connection of a mobile subscriber */
 struct gsm_subscriber_connection {
 	/* global linked list of subscriber_connections */
@@ -77,6 +90,7 @@ struct gsm_subscriber_connection {
 
 	/* FSM instance to control the subscriber connection's permissions and lifetime. */
 	struct osmo_fsm_inst *fi;
+	enum complete_layer3_type complete_layer3_type;
 
 	/* usage count. If this drops to zero, we start the release
 	 * towards A/Iu */

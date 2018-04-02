@@ -46,14 +46,6 @@ static const struct value_string subscr_conn_fsm_event_names[] = {
 	{ 0, NULL }
 };
 
-const struct value_string complete_layer3_type_names[] = {
-	OSMO_VALUE_STRING(SUBSCR_CONN_FROM_INVALID),
-	OSMO_VALUE_STRING(SUBSCR_CONN_FROM_LU),
-	OSMO_VALUE_STRING(SUBSCR_CONN_FROM_CM_SERVICE_REQ),
-	OSMO_VALUE_STRING(SUBSCR_CONN_FROM_PAGING_RESP),
-	{ 0, NULL }
-};
-
 static void paging_event(struct gsm_subscriber_connection *conn,
 			 enum gsm_paging_event pe)
 {
@@ -70,13 +62,7 @@ void subscr_conn_fsm_init(struct osmo_fsm_inst *fi, uint32_t event, void *data)
 void subscr_conn_fsm_new(struct osmo_fsm_inst *fi, uint32_t event, void *data)
 {
 	struct gsm_subscriber_connection *conn = fi->priv;
-	enum complete_layer3_type from = SUBSCR_CONN_FROM_INVALID;
 	bool success;
-
-	if (data) {
-		from = *(enum complete_layer3_type*)data;
-		LOGPFSM(fi, "%s\n", complete_layer3_type_name(from));
-	}
 
 	/* If accepted, transition the state, all other cases mean failure. */
 	switch (event) {
@@ -103,13 +89,13 @@ void subscr_conn_fsm_new(struct osmo_fsm_inst *fi, uint32_t event, void *data)
 
 	success = (fi->state == SUBSCR_CONN_S_ACCEPTED);
 
-	if (from == SUBSCR_CONN_FROM_LU)
+	if (conn->complete_layer3_type == COMPLETE_LAYER3_LU)
 		rate_ctr_inc(&conn->network->msc_ctrs->ctr[
 		             	success ? MSC_CTR_LOC_UPDATE_COMPLETED
 					: MSC_CTR_LOC_UPDATE_FAILED]);
 
 	/* signal paging success or failure in case this was a paging */
-	if (from == SUBSCR_CONN_FROM_PAGING_RESP)
+	if (conn->complete_layer3_type == COMPLETE_LAYER3_PAGING_RESP)
 		paging_event(conn,
 			     success ? GSM_PAGING_SUCCEEDED
 			     	     : GSM_PAGING_EXPIRED);
@@ -125,7 +111,7 @@ void subscr_conn_fsm_new(struct osmo_fsm_inst *fi, uint32_t event, void *data)
 		return;
 	}
 
-	if (from == SUBSCR_CONN_FROM_CM_SERVICE_REQ) {
+	if (conn->complete_layer3_type == COMPLETE_LAYER3_CM_SERVICE_REQ) {
 		conn->received_cm_service_request = true;
 		LOGPFSML(fi, LOGL_DEBUG, "received_cm_service_request = true\n");
 	}
@@ -381,4 +367,20 @@ void msc_subscr_conn_communicating(struct gsm_subscriber_connection *conn)
 void msc_subscr_conn_init(void)
 {
 	osmo_fsm_register(&subscr_conn_fsm);
+}
+
+const struct value_string complete_layer3_type_names[] = {
+	{ COMPLETE_LAYER3_NONE, "NONE" },
+	{ COMPLETE_LAYER3_LU, "LU" },
+	{ COMPLETE_LAYER3_CM_SERVICE_REQ, "CM_SERVICE_REQ" },
+	{ COMPLETE_LAYER3_PAGING_RESP, "PAGING_RESP" },
+	{ 0, NULL }
+};
+
+void msc_subscr_conn_update_id(struct gsm_subscriber_connection *conn,
+			       enum complete_layer3_type from, const char *id)
+{
+       conn->complete_layer3_type = from;
+       osmo_fsm_inst_update_id(conn->fi, id);
+       LOGPFSML(conn->fi, LOGL_DEBUG, "Updated ID from %s\n", complete_layer3_type_name(from));
 }
