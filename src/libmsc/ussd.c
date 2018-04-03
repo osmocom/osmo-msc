@@ -74,8 +74,9 @@ int handle_rcv_ussd(struct gsm_subscriber_connection *conn, struct msgb *msg)
 	if (!rc) {
 		LOGP(DMM, LOGL_ERROR, "SS/USSD message parsing error, "
 			"rejecting request...\n");
-		rc = gsm0480_send_ussd_reject(conn, &req);
-		return rc;
+		gsm0480_send_ussd_reject(conn, &req);
+		/* The GSM 04.80 API uses inverted codes (0 means error) */
+		return -EPROTO;
 	}
 
 	/* Interrogation or releaseComplete? */
