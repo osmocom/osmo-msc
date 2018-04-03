@@ -40,7 +40,8 @@
 const char USSD_TEXT_OWN_NUMBER[] = "*#100#";
 
 /* A network-specific handler function */
-static int send_own_number(struct gsm_subscriber_connection *conn, const struct msgb *msg, const struct ss_request *req)
+static int send_own_number(struct gsm_subscriber_connection *conn,
+			   const struct ss_request *req)
 {
 	char *own_number = conn->vsub->msisdn;
 	char response_string[GSM_EXTENSION_LENGTH + 20];
@@ -50,7 +51,7 @@ static int send_own_number(struct gsm_subscriber_connection *conn, const struct 
 
 	/* Need trailing CR as EOT character */
 	snprintf(response_string, sizeof(response_string), "Your extension is %s\r", own_number);
-	return gsm0480_send_ussd_response(conn, msg, response_string, req);
+	return gsm0480_send_ussd_response(conn, response_string, req);
 }
 
 /* Entrypoint - handler function common to all mobile-originated USSDs */
@@ -72,7 +73,7 @@ int handle_rcv_ussd(struct gsm_subscriber_connection *conn, struct msgb *msg)
 	rc = gsm0480_decode_ss_request(gh, msgb_l3len(msg), &req);
 	if (!rc) {
 		DEBUGP(DMM, "Unhandled SS\n");
-		rc = gsm0480_send_ussd_reject(conn, msg, &req);
+		rc = gsm0480_send_ussd_reject(conn, &req);
 		return rc;
 	}
 
@@ -80,7 +81,7 @@ int handle_rcv_ussd(struct gsm_subscriber_connection *conn, struct msgb *msg)
 	if (req.ussd_text[0] == '\0' || req.ussd_text[0] == 0xFF) {
 		if (req.ss_code > 0) {
 			/* Assume interrogateSS or modification of it and reject */
-			rc = gsm0480_send_ussd_reject(conn, msg, &req);
+			rc = gsm0480_send_ussd_reject(conn, &req);
 			return rc;
 		}
 		/* Still assuming a Release-Complete and returning */
@@ -90,10 +91,10 @@ int handle_rcv_ussd(struct gsm_subscriber_connection *conn, struct msgb *msg)
 	msc_subscr_conn_communicating(conn);
 	if (!strcmp(USSD_TEXT_OWN_NUMBER, (const char *)req.ussd_text)) {
 		DEBUGP(DMM, "USSD: Own number requested\n");
-		rc = send_own_number(conn, msg, &req);
+		rc = send_own_number(conn, &req);
 	} else {
 		DEBUGP(DMM, "Unhandled USSD %s\n", req.ussd_text);
-		rc = gsm0480_send_ussd_reject(conn, msg, &req);
+		rc = gsm0480_send_ussd_reject(conn, &req);
 	}
 
 	return rc;
