@@ -36,6 +36,7 @@
 #include <osmocom/msc/a_reset.h>
 #include <osmocom/msc/transaction.h>
 #include <osmocom/msc/msc_mgcp.h>
+#include <osmocom/msc/msc_lac.h>
 
 #include <errno.h>
 
@@ -349,6 +350,10 @@ static int bssmap_rx_l3_compl(struct osmo_sccp_user *scu, const struct a_conn_in
 
 	if (rc == MSC_CONN_ACCEPT) {
 		LOGP(DMSC, LOGL_INFO, "User has been accepted by MSC.\n");
+
+		/* Record the LAC in a list for later use (related to other, future operations) */
+		msc_lac_update_a(network, lac, a_conn_info->bsc);
+
 		return 0;
 	} else if (rc == MSC_CONN_REJECT)
 		LOGP(DMSC, LOGL_INFO, "User has been rejected by MSC.\n");

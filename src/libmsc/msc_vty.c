@@ -53,6 +53,9 @@
 #include <osmocom/msc/gsm_04_14.h>
 #include <osmocom/msc/signal.h>
 #include <osmocom/msc/mncc_int.h>
+#include <osmocom/msc/a_iface.h>
+#include <osmocom/msc/msc_lac.h>
+#include <osmocom/sigtran/sccp_helpers.h>
 
 static struct gsm_network *gsmnet = NULL;
 
@@ -501,6 +504,43 @@ DEFUN(show_msc_conn, show_msc_conn_cmd,
 	vty_conn_hdr(vty);
 	llist_for_each_entry(conn, &gsmnet->subscr_conns, entry)
 		vty_dump_one_conn(vty, conn);
+
+	return CMD_SUCCESS;
+}
+
+DEFUN(show_lac, show_lac_cmd, "show lac", SHOW_STR "LAC Information\n")
+{
+	struct lac_context *lac_context;
+	char *sccp_addr_str;
+	char *ran_str;
+	uint16_t lac;
+	struct osmo_sccp_addr *bsc_addr;
+	struct osmo_ss7_instance *ss7;
+
+	vty_out(vty, "--LAC RAN ------------Remote SCCP Address%s",
+		VTY_NEWLINE);
+
+	llist_for_each_entry(lac_context, &gsmnet->lac_contexts, list) {
+
+		lac = lac_context->lac;
+		sccp_addr_str = "(error)";
+
+		if (lac_context->ran_type == RAN_GERAN_A) {
+			ran_str = "A";
+			bsc_addr = &lac_context->bsc_context->bsc_addr;
+			ss7 = osmo_ss7_instance_find(gsmnet->a.cs7_instance);
+			if (bsc_addr && ss7)
+				sccp_addr_str =
+				    osmo_sccp_addr_name(ss7, bsc_addr);
+		} else {
+			/* FIXME: Also add printing for Iu RNC addresses */
+			ran_str = "Iu";
+			sccp_addr_str = "(fixme)";
+		}
+
+		vty_out(vty, "%5u %3s %s%s", lac, ran_str, sccp_addr_str,
+			VTY_NEWLINE);
+	}
 
 	return CMD_SUCCESS;
 }
@@ -1451,6 +1491,7 @@ void msc_vty_init(struct gsm_network *msc_network)
 	install_element_ve(&show_subscr_cmd);
 	install_element_ve(&show_subscr_cache_cmd);
 	install_element_ve(&show_msc_conn_cmd);
+	install_element_ve(&show_lac_cmd);
 	install_element_ve(&show_msc_transaction_cmd);
 
 	install_element_ve(&sms_send_pend_cmd);

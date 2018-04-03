@@ -347,6 +347,10 @@ struct gsm_network {
 		/* MSISDN to which to route MO emergency calls */
 		char *route_to_msisdn;
 	} emergency;
+
+	/* A list head to keep track on the LACs that are assoctiated with
+	 * this network */
+	struct llist_head lac_contexts;
 };
 
 struct osmo_esme;

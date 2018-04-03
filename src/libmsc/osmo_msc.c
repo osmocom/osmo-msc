@@ -72,6 +72,7 @@ struct gsm_network *gsm_network_init(void *ctx, mncc_recv_cb_t mncc_recv)
 	net->mncc_recv = mncc_recv;
 
 	INIT_LLIST_HEAD(&net->a.bscs);
+	INIT_LLIST_HEAD(&net->lac_contexts);
 
 	return net;
 }

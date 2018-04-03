@@ -20,6 +20,7 @@ noinst_HEADERS = \
 	mncc.h \
 	mncc_int.h \
 	msc_ifaces.h \
+	msc_lac.h \
 	msc_mgcp.h \
 	openbscdefines.h \
 	a_reset.h \
