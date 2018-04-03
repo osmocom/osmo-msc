@@ -72,7 +72,8 @@ int handle_rcv_ussd(struct gsm_subscriber_connection *conn, struct msgb *msg)
 	gh = msgb_l3(msg);
 	rc = gsm0480_decode_ss_request(gh, msgb_l3len(msg), &req);
 	if (!rc) {
-		DEBUGP(DMM, "Unhandled SS\n");
+		LOGP(DMM, LOGL_ERROR, "SS/USSD message parsing error, "
+			"rejecting request...\n");
 		rc = gsm0480_send_ussd_reject(conn, &req);
 		return rc;
 	}
