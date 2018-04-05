@@ -216,8 +216,6 @@ void a_sccp_rx_udt(struct osmo_sccp_user *scu, const struct a_conn_info *a_conn_
 static int bssmap_rx_clear_rqst(struct gsm_subscriber_connection *conn,
 				struct msgb *msg, struct tlv_parsed *tp)
 {
-	int rc;
-	struct msgb *msg_resp;
 	uint8_t cause;
 
 	LOGPCONN(conn, LOGL_INFO, "Rx BSSMAP CLEAR REQUEST\n");
@@ -228,13 +226,9 @@ static int bssmap_rx_clear_rqst(struct gsm_subscriber_connection *conn,
 	}
 	cause = TLVP_VAL(tp, GSM0808_IE_CAUSE)[0];
 
-	/* Respond with clear command */
-	msg_resp = gsm0808_create_clear_command(GSM0808_CAUSE_CALL_CONTROL);
-	rc = osmo_sccp_tx_data_msg(conn->a.scu, conn->a.conn_id, msg_resp);
+	msc_subscr_conn_mo_close(conn, cause);
 
-	msc_clear_request(conn, cause);
-
-	return rc;
+	return 0;
 }
 
 /* Endpoint to handle BSSMAP clear complete */
