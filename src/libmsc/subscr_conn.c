@@ -103,8 +103,11 @@ static void evaluate_acceptance_outcome(struct osmo_fsm_inst *fi, bool conn_acce
 
 static void log_close_event(struct osmo_fsm_inst *fi, uint32_t event, void *data)
 {
-	if (data)
-		LOGPFSML(fi, LOGL_DEBUG, "Close event, cause %u\n", *(uint32_t*)data);
+	enum gsm48_reject_value *cause = data;
+	/* The close event itself is logged by the FSM. We can only add the cause value, if present. */
+	if (!cause || !*cause)
+		return;
+	LOGPFSML(fi, LOGL_NOTICE, "Close event, cause: %s\n", gsm48_reject_value_name(*cause));
 }
 
 static void subscr_conn_fsm_new(struct osmo_fsm_inst *fi, uint32_t event, void *data)
@@ -250,7 +253,7 @@ static int subscr_conn_fsm_timeout(struct osmo_fsm_inst *fi)
 		LOGPFSML(fi, LOGL_ERROR, "Timeout while releasing, discarding right now\n");
 		osmo_fsm_inst_term(fi, OSMO_FSM_TERM_TIMEOUT, NULL);
 	} else {
-		uint32_t cause = GSM_CAUSE_NET_FAIL;
+		enum gsm48_reject_value cause = GSM48_REJECT_CONGESTION;
 		osmo_fsm_inst_dispatch(fi, SUBSCR_CONN_E_CN_CLOSE, &cause);
 	}
 	return 0;
@@ -273,7 +276,7 @@ static void subscr_conn_fsm_releasing_onenter(struct osmo_fsm_inst *fi, uint32_t
 	}
 
 	/* Cancel all VLR FSMs, if any */
-	vlr_subscr_conn_timeout(conn->vsub);
+	vlr_subscr_cancel_attach_fsm(conn->vsub, OSMO_FSM_TERM_ERROR, GSM48_REJECT_CONGESTION);
 
 	/* If we're closing in a middle of a trans, we need to clean up */
 	trans_conn_closed(conn);

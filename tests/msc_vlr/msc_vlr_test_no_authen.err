@@ -145,9 +145,9 @@ DVLR Process_Access_Request_VLR(CM_SERVICE_REQ:901700000004620){PR_ARQ_S_INIT}: 
 DVLR Process_Access_Request_VLR(CM_SERVICE_REQ:901700000004620){PR_ARQ_S_INIT}: _proc_arq_vlr_post_pres()
 DVLR Process_Access_Request_VLR(CM_SERVICE_REQ:901700000004620){PR_ARQ_S_INIT}: _proc_arq_vlr_post_trace()
 DVLR Process_Access_Request_VLR(CM_SERVICE_REQ:901700000004620){PR_ARQ_S_INIT}: _proc_arq_vlr_post_imei()
-DVLR Process_Access_Request_VLR(CM_SERVICE_REQ:901700000004620){PR_ARQ_S_INIT}: proc_arq_fsm_done(VLR_PR_ARQ_RES_PASSED)
+DVLR Process_Access_Request_VLR(CM_SERVICE_REQ:901700000004620){PR_ARQ_S_INIT}: proc_arq_fsm_done(PASSED)
 DVLR Process_Access_Request_VLR(CM_SERVICE_REQ:901700000004620){PR_ARQ_S_INIT}: state_chg to PR_ARQ_S_DONE
-DVLR Process_Access_Request_VLR(CM_SERVICE_REQ:901700000004620){PR_ARQ_S_DONE}: Process Access Request result: VLR_PR_ARQ_RES_PASSED
+DVLR Process_Access_Request_VLR(CM_SERVICE_REQ:901700000004620){PR_ARQ_S_DONE}: Process Access Request result: PASSED
 - sending CM Service Accept for MSISDN:46071
 DMM Subscr_Conn(CM_SERVICE_REQ:901700000004620){SUBSCR_CONN_S_NEW}: Received Event SUBSCR_CONN_E_ACCEPTED
 DREF MSISDN:46071: MSC conn use + cm_service == 2 (0x9)
@@ -236,9 +236,9 @@ DVLR Process_Access_Request_VLR(PAGING_RESP:901700000004620){PR_ARQ_S_INIT}: _pr
 DVLR Process_Access_Request_VLR(PAGING_RESP:901700000004620){PR_ARQ_S_INIT}: _proc_arq_vlr_post_pres()
 DVLR Process_Access_Request_VLR(PAGING_RESP:901700000004620){PR_ARQ_S_INIT}: _proc_arq_vlr_post_trace()
 DVLR Process_Access_Request_VLR(PAGING_RESP:901700000004620){PR_ARQ_S_INIT}: _proc_arq_vlr_post_imei()
-DVLR Process_Access_Request_VLR(PAGING_RESP:901700000004620){PR_ARQ_S_INIT}: proc_arq_fsm_done(VLR_PR_ARQ_RES_PASSED)
+DVLR Process_Access_Request_VLR(PAGING_RESP:901700000004620){PR_ARQ_S_INIT}: proc_arq_fsm_done(PASSED)
 DVLR Process_Access_Request_VLR(PAGING_RESP:901700000004620){PR_ARQ_S_INIT}: state_chg to PR_ARQ_S_DONE
-DVLR Process_Access_Request_VLR(PAGING_RESP:901700000004620){PR_ARQ_S_DONE}: Process Access Request result: VLR_PR_ARQ_RES_PASSED
+DVLR Process_Access_Request_VLR(PAGING_RESP:901700000004620){PR_ARQ_S_DONE}: Process Access Request result: PASSED
 DMM Subscr_Conn(PAGING_RESP:901700000004620){SUBSCR_CONN_S_NEW}: Received Event SUBSCR_CONN_E_ACCEPTED
 DPAG Paging success for MSISDN:46071 (event=0)
 DPAG Calling paging cbfn.
@@ -316,11 +316,12 @@ DRLL Dispatching 04.08 message GSM48_MT_MM_IMSI_DETACH_IND (0x5:0x1)
 DMM IMSI DETACH INDICATION: MI(IMSI)=901700000004620
 DREF VLR subscr MSISDN:46071 usage increases to: 2
 DMM IMSI DETACH for MSISDN:46071
+DREF VLR subscr MSISDN:46071 usage increases to: 3
+DREF VLR subscr MSISDN:46071 usage decreases to: 2
 DREF VLR subscr MSISDN:46071 usage decreases to: 1
 DREF VLR subscr MSISDN:46071 usage decreases to: 0
 DREF freeing VLR subscr MSISDN:46071
 DMM Subscr_Conn{SUBSCR_CONN_S_NEW}: Received Event SUBSCR_CONN_E_CN_CLOSE
-DMM Subscr_Conn{SUBSCR_CONN_S_NEW}: Close event, cause 0
 DMM Subscr_Conn{SUBSCR_CONN_S_NEW}: state_chg to SUBSCR_CONN_S_RELEASING
 DREF unknown: MSC conn use + release == 2 (0x101)
 - BSSAP Clear --RAN_GERAN_A--> MS
@@ -520,9 +521,9 @@ DVLR Process_Access_Request_VLR(CM_SERVICE_REQ:50462976){PR_ARQ_S_INIT}: _proc_a
 DVLR Process_Access_Request_VLR(CM_SERVICE_REQ:50462976){PR_ARQ_S_INIT}: _proc_arq_vlr_post_pres()
 DVLR Process_Access_Request_VLR(CM_SERVICE_REQ:50462976){PR_ARQ_S_INIT}: _proc_arq_vlr_post_trace()
 DVLR Process_Access_Request_VLR(CM_SERVICE_REQ:50462976){PR_ARQ_S_INIT}: _proc_arq_vlr_post_imei()
-DVLR Process_Access_Request_VLR(CM_SERVICE_REQ:50462976){PR_ARQ_S_INIT}: proc_arq_fsm_done(VLR_PR_ARQ_RES_PASSED)
+DVLR Process_Access_Request_VLR(CM_SERVICE_REQ:50462976){PR_ARQ_S_INIT}: proc_arq_fsm_done(PASSED)
 DVLR Process_Access_Request_VLR(CM_SERVICE_REQ:50462976){PR_ARQ_S_INIT}: state_chg to PR_ARQ_S_DONE
-DVLR Process_Access_Request_VLR(CM_SERVICE_REQ:50462976){PR_ARQ_S_DONE}: Process Access Request result: VLR_PR_ARQ_RES_PASSED
+DVLR Process_Access_Request_VLR(CM_SERVICE_REQ:50462976){PR_ARQ_S_DONE}: Process Access Request result: PASSED
 - sending CM Service Accept for MSISDN:46071
 DMM Subscr_Conn(CM_SERVICE_REQ:50462976){SUBSCR_CONN_S_NEW}: Received Event SUBSCR_CONN_E_ACCEPTED
 DREF MSISDN:46071: MSC conn use + cm_service == 2 (0x9)
@@ -610,9 +611,9 @@ DVLR Process_Access_Request_VLR(PAGING_RESP:50462976){PR_ARQ_S_INIT}: _proc_arq_
 DVLR Process_Access_Request_VLR(PAGING_RESP:50462976){PR_ARQ_S_INIT}: _proc_arq_vlr_post_pres()
 DVLR Process_Access_Request_VLR(PAGING_RESP:50462976){PR_ARQ_S_INIT}: _proc_arq_vlr_post_trace()
 DVLR Process_Access_Request_VLR(PAGING_RESP:50462976){PR_ARQ_S_INIT}: _proc_arq_vlr_post_imei()
-DVLR Process_Access_Request_VLR(PAGING_RESP:50462976){PR_ARQ_S_INIT}: proc_arq_fsm_done(VLR_PR_ARQ_RES_PASSED)
+DVLR Process_Access_Request_VLR(PAGING_RESP:50462976){PR_ARQ_S_INIT}: proc_arq_fsm_done(PASSED)
 DVLR Process_Access_Request_VLR(PAGING_RESP:50462976){PR_ARQ_S_INIT}: state_chg to PR_ARQ_S_DONE
-DVLR Process_Access_Request_VLR(PAGING_RESP:50462976){PR_ARQ_S_DONE}: Process Access Request result: VLR_PR_ARQ_RES_PASSED
+DVLR Process_Access_Request_VLR(PAGING_RESP:50462976){PR_ARQ_S_DONE}: Process Access Request result: PASSED
 DMM Subscr_Conn(PAGING_RESP:50462976){SUBSCR_CONN_S_NEW}: Received Event SUBSCR_CONN_E_ACCEPTED
 DPAG Paging success for MSISDN:46071 (event=0)
 DPAG Calling paging cbfn.
@@ -846,11 +847,12 @@ DRLL Dispatching 04.08 message GSM48_MT_MM_IMSI_DETACH_IND (0x5:0x1)
 DMM IMSI DETACH INDICATION: MI(TMSI)=117835012
 DREF VLR subscr MSISDN:46071 usage increases to: 2
 DMM IMSI DETACH for MSISDN:46071
+DREF VLR subscr MSISDN:46071 usage increases to: 3
+DREF VLR subscr MSISDN:46071 usage decreases to: 2
 DREF VLR subscr MSISDN:46071 usage decreases to: 1
 DREF VLR subscr MSISDN:46071 usage decreases to: 0
 DREF freeing VLR subscr MSISDN:46071
 DMM Subscr_Conn{SUBSCR_CONN_S_NEW}: Received Event SUBSCR_CONN_E_CN_CLOSE
-DMM Subscr_Conn{SUBSCR_CONN_S_NEW}: Close event, cause 0
 DMM Subscr_Conn{SUBSCR_CONN_S_NEW}: state_chg to SUBSCR_CONN_S_RELEASING
 DREF unknown: MSC conn use + release == 2 (0x101)
 - BSSAP Clear --RAN_GERAN_A--> MS
@@ -1034,11 +1036,12 @@ DRLL Dispatching 04.08 message GSM48_MT_MM_IMSI_DETACH_IND (0x5:0x1)
 DMM IMSI DETACH INDICATION: MI(IMSI)=901700000004620
 DREF VLR subscr MSISDN:46071 usage increases to: 2
 DMM IMSI DETACH for MSISDN:46071
+DREF VLR subscr MSISDN:46071 usage increases to: 3
+DREF VLR subscr MSISDN:46071 usage decreases to: 2
 DREF VLR subscr MSISDN:46071 usage decreases to: 1
 DREF VLR subscr MSISDN:46071 usage decreases to: 0
 DREF freeing VLR subscr MSISDN:46071
 DMM Subscr_Conn{SUBSCR_CONN_S_NEW}: Received Event SUBSCR_CONN_E_CN_CLOSE
-DMM Subscr_Conn{SUBSCR_CONN_S_NEW}: Close event, cause 0
 DMM Subscr_Conn{SUBSCR_CONN_S_NEW}: state_chg to SUBSCR_CONN_S_RELEASING
 DREF unknown: MSC conn use + release == 2 (0x101)
 - BSSAP Clear --RAN_GERAN_A--> MS
@@ -1248,11 +1251,12 @@ DRLL Dispatching 04.08 message GSM48_MT_MM_IMSI_DETACH_IND (0x5:0x1)
 DMM IMSI DETACH INDICATION: MI(IMSI)=901700000004620
 DREF VLR subscr MSISDN:46071 usage increases to: 2
 DMM IMSI DETACH for MSISDN:46071
+DREF VLR subscr MSISDN:46071 usage increases to: 3
+DREF VLR subscr MSISDN:46071 usage decreases to: 2
 DREF VLR subscr MSISDN:46071 usage decreases to: 1
 DREF VLR subscr MSISDN:46071 usage decreases to: 0
 DREF freeing VLR subscr MSISDN:46071
 DMM Subscr_Conn{SUBSCR_CONN_S_NEW}: Received Event SUBSCR_CONN_E_CN_CLOSE
-DMM Subscr_Conn{SUBSCR_CONN_S_NEW}: Close event, cause 0
 DMM Subscr_Conn{SUBSCR_CONN_S_NEW}: state_chg to SUBSCR_CONN_S_RELEASING
 DREF unknown: MSC conn use + release == 2 (0x101)
 - BSSAP Clear --RAN_GERAN_A--> MS
@@ -1422,11 +1426,12 @@ DRLL Dispatching 04.08 message GSM48_MT_MM_IMSI_DETACH_IND (0x5:0x1)
 DMM IMSI DETACH INDICATION: MI(IMSI)=901700000004620
 DREF VLR subscr MSISDN:46071 usage increases to: 2
 DMM IMSI DETACH for MSISDN:46071
+DREF VLR subscr MSISDN:46071 usage increases to: 3
+DREF VLR subscr MSISDN:46071 usage decreases to: 2
 DREF VLR subscr MSISDN:46071 usage decreases to: 1
 DREF VLR subscr MSISDN:46071 usage decreases to: 0
 DREF freeing VLR subscr MSISDN:46071
 DMM Subscr_Conn{SUBSCR_CONN_S_NEW}: Received Event SUBSCR_CONN_E_CN_CLOSE
-DMM Subscr_Conn{SUBSCR_CONN_S_NEW}: Close event, cause 0
 DMM Subscr_Conn{SUBSCR_CONN_S_NEW}: state_chg to SUBSCR_CONN_S_RELEASING
 DREF unknown: MSC conn use + release == 2 (0x101)
 - BSSAP Clear --RAN_GERAN_A--> MS
@@ -1628,11 +1633,12 @@ DRLL Dispatching 04.08 message GSM48_MT_MM_IMSI_DETACH_IND (0x5:0x1)
 DMM IMSI DETACH INDICATION: MI(IMSI)=901700000004620
 DREF VLR subscr MSISDN:46071 usage increases to: 2
 DMM IMSI DETACH for MSISDN:46071
+DREF VLR subscr MSISDN:46071 usage increases to: 3
+DREF VLR subscr MSISDN:46071 usage decreases to: 2
 DREF VLR subscr MSISDN:46071 usage decreases to: 1
 DREF VLR subscr MSISDN:46071 usage decreases to: 0
 DREF freeing VLR subscr MSISDN:46071
 DMM Subscr_Conn{SUBSCR_CONN_S_NEW}: Received Event SUBSCR_CONN_E_CN_CLOSE
-DMM Subscr_Conn{SUBSCR_CONN_S_NEW}: Close event, cause 0
 DMM Subscr_Conn{SUBSCR_CONN_S_NEW}: state_chg to SUBSCR_CONN_S_RELEASING
 DREF unknown: MSC conn use + release == 2 (0x101)
 - BSSAP Clear --RAN_GERAN_A--> MS
@@ -2005,11 +2011,12 @@ DRLL Dispatching 04.08 message GSM48_MT_MM_IMSI_DETACH_IND (0x5:0x1)
 DMM IMSI DETACH INDICATION: MI(TMSI)=117835012
 DREF VLR subscr MSISDN:46071 usage increases to: 2
 DMM IMSI DETACH for MSISDN:46071
+DREF VLR subscr MSISDN:46071 usage increases to: 3
+DREF VLR subscr MSISDN:46071 usage decreases to: 2
 DREF VLR subscr MSISDN:46071 usage decreases to: 1
 DREF VLR subscr MSISDN:46071 usage decreases to: 0
 DREF freeing VLR subscr MSISDN:46071
 DMM Subscr_Conn{SUBSCR_CONN_S_NEW}: Received Event SUBSCR_CONN_E_CN_CLOSE
-DMM Subscr_Conn{SUBSCR_CONN_S_NEW}: Close event, cause 0
 DMM Subscr_Conn{SUBSCR_CONN_S_NEW}: state_chg to SUBSCR_CONN_S_RELEASING
 DREF unknown: MSC conn use + release == 2 (0x101)
 - BSSAP Clear --RAN_GERAN_A--> MS
@@ -2238,11 +2245,12 @@ DRLL Dispatching 04.08 message GSM48_MT_MM_IMSI_DETACH_IND (0x5:0x1)
 DMM IMSI DETACH INDICATION: MI(IMSI)=901700000004620
 DREF VLR subscr MSISDN:46071 usage increases to: 2
 DMM IMSI DETACH for MSISDN:46071
+DREF VLR subscr MSISDN:46071 usage increases to: 3
+DREF VLR subscr MSISDN:46071 usage decreases to: 2
 DREF VLR subscr MSISDN:46071 usage decreases to: 1
 DREF VLR subscr MSISDN:46071 usage decreases to: 0
 DREF freeing VLR subscr MSISDN:46071
 DMM Subscr_Conn{SUBSCR_CONN_S_NEW}: Received Event SUBSCR_CONN_E_CN_CLOSE
-DMM Subscr_Conn{SUBSCR_CONN_S_NEW}: Close event, cause 0
 DMM Subscr_Conn{SUBSCR_CONN_S_NEW}: state_chg to SUBSCR_CONN_S_RELEASING
 DREF unknown: MSC conn use + release == 2 (0x101)
 - BSSAP Clear --RAN_GERAN_A--> MS

@@ -170,8 +170,6 @@ struct vlr_subscr {
 	} cs;
 };
 
-enum vlr_proc_arq_result;
-
 enum vlr_ciph {
 	VLR_CIPH_NONE, /*< A5/0, no encryption */
 	VLR_CIPH_A5_1, /*< A5/1, encryption */
@@ -208,9 +206,9 @@ struct vlr_ops {
 	int (*tx_id_req)(void *msc_conn_ref, uint8_t mi_type);
 
 	int (*tx_lu_acc)(void *msc_conn_ref, uint32_t send_tmsi);
-	int (*tx_lu_rej)(void *msc_conn_ref, uint8_t cause);
+	int (*tx_lu_rej)(void *msc_conn_ref, enum gsm48_reject_value cause);
 	int (*tx_cm_serv_acc)(void *msc_conn_ref);
-	int (*tx_cm_serv_rej)(void *msc_conn_ref, enum vlr_proc_arq_result result);
+	int (*tx_cm_serv_rej)(void *msc_conn_ref, enum gsm48_reject_value cause);
 
 	int (*set_ciph_mode)(void *msc_conn_ref, bool umts_aka, bool retrieve_imeisv);
 
@@ -275,7 +273,9 @@ vlr_loc_update(struct osmo_fsm_inst *parent,
 	       bool is_r99, bool is_utran,
 	       bool assign_tmsi);
 
-void vlr_loc_update_conn_timeout(struct osmo_fsm_inst *fi);
+void vlr_loc_update_cancel(struct osmo_fsm_inst *fi,
+			   enum osmo_fsm_term_cause fsm_cause,
+			   uint8_t gsm48_cause);
 
 /* tell the VLR that the subscriber connection is gone */
 int vlr_subscr_disconnected(struct vlr_subscr *vsub);
@@ -288,7 +288,6 @@ int vlr_subscr_tx_auth_fail_rep(const struct vlr_subscr *vsub) __attribute__((wa
 void vlr_subscr_rx_ciph_res(struct vlr_subscr *vsub, struct vlr_ciph_result *res);
 int vlr_subscr_rx_tmsi_reall_compl(struct vlr_subscr *vsub);
 int vlr_subscr_rx_imsi_detach(struct vlr_subscr *vsub);
-void vlr_subscr_conn_timeout(struct vlr_subscr *vsub);
 
 struct vlr_instance *vlr_alloc(void *ctx, const struct vlr_ops *ops);
 int vlr_start(const char *gsup_unit_name, struct vlr_instance *vlr,
@@ -376,28 +375,12 @@ uint32_t vlr_timer(struct vlr_instance *vlr, uint32_t timer);
 
 int vlr_subscr_changed(struct vlr_subscr *vsub);
 int vlr_subscr_purge(struct vlr_subscr *vsub) __attribute__((warn_unused_result));
-void vlr_subscr_cancel(struct vlr_subscr *vsub, enum gsm48_gmm_cause cause);
+void vlr_subscr_cancel_attach_fsm(struct vlr_subscr *vsub,
+				  enum osmo_fsm_term_cause fsm_cause,
+				  uint8_t gsm48_cause);
 
 
 /* Process Acccess Request FSM */
-
-enum vlr_proc_arq_result {
-	VLR_PR_ARQ_RES_NONE,
-	VLR_PR_ARQ_RES_SYSTEM_FAILURE,
-	VLR_PR_ARQ_RES_ILLEGAL_SUBSCR,
-	VLR_PR_ARQ_RES_UNIDENT_SUBSCR,
-	VLR_PR_ARQ_RES_ROAMING_NOTALLOWED,
-	VLR_PR_ARQ_RES_ILLEGAL_EQUIP,
-	VLR_PR_ARQ_RES_UNKNOWN_ERROR,
-	VLR_PR_ARQ_RES_TIMEOUT,
-	VLR_PR_ARQ_RES_PASSED,
-};
-
-extern const struct value_string vlr_proc_arq_result_names[];
-static inline const char *vlr_proc_arq_result_name(enum vlr_proc_arq_result res)
-{
-	return get_value_string(vlr_proc_arq_result_names, res);
-}
 
 enum proc_arq_vlr_event {
 	PR_ARQ_E_START,
@@ -431,7 +414,9 @@ vlr_proc_acc_req(struct osmo_fsm_inst *parent,
 		 bool ciphering_required,
 		 bool is_r99, bool is_utran);
 
-void vlr_parq_conn_timeout(struct osmo_fsm_inst *fi);
+void vlr_parq_cancel(struct osmo_fsm_inst *fi,
+		     enum osmo_fsm_term_cause fsm_cause,
+		     enum gsm48_reject_value gsm48_cause);
 
 void vlr_parq_fsm_init(void);
 

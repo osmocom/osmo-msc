@@ -42,15 +42,6 @@ static const struct value_string fsm_auth_event_names[] = {
 	{ 0, NULL }
 };
 
-const struct value_string vlr_auth_fsm_result_names[] = {
-	OSMO_VALUE_STRING(VLR_AUTH_RES_ABORTED),
-	OSMO_VALUE_STRING(VLR_AUTH_RES_UNKNOWN_SUBSCR),
-	OSMO_VALUE_STRING(VLR_AUTH_RES_PROC_ERR),
-	OSMO_VALUE_STRING(VLR_AUTH_RES_AUTH_FAILED),
-	OSMO_VALUE_STRING(VLR_AUTH_RES_PASSED),
-	{0, NULL}
-};
-
 /* private state of the auth_fsm_instance */
 struct auth_fsm_priv {
 	struct vlr_subscr *vsub;
@@ -239,23 +230,30 @@ static void auth_fsm_onenter_failed(struct osmo_fsm_inst *fi, uint32_t prev_stat
 	}
 }
 
+static const char *vlr_auth_fsm_result_name(enum gsm48_reject_value result)
+{
+	if (!result)
+		return "PASSED";
+	return get_value_string(gsm48_gmm_cause_names, result);
+}
+
 /* Terminate the Auth FSM Instance and notify parent */
-static void auth_fsm_term(struct osmo_fsm_inst *fi, enum vlr_auth_fsm_result res)
+static void auth_fsm_term(struct osmo_fsm_inst *fi, enum gsm48_reject_value result)
 {
 	struct auth_fsm_priv *afp = fi->priv;
 	struct vlr_subscr *vsub = afp->vsub;
 
 	LOGPFSM(fi, "Authentication terminating with result %s\n",
-		vlr_auth_fsm_result_name(res));
+		vlr_auth_fsm_result_name(result));
 
 	/* Do one final state transition (mostly for logging purpose) */
-	if (res == VLR_AUTH_RES_PASSED)
+	if (!result)
 		osmo_fsm_inst_state_chg(fi, VLR_SUB_AS_AUTHENTICATED, 0, 0);
 	else
 		osmo_fsm_inst_state_chg(fi, VLR_SUB_AS_AUTH_FAILED, 0, 0);
 
 	/* return the result to the parent FSM */
-	osmo_fsm_inst_term(fi, OSMO_FSM_TERM_REGULAR, &res);
+	osmo_fsm_inst_term(fi, OSMO_FSM_TERM_REGULAR, &result);
 	vsub->auth_fsm = NULL;
 }
 
@@ -274,7 +272,7 @@ static int _vlr_subscr_authenticate(struct osmo_fsm_inst *fi)
 		LOGPFSML(fi, LOGL_ERROR, "A previous check ensured that an"
 			 " auth tuple was available, but now there is in fact"
 			 " none.\n");
-		auth_fsm_term(fi, VLR_AUTH_RES_PROC_ERR);
+		auth_fsm_term(fi, GSM48_REJECT_NETWORK_FAILURE);
 		return -1;
 	}
 
@@ -350,7 +348,7 @@ static void auth_fsm_wait_ai(struct osmo_fsm_inst *fi, uint32_t event,
 			goto pass;
 		}
 		/* result = procedure error */
-		auth_fsm_term(fi, VLR_AUTH_RES_PROC_ERR);
+		auth_fsm_term(fi, GSM48_REJECT_NETWORK_FAILURE);
 		return;
 	}
 
@@ -362,8 +360,8 @@ static void auth_fsm_wait_ai(struct osmo_fsm_inst *fi, uint32_t event,
 	case VLR_AUTH_E_HLR_SAI_NACK:
 		auth_fsm_term(fi,
 			      gsup->cause == GMM_CAUSE_IMSI_UNKNOWN?
-				      VLR_AUTH_RES_UNKNOWN_SUBSCR
-				      : VLR_AUTH_RES_PROC_ERR);
+				      GSM48_REJECT_IMSI_UNKNOWN_IN_HLR
+				      : GSM48_REJECT_NETWORK_FAILURE);
 		break;
 	}
 
@@ -396,10 +394,10 @@ static void auth_fsm_wait_auth_resp(struct osmo_fsm_inst *fi, uint32_t event,
 						VLR_SUB_AS_WAIT_ID_IMSI,
 						vlr_timer(vlr, 3270), 3270);
 			} else {
-				auth_fsm_term(fi, VLR_AUTH_RES_AUTH_FAILED);
+				auth_fsm_term(fi, GSM48_REJECT_ILLEGAL_MS);
 			}
 		} else {
-			auth_fsm_term(fi, VLR_AUTH_RES_PASSED);
+			auth_fsm_term(fi, 0);
 		}
 		break;
 	case VLR_AUTH_E_MS_AUTH_FAIL:
@@ -411,7 +409,7 @@ static void auth_fsm_wait_auth_resp(struct osmo_fsm_inst *fi, uint32_t event,
 					VLR_SUB_AS_NEEDS_AUTH_WAIT_SAI_RESYNC,
 					GSM_29002_TIMER_M, 0);
 		} else
-			auth_fsm_term(fi, VLR_AUTH_RES_AUTH_FAILED);
+			auth_fsm_term(fi, GSM48_REJECT_ILLEGAL_MS);
 		break;
 	}
 }
@@ -431,7 +429,7 @@ static void auth_fsm_wait_ai_resync(struct osmo_fsm_inst *fi,
 	     gsup->cause != GMM_CAUSE_IMSI_UNKNOWN) ||
 	    (event == VLR_AUTH_E_HLR_SAI_ABORT)) {
 		/* result = procedure error */
-		auth_fsm_term(fi, VLR_AUTH_RES_PROC_ERR);
+		auth_fsm_term(fi, GSM48_REJECT_NETWORK_FAILURE);
 	}
 	switch (event) {
 	case VLR_AUTH_E_HLR_SAI_ACK:
@@ -441,8 +439,8 @@ static void auth_fsm_wait_ai_resync(struct osmo_fsm_inst *fi,
 	case VLR_AUTH_E_HLR_SAI_NACK:
 		auth_fsm_term(fi,
 			      gsup->cause == GMM_CAUSE_IMSI_UNKNOWN?
-				      VLR_AUTH_RES_UNKNOWN_SUBSCR
-				      : VLR_AUTH_RES_PROC_ERR);
+				      GSM48_REJECT_IMSI_UNKNOWN_IN_HLR
+				      : GSM48_REJECT_NETWORK_FAILURE);
 		break;
 	}
 
@@ -476,16 +474,16 @@ static void auth_fsm_wait_auth_resp_resync(struct osmo_fsm_inst *fi,
 						vlr_timer(vlr, 3270), 3270);
 			} else {
 				/* Result = Aborted */
-				auth_fsm_term(fi, VLR_AUTH_RES_ABORTED);
+				auth_fsm_term(fi, GSM48_REJECT_SYNCH_FAILURE);
 			}
 		} else {
 			/* Result = Pass */
-			auth_fsm_term(fi, VLR_AUTH_RES_PASSED);
+			auth_fsm_term(fi, 0);
 		}
 		break;
 	case VLR_AUTH_E_MS_AUTH_FAIL:
 		/* Second failure: Result = Fail */
-		auth_fsm_term(fi, VLR_AUTH_RES_AUTH_FAILED);
+		auth_fsm_term(fi, GSM48_REJECT_SYNCH_FAILURE);
 		break;
 	}
 }

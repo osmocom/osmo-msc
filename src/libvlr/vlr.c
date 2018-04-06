@@ -271,23 +271,19 @@ int vlr_subscr_purge(struct vlr_subscr *vsub)
 	return vlr_subscr_tx_gsup_message(vsub, &gsup_msg);
 }
 
-void vlr_subscr_cancel(struct vlr_subscr *vsub, enum gsm48_gmm_cause cause)
+void vlr_subscr_cancel_attach_fsm(struct vlr_subscr *vsub,
+				  enum osmo_fsm_term_cause fsm_cause,
+				  uint8_t gsm48_cause)
 {
 	if (!vsub)
 		return;
 
-	if (vsub->lu_fsm) {
-		if (vsub->lu_fsm->state == VLR_ULA_S_WAIT_HLR_UPD)
-			osmo_fsm_inst_dispatch(vsub->lu_fsm,
-					       VLR_ULA_E_HLR_LU_RES,
-					       (void*)&cause);
-		else
-			osmo_fsm_inst_term(vsub->lu_fsm, OSMO_FSM_TERM_ERROR,
-					   0);
-	}
-
+	vlr_subscr_get(vsub);
+	if (vsub->lu_fsm)
+		vlr_loc_update_cancel(vsub->lu_fsm, fsm_cause, gsm48_cause);
 	if (vsub->proc_arq_fsm)
-		osmo_fsm_inst_term(vsub->proc_arq_fsm, OSMO_FSM_TERM_ERROR, 0);
+		vlr_parq_cancel(vsub->proc_arq_fsm, fsm_cause, gsm48_cause);
+	vlr_subscr_put(vsub);
 }
 
 /* Call vlr_subscr_cancel(), then completely drop the entry from the VLR */
@@ -803,10 +799,111 @@ static int vlr_subscr_handle_lu_err(struct vlr_subscr *vsub,
 	return 0;
 }
 
+static void gmm_cause_to_fsm_and_mm_cause(enum gsm48_gmm_cause gmm_cause,
+					  enum osmo_fsm_term_cause *fsm_cause_p,
+					  enum gsm48_reject_value *gsm48_rej_p)
+{
+	enum osmo_fsm_term_cause fsm_cause = OSMO_FSM_TERM_ERROR;
+	enum gsm48_reject_value gsm48_rej = GSM48_REJECT_NETWORK_FAILURE;
+	switch (gmm_cause) {
+	case GMM_CAUSE_IMSI_UNKNOWN:
+		gsm48_rej = GSM48_REJECT_IMSI_UNKNOWN_IN_HLR;
+		break;
+	case GMM_CAUSE_ILLEGAL_MS:
+		gsm48_rej = GSM48_REJECT_ILLEGAL_MS;
+		break;
+	case GMM_CAUSE_IMEI_NOT_ACCEPTED:
+		gsm48_rej = GSM48_REJECT_IMEI_NOT_ACCEPTED;
+		break;
+	case GMM_CAUSE_ILLEGAL_ME:
+		gsm48_rej = GSM48_REJECT_ILLEGAL_ME;
+		break;
+	case GMM_CAUSE_GPRS_NOTALLOWED:
+		gsm48_rej = GSM48_REJECT_GPRS_NOT_ALLOWED;
+		break;
+	case GMM_CAUSE_GPRS_OTHER_NOTALLOWED:
+		gsm48_rej = GSM48_REJECT_SERVICES_NOT_ALLOWED;
+		break;
+	case GMM_CAUSE_MS_ID_NOT_DERIVED:
+		gsm48_rej = GSM48_REJECT_MS_IDENTITY_NOT_DERVIVABLE;
+		break;
+	case GMM_CAUSE_IMPL_DETACHED:
+		gsm48_rej = GSM48_REJECT_IMPLICITLY_DETACHED;
+		break;
+	case GMM_CAUSE_PLMN_NOTALLOWED:
+		gsm48_rej = GSM48_REJECT_PLMN_NOT_ALLOWED;
+		break;
+	case GMM_CAUSE_LA_NOTALLOWED:
+		gsm48_rej = GSM48_REJECT_LOC_NOT_ALLOWED;
+		break;
+	case GMM_CAUSE_ROAMING_NOTALLOWED:
+		gsm48_rej = GSM48_REJECT_ROAMING_NOT_ALLOWED;
+		break;
+	case GMM_CAUSE_NO_GPRS_PLMN:
+		gsm48_rej = GSM48_REJECT_GPRS_NOT_ALLOWED_IN_PLMN;
+		break;
+	case GMM_CAUSE_MSC_TEMP_NOTREACH:
+		gsm48_rej = GSM48_REJECT_MSC_TMP_NOT_REACHABLE;
+		break;
+	case GMM_CAUSE_SYNC_FAIL:
+		gsm48_rej = GSM48_REJECT_SYNCH_FAILURE;
+		break;
+	case GMM_CAUSE_CONGESTION:
+		gsm48_rej = GSM48_REJECT_CONGESTION;
+		break;
+	case GMM_CAUSE_SEM_INCORR_MSG:
+		gsm48_rej = GSM48_REJECT_INCORRECT_MESSAGE;
+		break;
+	case GMM_CAUSE_INV_MAND_INFO:
+		gsm48_rej = GSM48_REJECT_INVALID_MANDANTORY_INF;
+		break;
+	case GMM_CAUSE_MSGT_NOTEXIST_NOTIMPL:
+		gsm48_rej = GSM48_REJECT_MSG_TYPE_NOT_IMPLEMENTED;
+		break;
+	case GMM_CAUSE_MSGT_INCOMP_P_STATE:
+		gsm48_rej = GSM48_REJECT_MSG_TYPE_NOT_COMPATIBLE;
+		break;
+	case GMM_CAUSE_IE_NOTEXIST_NOTIMPL:
+		gsm48_rej = GSM48_REJECT_INF_ELEME_NOT_IMPLEMENTED;
+		break;
+	case GMM_CAUSE_COND_IE_ERR:
+		gsm48_rej = GSM48_REJECT_CONDTIONAL_IE_ERROR;
+		break;
+	case GMM_CAUSE_MSG_INCOMP_P_STATE:
+		gsm48_rej = GSM48_REJECT_MSG_NOT_COMPATIBLE;
+		break;
+	case GMM_CAUSE_PROTO_ERR_UNSPEC:
+		gsm48_rej = GSM48_REJECT_PROTOCOL_ERROR;
+		break;
+
+	case GMM_CAUSE_NO_SUIT_CELL_IN_LA:
+	case GMM_CAUSE_MAC_FAIL:
+	case GMM_CAUSE_GSM_AUTH_UNACCEPT:
+	case GMM_CAUSE_NOT_AUTH_FOR_CSG:
+	case GMM_CAUSE_SMS_VIA_GPRS_IN_RA:
+	case GMM_CAUSE_NO_PDP_ACTIVATED:
+	case GMM_CAUSE_NET_FAIL:
+		gsm48_rej = GSM48_REJECT_NETWORK_FAILURE;
+		break;
+	}
+	switch (gmm_cause) {
+		/* refine any error causes here? */
+	default:
+		fsm_cause = OSMO_FSM_TERM_ERROR;
+		break;
+	}
+	if (fsm_cause_p)
+		*fsm_cause_p = fsm_cause;
+	if (gsm48_rej_p)
+		*gsm48_rej_p = gsm48_rej;
+}
+
 /* Handle LOCATION CANCEL request from HLR */
 static int vlr_subscr_handle_cancel_req(struct vlr_subscr *vsub,
 					struct osmo_gsup_message *gsup_msg)
 {
+	enum gsm48_reject_value gsm48_rej;
+	enum osmo_fsm_term_cause fsm_cause;
 	struct osmo_gsup_message gsup_reply = {0};
 	int rc, is_update_procedure = !gsup_msg->cancel_type ||
 		gsup_msg->cancel_type == OSMO_GSUP_CANCEL_TYPE_UPDATE;
@@ -818,7 +915,8 @@ static int vlr_subscr_handle_cancel_req(struct vlr_subscr *vsub,
 	gsup_reply.message_type = OSMO_GSUP_MSGT_LOCATION_CANCEL_RESULT;
 	rc = vlr_subscr_tx_gsup_message(vsub, &gsup_reply);
 
-	vlr_subscr_cancel(vsub, gsup_msg->cause);
+	gmm_cause_to_fsm_and_mm_cause(gsup_msg->cause, &fsm_cause, &gsm48_rej);
+	vlr_subscr_cancel_attach_fsm(vsub, fsm_cause, gsm48_rej);
 
 	return rc;
 }
@@ -998,7 +1096,7 @@ bool vlr_subscr_expire(struct vlr_subscr *vsub)
 int vlr_subscr_rx_imsi_detach(struct vlr_subscr *vsub)
 {
 	/* paranoia: should any LU or PARQ FSMs still be running, stop them. */
-	vlr_subscr_cancel(vsub, GMM_CAUSE_IMPL_DETACHED);
+	vlr_subscr_cancel_attach_fsm(vsub, OSMO_FSM_TERM_ERROR, GSM48_REJECT_CONGESTION);
 
 	vsub->imsi_detached_flag = true;
 
@@ -1015,15 +1113,7 @@ int vlr_subscr_rx_imsi_detach(struct vlr_subscr *vsub)
  */
 void vlr_subscr_conn_timeout(struct vlr_subscr *vsub)
 {
-	if (!vsub)
-		return;
-
-	vlr_subscr_get(vsub);
-	if (vsub->lu_fsm)
-		vlr_loc_update_conn_timeout(vsub->lu_fsm);
-	if (vsub->proc_arq_fsm)
-		vlr_parq_conn_timeout(vsub->proc_arq_fsm);
-	vlr_subscr_put(vsub);
+	vlr_subscr_cancel_attach_fsm(vsub, OSMO_FSM_TERM_TIMEOUT, GSM48_REJECT_CONGESTION);
 }
 
 struct vlr_instance *vlr_alloc(void *ctx, const struct vlr_ops *ops)

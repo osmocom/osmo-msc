@@ -637,7 +637,7 @@ static int fake_vlr_tx_lu_acc(void *msc_conn_ref, uint32_t send_tmsi)
 	return 0;
 }
 
-static int fake_vlr_tx_lu_rej(void *msc_conn_ref, uint8_t cause)
+static int fake_vlr_tx_lu_rej(void *msc_conn_ref, enum gsm48_reject_value cause)
 {
 	struct gsm_subscriber_connection *conn = msc_conn_ref;
 	btw("sending LU Reject for %s, cause %u", vlr_subscr_name(conn->vsub), cause);
@@ -653,13 +653,11 @@ static int fake_vlr_tx_cm_serv_acc(void *msc_conn_ref)
 	return 0;
 }
 
-static int fake_vlr_tx_cm_serv_rej(void *msc_conn_ref,
-				   enum vlr_proc_arq_result result)
+static int fake_vlr_tx_cm_serv_rej(void *msc_conn_ref, enum gsm48_reject_value cause)
 {
 	struct gsm_subscriber_connection *conn = msc_conn_ref;
-	btw("sending CM Service Reject for %s, result %s",
-	    vlr_subscr_name(conn->vsub),
-	    vlr_proc_arq_result_name(result));
+	btw("sending CM Service Reject for %s, cause: %s",
+	    vlr_subscr_name(conn->vsub), gsm48_reject_value_name(cause));
 	cm_service_result_sent |= RES_REJECT;
 	return 0;
 }

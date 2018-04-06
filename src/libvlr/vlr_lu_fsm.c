@@ -741,11 +741,10 @@ static void lu_fsm_success(struct osmo_fsm_inst *fi)
 	_lu_fsm_done(fi, VLR_FSM_RESULT_SUCCESS);
 }
 
-static void lu_fsm_failure(struct osmo_fsm_inst *fi, uint8_t rej_cause)
+static void lu_fsm_failure(struct osmo_fsm_inst *fi, enum gsm48_reject_value rej_cause)
 {
 	struct lu_fsm_priv *lfp = lu_fsm_fi_priv(fi);
-	if (rej_cause)
-		lfp->vlr->ops.tx_lu_rej(lfp->msc_conn_ref, rej_cause);
+	lfp->vlr->ops.tx_lu_rej(lfp->msc_conn_ref, rej_cause ? : GSM48_REJECT_NETWORK_FAILURE);
 	_lu_fsm_done(fi, VLR_FSM_RESULT_FAILURE);
 }
 
@@ -1097,44 +1096,19 @@ static void lu_fsm_wait_auth(struct osmo_fsm_inst *fi, uint32_t event,
 			     void *data)
 {
 	struct lu_fsm_priv *lfp = lu_fsm_fi_priv(fi);
-	enum vlr_auth_fsm_result *res = data;
-	uint8_t rej_cause = 0;
+	enum gsm48_reject_value *res = data;
 
 	OSMO_ASSERT(event == VLR_ULA_E_AUTH_RES);
 
 	lfp->upd_hlr_vlr_fsm = NULL;
 
-	if (res) {
-		switch (*res) {
-		case VLR_AUTH_RES_PASSED:
-			/* Result == Pass */
-			vlr_loc_upd_post_auth(fi);
-			return;
-		case VLR_AUTH_RES_ABORTED:
-			/* go to Idle with no response */
-			rej_cause = 0;
-			break;
-		case VLR_AUTH_RES_UNKNOWN_SUBSCR:
-			/* FIXME: delete subscribe record */
-			rej_cause = GSM48_REJECT_IMSI_UNKNOWN_IN_HLR;
-			break;
-		case VLR_AUTH_RES_AUTH_FAILED:
-			/* cause = illegal subscriber */
-			rej_cause = GSM48_REJECT_ILLEGAL_MS;
-			break;
-		case VLR_AUTH_RES_PROC_ERR:
-			/* cause = system failure */
-			rej_cause = GSM48_REJECT_NETWORK_FAILURE;
-			break;
-		default:
-			LOGPFSML(fi, LOGL_ERROR, "event without effect: %s\n",
-				 osmo_fsm_event_name(fi->fsm, event));
-			break;
-		}
-	} else
-		rej_cause = GSM48_REJECT_NETWORK_FAILURE;
+	if (!res || *res) {
+		lu_fsm_failure(fi, res? *res : GSM48_REJECT_NETWORK_FAILURE);
+		return;
+	}
 
-	lu_fsm_failure(fi, rej_cause);
+	/* Result == Pass */
+	vlr_loc_upd_post_auth(fi);
 }
 
 static void lu_fsm_wait_ciph(struct osmo_fsm_inst *fi, uint32_t event,
@@ -1489,14 +1463,20 @@ vlr_loc_update(struct osmo_fsm_inst *parent,
 	return fi;
 }
 
-/* Gracefully terminate an FSM created by vlr_loc_update() in case of external
- * timeout (i.e. from MSC). */
-void vlr_loc_update_conn_timeout(struct osmo_fsm_inst *fi)
+void vlr_loc_update_cancel(struct osmo_fsm_inst *fi,
+			   enum osmo_fsm_term_cause fsm_cause,
+			   uint8_t gsm48_cause)
 {
-	if (!fi || fi->state == VLR_ULA_S_DONE)
-		return;
-	LOGPFSM(fi, "Connection timed out\n");
-	lu_fsm_failure(fi, GSM48_REJECT_CONGESTION);
+	struct lu_fsm_priv *lfp;
+
+	OSMO_ASSERT(fi);
+	OSMO_ASSERT(fi->fsm == &vlr_lu_fsm);
+
+	lfp = fi->priv;
+	lfp->rej_cause = gsm48_cause;
+
+	if (fi->state != VLR_ULA_S_DONE)
+		lu_fsm_failure(fi, gsm48_cause);
 }
 
 void vlr_lu_fsm_init(void)

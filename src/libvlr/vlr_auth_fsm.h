@@ -11,21 +11,6 @@ struct vlr_auth_resp_par {
 	const uint8_t *auts;
 };
 
-/* Result communicated back to parent FMS */
-enum vlr_auth_fsm_result {
-	VLR_AUTH_RES_ABORTED,
-	VLR_AUTH_RES_UNKNOWN_SUBSCR,
-	VLR_AUTH_RES_PROC_ERR,
-	VLR_AUTH_RES_AUTH_FAILED,
-	VLR_AUTH_RES_PASSED,
-};
-
-extern const struct value_string vlr_auth_fsm_result_names[];
-static inline const char *vlr_auth_fsm_result_name(enum vlr_auth_fsm_result val)
-{
-	return get_value_string(vlr_auth_fsm_result_names, val);
-}
-
 enum vlr_fsm_auth_event {
 	VLR_AUTH_E_START,
 	/* TS 23.018 OAS_VLR1(2): SendAuthInfo ACK from HLR */

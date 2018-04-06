@@ -36,19 +36,6 @@
  * Process_Access_Request_VLR, TS 29.002 Chapter 25.4.2
  ***********************************************************************/
 
-const struct value_string vlr_proc_arq_result_names[] = {
-	OSMO_VALUE_STRING(VLR_PR_ARQ_RES_NONE),
-	OSMO_VALUE_STRING(VLR_PR_ARQ_RES_SYSTEM_FAILURE),
-	OSMO_VALUE_STRING(VLR_PR_ARQ_RES_ILLEGAL_SUBSCR),
-	OSMO_VALUE_STRING(VLR_PR_ARQ_RES_UNIDENT_SUBSCR),
-	OSMO_VALUE_STRING(VLR_PR_ARQ_RES_ROAMING_NOTALLOWED),
-	OSMO_VALUE_STRING(VLR_PR_ARQ_RES_ILLEGAL_EQUIP),
-	OSMO_VALUE_STRING(VLR_PR_ARQ_RES_UNKNOWN_ERROR),
-	OSMO_VALUE_STRING(VLR_PR_ARQ_RES_TIMEOUT),
-	OSMO_VALUE_STRING(VLR_PR_ARQ_RES_PASSED),
-	{ 0, NULL }
-};
-
 static const struct value_string proc_arq_vlr_event_names[] = {
 	OSMO_VALUE_STRING(PR_ARQ_E_START),
 	OSMO_VALUE_STRING(PR_ARQ_E_ID_IMSI),
@@ -73,7 +60,7 @@ struct proc_arq_priv {
 	void *parent_event_data;
 
 	enum vlr_parq_type type;
-	enum vlr_proc_arq_result result;
+	enum gsm48_reject_value result; /*< 0 on success */
 	bool by_tmsi;
 	char imsi[16];
 	uint32_t tmsi;
@@ -97,15 +84,20 @@ static void assoc_par_with_subscr(struct osmo_fsm_inst *fi, struct vlr_subscr *v
 	vlr->ops.subscr_assoc(par->msc_conn_ref, par->vsub);
 }
 
+static const char *vlr_proc_arq_result_name(const struct osmo_fsm_inst *fi)
+{
+	struct proc_arq_priv *par = fi->priv;
+	return par->result? gsm48_reject_value_name(par->result) : "PASSED";
+}
+
 #define proc_arq_fsm_done(fi, res) _proc_arq_fsm_done(fi, res, __FILE__, __LINE__)
 static void _proc_arq_fsm_done(struct osmo_fsm_inst *fi,
-			       enum vlr_proc_arq_result res,
+			       enum gsm48_reject_value gsm48_rej,
 			       const char *file, int line)
 {
 	struct proc_arq_priv *par = fi->priv;
-	LOGPFSMSRC(fi, file, line, "proc_arq_fsm_done(%s)\n",
-		   vlr_proc_arq_result_name(res));
-	par->result = res;
+	par->result = gsm48_rej;
+	LOGPFSMSRC(fi, file, line, "proc_arq_fsm_done(%s)\n", vlr_proc_arq_result_name(fi));
 	osmo_fsm_inst_state_chg(fi, PR_ARQ_S_DONE, 0, 0);
 }
 
@@ -115,10 +107,9 @@ static void proc_arq_vlr_dispatch_result(struct osmo_fsm_inst *fi,
 	struct proc_arq_priv *par = fi->priv;
 	bool success;
 	int rc;
-	LOGPFSM(fi, "Process Access Request result: %s\n",
-		vlr_proc_arq_result_name(par->result));
+	LOGPFSM(fi, "Process Access Request result: %s\n", vlr_proc_arq_result_name(fi));
 
-	success = (par->result == VLR_PR_ARQ_RES_PASSED);
+	success = (par->result == 0);
 
 	/* It would be logical to first dispatch the success event to the
 	 * parent FSM, but that could start actions that send messages to the
@@ -184,7 +175,7 @@ static void _proc_arq_vlr_post_imei(struct osmo_fsm_inst *fi)
 		return;
 	}
 
-	proc_arq_fsm_done(fi, VLR_PR_ARQ_RES_PASSED);
+	proc_arq_fsm_done(fi, 0);
 }
 
 static void _proc_arq_vlr_post_trace(struct osmo_fsm_inst *fi)
@@ -228,13 +219,13 @@ static void _proc_arq_vlr_node2_post_vlr(struct osmo_fsm_inst *fi)
 
 	if (!vsub->sub_dataconf_by_hlr_ind) {
 		/* Set User Error: Unidentified Subscriber */
-		proc_arq_fsm_done(fi, VLR_PR_ARQ_RES_UNIDENT_SUBSCR);
+		proc_arq_fsm_done(fi, GSM48_REJECT_IMSI_UNKNOWN_IN_HLR);
 		return;
 	}
 	/* We don't feature location area specific blocking (yet). */
 	if (0 /* roaming not allowed in LA */) {
 		/* Set User Error: Roaming not allowed in this LA */
-		proc_arq_fsm_done(fi, VLR_PR_ARQ_RES_ROAMING_NOTALLOWED);
+		proc_arq_fsm_done(fi, GSM48_REJECT_ROAMING_NOT_ALLOWED);
 		return;
 	}
 	vsub->imsi_detached_flag = false;
@@ -302,7 +293,7 @@ static void _proc_arq_vlr_node2(struct osmo_fsm_inst *fi)
 		break;
 	default:
 		LOGPFSML(fi, LOGL_ERROR, "Cannot start ciphering, security context is not established\n");
-		proc_arq_fsm_done(fi, VLR_PR_ARQ_RES_SYSTEM_FAILURE);
+		proc_arq_fsm_done(fi, GSM48_REJECT_NETWORK_FAILURE);
 		return;
 	}
 
@@ -312,7 +303,7 @@ static void _proc_arq_vlr_node2(struct osmo_fsm_inst *fi)
 			      vsub->vlr->cfg.retrieve_imeisv_ciphered)) {
 		LOGPFSML(fi, LOGL_ERROR,
 			 "Failed to send Ciphering Mode Command\n");
-		proc_arq_fsm_done(fi, VLR_PR_ARQ_RES_SYSTEM_FAILURE);
+		proc_arq_fsm_done(fi, GSM48_REJECT_NETWORK_FAILURE);
 		return;
 	}
 
@@ -377,7 +368,7 @@ static void proc_arq_vlr_fn_init(struct osmo_fsm_inst *fi,
 				 " terminating the other FSM.\n",
 				 vlr_subscr_name(vsub));
 			proc_arq_fsm_done(vsub->proc_arq_fsm,
-					  VLR_PR_ARQ_RES_SYSTEM_FAILURE);
+					  GSM48_REJECT_NETWORK_FAILURE);
 		}
 		vsub->proc_arq_fsm = fi;
 		assoc_par_with_subscr(fi, vsub);
@@ -390,7 +381,7 @@ static void proc_arq_vlr_fn_init(struct osmo_fsm_inst *fi,
 	if (!par->by_tmsi) {
 		/* We couldn't find a subscriber even by IMSI,
 		 * Set User Error: Unidentified Subscriber */
-		proc_arq_fsm_done(fi, VLR_PR_ARQ_RES_UNIDENT_SUBSCR);
+		proc_arq_fsm_done(fi, GSM48_REJECT_MS_IDENTITY_NOT_DERVIVABLE);
 		return;
 	} else {
 		/* TMSI was included, are we permitted to use it? */
@@ -401,7 +392,7 @@ static void proc_arq_vlr_fn_init(struct osmo_fsm_inst *fi,
 			return;
 		} else {
 			/* Set User Error: Unidentified Subscriber */
-			proc_arq_fsm_done(fi, VLR_PR_ARQ_RES_UNIDENT_SUBSCR);
+			proc_arq_fsm_done(fi, GSM48_REJECT_MS_IDENTITY_NOT_DERVIVABLE);
 			return;
 		}
 	}
@@ -420,7 +411,7 @@ static void proc_arq_vlr_fn_w_obt_imsi(struct osmo_fsm_inst *fi,
 	vsub = vlr_subscr_find_by_imsi(vlr, par->imsi);
 	if (!vsub) {
 		/* Set User Error: Unidentified Subscriber */
-		proc_arq_fsm_done(fi, VLR_PR_ARQ_RES_UNIDENT_SUBSCR);
+		proc_arq_fsm_done(fi, GSM48_REJECT_MS_IDENTITY_NOT_DERVIVABLE);
 		return;
 	}
 	assoc_par_with_subscr(fi, vsub);
@@ -432,43 +423,17 @@ static void proc_arq_vlr_fn_w_obt_imsi(struct osmo_fsm_inst *fi,
 static void proc_arq_vlr_fn_w_auth(struct osmo_fsm_inst *fi,
 				   uint32_t event, void *data)
 {
-	enum vlr_auth_fsm_result res;
-	enum vlr_proc_arq_result ret;
+	enum gsm48_reject_value *cause = data;
 
 	OSMO_ASSERT(event == PR_ARQ_E_AUTH_RES);
 
-	res = data ? *(enum vlr_auth_fsm_result*)data : -1;
-	LOGPFSM(fi, "got %s\n", vlr_auth_fsm_result_name(res));
-
-	switch (res) {
-	case VLR_AUTH_RES_PASSED:
-		/* Node 2 */
-		_proc_arq_vlr_node2(fi);
+	if (!cause || *cause) {
+		proc_arq_fsm_done(fi, cause? *cause : GSM48_REJECT_NETWORK_FAILURE);
 		return;
-	case VLR_AUTH_RES_ABORTED:
-		/* Error */
-		ret = VLR_PR_ARQ_RES_UNKNOWN_ERROR;
-		break;
-	case VLR_AUTH_RES_UNKNOWN_SUBSCR:
-		/* Set User Error: Unidentified Subscriber */
-		ret = VLR_PR_ARQ_RES_UNIDENT_SUBSCR;
-		break;
-	case VLR_AUTH_RES_AUTH_FAILED:
-		/* Set User Error: Illegal Subscriber */
-		ret = VLR_PR_ARQ_RES_ILLEGAL_SUBSCR;
-		break;
-	case VLR_AUTH_RES_PROC_ERR:
-		/* Set User Error: System failure */
-		ret = VLR_PR_ARQ_RES_SYSTEM_FAILURE;
-		break;
-	default:
-		LOGPFSML(fi, LOGL_ERROR, "Unexpected vlr_auth_fsm_result value: %d (data=%p)\n", res, data);
-		ret = VLR_PR_ARQ_RES_UNKNOWN_ERROR;
-		break;
 	}
 
-	/* send process_access_req response to caller, enter error state */
-	proc_arq_fsm_done(fi, ret);
+	/* Node 2 */
+	_proc_arq_vlr_node2(fi);
 }
 
 static void proc_arq_vlr_fn_w_ciph(struct osmo_fsm_inst *fi,
@@ -490,12 +455,12 @@ static void proc_arq_vlr_fn_w_ciph(struct osmo_fsm_inst *fi,
 		break;
 	case VLR_CIPH_REJECT:
 		LOGPFSM(fi, "ciphering rejected\n");
-		proc_arq_fsm_done(fi, VLR_PR_ARQ_RES_ILLEGAL_SUBSCR);
+		proc_arq_fsm_done(fi, GSM48_REJECT_ILLEGAL_MS);
 		return;
 	default:
 		LOGPFSML(fi, LOGL_ERROR, "invalid ciphering result: %d\n",
 			 res.cause);
-		proc_arq_fsm_done(fi, VLR_PR_ARQ_RES_ILLEGAL_SUBSCR);
+		proc_arq_fsm_done(fi, GSM48_REJECT_ILLEGAL_MS);
 		return;
 	}
 
@@ -549,7 +514,7 @@ static void proc_arq_vlr_fn_w_tmsi(struct osmo_fsm_inst *fi,
 	OSMO_ASSERT(event == PR_ARQ_E_TMSI_ACK);
 
 	/* FIXME: check confirmation? unfreeze? */
-	proc_arq_fsm_done(fi, VLR_PR_ARQ_RES_PASSED);
+	proc_arq_fsm_done(fi, 0);
 }
 
 static const struct osmo_fsm_state proc_arq_vlr_states[] = {
@@ -722,8 +687,7 @@ vlr_proc_acc_req(struct osmo_fsm_inst *parent,
 	case GSM_MI_TYPE_IMEI:
 		/* TODO: IMEI (emergency call) */
 	default:
-		/* FIXME: directly send reject? */
-		proc_arq_fsm_done(fi, VLR_PR_ARQ_RES_UNIDENT_SUBSCR);
+		proc_arq_fsm_done(fi, GSM48_REJECT_MS_IDENTITY_NOT_DERVIVABLE);
 		return;
 	}
 
@@ -732,12 +696,14 @@ vlr_proc_acc_req(struct osmo_fsm_inst *parent,
 
 /* Gracefully terminate an FSM created by vlr_proc_acc_req() in case of
  * external timeout (i.e. from MSC). */
-void vlr_parq_conn_timeout(struct osmo_fsm_inst *fi)
+void vlr_parq_cancel(struct osmo_fsm_inst *fi,
+		     enum osmo_fsm_term_cause fsm_cause,
+		     enum gsm48_reject_value gsm48_cause)
 {
 	if (!fi || fi->state == PR_ARQ_S_DONE)
 		return;
-	LOGPFSM(fi, "Connection timed out\n");
-	proc_arq_fsm_done(fi, VLR_PR_ARQ_RES_TIMEOUT);
+	LOGPFSM(fi, "Cancel: %s\n", osmo_fsm_term_cause_name(fsm_cause));
+	proc_arq_fsm_done(fi, gsm48_cause);
 }
 
 

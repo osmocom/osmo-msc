@@ -644,7 +644,7 @@ int gsm48_tx_mm_auth_rej(struct gsm_subscriber_connection *conn)
 }
 
 static int msc_vlr_tx_cm_serv_acc(void *msc_conn_ref);
-static int msc_vlr_tx_cm_serv_rej(void *msc_conn_ref, enum vlr_proc_arq_result result);
+static int msc_vlr_tx_cm_serv_rej(void *msc_conn_ref, enum gsm48_reject_value result);
 
 static int cm_serv_reuse_conn(struct gsm_subscriber_connection *conn, const uint8_t *mi_lv)
 {
@@ -675,7 +675,7 @@ static int cm_serv_reuse_conn(struct gsm_subscriber_connection *conn, const uint
 
 	LOGP(DMM, LOGL_ERROR, "%s: CM Service Request with mismatching mobile identity: %s %s\n",
 	     vlr_subscr_name(conn->vsub), gsm48_mi_type_name(mi_type), mi_string);
-	msc_vlr_tx_cm_serv_rej(conn, VLR_PR_ARQ_RES_ILLEGAL_SUBSCR);
+	msc_vlr_tx_cm_serv_rej(conn, GSM48_REJECT_ILLEGAL_MS);
 	return -EINVAL;
 
 accept_reuse:
@@ -774,7 +774,7 @@ int gsm48_rx_mm_serv_req(struct gsm_subscriber_connection *conn, struct msgb *ms
 	if (msc_subscr_conn_is_establishing_auth_ciph(conn)) {
 		LOGP(DMM, LOGL_ERROR,
 		     "Cannot accept CM Service Request, conn already busy establishing authenticity\n");
-		msc_vlr_tx_cm_serv_rej(conn, VLR_PR_ARQ_RES_UNKNOWN_ERROR);
+		msc_vlr_tx_cm_serv_rej(conn, GSM48_REJECT_CONGESTION);
 		return -EINVAL;
 		/* or should we accept and note down the service request anyway? */
 	}
@@ -3576,7 +3576,7 @@ static int msc_vlr_tx_lu_acc(void *msc_conn_ref, uint32_t send_tmsi)
 }
 
 /* VLR asks us to transmit a Location Update Reject */
-static int msc_vlr_tx_lu_rej(void *msc_conn_ref, uint8_t cause)
+static int msc_vlr_tx_lu_rej(void *msc_conn_ref, enum gsm48_reject_value cause)
 {
 	struct gsm_subscriber_connection *conn = msc_conn_ref;
 	return gsm0408_loc_upd_rej(conn, cause);
@@ -3605,35 +3605,10 @@ static int msc_vlr_tx_mm_info(void *msc_conn_ref)
 }
 
 /* VLR asks us to transmit a CM Service Reject */
-static int msc_vlr_tx_cm_serv_rej(void *msc_conn_ref, enum vlr_proc_arq_result result)
+static int msc_vlr_tx_cm_serv_rej(void *msc_conn_ref, enum gsm48_reject_value cause)
 {
-	uint8_t cause;
 	struct gsm_subscriber_connection *conn = msc_conn_ref;
 	int rc;
-
-	switch (result) {
-	default:
-	case VLR_PR_ARQ_RES_NONE:
-	case VLR_PR_ARQ_RES_SYSTEM_FAILURE:
-	case VLR_PR_ARQ_RES_UNKNOWN_ERROR:
-		cause = GSM48_REJECT_NETWORK_FAILURE;
-		break;
-	case VLR_PR_ARQ_RES_ILLEGAL_SUBSCR:
-		cause = GSM48_REJECT_LOC_NOT_ALLOWED;
-		break;
-	case VLR_PR_ARQ_RES_UNIDENT_SUBSCR:
-		cause = GSM48_REJECT_INVALID_MANDANTORY_INF;
-		break;
-	case VLR_PR_ARQ_RES_ROAMING_NOTALLOWED:
-		cause = GSM48_REJECT_ROAMING_NOT_ALLOWED;
-		break;
-	case VLR_PR_ARQ_RES_ILLEGAL_EQUIP:
-		cause = GSM48_REJECT_ILLEGAL_MS;
-		break;
-	case VLR_PR_ARQ_RES_TIMEOUT:
-		cause = GSM48_REJECT_CONGESTION;
-		break;
-	};
 
 	rc = msc_gsm48_tx_mm_serv_rej(conn, cause);
 

@@ -63,10 +63,10 @@ DVLR Process_Access_Request_VLR(CM_SERVICE_REQ:901700000004620){PR_ARQ_S_INIT}: 
 DVLR Process_Access_Request_VLR(CM_SERVICE_REQ:901700000004620){PR_ARQ_S_INIT}: is child of Subscr_Conn(CM_SERVICE_REQ:901700000004620)
 DVLR Process_Access_Request_VLR(CM_SERVICE_REQ:901700000004620){PR_ARQ_S_INIT}: rev=GSM net=GERAN (no Auth)
 DVLR Process_Access_Request_VLR(CM_SERVICE_REQ:901700000004620){PR_ARQ_S_INIT}: Received Event PR_ARQ_E_START
-DVLR Process_Access_Request_VLR(CM_SERVICE_REQ:901700000004620){PR_ARQ_S_INIT}: proc_arq_fsm_done(VLR_PR_ARQ_RES_UNIDENT_SUBSCR)
+DVLR Process_Access_Request_VLR(CM_SERVICE_REQ:901700000004620){PR_ARQ_S_INIT}: proc_arq_fsm_done(MS_IDENTITY_NOT_DERVIVABLE)
 DVLR Process_Access_Request_VLR(CM_SERVICE_REQ:901700000004620){PR_ARQ_S_INIT}: state_chg to PR_ARQ_S_DONE
-DVLR Process_Access_Request_VLR(CM_SERVICE_REQ:901700000004620){PR_ARQ_S_DONE}: Process Access Request result: VLR_PR_ARQ_RES_UNIDENT_SUBSCR
-- sending CM Service Reject for unknown, result VLR_PR_ARQ_RES_UNIDENT_SUBSCR
+DVLR Process_Access_Request_VLR(CM_SERVICE_REQ:901700000004620){PR_ARQ_S_DONE}: Process Access Request result: MS_IDENTITY_NOT_DERVIVABLE
+- sending CM Service Reject for unknown, cause: MS_IDENTITY_NOT_DERVIVABLE
 DMM Subscr_Conn(CM_SERVICE_REQ:901700000004620){SUBSCR_CONN_S_NEW}: Received Event SUBSCR_CONN_E_CN_CLOSE
 DMM Subscr_Conn(CM_SERVICE_REQ:901700000004620){SUBSCR_CONN_S_NEW}: state_chg to SUBSCR_CONN_S_RELEASING
 DREF unknown: MSC conn use + release == 2 (0x101)
@@ -346,11 +346,12 @@ DRLL Dispatching 04.08 message GSM48_MT_MM_IMSI_DETACH_IND (0x5:0x1)
 DMM IMSI DETACH INDICATION: MI(IMSI)=901700000004620
 DREF VLR subscr MSISDN:46071 usage increases to: 2
 DMM IMSI DETACH for MSISDN:46071
+DREF VLR subscr MSISDN:46071 usage increases to: 3
+DREF VLR subscr MSISDN:46071 usage decreases to: 2
 DREF VLR subscr MSISDN:46071 usage decreases to: 1
 DREF VLR subscr MSISDN:46071 usage decreases to: 0
 DREF freeing VLR subscr MSISDN:46071
 DMM Subscr_Conn{SUBSCR_CONN_S_NEW}: Received Event SUBSCR_CONN_E_CN_CLOSE
-DMM Subscr_Conn{SUBSCR_CONN_S_NEW}: Close event, cause 0
 DMM Subscr_Conn{SUBSCR_CONN_S_NEW}: state_chg to SUBSCR_CONN_S_RELEASING
 DREF unknown: MSC conn use + release == 2 (0x101)
 - BSSAP Clear --RAN_GERAN_A--> MS

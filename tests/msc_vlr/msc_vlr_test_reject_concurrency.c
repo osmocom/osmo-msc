@@ -220,7 +220,7 @@ static void test_reject_cm_during_lu()
 
 	BTW("A CM Service Request in the middle of a LU is rejected");
 	cm_service_result_sent = RES_NONE;
-	dtap_expect_tx("052211");
+	dtap_expect_tx("052216");
 	ms_sends_msg("05247803305886089910070000006402");
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 	VERBOSE_ASSERT(cm_service_result_sent, == RES_NONE, "%d");
