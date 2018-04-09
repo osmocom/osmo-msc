@@ -82,7 +82,7 @@ void sms_free(struct gsm_sms *sms)
 }
 
 struct gsm_sms *sms_from_text(struct vlr_subscr *receiver,
-			      struct vlr_subscr *sender,
+			      const char *sender_msisdn,
                               int dcs, const char *text)
 {
 	struct gsm_sms *sms = sms_alloc();
@@ -93,7 +93,7 @@ struct gsm_sms *sms_from_text(struct vlr_subscr *receiver,
 	sms->receiver = vlr_subscr_get(receiver);
 	OSMO_STRLCPY_ARRAY(sms->text, text);
 
-	OSMO_STRLCPY_ARRAY(sms->src.addr, sender->msisdn);
+	OSMO_STRLCPY_ARRAY(sms->src.addr, sender_msisdn);
 	sms->reply_path_req = 0;
 	sms->status_rep_req = 0;
 	sms->ud_hdr_ind = 0;

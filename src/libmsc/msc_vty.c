@@ -705,13 +705,13 @@ DEFUN(sms_delete_expired,
 }
 
 static int _send_sms_str(struct vlr_subscr *receiver,
-			 struct vlr_subscr *sender,
+			 const char *sender_msisdn,
 			 char *str, uint8_t tp_pid)
 {
 	struct gsm_network *net = receiver->vlr->user_ctx;
 	struct gsm_sms *sms;
 
-	sms = sms_from_text(receiver, sender, 0, str);
+	sms = sms_from_text(receiver, sender_msisdn, 0, str);
 	sms->protocol_id = tp_pid;
 
 	/* store in database for the queue */
@@ -813,7 +813,7 @@ DEFUN(subscriber_send_sms,
 	SUBSCR_HELP "SMS Operations\n" SUBSCR_HELP "Send SMS\n" "Actual SMS Text\n")
 {
 	struct vlr_subscr *vsub = get_vsub_by_argv(gsmnet, argv[0], argv[1]);
-	struct vlr_subscr *sender = get_vsub_by_argv(gsmnet, argv[2], argv[3]);
+	const char *sender_msisdn;
 	char *str;
 	int rc;
 
@@ -824,21 +824,24 @@ DEFUN(subscriber_send_sms,
 		goto err;
 	}
 
-	if (!sender) {
-		vty_out(vty, "%% No sender found for %s %s%s",
-			argv[2], argv[3], VTY_NEWLINE);
-		rc = CMD_WARNING;
-		goto err;
+	if (!strcmp(argv[2], "msisdn"))
+		sender_msisdn = argv[3];
+	else {
+		struct vlr_subscr *sender = get_vsub_by_argv(gsmnet, argv[2], argv[3]);
+		if (!sender) {
+			vty_out(vty, "%% No sender found for %s %s%s", argv[2], argv[3], VTY_NEWLINE);
+			rc = CMD_WARNING;
+			goto err;
+		}
+		sender_msisdn = sender->msisdn;
+		vlr_subscr_put(sender);
 	}
 
 	str = argv_concat(argv, argc, 4);
-	rc = _send_sms_str(vsub, sender, str, 0);
+	rc = _send_sms_str(vsub, sender_msisdn, str, 0);
 	talloc_free(str);
 
 err:
-	if (sender)
-		vlr_subscr_put(sender);
-
 	if (vsub)
 		vlr_subscr_put(vsub);
 
@@ -852,7 +855,7 @@ DEFUN(subscriber_silent_sms,
 	SUBSCR_HELP "Silent SMS Operations\n" SUBSCR_HELP "Send SMS\n" "Actual SMS Text\n")
 {
 	struct vlr_subscr *vsub = get_vsub_by_argv(gsmnet, argv[0], argv[1]);
-	struct vlr_subscr *sender = get_vsub_by_argv(gsmnet, argv[2], argv[3]);
+	const char *sender_msisdn;
 	char *str;
 	int rc;
 
@@ -863,21 +866,24 @@ DEFUN(subscriber_silent_sms,
 		goto err;
 	}
 
-	if (!sender) {
-		vty_out(vty, "%% No sender found for %s %s%s",
-			argv[2], argv[3], VTY_NEWLINE);
-		rc = CMD_WARNING;
-		goto err;
+	if (!strcmp(argv[2], "msisdn")) {
+		sender_msisdn = argv[3];
+	} else {
+		struct vlr_subscr *sender = get_vsub_by_argv(gsmnet, argv[2], argv[3]);
+		if (!sender) {
+			vty_out(vty, "%% No sender found for %s %s%s", argv[2], argv[3], VTY_NEWLINE);
+			rc = CMD_WARNING;
+			goto err;
+		}
+		sender_msisdn = sender->msisdn;
+		vlr_subscr_put(sender);
 	}
 
 	str = argv_concat(argv, argc, 4);
-	rc = _send_sms_str(vsub, sender, str, 64);
+	rc = _send_sms_str(vsub, sender_msisdn, str, 64);
 	talloc_free(str);
 
 err:
-	if (sender)
-		vlr_subscr_put(sender);
-
 	if (vsub)
 		vlr_subscr_put(vsub);
 

@@ -294,7 +294,7 @@ void send_sms(struct vlr_subscr *receiver,
 	      struct vlr_subscr *sender,
 	      char *str)
 {
-	struct gsm_sms *sms = sms_from_text(receiver, sender, 0, str);
+	struct gsm_sms *sms = sms_from_text(receiver, sender->msisdn, 0, str);
 	gsm411_send_sms_subscr(receiver, sms);
 }
 
