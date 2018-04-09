@@ -1085,8 +1085,8 @@ DMSC msc_tx 2 bytes to MSISDN:42342 via RAN_UTRAN_IU
 DMNCC transmit message MNCC_REL_CNF
 DCC Sending 'MNCC_REL_CNF' to MNCC.
   MSC --> MNCC: callref 0x423: MNCC_REL_CNF
+DCC stopping pending timer T308
 DCC (ti 00 sub MSISDN:42342) new state RELEASE_REQ -> NULL
-DCC MSISDN:42342 Timer 0x308 is still running while discarding transaction -- this is a bug: we were still expecting a response but are freeing the transaction anyway
 DREF VLR subscr MSISDN:42342 usage decreases to: 2
 DREF MSISDN:42342: MSC conn use - trans_cc == 1 (0x4)
 - Iu Release --RAN_UTRAN_IU--> MS

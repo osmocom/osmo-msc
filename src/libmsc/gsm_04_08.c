@@ -1422,6 +1422,9 @@ void _gsm48_cc_trans_free(struct gsm_trans *trans)
 		mncc_release_ind(trans->net, trans, trans->callref,
 				 GSM48_CAUSE_LOC_PRN_S_LU,
 				 GSM48_CC_CAUSE_RESOURCE_UNAVAIL);
+		/* This is a final freeing of the transaction. The MNCC release may have triggered the
+		 * T308 release timer, but we don't have the luxury of graceful CC Release here. */
+		gsm48_stop_cc_timer(trans);
 	}
 	if (trans->cc.state != GSM_CSTATE_NULL)
 		new_cc_state(trans, GSM_CSTATE_NULL);
