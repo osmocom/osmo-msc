@@ -610,6 +610,7 @@ static int rx_dtap(const struct osmo_sccp_user *scu, const struct a_conn_info *a
 {
 	struct gsm_network *network = a_conn_info->network;
 	struct gsm_subscriber_connection *conn;
+	struct dtap_header *dtap = (struct dtap_header *) msg->l2h;
 
 	conn = subscr_conn_lookup_a(network, a_conn_info->conn_id);
 	if (!conn) {
@@ -620,6 +621,7 @@ static int rx_dtap(const struct osmo_sccp_user *scu, const struct a_conn_info *a
 
 	/* msc_dtap expects the dtap payload in l3h */
 	msg->l3h = msg->l2h + 3;
+	OMSC_LINKID_CB(msg) = dtap->link_id;
 
 	/* Forward dtap payload into the msc */
 	msc_dtap(conn, conn->a.conn_id, msg);

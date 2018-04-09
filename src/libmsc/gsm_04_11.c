@@ -137,6 +137,7 @@ static int gsm411_cp_sendmsg(struct msgb *msg, struct gsm_trans *trans,
 	/* Outgoing needs the highest bit set */
 	gh->proto_discr = trans->protocol | (trans->transaction_id<<4);
 	gh->msg_type = msg_type;
+	OMSC_LINKID_CB(msg) = trans->dlci;
 
 	DEBUGP(DLSMS, "sending CP message (trans=%x)\n", trans->transaction_id);
 
@@ -947,6 +948,7 @@ int gsm0411_rcv_sms(struct gsm_subscriber_connection *conn,
 			gsm411_rl_recv, gsm411_mn_send);
 
 		trans->conn = msc_subscr_conn_get(conn, MSC_CONN_USE_TRANS_SMS);
+		trans->dlci = OMSC_LINKID_CB(msg); /* DLCI as received from BSC */
 
 		new_trans = 1;
 		cm_service_request_concludes(conn, msg);
@@ -1029,6 +1031,8 @@ int gsm411_send_sms(struct gsm_subscriber_connection *conn, struct gsm_sms *sms)
 	trans->sms.sms = sms;
 
 	trans->conn = msc_subscr_conn_get(conn, MSC_CONN_USE_TRANS_SMS);
+	trans->dlci = 0x03;
+	/* FIXME: specify SACCH in case we already have active TCH */
 
 	/* Hardcode SMSC Originating Address for now */
 	data = (uint8_t *)msgb_put(msg, 8);

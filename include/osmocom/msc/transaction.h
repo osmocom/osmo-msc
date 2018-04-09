@@ -31,6 +31,9 @@ struct gsm_trans {
 	/* The current transaction ID */
 	uint8_t transaction_id;
 
+	/* The DLCI (DCCH/ACCH + SAPI) of this transaction */
+	uint8_t dlci;
+
 	/* To whom we belong, unique identifier of remote MM entity */
 	struct vlr_subscr *vsub;
 

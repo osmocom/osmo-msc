@@ -164,6 +164,7 @@ static int gsm48_conn_sendmsg(struct msgb *msg, struct gsm_subscriber_connection
 	 * work that the caller no longer has to do */
 	if (trans) {
 		gh->proto_discr = trans->protocol | (trans->transaction_id << 4);
+		OMSC_LINKID_CB(msg) = trans->dlci;
 	}
 
 	return msc_tx_dtap(conn, msg);
@@ -3110,6 +3111,7 @@ int mncc_tx_to_cc(struct gsm_network *net, int msg_type, void *arg)
 
 		/* Assign conn */
 		trans->conn = msc_subscr_conn_get(conn, MSC_CONN_USE_TRANS_CC);
+		trans->dlci = 0x00; /* SAPI=0, not SACCH */
 		vlr_subscr_put(vsub);
 	} else {
 		/* update the subscriber we deal with */
@@ -3262,6 +3264,7 @@ static int gsm0408_rcv_cc(struct gsm_subscriber_connection *conn, struct msgb *m
 		}
 		/* Assign transaction */
 		trans->conn = msc_subscr_conn_get(conn, MSC_CONN_USE_TRANS_CC);
+		trans->dlci = OMSC_LINKID_CB(msg); /* DLCI as received from BSC */
 		cm_service_request_concludes(conn, msg);
 	}
 

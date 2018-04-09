@@ -145,14 +145,13 @@ int a_iface_tx_dtap(struct msgb *msg)
 	struct gsm_subscriber_connection *conn;
 	struct msgb *msg_resp;
 
-	/* FIXME: Set this to some meaninful value! */
-	uint8_t link_id = 0x00;
+	uint8_t link_id = OMSC_LINKID_CB(msg);
 	OSMO_ASSERT(msg);
 	conn = (struct gsm_subscriber_connection *)msg->dst;
 	OSMO_ASSERT(conn);
 	OSMO_ASSERT(conn->a.scu);
 
-	LOGPCONN(conn, LOGL_DEBUG, "Passing DTAP message from MSC to BSC\n");
+	LOGPCONN(conn, LOGL_DEBUG, "Passing DTAP message (DLCI=0x%02x) from MSC to BSC\n", link_id);
 
 	msg->l3h = msg->data;
 	msg_resp = gsm0808_create_dtap(msg, link_id);

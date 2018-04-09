@@ -20,7 +20,8 @@
 
 #include "gsm_data_shared.h"
 
-
+/* TS 48.008 DLCI containing DCCH/ACCH + SAPI */
+#define OMSC_LINKID_CB(__msgb)   (__msgb)->cb[3]
 
 /** annotations for msgb ownership */
 #define __uses
