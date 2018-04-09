@@ -219,6 +219,37 @@ int msc_clear_request(struct gsm_subscriber_connection *conn, uint32_t cause)
 	return 1;
 }
 
+static const char *used_ref_counts_str(struct gsm_subscriber_connection *conn)
+{
+	static char buf[256];
+	int bit_nr;
+	char *pos = buf;
+	*pos = '\0';
+
+	if (conn->use_tokens < 0)
+		return "invalid";
+
+#define APPEND_STR(fmt, args...) do { \
+		int remain = sizeof(buf) - (pos - buf) - 1; \
+		int l = -1; \
+		if (remain > 0) \
+		    l = snprintf(pos, remain, "%s" fmt, (pos == buf? "" : ","), ##args); \
+		if (l < 0 || l > remain) { \
+			buf[sizeof(buf) - 1] = '\0'; \
+			return buf; \
+		} \
+		pos += l; \
+	} while(0)
+
+	for (bit_nr = 0; (1 << bit_nr) <= conn->use_tokens; bit_nr++) {
+		if (conn->use_tokens & (1 << bit_nr)) {
+			APPEND_STR("%s", get_value_string(msc_subscr_conn_use_names, bit_nr));
+		}
+	}
+	return buf;
+#undef APPEND_STR
+}
+
 /* increment the ref-count. Needs to be called by every user */
 struct gsm_subscriber_connection *
 _msc_subscr_conn_get(struct gsm_subscriber_connection *conn,
@@ -240,9 +271,9 @@ _msc_subscr_conn_get(struct gsm_subscriber_connection *conn,
 
 	conn->use_count++;
 	LOGPSRC(DREF, LOGL_DEBUG, file, line,
-		"%s: MSC conn use + %s == %u (0x%x)\n",
+		"%s: MSC conn use + %s == %u (0x%x: %s)\n",
 		vlr_subscr_name(conn->vsub), msc_subscr_conn_use_name(balance_token),
-		conn->use_count, conn->use_tokens);
+		conn->use_count, conn->use_tokens, used_ref_counts_str(conn));
 
 	return conn;
 }
@@ -275,9 +306,9 @@ void _msc_subscr_conn_put(struct gsm_subscriber_connection *conn,
 
 	conn->use_count--;
 	LOGPSRC(DREF, LOGL_DEBUG, file, line,
-		"%s: MSC conn use - %s == %u (0x%x)\n",
+		"%s: MSC conn use - %s == %u (0x%x: %s)\n",
 		vlr_subscr_name(conn->vsub), msc_subscr_conn_use_name(balance_token),
-		conn->use_count, conn->use_tokens);
+		conn->use_count, conn->use_tokens, used_ref_counts_str(conn));
 
 	if (conn->use_count == 0)
 		osmo_fsm_inst_dispatch(conn->fi, SUBSCR_CONN_E_UNUSED, NULL);

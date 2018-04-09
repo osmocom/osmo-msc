@@ -27,13 +27,13 @@ msc_subscr_conn_is_accepted() == true
 - CLOSE event marks conn_fsm as released and frees the conn
 DMM Subscr_Conn{SUBSCR_CONN_S_ACCEPTED}: Received Event SUBSCR_CONN_E_CN_CLOSE
 DMM Subscr_Conn{SUBSCR_CONN_S_ACCEPTED}: state_chg to SUBSCR_CONN_S_RELEASING
-DREF unknown: MSC conn use + release == 1 (0x100)
+DREF unknown: MSC conn use + release == 1 (0x100: release)
 DREF VLR subscr unknown usage increases to: 2
 DREF VLR subscr unknown usage decreases to: 1
 - BSSAP Clear --RAN_GERAN_A--> MS
   bssap_clear_sent == 1
 - BSS sends BSSMAP Clear Complete
-DREF unknown: MSC conn use - release == 0 (0x0)
+DREF unknown: MSC conn use - release == 0 (0x0: )
 DMM Subscr_Conn{SUBSCR_CONN_S_RELEASING}: Received Event SUBSCR_CONN_E_UNUSED
 DMM Subscr_Conn{SUBSCR_CONN_S_RELEASING}: state_chg to SUBSCR_CONN_S_RELEASED
 DMM Subscr_Conn{SUBSCR_CONN_S_RELEASED}: Terminating (cause = OSMO_FSM_TERM_REGULAR)
@@ -55,7 +55,7 @@ talloc_total_blocks(tall_bsc_ctx) == 12
   MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_CM_SERV_REQ
   new conn
 DMM Subscr_Conn{SUBSCR_CONN_S_NEW}: Allocated
-DREF unknown: MSC conn use + compl_l3 == 1 (0x1)
+DREF unknown: MSC conn use + compl_l3 == 1 (0x1: compl_l3)
 DRLL Dispatching 04.08 message GSM48_MT_MM_CM_SERV_REQ (0x5:0x24)
 DMM <- CM SERVICE REQUEST serv_type=0x08 MI(IMSI)=901700000004620
 DMM Subscr_Conn(CM_SERVICE_REQ:901700000004620){SUBSCR_CONN_S_NEW}: Updated ID
@@ -69,15 +69,15 @@ DVLR Process_Access_Request_VLR(CM_SERVICE_REQ:901700000004620){PR_ARQ_S_DONE}: 
 - sending CM Service Reject for unknown, cause: MS_IDENTITY_NOT_DERVIVABLE
 DMM Subscr_Conn(CM_SERVICE_REQ:901700000004620){SUBSCR_CONN_S_NEW}: Received Event SUBSCR_CONN_E_CN_CLOSE
 DMM Subscr_Conn(CM_SERVICE_REQ:901700000004620){SUBSCR_CONN_S_NEW}: state_chg to SUBSCR_CONN_S_RELEASING
-DREF unknown: MSC conn use + release == 2 (0x101)
+DREF unknown: MSC conn use + release == 2 (0x101: compl_l3,release)
 - BSSAP Clear --RAN_GERAN_A--> MS
 DMM Subscr_Conn(CM_SERVICE_REQ:901700000004620){SUBSCR_CONN_S_RELEASING}: Received Event SUBSCR_CONN_E_COMPLETE_LAYER_3
 DMM Subscr_Conn(CM_SERVICE_REQ:901700000004620){SUBSCR_CONN_S_RELEASING}: Event SUBSCR_CONN_E_COMPLETE_LAYER_3 not permitted
-DREF unknown: MSC conn use - compl_l3 == 1 (0x100)
+DREF unknown: MSC conn use - compl_l3 == 1 (0x100: release)
   bssap_clear_sent == 1
 - conn was released
 - BSS sends BSSMAP Clear Complete
-DREF unknown: MSC conn use - release == 0 (0x0)
+DREF unknown: MSC conn use - release == 0 (0x0: )
 DMM Subscr_Conn(CM_SERVICE_REQ:901700000004620){SUBSCR_CONN_S_RELEASING}: Received Event SUBSCR_CONN_E_UNUSED
 DMM Subscr_Conn(CM_SERVICE_REQ:901700000004620){SUBSCR_CONN_S_RELEASING}: state_chg to SUBSCR_CONN_S_RELEASED
 DMM Subscr_Conn(CM_SERVICE_REQ:901700000004620){SUBSCR_CONN_S_RELEASED}: Terminating (cause = OSMO_FSM_TERM_REGULAR)
@@ -99,7 +99,7 @@ talloc_total_blocks(tall_bsc_ctx) == 12
   MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
   new conn
 DMM Subscr_Conn{SUBSCR_CONN_S_NEW}: Allocated
-DREF unknown: MSC conn use + compl_l3 == 1 (0x1)
+DREF unknown: MSC conn use + compl_l3 == 1 (0x1: compl_l3)
 DRLL Dispatching 04.08 message GSM48_MT_MM_LOC_UPD_REQUEST (0x5:0x8)
 DMM Subscr_Conn(LU:901700000004620){SUBSCR_CONN_S_NEW}: Updated ID
 DMM LOCATION UPDATING REQUEST: MI(IMSI)=901700000004620 type=IMSI ATTACH
@@ -126,7 +126,7 @@ GSUP --> HLR: OSMO_GSUP_MSGT_UPDATE_LOCATION_REQUEST: 04010809710000004026f0
 DVLR upd_hlr_vlr_fsm(LU:901700000004620){UPD_HLR_VLR_S_INIT}: state_chg to UPD_HLR_VLR_S_WAIT_FOR_DATA
 DMM Subscr_Conn(LU:901700000004620){SUBSCR_CONN_S_NEW}: Received Event SUBSCR_CONN_E_COMPLETE_LAYER_3
 DMM Subscr_Conn(LU:901700000004620){SUBSCR_CONN_S_NEW}: state_chg to SUBSCR_CONN_S_AUTH_CIPH
-DREF IMSI:901700000004620: MSC conn use - compl_l3 == 0 (0x0)
+DREF IMSI:901700000004620: MSC conn use - compl_l3 == 0 (0x0: )
 DMM Subscr_Conn(LU:901700000004620){SUBSCR_CONN_S_AUTH_CIPH}: Received Event SUBSCR_CONN_E_UNUSED
 DMM Subscr_Conn(LU:901700000004620){SUBSCR_CONN_S_AUTH_CIPH}: Awaiting results for Auth+Ciph, overruling event SUBSCR_CONN_E_UNUSED
   lu_result_sent == 0
@@ -192,7 +192,7 @@ DMM Subscr_Conn(LU:901700000004620){SUBSCR_CONN_S_AUTH_CIPH}: Received Event SUB
 DMM Subscr_Conn(LU:901700000004620){SUBSCR_CONN_S_AUTH_CIPH}: state_chg to SUBSCR_CONN_S_ACCEPTED
 DMM Subscr_Conn(LU:901700000004620){SUBSCR_CONN_S_ACCEPTED}: Received Event SUBSCR_CONN_E_UNUSED
 DMM Subscr_Conn(LU:901700000004620){SUBSCR_CONN_S_ACCEPTED}: state_chg to SUBSCR_CONN_S_RELEASING
-DREF MSISDN:46071: MSC conn use + release == 1 (0x100)
+DREF MSISDN:46071: MSC conn use + release == 1 (0x100: release)
 DREF VLR subscr MSISDN:46071 usage increases to: 4
 DREF VLR subscr MSISDN:46071 usage decreases to: 3
 - BSSAP Clear --RAN_GERAN_A--> MS
@@ -202,7 +202,7 @@ DREF VLR subscr MSISDN:46071 usage decreases to: 2
 - LU was successful, and the conn has already been closed
   lu_result_sent == 1
 - BSS sends BSSMAP Clear Complete
-DREF MSISDN:46071: MSC conn use - release == 0 (0x0)
+DREF MSISDN:46071: MSC conn use - release == 0 (0x0: )
 DMM Subscr_Conn(LU:901700000004620){SUBSCR_CONN_S_RELEASING}: Received Event SUBSCR_CONN_E_UNUSED
 DMM Subscr_Conn(LU:901700000004620){SUBSCR_CONN_S_RELEASING}: state_chg to SUBSCR_CONN_S_RELEASED
 DMM Subscr_Conn(LU:901700000004620){SUBSCR_CONN_S_RELEASED}: Terminating (cause = OSMO_FSM_TERM_REGULAR)
@@ -222,7 +222,7 @@ DMM Subscr_Conn(LU:901700000004620){SUBSCR_CONN_S_RELEASED}: Deallocated
   MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
   new conn
 DMM Subscr_Conn{SUBSCR_CONN_S_NEW}: Allocated
-DREF unknown: MSC conn use + compl_l3 == 1 (0x1)
+DREF unknown: MSC conn use + compl_l3 == 1 (0x1: compl_l3)
 DRLL Dispatching 04.08 message GSM48_MT_MM_LOC_UPD_REQUEST (0x5:0x8)
 DMM Subscr_Conn(LU:901700000004620){SUBSCR_CONN_S_NEW}: Updated ID
 DMM LOCATION UPDATING REQUEST: MI(IMSI)=901700000004620 type=IMSI ATTACH
@@ -247,7 +247,7 @@ GSUP --> HLR: OSMO_GSUP_MSGT_UPDATE_LOCATION_REQUEST: 04010809710000004026f0
 DVLR upd_hlr_vlr_fsm(LU:901700000004620){UPD_HLR_VLR_S_INIT}: state_chg to UPD_HLR_VLR_S_WAIT_FOR_DATA
 DMM Subscr_Conn(LU:901700000004620){SUBSCR_CONN_S_NEW}: Received Event SUBSCR_CONN_E_COMPLETE_LAYER_3
 DMM Subscr_Conn(LU:901700000004620){SUBSCR_CONN_S_NEW}: state_chg to SUBSCR_CONN_S_AUTH_CIPH
-DREF MSISDN:46071: MSC conn use - compl_l3 == 0 (0x0)
+DREF MSISDN:46071: MSC conn use - compl_l3 == 0 (0x0: )
 DMM Subscr_Conn(LU:901700000004620){SUBSCR_CONN_S_AUTH_CIPH}: Received Event SUBSCR_CONN_E_UNUSED
 DMM Subscr_Conn(LU:901700000004620){SUBSCR_CONN_S_AUTH_CIPH}: Awaiting results for Auth+Ciph, overruling event SUBSCR_CONN_E_UNUSED
   lu_result_sent == 0
@@ -312,7 +312,7 @@ DMM Subscr_Conn(LU:901700000004620){SUBSCR_CONN_S_AUTH_CIPH}: Received Event SUB
 DMM Subscr_Conn(LU:901700000004620){SUBSCR_CONN_S_AUTH_CIPH}: state_chg to SUBSCR_CONN_S_ACCEPTED
 DMM Subscr_Conn(LU:901700000004620){SUBSCR_CONN_S_ACCEPTED}: Received Event SUBSCR_CONN_E_UNUSED
 DMM Subscr_Conn(LU:901700000004620){SUBSCR_CONN_S_ACCEPTED}: state_chg to SUBSCR_CONN_S_RELEASING
-DREF MSISDN:46071: MSC conn use + release == 1 (0x100)
+DREF MSISDN:46071: MSC conn use + release == 1 (0x100: release)
 DREF VLR subscr MSISDN:46071 usage increases to: 4
 DREF VLR subscr MSISDN:46071 usage decreases to: 3
 - BSSAP Clear --RAN_GERAN_A--> MS
@@ -322,7 +322,7 @@ DREF VLR subscr MSISDN:46071 usage decreases to: 2
 - LU was successful, and the conn has already been closed
   lu_result_sent == 1
 - BSS sends BSSMAP Clear Complete
-DREF MSISDN:46071: MSC conn use - release == 0 (0x0)
+DREF MSISDN:46071: MSC conn use - release == 0 (0x0: )
 DMM Subscr_Conn(LU:901700000004620){SUBSCR_CONN_S_RELEASING}: Received Event SUBSCR_CONN_E_UNUSED
 DMM Subscr_Conn(LU:901700000004620){SUBSCR_CONN_S_RELEASING}: state_chg to SUBSCR_CONN_S_RELEASED
 DMM Subscr_Conn(LU:901700000004620){SUBSCR_CONN_S_RELEASED}: Terminating (cause = OSMO_FSM_TERM_REGULAR)
@@ -341,7 +341,7 @@ DMM Subscr_Conn(LU:901700000004620){SUBSCR_CONN_S_RELEASED}: Deallocated
   MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_IMSI_DETACH_IND
   new conn
 DMM Subscr_Conn{SUBSCR_CONN_S_NEW}: Allocated
-DREF unknown: MSC conn use + compl_l3 == 1 (0x1)
+DREF unknown: MSC conn use + compl_l3 == 1 (0x1: compl_l3)
 DRLL Dispatching 04.08 message GSM48_MT_MM_IMSI_DETACH_IND (0x5:0x1)
 DMM IMSI DETACH INDICATION: MI(IMSI)=901700000004620
 DREF VLR subscr MSISDN:46071 usage increases to: 2
@@ -353,12 +353,12 @@ DREF VLR subscr MSISDN:46071 usage decreases to: 0
 DREF freeing VLR subscr MSISDN:46071
 DMM Subscr_Conn{SUBSCR_CONN_S_NEW}: Received Event SUBSCR_CONN_E_CN_CLOSE
 DMM Subscr_Conn{SUBSCR_CONN_S_NEW}: state_chg to SUBSCR_CONN_S_RELEASING
-DREF unknown: MSC conn use + release == 2 (0x101)
+DREF unknown: MSC conn use + release == 2 (0x101: compl_l3,release)
 - BSSAP Clear --RAN_GERAN_A--> MS
-DREF unknown: MSC conn use - compl_l3 == 1 (0x100)
+DREF unknown: MSC conn use - compl_l3 == 1 (0x100: release)
   bssap_clear_sent == 1
 - BSS sends BSSMAP Clear Complete
-DREF unknown: MSC conn use - release == 0 (0x0)
+DREF unknown: MSC conn use - release == 0 (0x0: )
 DMM Subscr_Conn{SUBSCR_CONN_S_RELEASING}: Received Event SUBSCR_CONN_E_UNUSED
 DMM Subscr_Conn{SUBSCR_CONN_S_RELEASING}: state_chg to SUBSCR_CONN_S_RELEASED
 DMM Subscr_Conn{SUBSCR_CONN_S_RELEASED}: Terminating (cause = OSMO_FSM_TERM_REGULAR)
@@ -376,7 +376,7 @@ talloc_total_blocks(tall_bsc_ctx) == 12
   MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
   new conn
 DMM Subscr_Conn{SUBSCR_CONN_S_NEW}: Allocated
-DREF unknown: MSC conn use + compl_l3 == 1 (0x1)
+DREF unknown: MSC conn use + compl_l3 == 1 (0x1: compl_l3)
 DRLL Dispatching 04.08 message GSM48_MT_MM_LOC_UPD_REQUEST (0x5:0x8)
 DMM Subscr_Conn(LU:591536962){SUBSCR_CONN_S_NEW}: Updated ID
 DMM LOCATION UPDATING REQUEST: MI(TMSI)=591536962 type=IMSI ATTACH
@@ -396,7 +396,7 @@ DMSC msc_tx 3 bytes to TMSI:0x23422342 via RAN_GERAN_A
 - DTAP matches expected message
 DMM Subscr_Conn(LU:591536962){SUBSCR_CONN_S_NEW}: Received Event SUBSCR_CONN_E_COMPLETE_LAYER_3
 DMM Subscr_Conn(LU:591536962){SUBSCR_CONN_S_NEW}: state_chg to SUBSCR_CONN_S_AUTH_CIPH
-DREF TMSI:0x23422342: MSC conn use - compl_l3 == 0 (0x0)
+DREF TMSI:0x23422342: MSC conn use - compl_l3 == 0 (0x0: )
 DMM Subscr_Conn(LU:591536962){SUBSCR_CONN_S_AUTH_CIPH}: Received Event SUBSCR_CONN_E_UNUSED
 DMM Subscr_Conn(LU:591536962){SUBSCR_CONN_S_AUTH_CIPH}: Awaiting results for Auth+Ciph, overruling event SUBSCR_CONN_E_UNUSED
   lu_result_sent == 0
@@ -412,7 +412,7 @@ DRLL Dispatching 04.08 message SMS:0x01 (0x9:0x1)
 DRLL subscr TMSI:0x23422342: Message not permitted for initial conn: SMS:0x01
 - MS tells us the IMSI, causes a GSUP LU request to HLR
   MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_ID_RESP
-DREF TMSI:0x23422342: MSC conn use + dtap == 1 (0x2)
+DREF TMSI:0x23422342: MSC conn use + dtap == 1 (0x2: dtap)
 DRLL Dispatching 04.08 message GSM48_MT_MM_ID_RESP (0x5:0x19)
 DMM IDENTITY RESPONSE: MI(IMSI)=901700000004620
 DVLR set IMSI on subscriber; IMSI=901700000004620 id=901700000004620
@@ -429,7 +429,7 @@ DVLR upd_hlr_vlr_fsm(LU:591536962){UPD_HLR_VLR_S_INIT}: Received Event UPD_HLR_V
 DVLR GSUP tx: 04010809710000004026f0
 GSUP --> HLR: OSMO_GSUP_MSGT_UPDATE_LOCATION_REQUEST: 04010809710000004026f0
 DVLR upd_hlr_vlr_fsm(LU:591536962){UPD_HLR_VLR_S_INIT}: state_chg to UPD_HLR_VLR_S_WAIT_FOR_DATA
-DREF IMSI:901700000004620: MSC conn use - dtap == 0 (0x0)
+DREF IMSI:901700000004620: MSC conn use - dtap == 0 (0x0: )
 DMM Subscr_Conn(LU:591536962){SUBSCR_CONN_S_AUTH_CIPH}: Received Event SUBSCR_CONN_E_UNUSED
 DMM Subscr_Conn(LU:591536962){SUBSCR_CONN_S_AUTH_CIPH}: Awaiting results for Auth+Ciph, overruling event SUBSCR_CONN_E_UNUSED
   lu_result_sent == 0
@@ -495,7 +495,7 @@ DMM Subscr_Conn(LU:591536962){SUBSCR_CONN_S_AUTH_CIPH}: Received Event SUBSCR_CO
 DMM Subscr_Conn(LU:591536962){SUBSCR_CONN_S_AUTH_CIPH}: state_chg to SUBSCR_CONN_S_ACCEPTED
 DMM Subscr_Conn(LU:591536962){SUBSCR_CONN_S_ACCEPTED}: Received Event SUBSCR_CONN_E_UNUSED
 DMM Subscr_Conn(LU:591536962){SUBSCR_CONN_S_ACCEPTED}: state_chg to SUBSCR_CONN_S_RELEASING
-DREF MSISDN:46071: MSC conn use + release == 1 (0x100)
+DREF MSISDN:46071: MSC conn use + release == 1 (0x100: release)
 DREF VLR subscr MSISDN:46071 usage increases to: 4
 DREF VLR subscr MSISDN:46071 usage decreases to: 3
 - BSSAP Clear --RAN_GERAN_A--> MS
@@ -505,7 +505,7 @@ DREF VLR subscr MSISDN:46071 usage decreases to: 2
 - LU was successful, and the conn has already been closed
   lu_result_sent == 1
 - BSS sends BSSMAP Clear Complete
-DREF MSISDN:46071: MSC conn use - release == 0 (0x0)
+DREF MSISDN:46071: MSC conn use - release == 0 (0x0: )
 DMM Subscr_Conn(LU:591536962){SUBSCR_CONN_S_RELEASING}: Received Event SUBSCR_CONN_E_UNUSED
 DMM Subscr_Conn(LU:591536962){SUBSCR_CONN_S_RELEASING}: state_chg to SUBSCR_CONN_S_RELEASED
 DMM Subscr_Conn(LU:591536962){SUBSCR_CONN_S_RELEASED}: Terminating (cause = OSMO_FSM_TERM_REGULAR)
