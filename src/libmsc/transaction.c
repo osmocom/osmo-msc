@@ -158,9 +158,6 @@ void trans_free(struct gsm_trans *trans)
 	trans->conn = NULL;
 	talloc_free(trans);
 
-	/* trans_free() should always happen while the fi is still around. */
-	OSMO_ASSERT(conn->fi);
-
 	/* Possibly this was the last transaction used by this conn. */
 	subscr_conn_release_when_unused(conn);
 }
