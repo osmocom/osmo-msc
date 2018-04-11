@@ -156,6 +156,7 @@ static const struct value_string msc_mgcp_fsm_evt_names[] = {
 static void _handle_error(struct mgcp_ctx *mgcp_ctx, enum msc_mgcp_cause_code cause, bool dlcx, const char *file,
 			  int line)
 {
+	bool dlcx_possible = true;
 	struct osmo_fsm_inst *fi;
 	struct gsm_mncc mncc = {
 		.msg_type = MNCC_REL_REQ,
@@ -171,6 +172,14 @@ static void _handle_error(struct mgcp_ctx *mgcp_ctx, enum msc_mgcp_cause_code ca
 	fi = mgcp_ctx->fsm;
 	OSMO_ASSERT(fi);
 
+	/* Check if the endpoint identifier is a specific endpoint identifier,
+	 * since in order to perform a DLCX we must know the specific
+	 * identifier of the endpoint we want to release. If we do not have
+	 * this information because of errornous communication we can not
+	 * perform a DLCX. */
+	if (strstr(mgcp_ctx->rtp_endpoint, "*"))
+		dlcx_possible = false;
+
 	LOGPFSMLSRC(mgcp_ctx->fsm, LOGL_ERROR, file, line, "%s -- graceful shutdown...\n",
 		    get_value_string(msc_mgcp_cause_codes_names, cause));
 
@@ -180,7 +189,7 @@ static void _handle_error(struct mgcp_ctx *mgcp_ctx, enum msc_mgcp_cause_code ca
 	 * where a DLCX does not make sense (e.g. the MGW times out), halting
 	 * directly is the better options. In those cases, the dlcx flag
 	 * should not be set */
-	if (dlcx) {
+	if (dlcx && dlcx_possible) {
 		/* Fast-forward the FSM into call state. In this state the FSM
 		 * expects either an EV_TEARDOWN or an EV_TEARDOWN_ERROR. When
 		 * one of the two events is received a DLCX will be send to
@@ -273,6 +282,10 @@ static void fsm_crcx_ran_cb(struct osmo_fsm_inst *fi, uint32_t event, void *data
 	mgcp = mgcp_ctx->mgcp;
 	OSMO_ASSERT(mgcp);
 
+	/* NOTE: In case of error, we will not be able to perform any DLCX
+	 * operation because until this point we do not have requested any
+	 * endpoint yet. */
+
 	LOGPFSML(fi, LOGL_DEBUG,
 		 "CRCX/RAN: creating connection for the RAN side on MGW endpoint:%s...\n", mgcp_ctx->rtp_endpoint);
 
@@ -285,7 +298,7 @@ static void fsm_crcx_ran_cb(struct osmo_fsm_inst *fi, uint32_t event, void *data
 	};
 	if (osmo_strlcpy(mgcp_msg.endpoint, mgcp_ctx->rtp_endpoint, sizeof(mgcp_msg.endpoint)) >=
 	    MGCP_ENDPOINT_MAXLEN) {
-		handle_error(mgcp_ctx, MGCP_ERR_TOOLONG, true);
+		handle_error(mgcp_ctx, MGCP_ERR_TOOLONG, false);
 		return;
 	}
 
@@ -296,7 +309,7 @@ static void fsm_crcx_ran_cb(struct osmo_fsm_inst *fi, uint32_t event, void *data
 	mgcp_ctx->mgw_pending_trans = mgcp_msg_trans_id(msg);
 	rc = mgcp_client_tx(mgcp, msg, mgw_crcx_ran_resp_cb, mgcp_ctx);
 	if (rc < 0) {
-		handle_error(mgcp_ctx, MGCP_ERR_MGW_TX_FAIL, true);
+		handle_error(mgcp_ctx, MGCP_ERR_MGW_TX_FAIL, false);
 		return;
 	}
 
@@ -311,6 +324,13 @@ static void mgw_crcx_ran_resp_cb(struct mgcp_response *r, void *priv)
 	struct gsm_trans *trans;
 	struct gsm_subscriber_connection *conn;
 
+	/* NOTE: In case of error, we will not be able to perform any DLCX
+	 * operation because until we either get a parseable message that
+	 * contains an error code (no endpoint is seized in those cases)
+	 * or we get an unparseable message. In this case we can not be
+	 * sure, but we also can not draw any assumptions from unparseable
+	 * messages. */
+
 	OSMO_ASSERT(mgcp_ctx);
 	trans = mgcp_ctx->trans;
 	OSMO_ASSERT(trans);
@@ -320,7 +340,7 @@ static void mgw_crcx_ran_resp_cb(struct mgcp_response *r, void *priv)
 	if (r->head.response_code != 200) {
 		LOGPFSML(mgcp_ctx->fsm, LOGL_ERROR,
 			 "CRCX/RAN: response yields error: %d %s\n", r->head.response_code, r->head.comment);
-		handle_error(mgcp_ctx, MGCP_ERR_MGW_FAIL, true);
+		handle_error(mgcp_ctx, MGCP_ERR_MGW_FAIL, false);
 		return;
 	}
 
@@ -333,7 +353,7 @@ static void mgw_crcx_ran_resp_cb(struct mgcp_response *r, void *priv)
 	rc = mgcp_response_parse_params(r);
 	if (rc) {
 		LOGPFSML(mgcp_ctx->fsm, LOGL_ERROR, "CRCX/RAN: Cannot parse response\n");
-		handle_error(mgcp_ctx, MGCP_ERR_MGW_INVAL_RESP, true);
+		handle_error(mgcp_ctx, MGCP_ERR_MGW_INVAL_RESP, false);
 		return;
 	}
 
