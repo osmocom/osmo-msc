@@ -274,7 +274,7 @@ static void fsm_crcx_ran_cb(struct osmo_fsm_inst *fi, uint32_t event, void *data
 	OSMO_ASSERT(mgcp);
 
 	LOGPFSML(fi, LOGL_DEBUG,
-		 "CRCX/RAN: creating connection for the RAN side on MGW endpoint:%p...\n", mgcp_ctx->rtp_endpoint);
+		 "CRCX/RAN: creating connection for the RAN side on MGW endpoint:%s...\n", mgcp_ctx->rtp_endpoint);
 
 	/* Generate MGCP message string */
 	mgcp_msg = (struct mgcp_msg) {
@@ -370,7 +370,7 @@ static void fsm_crcx_cn_cb(struct osmo_fsm_inst *fi, uint32_t event, void *data)
 	}
 
 	LOGPFSML(fi, LOGL_DEBUG,
-		 "CRCX/CN creating connection for the CN side on MGW endpoint:%p...\n", mgcp_ctx->rtp_endpoint);
+		 "CRCX/CN creating connection for the CN side on MGW endpoint:%s...\n", mgcp_ctx->rtp_endpoint);
 
 	/* Generate MGCP message string */
 	mgcp_msg = (struct mgcp_msg) {
@@ -733,7 +733,7 @@ static void fsm_call_cb(struct osmo_fsm_inst *fi, uint32_t event, void *data)
 	OSMO_ASSERT(mgcp);
 
 	LOGPFSML(fi, LOGL_DEBUG,
-		 "DLCX: removing connection for the RAN and CN side on MGW endpoint:%p...\n", mgcp_ctx->rtp_endpoint);
+		 "DLCX: removing connection for the RAN and CN side on MGW endpoint:%s...\n", mgcp_ctx->rtp_endpoint);
 
 	/* Generate MGCP message string */
 	mgcp_msg = (struct mgcp_msg) {
