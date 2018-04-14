@@ -249,6 +249,8 @@ static void esme_destroy(struct osmo_esme *esme)
 	}
 	smpp_cmd_flush_pending(esme);
 	llist_del(&esme->list);
+	if (esme->acl)
+		esme->acl->esme = NULL;
 	talloc_free(esme);
 }
 
@@ -875,6 +877,8 @@ dead_socket:
 	osmo_fd_unregister(&esme->wqueue.bfd);
 	close(esme->wqueue.bfd.fd);
 	esme->wqueue.bfd.fd = -1;
+	if (esme->acl)
+		esme->acl->esme = NULL;
 	smpp_esme_put(esme);
 
 	return 0;
@@ -891,6 +895,8 @@ static int esme_link_write_cb(struct osmo_fd *ofd, struct msgb *msg)
 		osmo_fd_unregister(&esme->wqueue.bfd);
 		close(esme->wqueue.bfd.fd);
 		esme->wqueue.bfd.fd = -1;
+		if (esme->acl)
+			esme->acl->esme = NULL;
 		smpp_esme_put(esme);
 	} else if (rc < msgb_length(msg)) {
 		LOGP(DSMPP, LOGL_ERROR, "[%s] Short write\n", esme->system_id);
