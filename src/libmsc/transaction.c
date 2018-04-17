@@ -128,6 +128,9 @@ void trans_free(struct gsm_trans *trans)
 		_gsm411_sms_trans_free(trans);
 		conn_usage_token = MSC_CONN_USE_TRANS_SMS;
 		break;
+	case GSM48_PDISC_NC_SS:
+		conn_usage_token = MSC_CONN_USE_TRANS_NC_SS;
+		break;
 	}
 
 	if (trans->paging_request) {

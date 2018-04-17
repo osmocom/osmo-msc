@@ -259,8 +259,13 @@ DREF MSISDN:42342: MSC conn use - dtap == 1 (0x8: cm_service)
   MSC <--RAN_GERAN_A-- MS: GSM0480_MTYPE_REGISTER
 DREF MSISDN:42342: MSC conn use + dtap == 2 (0xa: dtap,cm_service)
 DRLL Dispatching 04.08 message GSM0480_MTYPE_REGISTER (0xb:0x3b)
+DMM Received SS/USSD data (trans_id=8, msg_type=GSM0480_MTYPE_REGISTER)
+DMM  -> (new transaction)
+DCC (ti 08 sub MSISDN:42342 callref 20000001) New transaction
+DREF VLR subscr MSISDN:42342 usage increases to: 3
+DREF MSISDN:42342: MSC conn use + trans_nc_ss == 3 (0x4a: dtap,cm_service,trans_nc_ss)
 DMM MSISDN:42342: rx msg GSM0480_MTYPE_REGISTER: received_cm_service_request changes to false
-DREF MSISDN:42342: MSC conn use - cm_service == 1 (0x2: dtap)
+DREF MSISDN:42342: MSC conn use - cm_service == 2 (0x42: dtap,trans_nc_ss)
 DMM Subscr_Conn(CM_SERVICE_REQ:901700000010650){SUBSCR_CONN_S_ACCEPTED}: Received Event SUBSCR_CONN_E_COMMUNICATING
 DMM Subscr_Conn(CM_SERVICE_REQ:901700000010650){SUBSCR_CONN_S_ACCEPTED}: state_chg to SUBSCR_CONN_S_COMMUNICATING
 DMM USSD: Own number requested
@@ -268,6 +273,8 @@ DMM MSISDN:42342: MSISDN = 42342
 DMSC msc_tx 43 bytes to MSISDN:42342 via RAN_GERAN_A
 - DTAP --RAN_GERAN_A--> MS: GSM0480_MTYPE_RELEASE_COMPLETE: 8b2a1c27a225020100302002013b301b04010f0416d9775d0e2ae3e965f73cfd7683d273104d36a3c91a0d
 - DTAP matches expected message
+DREF VLR subscr MSISDN:42342 usage decreases to: 2
+DREF MSISDN:42342: MSC conn use - trans_nc_ss == 1 (0x2: dtap)
 DREF MSISDN:42342: MSC conn use - dtap == 0 (0x0: )
 DMM Subscr_Conn(CM_SERVICE_REQ:901700000010650){SUBSCR_CONN_S_COMMUNICATING}: Received Event SUBSCR_CONN_E_UNUSED
 DMM Subscr_Conn(CM_SERVICE_REQ:901700000010650){SUBSCR_CONN_S_COMMUNICATING}: state_chg to SUBSCR_CONN_S_RELEASING
@@ -381,8 +388,13 @@ DREF MSISDN:42342: MSC conn use - dtap == 1 (0x8: cm_service)
   MSC <--RAN_GERAN_A-- MS: GSM0480_MTYPE_REGISTER
 DREF MSISDN:42342: MSC conn use + dtap == 2 (0xa: dtap,cm_service)
 DRLL Dispatching 04.08 message GSM0480_MTYPE_REGISTER (0xb:0x3b)
+DMM Received SS/USSD data (trans_id=8, msg_type=GSM0480_MTYPE_REGISTER)
+DMM  -> (new transaction)
+DCC (ti 08 sub MSISDN:42342 callref 20000002) New transaction
+DREF VLR subscr MSISDN:42342 usage increases to: 3
+DREF MSISDN:42342: MSC conn use + trans_nc_ss == 3 (0x4a: dtap,cm_service,trans_nc_ss)
 DMM MSISDN:42342: rx msg GSM0480_MTYPE_REGISTER: received_cm_service_request changes to false
-DREF MSISDN:42342: MSC conn use - cm_service == 1 (0x2: dtap)
+DREF MSISDN:42342: MSC conn use - cm_service == 2 (0x42: dtap,trans_nc_ss)
 DMM Subscr_Conn(CM_SERVICE_REQ:901700000010650){SUBSCR_CONN_S_ACCEPTED}: Received Event SUBSCR_CONN_E_COMMUNICATING
 DMM Subscr_Conn(CM_SERVICE_REQ:901700000010650){SUBSCR_CONN_S_ACCEPTED}: state_chg to SUBSCR_CONN_S_COMMUNICATING
 DMM USSD: Own number requested
@@ -390,6 +402,8 @@ DMM MSISDN:42342: MSISDN = 42342
 DMSC msc_tx 43 bytes to MSISDN:42342 via RAN_GERAN_A
 - DTAP --RAN_GERAN_A--> MS: GSM0480_MTYPE_RELEASE_COMPLETE: 8b2a1c27a225020100302002013b301b04010f0416d9775d0e2ae3e965f73cfd7683d273104d36a3c91a0d
 - DTAP matches expected message
+DREF VLR subscr MSISDN:42342 usage decreases to: 2
+DREF MSISDN:42342: MSC conn use - trans_nc_ss == 1 (0x2: dtap)
 DREF MSISDN:42342: MSC conn use - dtap == 0 (0x0: )
 DMM Subscr_Conn(CM_SERVICE_REQ:901700000010650){SUBSCR_CONN_S_COMMUNICATING}: Received Event SUBSCR_CONN_E_UNUSED
 DMM Subscr_Conn(CM_SERVICE_REQ:901700000010650){SUBSCR_CONN_S_COMMUNICATING}: state_chg to SUBSCR_CONN_S_RELEASING
@@ -731,8 +745,13 @@ DMM Subscr_Conn(CM_SERVICE_REQ:901700000010650){SUBSCR_CONN_S_ACCEPTED}: subscr_
   MSC <--RAN_UTRAN_IU-- MS: GSM0480_MTYPE_REGISTER
 DREF MSISDN:42342: MSC conn use + dtap == 2 (0xa: dtap,cm_service)
 DRLL Dispatching 04.08 message GSM0480_MTYPE_REGISTER (0xb:0x3b)
+DMM Received SS/USSD data (trans_id=8, msg_type=GSM0480_MTYPE_REGISTER)
+DMM  -> (new transaction)
+DCC (ti 08 sub MSISDN:42342 callref 20000003) New transaction
+DREF VLR subscr MSISDN:42342 usage increases to: 3
+DREF MSISDN:42342: MSC conn use + trans_nc_ss == 3 (0x4a: dtap,cm_service,trans_nc_ss)
 DMM MSISDN:42342: rx msg GSM0480_MTYPE_REGISTER: received_cm_service_request changes to false
-DREF MSISDN:42342: MSC conn use - cm_service == 1 (0x2: dtap)
+DREF MSISDN:42342: MSC conn use - cm_service == 2 (0x42: dtap,trans_nc_ss)
 DMM Subscr_Conn(CM_SERVICE_REQ:901700000010650){SUBSCR_CONN_S_ACCEPTED}: Received Event SUBSCR_CONN_E_COMMUNICATING
 DMM Subscr_Conn(CM_SERVICE_REQ:901700000010650){SUBSCR_CONN_S_ACCEPTED}: state_chg to SUBSCR_CONN_S_COMMUNICATING
 DMM USSD: Own number requested
@@ -740,6 +759,8 @@ DMM MSISDN:42342: MSISDN = 42342
 DMSC msc_tx 43 bytes to MSISDN:42342 via RAN_UTRAN_IU
 - DTAP --RAN_UTRAN_IU--> MS: GSM0480_MTYPE_RELEASE_COMPLETE: 8b2a1c27a225020100302002013b301b04010f0416d9775d0e2ae3e965f73cfd7683d273104d36a3c91a0d
 - DTAP matches expected message
+DREF VLR subscr MSISDN:42342 usage decreases to: 2
+DREF MSISDN:42342: MSC conn use - trans_nc_ss == 1 (0x2: dtap)
 DREF MSISDN:42342: MSC conn use - dtap == 0 (0x0: )
 DMM Subscr_Conn(CM_SERVICE_REQ:901700000010650){SUBSCR_CONN_S_COMMUNICATING}: Received Event SUBSCR_CONN_E_UNUSED
 DMM Subscr_Conn(CM_SERVICE_REQ:901700000010650){SUBSCR_CONN_S_COMMUNICATING}: state_chg to SUBSCR_CONN_S_RELEASING
@@ -866,8 +887,13 @@ DMM Subscr_Conn(CM_SERVICE_REQ:901700000010650){SUBSCR_CONN_S_ACCEPTED}: subscr_
   MSC <--RAN_UTRAN_IU-- MS: GSM0480_MTYPE_REGISTER
 DREF MSISDN:42342: MSC conn use + dtap == 2 (0xa: dtap,cm_service)
 DRLL Dispatching 04.08 message GSM0480_MTYPE_REGISTER (0xb:0x3b)
+DMM Received SS/USSD data (trans_id=8, msg_type=GSM0480_MTYPE_REGISTER)
+DMM  -> (new transaction)
+DCC (ti 08 sub MSISDN:42342 callref 20000004) New transaction
+DREF VLR subscr MSISDN:42342 usage increases to: 3
+DREF MSISDN:42342: MSC conn use + trans_nc_ss == 3 (0x4a: dtap,cm_service,trans_nc_ss)
 DMM MSISDN:42342: rx msg GSM0480_MTYPE_REGISTER: received_cm_service_request changes to false
-DREF MSISDN:42342: MSC conn use - cm_service == 1 (0x2: dtap)
+DREF MSISDN:42342: MSC conn use - cm_service == 2 (0x42: dtap,trans_nc_ss)
 DMM Subscr_Conn(CM_SERVICE_REQ:901700000010650){SUBSCR_CONN_S_ACCEPTED}: Received Event SUBSCR_CONN_E_COMMUNICATING
 DMM Subscr_Conn(CM_SERVICE_REQ:901700000010650){SUBSCR_CONN_S_ACCEPTED}: state_chg to SUBSCR_CONN_S_COMMUNICATING
 DMM USSD: Own number requested
@@ -875,6 +901,8 @@ DMM MSISDN:42342: MSISDN = 42342
 DMSC msc_tx 43 bytes to MSISDN:42342 via RAN_UTRAN_IU
 - DTAP --RAN_UTRAN_IU--> MS: GSM0480_MTYPE_RELEASE_COMPLETE: 8b2a1c27a225020100302002013b301b04010f0416d9775d0e2ae3e965f73cfd7683d273104d36a3c91a0d
 - DTAP matches expected message
+DREF VLR subscr MSISDN:42342 usage decreases to: 2
+DREF MSISDN:42342: MSC conn use - trans_nc_ss == 1 (0x2: dtap)
 DREF MSISDN:42342: MSC conn use - dtap == 0 (0x0: )
 DMM Subscr_Conn(CM_SERVICE_REQ:901700000010650){SUBSCR_CONN_S_COMMUNICATING}: Received Event SUBSCR_CONN_E_UNUSED
 DMM Subscr_Conn(CM_SERVICE_REQ:901700000010650){SUBSCR_CONN_S_COMMUNICATING}: state_chg to SUBSCR_CONN_S_RELEASING
@@ -1191,8 +1219,13 @@ DREF MSISDN:42342: MSC conn use - dtap == 1 (0x8: cm_service)
   MSC <--RAN_GERAN_A-- MS: GSM0480_MTYPE_REGISTER
 DREF MSISDN:42342: MSC conn use + dtap == 2 (0xa: dtap,cm_service)
 DRLL Dispatching 04.08 message GSM0480_MTYPE_REGISTER (0xb:0x3b)
+DMM Received SS/USSD data (trans_id=8, msg_type=GSM0480_MTYPE_REGISTER)
+DMM  -> (new transaction)
+DCC (ti 08 sub MSISDN:42342 callref 20000005) New transaction
+DREF VLR subscr MSISDN:42342 usage increases to: 3
+DREF MSISDN:42342: MSC conn use + trans_nc_ss == 3 (0x4a: dtap,cm_service,trans_nc_ss)
 DMM MSISDN:42342: rx msg GSM0480_MTYPE_REGISTER: received_cm_service_request changes to false
-DREF MSISDN:42342: MSC conn use - cm_service == 1 (0x2: dtap)
+DREF MSISDN:42342: MSC conn use - cm_service == 2 (0x42: dtap,trans_nc_ss)
 DMM Subscr_Conn(CM_SERVICE_REQ:901700000010650){SUBSCR_CONN_S_ACCEPTED}: Received Event SUBSCR_CONN_E_COMMUNICATING
 DMM Subscr_Conn(CM_SERVICE_REQ:901700000010650){SUBSCR_CONN_S_ACCEPTED}: state_chg to SUBSCR_CONN_S_COMMUNICATING
 DMM USSD: Own number requested
@@ -1200,6 +1233,8 @@ DMM MSISDN:42342: MSISDN = 42342
 DMSC msc_tx 43 bytes to MSISDN:42342 via RAN_GERAN_A
 - DTAP --RAN_GERAN_A--> MS: GSM0480_MTYPE_RELEASE_COMPLETE: 8b2a1c27a225020100302002013b301b04010f0416d9775d0e2ae3e965f73cfd7683d273104d36a3c91a0d
 - DTAP matches expected message
+DREF VLR subscr MSISDN:42342 usage decreases to: 2
+DREF MSISDN:42342: MSC conn use - trans_nc_ss == 1 (0x2: dtap)
 DREF MSISDN:42342: MSC conn use - dtap == 0 (0x0: )
 DMM Subscr_Conn(CM_SERVICE_REQ:901700000010650){SUBSCR_CONN_S_COMMUNICATING}: Received Event SUBSCR_CONN_E_UNUSED
 DMM Subscr_Conn(CM_SERVICE_REQ:901700000010650){SUBSCR_CONN_S_COMMUNICATING}: state_chg to SUBSCR_CONN_S_RELEASING
@@ -1299,8 +1334,13 @@ DREF MSISDN:42342: MSC conn use - dtap == 1 (0x8: cm_service)
   MSC <--RAN_GERAN_A-- MS: GSM0480_MTYPE_REGISTER
 DREF MSISDN:42342: MSC conn use + dtap == 2 (0xa: dtap,cm_service)
 DRLL Dispatching 04.08 message GSM0480_MTYPE_REGISTER (0xb:0x3b)
+DMM Received SS/USSD data (trans_id=8, msg_type=GSM0480_MTYPE_REGISTER)
+DMM  -> (new transaction)
+DCC (ti 08 sub MSISDN:42342 callref 20000006) New transaction
+DREF VLR subscr MSISDN:42342 usage increases to: 3
+DREF MSISDN:42342: MSC conn use + trans_nc_ss == 3 (0x4a: dtap,cm_service,trans_nc_ss)
 DMM MSISDN:42342: rx msg GSM0480_MTYPE_REGISTER: received_cm_service_request changes to false
-DREF MSISDN:42342: MSC conn use - cm_service == 1 (0x2: dtap)
+DREF MSISDN:42342: MSC conn use - cm_service == 2 (0x42: dtap,trans_nc_ss)
 DMM Subscr_Conn(CM_SERVICE_REQ:901700000010650){SUBSCR_CONN_S_ACCEPTED}: Received Event SUBSCR_CONN_E_COMMUNICATING
 DMM Subscr_Conn(CM_SERVICE_REQ:901700000010650){SUBSCR_CONN_S_ACCEPTED}: state_chg to SUBSCR_CONN_S_COMMUNICATING
 DMM USSD: Own number requested
@@ -1308,6 +1348,8 @@ DMM MSISDN:42342: MSISDN = 42342
 DMSC msc_tx 43 bytes to MSISDN:42342 via RAN_GERAN_A
 - DTAP --RAN_GERAN_A--> MS: GSM0480_MTYPE_RELEASE_COMPLETE: 8b2a1c27a225020100302002013b301b04010f0416d9775d0e2ae3e965f73cfd7683d273104d36a3c91a0d
 - DTAP matches expected message
+DREF VLR subscr MSISDN:42342 usage decreases to: 2
+DREF MSISDN:42342: MSC conn use - trans_nc_ss == 1 (0x2: dtap)
 DREF MSISDN:42342: MSC conn use - dtap == 0 (0x0: )
 DMM Subscr_Conn(CM_SERVICE_REQ:901700000010650){SUBSCR_CONN_S_COMMUNICATING}: Received Event SUBSCR_CONN_E_UNUSED
 DMM Subscr_Conn(CM_SERVICE_REQ:901700000010650){SUBSCR_CONN_S_COMMUNICATING}: state_chg to SUBSCR_CONN_S_RELEASING
@@ -1407,8 +1449,13 @@ DREF MSISDN:42342: MSC conn use - dtap == 1 (0x8: cm_service)
   MSC <--RAN_GERAN_A-- MS: GSM0480_MTYPE_REGISTER
 DREF MSISDN:42342: MSC conn use + dtap == 2 (0xa: dtap,cm_service)
 DRLL Dispatching 04.08 message GSM0480_MTYPE_REGISTER (0xb:0x3b)
+DMM Received SS/USSD data (trans_id=8, msg_type=GSM0480_MTYPE_REGISTER)
+DMM  -> (new transaction)
+DCC (ti 08 sub MSISDN:42342 callref 20000007) New transaction
+DREF VLR subscr MSISDN:42342 usage increases to: 3
+DREF MSISDN:42342: MSC conn use + trans_nc_ss == 3 (0x4a: dtap,cm_service,trans_nc_ss)
 DMM MSISDN:42342: rx msg GSM0480_MTYPE_REGISTER: received_cm_service_request changes to false
-DREF MSISDN:42342: MSC conn use - cm_service == 1 (0x2: dtap)
+DREF MSISDN:42342: MSC conn use - cm_service == 2 (0x42: dtap,trans_nc_ss)
 DMM Subscr_Conn(CM_SERVICE_REQ:901700000010650){SUBSCR_CONN_S_ACCEPTED}: Received Event SUBSCR_CONN_E_COMMUNICATING
 DMM Subscr_Conn(CM_SERVICE_REQ:901700000010650){SUBSCR_CONN_S_ACCEPTED}: state_chg to SUBSCR_CONN_S_COMMUNICATING
 DMM USSD: Own number requested
@@ -1416,6 +1463,8 @@ DMM MSISDN:42342: MSISDN = 42342
 DMSC msc_tx 43 bytes to MSISDN:42342 via RAN_GERAN_A
 - DTAP --RAN_GERAN_A--> MS: GSM0480_MTYPE_RELEASE_COMPLETE: 8b2a1c27a225020100302002013b301b04010f0416d9775d0e2ae3e965f73cfd7683d273104d36a3c91a0d
 - DTAP matches expected message
+DREF VLR subscr MSISDN:42342 usage decreases to: 2
+DREF MSISDN:42342: MSC conn use - trans_nc_ss == 1 (0x2: dtap)
 DREF MSISDN:42342: MSC conn use - dtap == 0 (0x0: )
 DMM Subscr_Conn(CM_SERVICE_REQ:901700000010650){SUBSCR_CONN_S_COMMUNICATING}: Received Event SUBSCR_CONN_E_UNUSED
 DMM Subscr_Conn(CM_SERVICE_REQ:901700000010650){SUBSCR_CONN_S_COMMUNICATING}: state_chg to SUBSCR_CONN_S_RELEASING
@@ -1757,8 +1806,13 @@ DMM Subscr_Conn(CM_SERVICE_REQ:901700000010650){SUBSCR_CONN_S_ACCEPTED}: subscr_
   MSC <--RAN_UTRAN_IU-- MS: GSM0480_MTYPE_REGISTER
 DREF MSISDN:42342: MSC conn use + dtap == 2 (0xa: dtap,cm_service)
 DRLL Dispatching 04.08 message GSM0480_MTYPE_REGISTER (0xb:0x3b)
+DMM Received SS/USSD data (trans_id=8, msg_type=GSM0480_MTYPE_REGISTER)
+DMM  -> (new transaction)
+DCC (ti 08 sub MSISDN:42342 callref 20000008) New transaction
+DREF VLR subscr MSISDN:42342 usage increases to: 3
+DREF MSISDN:42342: MSC conn use + trans_nc_ss == 3 (0x4a: dtap,cm_service,trans_nc_ss)
 DMM MSISDN:42342: rx msg GSM0480_MTYPE_REGISTER: received_cm_service_request changes to false
-DREF MSISDN:42342: MSC conn use - cm_service == 1 (0x2: dtap)
+DREF MSISDN:42342: MSC conn use - cm_service == 2 (0x42: dtap,trans_nc_ss)
 DMM Subscr_Conn(CM_SERVICE_REQ:901700000010650){SUBSCR_CONN_S_ACCEPTED}: Received Event SUBSCR_CONN_E_COMMUNICATING
 DMM Subscr_Conn(CM_SERVICE_REQ:901700000010650){SUBSCR_CONN_S_ACCEPTED}: state_chg to SUBSCR_CONN_S_COMMUNICATING
 DMM USSD: Own number requested
@@ -1766,6 +1820,8 @@ DMM MSISDN:42342: MSISDN = 42342
 DMSC msc_tx 43 bytes to MSISDN:42342 via RAN_UTRAN_IU
 - DTAP --RAN_UTRAN_IU--> MS: GSM0480_MTYPE_RELEASE_COMPLETE: 8b2a1c27a225020100302002013b301b04010f0416d9775d0e2ae3e965f73cfd7683d273104d36a3c91a0d
 - DTAP matches expected message
+DREF VLR subscr MSISDN:42342 usage decreases to: 2
+DREF MSISDN:42342: MSC conn use - trans_nc_ss == 1 (0x2: dtap)
 DREF MSISDN:42342: MSC conn use - dtap == 0 (0x0: )
 DMM Subscr_Conn(CM_SERVICE_REQ:901700000010650){SUBSCR_CONN_S_COMMUNICATING}: Received Event SUBSCR_CONN_E_UNUSED
 DMM Subscr_Conn(CM_SERVICE_REQ:901700000010650){SUBSCR_CONN_S_COMMUNICATING}: state_chg to SUBSCR_CONN_S_RELEASING
@@ -1878,8 +1934,13 @@ DMM Subscr_Conn(CM_SERVICE_REQ:901700000010650){SUBSCR_CONN_S_ACCEPTED}: subscr_
   MSC <--RAN_UTRAN_IU-- MS: GSM0480_MTYPE_REGISTER
 DREF MSISDN:42342: MSC conn use + dtap == 2 (0xa: dtap,cm_service)
 DRLL Dispatching 04.08 message GSM0480_MTYPE_REGISTER (0xb:0x3b)
+DMM Received SS/USSD data (trans_id=8, msg_type=GSM0480_MTYPE_REGISTER)
+DMM  -> (new transaction)
+DCC (ti 08 sub MSISDN:42342 callref 20000009) New transaction
+DREF VLR subscr MSISDN:42342 usage increases to: 3
+DREF MSISDN:42342: MSC conn use + trans_nc_ss == 3 (0x4a: dtap,cm_service,trans_nc_ss)
 DMM MSISDN:42342: rx msg GSM0480_MTYPE_REGISTER: received_cm_service_request changes to false
-DREF MSISDN:42342: MSC conn use - cm_service == 1 (0x2: dtap)
+DREF MSISDN:42342: MSC conn use - cm_service == 2 (0x42: dtap,trans_nc_ss)
 DMM Subscr_Conn(CM_SERVICE_REQ:901700000010650){SUBSCR_CONN_S_ACCEPTED}: Received Event SUBSCR_CONN_E_COMMUNICATING
 DMM Subscr_Conn(CM_SERVICE_REQ:901700000010650){SUBSCR_CONN_S_ACCEPTED}: state_chg to SUBSCR_CONN_S_COMMUNICATING
 DMM USSD: Own number requested
@@ -1887,6 +1948,8 @@ DMM MSISDN:42342: MSISDN = 42342
 DMSC msc_tx 43 bytes to MSISDN:42342 via RAN_UTRAN_IU
 - DTAP --RAN_UTRAN_IU--> MS: GSM0480_MTYPE_RELEASE_COMPLETE: 8b2a1c27a225020100302002013b301b04010f0416d9775d0e2ae3e965f73cfd7683d273104d36a3c91a0d
 - DTAP matches expected message
+DREF VLR subscr MSISDN:42342 usage decreases to: 2
+DREF MSISDN:42342: MSC conn use - trans_nc_ss == 1 (0x2: dtap)
 DREF MSISDN:42342: MSC conn use - dtap == 0 (0x0: )
 DMM Subscr_Conn(CM_SERVICE_REQ:901700000010650){SUBSCR_CONN_S_COMMUNICATING}: Received Event SUBSCR_CONN_E_UNUSED
 DMM Subscr_Conn(CM_SERVICE_REQ:901700000010650){SUBSCR_CONN_S_COMMUNICATING}: state_chg to SUBSCR_CONN_S_RELEASING
@@ -1999,8 +2062,13 @@ DMM Subscr_Conn(CM_SERVICE_REQ:901700000010650){SUBSCR_CONN_S_ACCEPTED}: subscr_
   MSC <--RAN_UTRAN_IU-- MS: GSM0480_MTYPE_REGISTER
 DREF MSISDN:42342: MSC conn use + dtap == 2 (0xa: dtap,cm_service)
 DRLL Dispatching 04.08 message GSM0480_MTYPE_REGISTER (0xb:0x3b)
+DMM Received SS/USSD data (trans_id=8, msg_type=GSM0480_MTYPE_REGISTER)
+DMM  -> (new transaction)
+DCC (ti 08 sub MSISDN:42342 callref 2000000a) New transaction
+DREF VLR subscr MSISDN:42342 usage increases to: 3
+DREF MSISDN:42342: MSC conn use + trans_nc_ss == 3 (0x4a: dtap,cm_service,trans_nc_ss)
 DMM MSISDN:42342: rx msg GSM0480_MTYPE_REGISTER: received_cm_service_request changes to false
-DREF MSISDN:42342: MSC conn use - cm_service == 1 (0x2: dtap)
+DREF MSISDN:42342: MSC conn use - cm_service == 2 (0x42: dtap,trans_nc_ss)
 DMM Subscr_Conn(CM_SERVICE_REQ:901700000010650){SUBSCR_CONN_S_ACCEPTED}: Received Event SUBSCR_CONN_E_COMMUNICATING
 DMM Subscr_Conn(CM_SERVICE_REQ:901700000010650){SUBSCR_CONN_S_ACCEPTED}: state_chg to SUBSCR_CONN_S_COMMUNICATING
 DMM USSD: Own number requested
@@ -2008,6 +2076,8 @@ DMM MSISDN:42342: MSISDN = 42342
 DMSC msc_tx 43 bytes to MSISDN:42342 via RAN_UTRAN_IU
 - DTAP --RAN_UTRAN_IU--> MS: GSM0480_MTYPE_RELEASE_COMPLETE: 8b2a1c27a225020100302002013b301b04010f0416d9775d0e2ae3e965f73cfd7683d273104d36a3c91a0d
 - DTAP matches expected message
+DREF VLR subscr MSISDN:42342 usage decreases to: 2
+DREF MSISDN:42342: MSC conn use - trans_nc_ss == 1 (0x2: dtap)
 DREF MSISDN:42342: MSC conn use - dtap == 0 (0x0: )
 DMM Subscr_Conn(CM_SERVICE_REQ:901700000010650){SUBSCR_CONN_S_COMMUNICATING}: Received Event SUBSCR_CONN_E_UNUSED
 DMM Subscr_Conn(CM_SERVICE_REQ:901700000010650){SUBSCR_CONN_S_COMMUNICATING}: state_chg to SUBSCR_CONN_S_RELEASING
@@ -2338,8 +2408,13 @@ DREF MSISDN:42342: MSC conn use - dtap == 1 (0x8: cm_service)
   MSC <--RAN_GERAN_A-- MS: GSM0480_MTYPE_REGISTER
 DREF MSISDN:42342: MSC conn use + dtap == 2 (0xa: dtap,cm_service)
 DRLL Dispatching 04.08 message GSM0480_MTYPE_REGISTER (0xb:0x3b)
+DMM Received SS/USSD data (trans_id=8, msg_type=GSM0480_MTYPE_REGISTER)
+DMM  -> (new transaction)
+DCC (ti 08 sub MSISDN:42342 callref 2000000b) New transaction
+DREF VLR subscr MSISDN:42342 usage increases to: 3
+DREF MSISDN:42342: MSC conn use + trans_nc_ss == 3 (0x4a: dtap,cm_service,trans_nc_ss)
 DMM MSISDN:42342: rx msg GSM0480_MTYPE_REGISTER: received_cm_service_request changes to false
-DREF MSISDN:42342: MSC conn use - cm_service == 1 (0x2: dtap)
+DREF MSISDN:42342: MSC conn use - cm_service == 2 (0x42: dtap,trans_nc_ss)
 DMM Subscr_Conn(CM_SERVICE_REQ:901700000010650){SUBSCR_CONN_S_ACCEPTED}: Received Event SUBSCR_CONN_E_COMMUNICATING
 DMM Subscr_Conn(CM_SERVICE_REQ:901700000010650){SUBSCR_CONN_S_ACCEPTED}: state_chg to SUBSCR_CONN_S_COMMUNICATING
 DMM USSD: Own number requested
@@ -2347,6 +2422,8 @@ DMM MSISDN:42342: MSISDN = 42342
 DMSC msc_tx 43 bytes to MSISDN:42342 via RAN_GERAN_A
 - DTAP --RAN_GERAN_A--> MS: GSM0480_MTYPE_RELEASE_COMPLETE: 8b2a1c27a225020100302002013b301b04010f0416d9775d0e2ae3e965f73cfd7683d273104d36a3c91a0d
 - DTAP matches expected message
+DREF VLR subscr MSISDN:42342 usage decreases to: 2
+DREF MSISDN:42342: MSC conn use - trans_nc_ss == 1 (0x2: dtap)
 DREF MSISDN:42342: MSC conn use - dtap == 0 (0x0: )
 DMM Subscr_Conn(CM_SERVICE_REQ:901700000010650){SUBSCR_CONN_S_COMMUNICATING}: Received Event SUBSCR_CONN_E_UNUSED
 DMM Subscr_Conn(CM_SERVICE_REQ:901700000010650){SUBSCR_CONN_S_COMMUNICATING}: state_chg to SUBSCR_CONN_S_RELEASING
@@ -2702,8 +2779,13 @@ DMM Subscr_Conn(CM_SERVICE_REQ:901700000010650){SUBSCR_CONN_S_ACCEPTED}: subscr_
   MSC <--RAN_UTRAN_IU-- MS: GSM0480_MTYPE_REGISTER
 DREF MSISDN:42342: MSC conn use + dtap == 2 (0xa: dtap,cm_service)
 DRLL Dispatching 04.08 message GSM0480_MTYPE_REGISTER (0xb:0x3b)
+DMM Received SS/USSD data (trans_id=8, msg_type=GSM0480_MTYPE_REGISTER)
+DMM  -> (new transaction)
+DCC (ti 08 sub MSISDN:42342 callref 2000000c) New transaction
+DREF VLR subscr MSISDN:42342 usage increases to: 3
+DREF MSISDN:42342: MSC conn use + trans_nc_ss == 3 (0x4a: dtap,cm_service,trans_nc_ss)
 DMM MSISDN:42342: rx msg GSM0480_MTYPE_REGISTER: received_cm_service_request changes to false
-DREF MSISDN:42342: MSC conn use - cm_service == 1 (0x2: dtap)
+DREF MSISDN:42342: MSC conn use - cm_service == 2 (0x42: dtap,trans_nc_ss)
 DMM Subscr_Conn(CM_SERVICE_REQ:901700000010650){SUBSCR_CONN_S_ACCEPTED}: Received Event SUBSCR_CONN_E_COMMUNICATING
 DMM Subscr_Conn(CM_SERVICE_REQ:901700000010650){SUBSCR_CONN_S_ACCEPTED}: state_chg to SUBSCR_CONN_S_COMMUNICATING
 DMM USSD: Own number requested
@@ -2711,6 +2793,8 @@ DMM MSISDN:42342: MSISDN = 42342
 DMSC msc_tx 43 bytes to MSISDN:42342 via RAN_UTRAN_IU
 - DTAP --RAN_UTRAN_IU--> MS: GSM0480_MTYPE_RELEASE_COMPLETE: 8b2a1c27a225020100302002013b301b04010f0416d9775d0e2ae3e965f73cfd7683d273104d36a3c91a0d
 - DTAP matches expected message
+DREF VLR subscr MSISDN:42342 usage decreases to: 2
+DREF MSISDN:42342: MSC conn use - trans_nc_ss == 1 (0x2: dtap)
 DREF MSISDN:42342: MSC conn use - dtap == 0 (0x0: )
 DMM Subscr_Conn(CM_SERVICE_REQ:901700000010650){SUBSCR_CONN_S_COMMUNICATING}: Received Event SUBSCR_CONN_E_UNUSED
 DMM Subscr_Conn(CM_SERVICE_REQ:901700000010650){SUBSCR_CONN_S_COMMUNICATING}: state_chg to SUBSCR_CONN_S_RELEASING

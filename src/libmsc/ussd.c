@@ -35,6 +35,10 @@
 #include <osmocom/msc/osmo_msc.h>
 #include <osmocom/msc/vlr.h>
 #include <osmocom/msc/gsm_04_08.h>
+#include <osmocom/msc/transaction.h>
+
+/* FIXME: choose a proper range */
+static uint32_t new_callref = 0x20000001;
 
 /* Declarations of USSD strings to be recognised */
 const char USSD_TEXT_OWN_NUMBER[] = "*#100#";
@@ -57,19 +61,60 @@ static int send_own_number(struct gsm_subscriber_connection *conn,
 /* Entrypoint - handler function common to all mobile-originated USSDs */
 int handle_rcv_ussd(struct gsm_subscriber_connection *conn, struct msgb *msg)
 {
-	int rc;
+	struct gsm48_hdr *gh = msgb_l3(msg);
+	struct gsm_trans *trans;
 	struct ss_request req;
-	struct gsm48_hdr *gh;
+	uint8_t pdisc, tid;
+	uint8_t msg_type;
+	int rc;
 
-	/* TODO: Use subscriber_connection ref-counting if we ever want
-	 * to keep the connection alive due ot ongoing USSD exchange.
-	 * As we answer everytying synchronously so far, there's no need
-	 * yet */
+	pdisc = gsm48_hdr_pdisc(gh);
+	msg_type = gsm48_hdr_msg_type(gh);
+	tid = gsm48_hdr_trans_id_flip_ti(gh);
 
-	cm_service_request_concludes(conn, msg);
+	/* Associate logging messages with this subscriber */
+	log_set_context(LOG_CTX_VLR_SUBSCR, conn->vsub);
+
+	DEBUGP(DMM, "Received SS/USSD data (trans_id=%x, msg_type=%s)\n",
+		tid, gsm48_pdisc_msgtype_name(pdisc, msg_type));
+
+	/* Reuse existing transaction, or create a new one */
+	trans = trans_find_by_id(conn, pdisc, tid);
+	if (!trans) {
+		/**
+		 * According to GSM TS 04.80, section 2.4.2 "Register
+		 * (mobile station to network direction)", the REGISTER
+		 * message is sent by the mobile station to the network
+		 * to assign a new transaction identifier for call independent
+		 * supplementary service control and to request or acknowledge
+		 * a supplementary service.
+		 */
+		if (msg_type != GSM0480_MTYPE_REGISTER) {
+			LOGP(DMM, LOGL_ERROR, "Unexpected message (msg_type=%s), "
+				"transaction is not allocated yet\n",
+				gsm48_pdisc_msgtype_name(pdisc, msg_type));
+			gsm0480_send_ussd_reject(conn, &req,
+				GSM_0480_PROBLEM_CODE_TAG_GENERAL,
+				GSM_0480_GEN_PROB_CODE_UNRECOGNISED);
+			return -EINVAL;
+		}
+
+		DEBUGP(DMM, " -> (new transaction)\n");
+		trans = trans_alloc(conn->network, conn->vsub,
+			pdisc, tid, new_callref++);
+		if (!trans) {
+			DEBUGP(DMM, " -> No memory for trans\n");
+			gsm0480_send_ussd_return_error(conn, &req,
+				GSM0480_ERR_CODE_SYSTEM_FAILURE);
+			return -ENOMEM;
+		}
+
+		trans->conn = msc_subscr_conn_get(conn, MSC_CONN_USE_TRANS_NC_SS);
+		trans->dlci = OMSC_LINKID_CB(msg);
+		cm_service_request_concludes(conn, msg);
+	}
 
 	memset(&req, 0, sizeof(req));
-	gh = msgb_l3(msg);
 	rc = gsm0480_decode_ss_request(gh, msgb_l3len(msg), &req);
 	if (!rc) {
 		LOGP(DMM, LOGL_ERROR, "SS/USSD message parsing error, "
@@ -100,6 +145,14 @@ int handle_rcv_ussd(struct gsm_subscriber_connection *conn, struct msgb *msg)
 		rc = gsm0480_send_ussd_return_error(conn, &req,
 			GSM0480_ERR_CODE_UNEXPECTED_DATA_VALUE);
 	}
+
+	/**
+	 * TODO: as we only handle *#100# for now, and always
+	 * respond with RELEASE COMPLETE, let's manually free
+	 * the transaction here, until the external interface
+	 * is implemented.
+	 */
+	trans_free(trans);
 
 	return rc;
 }
