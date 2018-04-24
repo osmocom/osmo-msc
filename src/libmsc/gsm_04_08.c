@@ -1472,8 +1472,9 @@ static int setup_trig_pag_evt(unsigned int hooknum, unsigned int event,
 		break;
 	case GSM_PAGING_EXPIRED:
 	case GSM_PAGING_BUSY:
-		DEBUGP(DCC, "Paging subscr %s expired!\n",
-		       vlr_subscr_msisdn_or_name(transt->vsub));
+		DEBUGP(DCC, "Paging subscr %s %s!\n",
+		       vlr_subscr_msisdn_or_name(transt->vsub),
+		       paging_event == GSM_PAGING_EXPIRED ? "expired" : "busy");
 		/* Temporarily out of order */
 		mncc_release_ind(transt->net, transt,
 				 transt->callref,
