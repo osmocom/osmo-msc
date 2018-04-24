@@ -1467,6 +1467,7 @@ static int setup_trig_pag_evt(unsigned int hooknum, unsigned int event,
 		OSMO_ASSERT(conn);
 		/* Assign conn */
 		transt->conn = msc_subscr_conn_get(conn, MSC_CONN_USE_TRANS_CC);
+		transt->paging_request = NULL;
 		/* send SETUP request to called party */
 		gsm48_cc_tx_setup(transt, &transt->cc.msg);
 		break;
@@ -1486,7 +1487,6 @@ static int setup_trig_pag_evt(unsigned int hooknum, unsigned int event,
 		break;
 	}
 
-	transt->paging_request = NULL;
 	return 0;
 }
 
