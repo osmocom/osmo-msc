@@ -63,7 +63,6 @@ static int paging_cb_silent(unsigned int hooknum, unsigned int event,
 		break;
 	case GSM_PAGING_EXPIRED:
 	case GSM_PAGING_BUSY:
-	case GSM_PAGING_OOM:
 		DEBUGP(DLSMS, "expired\n");
 		osmo_signal_dispatch(SS_SCALL, S_SCALL_EXPIRED, &sigdata);
 		break;

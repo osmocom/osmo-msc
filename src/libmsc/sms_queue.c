@@ -511,8 +511,6 @@ static int sms_sms_cb(unsigned int subsys, unsigned int signal,
 		case GSM_PAGING_EXPIRED:
 			sms_pending_failed(pending, 1);
 			break;
-
-		case GSM_PAGING_OOM:
 		case GSM_PAGING_BUSY:
 			network->sms_queue->pending -= 1;
 			sms_pending_free(pending);
