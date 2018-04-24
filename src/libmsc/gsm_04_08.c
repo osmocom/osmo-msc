@@ -1456,10 +1456,11 @@ static int setup_trig_pag_evt(unsigned int hooknum, unsigned int event,
 {
 	struct gsm_subscriber_connection *conn = _conn;
 	struct gsm_trans *transt = _transt;
+	enum gsm_paging_event paging_event = event;
 
 	OSMO_ASSERT(!transt->conn);
 
-	switch (event) {
+	switch (paging_event) {
 	case GSM_PAGING_SUCCEEDED:
 		DEBUGP(DCC, "Paging subscr %s succeeded!\n",
 		       vlr_subscr_msisdn_or_name(transt->vsub));
@@ -1481,9 +1482,6 @@ static int setup_trig_pag_evt(unsigned int hooknum, unsigned int event,
 		transt->callref = 0;
 		transt->paging_request = NULL;
 		trans_free(transt);
-		break;
-	default:
-		LOGP(DCC, LOGL_ERROR, "Unknown paging event %d\n", event);
 		break;
 	}
 
