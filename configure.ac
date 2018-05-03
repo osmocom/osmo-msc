@@ -39,16 +39,16 @@ AC_SEARCH_LIBS([dlopen], [dl dld], [LIBRARY_DL="$LIBS";LIBS=""])
 AC_SUBST(LIBRARY_DL)
 
 
-PKG_CHECK_MODULES(LIBOSMOCORE, libosmocore >= 0.10.0)
-PKG_CHECK_MODULES(LIBOSMOVTY, libosmovty >= 0.10.0)
-PKG_CHECK_MODULES(LIBOSMOCTRL, libosmoctrl >= 0.10.0)
-PKG_CHECK_MODULES(LIBOSMOGSM, libosmogsm >= 0.10.0)
-PKG_CHECK_MODULES(LIBOSMOABIS, libosmoabis >= 0.2.0)
-PKG_CHECK_MODULES(LIBOSMONETIF, libosmo-netif >= 0.1.0)
-PKG_CHECK_MODULES(LIBOSMOSIGTRAN, libosmo-sigtran >= 0.8.0)
-PKG_CHECK_MODULES(LIBOSMOSCCP, libosmo-sccp)
-PKG_CHECK_MODULES(LIBOSMOMGCPCLIENT, libosmo-mgcp-client >= 1.1.0)
-PKG_CHECK_MODULES(LIBSMPP34, libsmpp34 >= 1.12.0)
+PKG_CHECK_MODULES(LIBOSMOCORE, libosmocore >= 0.11.0)
+PKG_CHECK_MODULES(LIBOSMOVTY, libosmovty >= 0.11.0)
+PKG_CHECK_MODULES(LIBOSMOCTRL, libosmoctrl >= 0.11.0)
+PKG_CHECK_MODULES(LIBOSMOGSM, libosmogsm >= 0.11.0)
+PKG_CHECK_MODULES(LIBOSMOABIS, libosmoabis >= 0.5.0)
+PKG_CHECK_MODULES(LIBOSMONETIF, libosmo-netif >= 0.2.0)
+PKG_CHECK_MODULES(LIBOSMOSIGTRAN, libosmo-sigtran >= 0.9.0)
+PKG_CHECK_MODULES(LIBOSMOSCCP, libosmo-sccp >= 0.9.0)
+PKG_CHECK_MODULES(LIBOSMOMGCPCLIENT, libosmo-mgcp-client >= 1.3.0)
+PKG_CHECK_MODULES(LIBSMPP34, libsmpp34 >= 1.13.0)
 
 AC_ARG_ENABLE(sanitize,
 	[AS_HELP_STRING(
@@ -84,7 +84,7 @@ fi
 AC_ARG_ENABLE([smpp], [AS_HELP_STRING([--enable-smpp], [Build the SMPP interface])],
     [osmo_ac_build_smpp="$enableval"],[osmo_ac_build_smpp="no"])
 if test "$osmo_ac_build_smpp" = "yes" ; then
-    PKG_CHECK_MODULES(LIBSMPP34, libsmpp34 >= 1.12)
+    PKG_CHECK_MODULES(LIBSMPP34, libsmpp34 >= 1.13.0)
     AC_DEFINE(BUILD_SMPP, 1, [Define if we want to build SMPP])
 fi
 AM_CONDITIONAL(BUILD_SMPP, test "x$osmo_ac_build_smpp" = "xyes")
@@ -94,8 +94,8 @@ AC_SUBST(osmo_ac_build_smpp)
 AC_ARG_ENABLE([iu], [AS_HELP_STRING([--enable-iu], [Build 3G support, aka IuPS and IuCS interfaces])],
     [osmo_ac_iu="$enableval"],[osmo_ac_iu="no"])
 if test "x$osmo_ac_iu" = "xyes" ; then
-    PKG_CHECK_MODULES(LIBASN1C, libasn1c >= 0.9.28)
-    PKG_CHECK_MODULES(LIBOSMORANAP, libosmo-ranap >= 0.2.0)
+    PKG_CHECK_MODULES(LIBASN1C, libasn1c >= 0.9.30)
+    PKG_CHECK_MODULES(LIBOSMORANAP, libosmo-ranap >= 0.3.0)
     AC_DEFINE(BUILD_IU, 1, [Define if we want to build IuPS and IuCS interfaces support])
 fi
 AM_CONDITIONAL(BUILD_IU, test "x$osmo_ac_iu" = "xyes")

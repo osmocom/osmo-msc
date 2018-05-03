@@ -1,3 +1,299 @@
+osmo-msc (1.2.0) unstable; urgency=medium
+
+  [ Neels Hofmeyr ]
+  * msc_vlr_tests: fix rebuild: rebuild when src/ libs were rebuilt
+  * cosmetic: vlr: rename auth_tuple_max_use_count to _reuse_
+  * tests: add msc_vlr_test_authen_reuse
+  * vty: make auth tuple reuse configurable
+  * vty: drop deprecated 'logging level sms...'
+  * defaults: assign TMSI by default
+  * vty: skip installing cmds now always installed by default
+  * examples: apply mgcp_client vty rename from 'mgcpgw' to 'mgw'
+  * vlr: auth_fsm_start: check return value of fsm alloc
+  * add --enable-sanitize config option
+  * rate_ctr: don't use . as separator
+  * sub_pres_vlr_fsm_start: fix heap use after free
+  * vlr_gsupc_read_cb: fix use after free of GSUP msgb
+  * subscr_conn: don't close after conn timeout
+  * vlr_subscr_conn_timeout(): don't fire events to discarded fi
+  * cosmetic: msc_vlr_tests: add comment to show expected tallocs
+  * sms_queue_test: sanitize: clean up talloc contexts when done
+  * cosmetic: log: CC state transition: log trans id and subscr
+  * cosmetic: log: CC trans_alloc: log trans_id and subscr, not memory addrs
+  * cosmetic: debug log: mncc: detached subscr: show subscriber
+  * msc_vlr_tests: fix test nr arg: clear errno before strtol()
+  * msc_vlr_tests: set a valid lac for fake conns
+  * use only 0.23.1 as point code for both A and Iu
+  * subscr_conn: introduce usage tokens for ref error tracking
+  * cosmetic: log error when using a conn that's in release
+  * add msc_vlr_test_call to reproduce a sanitizer error
+  * fix use after free: missing conn_get on CC paging response
+  * sms db: don't attempt to query pending SMS for unset MSISDN
+  * sms db: properly quote MSISDN in various SQL queries
+  * sms.db: silence libdbi warnings on out-of-range index
+  * fix vty write: add missing 'authentication optional/required' output
+  * compiler warning: drop double 'const' in a_iface_tx_cipher_mode()
+  * debug log: a_iface_tx_cipher_mode(): log cipher and key
+  * cosmetic: msc_vlr_tests: log SMS details when invoked with -v
+  * vlr: debug log: log Ciphering Mode details
+  * fix BSSMAP Cipher Mode Cmd: properly set permitted algorithms
+  * cosmetic: move translation of vlr_ciph into msc_vlr_set_ciph_mode()
+  * cosmetic prep: publish vlr_use_umts_aka() decision
+  * cosmetic prep: tell vlr_ops.set_ciph_mode() whether UMTS AKA is used
+  * drop unused T* timers (BSC land, not MSC)
+  * cosmetic: msc_paging_request: drop obsolete comment
+  * fix GSM-Milenage in presence of 2G keys
+  * compiler warning: extend #if 0 to include unused array
+  * a_iface_bssap: compiler warning: cast const away from TLV val for l2h
+  * smpp_smsc: fix truncated string copy into bind_r.system_id
+  * log: a_iface.c: revisit logging, use LOGPCONN
+  * cosmetic: rename sccp_rx_udt and sccp_rx_dt to a_*
+  * fix paging: add timeout to discard unsuccessful paging
+  * fix: properly cancel all Paging on IMSI Detach
+  * a_iface_tx_assignment: fix log lvl for "Sending Assignment..."
+  * fix build: missing LIBOSMORANAP flags in libmsc
+  * drop unused libmsc/meas_feed.h
+  * cosmetic: gsm_network_init(): imply default 001-01 PLMN
+  * implement support for 3-digit MNC with leading zeros
+  * vlr: fix post-auth LU failure handling
+  * vlr_lu_fsm: guard against using the wrong fi
+  * msc_vlr_tests: revert IMSI parameter and test nr output
+  * msc_vlr_test_gsm_ciph: drop unused function
+  * msc_vlr_tests: make all test functions static
+  * msc_vlr_tests: improve cipher mode coverage
+  * fix: clear vlr_subscr->msc_conn_ref when the conn is discarded
+  * vty: drop unused commands
+  * vty: add 'msisdn' as alias for 'extension'
+  * vty: add 'subscriber ... paging' cmd
+  * msc_main: do not say 'osmo-nitb' in the usage
+  * silent call: clarify rc and error messages logged on vty
+  * msc_vlr_tests: clearly separate Ciph Mode from Security Mode checking
+  * msc_vlr_test_gsm_ciph: add test for GSM AKA in UMTS environment
+  * vlr: fix GSM AKA in a UMTS AKA capable environment
+  * vlr auth: gracefully reject malformed auth response
+  * gsm48_rx_mm_auth_resp(): pass is_r99 from classmark, not response size
+  * cosmetic: gsm48_rx_mm_auth_resp(): log 'UMTS AUTH', not 'R99 AUTH'
+  * msc_vlr_test_umts_authen: test response with too short RES
+  * msc_vlr_test_umts_authen: test response with too long RES
+  * msc_vlr_test_umts_authen: test response with only SRES half of RES
+  * cosmetic: vlr_auth_fsm: clarify decision on UMTS AKA or GSM AKA
+  * cosmetic: vlr_auth_fsm: log RAN and size along with SRES/RES
+  * msc_vlr_tests: add test_a5_3_not_supported
+  * configure: add --enable-werror
+  * vlr_ciph_result: fix use after free of imeisv
+  * trans_free: safeguard against a still running CC timer on free
+  * cosmetic: vlr_auth: log decision to send UMTS or GSM AKA challenge
+  * cosmetic: msc_vlr_tests: enable CC logging in debug
+  * cosmetic: rename conn_fsm "bump" event to "release_when_unused"
+  * msc_vlr_tests: add CC Release test and test to catch OS#2779
+  * cosmetic: gsm_04_08.c: drop unused struct gsm_lai
+  * trans_free: tear down conn when last transaction is done
+  * dissolve libcommon,libcommon-cs: clean up vty definitions
+  * cosmetic: msc_vty.c: use static gsmnet instead of gsmnet_from_vty()
+  * dissolve libcommon: drop unused bsc_version.c
+  * dissolve libcommon: drop debug.c
+  * dissolve libcommon: move talloc ctx into msc_main.c, drop talloc_ctx.c
+  * dissolve libcommon: drop gsm_subscriber_base.c, move vlr_subscr_* to vlr.c
+  * dissolve libcommon: drop gsm_data.c, move code to libmsc
+  * rename libcommon to libgsupclient
+  * dissolve libcommon-cs: mv a_reset.c to libmsc
+  * dissolve libcommon-cs: move gsm_network_init() to libmsc
+  * dissolve libcommon-cs: move gsm48_* code to libmsc, drop sms_next_rp_msg_ref()
+  * remove empty libcommon-cs
+  * gsup_test_client: gsupc_read_cb: fix uninitialized value 'io'
+  * use osmo_init_logging2() with proper talloc ctx
+  * drop some dead definitions (gsm_data.h, gsup_client.c)
+  * test_reject_concurrency: missing assert
+  * cosmetic: rx_bssmap: read message type once into local var
+  * cosmetic: rename gsm_subscriber_connection->conn_fsm to ->fi
+  * cosmetic: rename subscr_conn_from to complete_layer3_type
+  * subscr_conn: store complete_layer3_type in conn, not FSM event arg
+  * unify allocation of gsm_subscriber_connection
+  * trans_free: drop bad assertion
+  * msc_vlr_test_call: reproduce OS#3062
+  * CC: intentionally release T308 on BSSMAP Clear Request from BSC
+  * refactor subscr_conn and subscr_conn_fsm de-/alloc
+  * properly receive BSSMAP Clear Complete and Iu Release Complete
+  * fix BSC Clear Request
+  * cosmetic: embed compl_l3_type in FSM id
+  * refactor VLR FSM result handling
+  * msc conn ref counts: log human readable list of conn owners
+  * cosmetic: use enum ranap_nsap_addr_enc instead of int
+
+  [ Harald Welte ]
+  * sms_route_mt_sms: Don't return uninitialized variable
+  * MNCC: Add input validation
+  * Log difference between SETUP and EMERGENCY_SETUP
+  * Emergency Call: Set MNCC_F_EMERGENCY flag
+  * Refuse Emergency Calls by IMEI with proper CM SERVICE REJECT Cause
+    (Closes: #2866)
+  * Reject any CM SERVICE we don't support
+  * Remove traces of meas_feed
+  * Fix msc_vlr test results (.err) for new libosmocore GSM48_PDISC names
+  * Properly reject CM Re-Establishment Request
+  * msc_cipher_mode_compl: Handle CIPH MOD COMPL without L3 message
+  * remove unused paging.h and osmo_bsc_grace.h
+  * debug: Remove code for filters that don't exist in OsmoMSC
+  * remove traces of bsc_subscriber
+  * jenkins.sh: Don't depend on osmo-ggsn
+  * Massive removal of unused code/structs/headers
+  * remove unused ipaccess.h
+  * remove dead code in auth.h / auth.c
+  * remove dead header files bsc_msc.h, bsc_msc_data.h and bsc_rll.h
+  * signal.h: Remove unused/dead signal definitions
+  * remove dead ctrl.h header file
+  * debug: Remove dead log categories
+  * Shift ciphering algorithm selection from VLR to MSC
+  * Permit a set of multiple different A5 ciphers
+  * MSC: Intersect configured A5 algorithms with MS-supported ones
+  * Change GSUP re-connect interval to 1s
+  * Implement checks for duplicate uplink UL L3 message (Closes: #2908)
+  * VTY: Add 'show connections' and 'show transactions' commands
+  * a_reset: Add additional "a_reset_alloc" argument
+  * Don't answer to BSC-originated RESET with another RESET
+  * cosmetic: Use msgb_hexdump*() rather than manual osmo_hexdump() on msg
+  * a_iface: Reduce log levels
+  * a_iface_bssap.c: Use LOGPCONN() whenever possible
+  * a_sccp_rx_dt(): Don't print hexdump of message multiple times
+  * cosmetic: a_iface: Harmonize log statements
+  * cosmetic: No need for 'break' after 'return'
+  * a_iface: centralize lookup of subscriber_conn
+  * cosmetic: a_iface: More logging harmonization
+  * a_iface: Add copyright statement (after recent contributions)
+  * Introduce new BSSAP logging category/subsystem
+  * a_iface: Fix heap-use-after-free by cleaning up msgb ownership
+  * Add VTY command to configure destination MSISDN for emergency calls
+  * a_iface: Fix heap-use-after-free in a_clear_all()
+  * MGCP: Response code 250 is *not* an error for DLCX
+  * a_iface: s/Abis/L3/ for speech version/preference fields
+  * a_iface: Consistent and understandable function names
+  * MT Calls: Copy bearer capabilities from NNCC primitive to trans
+  * MNCC: Copy bearer_cap from MNCC to gsm_trans
+  * gsm_data: remove unused gsm_subscriber_connection members
+  * remove bsc_api.h and all users - they're all dead code
+  * dead code removal
+  * remove unused dyn_ts_allow_tch_f VTY option
+  * osmo-msc: Add talloc context introspection via VTY
+  * remove unused VTY command "location updating reject cause"
+  * remove unused "authorized-regexp" VTY command
+  * remove unused "auth policy" VTY command
+  * remove dead code (gsm_parse_reg)
+  * BSSAP: Return error code if COMPL L3 with no or too short L3 payload
+  * a_iface_bssap: Treat inbound RESET as implicit RESET ACK
+  * a_iface: If L3/DTAP returns error in COMPL L3, close SCCP connection
+  * DTAP: Ensure proper DLCI is used in MSC-originated DTAP
+  * Permit any Sender MSISDN when sending SMS from VTY
+  * smpp: Unset esme->acl on socket close
+  * sms_queue: fix use-after-free on 'pending'
+
+  [ Alexander Couzens ]
+  * debian/rules: remove doublicated project name in example files
+  * libmsc/vty: don't access old bsc rate counters
+
+  [ Philipp Maier ]
+  * reset: remove name variable from reset context
+  * cosmetic: move log message to else branch
+  * cosmetic: add missing spaces
+  * cosmetic: remove duplicate logging
+  * mncc: re-add lchan members to structs
+  * mncc: remove deprecated commandline option.
+  * a_iface: correct data type for a.conn_id in gsm_subscriber_connection
+  * mgcp: use osmo-mgw to switch rtp streams
+  * increase RAN timeout in MGCP FSM
+  * a_reset: Add FSM event names
+  * msc_mgcp: Add FSM event names
+  * a_iface: fix BSSMAP reset handling
+  * msc_mgcp: fix mgw timeout handling
+  * mgcp: be sure that pending mgcp transactions are canceled before free
+  * msc_mgcp: use more conceise error msg on truncation
+  * mcgp: let the MGW allocate the MGCP endpoint
+  * cosmetic: remove disabled (debug) code gsm_04_08.c
+  * msc_mgcp: to not access higher layers after release
+  * cosmetic: remove unused variable
+  * msc_mgcp.c: log endpoint name instead of pointer
+  * msc_mgcp: do not send wildcarded DLCX messages
+
+  [ Max ]
+  * Use osmo-ggsn instead of openggsn in jenkins tests
+  * Add basic CTRL test
+  * Remove obsolete ./configure option
+  * Remove unneeded .py scripts
+  * Enable sanitize for CI tests
+  * Migrate from OpenSSL to osmo_get_rand_id()
+  * VLR: remove unused parameter
+  * VLR: log subscriber update
+  * Add control command to expire subscriber
+  * VLR: constify GSUP-related function parameters
+  * cosmetic: log prim operation as text
+  * Remove unused code
+  * Wrap osmo_strlcpy() calls
+  * Fix whitespace issues
+  * Constify msc_subscr_conn_is_accepted() parameter
+  * Move IMSI into test parameters
+  * VLR tests: mark static test functions as such
+  * Expand VLR tests
+  * VLR tests: don't fail via assert
+  * VLR tests: remove weird code
+  * VLR tests: always print test parameters
+  * VLR tests: move network init into function
+  * GSUP: check osmo_gsup_encode() result
+  * VLR: fix potential NULL dereference
+
+  [ Alexander Huemer ]
+  * Add missing CFLAGS
+  * Remove utils imported from openbsc, fix building remaining util smpp_mirror
+
+  [ Pau Espin Pedrol ]
+  * libmsc: db.c: Replace dbi APIs marked as deprecated
+  * libmsc: msc_vty: Fix compilation warning
+  * libmsc: bssap: Fix typo in log message
+  * libmsc: bssap: Refactor rx paths to to avoid parse_tlv code duplication
+  * libmsc: bssap: Catch TLV parse failures
+  * libmsc: bssap: Remove fixme and properly update msgb tail
+  * msc_mgcp.c: Fix several wrong ptr printf fmt
+  * contrib: osmo-msc.service: Depend on osmo-mgw.service
+  * smpp_smsc_conf: Fix heap-use-after-free
+  * Remove unused GSM_PAGING_OOM
+  * setup_trig_pag_evt: Remove uneeded default case in switch statement
+  * setup_trig_pag_evt: Always log correct paging failure case
+  * setup_trig_pag_evt: Fix heap-use-after-free
+
+  [ the 34c3 gsm team ]
+  * smpp_smsc.c: don't talloc_strdup NULL pointers
+
+  [ Vadim Yanitskiy ]
+  * msc/gsm_04_80.h: clean up useless declarations
+  * msc/gsm_04_80.h: cosmetic: whitespace fix
+  * msc/gsm_04_80.h: use '#pragma once' instead of includes
+  * src/libmsc/ussd.c: drop useless forward declaration
+  * ussd.h: cosmetic: remove useless comment
+  * ussd.h: cosmetic: use '#pragma once' include guard
+  * libmsc/gsm_04_80.c: drop unused 'in_msg' argument
+  * libmsc/ussd.c: cosmetic: correct log level and message
+  * libmsc/ussd: don't overwrite rc if decoding failed
+  * tests/msc_vlr: fix expected SS message names
+
+  [ Stefan Sperling ]
+  * Improve an error message in db_init().
+  * Delete SMS from the database once they were sent successfully
+  * Store/retrieve SMS validity time in the SMS datebase
+  * Fix value of stored SMS validity time.
+  * Add a VTY command which deletes all expired SMS.
+  * Accept SMS for any receiver
+  * Delete expired SMS automatically.
+  * Make sending an SMS to an unknown subscriber B work over SMPP.
+  * enable osmo_fsm vty commands in osmo-msc vty
+  * Track libosmocore API change in osmo-msc.
+  * restore sending of optional MM info messages
+  * use libosmocom to parse cell identifier in bssmap_rx_l3_compl()
+
+  [ Daniel Willmann ]
+  * iucs: Add a function to return the connection ID for the IU SCCP conn
+  * libmsc: Add a function to return a unique ID of the subscriber conn
+  * libmsc: Pretend MNCC requested release in handle_error()
+
+ -- Pau Espin Pedrol <pespin@sysmocom.de>  Thu, 03 May 2018 18:52:03 +0200
+
 osmo-msc (1.1.2) unstable; urgency=medium
 
   * Depend on both libosmo-sigtran-dev and libosmo-sccp-dev
