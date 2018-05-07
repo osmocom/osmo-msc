@@ -209,7 +209,7 @@ int a_iface_tx_paging(const char *imsi, uint32_t tmsi, uint16_t lac)
 
 	/* Deliver paging request to all known BSCs */
 	llist_for_each_entry(bsc_ctx, &gsm_network->a.bscs, list) {
-		if (a_reset_conn_ready(bsc_ctx->reset)) {
+		if (a_reset_conn_ready(bsc_ctx->reset_fsm)) {
 			LOGP(DBSSAP, LOGL_DEBUG,
 			     "Tx BSSMAP paging message from MSC %s to BSC %s (imsi=%s, tmsi=0x%08x, lac=%u)\n",
 			     osmo_sccp_addr_name(ss7, &bsc_ctx->msc_addr),
@@ -471,10 +471,10 @@ static struct bsc_context *add_bsc(const struct osmo_sccp_addr *msc_addr,
 void a_start_reset(struct bsc_context *bsc_ctx, bool already_connected)
 {
 	char bsc_name[32];
-	OSMO_ASSERT(bsc_ctx->reset == NULL);
+	OSMO_ASSERT(bsc_ctx->reset_fsm == NULL);
 	/* Start reset procedure to make the new connection active */
 	snprintf(bsc_name, sizeof(bsc_name), "bsc-%i", bsc_ctx->bsc_addr.pc);
-	bsc_ctx->reset = a_reset_alloc(bsc_ctx, bsc_name, a_reset_cb, bsc_ctx, already_connected);
+	bsc_ctx->reset_fsm = a_reset_alloc(bsc_ctx, bsc_name, a_reset_cb, bsc_ctx, already_connected);
 }
 
 /* determine if given msg is BSSMAP RESET related (true) or not (false) */
@@ -521,7 +521,7 @@ static int sccp_sap_up(struct osmo_prim_hdr *oph, void *_scu)
 			a_start_reset(a_conn_info.bsc, false);
 		} else {
 			/* This BSC is already known to us, check if we have been through reset yet */
-			if (a_reset_conn_ready(a_conn_info.bsc->reset) == false) {
+			if (a_reset_conn_ready(a_conn_info.bsc->reset_fsm) == false) {
 				LOGP(DBSSAP, LOGL_NOTICE, "Refusing N-CONNECT.ind(%u, %s), BSC not reset yet\n",
 				     scu_prim->u.connect.conn_id, msgb_hexdump_l2(oph->msg));
 				rc = osmo_sccp_tx_disconn(scu, a_conn_info.conn_id, &a_conn_info.bsc->msc_addr,
@@ -580,7 +580,7 @@ static int sccp_sap_up(struct osmo_prim_hdr *oph, void *_scu)
 
 		/* As long as we are in the reset phase, only reset related BSSMAP messages may pass
 		 * beond here. */
-		if (!bssmap_is_reset(oph->msg) && a_reset_conn_ready(a_conn_info.bsc->reset) == false) {
+		if (!bssmap_is_reset(oph->msg) && a_reset_conn_ready(a_conn_info.bsc->reset_fsm) == false) {
 			LOGP(DBSSAP, LOGL_NOTICE, "Ignoring N-UNITDATA.ind(%s), BSC not reset yet\n",
 			     msgb_hexdump_l2(oph->msg));
 			break;

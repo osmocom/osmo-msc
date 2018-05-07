@@ -20,45 +20,12 @@
 
 #pragma once
 
-
-
-/* Reset context data (callbacks, state machine etc...) */
-struct a_reset_ctx {
-
-	/* FSM instance, which handles the reset procedure */
-	struct osmo_fsm_inst *fsm;
-
-	/* Connection failure counter. When this counter
-	 * reaches a certain threshold, the reset procedure
-	 * will be triggered */
-	int conn_loss_counter;
-
-	/* A human readable name to display in the logs */
-	char name[256];
-
-	/* Callback function to be called when a connection
-	 * failure is detected and a rest must occur */
-	void (*cb)(void *priv);
-
-	/* Privated data for the callback function */
-	void *priv;
-};
-
 /* Create and start state machine which handles the reset/reset-ack procedure */
-struct a_reset_ctx *a_reset_alloc(const void *ctx, const char *name, void *cb, void *priv,
-				  bool already_connected);
-
-/* Tear down state machine */
-void a_reset_free(struct a_reset_ctx *reset);
+struct osmo_fsm_inst *a_reset_alloc(void *ctx, const char *name, void *cb,
+				    void *priv, bool already_connected);
 
 /* Confirm that we sucessfully received a reset acknowlege message */
-void a_reset_ack_confirm(struct a_reset_ctx *reset);
-
-/* Report a failed connection */
-void a_reset_conn_fail(struct a_reset_ctx *reset);
-
-/* Report a successful connection */
-void a_reset_conn_success(struct a_reset_ctx *reset);
+void a_reset_ack_confirm(struct osmo_fsm_inst *reset_fsm);
 
 /* Check if we have a connection to a specified msc */
-bool a_reset_conn_ready(struct a_reset_ctx *reset);
+bool a_reset_conn_ready(struct osmo_fsm_inst *reset_fsm);

@@ -51,7 +51,7 @@ struct bsc_context {
 	/* A pointer to the reset handler FSM, the
 	 * state machine is allocated when the BSC
 	 * is registerd. */
-	struct a_reset_ctx *reset;
+	struct osmo_fsm_inst *reset_fsm;
 
 	/* A pointer to the sccp_user that is associated
 	 * with the A interface. We need this information

@@ -114,12 +114,12 @@ static void bssmap_rx_reset(struct osmo_sccp_user *scu, const struct a_conn_info
 	/* Make sure all orphand subscriber connections will be cleard */
 	a_clear_all(scu, &a_conn_info->bsc->bsc_addr);
 
-	if (!a_conn_info->bsc->reset)
+	if (!a_conn_info->bsc->reset_fsm)
 		a_start_reset(a_conn_info->bsc, true);
 
 	/* Treat an incoming RESET like an ACK to any RESET request we may have just sent.
 	 * After all, what we wanted is the A interface to be reset, which we now know has happened. */
-	a_reset_ack_confirm(a_conn_info->bsc->reset);
+	a_reset_ack_confirm(a_conn_info->bsc->reset_fsm);
 }
 
 /* Endpoint to handle BSSMAP reset acknowlegement */
@@ -133,7 +133,7 @@ static void bssmap_rx_reset_ack(const struct osmo_sccp_user *scu, const struct a
 	ss7 = osmo_ss7_instance_find(network->a.cs7_instance);
 	OSMO_ASSERT(ss7);
 
-	if (a_conn_info->bsc->reset == NULL) {
+	if (a_conn_info->bsc->reset_fsm == NULL) {
 		LOGP(DBSSAP, LOGL_ERROR, "Received RESET ACK from an unknown BSC %s, ignoring...\n",
 		     osmo_sccp_addr_name(ss7, &a_conn_info->bsc->bsc_addr));
 		return;
@@ -144,7 +144,7 @@ static void bssmap_rx_reset_ack(const struct osmo_sccp_user *scu, const struct a
 
 	/* Confirm that we managed to get the reset ack message
 	 * towards the connection reset logic */
-	a_reset_ack_confirm(a_conn_info->bsc->reset);
+	a_reset_ack_confirm(a_conn_info->bsc->reset_fsm);
 }
 
 /* Handle UNITDATA BSSMAP messages */
