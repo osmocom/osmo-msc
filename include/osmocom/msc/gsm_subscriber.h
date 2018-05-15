@@ -17,8 +17,6 @@
 #define GSM_SUBSCRIBER_FIRST_CONTACT	0x00000001
 /* gprs_sgsn.h defines additional flags including and above bit 16 (0x10000) */
 
-#define GSM_SUBSCRIBER_NO_EXPIRATION	0x0
-
 enum gsm_subscriber_field {
 	GSM_SUBSCRIBER_IMSI,
 	GSM_SUBSCRIBER_TMSI,

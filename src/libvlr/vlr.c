@@ -22,6 +22,7 @@
 #include <osmocom/core/linuxlist.h>
 #include <osmocom/core/fsm.h>
 #include <osmocom/core/utils.h>
+#include <osmocom/core/timer.h>
 #include <osmocom/gsm/protocol/gsm_04_08_gprs.h>
 #include <osmocom/gsm/gsup.h>
 #include <osmocom/gsm/apn.h>
@@ -458,6 +459,50 @@ int vlr_subscr_changed(struct vlr_subscr *vsub)
 	/* FIXME */
 	LOGP(DVLR, LOGL_ERROR, "Not implemented: %s\n", __func__);
 	return 0;
+}
+
+void vlr_subscr_enable_expire_lu(struct vlr_subscr *vsub)
+{
+	struct gsm_network *net = vsub->vlr->user_ctx; /* XXX move t3212 into struct vlr_instance? */
+	struct timespec now;
+
+	/* The T3212 timeout value field is coded as the binary representation of the timeout
+	 * value for periodic updating in decihours. Mark the subscriber as inactive if it missed
+	 * two consecutive location updates. Timeout is twice the t3212 value plus one minute. */
+	if (osmo_clock_gettime(CLOCK_MONOTONIC, &now) == 0) {
+		vsub->expire_lu = now.tv_sec + (net->t3212 * 60 * 6 * 2) + 60;
+	} else {
+		LOGP(DVLR, LOGL_ERROR,
+		     "%s: Could not enable Location Update expiry: unable to read current time\n", vlr_subscr_name(vsub));
+		/* Disable LU expiry for this subscriber. This subscriber will only be freed after an explicit IMSI detach. */
+		vsub->expire_lu = VLR_SUBSCRIBER_NO_EXPIRATION;
+	}
+}
+
+void vlr_subscr_expire_lu(void *data)
+{
+	struct vlr_instance *vlr = data;
+	struct vlr_subscr *vsub, *vsub_tmp;
+	struct timespec now;
+
+	if (llist_empty(&vlr->subscribers))
+		goto done;
+
+	if (osmo_clock_gettime(CLOCK_MONOTONIC, &now) != 0) {
+		LOGP(DVLR, LOGL_ERROR, "Skipping Location Update expiry: Could not read current time\n");
+		goto done;
+	}
+
+	llist_for_each_entry_safe(vsub, vsub_tmp, &vlr->subscribers, list) {
+		if (vsub->expire_lu == VLR_SUBSCRIBER_NO_EXPIRATION || vsub->expire_lu > now.tv_sec)
+			continue;
+
+		LOGP(DVLR, LOGL_DEBUG, "%s: Location Update expired\n", vlr_subscr_name(vsub));
+		vlr_subscr_rx_imsi_detach(vsub);
+	}
+
+done:
+	osmo_timer_schedule(&vlr->lu_expire_timer, VLR_SUBSCRIBER_LU_EXPIRATION_INTERVAL, 0);
 }
 
 /***********************************************************************
@@ -1093,12 +1138,14 @@ bool vlr_subscr_expire(struct vlr_subscr *vsub)
 	return false;
 }
 
+/* See TS 23.012 version 9.10.0 4.3.2.1 "Process Detach_IMSI_VLR" */
 int vlr_subscr_rx_imsi_detach(struct vlr_subscr *vsub)
 {
 	/* paranoia: should any LU or PARQ FSMs still be running, stop them. */
 	vlr_subscr_cancel_attach_fsm(vsub, OSMO_FSM_TERM_ERROR, GSM48_REJECT_CONGESTION);
 
 	vsub->imsi_detached_flag = true;
+	vsub->expire_lu = VLR_SUBSCRIBER_NO_EXPIRATION;
 
 	/* balancing the get from vlr_lu_compl_fsm_success() */
 	vlr_subscr_expire(vsub);
@@ -1165,6 +1212,8 @@ int vlr_start(const char *gsup_unit_name, struct vlr_instance *vlr,
 		return -ENOMEM;
 	vlr->gsup_client->data = vlr;
 
+	osmo_timer_setup(&vlr->lu_expire_timer, vlr_subscr_expire_lu, vlr);
+	osmo_timer_schedule(&vlr->lu_expire_timer, VLR_SUBSCRIBER_LU_EXPIRATION_INTERVAL, 0);
 	return 0;
 }
 

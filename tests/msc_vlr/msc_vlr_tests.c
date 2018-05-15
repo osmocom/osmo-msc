@@ -813,8 +813,15 @@ const struct timeval fake_time_start_time = { 123, 456 };
 
 void fake_time_start()
 {
+	struct timespec *clock_override;
+
 	osmo_gettimeofday_override_time = fake_time_start_time;
 	osmo_gettimeofday_override = true;
+	clock_override = osmo_clock_override_gettimespec(CLOCK_MONOTONIC);
+	OSMO_ASSERT(clock_override);
+	clock_override->tv_sec = fake_time_start_time.tv_sec;
+	clock_override->tv_nsec = fake_time_start_time.tv_usec * 1000;
+	osmo_clock_override_enable(CLOCK_MONOTONIC, true);
 	fake_time_passes(0, 0);
 }
 

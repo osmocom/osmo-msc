@@ -218,6 +218,7 @@ void fake_time_start();
 { \
 	struct timeval diff; \
 	osmo_gettimeofday_override_add(secs, usecs); \
+	osmo_clock_override_add(CLOCK_MONOTONIC, secs, usecs * 1000); \
 	timersub(&osmo_gettimeofday_override_time, &fake_time_start_time, &diff); \
 	btw("Total time passed: %d.%06d s", \
 	    (int)diff.tv_sec, (int)diff.tv_usec); \

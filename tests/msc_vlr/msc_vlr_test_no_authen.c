@@ -917,6 +917,64 @@ static void test_no_authen_imeisv_tmsi_imei()
 	comment_end();
 }
 
+static void test_no_authen_subscr_expire()
+{
+	struct vlr_subscr *vsub;
+	const char *imsi = "901700000004620";
+
+	/* No auth only works on GERAN */
+	rx_from_ran = RAN_GERAN_A;
+
+	comment_start();
+
+	fake_time_start();
+
+	/* The test framework has already started the VLR before fake time was active.
+	 * Manually schedule this timeout in fake time. */
+	osmo_timer_del(&net->vlr->lu_expire_timer);
+	osmo_timer_schedule(&net->vlr->lu_expire_timer, VLR_SUBSCRIBER_LU_EXPIRATION_INTERVAL, 0);
+
+	/* Let the LU expiration timer tick once */
+	fake_time_passes(VLR_SUBSCRIBER_LU_EXPIRATION_INTERVAL + 1, 0);
+
+	btw("Location Update request causes a GSUP LU request to HLR");
+	lu_result_sent = RES_NONE;
+	gsup_expect_tx("04010809710000004026f0");
+	ms_sends_msg("050802008168000130089910070000006402");
+	OSMO_ASSERT(gsup_tx_confirmed);
+	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
+
+	btw("HLR sends _INSERT_DATA_REQUEST, VLR responds with _INSERT_DATA_RESULT");
+	gsup_rx("10010809710000004026f00804036470f1",
+		"12010809710000004026f0");
+	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
+
+	btw("HLR also sends GSUP _UPDATE_LOCATION_RESULT");
+	expect_bssap_clear();
+	gsup_rx("06010809710000004026f0", NULL);
+
+	btw("LU was successful, and the conn has already been closed");
+	VERBOSE_ASSERT(lu_result_sent, == RES_ACCEPT, "%d");
+	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
+
+	bss_sends_clear_complete();
+	EXPECT_CONN_COUNT(0);
+
+	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi);
+	OSMO_ASSERT(vsub);
+	vlr_subscr_put(vsub);
+
+	/* Let T3212 (periodic Location update timer) expire */
+	fake_time_passes((net->t3212 * 60 * 6 * 2) + 60*4, 0);
+
+	/* The subscriber should now be gone. */
+	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi);
+	OSMO_ASSERT(vsub == NULL);
+
+	EXPECT_CONN_COUNT(0);
+	clear_vlr();
+	comment_end();
+}
 
 msc_vlr_test_func_t msc_vlr_tests[] = {
 	test_no_authen,
@@ -927,5 +985,6 @@ msc_vlr_test_func_t msc_vlr_tests[] = {
 	test_no_authen_imeisv_imei,
 	test_no_authen_imeisv_tmsi,
 	test_no_authen_imeisv_tmsi_imei,
+	test_no_authen_subscr_expire,
 	NULL
 };
