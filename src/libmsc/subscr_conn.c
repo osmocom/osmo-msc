@@ -202,6 +202,11 @@ static bool subscr_conn_fsm_has_active_transactions(struct osmo_fsm_inst *fi)
 
 static void subscr_conn_fsm_accepted_enter(struct osmo_fsm_inst *fi, uint32_t prev_state)
 {
+	struct gsm_subscriber_connection *conn = fi->priv;
+
+	/* Stop location update expiry for this subscriber. */
+	conn->vsub->expire_lu = GSM_SUBSCRIBER_NO_EXPIRATION;
+
 	if (!subscr_conn_fsm_has_active_transactions(fi))
 		osmo_fsm_inst_dispatch(fi, SUBSCR_CONN_E_UNUSED, NULL);
 }
@@ -277,6 +282,11 @@ static void subscr_conn_fsm_releasing_onenter(struct osmo_fsm_inst *fi, uint32_t
 
 	/* Cancel all VLR FSMs, if any */
 	vlr_subscr_cancel_attach_fsm(conn->vsub, OSMO_FSM_TERM_ERROR, GSM48_REJECT_CONGESTION);
+
+	if (conn->vsub) {
+		/* Restart LU expiry for this subscriber. */
+		vlr_subscr_enable_expire_lu(conn->vsub);
+	}
 
 	/* If we're closing in a middle of a trans, we need to clean up */
 	trans_conn_closed(conn);

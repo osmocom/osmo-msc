@@ -148,6 +148,7 @@ struct vlr_subscr {
 	struct osmo_fsm_inst *proc_arq_fsm;
 
 	bool lu_complete;
+	time_t expire_lu;
 
 	void *msc_conn_ref;
 
@@ -237,6 +238,7 @@ struct vlr_instance {
 	struct llist_head operations;
 	struct gsup_client *gsup_client;
 	struct vlr_ops ops;
+	struct osmo_timer_list lu_expire_timer;
 	struct {
 		bool retrieve_imeisv_early;
 		bool retrieve_imeisv_ciphered;
@@ -379,6 +381,7 @@ void vlr_subscr_cancel_attach_fsm(struct vlr_subscr *vsub,
 				  enum osmo_fsm_term_cause fsm_cause,
 				  uint8_t gsm48_cause);
 
+void vlr_subscr_enable_expire_lu(struct vlr_subscr *vsub);
 
 /* Process Acccess Request FSM */
 

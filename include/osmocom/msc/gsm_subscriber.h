@@ -18,6 +18,7 @@
 /* gprs_sgsn.h defines additional flags including and above bit 16 (0x10000) */
 
 #define GSM_SUBSCRIBER_NO_EXPIRATION	0x0
+#define GSM_SUBSCRIBER_LU_EXPIRATION_INTERVAL	60	/* in seconds */
 
 enum gsm_subscriber_field {
 	GSM_SUBSCRIBER_IMSI,

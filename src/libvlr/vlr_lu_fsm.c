@@ -356,7 +356,7 @@ static void vlr_lu_compl_fsm_success(struct osmo_fsm_inst *fi)
 	struct vlr_subscr *vsub = lcvp->vsub;
 	if (!vsub->lu_complete) {
 		vsub->lu_complete = true;
-		/* Balanced by vlr_subscr_rx_imsi_detach() */
+		/* Balanced by vlr_subscr_rx_imsi_detach() or Location Update expiry */
 		vlr_subscr_get(vsub);
 	}
 	_vlr_lu_compl_fsm_done(fi, VLR_FSM_RESULT_SUCCESS, 0);
