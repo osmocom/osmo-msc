@@ -381,7 +381,7 @@ static void proc_arq_vlr_fn_init(struct osmo_fsm_inst *fi,
 	if (!par->by_tmsi) {
 		/* We couldn't find a subscriber even by IMSI,
 		 * Set User Error: Unidentified Subscriber */
-		proc_arq_fsm_done(fi, GSM48_REJECT_MS_IDENTITY_NOT_DERVIVABLE);
+		proc_arq_fsm_done(fi, GSM48_REJECT_IMSI_UNKNOWN_IN_VLR);
 		return;
 	} else {
 		/* TMSI was included, are we permitted to use it? */
@@ -392,7 +392,7 @@ static void proc_arq_vlr_fn_init(struct osmo_fsm_inst *fi,
 			return;
 		} else {
 			/* Set User Error: Unidentified Subscriber */
-			proc_arq_fsm_done(fi, GSM48_REJECT_MS_IDENTITY_NOT_DERVIVABLE);
+			proc_arq_fsm_done(fi, GSM48_REJECT_IMSI_UNKNOWN_IN_VLR);
 			return;
 		}
 	}
@@ -411,7 +411,7 @@ static void proc_arq_vlr_fn_w_obt_imsi(struct osmo_fsm_inst *fi,
 	vsub = vlr_subscr_find_by_imsi(vlr, par->imsi);
 	if (!vsub) {
 		/* Set User Error: Unidentified Subscriber */
-		proc_arq_fsm_done(fi, GSM48_REJECT_MS_IDENTITY_NOT_DERVIVABLE);
+		proc_arq_fsm_done(fi, GSM48_REJECT_IMSI_UNKNOWN_IN_VLR);
 		return;
 	}
 	assoc_par_with_subscr(fi, vsub);
@@ -687,7 +687,7 @@ vlr_proc_acc_req(struct osmo_fsm_inst *parent,
 	case GSM_MI_TYPE_IMEI:
 		/* TODO: IMEI (emergency call) */
 	default:
-		proc_arq_fsm_done(fi, GSM48_REJECT_MS_IDENTITY_NOT_DERVIVABLE);
+		proc_arq_fsm_done(fi, GSM48_REJECT_INVALID_MANDANTORY_INF);
 		return;
 	}
 
