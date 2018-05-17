@@ -28,7 +28,6 @@ if BUILD_SMPP
 noinst_PROGRAMS = \
 	smpp_mirror \
 	$(NULL)
-endif
 
 smpp_mirror_SOURCES = \
 	smpp_mirror.c \
@@ -44,4 +43,4 @@ smpp_mirror_LDADD = \
 	$(LIBOSMOGSM_LIBS) \
 	$(LIBSMPP34_LIBS) \
 	$(NULL)
-
+endif
