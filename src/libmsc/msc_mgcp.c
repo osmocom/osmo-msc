@@ -278,9 +278,21 @@ static void fsm_crcx_ran_cb(struct osmo_fsm_inst *fi, uint32_t event, void *data
 	struct msgb *msg;
 	int rc;
 
+#ifdef BUILD_IU
+	struct gsm_trans *trans;
+	struct gsm_subscriber_connection *conn;
+#endif
+
 	OSMO_ASSERT(mgcp_ctx);
 	mgcp = mgcp_ctx->mgcp;
 	OSMO_ASSERT(mgcp);
+
+#ifdef BUILD_IU
+	trans = mgcp_ctx->trans;
+	OSMO_ASSERT(trans);
+	conn = trans->conn;
+	OSMO_ASSERT(conn);
+#endif
 
 	/* NOTE: In case of error, we will not be able to perform any DLCX
 	 * operation because until this point we do not have requested any
@@ -301,6 +313,14 @@ static void fsm_crcx_ran_cb(struct osmo_fsm_inst *fi, uint32_t event, void *data
 		handle_error(mgcp_ctx, MGCP_ERR_TOOLONG, false);
 		return;
 	}
+
+	/* HACK: We put the connection in loopback mode at the beginnig to
+	 * trick the NodeB into doing the IuUP negotiation with itsself.
+	 * this is a hack we need because osmo-mgw does not support IuUP yet */
+#ifdef BUILD_IU
+	if (conn->via_ran == RAN_UTRAN_IU)
+		mgcp_msg.conn_mode = MGCP_CONN_LOOPBACK;
+#endif
 
 	msg = mgcp_msg_gen(mgcp, &mgcp_msg);
 	OSMO_ASSERT(msg);
@@ -377,9 +397,21 @@ static void fsm_crcx_cn_cb(struct osmo_fsm_inst *fi, uint32_t event, void *data)
 	struct msgb *msg;
 	int rc;
 
+#ifdef BUILD_IU
+	struct gsm_trans *trans;
+	struct gsm_subscriber_connection *conn;
+#endif
+
 	OSMO_ASSERT(mgcp_ctx);
 	mgcp = mgcp_ctx->mgcp;
 	OSMO_ASSERT(mgcp);
+
+#ifdef BUILD_IU
+	trans = mgcp_ctx->trans;
+	OSMO_ASSERT(trans);
+	conn = trans->conn;
+	OSMO_ASSERT(conn);
+#endif
 
 	switch (event) {
 	case EV_CRCX_RAN_RESP:
@@ -404,6 +436,14 @@ static void fsm_crcx_cn_cb(struct osmo_fsm_inst *fi, uint32_t event, void *data)
 		handle_error(mgcp_ctx, MGCP_ERR_TOOLONG, true);
 		return;
 	}
+
+	/* HACK: We put the connection in loopback mode at the beginnig to
+	 * trick the NodeB into doing the IuUP negotiation with itsself.
+	 * this is a hack we need because osmo-mgw does not support IuUP yet */
+#ifdef BUILD_IU
+	if (conn->via_ran == RAN_UTRAN_IU)
+		mgcp_msg.conn_mode = MGCP_CONN_LOOPBACK;
+#endif
 
 	msg = mgcp_msg_gen(mgcp, &mgcp_msg);
 	OSMO_ASSERT(msg);
