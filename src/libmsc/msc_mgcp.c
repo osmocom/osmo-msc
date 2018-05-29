@@ -294,7 +294,7 @@ static void fsm_crcx_ran_cb(struct osmo_fsm_inst *fi, uint32_t event, void *data
 		.verb = MGCP_VERB_CRCX,
 		.presence = (MGCP_MSG_PRESENCE_ENDPOINT | MGCP_MSG_PRESENCE_CALL_ID | MGCP_MSG_PRESENCE_CONN_MODE),
 		.call_id = mgcp_ctx->call_id,
-		.conn_mode = MGCP_CONN_LOOPBACK
+		.conn_mode = MGCP_CONN_RECV_ONLY
 	};
 	if (osmo_strlcpy(mgcp_msg.endpoint, mgcp_ctx->rtp_endpoint, sizeof(mgcp_msg.endpoint)) >=
 	    MGCP_ENDPOINT_MAXLEN) {
@@ -397,7 +397,7 @@ static void fsm_crcx_cn_cb(struct osmo_fsm_inst *fi, uint32_t event, void *data)
 		.verb = MGCP_VERB_CRCX,
 		.presence = (MGCP_MSG_PRESENCE_ENDPOINT | MGCP_MSG_PRESENCE_CALL_ID | MGCP_MSG_PRESENCE_CONN_MODE),
 		.call_id = mgcp_ctx->call_id,
-		.conn_mode = MGCP_CONN_LOOPBACK
+		.conn_mode = MGCP_CONN_RECV_ONLY
 	};
 	if (osmo_strlcpy(mgcp_msg.endpoint, mgcp_ctx->rtp_endpoint, sizeof(mgcp_msg.endpoint)) >=
 	    MGCP_ENDPOINT_MAXLEN) {
