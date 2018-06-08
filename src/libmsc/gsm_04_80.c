@@ -108,15 +108,42 @@ int gsm0480_send_ussd_response(struct gsm_subscriber_connection *conn,
 	return msc_tx_dtap(conn, msg);
 }
 
+int gsm0480_send_ussd_return_error(struct gsm_subscriber_connection *conn,
+	const struct ss_request *req, uint8_t error_code)
+{
+	struct msgb *msg = gsm48_msgb_alloc_name("GSM 04.08 USSD ERR");
+	struct gsm48_hdr *gh;
+
+	/* First insert the problem code */
+	msgb_push_TLV1(msg, GSM_0480_ERROR_CODE_TAG, error_code);
+
+	/* Before it insert the invoke ID */
+	msgb_push_TLV1(msg, GSM0480_COMPIDTAG_INVOKE_ID, req->invoke_id);
+
+	/* Wrap this up as a Reject component */
+	msgb_wrap_with_TL(msg, GSM0480_CTYPE_RETURN_ERROR);
+
+	/* Wrap the component in a Facility message */
+	msgb_wrap_with_TL(msg, GSM0480_IE_FACILITY);
+
+	/* And finally pre-pend the L3 header */
+	gh = (struct gsm48_hdr *) msgb_push(msg, sizeof(*gh));
+	gh->proto_discr = GSM48_PDISC_NC_SS;
+	gh->proto_discr |= req->transaction_id | (1<<7);  /* TI direction = 1 */
+	gh->msg_type = GSM0480_MTYPE_RELEASE_COMPLETE;
+
+	return msc_tx_dtap(conn, msg);
+}
+
 int gsm0480_send_ussd_reject(struct gsm_subscriber_connection *conn,
-			     const struct ss_request *req)
+			     const struct ss_request *req,
+			     uint8_t error_tag, uint8_t error_code)
 {
 	struct msgb *msg = gsm48_msgb_alloc_name("GSM 04.08 USSD REJ");
 	struct gsm48_hdr *gh;
 
 	/* First insert the problem code */
-	msgb_push_TLV1(msg, GSM_0480_PROBLEM_CODE_TAG_GENERAL,
-			GSM_0480_GEN_PROB_CODE_UNRECOGNISED);
+	msgb_push_TLV1(msg, error_tag, error_code);
 
 	/* Before it insert the invoke ID */
 	msgb_push_TLV1(msg, GSM0480_COMPIDTAG_INVOKE_ID, req->invoke_id);

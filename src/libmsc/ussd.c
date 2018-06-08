@@ -74,7 +74,8 @@ int handle_rcv_ussd(struct gsm_subscriber_connection *conn, struct msgb *msg)
 	if (!rc) {
 		LOGP(DMM, LOGL_ERROR, "SS/USSD message parsing error, "
 			"rejecting request...\n");
-		gsm0480_send_ussd_reject(conn, &req);
+		gsm0480_send_ussd_reject(conn, &req, GSM_0480_PROBLEM_CODE_TAG_GENERAL,
+			GSM_0480_GEN_PROB_CODE_UNRECOGNISED);
 		/* The GSM 04.80 API uses inverted codes (0 means error) */
 		return -EPROTO;
 	}
@@ -83,8 +84,8 @@ int handle_rcv_ussd(struct gsm_subscriber_connection *conn, struct msgb *msg)
 	if (req.ussd_text[0] == '\0' || req.ussd_text[0] == 0xFF) {
 		if (req.ss_code > 0) {
 			/* Assume interrogateSS or modification of it and reject */
-			rc = gsm0480_send_ussd_reject(conn, &req);
-			return rc;
+			return gsm0480_send_ussd_return_error(conn, &req,
+				GSM0480_ERR_CODE_ILLEGAL_SS_OPERATION);
 		}
 		/* Still assuming a Release-Complete and returning */
 		return 0;
@@ -96,7 +97,8 @@ int handle_rcv_ussd(struct gsm_subscriber_connection *conn, struct msgb *msg)
 		rc = send_own_number(conn, &req);
 	} else {
 		DEBUGP(DMM, "Unhandled USSD %s\n", req.ussd_text);
-		rc = gsm0480_send_ussd_reject(conn, &req);
+		rc = gsm0480_send_ussd_return_error(conn, &req,
+			GSM0480_ERR_CODE_UNEXPECTED_DATA_VALUE);
 	}
 
 	return rc;
