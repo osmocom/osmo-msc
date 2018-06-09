@@ -20,7 +20,7 @@ mkdir "$deps" || true
 
 osmo-build-dep.sh libosmocore "" ac_cv_path_DOXYGEN=false
 
-verify_value_string_arrays_are_terminated.py $(find . -name "*.[hc]")
+verify_value_string_arrays_are_terminated.py
 
 export PKG_CONFIG_PATH="$inst/lib/pkgconfig:$PKG_CONFIG_PATH"
 export LD_LIBRARY_PATH="$inst/lib"
