@@ -327,7 +327,7 @@ const struct value_string msc_subscr_conn_use_names[] = {
 	{MSC_CONN_USE_CM_SERVICE,	"cm_service"},
 	{MSC_CONN_USE_TRANS_CC,		"trans_cc"},
 	{MSC_CONN_USE_TRANS_SMS,	"trans_sms"},
-	{MSC_CONN_USE_TRANS_USSD,	"trans_ussd"},
+	{MSC_CONN_USE_TRANS_NC_SS,	"trans_nc_ss"},
 	{MSC_CONN_USE_SILENT_CALL,	"silent_call"},
 	{MSC_CONN_USE_RELEASE,		"release"},
 	{0, NULL},
