@@ -1,5 +1,3 @@
-/* Network-specific handling of mobile-originated USSDs. */
-
 /* (C) 2008-2009 by Harald Welte <laforge@gnumonks.org>
  * (C) 2008, 2009 by Holger Hans Peter Freyther <zecke@selfish.org>
  * (C) 2009 by Mike Haben <michael.haben@btinternet.com>
@@ -21,8 +19,11 @@
  *
  */
 
-/* This module defines the network-specific handling of mobile-originated
-   USSD messages. */
+/**
+ * MSC-specific handling of call independent Supplementary
+ * Services messages (NC_SS) according to GSM TS 09.11
+ * "Signalling interworking for supplementary services".
+ */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -58,8 +59,8 @@ static int send_own_number(struct gsm_subscriber_connection *conn,
 	return gsm0480_send_ussd_response(conn, response_string, req);
 }
 
-/* Entrypoint - handler function common to all mobile-originated USSDs */
-int handle_rcv_ussd(struct gsm_subscriber_connection *conn, struct msgb *msg)
+/* Entry point for call independent MO SS messages */
+int gsm0911_rcv_nc_ss(struct gsm_subscriber_connection *conn, struct msgb *msg)
 {
 	struct gsm48_hdr *gh = msgb_l3(msg);
 	struct gsm_trans *trans;

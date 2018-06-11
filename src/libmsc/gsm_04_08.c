@@ -42,9 +42,9 @@
 #include <osmocom/msc/gsm_04_08.h>
 #include <osmocom/msc/gsm_04_80.h>
 #include <osmocom/msc/gsm_04_14.h>
+#include <osmocom/msc/gsm_09_11.h>
 #include <osmocom/msc/signal.h>
 #include <osmocom/msc/transaction.h>
-#include <osmocom/msc/ussd.h>
 #include <osmocom/msc/silent_call.h>
 #include <osmocom/msc/osmo_msc.h>
 #include <osmocom/msc/mncc_int.h>
@@ -3524,7 +3524,7 @@ int gsm0408_dispatch(struct gsm_subscriber_connection *conn, struct msgb *msg)
 		rc = -ENOTSUP;
 		break;
 	case GSM48_PDISC_NC_SS:
-		rc = handle_rcv_ussd(conn, msg);
+		rc = gsm0911_rcv_nc_ss(conn, msg);
 		break;
 	case GSM48_PDISC_TEST:
 		rc = gsm0414_rcv_test(conn, msg);

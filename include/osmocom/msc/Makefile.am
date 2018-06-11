@@ -9,6 +9,7 @@ noinst_HEADERS = \
 	gsm_04_11.h \
 	gsm_04_14.h \
 	gsm_04_80.h \
+	gsm_09_11.h \
 	gsm_data.h \
 	gsm_data_shared.h \
 	gsm_subscriber.h \
@@ -30,7 +31,6 @@ noinst_HEADERS = \
 	smpp.h \
 	sms_queue.h \
 	transaction.h \
-	ussd.h \
 	vlr.h \
 	vty.h \
 	$(NULL)

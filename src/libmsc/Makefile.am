@@ -35,6 +35,7 @@ libmsc_a_SOURCES = \
 	gsm_04_11.c \
 	gsm_04_14.c \
 	gsm_04_80.c \
+	gsm_09_11.c \
 	gsm_subscriber.c \
 	mncc.c \
 	mncc_builtin.c \
@@ -44,7 +45,6 @@ libmsc_a_SOURCES = \
 	rrlp.c \
 	silent_call.c \
 	sms_queue.c \
-	ussd.c \
 	transaction.c \
 	osmo_msc.c \
 	ctrl_commands.c \
