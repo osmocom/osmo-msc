@@ -34,6 +34,8 @@ int gsm0408_rcvmsg(struct msgb *msg, uint8_t link_id);
 /* don't use "enum gsm_chreq_reason_t" to avoid circular dependency */
 void gsm_net_update_ctype(struct gsm_network *net);
 
+int gsm48_tx_simple(struct gsm_subscriber_connection *conn,
+		    uint8_t pdisc, uint8_t msg_type);
 int gsm48_tx_mm_info(struct gsm_subscriber_connection *conn);
 int gsm48_tx_mm_auth_req(struct gsm_subscriber_connection *conn, uint8_t *rand,
 			 uint8_t *autn, int key_seq);

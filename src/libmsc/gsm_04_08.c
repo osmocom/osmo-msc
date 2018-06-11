@@ -79,8 +79,6 @@ void *tall_authciphop_ctx;
 
 static int gsm0408_loc_upd_acc(struct gsm_subscriber_connection *conn,
 			       uint32_t send_tmsi);
-static int gsm48_tx_simple(struct gsm_subscriber_connection *conn,
-			   uint8_t pdisc, uint8_t msg_type);
 
 static uint32_t new_callref = 0x80000001;
 
@@ -1345,8 +1343,14 @@ static int gsm48_cc_tx_status(struct gsm_trans *trans, void *arg)
 	return gsm48_conn_sendmsg(msg, trans->conn, trans);
 }
 
-static int gsm48_tx_simple(struct gsm_subscriber_connection *conn,
-			   uint8_t pdisc, uint8_t msg_type)
+/*! Send a simple GSM 04.08 message without any payload
+ * \param      conn      Active subscriber connection
+ * \param[in]  pdisc     Protocol discriminator
+ * \param[in]  msg_type  Message type
+ * \return     result of \ref gsm48_conn_sendmsg
+ */
+int gsm48_tx_simple(struct gsm_subscriber_connection *conn,
+		    uint8_t pdisc, uint8_t msg_type)
 {
 	struct msgb *msg = gsm48_msgb_alloc_name("GSM 04.08 TX SIMPLE");
 	struct gsm48_hdr *gh = (struct gsm48_hdr *) msgb_put(msg, sizeof(*gh));
