@@ -94,9 +94,9 @@ int gsm0911_rcv_nc_ss(struct gsm_subscriber_connection *conn, struct msgb *msg)
 			LOGP(DMM, LOGL_ERROR, "Unexpected message (msg_type=%s), "
 				"transaction is not allocated yet\n",
 				gsm48_pdisc_msgtype_name(pdisc, msg_type));
-			gsm0480_send_ussd_reject(conn, &req,
-				GSM_0480_PROBLEM_CODE_TAG_GENERAL,
-				GSM_0480_GEN_PROB_CODE_UNRECOGNISED);
+			gsm48_tx_simple(conn,
+				GSM48_PDISC_NC_SS | (tid << 4),
+				GSM0480_MTYPE_RELEASE_COMPLETE);
 			return -EINVAL;
 		}
 
@@ -105,8 +105,9 @@ int gsm0911_rcv_nc_ss(struct gsm_subscriber_connection *conn, struct msgb *msg)
 			pdisc, tid, new_callref++);
 		if (!trans) {
 			DEBUGP(DMM, " -> No memory for trans\n");
-			gsm0480_send_ussd_return_error(conn, &req,
-				GSM0480_ERR_CODE_SYSTEM_FAILURE);
+			gsm48_tx_simple(conn,
+				GSM48_PDISC_NC_SS | (tid << 4),
+				GSM0480_MTYPE_RELEASE_COMPLETE);
 			return -ENOMEM;
 		}
 
