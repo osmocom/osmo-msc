@@ -3748,7 +3748,13 @@ static int msc_vlr_route_gsup_msg(struct vlr_subscr *vsub,
 				  struct osmo_gsup_message *gsup_msg)
 {
 	switch (gsup_msg->message_type) {
-	/* Nowhere to route for now */
+	/* GSM 09.11 code implementing SS/USSD */
+	case OSMO_GSUP_MSGT_PROC_SS_REQUEST:
+	case OSMO_GSUP_MSGT_PROC_SS_RESULT:
+	case OSMO_GSUP_MSGT_PROC_SS_ERROR:
+		DEBUGP(DMSC, "Routed to GSM 09.11 SS/USSD handler\n");
+		return gsm0911_gsup_handler(vsub, gsup_msg);
+
 	default:
 		LOGP(DMM, LOGL_ERROR, "No handler found for %s, dropping message...\n",
 			osmo_gsup_message_type_name(gsup_msg->message_type));

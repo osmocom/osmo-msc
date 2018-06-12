@@ -1,6 +1,7 @@
 /* (C) 2008-2009 by Harald Welte <laforge@gnumonks.org>
  * (C) 2008, 2009 by Holger Hans Peter Freyther <zecke@selfish.org>
  * (C) 2009 by Mike Haben <michael.haben@btinternet.com>
+ * (C) 2018 by Vadim Yanitskiy <axilirator@gmail.com>
  *
  * All Rights Reserved
  *
@@ -26,9 +27,12 @@
  */
 
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <errno.h>
+#include <stdbool.h>
+
+#include <osmocom/core/utils.h>
+#include <osmocom/core/msgb.h>
+#include <osmocom/gsm/tlv.h>
 
 #include <osmocom/msc/gsm_04_80.h>
 #include <osmocom/msc/gsm_subscriber.h>
@@ -37,34 +41,21 @@
 #include <osmocom/msc/vlr.h>
 #include <osmocom/msc/gsm_04_08.h>
 #include <osmocom/msc/transaction.h>
+#include <osmocom/msc/gsup_client.h>
+#include <osmocom/msc/msc_ifaces.h>
 
 /* FIXME: choose a proper range */
 static uint32_t new_callref = 0x20000001;
-
-/* Declarations of USSD strings to be recognised */
-const char USSD_TEXT_OWN_NUMBER[] = "*#100#";
-
-/* A network-specific handler function */
-static int send_own_number(struct gsm_subscriber_connection *conn,
-			   uint8_t tid, uint8_t invoke_id)
-{
-	char *own_number = conn->vsub->msisdn;
-	char response_string[GSM_EXTENSION_LENGTH + 20];
-
-	DEBUGP(DMM, "%s: MSISDN = %s\n", vlr_subscr_name(conn->vsub),
-	       own_number);
-
-	/* Need trailing CR as EOT character */
-	snprintf(response_string, sizeof(response_string), "Your extension is %s\r", own_number);
-	return gsm0480_send_ussd_response(conn, tid, invoke_id, response_string);
-}
 
 /* Entry point for call independent MO SS messages */
 int gsm0911_rcv_nc_ss(struct gsm_subscriber_connection *conn, struct msgb *msg)
 {
 	struct gsm48_hdr *gh = msgb_l3(msg);
+	struct osmo_gsup_message gsup_msg;
 	struct gsm_trans *trans;
-	struct ss_request req;
+	struct msgb *gsup_msgb;
+	uint16_t facility_ie_len;
+	uint8_t *facility_ie;
 	uint8_t pdisc, tid;
 	uint8_t msg_type;
 	int rc;
@@ -116,47 +107,195 @@ int gsm0911_rcv_nc_ss(struct gsm_subscriber_connection *conn, struct msgb *msg)
 		cm_service_request_concludes(conn, msg);
 	}
 
-	memset(&req, 0, sizeof(req));
-	rc = gsm0480_decode_ss_request(gh, msgb_l3len(msg), &req);
-	if (!rc) {
-		LOGP(DMM, LOGL_ERROR, "SS/USSD message parsing error, "
-			"rejecting request...\n");
-		gsm0480_send_ussd_reject(conn, tid, -1,
-			GSM_0480_PROBLEM_CODE_TAG_GENERAL,
-			GSM_0480_GEN_PROB_CODE_UNRECOGNISED);
-		/* The GSM 04.80 API uses inverted codes (0 means error) */
-		return -EPROTO;
+	/* Attempt to extract Facility IE */
+	rc = gsm0480_extract_ie_by_tag(gh, msgb_l3len(msg),
+		&facility_ie, &facility_ie_len, GSM0480_IE_FACILITY);
+	if (rc) {
+		LOGP(DMM, LOGL_ERROR, "GSM 04.80 message parsing error, "
+			"couldn't extract Facility IE\n");
+		goto error;
 	}
 
-	/* Interrogation or releaseComplete? */
-	if (req.ussd_text[0] == '\0' || req.ussd_text[0] == 0xFF) {
-		if (req.ss_code > 0) {
-			/* Assume interrogateSS or modification of it and reject */
-			return gsm0480_send_ussd_return_error(conn, tid,
-				req.invoke_id, GSM0480_ERR_CODE_ILLEGAL_SS_OPERATION);
+	/* Facility IE is optional for RELEASE COMPLETE */
+	if (msg_type != GSM0480_MTYPE_RELEASE_COMPLETE) {
+		if (!facility_ie || facility_ie_len < 2) {
+			LOGP(DMM, LOGL_ERROR, "GSM 04.80 message parsing error, "
+				"missing mandatory Facility IE\n");
+			rc = -EINVAL;
+			goto error;
 		}
-		/* Still assuming a Release-Complete and returning */
+	}
+
+	/* Compose a mew GSUP message */
+	memset(&gsup_msg, 0x00, sizeof(gsup_msg));
+	gsup_msg.message_type = OSMO_GSUP_MSGT_PROC_SS_REQUEST;
+	gsup_msg.session_id = trans->callref;
+
+	/**
+	 * Perform A-interface to GSUP-interface mapping,
+	 * according to GSM TS 09.11, table 4.2.
+	 */
+	switch (msg_type) {
+	case GSM0480_MTYPE_REGISTER:
+		gsup_msg.session_state = OSMO_GSUP_SESSION_STATE_BEGIN;
+		break;
+	case GSM0480_MTYPE_FACILITY:
+		gsup_msg.session_state = OSMO_GSUP_SESSION_STATE_CONTINUE;
+		break;
+	case GSM0480_MTYPE_RELEASE_COMPLETE:
+		gsup_msg.session_state = OSMO_GSUP_SESSION_STATE_END;
+		break;
+	}
+
+	/* Fill in the (optional) message payload */
+	if (facility_ie) {
+		gsup_msg.ss_info_len = facility_ie_len;
+		gsup_msg.ss_info = facility_ie;
+	}
+
+	/* Fill in subscriber's IMSI */
+	OSMO_STRLCPY_ARRAY(gsup_msg.imsi, conn->vsub->imsi);
+
+	/* Allocate GSUP message buffer */
+	gsup_msgb = gsup_client_msgb_alloc();
+	if (!gsup_msgb) {
+		LOGP(DMM, LOGL_ERROR, "Couldn't allocate GSUP message\n");
+		rc = -ENOMEM;
+		goto error;
+	}
+
+	/* Encode GSUP message */
+	rc = osmo_gsup_encode(gsup_msgb, &gsup_msg);
+	if (rc) {
+		LOGP(DMM, LOGL_ERROR, "Couldn't encode GSUP message\n");
+		goto error;
+	}
+
+	/* Finally send */
+	rc = gsup_client_send(conn->network->vlr->gsup_client, gsup_msgb);
+	if (rc) {
+		LOGP(DMM, LOGL_ERROR, "Couldn't send GSUP message\n");
+		goto error;
+	}
+
+	/* Don't release connection, wait for response */
+	msc_subscr_conn_communicating(conn);
+
+	return 0;
+
+error:
+	/* Abort transaction on DTAP-interface */
+	gsm0480_send_ussd_reject(conn, tid, -1,
+		GSM_0480_PROBLEM_CODE_TAG_GENERAL,
+		GSM_0480_GEN_PROB_CODE_UNRECOGNISED);
+	if (trans)
+		trans_free(trans);
+
+	/* TODO: abort transaction on GSUP interface if any */
+	return rc;
+}
+
+int gsm0911_gsup_handler(struct vlr_subscr *vsub,
+			 struct osmo_gsup_message *gsup_msg)
+{
+	struct vlr_instance *vlr;
+	struct gsm_network *net;
+	struct gsm_trans *trans;
+	struct gsm48_hdr *gh;
+	struct msgb *ss_msg;
+	bool trans_end;
+
+	/* Associate logging messages with this subscriber */
+	log_set_context(LOG_CTX_VLR_SUBSCR, vsub);
+
+	/* Obtain pointer to vlr_instance */
+	vlr = vsub->vlr;
+	OSMO_ASSERT(vlr);
+
+	/* Obtain pointer to gsm_network */
+	net = (struct gsm_network *) vlr->user_ctx;
+	OSMO_ASSERT(net);
+
+	/* Handle errors */
+	if (OSMO_GSUP_IS_MSGT_ERROR(gsup_msg->message_type)) {
+		/* FIXME: handle this error somehow! */
 		return 0;
 	}
 
-	msc_subscr_conn_communicating(conn);
-	if (!strcmp(USSD_TEXT_OWN_NUMBER, (const char *)req.ussd_text)) {
-		DEBUGP(DMM, "USSD: Own number requested\n");
-		rc = send_own_number(conn, tid, req.invoke_id);
-	} else {
-		DEBUGP(DMM, "Unhandled USSD %s\n", req.ussd_text);
-		rc = gsm0480_send_ussd_return_error(conn,
-			tid, req.invoke_id,
-			GSM0480_ERR_CODE_UNEXPECTED_DATA_VALUE);
+	/* Attempt to find DTAP-transaction */
+	trans = trans_find_by_callref(net, gsup_msg->session_id);
+	if (!trans) {
+		/* FIXME: network-originated sessions are not supported yet */
+		LOGP(DMM, LOGL_ERROR, "Network-originated sessions "
+			"are not supported, dropping request...\n");
+		return -ENOTSUP;
 	}
 
-	/**
-	 * TODO: as we only handle *#100# for now, and always
-	 * respond with RELEASE COMPLETE, let's manually free
-	 * the transaction here, until the external interface
-	 * is implemented.
-	 */
-	trans_free(trans);
+	/* Allocate and prepare a new MT message */
+	ss_msg = gsm48_msgb_alloc_name("GSM 04.08 SS/USSD");
+	gh = (struct gsm48_hdr *) msgb_push(ss_msg, sizeof(*gh));
+	gh->proto_discr  = GSM48_PDISC_NC_SS;
+	gh->proto_discr |= trans->transaction_id << 4;
 
-	return rc;
+	/**
+	 * Perform GSUP-interface to A-interface mapping,
+	 * according to GSM TS 09.11, table 4.1.
+	 *
+	 * TODO: see (note 3), both CONTINUE and END may
+	 * be also mapped to REGISTER if a new transaction
+	 * has to be established.
+	 */
+	switch (gsup_msg->session_state) {
+	case OSMO_GSUP_SESSION_STATE_BEGIN:
+		gh->msg_type = GSM0480_MTYPE_REGISTER;
+		break;
+	case OSMO_GSUP_SESSION_STATE_CONTINUE:
+		gh->msg_type = GSM0480_MTYPE_FACILITY;
+		break;
+	case OSMO_GSUP_SESSION_STATE_END:
+		gh->msg_type = GSM0480_MTYPE_RELEASE_COMPLETE;
+		break;
+
+	/* Missing or incorrect session state */
+	case OSMO_GSUP_SESSION_STATE_NONE:
+	default:
+		LOGP(DMM, LOGL_ERROR, "Unexpected session state %d\n",
+			gsup_msg->session_state);
+		/* FIXME: send ERROR back to the HLR */
+		msgb_free(ss_msg);
+		return -EINVAL;
+	}
+
+	/* Facility IE is optional only for RELEASE COMPLETE */
+	if (gh->msg_type != GSM0480_MTYPE_RELEASE_COMPLETE) {
+		if (!gsup_msg->ss_info || gsup_msg->ss_info_len < 2) {
+			LOGP(DMM, LOGL_ERROR, "Missing mandatory Facility IE "
+				"for mapped 0x%02x message\n", gh->msg_type);
+			/* FIXME: send ERROR back to the HLR */
+			msgb_free(ss_msg);
+			return -EINVAL;
+		}
+	}
+
+	/* Append Facility IE if preset */
+	if (gsup_msg->ss_info && gsup_msg->ss_info_len > 2) {
+		/* Facility IE carries LV, others carry TLV */
+		if (gh->msg_type == GSM0480_MTYPE_FACILITY)
+			msgb_lv_put(ss_msg, gsup_msg->ss_info_len, gsup_msg->ss_info);
+		else
+			msgb_tlv_put(ss_msg, GSM0480_IE_FACILITY,
+				gsup_msg->ss_info_len, gsup_msg->ss_info);
+	}
+
+	/* Should we release the transaction? */
+	trans_end = (gh->msg_type == GSM0480_MTYPE_RELEASE_COMPLETE);
+
+	/* Sent to the MS, give ownership of ss_msg */
+	msc_tx_dtap(trans->conn, ss_msg);
+
+	/* Release transaction if required */
+	if (trans_end)
+		trans_free(trans);
+
+	return 0;
 }
