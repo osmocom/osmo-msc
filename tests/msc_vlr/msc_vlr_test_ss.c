@@ -94,11 +94,21 @@ static void _test_ss_ussd(enum ran_type via_ran)
 	EXPECT_ACCEPTED(true);
 
 	/* MT: GSM 04.80 RELEASE COMPLETE with Facility IE */
+	gsup_expect_tx("20" /* OSMO_GSUP_MSGT_PROC_SS_REQUEST */
+		"0108" "09710000004026f0" /* IMSI TLV */
+		"3004" "20000001" /* Session ID TLV */
+		"3101" "01" /* Session state: BEGIN */
+		"3515" FACILITY_IE_REQ);
 	dtap_expect_tx("8b2a" "1c27" FACILITY_IE_RSP);
 	expect_release_clear(via_ran);
 
 	/* MO: GSM 04.80 REGISTER with Facility IE and SS version IE */
 	ms_sends_msg("0b7b" "1c15" FACILITY_IE_REQ "7f0100");
+	gsup_rx("20" /* OSMO_GSUP_MSGT_PROC_SS_REQUEST */
+		"0108" "09710000004026f0" /* IMSI TLV */
+		"3004" "20000001" /* Session ID TLV */
+		"3101" "03" /* Session state: END */
+		"3527" FACILITY_IE_RSP, NULL);
 	VERBOSE_ASSERT(dtap_tx_confirmed, == true, "%d");
 	ASSERT_RELEASE_CLEAR(via_ran);
 

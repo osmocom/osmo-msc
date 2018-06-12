@@ -162,22 +162,27 @@ DREF VLR subscr MSISDN:46071 usage increases to: 3
 DREF MSISDN:46071: MSC conn use + trans_nc_ss == 3 (0x4a: dtap,cm_service,trans_nc_ss)
 DMM MSISDN:46071: rx msg GSM0480_MTYPE_REGISTER: received_cm_service_request changes to false
 DREF MSISDN:46071: MSC conn use - cm_service == 2 (0x42: dtap,trans_nc_ss)
+GSUP --> HLR: OSMO_GSUP_MSGT_PROC_SS_REQUEST: 20010809710000004026f03004200000013101013515a11302010102013b300b04010f0406aa510c061b01
 DMM Subscr_Conn(CM_SERVICE_REQ:901700000004620){SUBSCR_CONN_S_ACCEPTED}: Received Event SUBSCR_CONN_E_COMMUNICATING
 DMM Subscr_Conn(CM_SERVICE_REQ:901700000004620){SUBSCR_CONN_S_ACCEPTED}: state_chg to SUBSCR_CONN_S_COMMUNICATING
-DMM USSD: Own number requested
-DMM MSISDN:46071: MSISDN = 46071
+DREF MSISDN:46071: MSC conn use - dtap == 1 (0x40: trans_nc_ss)
+<-- GSUP rx OSMO_GSUP_MSGT_PROC_SS_REQUEST: 20010809710000004026f03004200000013101033527a225020101302002013b301b04010f0416d9775d0e2ae3e965f73cfd7683d27310cd06bbc51a0d
+DVLR GSUP rx 61: 20010809710000004026f03004200000013101033527a225020101302002013b301b04010f0416d9775d0e2ae3e965f73cfd7683d27310cd06bbc51a0d
+DREF VLR subscr MSISDN:46071 usage increases to: 4
+DMSC Routed to GSM 09.11 SS/USSD handler
 DMSC msc_tx 43 bytes to MSISDN:46071 via RAN_GERAN_A
 - DTAP --RAN_GERAN_A--> MS: GSM0480_MTYPE_RELEASE_COMPLETE: 8b2a1c27a225020101302002013b301b04010f0416d9775d0e2ae3e965f73cfd7683d27310cd06bbc51a0d
 - DTAP matches expected message
-DREF VLR subscr MSISDN:46071 usage decreases to: 2
-DREF MSISDN:46071: MSC conn use - trans_nc_ss == 1 (0x2: dtap)
-DREF MSISDN:46071: MSC conn use - dtap == 0 (0x0: )
+DREF VLR subscr MSISDN:46071 usage decreases to: 3
+DREF MSISDN:46071: MSC conn use - trans_nc_ss == 0 (0x0: )
 DMM Subscr_Conn(CM_SERVICE_REQ:901700000004620){SUBSCR_CONN_S_COMMUNICATING}: Received Event SUBSCR_CONN_E_UNUSED
 DMM Subscr_Conn(CM_SERVICE_REQ:901700000004620){SUBSCR_CONN_S_COMMUNICATING}: state_chg to SUBSCR_CONN_S_RELEASING
 DREF MSISDN:46071: MSC conn use + release == 1 (0x100: release)
-DREF VLR subscr MSISDN:46071 usage increases to: 3
-DREF VLR subscr MSISDN:46071 usage decreases to: 2
+DREF VLR subscr MSISDN:46071 usage increases to: 4
+DREF VLR subscr MSISDN:46071 usage decreases to: 3
 - BSSAP Clear --RAN_GERAN_A--> MS
+DREF VLR subscr MSISDN:46071 usage decreases to: 2
+<-- GSUP rx OSMO_GSUP_MSGT_PROC_SS_REQUEST: vlr_gsupc_read_cb() returns 0
   dtap_tx_confirmed == 1
   bssap_clear_sent == 1
 - all requests serviced, conn has been released
