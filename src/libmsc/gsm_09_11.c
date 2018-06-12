@@ -46,7 +46,7 @@ const char USSD_TEXT_OWN_NUMBER[] = "*#100#";
 
 /* A network-specific handler function */
 static int send_own_number(struct gsm_subscriber_connection *conn,
-			   const struct ss_request *req)
+			   uint8_t tid, uint8_t invoke_id)
 {
 	char *own_number = conn->vsub->msisdn;
 	char response_string[GSM_EXTENSION_LENGTH + 20];
@@ -56,7 +56,7 @@ static int send_own_number(struct gsm_subscriber_connection *conn,
 
 	/* Need trailing CR as EOT character */
 	snprintf(response_string, sizeof(response_string), "Your extension is %s\r", own_number);
-	return gsm0480_send_ussd_response(conn, response_string, req);
+	return gsm0480_send_ussd_response(conn, tid, invoke_id, response_string);
 }
 
 /* Entry point for call independent MO SS messages */
@@ -121,7 +121,8 @@ int gsm0911_rcv_nc_ss(struct gsm_subscriber_connection *conn, struct msgb *msg)
 	if (!rc) {
 		LOGP(DMM, LOGL_ERROR, "SS/USSD message parsing error, "
 			"rejecting request...\n");
-		gsm0480_send_ussd_reject(conn, &req, GSM_0480_PROBLEM_CODE_TAG_GENERAL,
+		gsm0480_send_ussd_reject(conn, tid, -1,
+			GSM_0480_PROBLEM_CODE_TAG_GENERAL,
 			GSM_0480_GEN_PROB_CODE_UNRECOGNISED);
 		/* The GSM 04.80 API uses inverted codes (0 means error) */
 		return -EPROTO;
@@ -131,8 +132,8 @@ int gsm0911_rcv_nc_ss(struct gsm_subscriber_connection *conn, struct msgb *msg)
 	if (req.ussd_text[0] == '\0' || req.ussd_text[0] == 0xFF) {
 		if (req.ss_code > 0) {
 			/* Assume interrogateSS or modification of it and reject */
-			return gsm0480_send_ussd_return_error(conn, &req,
-				GSM0480_ERR_CODE_ILLEGAL_SS_OPERATION);
+			return gsm0480_send_ussd_return_error(conn, tid,
+				req.invoke_id, GSM0480_ERR_CODE_ILLEGAL_SS_OPERATION);
 		}
 		/* Still assuming a Release-Complete and returning */
 		return 0;
@@ -141,10 +142,11 @@ int gsm0911_rcv_nc_ss(struct gsm_subscriber_connection *conn, struct msgb *msg)
 	msc_subscr_conn_communicating(conn);
 	if (!strcmp(USSD_TEXT_OWN_NUMBER, (const char *)req.ussd_text)) {
 		DEBUGP(DMM, "USSD: Own number requested\n");
-		rc = send_own_number(conn, &req);
+		rc = send_own_number(conn, tid, req.invoke_id);
 	} else {
 		DEBUGP(DMM, "Unhandled USSD %s\n", req.ussd_text);
-		rc = gsm0480_send_ussd_return_error(conn, &req,
+		rc = gsm0480_send_ussd_return_error(conn,
+			tid, req.invoke_id,
 			GSM0480_ERR_CODE_UNEXPECTED_DATA_VALUE);
 	}
 

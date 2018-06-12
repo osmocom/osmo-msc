@@ -59,10 +59,28 @@ static inline unsigned char *msgb_push_TLV1(struct msgb *msgb, uint8_t tag,
 	return data;
 }
 
+static inline unsigned char *msgb_push_NULL(struct msgb *msgb)
+{
+	uint8_t *data = msgb_push(msgb, 2);
 
-/* Send response to a mobile-originated ProcessUnstructuredSS-Request */
+	data[0] = ASN1_NULL_TYPE_TAG;
+	data[1] = 0;
+	return data;
+}
+
+
+/*! Send a MT RELEASE COMPLETE message with USSD-response,
+ *  wrapped into the ReturnResult component (see section 3.6.1).
+ *
+ * \param[in]  conn            Active subscriber connection
+ * \param[in]  transaction_id  Transaction ID with TI flag set
+ * \param[in]  invoke_id       InvokeID of the request
+ * \param[in]  response_text   The response text
+ * \return     result of \ref msc_tx_dtap
+ */
 int gsm0480_send_ussd_response(struct gsm_subscriber_connection *conn,
-			       const char *response_text, const struct ss_request *req)
+			       uint8_t transaction_id, uint8_t invoke_id,
+			       const char *response_text)
 {
 	struct msgb *msg = gsm48_msgb_alloc_name("GSM 04.08 USSD RSP");
 	struct gsm48_hdr *gh;
@@ -91,7 +109,7 @@ int gsm0480_send_ussd_response(struct gsm_subscriber_connection *conn,
 	msgb_wrap_with_TL(msg, GSM_0480_SEQUENCE_TAG);
 
 	/* Pre-pend the invoke ID */
-	msgb_push_TLV1(msg, GSM0480_COMPIDTAG_INVOKE_ID, req->invoke_id);
+	msgb_push_TLV1(msg, GSM0480_COMPIDTAG_INVOKE_ID, invoke_id);
 
 	/* Wrap this up as a Return Result component */
 	msgb_wrap_with_TL(msg, GSM0480_CTYPE_RETURN_RESULT);
@@ -101,15 +119,24 @@ int gsm0480_send_ussd_response(struct gsm_subscriber_connection *conn,
 
 	/* And finally pre-pend the L3 header */
 	gh = (struct gsm48_hdr *) msgb_push(msg, sizeof(*gh));
-	gh->proto_discr = GSM48_PDISC_NC_SS | req->transaction_id
-					| (1<<7);  /* TI direction = 1 */
+	gh->proto_discr  = GSM48_PDISC_NC_SS;
+	gh->proto_discr |= transaction_id << 4;
 	gh->msg_type = GSM0480_MTYPE_RELEASE_COMPLETE;
 
 	return msc_tx_dtap(conn, msg);
 }
 
+/*! Send a MT RELEASE COMPLETE message with ReturnError component
+ *  (see section 3.6.1) and given error code (see section 3.6.6).
+ *
+ * \param[in]  conn            Active subscriber connection
+ * \param[in]  transaction_id  Transaction ID with TI flag set
+ * \param[in]  invoke_id       InvokeID of the request
+ * \param[in]  error_code      Error code (section 4.5)
+ * \return     result of \ref msc_tx_dtap
+ */
 int gsm0480_send_ussd_return_error(struct gsm_subscriber_connection *conn,
-	const struct ss_request *req, uint8_t error_code)
+	uint8_t transaction_id, uint8_t invoke_id, uint8_t error_code)
 {
 	struct msgb *msg = gsm48_msgb_alloc_name("GSM 04.08 USSD ERR");
 	struct gsm48_hdr *gh;
@@ -118,7 +145,7 @@ int gsm0480_send_ussd_return_error(struct gsm_subscriber_connection *conn,
 	msgb_push_TLV1(msg, GSM_0480_ERROR_CODE_TAG, error_code);
 
 	/* Before it insert the invoke ID */
-	msgb_push_TLV1(msg, GSM0480_COMPIDTAG_INVOKE_ID, req->invoke_id);
+	msgb_push_TLV1(msg, GSM0480_COMPIDTAG_INVOKE_ID, invoke_id);
 
 	/* Wrap this up as a Reject component */
 	msgb_wrap_with_TL(msg, GSM0480_CTYPE_RETURN_ERROR);
@@ -128,25 +155,45 @@ int gsm0480_send_ussd_return_error(struct gsm_subscriber_connection *conn,
 
 	/* And finally pre-pend the L3 header */
 	gh = (struct gsm48_hdr *) msgb_push(msg, sizeof(*gh));
-	gh->proto_discr = GSM48_PDISC_NC_SS;
-	gh->proto_discr |= req->transaction_id | (1<<7);  /* TI direction = 1 */
+	gh->proto_discr  = GSM48_PDISC_NC_SS;
+	gh->proto_discr |= transaction_id << 4;
 	gh->msg_type = GSM0480_MTYPE_RELEASE_COMPLETE;
 
 	return msc_tx_dtap(conn, msg);
 }
 
+/*! Send a MT RELEASE COMPLETE message with Reject component
+ *  (see section 3.6.1) and given error code (see section 3.6.7).
+ *
+ * \param[in]  conn            Active subscriber connection
+ * \param[in]  transaction_id  Transaction ID with TI flag set
+ * \param[in]  invoke_id       InvokeID of the request
+ * \param[in]  problem_tag     Problem code tag (table 3.13)
+ * \param[in]  problem_code    Problem code (tables 3.14-17)
+ * \return     result of \ref msc_tx_dtap
+ *
+ * Note: if InvokeID is not available, e.g. when message parsing
+ * failed, any incorrect value can be passed (0x00 > x > 0xff), so
+ * the universal NULL-tag (see table 3.6) will be used instead.
+ */
 int gsm0480_send_ussd_reject(struct gsm_subscriber_connection *conn,
-			     const struct ss_request *req,
-			     uint8_t error_tag, uint8_t error_code)
+			     uint8_t transaction_id, int invoke_id,
+			     uint8_t problem_tag, uint8_t problem_code)
 {
 	struct msgb *msg = gsm48_msgb_alloc_name("GSM 04.08 USSD REJ");
 	struct gsm48_hdr *gh;
 
 	/* First insert the problem code */
-	msgb_push_TLV1(msg, error_tag, error_code);
+	msgb_push_TLV1(msg, problem_tag, problem_code);
 
-	/* Before it insert the invoke ID */
-	msgb_push_TLV1(msg, GSM0480_COMPIDTAG_INVOKE_ID, req->invoke_id);
+	/**
+	 * If the Invoke ID is not available, Universal Null
+	 * (table 3.9) with length = 0 shall be used.
+	 */
+	if (invoke_id < 0 || invoke_id > 255)
+		msgb_push_NULL(msg);
+	else
+		msgb_push_TLV1(msg, GSM0480_COMPIDTAG_INVOKE_ID, invoke_id);
 
 	/* Wrap this up as a Reject component */
 	msgb_wrap_with_TL(msg, GSM0480_CTYPE_REJECT);
@@ -156,8 +203,8 @@ int gsm0480_send_ussd_reject(struct gsm_subscriber_connection *conn,
 
 	/* And finally pre-pend the L3 header */
 	gh = (struct gsm48_hdr *) msgb_push(msg, sizeof(*gh));
-	gh->proto_discr = GSM48_PDISC_NC_SS;
-	gh->proto_discr |= req->transaction_id | (1<<7);  /* TI direction = 1 */
+	gh->proto_discr  = GSM48_PDISC_NC_SS;
+	gh->proto_discr |= transaction_id << 4;
 	gh->msg_type = GSM0480_MTYPE_RELEASE_COMPLETE;
 
 	return msc_tx_dtap(conn, msg);

@@ -7,14 +7,14 @@
 struct gsm_subscriber_connection;
 
 int gsm0480_send_ussd_response(struct gsm_subscriber_connection *conn,
-			       const char* response_text,
-			       const struct ss_request *req);
+			       uint8_t transaction_id, uint8_t invoke_id,
+			       const char *response_text);
 int gsm0480_send_ussd_return_error(struct gsm_subscriber_connection *conn,
-				   const struct ss_request *req,
+				   uint8_t transaction_id, uint8_t invoke_id,
 				   uint8_t error_code);
 int gsm0480_send_ussd_reject(struct gsm_subscriber_connection *conn,
-			     const struct ss_request *req,
-			     uint8_t error_tag, uint8_t error_code);
+			     uint8_t transaction_id, int invoke_id,
+			     uint8_t problem_tag, uint8_t problem_code);
 
 int msc_send_ussd_notify(struct gsm_subscriber_connection *conn, int level,
 			 const char *text);
