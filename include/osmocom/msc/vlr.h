@@ -8,6 +8,7 @@
 #include <osmocom/gsm/protocol/gsm_04_08_gprs.h>
 #include <osmocom/gsm/gsm23003.h>
 #include <osmocom/gsm/gsm0808.h>
+#include <osmocom/gsm/gsup.h>
 #include <osmocom/msc/gsm_data.h>
 // for GSM_NAME_LENGTH
 #include <osmocom/msc/gsm_subscriber.h>
@@ -226,6 +227,9 @@ struct vlr_ops {
 	/* notify MSC/SGSN that the given subscriber has been associated
 	 * with this msc_conn_ref */
 	void (*subscr_assoc)(void *msc_conn_ref, struct vlr_subscr *vsub);
+
+	/* Forward a parsed GSUP message towards MSC message router */
+	int (*forward_gsup_msg)(struct vlr_subscr *vsub, struct osmo_gsup_message *gsup_msg);
 };
 
 enum vlr_timer {

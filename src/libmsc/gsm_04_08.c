@@ -1698,6 +1698,18 @@ static void msc_vlr_subscr_assoc(void *msc_conn_ref,
 	conn->vsub->cs.attached_via_ran = conn->via_ran;
 }
 
+static int msc_vlr_route_gsup_msg(struct vlr_subscr *vsub,
+				  struct osmo_gsup_message *gsup_msg)
+{
+	switch (gsup_msg->message_type) {
+	/* Nowhere to route for now */
+	default:
+		LOGP(DMM, LOGL_ERROR, "No handler found for %s, dropping message...\n",
+			osmo_gsup_message_type_name(gsup_msg->message_type));
+		return -GMM_CAUSE_MSGT_NOTEXIST_NOTIMPL;
+	}
+}
+
 /* operations that we need to implement for libvlr */
 static const struct vlr_ops msc_vlr_ops = {
 	.tx_auth_req = msc_vlr_tx_auth_req,
@@ -1712,6 +1724,7 @@ static const struct vlr_ops msc_vlr_ops = {
 	.tx_mm_info = msc_vlr_tx_mm_info,
 	.subscr_update = msc_vlr_subscr_update,
 	.subscr_assoc = msc_vlr_subscr_assoc,
+	.forward_gsup_msg = msc_vlr_route_gsup_msg,
 };
 
 /* Allocate net->vlr so that the VTY may configure the VLR's data structures */
