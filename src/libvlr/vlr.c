@@ -1042,10 +1042,8 @@ int vlr_gsupc_read_cb(struct gsup_client *gsupc, struct msgb *msg)
 		rc = -GMM_CAUSE_MSGT_NOTEXIST_NOTIMPL;
 		break;
 	default:
-		LOGVSUBP(LOGL_ERROR, vsub,
-			"Rx GSUP msg_type=%d not valid at VLR/SGSN side\n",
-			gsup.message_type);
-		rc = -GMM_CAUSE_MSGT_NOTEXIST_NOTIMPL;
+		/* Forward message towards MSC */
+		rc = vlr->ops.forward_gsup_msg(vsub, &gsup);
 		break;
 	}
 
@@ -1192,6 +1190,7 @@ struct vlr_instance *vlr_alloc(void *ctx, const struct vlr_ops *ops)
 	OSMO_ASSERT(ops->tx_common_id);
 	OSMO_ASSERT(ops->subscr_update);
 	OSMO_ASSERT(ops->subscr_assoc);
+	OSMO_ASSERT(ops->forward_gsup_msg);
 
 	INIT_LLIST_HEAD(&vlr->subscribers);
 	INIT_LLIST_HEAD(&vlr->operations);
