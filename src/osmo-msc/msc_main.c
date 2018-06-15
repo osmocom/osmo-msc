@@ -125,7 +125,7 @@ static void print_help()
 	printf("  -s --disable-color\n");
 	printf("  -l --database db-name      The database to use.\n");
 	printf("  -T --timestamp             Prefix every log line with a timestamp.\n");
-	printf("  -V --version               Print the version of OpenBSC.\n");
+	printf("  -V --version               Print the version of OsmoMSC.\n");
 	printf("  -e --log-level number      Set a global loglevel.\n");
 	printf("  -M --mncc-sock-path PATH   Disable built-in MNCC handler and offer socket.\n");
 	printf("  -C --no-dbcounter          Disable regular syncing of counters to database.\n");
