@@ -125,12 +125,9 @@ static void test_ciph()
 	ms_sends_msg("0632");
 	VERBOSE_ASSERT(cm_service_result_sent, == RES_NONE, "%d");
 
-	btw("a USSD request is serviced");
-	dtap_expect_tx_ussd("Your extension is 46071\r");
-	expect_bssap_clear();
-	ms_sends_msg("0b3b1c15a11302010002013b300b04010f0406aa510c061b017f0100");
-	OSMO_ASSERT(dtap_tx_confirmed);
-	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
+	/* Release connection */
+	expect_bssap_clear(RAN_GERAN_A);
+	conn_conclude_cm_service_req(g_conn, RAN_GERAN_A);
 
 	btw("all requests serviced, conn has been released");
 	bss_sends_clear_complete();
@@ -368,12 +365,9 @@ static void test_ciph_tmsi()
 	ms_sends_msg("0632");
 	VERBOSE_ASSERT(cm_service_result_sent, == RES_NONE, "%d");
 
-	btw("a USSD request is serviced");
-	dtap_expect_tx_ussd("Your extension is 46071\r");
-	expect_bssap_clear();
-	ms_sends_msg("0b3b1c15a11302010002013b300b04010f0406aa510c061b017f0100");
-	OSMO_ASSERT(dtap_tx_confirmed);
-	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
+	/* Release connection */
+	expect_bssap_clear(RAN_GERAN_A);
+	conn_conclude_cm_service_req(g_conn, RAN_GERAN_A);
 
 	btw("all requests serviced, conn has been released");
 	bss_sends_clear_complete();
@@ -968,12 +962,9 @@ static void test_gsm_ciph_in_umts_env()
 	ms_sends_msg("0632");
 	VERBOSE_ASSERT(cm_service_result_sent, == RES_NONE, "%d");
 
-	btw("a USSD request is serviced");
-	dtap_expect_tx_ussd("Your extension is 42342\r");
-	expect_bssap_clear();
-	ms_sends_msg("0b3b1c15a11302010002013b300b04010f0406aa510c061b017f0100");
-	OSMO_ASSERT(dtap_tx_confirmed);
-	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
+	/* Release connection */
+	expect_bssap_clear(RAN_GERAN_A);
+	conn_conclude_cm_service_req(g_conn, RAN_GERAN_A);
 
 	btw("all requests serviced, conn has been released");
 	bss_sends_clear_complete();

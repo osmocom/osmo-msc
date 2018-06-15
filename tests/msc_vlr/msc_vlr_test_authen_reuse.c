@@ -177,12 +177,9 @@ static void _test_auth_reuse(enum ran_type via_ran,
 			VERBOSE_ASSERT(cm_service_result_sent, == RES_NONE, "%d");
 		}
 
-		btw("a USSD request is serviced");
-		dtap_expect_tx_ussd("Your extension is 42342\r");
+		/* Release connection */
 		expect_release_clear(via_ran);
-		ms_sends_msg("0b3b1c15a11302010002013b300b04010f0406aa510c061b017f0100");
-		OSMO_ASSERT(dtap_tx_confirmed);
-		ASSERT_RELEASE_CLEAR(via_ran);
+		conn_conclude_cm_service_req(g_conn, via_ran);
 		bss_rnc_sends_release_clear_complete(via_ran);
 
 		btw("all requests serviced, conn has been released");
@@ -252,12 +249,9 @@ static void _test_auth_reuse(enum ran_type via_ran,
 			VERBOSE_ASSERT(cm_service_result_sent, == RES_NONE, "%d");
 		}
 
-		btw("a USSD request is serviced");
-		dtap_expect_tx_ussd("Your extension is 42342\r");
+		/* Release connection */
 		expect_release_clear(via_ran);
-		ms_sends_msg("0b3b1c15a11302010002013b300b04010f0406aa510c061b017f0100");
-		OSMO_ASSERT(dtap_tx_confirmed);
-		ASSERT_RELEASE_CLEAR(via_ran);
+		conn_conclude_cm_service_req(g_conn, via_ran);
 		bss_rnc_sends_release_clear_complete(via_ran);
 
 		btw("all requests serviced, conn has been released");

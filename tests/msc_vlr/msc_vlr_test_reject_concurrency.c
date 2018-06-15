@@ -313,11 +313,10 @@ static void test_reject_paging_resp_during_cm()
 	EXPECT_CONN_COUNT(1);
 
 	BTW("The original CM Service Request can conclude");
-	btw("a USSD request is serviced");
-	dtap_expect_tx_ussd("Your extension is 46071\r");
-	expect_bssap_clear();
-	ms_sends_msg("0b3b1c15a11302010002013b300b04010f0406aa510c061b017f0100");
-	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
+
+	/* Release connection */
+	expect_bssap_clear(RAN_GERAN_A);
+	conn_conclude_cm_service_req(g_conn, RAN_GERAN_A);
 
 	btw("all requests serviced, conn has been released");
 	bss_sends_clear_complete();
