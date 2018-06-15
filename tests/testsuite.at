@@ -92,3 +92,10 @@ cat $abs_srcdir/msc_vlr/msc_vlr_test_rest.ok > expout
 cat $abs_srcdir/msc_vlr/msc_vlr_test_rest.err > experr
 AT_CHECK([$abs_top_builddir/tests/msc_vlr/msc_vlr_test_rest], [], [expout], [experr])
 AT_CLEANUP
+
+AT_SETUP([msc_vlr_test_ss])
+AT_KEYWORDS([msc_vlr_test_ss])
+cat $abs_srcdir/msc_vlr/msc_vlr_test_ss.ok > expout
+cat $abs_srcdir/msc_vlr/msc_vlr_test_ss.err > experr
+AT_CHECK([$abs_top_builddir/tests/msc_vlr/msc_vlr_test_ss], [], [expout], [experr])
+AT_CLEANUP

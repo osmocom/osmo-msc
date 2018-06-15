@@ -153,6 +153,8 @@ struct msgb *msgb_from_hex(const char *label, uint16_t size, const char *hex);
 
 void clear_vlr();
 bool conn_exists(struct gsm_subscriber_connection *conn);
+void conn_conclude_cm_service_req(struct gsm_subscriber_connection *conn,
+				  enum ran_type via_ran);
 
 void dtap_expect_tx(const char *hex);
 void dtap_expect_tx_ussd(char *ussd_text);

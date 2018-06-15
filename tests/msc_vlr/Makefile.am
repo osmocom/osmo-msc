@@ -80,6 +80,8 @@ EXTRA_DIST = \
 	msc_vlr_test_call.err \
 	msc_vlr_test_rest.ok \
 	msc_vlr_test_rest.err \
+	msc_vlr_test_ss.ok \
+	msc_vlr_test_ss.err \
 	$(NULL)
 
 noinst_PROGRAMS = \
@@ -94,6 +96,7 @@ noinst_PROGRAMS = \
 	msc_vlr_test_reject_concurrency \
 	msc_vlr_test_call \
 	msc_vlr_test_rest \
+	msc_vlr_test_ss \
 	$(NULL)
 
 msc_vlr_test_no_authen_SOURCES = \
@@ -151,6 +154,11 @@ msc_vlr_test_rest_SOURCES = \
 	msc_vlr_tests.c \
 	$(NULL)
 
+msc_vlr_test_ss_SOURCES = \
+	msc_vlr_test_ss.c \
+	msc_vlr_tests.c \
+	$(NULL)
+
 .PHONY: update_exp
 update_exp:
 	$(builddir)/msc_vlr_test_no_authen >$(srcdir)/msc_vlr_test_no_authen.ok 2>$(srcdir)/msc_vlr_test_no_authen.err
@@ -164,3 +172,4 @@ update_exp:
 	$(builddir)/msc_vlr_test_reject_concurrency >$(srcdir)/msc_vlr_test_reject_concurrency.ok 2>$(srcdir)/msc_vlr_test_reject_concurrency.err
 	$(builddir)/msc_vlr_test_call >$(srcdir)/msc_vlr_test_call.ok 2>$(srcdir)/msc_vlr_test_call.err
 	$(builddir)/msc_vlr_test_rest >$(srcdir)/msc_vlr_test_rest.ok 2>$(srcdir)/msc_vlr_test_rest.err
+	$(builddir)/msc_vlr_test_ss >$(srcdir)/msc_vlr_test_ss.ok 2>$(srcdir)/msc_vlr_test_ss.err

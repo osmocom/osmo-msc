@@ -114,12 +114,9 @@ static void test_gsm_authen()
 	ms_sends_msg("0554" "20bde240" /* 2nd vector's sres, s.a. */);
 	VERBOSE_ASSERT(cm_service_result_sent, == RES_ACCEPT, "%d");
 
-	btw("a USSD request is serviced");
-	dtap_expect_tx_ussd("Your extension is 46071\r");
-	expect_bssap_clear();
-	ms_sends_msg("0b3b1c15a11302010002013b300b04010f0406aa510c061b017f0100");
-	OSMO_ASSERT(dtap_tx_confirmed);
-	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
+	/* Release connection */
+	expect_bssap_clear(RAN_GERAN_A);
+	conn_conclude_cm_service_req(g_conn, RAN_GERAN_A);
 
 	btw("all requests serviced, conn has been released");
 	bss_sends_clear_complete();
@@ -335,12 +332,9 @@ static void test_gsm_authen_tmsi()
 	ms_sends_msg("0554" "20bde240" /* 2nd vector's sres, s.a. */);
 	VERBOSE_ASSERT(cm_service_result_sent, == RES_ACCEPT, "%d");
 
-	btw("a USSD request is serviced");
-	dtap_expect_tx_ussd("Your extension is 46071\r");
-	expect_bssap_clear();
-	ms_sends_msg("0b3b1c15a11302010002013b300b04010f0406aa510c061b017f0100");
-	OSMO_ASSERT(dtap_tx_confirmed);
-	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
+	/* Release connection */
+	expect_bssap_clear(RAN_GERAN_A);
+	conn_conclude_cm_service_req(g_conn, RAN_GERAN_A);
 
 	btw("all requests serviced, conn has been released");
 	bss_sends_clear_complete();
@@ -833,12 +827,9 @@ static void test_gsm_milenage_authen()
 	ms_sends_msg("0554" "85aa3130"); /* 2nd vector's sres, s.a. */
 	VERBOSE_ASSERT(cm_service_result_sent, == RES_ACCEPT, "%d");
 
-	btw("a USSD request is serviced");
-	dtap_expect_tx_ussd("Your extension is 42342\r");
-	expect_bssap_clear();
-	ms_sends_msg("0b3b1c15a11302010002013b300b04010f0406aa510c061b017f0100");
-	OSMO_ASSERT(dtap_tx_confirmed);
-	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
+	/* Release connection */
+	expect_bssap_clear(RAN_GERAN_A);
+	conn_conclude_cm_service_req(g_conn, RAN_GERAN_A);
 
 	btw("all requests serviced, conn has been released");
 	bss_sends_clear_complete();

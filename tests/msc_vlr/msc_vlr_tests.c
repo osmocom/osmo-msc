@@ -138,22 +138,6 @@ void dtap_expect_tx(const char *hex)
 	dtap_tx_confirmed = false;
 }
 
-void dtap_expect_tx_ussd(char *ussd_text)
-{
-	uint8_t ussd_enc[128];
-	int len;
-	/* header */
-	char ussd_msg_hex[128] = "8b2a1c27a225020100302002013b301b04010f0416";
-
-	log("expecting USSD:\n  %s", ussd_text);
-	/* append encoded USSD text */
-	gsm_7bit_encode_n_ussd(ussd_enc, sizeof(ussd_enc), ussd_text,
-			       &len);
-	strncat(ussd_msg_hex, osmo_hexdump_nospc(ussd_enc, len),
-		sizeof(ussd_msg_hex) - strlen(ussd_msg_hex));
-	dtap_expect_tx(ussd_msg_hex);
-}
-
 int vlr_gsupc_read_cb(struct gsup_client *gsupc, struct msgb *msg);
 
 void gsup_rx(const char *rx_hex, const char *expect_tx_hex)
@@ -184,6 +168,21 @@ bool conn_exists(struct gsm_subscriber_connection *conn)
 			return true;
 	}
 	return false;
+}
+
+/* Simplified version of the cm_service_request_concludes() */
+void conn_conclude_cm_service_req(struct gsm_subscriber_connection *conn,
+				  enum ran_type via_ran)
+{
+	btw("Concluding CM Service Request");
+
+	OSMO_ASSERT(conn);
+	OSMO_ASSERT(conn->received_cm_service_request);
+
+	conn->received_cm_service_request = false;
+	msc_subscr_conn_put(conn, MSC_CONN_USE_CM_SERVICE);
+
+	ASSERT_RELEASE_CLEAR(via_ran);
 }
 
 enum ran_type rx_from_ran = RAN_GERAN_A;
