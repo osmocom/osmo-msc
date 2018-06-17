@@ -31,6 +31,7 @@
 void *tall_trans_ctx;
 
 void _gsm48_cc_trans_free(struct gsm_trans *trans);
+void _gsm911_nc_ss_trans_free(struct gsm_trans *trans);
 
 /*! Find a transaction in connection for given protocol + transaction ID
  * \param[in] conn Connection in whihc we want to find transaction
@@ -129,6 +130,7 @@ void trans_free(struct gsm_trans *trans)
 		conn_usage_token = MSC_CONN_USE_TRANS_SMS;
 		break;
 	case GSM48_PDISC_NC_SS:
+		_gsm911_nc_ss_trans_free(trans);
 		conn_usage_token = MSC_CONN_USE_TRANS_NC_SS;
 		break;
 	}

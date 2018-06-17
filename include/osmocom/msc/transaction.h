@@ -77,6 +77,13 @@ struct gsm_trans {
 
 			struct gsm_sms *sms;
 		} sms;
+		struct {
+			/**
+			 * Stores a GSM 04.80 message to be sent to
+			 * a subscriber after successful Paging Response
+			 */
+			struct msgb *msg;
+		} ss;
 	};
 
 	struct {
