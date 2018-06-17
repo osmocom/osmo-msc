@@ -30,6 +30,7 @@
 #include <errno.h>
 #include <stdbool.h>
 
+#include <osmocom/core/linuxlist.h>
 #include <osmocom/core/utils.h>
 #include <osmocom/core/msgb.h>
 #include <osmocom/gsm/tlv.h>
@@ -195,6 +196,163 @@ error:
 	return rc;
 }
 
+/* Call-back from paging the B-end of the connection */
+static int handle_paging_event(unsigned int hooknum, unsigned int event,
+			      struct msgb *msg, void *_conn, void *_transt)
+{
+	struct gsm_subscriber_connection *conn = _conn;
+	enum gsm_paging_event paging_event = event;
+	struct gsm_trans *transt = _transt;
+	struct gsm48_hdr *gh;
+	struct msgb *ss_msg;
+
+	OSMO_ASSERT(!transt->conn);
+	OSMO_ASSERT(transt->ss.msg);
+
+	switch (paging_event) {
+	case GSM_PAGING_SUCCEEDED:
+		DEBUGP(DMM, "Paging subscr %s succeeded!\n",
+			vlr_subscr_msisdn_or_name(transt->vsub));
+
+		/* Assign connection */
+		transt->conn = msc_subscr_conn_get(conn, MSC_CONN_USE_TRANS_NC_SS);
+		transt->paging_request = NULL;
+
+		/* Send stored message */
+		ss_msg = transt->ss.msg;
+		OSMO_ASSERT(ss_msg);
+
+		gh = (struct gsm48_hdr *) msgb_push(ss_msg, sizeof(*gh));
+		gh->proto_discr  = GSM48_PDISC_NC_SS;
+		gh->proto_discr |= transt->transaction_id << 4;
+		gh->msg_type = GSM0480_MTYPE_REGISTER;
+
+		/* Sent to the MS, give ownership of ss_msg */
+		msc_tx_dtap(transt->conn, ss_msg);
+		transt->ss.msg = NULL;
+		break;
+	case GSM_PAGING_EXPIRED:
+	case GSM_PAGING_BUSY:
+		DEBUGP(DMM, "Paging subscr %s %s!\n",
+			vlr_subscr_msisdn_or_name(transt->vsub),
+			paging_event == GSM_PAGING_EXPIRED ? "expired" : "busy");
+
+		/* TODO: inform HLR about this failure */
+
+		msgb_free(transt->ss.msg);
+		transt->ss.msg = NULL;
+
+		transt->callref = 0;
+		transt->paging_request = NULL;
+		trans_free(transt);
+		break;
+	}
+
+	return 0;
+}
+
+static struct gsm_trans *establish_nc_ss_trans(struct gsm_network *net,
+	struct vlr_subscr *vsub, struct osmo_gsup_message *gsup_msg)
+{
+	struct gsm_subscriber_connection *conn;
+	struct gsm_trans *trans, *transt;
+	int tid;
+
+	if (gsup_msg->session_state != OSMO_GSUP_SESSION_STATE_BEGIN) {
+		LOGP(DMM, LOGL_ERROR, "Received non-BEGIN message "
+			"for non-existing transaction\n");
+		return NULL;
+	}
+
+	if (!gsup_msg->ss_info || gsup_msg->ss_info_len < 2) {
+		LOGP(DMM, LOGL_ERROR, "Missing mandatory Facility IE\n");
+		return NULL;
+	}
+
+	/* If subscriber is not "attached" */
+	if (!vsub->lac) {
+		LOGP(DMM, LOGL_ERROR, "Network-originated session "
+			"rejected - subscriber is not attached\n");
+		return NULL;
+	}
+
+	DEBUGP(DMM, "Establishing network-originated session\n");
+
+	/* Allocate a new transaction */
+	trans = trans_alloc(net, vsub, GSM48_PDISC_NC_SS,
+		0xff, gsup_msg->session_id);
+	if (!trans) {
+		DEBUGP(DMM, " -> No memory for trans\n");
+		return NULL;
+	}
+
+	/* Assign transaction ID */
+	tid = trans_assign_trans_id(trans->net,
+		trans->vsub, GSM48_PDISC_NC_SS, 0);
+	if (tid < 0) {
+		LOGP(DMM, LOGL_ERROR, "No free transaction ID\n");
+		/* TODO: inform HLR about this */
+		/* TODO: release connection with subscriber */
+		trans->callref = 0;
+		trans_free(trans);
+		return NULL;
+	}
+	trans->transaction_id = tid;
+
+	/* Attempt to find connection */
+	conn = connection_for_subscr(vsub);
+	if (conn) {
+		/* Assign connection */
+		trans->conn = msc_subscr_conn_get(conn, MSC_CONN_USE_TRANS_NC_SS);
+		trans->dlci = 0x00; /* SAPI=0, not SACCH */
+		return trans;
+	}
+
+	DEBUGP(DMM, "Triggering Paging Request\n");
+
+	/* Find transaction with this subscriber already paging */
+	llist_for_each_entry(transt, &net->trans_list, entry) {
+		/* Transaction of our conn? */
+		if (transt == trans || transt->vsub != vsub)
+			continue;
+
+		LOGP(DMM, LOGL_ERROR, "Paging already started, "
+			"rejecting message...\n");
+		trans_free(trans);
+		return NULL;
+	}
+
+	/* Trigger Paging Request */
+	trans->paging_request = subscr_request_conn(vsub,
+		&handle_paging_event, trans, "GSM 09.11 SS/USSD");
+	if (!trans->paging_request) {
+		LOGP(DMM, LOGL_ERROR, "Failed to allocate paging token\n");
+		trans_free(trans);
+		return NULL;
+	}
+
+	/* Store the Facility IE to be sent */
+	OSMO_ASSERT(trans->ss.msg == NULL);
+	trans->ss.msg = gsm48_msgb_alloc_name("GSM 04.08 SS/USSD");
+	msgb_tlv_put(trans->ss.msg, GSM0480_IE_FACILITY,
+		gsup_msg->ss_info_len, gsup_msg->ss_info);
+
+	return NULL;
+}
+
+/* NC SS specific transaction release.
+ * Gets called by trans_free, DO NOT CALL YOURSELF! */
+void _gsm911_nc_ss_trans_free(struct gsm_trans *trans)
+{
+	/**
+	 * TODO: if transaction wasn't properly terminated,
+	 * we need to do it here by releasing the subscriber
+	 * connection and sending notification via GSUP...
+	 */
+	if (trans->ss.msg != NULL)
+		msgb_free(trans->ss.msg);
+}
+
 int gsm0911_gsup_handler(struct vlr_subscr *vsub,
 			 struct osmo_gsup_message *gsup_msg)
 {
@@ -225,10 +383,16 @@ int gsm0911_gsup_handler(struct vlr_subscr *vsub,
 	/* Attempt to find DTAP-transaction */
 	trans = trans_find_by_callref(net, gsup_msg->session_id);
 	if (!trans) {
-		/* FIXME: network-originated sessions are not supported yet */
-		LOGP(DMM, LOGL_ERROR, "Network-originated sessions "
-			"are not supported, dropping request...\n");
-		return -ENOTSUP;
+		/* Attempt to establish a new transaction */
+		trans = establish_nc_ss_trans(net, vsub, gsup_msg);
+		if (!trans) {
+			/* FIXME: send ERROR back to the HLR */
+			return -EINVAL;
+		}
+
+		/* Wait for Paging Response */
+		if (trans->paging_request)
+			return 0;
 	}
 
 	/* Allocate and prepare a new MT message */

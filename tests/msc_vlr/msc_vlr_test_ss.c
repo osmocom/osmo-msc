@@ -75,7 +75,7 @@ static void perform_lu(void)
 	EXPECT_CONN_COUNT(0);
 }
 
-static void _test_ss_ussd(enum ran_type via_ran)
+static void _test_ss_ussd_mo(enum ran_type via_ran)
 {
 	/* TODO: UTRAN requires auth and ciph */
 	rx_from_ran = via_ran;
@@ -117,16 +117,99 @@ static void _test_ss_ussd(enum ran_type via_ran)
 	EXPECT_CONN_COUNT(0);
 }
 
-static void test_ss_ussd_geran()
+static void _test_ss_ussd_no(enum ran_type via_ran)
+{
+	struct vlr_subscr *vsub;
+
+	/* TODO: UTRAN requires auth and ciph */
+	rx_from_ran = via_ran;
+
+	/* Perform Location Update */
+	perform_lu();
+
+	BTW("after a while, HLR initiates SS/USSD session");
+
+	paging_expect_imsi(IMSI);
+	paging_sent = false;
+	vsub = vlr_subscr_find_by_imsi(net->vlr, IMSI);
+	OSMO_ASSERT(vsub);
+	VERBOSE_ASSERT(llist_count(&vsub->cs.requests), == 0, "%d");
+
+	/* MT: GSM 04.80 REGISTER with request */
+	gsup_rx("20" /* OSMO_GSUP_MSGT_PROC_SS_REQUEST */
+		"0108" "09710000004026f0" /* IMSI TLV */
+		"3004" "20000101" /* Session ID TLV */
+		"3101" "01" /* Session state: BEGIN */
+		"3515" FACILITY_IE_REQ, NULL);
+
+	VERBOSE_ASSERT(llist_count(&vsub->cs.requests), == 1, "%d");
+	vlr_subscr_put(vsub);
+	vsub = NULL;
+	VERBOSE_ASSERT(paging_sent, == true, "%d");
+	VERBOSE_ASSERT(paging_stopped, == false, "%d");
+
+	btw("the subscriber and its pending request should remain");
+	vsub = vlr_subscr_find_by_imsi(net->vlr, IMSI);
+	OSMO_ASSERT(vsub);
+	VERBOSE_ASSERT(llist_count(&vsub->cs.requests), == 1, "%d");
+	vlr_subscr_put(vsub);
+
+	btw("MS replies with Paging Response, we deliver the NC/USSD");
+
+	dtap_expect_tx("0b3b" "1c15" FACILITY_IE_REQ);
+	ms_sends_msg("06270703305882089910070000006402");
+	VERBOSE_ASSERT(dtap_tx_confirmed, == true, "%d");
+	VERBOSE_ASSERT(paging_stopped, == true, "%d");
+
+	btw("MS responds to SS/USSD request");
+
+	/* MO: GSM 04.80 FACILITY with response */
+	gsup_expect_tx("20" /* OSMO_GSUP_MSGT_PROC_SS_REQUEST */
+		"0108" "09710000004026f0" /* IMSI TLV */
+		"3004" "20000101" /* Session ID TLV */
+		"3101" "02" /* Session state: CONTINUE */
+		"3527" FACILITY_IE_RSP);
+	ms_sends_msg("8b3a" "27" FACILITY_IE_RSP);
+	VERBOSE_ASSERT(dtap_tx_confirmed, == true, "%d");
+	VERBOSE_ASSERT(paging_stopped, == true, "%d");
+
+	btw("HLR terminates the session");
+
+	/* MT: GSM 04.80 RELEASE COMPLETE without Facility IE */
+	dtap_expect_tx("0b2a");
+	expect_release_clear(via_ran);
+	gsup_rx("20" /* OSMO_GSUP_MSGT_PROC_SS_REQUEST */
+		"0108" "09710000004026f0" /* IMSI TLV */
+		"3004" "20000101" /* Session ID TLV */
+		"3101" "03", /* Session state: END */
+		NULL);
+	VERBOSE_ASSERT(dtap_tx_confirmed, == true, "%d");
+	ASSERT_RELEASE_CLEAR(via_ran);
+
+	btw("all requests serviced, conn has been released");
+	bss_sends_clear_complete();
+	EXPECT_CONN_COUNT(0);
+}
+
+static void test_ss_ussd_mo_geran()
 {
 	comment_start();
-	_test_ss_ussd(RAN_GERAN_A);
+	_test_ss_ussd_mo(RAN_GERAN_A);
+	clear_vlr();
+	comment_end();
+}
+
+static void test_ss_ussd_no_geran()
+{
+	comment_start();
+	_test_ss_ussd_no(RAN_GERAN_A);
 	clear_vlr();
 	comment_end();
 }
 
 msc_vlr_test_func_t msc_vlr_tests[] = {
 	/* TODO: UTRAN requires auth and enc */
-	test_ss_ussd_geran,
+	test_ss_ussd_mo_geran, /* MS-originated */
+	test_ss_ussd_no_geran, /* Network-originated */
 	NULL
 };
