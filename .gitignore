@@ -53,6 +53,7 @@ tests/*/*_test
 tests/msc_vlr/msc_vlr_test_*
 !tests/msc_vlr/msc_vlr_test_*.*
 tests/msc_vlr/msc_vlr_test_*.o
+src/libgsupclient/gsup_test_client
 
 
 tests/atconfig
