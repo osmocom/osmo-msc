@@ -32,6 +32,7 @@ libmsc_a_SOURCES = \
 	msc_vty.c \
 	db.c \
 	gsm_04_08.c \
+	gsm_04_08_cc.c \
 	gsm_04_11.c \
 	gsm_04_14.c \
 	gsm_04_80.c \
