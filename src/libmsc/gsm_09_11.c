@@ -179,8 +179,11 @@ int gsm0911_rcv_nc_ss(struct gsm_subscriber_connection *conn, struct msgb *msg)
 		goto error;
 	}
 
-	/* Don't release connection, wait for response */
-	msc_subscr_conn_communicating(conn);
+	/* Should we release connection? Or wait for response? */
+	if (msg_type == GSM0480_MTYPE_RELEASE_COMPLETE)
+		trans_free(trans);
+	else
+		msc_subscr_conn_communicating(conn);
 
 	return 0;
 
