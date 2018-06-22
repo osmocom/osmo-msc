@@ -200,6 +200,10 @@ enum {
 	MSC_CTR_CALL_ACTIVE,
 	MSC_CTR_CALL_COMPLETE,
 	MSC_CTR_CALL_INCOMPLETE,
+	MSC_CTR_NC_SS_MO_REQUESTS,
+	MSC_CTR_NC_SS_MO_ESTABLISHED,
+	MSC_CTR_NC_SS_MT_REQUESTS,
+	MSC_CTR_NC_SS_MT_ESTABLISHED,
 };
 
 static const struct rate_ctr_desc msc_ctr_description[] = {
@@ -227,6 +231,10 @@ static const struct rate_ctr_desc msc_ctr_description[] = {
 	[MSC_CTR_CALL_ACTIVE] =			{"call:active", "Count total amount of calls that ever reached active state."},
 	[MSC_CTR_CALL_COMPLETE] = 		{"call:complete", "Count total amount of calls which got terminated by disconnect req or ind after reaching active state."},
 	[MSC_CTR_CALL_INCOMPLETE] = 		{"call:incomplete", "Count total amount of call which got terminated by any other reason after reaching active state."},
+	[MSC_CTR_NC_SS_MO_REQUESTS] = 		{"nc_ss:mo_requests", "Received MS-initiated call independent SS/USSD requests."},
+	[MSC_CTR_NC_SS_MO_ESTABLISHED] = 	{"nc_ss:mo_established", "Established MS-initiated call independent SS/USSD sessions."},
+	[MSC_CTR_NC_SS_MT_REQUESTS] = 		{"nc_ss:mt_requests", "Received network-initiated call independent SS/USSD requests."},
+	[MSC_CTR_NC_SS_MT_ESTABLISHED] = 	{"nc_ss:mt_established", "Established network-initiated call independent SS/USSD sessions."},
 };
 
 static const struct rate_ctr_group_desc msc_ctrg_desc = {

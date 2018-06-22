@@ -1217,6 +1217,18 @@ DEFUN(show_stats,
 		gsmnet->msc_ctrs->ctr[MSC_CTR_CALL_MT_SETUP].current,
 		gsmnet->msc_ctrs->ctr[MSC_CTR_CALL_MT_CONNECT].current,
 		VTY_NEWLINE);
+	vty_out(vty, "MO NC SS/USSD           : %lu requests, %lu established, %lu rejected%s",
+		gsmnet->msc_ctrs->ctr[MSC_CTR_NC_SS_MO_REQUESTS].current,
+		gsmnet->msc_ctrs->ctr[MSC_CTR_NC_SS_MO_ESTABLISHED].current,
+		gsmnet->msc_ctrs->ctr[MSC_CTR_NC_SS_MO_REQUESTS].current
+			- gsmnet->msc_ctrs->ctr[MSC_CTR_NC_SS_MO_ESTABLISHED].current,
+		VTY_NEWLINE);
+	vty_out(vty, "MT NC SS/USSD           : %lu requests, %lu established, %lu rejected%s",
+		gsmnet->msc_ctrs->ctr[MSC_CTR_NC_SS_MT_REQUESTS].current,
+		gsmnet->msc_ctrs->ctr[MSC_CTR_NC_SS_MT_ESTABLISHED].current,
+		gsmnet->msc_ctrs->ctr[MSC_CTR_NC_SS_MT_REQUESTS].current
+			- gsmnet->msc_ctrs->ctr[MSC_CTR_NC_SS_MT_ESTABLISHED].current,
+		VTY_NEWLINE);
 	return CMD_SUCCESS;
 }
 

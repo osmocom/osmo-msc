@@ -31,6 +31,7 @@
 #include <stdbool.h>
 
 #include <osmocom/core/linuxlist.h>
+#include <osmocom/core/rate_ctr.h>
 #include <osmocom/core/utils.h>
 #include <osmocom/core/msgb.h>
 #include <osmocom/gsm/tlv.h>
@@ -74,6 +75,9 @@ int gsm0911_rcv_nc_ss(struct gsm_subscriber_connection *conn, struct msgb *msg)
 	/* Reuse existing transaction, or create a new one */
 	trans = trans_find_by_id(conn, pdisc, tid);
 	if (!trans) {
+		/* Count MS-initiated attempts to establish a NC SS/USSD session */
+		rate_ctr_inc(&conn->network->msc_ctrs->ctr[MSC_CTR_NC_SS_MO_REQUESTS]);
+
 		/**
 		 * According to GSM TS 04.80, section 2.4.2 "Register
 		 * (mobile station to network direction)", the REGISTER
@@ -185,6 +189,10 @@ int gsm0911_rcv_nc_ss(struct gsm_subscriber_connection *conn, struct msgb *msg)
 	else
 		msc_subscr_conn_communicating(conn);
 
+	/* Count established MS-initiated NC SS/USSD sessions */
+	if (msg_type == GSM0480_MTYPE_REGISTER)
+		rate_ctr_inc(&conn->network->msc_ctrs->ctr[MSC_CTR_NC_SS_MO_ESTABLISHED]);
+
 	return 0;
 
 error:
@@ -233,6 +241,9 @@ static int handle_paging_event(unsigned int hooknum, unsigned int event,
 		/* Sent to the MS, give ownership of ss_msg */
 		msc_tx_dtap(transt->conn, ss_msg);
 		transt->ss.msg = NULL;
+
+		/* Count established network-initiated NC SS/USSD sessions */
+		rate_ctr_inc(&conn->network->msc_ctrs->ctr[MSC_CTR_NC_SS_MT_ESTABLISHED]);
 		break;
 	case GSM_PAGING_EXPIRED:
 	case GSM_PAGING_BUSY:
@@ -386,6 +397,9 @@ int gsm0911_gsup_handler(struct vlr_subscr *vsub,
 	/* Attempt to find DTAP-transaction */
 	trans = trans_find_by_callref(net, gsup_msg->session_id);
 	if (!trans) {
+		/* Count network-initiated attempts to establish a NC SS/USSD session */
+		rate_ctr_inc(&net->msc_ctrs->ctr[MSC_CTR_NC_SS_MT_REQUESTS]);
+
 		/* Attempt to establish a new transaction */
 		trans = establish_nc_ss_trans(net, vsub, gsup_msg);
 		if (!trans) {
@@ -463,6 +477,10 @@ int gsm0911_gsup_handler(struct vlr_subscr *vsub,
 	/* Release transaction if required */
 	if (trans_end)
 		trans_free(trans);
+
+	/* Count established network-initiated NC SS/USSD sessions */
+	if (gsup_msg->session_state == OSMO_GSUP_SESSION_STATE_BEGIN)
+		rate_ctr_inc(&net->msc_ctrs->ctr[MSC_CTR_NC_SS_MT_ESTABLISHED]);
 
 	return 0;
 }
