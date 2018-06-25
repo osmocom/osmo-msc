@@ -396,7 +396,13 @@ void vlr_subscr_set_imsi(struct vlr_subscr *vsub, const char *imsi)
 {
 	if (!vsub)
 		return;
-	OSMO_STRLCPY_ARRAY(vsub->imsi, imsi);
+
+	if (OSMO_STRLCPY_ARRAY(vsub->imsi, imsi) >= sizeof(vsub->imsi)) {
+		LOGP(DVLR, LOGL_NOTICE, "IMSI was truncated: full IMSI=%s, truncated IMSI=%s\n",
+		       imsi, vsub->imsi);
+		/* XXX Set truncated IMSI anyway, we currently cannot return an error from here. */
+	}
+
 	vsub->id = atoll(vsub->imsi);
 	DEBUGP(DVLR, "set IMSI on subscriber; IMSI=%s id=%llu\n",
 	       vsub->imsi, vsub->id);
@@ -1062,10 +1068,15 @@ int vlr_subscr_rx_id_resp(struct vlr_subscr *vsub,
 	/* update the vlr_subscr with the given identity */
 	switch (mi_type) {
 	case GSM_MI_TYPE_IMSI:
-		if (vsub->imsi[0]
+		if (strlen(mi_string) >= sizeof(vsub->imsi)) {
+			LOGVSUBP(LOGL_ERROR, vsub, "IMSI in ID RESP too long (>%zu bytes): %s\n",
+				 sizeof(vsub->imsi) - 1, mi_string);
+			return -ENOSPC; /* ignore message; do not avance LU FSM */
+		} else if (vsub->imsi[0]
 		    && !vlr_subscr_matches_imsi(vsub, mi_string)) {
 			LOGVSUBP(LOGL_ERROR, vsub, "IMSI in ID RESP differs:"
 				 " %s\n", mi_string);
+			/* XXX Should we return an error, e.g. -EINVAL ? */
 		} else
 			vlr_subscr_set_imsi(vsub, mi_string);
 		break;
