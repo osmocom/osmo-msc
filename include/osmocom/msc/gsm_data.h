@@ -276,6 +276,7 @@ struct gsm_network {
 
 	struct rate_ctr_group *msc_ctrs;
 	struct osmo_counter *active_calls;
+	struct osmo_counter *active_nc_ss;
 
 	/* layer 4 */
 	struct mncc_sock_state *mncc_state;

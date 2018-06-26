@@ -67,6 +67,7 @@ struct gsm_network *gsm_network_init(void *ctx, mncc_recv_cb_t mncc_recv)
 		return NULL;
 	}
 	net->active_calls = osmo_counter_alloc("msc.active_calls");
+	net->active_nc_ss = osmo_counter_alloc("msc.active_nc_ss");
 
 	net->mncc_recv = mncc_recv;
 
