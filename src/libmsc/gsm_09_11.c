@@ -107,6 +107,9 @@ int gsm0911_rcv_nc_ss(struct gsm_subscriber_connection *conn, struct msgb *msg)
 			return -ENOMEM;
 		}
 
+		/* Count active NC SS/USSD sessions */
+		osmo_counter_inc(conn->network->active_nc_ss);
+
 		trans->conn = msc_subscr_conn_get(conn, MSC_CONN_USE_TRANS_NC_SS);
 		trans->dlci = OMSC_LINKID_CB(msg);
 		cm_service_request_concludes(conn, msg);
@@ -300,6 +303,9 @@ static struct gsm_trans *establish_nc_ss_trans(struct gsm_network *net,
 		return NULL;
 	}
 
+	/* Count active NC SS/USSD sessions */
+	osmo_counter_inc(net->active_nc_ss);
+
 	/* Assign transaction ID */
 	tid = trans_assign_trans_id(trans->net,
 		trans->vsub, GSM48_PDISC_NC_SS, 0);
@@ -365,6 +371,9 @@ void _gsm911_nc_ss_trans_free(struct gsm_trans *trans)
 	 */
 	if (trans->ss.msg != NULL)
 		msgb_free(trans->ss.msg);
+
+	/* One session less */
+	osmo_counter_dec(trans->net->active_nc_ss);
 }
 
 int gsm0911_gsup_handler(struct vlr_subscr *vsub,
