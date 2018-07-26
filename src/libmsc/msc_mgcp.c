@@ -437,14 +437,6 @@ static void fsm_crcx_cn_cb(struct osmo_fsm_inst *fi, uint32_t event, void *data)
 		return;
 	}
 
-	/* HACK: We put the connection in loopback mode at the beginnig to
-	 * trick the NodeB into doing the IuUP negotiation with itsself.
-	 * this is a hack we need because osmo-mgw does not support IuUP yet */
-#ifdef BUILD_IU
-	if (conn->via_ran == RAN_UTRAN_IU)
-		mgcp_msg.conn_mode = MGCP_CONN_LOOPBACK;
-#endif
-
 	msg = mgcp_msg_gen(mgcp, &mgcp_msg);
 	OSMO_ASSERT(msg);
 
