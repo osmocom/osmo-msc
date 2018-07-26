@@ -676,8 +676,7 @@ vlr_proc_acc_req(struct osmo_fsm_inst *parent,
 	mi_type = mi_lv[1] & GSM_MI_TYPE_MASK;
 	switch (mi_type) {
 	case GSM_MI_TYPE_IMSI:
-		strncpy(par->imsi, mi_string, sizeof(par->imsi)-1);
-		par->imsi[sizeof(par->imsi)-1] = '\0';
+		osmo_strlcpy(par->imsi, mi_string, sizeof(par->imsi));
 		par->by_tmsi = false;
 		break;
 	case GSM_MI_TYPE_TMSI:
