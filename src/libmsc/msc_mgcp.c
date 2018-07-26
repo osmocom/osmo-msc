@@ -315,8 +315,8 @@ static void fsm_crcx_ran_cb(struct osmo_fsm_inst *fi, uint32_t event, void *data
 	}
 
 	/* HACK: We put the connection in loopback mode at the beginnig to
-	 * trick the NodeB into doing the IuUP negotiation with itsself.
-	 * this is a hack we need because osmo-mgw does not support IuUP yet */
+	 * trick the hNodeB into doing the IuUP negotiation with itself.
+	 * This is a hack we need because osmo-mgw does not support IuUP yet, see OS#2459. */
 #ifdef BUILD_IU
 	if (conn->via_ran == RAN_UTRAN_IU)
 		mgcp_msg.conn_mode = MGCP_CONN_LOOPBACK;
@@ -1044,19 +1044,19 @@ int msc_mgcp_ass_complete(struct gsm_subscriber_connection *conn, uint16_t port,
 	OSMO_ASSERT(conn);
 
 	if (port == 0) {
-		LOGP(DMGCP, LOGL_ERROR, "(subscriber:%s) invalid remote call leg port, assignmnet completion failed\n",
+		LOGP(DMGCP, LOGL_ERROR, "(subscriber:%s) invalid remote call leg port, assignment completion failed\n",
 		     vlr_subscr_name(conn->vsub));
 		return -EINVAL;
 	}
 	if (!addr || strlen(addr) <= 0) {
-		LOGP(DMGCP, LOGL_ERROR, "(subscriber:%s) missing remote call leg address, assignmnet completion failed\n",
+		LOGP(DMGCP, LOGL_ERROR, "(subscriber:%s) missing remote call leg address, assignment completion failed\n",
 		     vlr_subscr_name(conn->vsub));
 		return -EINVAL;
 	}
 
 	mgcp_ctx = conn->rtp.mgcp_ctx;
 	if (!mgcp_ctx) {
-		LOGP(DMGCP, LOGL_ERROR, "(subscriber:%s) invalid mgcp context, assignmnet completion failed.\n",
+		LOGP(DMGCP, LOGL_ERROR, "(subscriber:%s) invalid mgcp context, assignment completion failed.\n",
 		     vlr_subscr_name(conn->vsub));
 		return -EINVAL;
 	}
@@ -1066,7 +1066,7 @@ int msc_mgcp_ass_complete(struct gsm_subscriber_connection *conn, uint16_t port,
 	conn->rtp.remote_port_ran = port;
 	osmo_strlcpy(conn->rtp.remote_addr_ran, addr, sizeof(conn->rtp.remote_addr_ran));
 
-	LOGP(DMGCP, LOGL_DEBUG, "(subscriber:%s) assignmnet completed, rtp %s:%d.\n",
+	LOGP(DMGCP, LOGL_DEBUG, "(subscriber:%s) assignment completed, rtp %s:%d.\n",
 	     vlr_subscr_name(conn->vsub), conn->rtp.remote_addr_ran, port);
 
 	/* Note: We only dispatch the event if we are really waiting for the
