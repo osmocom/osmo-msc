@@ -497,11 +497,11 @@ int mncc_recv(struct gsm_network *net, struct msgb *msg)
 struct gsup_client *
 __real_gsup_client_create(const char *ip_addr, unsigned int tcp_port,
 			  gsup_client_read_cb_t read_cb,
-			  struct oap_client_config *oap_config);
+			  struct osmo_oap_client_config *oap_config);
 struct gsup_client *
 __wrap_gsup_client_create(const char *ip_addr, unsigned int tcp_port,
 			  gsup_client_read_cb_t read_cb,
-			  struct oap_client_config *oap_config)
+			  struct osmo_oap_client_config *oap_config)
 {
 	struct gsup_client *gsupc;
 	gsupc = talloc_zero(msc_vlr_tests_ctx, struct gsup_client);

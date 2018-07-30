@@ -21,7 +21,6 @@ noinst_HEADERS = \
 	mncc_int.h \
 	msc_ifaces.h \
 	msc_mgcp.h \
-	oap_client.h \
 	openbscdefines.h \
 	a_reset.h \
 	osmo_msc.h \

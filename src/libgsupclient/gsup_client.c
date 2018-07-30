@@ -25,6 +25,7 @@
 
 #include <osmocom/abis/ipa.h>
 #include <osmocom/gsm/protocol/ipaccess.h>
+#include <osmocom/gsm/oap_client.h>
 #include <osmocom/core/msgb.h>
 #include <osmocom/core/logging.h>
 
@@ -114,7 +115,7 @@ static void gsup_client_oap_register(struct gsup_client *gsupc)
 {
 	struct msgb *msg_tx;
 	int rc;
-	rc = oap_client_register(&gsupc->oap_state, &msg_tx);
+	rc = osmo_oap_client_register(&gsupc->oap_state, &msg_tx);
 
 	if ((rc < 0) || (!msg_tx)) {
 		LOGP(DLGSUP, LOGL_ERROR, "GSUP OAP set up, but cannot register.\n");
@@ -136,7 +137,7 @@ static void gsup_client_updown_cb(struct ipa_client_conn *link, int up)
 	if (up) {
 		start_test_procedure(gsupc);
 
-		if (gsupc->oap_state.state == OAP_INITIALIZED)
+		if (gsupc->oap_state.state == OSMO_OAP_INITIALIZED)
 			gsup_client_oap_register(gsupc);
 
 		osmo_timer_del(&gsupc->connect_timer);
@@ -154,7 +155,7 @@ static int gsup_client_oap_handle(struct gsup_client *gsupc, struct msgb *msg_rx
 	struct msgb *msg_tx;
 
 	/* If the oap_state is disabled, this will reject the messages. */
-	rc = oap_client_handle(&gsupc->oap_state, msg_rx, &msg_tx);
+	rc = osmo_oap_client_handle(&gsupc->oap_state, msg_rx, &msg_tx);
 	msgb_free(msg_rx);
 	if (rc < 0)
 		return rc;
@@ -268,7 +269,7 @@ struct gsup_client *gsup_client_create(void *talloc_ctx,
 				       const char *ip_addr,
 				       unsigned int tcp_port,
 				       gsup_client_read_cb_t read_cb,
-				       struct oap_client_config *oapc_config)
+				       struct osmo_oap_client_config *oapc_config)
 {
 	struct gsup_client *gsupc;
 	int rc;
@@ -283,7 +284,7 @@ struct gsup_client *gsup_client_create(void *talloc_ctx,
 	OSMO_ASSERT(gsupc->unit_name);
 
 	/* a NULL oapc_config will mark oap_state disabled. */
-	rc = oap_client_init(oapc_config, &gsupc->oap_state);
+	rc = osmo_oap_client_init(oapc_config, &gsupc->oap_state);
 	if (rc != 0)
 		goto failed;
 

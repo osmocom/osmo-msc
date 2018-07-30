@@ -19,7 +19,6 @@ noinst_LIBRARIES = \
 
 libgsupclient_a_SOURCES = \
 	gsup_client.c \
-	oap_client.c \
 	$(NULL)
 
 noinst_PROGRAMS = \
