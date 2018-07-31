@@ -30,6 +30,7 @@ osmo-build-dep.sh libosmo-netif
 osmo-build-dep.sh libosmo-sccp
 PARALLEL_MAKE="" osmo-build-dep.sh libsmpp34
 osmo-build-dep.sh osmo-mgw
+osmo-build-dep.sh osmo-hlr
 
 enable_werror=""
 if [ "x$IU" = "x--enable-iu" ]; then

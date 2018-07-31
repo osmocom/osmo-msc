@@ -44,6 +44,7 @@ PKG_CHECK_MODULES(LIBOSMONETIF, libosmo-netif >= 0.2.0)
 PKG_CHECK_MODULES(LIBOSMOSIGTRAN, libosmo-sigtran >= 0.9.0)
 PKG_CHECK_MODULES(LIBOSMOSCCP, libosmo-sccp >= 0.9.0)
 PKG_CHECK_MODULES(LIBOSMOMGCPCLIENT, libosmo-mgcp-client >= 1.3.0)
+PKG_CHECK_MODULES(LIBOSMOGSUPCLIENT, libosmo-gsup-client >= 0.2.1)
 
 AC_ARG_ENABLE(sanitize,
 	[AS_HELP_STRING(
@@ -193,7 +194,6 @@ AC_OUTPUT(
     src/Makefile
     src/libmsc/Makefile
     src/libvlr/Makefile
-    src/libgsupclient/Makefile
     src/osmo-msc/Makefile
     src/utils/Makefile
     tests/Makefile

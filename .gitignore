@@ -39,7 +39,6 @@ m4/*.m4
 
 # apps and app data
 src/osmo-msc/osmo-msc
-src/libcommon/gsup_test_client
 src/utils/smpp_mirror
 sms.db
 src/osmo-msc/*.cfg*
@@ -53,7 +52,6 @@ tests/*/*_test
 tests/msc_vlr/msc_vlr_test_*
 !tests/msc_vlr/msc_vlr_test_*.*
 tests/msc_vlr/msc_vlr_test_*.o
-src/libgsupclient/gsup_test_client
 
 
 tests/atconfig

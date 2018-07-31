@@ -14,6 +14,7 @@ AM_CFLAGS = \
 	$(LIBOSMORANAP_CFLAGS) \
 	$(LIBASN1C_CFLAGS) \
 	$(LIBOSMOMGCPCLIENT_CFLAGS) \
+	$(LIBOSMOGSUPCLIENT_CFLAGS) \
 	$(NULL)
 
 EXTRA_DIST = \
@@ -32,7 +33,6 @@ sms_queue_test_SOURCES = \
 sms_queue_test_LDADD = \
 	$(top_builddir)/src/libmsc/libmsc.a \
 	$(top_builddir)/src/libvlr/libvlr.a \
-	$(top_builddir)/src/libgsupclient/libgsupclient.a \
 	$(LIBSMPP34_LIBS) \
 	$(LIBOSMOCORE_LIBS) \
 	$(LIBOSMOGSM_LIBS) \
@@ -41,6 +41,7 @@ sms_queue_test_LDADD = \
 	$(LIBOSMOSIGTRAN_LIBS) \
 	$(LIBOSMORANAP_LIBS) \
 	$(LIBOSMOMGCPCLIENT_LIBS) \
+	$(LIBOSMOGSUPCLIENT_LIBS) \
 	$(LIBRARY_GSM) \
 	-ldbi \
 	-lrt \

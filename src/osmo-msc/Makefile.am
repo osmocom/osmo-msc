@@ -17,6 +17,7 @@ AM_CFLAGS = \
 	$(LIBASN1C_CFLAGS) \
 	$(LIBOSMOSIGTRAN_CFLAGS) \
 	$(LIBOSMOMGCPCLIENT_CFLAGS) \
+	$(LIBOSMOGSUPCLIENT_CFLAGS) \
 	$(NULL)
 
 AM_LDFLAGS = \
@@ -34,7 +35,6 @@ osmo_msc_SOURCES = \
 osmo_msc_LDADD = \
 	$(top_builddir)/src/libmsc/libmsc.a \
 	$(top_builddir)/src/libvlr/libvlr.a \
-	$(top_builddir)/src/libgsupclient/libgsupclient.a \
 	$(LIBOSMOGSM_LIBS) \
 	$(LIBOSMOVTY_LIBS) \
 	$(LIBOSMOCORE_LIBS) \
@@ -43,6 +43,7 @@ osmo_msc_LDADD = \
 	$(LIBSMPP34_LIBS) \
 	$(LIBOSMOSIGTRAN_LIBS) \
 	$(LIBOSMOMGCPCLIENT_LIBS) \
+	$(LIBOSMOGSUPCLIENT_LIBS) \
 	-ldbi \
 	$(NULL)
 if BUILD_IU
