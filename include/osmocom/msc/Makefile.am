@@ -13,7 +13,6 @@ noinst_HEADERS = \
 	gsm_data.h \
 	gsm_data_shared.h \
 	gsm_subscriber.h \
-	gsup_client.h \
 	iucs.h \
 	iucs_ranap.h \
 	iu_dummy.h \

@@ -43,7 +43,7 @@
 #include <osmocom/msc/vlr.h>
 #include <osmocom/msc/gsm_04_08.h>
 #include <osmocom/msc/transaction.h>
-#include <osmocom/msc/gsup_client.h>
+#include <osmocom/gsupclient/gsup_client.h>
 #include <osmocom/msc/msc_ifaces.h>
 
 /* FIXME: choose a proper range */
@@ -165,7 +165,7 @@ int gsm0911_rcv_nc_ss(struct gsm_subscriber_connection *conn, struct msgb *msg)
 	OSMO_STRLCPY_ARRAY(gsup_msg.imsi, conn->vsub->imsi);
 
 	/* Allocate GSUP message buffer */
-	gsup_msgb = gsup_client_msgb_alloc();
+	gsup_msgb = osmo_gsup_client_msgb_alloc();
 	if (!gsup_msgb) {
 		LOGP(DMM, LOGL_ERROR, "Couldn't allocate GSUP message\n");
 		rc = -ENOMEM;
@@ -180,7 +180,7 @@ int gsm0911_rcv_nc_ss(struct gsm_subscriber_connection *conn, struct msgb *msg)
 	}
 
 	/* Finally send */
-	rc = gsup_client_send(conn->network->vlr->gsup_client, gsup_msgb);
+	rc = osmo_gsup_client_send(conn->network->vlr->gsup_client, gsup_msgb);
 	if (rc) {
 		LOGP(DMM, LOGL_ERROR, "Couldn't send GSUP message\n");
 		goto error;

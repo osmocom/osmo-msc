@@ -21,7 +21,6 @@ AM_LDFLAGS = \
 
 # Libraries
 SUBDIRS = \
-	libgsupclient \
 	libvlr \
 	libmsc \
 	$(NULL)

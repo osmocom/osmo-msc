@@ -28,7 +28,7 @@
 #include <osmocom/gsm/apn.h>
 #include <osmocom/gsm/gsm48.h>
 #include <osmocom/msc/gsm_subscriber.h>
-#include <osmocom/msc/gsup_client.h>
+#include <osmocom/gsupclient/gsup_client.h>
 #include <osmocom/msc/vlr.h>
 #include <osmocom/msc/debug.h>
 
@@ -156,7 +156,7 @@ struct vlr_subscr *_vlr_subscr_find_by_msisdn(struct vlr_instance *vlr,
 static int vlr_tx_gsup_message(const struct vlr_instance *vlr,
 			       const struct osmo_gsup_message *gsup_msg)
 {
-	struct msgb *msg = gsup_client_msgb_alloc();
+	struct msgb *msg = osmo_gsup_client_msgb_alloc();
 
 	int rc = osmo_gsup_encode(msg, gsup_msg);
 	if (rc < 0) {
@@ -174,7 +174,7 @@ static int vlr_tx_gsup_message(const struct vlr_instance *vlr,
 	LOGP(DVLR, LOGL_DEBUG, "GSUP tx: %s\n",
 	     osmo_hexdump_nospc(msg->data, msg->len));
 
-	return gsup_client_send(vlr->gsup_client, msg);
+	return osmo_gsup_client_send(vlr->gsup_client, msg);
 }
 
 /* Transmit GSUP message for subscriber to HLR, using IMSI from subscriber */
@@ -974,7 +974,7 @@ static int vlr_subscr_handle_cancel_req(struct vlr_subscr *vsub,
 
 /* Incoming handler for GSUP from HLR.
  * Keep this function non-static for direct invocation by unit tests. */
-int vlr_gsupc_read_cb(struct gsup_client *gsupc, struct msgb *msg)
+int vlr_gsupc_read_cb(struct osmo_gsup_client *gsupc, struct msgb *msg)
 {
 	struct vlr_instance *vlr = (struct vlr_instance *) gsupc->data;
 	struct vlr_subscr *vsub;
@@ -1214,10 +1214,10 @@ int vlr_start(const char *gsup_unit_name, struct vlr_instance *vlr,
 {
 	OSMO_ASSERT(vlr);
 
-	vlr->gsup_client = gsup_client_create(vlr, gsup_unit_name,
-					      gsup_server_addr_str,
-					      gsup_server_port,
-					      &vlr_gsupc_read_cb, NULL);
+	vlr->gsup_client = osmo_gsup_client_create(vlr, gsup_unit_name,
+						   gsup_server_addr_str,
+						   gsup_server_port,
+						   &vlr_gsupc_read_cb, NULL);
 	if (!vlr->gsup_client)
 		return -ENOMEM;
 	vlr->gsup_client->data = vlr;

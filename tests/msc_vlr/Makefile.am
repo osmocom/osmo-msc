@@ -15,11 +15,12 @@ AM_CFLAGS = \
 	$(LIBOSMORANAP_CFLAGS) \
 	$(LIBASN1C_CFLAGS) \
 	$(LIBOSMOMGCPCLIENT_CFLAGS) \
+	$(LIBOSMOGSUPCLIENT_CFLAGS) \
 	$(NULL)
 
 AM_LDFLAGS = \
-	-Wl,--wrap=gsup_client_create \
-	-Wl,--wrap=gsup_client_send \
+	-Wl,--wrap=osmo_gsup_client_create \
+	-Wl,--wrap=osmo_gsup_client_send \
 	-Wl,--wrap=a_iface_tx_dtap \
 	-Wl,--wrap=a_iface_tx_clear_cmd \
 	-Wl,--wrap=a_iface_tx_paging \
@@ -39,7 +40,6 @@ AM_LDFLAGS = \
 LDADD = \
 	$(top_builddir)/src/libmsc/libmsc.a \
 	$(top_builddir)/src/libvlr/libvlr.a \
-	$(top_builddir)/src/libgsupclient/libgsupclient.a \
 	$(LIBSMPP34_LIBS) \
 	$(LIBOSMOCORE_LIBS) \
 	$(LIBOSMOGSM_LIBS) \
@@ -48,6 +48,7 @@ LDADD = \
 	$(LIBOSMOSIGTRAN_LIBS) \
 	$(LIBOSMORANAP_LIBS) \
 	$(LIBOSMOMGCPCLIENT_LIBS) \
+	$(LIBOSMOGSUPCLIENT_LIBS) \
 	$(LIBRARY_GSM) \
 	-ldbi \
 	-lrt \

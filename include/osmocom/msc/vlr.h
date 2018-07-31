@@ -12,6 +12,7 @@
 #include <osmocom/msc/gsm_data.h>
 // for GSM_NAME_LENGTH
 #include <osmocom/msc/gsm_subscriber.h>
+#include <osmocom/gsupclient/gsup_client.h>
 
 #define LOGGSUPP(level, gsup, fmt, args...)				\
 	LOGP(DVLR, level, "GSUP(%s) " fmt, (gsup)->imsi, ## args)
@@ -243,7 +244,7 @@ enum vlr_timer {
 struct vlr_instance {
 	struct llist_head subscribers;
 	struct llist_head operations;
-	struct gsup_client *gsup_client;
+	struct osmo_gsup_client *gsup_client;
 	struct vlr_ops ops;
 	struct osmo_timer_list lu_expire_timer;
 	struct {

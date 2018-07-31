@@ -30,7 +30,7 @@
 #include <osmocom/core/application.h>
 #include <osmocom/gsm/protocol/gsm_04_11.h>
 #include <osmocom/gsm/gsup.h>
-#include <osmocom/msc/gsup_client.h>
+#include <osmocom/gsupclient/gsup_client.h>
 #include <osmocom/msc/gsm_04_11.h>
 #include <osmocom/msc/debug.h>
 #include <osmocom/msc/gsm_04_08.h>
@@ -138,7 +138,7 @@ void dtap_expect_tx(const char *hex)
 	dtap_tx_confirmed = false;
 }
 
-int vlr_gsupc_read_cb(struct gsup_client *gsupc, struct msgb *msg);
+int vlr_gsupc_read_cb(struct osmo_gsup_client *gsupc, struct msgb *msg);
 
 void gsup_rx(const char *rx_hex, const char *expect_tx_hex)
 {
@@ -494,24 +494,24 @@ int mncc_recv(struct gsm_network *net, struct msgb *msg)
 }
 
 /* override, requires '-Wl,--wrap=gsup_client_create' */
-struct gsup_client *
-__real_gsup_client_create(const char *ip_addr, unsigned int tcp_port,
-			  gsup_client_read_cb_t read_cb,
+struct osmo_gsup_client *
+__real_osmo_gsup_client_create(const char *ip_addr, unsigned int tcp_port,
+			  osmo_gsup_client_read_cb_t read_cb,
 			  struct osmo_oap_client_config *oap_config);
-struct gsup_client *
-__wrap_gsup_client_create(const char *ip_addr, unsigned int tcp_port,
-			  gsup_client_read_cb_t read_cb,
+struct osmo_gsup_client *
+__wrap_osmo_gsup_client_create(const char *ip_addr, unsigned int tcp_port,
+			  osmo_gsup_client_read_cb_t read_cb,
 			  struct osmo_oap_client_config *oap_config)
 {
-	struct gsup_client *gsupc;
-	gsupc = talloc_zero(msc_vlr_tests_ctx, struct gsup_client);
+	struct osmo_gsup_client *gsupc;
+	gsupc = talloc_zero(msc_vlr_tests_ctx, struct osmo_gsup_client);
 	OSMO_ASSERT(gsupc);
 	return gsupc;
 }
 
 /* override, requires '-Wl,--wrap=gsup_client_send' */
-int __real_gsup_client_send(struct gsup_client *gsupc, struct msgb *msg);
-int __wrap_gsup_client_send(struct gsup_client *gsupc, struct msgb *msg)
+int __real_osmo_gsup_client_send(struct osmo_gsup_client *gsupc, struct msgb *msg);
+int __wrap_osmo_gsup_client_send(struct osmo_gsup_client *gsupc, struct msgb *msg)
 {
 	const char *is = osmo_hexdump_nospc(msg->data, msg->len);
 	fprintf(stderr, "GSUP --> HLR: %s: %s\n",
@@ -831,7 +831,7 @@ static void check_talloc(void *msgb_ctx, void *msc_vlr_tests_ctx)
 	/* Expecting these to stick around in msc_vlr_tests_ctx:
 	 * talloc_total_blocks(tall_bsc_ctx) == 12
 	 * full talloc report on 'msc_vlr_tests_ctx' (total   3636 bytes in  12 blocks)
-	 *     struct gsup_client             contains    248 bytes in   1 blocks (ref 0) 0x563a489c05f0
+	 *     struct osmo_gsup_client        contains    248 bytes in   1 blocks (ref 0) 0x563a489c05f0
 	 *     struct gsm_network             contains   2031 bytes in   4 blocks (ref 0) 0x563a489bfbb0
 	 *         struct vlr_instance            contains    168 bytes in   1 blocks (ref 0) 0x563a489c04e0
 	 *         no_gsup_server                 contains     15 bytes in   1 blocks (ref 0) 0x563a489c0460
