@@ -34,6 +34,9 @@
 #include <osmocom/core/rate_ctr.h>
 #include <osmocom/core/utils.h>
 #include <osmocom/core/msgb.h>
+
+#include <osmocom/gsm/protocol/gsm_04_80.h>
+#include <osmocom/gsm/gsm0480.h>
 #include <osmocom/gsm/tlv.h>
 
 #include <osmocom/msc/gsm_04_80.h>
@@ -200,7 +203,7 @@ int gsm0911_rcv_nc_ss(struct gsm_subscriber_connection *conn, struct msgb *msg)
 
 error:
 	/* Abort transaction on DTAP-interface */
-	gsm0480_send_ussd_reject(conn, tid, -1,
+	msc_send_ussd_reject(conn, tid, -1,
 		GSM_0480_PROBLEM_CODE_TAG_GENERAL,
 		GSM_0480_GEN_PROB_CODE_UNRECOGNISED);
 	if (trans)
