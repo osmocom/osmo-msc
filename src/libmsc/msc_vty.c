@@ -53,6 +53,7 @@
 #include <osmocom/msc/gsm_04_14.h>
 #include <osmocom/msc/signal.h>
 #include <osmocom/msc/mncc_int.h>
+#include <osmocom/msc/rrlp.h>
 
 static struct gsm_network *gsmnet = NULL;
 
@@ -161,24 +162,6 @@ DEFUN(cfg_net_authentication,
 	return CMD_SUCCESS;
 }
 
-static const struct value_string rrlp_mode_names[] = {
-	{ RRLP_MODE_NONE,	"none" },
-	{ RRLP_MODE_MS_BASED,	"ms-based" },
-	{ RRLP_MODE_MS_PREF,	"ms-preferred" },
-	{ RRLP_MODE_ASS_PREF,	"ass-preferred" },
-	{ 0,			NULL }
-};
-
-static enum rrlp_mode rrlp_mode_parse(const char *arg)
-{
-	return get_string_value(rrlp_mode_names, arg);
-}
-
-static const char *rrlp_mode_name(enum rrlp_mode mode)
-{
-	return get_value_string(rrlp_mode_names, mode);
-}
-
 DEFUN(cfg_net_rrlp_mode, cfg_net_rrlp_mode_cmd,
       "rrlp mode (none|ms-based|ms-preferred|ass-preferred)",
 	"Radio Resource Location Protocol\n"
@@ -188,7 +171,7 @@ DEFUN(cfg_net_rrlp_mode, cfg_net_rrlp_mode_cmd,
 	"Request any location, prefer MS-based\n"
 	"Request any location, prefer MS-assisted\n")
 {
-	gsmnet->rrlp.mode = rrlp_mode_parse(argv[0]);
+	gsmnet->rrlp.mode = msc_rrlp_mode_parse(argv[0]);
 
 	return CMD_SUCCESS;
 }
@@ -311,7 +294,7 @@ static int config_write_net(struct vty *vty)
 	vty_out(vty, "%s", VTY_NEWLINE);
 	vty_out(vty, " authentication %s%s",
 		gsmnet->authentication_required ? "required" : "optional", VTY_NEWLINE);
-	vty_out(vty, " rrlp mode %s%s", rrlp_mode_name(gsmnet->rrlp.mode),
+	vty_out(vty, " rrlp mode %s%s", msc_rrlp_mode_name(gsmnet->rrlp.mode),
 		VTY_NEWLINE);
 	vty_out(vty, " mm info %u%s", gsmnet->send_mm_info, VTY_NEWLINE);
 	if (gsmnet->tz.override != 0) {

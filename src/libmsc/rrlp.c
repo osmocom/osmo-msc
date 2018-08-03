@@ -21,6 +21,8 @@
 
 #include <stdint.h>
 
+#include <osmocom/core/utils.h>
+
 #include <osmocom/msc/gsm_04_08.h>
 #include <osmocom/msc/signal.h>
 #include <osmocom/msc/gsm_subscriber.h>
@@ -36,6 +38,24 @@ static const uint8_t ms_pref_pos_req[]  = { 0x40, 0x02, 0x79, 0x50 };
 /* RRLP msPositionReq, msAssistedPref,
 	Accuracy=60, Method=gpsOrEOTD, ResponseTime=5, multipleSets */
 static const uint8_t ass_pref_pos_req[] = { 0x40, 0x03, 0x79, 0x50 };
+
+static const struct value_string rrlp_mode_names[] = {
+	{ RRLP_MODE_NONE,	"none" },
+	{ RRLP_MODE_MS_BASED,	"ms-based" },
+	{ RRLP_MODE_MS_PREF,	"ms-preferred" },
+	{ RRLP_MODE_ASS_PREF,	"ass-preferred" },
+	{ 0,			NULL }
+};
+
+enum rrlp_mode msc_rrlp_mode_parse(const char *arg)
+{
+	return get_string_value(rrlp_mode_names, arg);
+}
+
+const char *msc_rrlp_mode_name(enum rrlp_mode mode)
+{
+	return get_value_string(rrlp_mode_names, mode);
+}
 
 static int send_rrlp_req(struct gsm_subscriber_connection *conn)
 {
