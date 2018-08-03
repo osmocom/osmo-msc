@@ -1,7 +1,3 @@
-#ifndef _RRLP_H
-#define _RRLP_H
+#pragma once
 
 void on_dso_load_rrlp(void);
-
-#endif /* _RRLP_H */
-
