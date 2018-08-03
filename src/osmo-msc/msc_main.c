@@ -681,6 +681,9 @@ TODO: we probably want some of the _net_ ctrl commands from bsc_base_ctrl_cmds_i
 	/* Set up A interface */
 	a_init(msc_network->a.sccp, msc_network);
 
+	/* Init RRLP handlers */
+	msc_rrlp_init();
+
 	if (msc_cmdline_config.daemonize) {
 		rc = osmo_daemonize();
 		if (rc < 0) {
