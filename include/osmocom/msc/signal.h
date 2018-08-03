@@ -19,8 +19,7 @@
  *
  */
 
-#ifndef OPENBSC_SIGNAL_H
-#define OPENBSC_SIGNAL_H
+#pragma once
 
 #include <stdlib.h>
 #include <errno.h>
@@ -99,5 +98,3 @@ struct sms_signal_data {
 	/* int paging result. Only the ones with > 0 */
 	int paging_result;
 };
-
-#endif
