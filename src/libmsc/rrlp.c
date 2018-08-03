@@ -25,6 +25,7 @@
 
 #include <osmocom/msc/gsm_04_08.h>
 #include <osmocom/msc/signal.h>
+#include <osmocom/msc/debug.h>
 #include <osmocom/msc/gsm_subscriber.h>
 
 /* RRLP msPositionReq, nsBased,
@@ -76,6 +77,9 @@ static int send_rrlp_req(struct gsm_subscriber_connection *conn)
 	default:
 		return 0;
 	}
+
+	LOGP(DRR, LOGL_INFO, "Sending '%s' RRLP position request\n",
+		msc_rrlp_mode_name(net->rrlp.mode));
 
 	return gsm48_send_rr_app_info(conn, 0x00,
 				      sizeof(ms_based_pos_req), req);
