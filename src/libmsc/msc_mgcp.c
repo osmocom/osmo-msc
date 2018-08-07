@@ -277,22 +277,16 @@ static void fsm_crcx_ran_cb(struct osmo_fsm_inst *fi, uint32_t event, void *data
 	struct mgcp_msg mgcp_msg;
 	struct msgb *msg;
 	int rc;
-
-#ifdef BUILD_IU
 	struct gsm_trans *trans;
 	struct gsm_subscriber_connection *conn;
-#endif
 
 	OSMO_ASSERT(mgcp_ctx);
 	mgcp = mgcp_ctx->mgcp;
 	OSMO_ASSERT(mgcp);
-
-#ifdef BUILD_IU
 	trans = mgcp_ctx->trans;
 	OSMO_ASSERT(trans);
 	conn = trans->conn;
 	OSMO_ASSERT(conn);
-#endif
 
 	/* NOTE: In case of error, we will not be able to perform any DLCX
 	 * operation because until this point we do not have requested any
@@ -396,22 +390,16 @@ static void fsm_crcx_cn_cb(struct osmo_fsm_inst *fi, uint32_t event, void *data)
 	struct mgcp_msg mgcp_msg;
 	struct msgb *msg;
 	int rc;
-
-#ifdef BUILD_IU
 	struct gsm_trans *trans;
 	struct gsm_subscriber_connection *conn;
-#endif
 
 	OSMO_ASSERT(mgcp_ctx);
 	mgcp = mgcp_ctx->mgcp;
 	OSMO_ASSERT(mgcp);
-
-#ifdef BUILD_IU
 	trans = mgcp_ctx->trans;
 	OSMO_ASSERT(trans);
 	conn = trans->conn;
 	OSMO_ASSERT(conn);
-#endif
 
 	switch (event) {
 	case EV_CRCX_RAN_RESP:
@@ -593,7 +581,9 @@ static void fsm_mdcx_cn_cb(struct osmo_fsm_inst *fi, uint32_t event, void *data)
 		.conn_id = mgcp_ctx->conn_id_cn,
 		.conn_mode = MGCP_CONN_RECV_SEND,
 		.audio_ip = conn->rtp.remote_addr_cn,
-		.audio_port = conn->rtp.remote_port_cn
+		.audio_port = conn->rtp.remote_port_cn,
+		.codecs[0] = conn->rtp.codec_cn,
+		.codecs_len = 1
 	};
 	if (osmo_strlcpy(mgcp_msg.endpoint, mgcp_ctx->rtp_endpoint, sizeof(mgcp_msg.endpoint)) >=
 	    MGCP_ENDPOINT_MAXLEN) {
@@ -710,7 +700,9 @@ static void fsm_mdcx_ran_cb(struct osmo_fsm_inst *fi, uint32_t event, void *data
 		.conn_id = mgcp_ctx->conn_id_ran,
 		.conn_mode = MGCP_CONN_RECV_SEND,
 		.audio_ip = conn->rtp.remote_addr_ran,
-		.audio_port = conn->rtp.remote_port_ran
+		.audio_port = conn->rtp.remote_port_ran,
+		.codecs[0] = conn->rtp.codec_ran,
+		.codecs_len = 1
 	};
 	if (osmo_strlcpy(mgcp_msg.endpoint, mgcp_ctx->rtp_endpoint, sizeof(mgcp_msg.endpoint)) >=
 	    MGCP_ENDPOINT_MAXLEN) {

@@ -502,11 +502,50 @@ static int bssmap_rx_sapi_n_rej(struct gsm_subscriber_connection *conn, struct m
 	return 0;
 }
 
+/* Use the speech codec info we go with the assignment complete to dtermine
+ * which codec we will signal to the MGW */
+static enum mgcp_codecs mgcp_codec_from_sc(struct gsm0808_speech_codec *sc)
+{
+	switch (sc->type) {
+	case GSM0808_SCT_FR1:
+		return CODEC_GSM_8000_1;
+		break;
+	case GSM0808_SCT_FR2:
+		return CODEC_GSMEFR_8000_1;
+		break;
+	case GSM0808_SCT_FR3:
+		return CODEC_AMR_8000_1;
+		break;
+	case GSM0808_SCT_FR4:
+		return CODEC_AMRWB_16000_1;
+		break;
+	case GSM0808_SCT_FR5:
+		return CODEC_AMRWB_16000_1;
+		break;
+	case GSM0808_SCT_HR1:
+		return CODEC_GSMHR_8000_1;
+		break;
+	case GSM0808_SCT_HR3:
+		return CODEC_AMR_8000_1;
+		break;
+	case GSM0808_SCT_HR4:
+		return CODEC_AMRWB_16000_1;
+		break;
+	case GSM0808_SCT_HR6:
+		return CODEC_AMRWB_16000_1;
+		break;
+	default:
+		return CODEC_PCMU_8000_1;
+		break;
+	}
+}
+
 /* Endpoint to handle assignment complete */
 static int bssmap_rx_ass_compl(struct gsm_subscriber_connection *conn, struct msgb *msg,
 			       struct tlv_parsed *tp)
 {
 	struct sockaddr_storage rtp_addr;
+	struct gsm0808_speech_codec sc;
 	struct sockaddr_in *rtp_addr_in;
 	int rc;
 
@@ -524,6 +563,15 @@ static int bssmap_rx_ass_compl(struct gsm_subscriber_connection *conn, struct ms
 		LOGPCONN(conn, LOGL_ERROR, "Unable to decode aoip transport address.\n");
 		return -EINVAL;
 	}
+
+	/* Decode speech codec (choosen) element */
+	rc = gsm0808_dec_speech_codec(&sc, TLVP_VAL(tp, GSM0808_IE_SPEECH_CODEC),
+					 TLVP_LEN(tp, GSM0808_IE_SPEECH_CODEC));
+	if (rc < 0) {
+		LOGPCONN(conn, LOGL_ERROR, "Unable to decode speech codec (choosen).\n");
+		return -EINVAL;
+	}
+	conn->rtp.codec_ran = mgcp_codec_from_sc(&sc);
 
 	/* use address / port supplied with the AoIP
 	 * transport address element */

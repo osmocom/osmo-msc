@@ -319,6 +319,15 @@ static int tch_bridge(struct gsm_network *net, struct gsm_mncc_bridge *bridge)
 	/* Which subscriber do we want to track trans1 or trans2? */
 	log_set_context(LOG_CTX_VLR_SUBSCR, trans1->vsub);
 
+	/* This call briding mechanism is only used with the internal MNCC.
+	 * functionality (with external MNCC briding would be done by the PBX)
+	 * This means we may just copy the codec info we have for the RAN side
+	 * of the first leg to the CN side of both legs. This also means that
+	 * if both legs use different codecs the MGW must perform transcoding
+	 * on the second leg. */
+	trans1->conn->rtp.codec_cn = trans1->conn->rtp.codec_ran;
+	trans2->conn->rtp.codec_cn = trans1->conn->rtp.codec_ran;
+
 	/* Bridge RTP streams */
 	rc = msc_mgcp_call_complete(trans1, trans2->conn->rtp.local_port_cn,
 				    trans2->conn->rtp.local_addr_cn);
@@ -1715,6 +1724,16 @@ static int tch_rtp_connect(struct gsm_network *net, void *arg)
 	struct gsm_trans *trans;
 	struct gsm_mncc_rtp *rtp = arg;
 	struct in_addr addr;
+
+	/* FIXME: in *rtp we should get the codec information of the remote
+	 * leg. We will have to populate trans->conn->rtp.codec_cn with a
+	 * meaningful value based on this information but unfortunately we
+	 * can't do that yet because the mncc API can not signal dynamic
+	 * payload types yet. This must be fixed first. Also there may be
+	 * additional members necessary in trans->conn->rtp because we
+	 * somehow need to deal with dynamic payload types that do not
+	 * comply to 3gpp's assumptions of payload type numbers on the A
+	 * interface. See also related tickets: OS#3399 and OS1683 */
 
 	/* Find callref */
 	trans = trans_find_by_callref(net, rtp->callref);

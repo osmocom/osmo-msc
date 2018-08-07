@@ -143,10 +143,13 @@ struct gsm_subscriber_connection {
 		char local_addr_ran[INET_ADDRSTRLEN];
 		uint16_t remote_port_ran;
 		char remote_addr_ran[INET_ADDRSTRLEN];
+		enum mgcp_codecs codec_ran;
+
 		uint16_t local_port_cn;
 		char local_addr_cn[INET_ADDRSTRLEN];
 		uint16_t remote_port_cn;
 		char remote_addr_cn[INET_ADDRSTRLEN];
+		enum mgcp_codecs codec_cn;
 	} rtp;
 
 	/* which Iu-CS connection, if any. */
