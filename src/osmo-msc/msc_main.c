@@ -110,6 +110,8 @@ static struct {
 
 static struct osmo_timer_list db_sync_timer;
 
+static int quit = 0;
+
 static void print_usage()
 {
 	printf("Usage: osmo-msc\n");
@@ -233,10 +235,8 @@ static void signal_handler(int signal)
 	switch (signal) {
 	case SIGINT:
 	case SIGTERM:
-		msc_network_shutdown(msc_network);
-		osmo_signal_dispatch(SS_L_GLOBAL, S_L_GLOBAL_SHUTDOWN, NULL);
-		sleep(3);
-		exit(0);
+		LOGP(DMSC, LOGL_NOTICE, "Terminating due to signal %d\n", signal);
+		quit++;
 		break;
 	case SIGABRT:
 		osmo_generate_backtrace();
@@ -692,8 +692,29 @@ TODO: we probably want some of the _net_ ctrl commands from bsc_base_ctrl_cmds_i
 		}
 	}
 
-	while (1) {
+	while (!quit) {
 		log_reset_context();
 		osmo_select_main(0);
 	}
+
+	msc_network_shutdown(msc_network);
+	osmo_signal_dispatch(SS_L_GLOBAL, S_L_GLOBAL_SHUTDOWN, NULL);
+	sleep(3);
+
+	log_fini();
+
+	/**
+	 * Report the heap state of root context, then free,
+	 * so both ASAN and Valgrind are happy...
+	 */
+	talloc_report_full(tall_msc_ctx, stderr);
+	talloc_free(tall_msc_ctx);
+
+	/**
+	 * Report the heap state of NULL context, then free,
+	 * so both ASAN and Valgrind are happy...
+	 */
+	talloc_report_full(NULL, stderr);
+	talloc_disable_null_tracking();
+	return 0;
 }
