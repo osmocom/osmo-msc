@@ -521,6 +521,9 @@ int main(int argc, char **argv)
 {
 	int rc;
 
+	/* Track the use of talloc NULL memory contexts */
+	talloc_enable_null_tracking();
+
 	msc_vty_info.copyright	= osmomsc_copyright;
 
 	tall_msc_ctx = talloc_named_const(NULL, 1, "osmo_msc");
