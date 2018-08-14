@@ -710,6 +710,9 @@ TODO: we probably want some of the _net_ ctrl commands from bsc_base_ctrl_cmds_i
 	talloc_report_full(tall_msc_ctx, stderr);
 	talloc_free(tall_msc_ctx);
 
+	/* FIXME: VTY code still uses NULL-context */
+	talloc_free(tall_vty_ctx);
+
 	/**
 	 * Report the heap state of NULL context, then free,
 	 * so both ASAN and Valgrind are happy...
