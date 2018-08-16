@@ -530,6 +530,7 @@ int main(int argc, char **argv)
 	msc_vty_info.tall_ctx = tall_msc_ctx;
 
 	msgb_talloc_ctx_init(tall_msc_ctx, 0);
+	osmo_signal_talloc_ctx_init(tall_msc_ctx);
 	tall_gsms_ctx = talloc_named_const(tall_msc_ctx, 0, "sms");
 	tall_call_ctx = talloc_named_const(tall_msc_ctx, 0, "gsm_call");
 	tall_trans_ctx = talloc_named_const(tall_msc_ctx, 0, "transaction");
