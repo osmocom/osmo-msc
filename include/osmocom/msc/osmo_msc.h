@@ -101,9 +101,9 @@ static inline const char *msc_subscr_conn_use_name(enum msc_subscr_conn_use val)
 { return get_value_string(msc_subscr_conn_use_names, val); }
 
 #define msc_subscr_conn_get(conn, balance_token) \
-	_msc_subscr_conn_get(conn, balance_token, __BASE_FILE__, __LINE__)
+	_msc_subscr_conn_get(conn, balance_token, __FILE__, __LINE__)
 #define msc_subscr_conn_put(conn, balance_token) \
-	_msc_subscr_conn_put(conn, balance_token, __BASE_FILE__, __LINE__)
+	_msc_subscr_conn_put(conn, balance_token, __FILE__, __LINE__)
 struct gsm_subscriber_connection *
 _msc_subscr_conn_get(struct gsm_subscriber_connection *conn,
 		     enum msc_subscr_conn_use balance_token,
