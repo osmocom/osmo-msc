@@ -702,7 +702,6 @@ DMM Subscr_Conn(CM_SERVICE_REQ:901700000004620){SUBSCR_CONN_S_NEW}: state_chg to
 DMM Subscr_Conn(CM_SERVICE_REQ:901700000004620){SUBSCR_CONN_S_ACCEPTED}: subscr_conn_fsm_has_active_transactions: still awaiting first request after a CM Service Request
 DREF VLR subscr MSISDN:46071 usage decreases to: 2
 DMM Subscr_Conn(CM_SERVICE_REQ:901700000004620){SUBSCR_CONN_S_ACCEPTED}: Received Event SUBSCR_CONN_E_COMPLETE_LAYER_3
-DMM Subscr_Conn(CM_SERVICE_REQ:901700000004620){SUBSCR_CONN_S_ACCEPTED}: Event SUBSCR_CONN_E_COMPLETE_LAYER_3 not permitted
 DREF MSISDN:46071: MSC conn use - compl_l3 == 1 (0x8: cm_service)
   cm_service_result_sent == 1
 msc_subscr_conn_is_accepted() == true
@@ -900,7 +899,6 @@ DMM Subscr_Conn(CM_SERVICE_REQ:901700000004620){SUBSCR_CONN_S_NEW}: state_chg to
 DMM Subscr_Conn(CM_SERVICE_REQ:901700000004620){SUBSCR_CONN_S_ACCEPTED}: subscr_conn_fsm_has_active_transactions: still awaiting first request after a CM Service Request
 DREF VLR subscr MSISDN:46071 usage decreases to: 2
 DMM Subscr_Conn(CM_SERVICE_REQ:901700000004620){SUBSCR_CONN_S_ACCEPTED}: Received Event SUBSCR_CONN_E_COMPLETE_LAYER_3
-DMM Subscr_Conn(CM_SERVICE_REQ:901700000004620){SUBSCR_CONN_S_ACCEPTED}: Event SUBSCR_CONN_E_COMPLETE_LAYER_3 not permitted
 DREF MSISDN:46071: MSC conn use - compl_l3 == 1 (0x8: cm_service)
   cm_service_result_sent == 1
 msc_subscr_conn_is_accepted() == true
@@ -1101,7 +1099,6 @@ DMM Subscr_Conn(CM_SERVICE_REQ:901700000004620){SUBSCR_CONN_S_NEW}: state_chg to
 DMM Subscr_Conn(CM_SERVICE_REQ:901700000004620){SUBSCR_CONN_S_ACCEPTED}: subscr_conn_fsm_has_active_transactions: still awaiting first request after a CM Service Request
 DREF VLR subscr MSISDN:46071 usage decreases to: 2
 DMM Subscr_Conn(CM_SERVICE_REQ:901700000004620){SUBSCR_CONN_S_ACCEPTED}: Received Event SUBSCR_CONN_E_COMPLETE_LAYER_3
-DMM Subscr_Conn(CM_SERVICE_REQ:901700000004620){SUBSCR_CONN_S_ACCEPTED}: Event SUBSCR_CONN_E_COMPLETE_LAYER_3 not permitted
 DREF MSISDN:46071: MSC conn use - compl_l3 == 1 (0x8: cm_service)
   cm_service_result_sent == 1
 msc_subscr_conn_is_accepted() == true
@@ -1309,7 +1306,6 @@ DMM Subscr_Conn(PAGING_RESP:901700000004620){SUBSCR_CONN_S_NEW}: state_chg to SU
 DMM Subscr_Conn(PAGING_RESP:901700000004620){SUBSCR_CONN_S_ACCEPTED}: subscr_conn_fsm_has_active_transactions: connection still has active transaction: SMS
 DREF VLR subscr MSISDN:46071 usage decreases to: 4
 DMM Subscr_Conn(PAGING_RESP:901700000004620){SUBSCR_CONN_S_ACCEPTED}: Received Event SUBSCR_CONN_E_COMPLETE_LAYER_3
-DMM Subscr_Conn(PAGING_RESP:901700000004620){SUBSCR_CONN_S_ACCEPTED}: Event SUBSCR_CONN_E_COMPLETE_LAYER_3 not permitted
 DREF MSISDN:46071: MSC conn use - compl_l3 == 1 (0x20: trans_sms)
   dtap_tx_confirmed == 1
   paging_stopped == 1
@@ -1537,7 +1533,6 @@ DMM Subscr_Conn(PAGING_RESP:901700000004620){SUBSCR_CONN_S_NEW}: state_chg to SU
 DMM Subscr_Conn(PAGING_RESP:901700000004620){SUBSCR_CONN_S_ACCEPTED}: subscr_conn_fsm_has_active_transactions: connection still has active transaction: SMS
 DREF VLR subscr MSISDN:46071 usage decreases to: 4
 DMM Subscr_Conn(PAGING_RESP:901700000004620){SUBSCR_CONN_S_ACCEPTED}: Received Event SUBSCR_CONN_E_COMPLETE_LAYER_3
-DMM Subscr_Conn(PAGING_RESP:901700000004620){SUBSCR_CONN_S_ACCEPTED}: Event SUBSCR_CONN_E_COMPLETE_LAYER_3 not permitted
 DREF MSISDN:46071: MSC conn use - compl_l3 == 1 (0x20: trans_sms)
   dtap_tx_confirmed == 1
   paging_stopped == 1
@@ -1785,7 +1780,6 @@ DMM Subscr_Conn(PAGING_RESP:901700000004620){SUBSCR_CONN_S_NEW}: state_chg to SU
 DMM Subscr_Conn(PAGING_RESP:901700000004620){SUBSCR_CONN_S_ACCEPTED}: subscr_conn_fsm_has_active_transactions: connection still has active transaction: SMS
 DREF VLR subscr MSISDN:46071 usage decreases to: 4
 DMM Subscr_Conn(PAGING_RESP:901700000004620){SUBSCR_CONN_S_ACCEPTED}: Received Event SUBSCR_CONN_E_COMPLETE_LAYER_3
-DMM Subscr_Conn(PAGING_RESP:901700000004620){SUBSCR_CONN_S_ACCEPTED}: Event SUBSCR_CONN_E_COMPLETE_LAYER_3 not permitted
 DREF MSISDN:46071: MSC conn use - compl_l3 == 1 (0x20: trans_sms)
   dtap_tx_confirmed == 1
   paging_stopped == 1

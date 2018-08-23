@@ -218,6 +218,12 @@ static void subscr_conn_fsm_accepted_enter(struct osmo_fsm_inst *fi, uint32_t pr
 static void subscr_conn_fsm_accepted(struct osmo_fsm_inst *fi, uint32_t event, void *data)
 {
 	switch (event) {
+	case SUBSCR_CONN_E_COMPLETE_LAYER_3:
+		/* When Authentication is off, we may already be in the Accepted state when the code
+		 * evaluates the Compl L3. Simply ignore. This just cosmetically mutes the error log
+		 * about the useless event. */
+		return;
+
 	case SUBSCR_CONN_E_COMMUNICATING:
 		osmo_fsm_inst_state_chg(fi, SUBSCR_CONN_S_COMMUNICATING, 0, 0);
 		return;
@@ -363,7 +369,8 @@ static const struct osmo_fsm_state subscr_conn_fsm_states[] = {
 	[SUBSCR_CONN_S_ACCEPTED] = {
 		.name = OSMO_STRINGIFY(SUBSCR_CONN_S_ACCEPTED),
 		/* allow everything to release for any odd behavior */
-		.in_event_mask = S(SUBSCR_CONN_E_COMMUNICATING) |
+		.in_event_mask = S(SUBSCR_CONN_E_COMPLETE_LAYER_3) |
+				 S(SUBSCR_CONN_E_COMMUNICATING) |
 		                 S(SUBSCR_CONN_E_RELEASE_WHEN_UNUSED) |
 				 S(SUBSCR_CONN_E_ACCEPTED) |
 				 S(SUBSCR_CONN_E_MO_CLOSE) |
