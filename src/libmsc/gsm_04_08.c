@@ -119,13 +119,16 @@ static bool classmark_is_r99(struct gsm_classmark *cm)
 	return classmark2_is_r99(cm->classmark2, cm->classmark2_len);
 }
 
-/* Determine if the given CLASSMARK (1/2/3) value permits a given A5/n cipher */
-static bool classmark_supports_a5(const struct gsm_classmark *cm, uint8_t a5)
+/* Determine if the given CLASSMARK (1/2/3) value permits a given A5/n cipher.
+ * Return 1 when the given A5/n is permitted, 0 when not, and negative if the respective MS CLASSMARK is
+ * not known, where the negative number indicates the classmark type: -2 means Classmark 2 is not
+ * available. */
+static int classmark_supports_a5(const struct gsm_classmark *cm, uint8_t a5)
 {
 	switch (a5) {
 	case 0:
 		/* all phones must implement A5/0, see 3GPP TS 43.020 4.9 */
-		return true;
+		return 1;
 	case 1:
 		/* 3GPP TS 43.020 4.9 requires A5/1 to be suppored by all phones and actually states:
 		 * "The network shall not provide service to an MS which indicates that it does not
@@ -134,25 +137,24 @@ static bool classmark_supports_a5(const struct gsm_classmark *cm, uint8_t a5)
 		/* See 3GPP TS 24.008 10.5.1.7 */
 		if (!cm->classmark1_set) {
 			DEBUGP(DMSC, "CLASSMARK 1 unknown, assuming MS supports A5/1\n");
-			return true;
+			return -1;
 		} else {
 			if (cm->classmark1.a5_1)
-				return false;	/* Inverted logic for this bit! */
+				return 0;	/* Inverted logic for this bit! */
 			else
-				return true;
+				return 1;
 		}
 		break;
 	case 2:
 	case 3:
 		/* See 3GPP TS 24.008 10.5.1.6 */
 		if (cm->classmark2_len < 3) {
-			DEBUGP(DMSC, "CLASSMARK 2 unknown, assuming MS doesn't support A5/%u\n", a5);
-			return false;
+			return -2;
 		} else {
 			if (cm->classmark2[2] & (1 << (a5-2)))
-				return true;
+				return 1;
 			else
-				return false;
+				return 0;
 		}
 		break;
 	case 4:
@@ -161,13 +163,12 @@ static bool classmark_supports_a5(const struct gsm_classmark *cm, uint8_t a5)
 	case 7:
 		/* See 3GPP TS 24.008 10.5.1.7 */
 		if (cm->classmark3_len < 1) {
-			DEBUGP(DMSC, "CLASSMARK 3 unknown, assuming MS doesn't support A5/%u\n", a5);
-			return false;
+			return -3;
 		} else {
 			if (cm->classmark3[0] & (1 << (a5-4)))
-				return true;
+				return 1;
 			else
-				return false;
+				return 0;
 		}
 		break;
 	default:
@@ -1592,6 +1593,78 @@ static int msc_vlr_tx_cm_serv_rej(void *msc_conn_ref, enum gsm48_reject_value ca
 osmo_static_assert(sizeof(((struct gsm0808_encrypt_info*)0)->key) >= sizeof(((struct osmo_auth_vector*)0)->kc),
 		   gsm0808_encrypt_info_key_fits_osmo_auth_vec_kc);
 
+int msc_geran_set_cipher_mode(struct gsm_subscriber_connection *conn, bool umts_aka, bool retrieve_imeisv)
+{
+	struct gsm_network *net = conn->network;
+	struct gsm0808_encrypt_info ei;
+	int i, j = 0;
+	int request_classmark = 0;
+	int request_classmark_for_a5_n = 0;
+	struct gsm_auth_tuple *tuple = conn->vsub->last_tuple;
+
+	if (!conn || !conn->vsub || !conn->vsub->last_tuple) {
+		/* This should really never happen, because we checked this in msc_vlr_set_ciph_mode()
+		 * already. */
+		LOGP(DMM, LOGL_ERROR, "Internal error: missing state during Ciphering Mode Command\n");
+		return -EINVAL;
+	}
+
+	for (i = 0; i < 8; i++) {
+		int supported;
+
+		/* A5/n permitted by osmo-msc.cfg? */
+		if (!(net->a5_encryption_mask & (1 << i)))
+			continue;
+
+		/* A5/n supported by MS? */
+		supported = classmark_supports_a5(&conn->vsub->classmark, i);
+		if (supported == 1) {
+			ei.perm_algo[j++] = vlr_ciph_to_gsm0808_alg_id(i);
+			/* A higher A5/n is supported, so no need to request a Classmark
+			 * for support of a lesser A5/n. */
+			request_classmark = 0;
+		} else if (supported < 0) {
+			request_classmark = -supported;
+			request_classmark_for_a5_n = i;
+		}
+	}
+	ei.perm_algo_len = j;
+
+	if (request_classmark) {
+		/* The highest A5/n as from osmo-msc.cfg might be available, but we are
+		 * still missing the Classmark information for that from the MS. First
+		 * ask for that. */
+		LOGP(DMM, LOGL_DEBUG, "%s: to determine whether A5/%d is supported,"
+		     " first ask for a Classmark Update to obtain Classmark %d\n",
+		     vlr_subscr_name(conn->vsub), request_classmark_for_a5_n,
+		     request_classmark);
+
+		return msc_classmark_request_then_cipher_mode_cmd(conn, umts_aka, retrieve_imeisv);
+	}
+
+	if (ei.perm_algo_len == 0) {
+		LOGP(DMM, LOGL_ERROR, "%s: cannot start ciphering, no intersection "
+		     "between MSC-configured and MS-supported A5 algorithms\n",
+		     vlr_subscr_name(conn->vsub));
+		return -ENOTSUP;
+	}
+
+	DEBUGP(DMM, "-> CIPHER MODE COMMAND %s\n", vlr_subscr_name(conn->vsub));
+
+	tuple = conn->vsub->last_tuple;
+
+	/* In case of UMTS AKA, the Kc for ciphering must be derived from the 3G auth
+	 * tokens.  tuple->vec.kc was calculated from the GSM algorithm and is not
+	 * necessarily a match for the UMTS AKA tokens. */
+	if (umts_aka)
+		osmo_auth_c3(ei.key, tuple->vec.ck, tuple->vec.ik);
+	else
+		memcpy(ei.key, tuple->vec.kc, sizeof(tuple->vec.kc));
+	ei.key_len = sizeof(tuple->vec.kc);
+
+	return a_iface_tx_cipher_mode(conn, &ei, retrieve_imeisv);
+}
+
 /* VLR asks us to start using ciphering.
  * (Keep non-static to allow regression testing on this function.) */
 int msc_vlr_set_ciph_mode(void *msc_conn_ref,
@@ -1620,38 +1693,7 @@ int msc_vlr_set_ciph_mode(void *msc_conn_ref,
 
 	switch (conn->via_ran) {
 	case RAN_GERAN_A:
-		DEBUGP(DMM, "-> CIPHER MODE COMMAND %s\n",
-		       vlr_subscr_name(conn->vsub));
-		{
-			struct gsm_network *net = conn->network;
-			struct gsm0808_encrypt_info ei;
-			int i, j = 0;
-
-			for (i = 0; i < 8; i++) {
-				if (net->a5_encryption_mask & (1 << i) &&
-				    classmark_supports_a5(&conn->vsub->classmark, i))
-					ei.perm_algo[j++] = vlr_ciph_to_gsm0808_alg_id(i);
-			}
-			ei.perm_algo_len = j;
-
-			if (ei.perm_algo_len == 0) {
-				LOGP(DMM, LOGL_ERROR, "%s: cannot start ciphering, no intersection "
-					"between MSC-configured and MS-supported A5 algorithms\n",
-					vlr_subscr_name(conn->vsub));
-				return -ENOTSUP;
-			}
-
-			/* In case of UMTS AKA, the Kc for ciphering must be derived from the 3G auth
-			 * tokens.  tuple->vec.kc was calculated from the GSM algorithm and is not
-			 * necessarily a match for the UMTS AKA tokens. */
-			if (umts_aka)
-				osmo_auth_c3(ei.key, tuple->vec.ck, tuple->vec.ik);
-			else
-				memcpy(ei.key, tuple->vec.kc, sizeof(tuple->vec.kc));
-			ei.key_len = sizeof(tuple->vec.kc);
-
-			return a_iface_tx_cipher_mode(conn, &ei, retrieve_imeisv);
-		}
+		return msc_geran_set_cipher_mode(conn, umts_aka, retrieve_imeisv);
 
 	case RAN_UTRAN_IU:
 #ifdef BUILD_IU

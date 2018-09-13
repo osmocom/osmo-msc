@@ -1053,8 +1053,11 @@ static void test_gsm_ciph_in_umts_env()
 	comment_end();
 }
 
-static void test_a5_3_not_supported()
+static void test_a5_3_supported()
 {
+	struct vlr_subscr *vsub;
+	const char *imsi = "901700000004620";
+
 	comment_start();
 
 	/* implicit: net->authentication_required = true; */
@@ -1093,12 +1096,403 @@ static void test_a5_3_not_supported()
 	VERBOSE_ASSERT(auth_request_sent, == true, "%d");
 
 	BTW("MS sends Authen Response, VLR accepts and wants to send Ciphering Mode Command to MS"
-	    " -- alas, no matching cipher can be found, abort and release");
+	    " -- but needs Classmark 2 to determine whether A5/3 is supported");
 	cipher_mode_cmd_sent = false;
-	expect_bssap_clear();
 	ms_sends_msg("05542d8b2c3e");
 	OSMO_ASSERT(!cipher_mode_cmd_sent);
-	VERBOSE_ASSERT(lu_result_sent, == RES_REJECT, "%d");
+	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
+
+	btw("BSC sends back a BSSMAP Classmark Update, that triggers the Ciphering Mode Command in A5/3");
+	expect_cipher_mode_cmd("61855fb81fc2a800");
+	bss_sends_bssap_mgmt("541203505886130b6014042f6503b8800d2100");
+	OSMO_ASSERT(cipher_mode_cmd_sent);
+	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
+
+	btw("MS sends Ciphering Mode Complete, VLR accepts and sends GSUP LU Req to HLR");
+	gsup_expect_tx("04010809710000004026f0");
+	ms_sends_msg("0632");
+	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
+
+	btw("HLR sends _INSERT_DATA_REQUEST, VLR responds with _INSERT_DATA_RESULT");
+	gsup_rx("10010809710000004026f00804032443f2",
+		"12010809710000004026f0");
+	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
+
+	btw("HLR also sends GSUP _UPDATE_LOCATION_RESULT");
+	expect_bssap_clear();
+	gsup_rx("06010809710000004026f0", NULL);
+	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
+
+	btw("LU was successful, and the conn has already been closed");
+	VERBOSE_ASSERT(lu_result_sent, == RES_ACCEPT, "%d");
+	bss_sends_clear_complete();
+	EXPECT_CONN_COUNT(0);
+
+	BTW("after a while, a new conn sends a CM Service Request. VLR responds with Auth Req, 2nd auth vector");
+	cm_service_result_sent = RES_NONE;
+	auth_request_sent = false;
+	auth_request_expect_rand = "12aca96fb4ffdea5c985cbafa9b6e18b";
+	ms_sends_msg("05247803305886089910070000006402");
+	OSMO_ASSERT(g_conn);
+	OSMO_ASSERT(g_conn->fi);
+	OSMO_ASSERT(g_conn->vsub);
+	VERBOSE_ASSERT(auth_request_sent, == true, "%d");
+	VERBOSE_ASSERT(cm_service_result_sent, == RES_NONE, "%d");
+
+	btw("needs auth, not yet accepted");
+	EXPECT_ACCEPTED(false);
+	thwart_rx_non_initial_requests();
+
+	btw("MS sends Authen Response, VLR accepts and requests Ciphering. We already know Classmark 3,"
+	    " so no need to request Classmark Update.");
+	expect_cipher_mode_cmd("07fa7502e07e1c00");
+	ms_sends_msg("0554" "20bde240" /* 2nd vector's sres, s.a. */);
+	VERBOSE_ASSERT(cm_service_result_sent, == RES_NONE, "%d");
+	VERBOSE_ASSERT(cipher_mode_cmd_sent, == true, "%d");
+
+	btw("needs ciph, not yet accepted");
+	EXPECT_ACCEPTED(false);
+	thwart_rx_non_initial_requests();
+
+	btw("MS sends Ciphering Mode Complete, VLR accepts; above Ciphering is an implicit CM Service Accept");
+	ms_sends_msg("0632");
+	VERBOSE_ASSERT(cm_service_result_sent, == RES_NONE, "%d");
+
+	/* Release connection */
+	expect_bssap_clear(RAN_GERAN_A);
+	conn_conclude_cm_service_req(g_conn, RAN_GERAN_A);
+
+	btw("all requests serviced, conn has been released");
+	bss_sends_clear_complete();
+	EXPECT_CONN_COUNT(0);
+
+	BTW("an SMS is sent, MS is paged");
+	paging_expect_imsi(imsi);
+	paging_sent = false;
+	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi);
+	OSMO_ASSERT(vsub);
+	VERBOSE_ASSERT(llist_count(&vsub->cs.requests), == 0, "%d");
+
+	send_sms(vsub, vsub,
+		 "Privacy in residential applications is a desirable"
+		 " marketing option.");
+
+	VERBOSE_ASSERT(llist_count(&vsub->cs.requests), == 1, "%d");
+	vlr_subscr_put(vsub);
+	vsub = NULL;
+	VERBOSE_ASSERT(paging_sent, == true, "%d");
+	VERBOSE_ASSERT(paging_stopped, == false, "%d");
+
+	btw("the subscriber and its pending request should remain");
+	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi);
+	OSMO_ASSERT(vsub);
+	VERBOSE_ASSERT(llist_count(&vsub->cs.requests), == 1, "%d");
+	vlr_subscr_put(vsub);
+
+	btw("MS replies with Paging Response, and VLR sends Auth Request with third key");
+	auth_request_sent = false;
+	auth_request_expect_rand = "e7c03ba7cf0e2fde82b2dc4d63077d42";
+	ms_sends_msg("06270703305882089910070000006402");
+	VERBOSE_ASSERT(auth_request_sent, == true, "%d");
+
+	btw("needs auth, not yet accepted");
+	EXPECT_ACCEPTED(false);
+	thwart_rx_non_initial_requests();
+
+	btw("MS sends Authen Response, VLR accepts and requests Ciphering");
+	expect_cipher_mode_cmd("e2b234f807886400");
+	ms_sends_msg("0554" "a29514ae" /* 3rd vector's sres, s.a. */);
+	VERBOSE_ASSERT(cipher_mode_cmd_sent, == true, "%d");
+
+	btw("needs ciph, not yet accepted");
+	EXPECT_ACCEPTED(false);
+	thwart_rx_non_initial_requests();
+
+	btw("MS sends Ciphering Mode Complete, VLR accepts and sends pending SMS");
+	dtap_expect_tx("09" /* SMS messages */
+		       "01" /* CP-DATA */
+		       "58" /* length */
+		       "01" /* Network to MS */
+		       "00" /* reference */
+		       /* originator (gsm411_send_sms() hardcodes this weird nr) */
+		       "0791" "447758100650" /* 447785016005 */
+		       "00" /* dest */
+		       /* SMS TPDU */
+		       "4c" /* len */
+		       "00" /* SMS deliver */
+		       "05802443f2" /* originating address 42342 */
+		       "00" /* TP-PID */
+		       "00" /* GSM default alphabet */
+		       "071010" /* Y-M-D (from wrapped gsm340_gen_scts())*/
+		       "000000" /* H-M-S */
+		       "00" /* GMT+0 */
+		       "44" /* data length */
+		       "5079da1e1ee7416937485e9ea7c965373d1d6683c270383b3d0e"
+		       "d3d36ff71c949e83c22072799e9687c5ec32a81d96afcbf4b4fb"
+		       "0c7ac3e9e9b7db05");
+	ms_sends_msg("0632");
+	VERBOSE_ASSERT(dtap_tx_confirmed, == true, "%d");
+	VERBOSE_ASSERT(paging_stopped, == true, "%d");
+
+	btw("SMS was delivered, no requests pending for subscr");
+	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi);
+	OSMO_ASSERT(vsub);
+	VERBOSE_ASSERT(llist_count(&vsub->cs.requests), == 0, "%d");
+	vlr_subscr_put(vsub);
+
+	btw("conn is still open to wait for SMS ack dance");
+	EXPECT_CONN_COUNT(1);
+
+	btw("MS replies with CP-ACK for received SMS");
+	ms_sends_msg("8904");
+	EXPECT_CONN_COUNT(1);
+
+	btw("MS also sends RP-ACK, MSC in turn sends CP-ACK for that");
+	dtap_expect_tx("0904");
+	expect_bssap_clear();
+	ms_sends_msg("890106020041020000");
+	VERBOSE_ASSERT(dtap_tx_confirmed, == true, "%d");
+	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
+
+	btw("SMS is done, conn is gone");
+	bss_sends_clear_complete();
+	EXPECT_CONN_COUNT(0);
+
+	BTW("subscriber detaches");
+	expect_bssap_clear();
+	ms_sends_msg("050130089910070000006402");
+	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
+
+	bss_sends_clear_complete();
+	EXPECT_CONN_COUNT(0);
+	clear_vlr();
+	comment_end();
+}
+
+/* During CM Service Request or Paging Response we already have Classmark 2 that indicates A5/3
+ * availablity. Here, in a hacky way remove the knowledge of Classmark 2 to tickle a code path where
+ * proc_arq_fsm needs a Classmark Update during Ciphering. Shouldn't happen in reality though. */
+static void test_cm_service_needs_classmark_update()
+{
+	struct vlr_subscr *vsub;
+	const char *imsi = "901700000004620";
+
+	comment_start();
+
+	/* A5/3 support is indicated in Classmark 3. By configuring A5/3, trigger the code paths that
+	 * send a Classmark Request. */
+	net->a5_encryption_mask = (1 << 3); /* A5/3 */
+        /* implicit: net->authentication_required = true; */
+
+	btw("Location Update request causes a GSUP Send Auth Info request to HLR");
+	lu_result_sent = RES_NONE;
+	gsup_expect_tx("08010809710000004026f0");
+	ms_sends_msg("050802008168000130089910070000006402");
+	OSMO_ASSERT(gsup_tx_confirmed);
+	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
+
+	btw("from HLR, rx _SEND_AUTH_INFO_RESULT; VLR sends Auth Req to MS");
+	/* Based on a Ki of 000102030405060708090a0b0c0d0e0f */
+	auth_request_sent = false;
+	auth_request_expect_rand = "585df1ae287f6e273dce07090d61320b";
+	auth_request_expect_autn = NULL;
+	gsup_rx("0a"
+		/* imsi */
+		"0108" "09710000004026f0"
+		/* 5 auth vectors... */
+		/* TL    TL     rand */
+		"0322"  "2010" "585df1ae287f6e273dce07090d61320b"
+		/*       TL     sres       TL     kc */
+			"2104" "2d8b2c3e" "2208" "61855fb81fc2a800"
+		"0322"  "2010" "12aca96fb4ffdea5c985cbafa9b6e18b"
+			"2104" "20bde240" "2208" "07fa7502e07e1c00"
+		"0322"  "2010" "e7c03ba7cf0e2fde82b2dc4d63077d42"
+			"2104" "a29514ae" "2208" "e2b234f807886400"
+		"0322"  "2010" "fa8f20b781b5881329d4fea26b1a3c51"
+			"2104" "5afc8d72" "2208" "2392f14f709ae000"
+		"0322"  "2010" "0fd4cc8dbe8715d1f439e304edfd68dc"
+			"2104" "bc8d1c5b" "2208" "da7cdd6bfe2d7000",
+		NULL);
+	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
+	VERBOSE_ASSERT(auth_request_sent, == true, "%d");
+
+	BTW("MS sends Authen Response, VLR accepts and wants to send Ciphering Mode Command to MS"
+	    " -- but needs Classmark 2 to determine whether A5/3 is supported");
+	cipher_mode_cmd_sent = false;
+	ms_sends_msg("05542d8b2c3e");
+	OSMO_ASSERT(!cipher_mode_cmd_sent);
+	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
+
+	btw("BSC sends back a BSSMAP Classmark Update, that triggers the Ciphering Mode Command in A5/3");
+	expect_cipher_mode_cmd("61855fb81fc2a800");
+	bss_sends_bssap_mgmt("541203505886130b6014042f6503b8800d2100");
+	OSMO_ASSERT(cipher_mode_cmd_sent);
+	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
+
+	btw("MS sends Ciphering Mode Complete, VLR accepts and sends GSUP LU Req to HLR");
+	gsup_expect_tx("04010809710000004026f0");
+	ms_sends_msg("0632");
+	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
+
+	btw("HLR sends _INSERT_DATA_REQUEST, VLR responds with _INSERT_DATA_RESULT");
+	gsup_rx("10010809710000004026f00804032443f2",
+		"12010809710000004026f0");
+	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
+
+	btw("HLR also sends GSUP _UPDATE_LOCATION_RESULT");
+	expect_bssap_clear();
+	gsup_rx("06010809710000004026f0", NULL);
+	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
+
+	btw("LU was successful, and the conn has already been closed");
+	VERBOSE_ASSERT(lu_result_sent, == RES_ACCEPT, "%d");
+	bss_sends_clear_complete();
+	EXPECT_CONN_COUNT(0);
+
+
+	BTW("after a while, a new conn sends a CM Service Request. VLR responds with Auth Req, 2nd auth vector");
+	cm_service_result_sent = RES_NONE;
+	auth_request_sent = false;
+	auth_request_expect_rand = "12aca96fb4ffdea5c985cbafa9b6e18b";
+	ms_sends_msg("05247803305886089910070000006402");
+	OSMO_ASSERT(g_conn);
+	OSMO_ASSERT(g_conn->fi);
+	OSMO_ASSERT(g_conn->vsub);
+	VERBOSE_ASSERT(auth_request_sent, == true, "%d");
+	VERBOSE_ASSERT(cm_service_result_sent, == RES_NONE, "%d");
+
+	btw("needs auth, not yet accepted");
+	EXPECT_ACCEPTED(false);
+	thwart_rx_non_initial_requests();
+
+	btw("MS sends Authen Response, VLR accepts and requests Ciphering. We already know Classmark 3,"
+	    " so no need to request Classmark Update.");
+	expect_cipher_mode_cmd("07fa7502e07e1c00");
+	ms_sends_msg("0554" "20bde240" /* 2nd vector's sres, s.a. */);
+	VERBOSE_ASSERT(cm_service_result_sent, == RES_NONE, "%d");
+	VERBOSE_ASSERT(cipher_mode_cmd_sent, == true, "%d");
+
+	btw("needs ciph, not yet accepted");
+	EXPECT_ACCEPTED(false);
+	thwart_rx_non_initial_requests();
+
+	btw("MS sends Ciphering Mode Complete, VLR accepts; above Ciphering is an implicit CM Service Accept");
+	ms_sends_msg("0632");
+	VERBOSE_ASSERT(cm_service_result_sent, == RES_NONE, "%d");
+
+	/* Release connection */
+	expect_bssap_clear(RAN_GERAN_A);
+	conn_conclude_cm_service_req(g_conn, RAN_GERAN_A);
+
+	btw("all requests serviced, conn has been released");
+	bss_sends_clear_complete();
+	EXPECT_CONN_COUNT(0);
+
+	BTW("an SMS is sent, MS is paged");
+	paging_expect_imsi(imsi);
+	paging_sent = false;
+	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi);
+	OSMO_ASSERT(vsub);
+	VERBOSE_ASSERT(llist_count(&vsub->cs.requests), == 0, "%d");
+
+	send_sms(vsub, vsub, "Privacy in residential applications is a desirable marketing option.");
+
+	VERBOSE_ASSERT(llist_count(&vsub->cs.requests), == 1, "%d");
+	vlr_subscr_put(vsub);
+	vsub = NULL;
+	VERBOSE_ASSERT(paging_sent, == true, "%d");
+	VERBOSE_ASSERT(paging_stopped, == false, "%d");
+
+	btw("the subscriber and its pending request should remain");
+	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi);
+	OSMO_ASSERT(vsub);
+	VERBOSE_ASSERT(llist_count(&vsub->cs.requests), == 1, "%d");
+	vlr_subscr_put(vsub);
+
+	btw("MS replies with Paging Response, and VLR sends Auth Request with third key");
+	auth_request_sent = false;
+	auth_request_expect_rand = "e7c03ba7cf0e2fde82b2dc4d63077d42";
+	ms_sends_msg("06270703305882089910070000006402");
+	VERBOSE_ASSERT(auth_request_sent, == true, "%d");
+
+	BTW("Fake a situation where Classmark 2 is unknown during proc_arq_fsm");
+	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi);
+	OSMO_ASSERT(vsub);
+	vsub->classmark.classmark2_len = 0;
+	vsub->classmark.classmark3_len = 0;
+	vlr_subscr_put(vsub);
+	
+
+	btw("MS sends Authen Response, VLR accepts and requests Ciphering");
+	btw("MS sends Authen Response, VLR accepts and requests Ciphering."
+	    " Normally, we'd know Classmark 3, but this test removed it."
+	    " Hence a Classmark Request is generated.");
+	cipher_mode_cmd_sent = false;
+	ms_sends_msg("0554" "a29514ae" /* 3rd vector's sres, s.a. */);
+	OSMO_ASSERT(!cipher_mode_cmd_sent);
+
+	btw("BSC sends back a BSSMAP Classmark Update, that triggers the Ciphering Mode Command in A5/3");
+	expect_cipher_mode_cmd("e2b234f807886400");
+	bss_sends_bssap_mgmt("541203505886130b6014042f6503b8800d2100");
+	OSMO_ASSERT(cipher_mode_cmd_sent);
+
+	btw("needs ciph, not yet accepted");
+	EXPECT_ACCEPTED(false);
+
+	btw("MS sends Ciphering Mode Complete, VLR accepts and sends pending SMS");
+	dtap_expect_tx("09" /* SMS messages */
+		       "01" /* CP-DATA */
+		       "58" /* length */
+		       "01" /* Network to MS */
+		       "00" /* reference */
+		       /* originator (gsm411_send_sms() hardcodes this weird nr) */
+		       "0791" "447758100650" /* 447785016005 */
+		       "00" /* dest */
+		       /* SMS TPDU */
+		       "4c" /* len */
+		       "00" /* SMS deliver */
+		       "05802443f2" /* originating address 42342 */
+		       "00" /* TP-PID */
+		       "00" /* GSM default alphabet */
+		       "071010" /* Y-M-D (from wrapped gsm340_gen_scts())*/
+		       "000000" /* H-M-S */
+		       "00" /* GMT+0 */
+		       "44" /* data length */
+		       "5079da1e1ee7416937485e9ea7c965373d1d6683c270383b3d0e"
+		       "d3d36ff71c949e83c22072799e9687c5ec32a81d96afcbf4b4fb"
+		       "0c7ac3e9e9b7db05");
+	ms_sends_msg("0632");
+	VERBOSE_ASSERT(dtap_tx_confirmed, == true, "%d");
+	VERBOSE_ASSERT(paging_stopped, == true, "%d");
+
+	btw("SMS was delivered, no requests pending for subscr");
+	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi);
+	OSMO_ASSERT(vsub);
+	VERBOSE_ASSERT(llist_count(&vsub->cs.requests), == 0, "%d");
+	vlr_subscr_put(vsub);
+
+	btw("conn is still open to wait for SMS ack dance");
+	EXPECT_CONN_COUNT(1);
+
+	btw("MS replies with CP-ACK for received SMS");
+	ms_sends_msg("8904");
+	EXPECT_CONN_COUNT(1);
+
+	btw("MS also sends RP-ACK, MSC in turn sends CP-ACK for that");
+	dtap_expect_tx("0904");
+	expect_bssap_clear();
+	ms_sends_msg("890106020041020000");
+	VERBOSE_ASSERT(dtap_tx_confirmed, == true, "%d");
+	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
+
+	btw("SMS is done, conn is gone");
+	bss_sends_clear_complete();
+	EXPECT_CONN_COUNT(0);
+
+	BTW("subscriber detaches");
+	expect_bssap_clear();
+	ms_sends_msg("050130089910070000006402");
+	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
 	bss_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
@@ -1114,6 +1508,7 @@ msc_vlr_test_func_t msc_vlr_tests[] = {
 	test_ciph_imeisv,
 	test_ciph_tmsi_imei,
 	test_gsm_ciph_in_umts_env,
-	test_a5_3_not_supported,
+	test_a5_3_supported,
+	test_cm_service_needs_classmark_update,
 	NULL
 };

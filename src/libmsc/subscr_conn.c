@@ -45,6 +45,7 @@
 static const struct value_string subscr_conn_fsm_event_names[] = {
 	OSMO_VALUE_STRING(SUBSCR_CONN_E_INVALID),
 	OSMO_VALUE_STRING(SUBSCR_CONN_E_COMPLETE_LAYER_3),
+	OSMO_VALUE_STRING(SUBSCR_CONN_E_CLASSMARK_UPDATE),
 	OSMO_VALUE_STRING(SUBSCR_CONN_E_ACCEPTED),
 	OSMO_VALUE_STRING(SUBSCR_CONN_E_COMMUNICATING),
 	OSMO_VALUE_STRING(SUBSCR_CONN_E_RELEASE_WHEN_UNUSED),
@@ -157,6 +158,66 @@ void subscr_conn_fsm_auth_ciph(struct osmo_fsm_inst *fi, uint32_t event, void *d
 		osmo_fsm_inst_state_chg(fi, SUBSCR_CONN_S_RELEASING, SUBSCR_CONN_TIMEOUT, 0);
 		return;
 
+
+	default:
+		OSMO_ASSERT(false);
+	}
+}
+
+int msc_classmark_request_then_cipher_mode_cmd(struct gsm_subscriber_connection *conn, bool umts_aka,
+					       bool retrieve_imeisv)
+{
+	int rc;
+	conn->geran_set_cipher_mode.umts_aka = umts_aka;
+	conn->geran_set_cipher_mode.retrieve_imeisv = retrieve_imeisv;
+
+	rc = a_iface_tx_classmark_request(conn);
+	if (rc) {
+		LOGP(DMM, LOGL_ERROR, "%s: cannot send BSSMAP Classmark Request\n",
+		     vlr_subscr_name(conn->vsub));
+		return -EIO;
+	}
+
+	osmo_fsm_inst_state_chg(conn->fi, SUBSCR_CONN_S_WAIT_CLASSMARK_UPDATE, SUBSCR_CONN_TIMEOUT, 0);
+	return 0;
+}
+
+static void subscr_conn_fsm_wait_classmark_update(struct osmo_fsm_inst *fi, uint32_t event, void *data)
+{
+	struct gsm_subscriber_connection *conn = fi->priv;
+	switch (event) {
+	case SUBSCR_CONN_E_CLASSMARK_UPDATE:
+		/* Theoretically, this event can be used for requesting Classmark in various situations.
+		 * So far though, the only time we send a Classmark Request is during Ciphering. As soon
+		 * as more such situations arise, we need to add state to indicate what action should
+		 * follow after a Classmark Update is received (e.g.
+		 * msc_classmark_request_then_cipher_mode_cmd() sets an enum value to indicate that
+		 * Ciphering should continue afterwards). But right now, it is accurate to always
+		 * continue with Ciphering: */
+
+		/* During Ciphering, we needed Classmark information. The Classmark Update has come in,
+		 * go back into the Set Ciphering Command procedure. */
+		osmo_fsm_inst_state_chg(fi, SUBSCR_CONN_S_AUTH_CIPH, SUBSCR_CONN_TIMEOUT, 0);
+		if (msc_geran_set_cipher_mode(conn, conn->geran_set_cipher_mode.umts_aka,
+					      conn->geran_set_cipher_mode.retrieve_imeisv)) {
+			LOGPFSML(fi, LOGL_ERROR,
+				 "Sending Cipher Mode Command failed, aborting attach\n");
+			vlr_subscr_cancel_attach_fsm(conn->vsub, OSMO_FSM_TERM_ERROR,
+						     GSM48_REJECT_NETWORK_FAILURE);
+		}
+		return;
+
+	case SUBSCR_CONN_E_UNUSED:
+		LOGPFSML(fi, LOGL_DEBUG, "Awaiting results for Auth+Ciph, overruling event %s\n",
+			 osmo_fsm_event_name(fi->fsm, event));
+		return;
+
+	case SUBSCR_CONN_E_MO_CLOSE:
+	case SUBSCR_CONN_E_CN_CLOSE:
+		log_close_event(fi, event, data);
+		evaluate_acceptance_outcome(fi, false);
+		osmo_fsm_inst_state_chg(fi, SUBSCR_CONN_S_RELEASING, SUBSCR_CONN_TIMEOUT, 0);
+		return;
 
 	default:
 		OSMO_ASSERT(false);
@@ -362,9 +423,20 @@ static const struct osmo_fsm_state subscr_conn_fsm_states[] = {
 				 S(SUBSCR_CONN_E_MO_CLOSE) |
 				 S(SUBSCR_CONN_E_CN_CLOSE) |
 				 S(SUBSCR_CONN_E_UNUSED),
-		.out_state_mask = S(SUBSCR_CONN_S_ACCEPTED) |
+		.out_state_mask = S(SUBSCR_CONN_S_WAIT_CLASSMARK_UPDATE) |
+				  S(SUBSCR_CONN_S_ACCEPTED) |
 				  S(SUBSCR_CONN_S_RELEASING),
 		.action = subscr_conn_fsm_auth_ciph,
+	},
+	[SUBSCR_CONN_S_WAIT_CLASSMARK_UPDATE] = {
+		.name = OSMO_STRINGIFY(SUBSCR_CONN_S_WAIT_CLASSMARK_UPDATE),
+		.in_event_mask = S(SUBSCR_CONN_E_CLASSMARK_UPDATE) |
+				 S(SUBSCR_CONN_E_MO_CLOSE) |
+				 S(SUBSCR_CONN_E_CN_CLOSE) |
+				 S(SUBSCR_CONN_E_UNUSED),
+		.out_state_mask = S(SUBSCR_CONN_S_AUTH_CIPH) |
+				  S(SUBSCR_CONN_S_RELEASING),
+		.action = subscr_conn_fsm_wait_classmark_update,
 	},
 	[SUBSCR_CONN_S_ACCEPTED] = {
 		.name = OSMO_STRINGIFY(SUBSCR_CONN_S_ACCEPTED),

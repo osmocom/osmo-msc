@@ -167,6 +167,10 @@ void msc_classmark_chg(struct gsm_subscriber_connection *conn,
 		cm->classmark3_len = cm3_len;
 		memcpy(cm->classmark3, cm3, cm3_len);
 	}
+
+	/* bump subscr conn FSM in case it is waiting for a Classmark Update */
+	if (conn->fi->state == SUBSCR_CONN_S_WAIT_CLASSMARK_UPDATE)
+		osmo_fsm_inst_dispatch(conn->fi, SUBSCR_CONN_E_CLASSMARK_UPDATE, NULL);
 }
 
 /* Receive a CIPHERING MODE COMPLETE from BSC */

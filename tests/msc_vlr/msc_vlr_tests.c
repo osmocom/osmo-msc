@@ -35,6 +35,7 @@
 #include <osmocom/msc/debug.h>
 #include <osmocom/msc/gsm_04_08.h>
 #include <osmocom/msc/transaction.h>
+#include <osmocom/msc/a_iface_bssap.h>
 
 #if BUILD_IU
 #include <osmocom/msc/iucs_ranap.h>
@@ -111,10 +112,10 @@ static void reset_l3_seq_nr()
 
 struct msgb *msgb_from_hex(const char *label, uint16_t size, const char *hex)
 {
-	struct msgb *msg = msgb_alloc(size, label);
+	struct msgb *msg = msgb_alloc_headroom(size, 4, label);
 	unsigned char *rc;
-	msg->l2h = msg->head;
-	rc = msgb_put(msg, osmo_hexparse(hex, msg->head, msgb_tailroom(msg)));
+	msg->l2h = msg->data;
+	rc = msgb_put(msg, osmo_hexparse(hex, msg->data, msgb_tailroom(msg)));
 	OSMO_ASSERT(rc == msg->l2h);
 	return msg;
 }
@@ -240,7 +241,32 @@ void ms_sends_msg(const char *hex)
 	msg = msgb_from_hex("ms_sends_msg", 1024, hex);
 	msg->l1h = msg->l2h = msg->l3h = msg->data;
 	rx_from_ms(msg);
-	talloc_free(msg);
+	msgb_free(msg);
+}
+
+void bss_sends_bssap_mgmt(const char *hex)
+{
+	struct msgb *msg;
+	struct bssmap_header *bh;
+	struct a_conn_info a_conn_info;
+
+	msg = msgb_from_hex("bss_sends_bssap_mgmt", 1024, hex);
+	msg->l3h = msg->data;
+
+	msg->l2h = msgb_push(msg, sizeof(*bh));
+	bh = (void*)msg->l2h;
+	bh->type = BSSAP_MSG_BSS_MANAGEMENT;
+	bh->length = msgb_l3len(msg);
+
+	if (g_conn && !conn_exists(g_conn))
+		g_conn = NULL;
+
+	OSMO_ASSERT(g_conn);
+	a_conn_info.network = net;
+	a_conn_info.conn_id = g_conn->a.conn_id;
+
+	a_sccp_rx_dt((struct osmo_sccp_user*)0x1, &a_conn_info, msg);
+	msgb_free(msg);
 }
 
 static int ms_sends_msg_fake(uint8_t pdisc, uint8_t msg_type)
@@ -361,6 +387,33 @@ void __real_msc_stop_paging(struct vlr_subscr *vsub);
 void __wrap_msc_stop_paging(struct vlr_subscr *vsub)
 {
 	paging_stopped = true;
+}
+
+
+/* override, requires '-Wl,--wrap=osmo_sccp_tx_data_msg' */
+int __real_osmo_sccp_tx_data_msg(struct osmo_sccp_user *scu, uint32_t conn_id,
+				 struct msgb *msg);
+int __wrap_osmo_sccp_tx_data_msg(struct osmo_sccp_user *scu, uint32_t conn_id,
+				 struct msgb *msg)
+{
+	const char *proto_str;
+	const char *msg_str = gsm0808_bssmap_name(msg->l3h[2]);
+	switch (*msg->l3h) {
+	case BSSAP_MSG_BSS_MANAGEMENT:
+		proto_str = "BSSAP-BSS-MANAGEMENT";
+		break;
+	case BSSAP_MSG_DTAP:
+		proto_str = "BSSAP-DTAP";
+		break;
+	default:
+		proto_str = "";
+		msg_str = "";
+		break;
+	}
+
+	log("BSC <--%s-- MSC: %s %s", proto_str, msg_str, msgb_hexdump(msg));
+	msgb_free(msg);
+	return 0;
 }
 
 void clear_vlr()

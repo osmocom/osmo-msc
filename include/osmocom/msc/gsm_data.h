@@ -130,6 +130,13 @@ struct gsm_subscriber_connection {
 	uint16_t lac;
 	struct gsm_encr encr;
 
+	/* "Temporary" storage for the case the VLR asked for Cipher Mode Command, but the MSC still
+	 * wants to request a Classmark Update first. */
+	struct {
+		bool umts_aka;
+		bool retrieve_imeisv;
+	} geran_set_cipher_mode;
+
 	/* N(SD) expected in the received frame, per flow (TS 24.007 11.2.3.2.3.2.2) */
 	uint8_t n_sd_next[4];
 

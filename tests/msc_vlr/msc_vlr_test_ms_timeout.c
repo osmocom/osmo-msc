@@ -292,9 +292,79 @@ static void test_ms_timeout_paging()
 	comment_end();
 }
 
+static void test_classmark_update_timeout()
+{
+	comment_start();
+
+	fake_time_start();
+
+	/* implicit: net->authentication_required = true; */
+	net->a5_encryption_mask = (1 << 3); /* A5/3 */
+
+	btw("Location Update request causes a GSUP Send Auth Info request to HLR");
+	lu_result_sent = RES_NONE;
+	gsup_expect_tx("08010809710000004026f0");
+	ms_sends_msg("050802008168000130089910070000006402");
+	OSMO_ASSERT(gsup_tx_confirmed);
+	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
+
+	btw("from HLR, rx _SEND_AUTH_INFO_RESULT; VLR sends Auth Req to MS");
+	/* Based on a Ki of 000102030405060708090a0b0c0d0e0f */
+	auth_request_sent = false;
+	auth_request_expect_rand = "585df1ae287f6e273dce07090d61320b";
+	auth_request_expect_autn = NULL;
+	gsup_rx("0a"
+		/* imsi */
+		"0108" "09710000004026f0"
+		/* TL    TL     rand */
+		"0322"  "2010" "585df1ae287f6e273dce07090d61320b"
+		/*       TL     sres       TL     kc */
+			"2104" "2d8b2c3e" "2208" "61855fb81fc2a800"
+		,
+		NULL);
+	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
+	VERBOSE_ASSERT(auth_request_sent, == true, "%d");
+
+	BTW("MS sends Authen Response, VLR accepts and wants to send Ciphering Mode Command to MS"
+	    " -- but needs Classmark 2 to determine whether A5/3 is supported");
+	cipher_mode_cmd_sent = false;
+	ms_sends_msg("05542d8b2c3e");
+	OSMO_ASSERT(!cipher_mode_cmd_sent);
+	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
+
+	BTW("But the BSSMAP Classmark Update never arrives");
+	btw("At first, we're still waiting");
+	fake_time_passes(0, 423);
+	EXPECT_CONN_COUNT(1);
+	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
+	fake_time_passes(1, 235);
+	EXPECT_CONN_COUNT(1);
+	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
+	fake_time_passes(1, 235);
+	EXPECT_CONN_COUNT(1);
+	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
+	fake_time_passes(1, 235);
+	EXPECT_CONN_COUNT(1);
+	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
+	fake_time_passes(1, 235);
+	EXPECT_CONN_COUNT(1);
+	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
+	expect_bssap_clear();
+	fake_time_passes(1, 235);
+	btw("SUBSCR_CONN_TIMEOUT has passed, conn is gone.");
+	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
+	bss_sends_clear_complete();
+	EXPECT_CONN_COUNT(0);
+	VERBOSE_ASSERT(lu_result_sent, == RES_REJECT, "%d");
+
+	comment_end();
+}
+
+
 msc_vlr_test_func_t msc_vlr_tests[] = {
 	test_ms_timeout_lu_auth_resp,
 	test_ms_timeout_cm_auth_resp,
 	test_ms_timeout_paging,
+	test_classmark_update_timeout,
 	NULL
 };

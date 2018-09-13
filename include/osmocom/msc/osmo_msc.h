@@ -16,6 +16,8 @@ enum subscr_conn_fsm_event {
 	SUBSCR_CONN_E_INVALID = 0,
 	/* Accepted the initial Complete Layer 3 (starting to evaluate Authentication and Ciphering) */
 	SUBSCR_CONN_E_COMPLETE_LAYER_3,
+	/* Received Classmark Update, typically neede for Ciphering Mode Command */
+	SUBSCR_CONN_E_CLASSMARK_UPDATE,
 	/* LU or Process Access FSM has determined that this conn is good */
 	SUBSCR_CONN_E_ACCEPTED,
 	/* received first reply from MS in "real" CC, SMS, USSD communication */
@@ -33,6 +35,7 @@ enum subscr_conn_fsm_event {
 enum subscr_conn_fsm_state {
 	SUBSCR_CONN_S_NEW,
 	SUBSCR_CONN_S_AUTH_CIPH,
+	SUBSCR_CONN_S_WAIT_CLASSMARK_UPDATE,
 	SUBSCR_CONN_S_ACCEPTED,
 	SUBSCR_CONN_S_COMMUNICATING,
 	SUBSCR_CONN_S_RELEASING,
@@ -62,6 +65,9 @@ int msc_compl_l3(struct gsm_subscriber_connection *conn,
 		 struct msgb *msg, uint16_t chosen_channel);
 void msc_dtap(struct gsm_subscriber_connection *conn, uint8_t link_id,
 	      struct msgb *msg);
+int msc_classmark_request_then_cipher_mode_cmd(struct gsm_subscriber_connection *conn, bool umts_aka,
+					       bool retrieve_imeisv);
+int msc_geran_set_cipher_mode(struct gsm_subscriber_connection *conn, bool umts_aka, bool retrieve_imeisv);
 void msc_cipher_mode_compl(struct gsm_subscriber_connection *conn,
 			   struct msgb *msg, uint8_t alg_id);
 void msc_rx_sec_mode_compl(struct gsm_subscriber_connection *conn);

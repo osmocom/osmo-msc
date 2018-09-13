@@ -161,6 +161,7 @@ void dtap_expect_tx_ussd(char *ussd_text);
 void paging_expect_imsi(const char *imsi);
 void paging_expect_tmsi(uint32_t tmsi);
 
+void bss_sends_bssap_mgmt(const char *hex);
 void ms_sends_msg(const char *hex);
 void ms_sends_security_mode_complete();
 void gsup_rx(const char *rx_hex, const char *expect_tx_hex);

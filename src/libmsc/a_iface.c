@@ -422,6 +422,16 @@ int a_iface_tx_clear_cmd(struct gsm_subscriber_connection *conn)
 	return osmo_sccp_tx_data_msg(conn->a.scu, conn->a.conn_id, msg);
 }
 
+int a_iface_tx_classmark_request(const struct gsm_subscriber_connection *conn)
+{
+	struct msgb *msg;
+
+	LOGPCONN(conn, LOGL_INFO, "Tx BSSMAP CLASSMARK REQUEST to BSC\n");
+
+	msg = gsm0808_create_classmark_request();
+	return osmo_sccp_tx_data_msg(conn->a.scu, conn->a.conn_id, msg);
+}
+
 /* Callback function: Close all open connections */
 static void a_reset_cb(const void *priv)
 {
