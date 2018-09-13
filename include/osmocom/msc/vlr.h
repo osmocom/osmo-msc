@@ -174,6 +174,8 @@ struct vlr_subscr {
 		uint8_t lac;
 		enum ran_type attached_via_ran;
 	} cs;
+
+	struct gsm_classmark classmark;
 };
 
 enum vlr_ciph {

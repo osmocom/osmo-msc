@@ -98,14 +98,25 @@ int gsm48_tx_simple(struct gsm_subscriber_connection *conn,
 	return gsm48_conn_sendmsg(msg, conn, NULL);
 }
 
+static bool classmark1_is_r99(const struct gsm48_classmark1 *cm1)
+{
+	return cm1->rev_lev >= 2;
+}
+
+static bool classmark2_is_r99(const uint8_t *cm2, uint8_t cm2_len)
+{
+	uint8_t rev_lev;
+	if (!cm2_len)
+		return false;
+	rev_lev = (cm2[0] >> 5) & 0x3;
+	return rev_lev >= 2;
+}
+
 static bool classmark_is_r99(struct gsm_classmark *cm)
 {
-	int rev_lev = 0;
 	if (cm->classmark1_set)
-		rev_lev = cm->classmark1.rev_lev;
-	else if (cm->classmark2_len > 0)
-		rev_lev = (cm->classmark2[0] >> 5) & 0x3;
-	return rev_lev >= 2;
+		return classmark1_is_r99(&cm->classmark1);
+	return classmark2_is_r99(cm->classmark2, cm->classmark2_len);
 }
 
 /* Determine if the given CLASSMARK (1/2/3) value permits a given A5/n cipher */
@@ -345,9 +356,6 @@ int mm_rx_loc_upd_req(struct gsm_subscriber_connection *conn, struct msgb *msg)
 
 	msc_subscr_conn_update_id(conn, COMPLETE_LAYER3_LU, mi_string);
 
-	conn->classmark.classmark1 = lu->classmark1;
-	conn->classmark.classmark1_set = true;
-
 	DEBUGP(DMM, "LOCATION UPDATING REQUEST: MI(%s)=%s type=%s\n",
 	       gsm48_mi_type_name(mi_type), mi_string,
 	       get_value_string(lupd_names, lu->type));
@@ -402,7 +410,7 @@ int mm_rx_loc_upd_req(struct gsm_subscriber_connection *conn, struct msgb *msg)
 				&old_lai, &new_lai,
 				is_utran || conn->network->authentication_required,
 				is_utran || conn->network->a5_encryption_mask > 0x01,
-				classmark_is_r99(&conn->classmark),
+				classmark1_is_r99(&lu->classmark1),
 				is_utran,
 				net->vlr->cfg.assign_tmsi);
 	if (!lu_fsm) {
@@ -420,6 +428,9 @@ int mm_rx_loc_upd_req(struct gsm_subscriber_connection *conn, struct msgb *msg)
 		     mi_string);
 		return -EIO;
 	}
+
+	conn->vsub->classmark.classmark1 = lu->classmark1;
+	conn->vsub->classmark.classmark1_set = true;
 
 	msc_subscr_conn_complete_layer_3(conn);
 	return 0;
@@ -773,8 +784,6 @@ int gsm48_rx_mm_serv_req(struct gsm_subscriber_connection *conn, struct msgb *ms
 	msc_subscr_conn_update_id(conn, COMPLETE_LAYER3_CM_SERVICE_REQ, mi_string);
 
 	osmo_signal_dispatch(SS_SUBSCR, S_SUBSCR_IDENTITY, mi_p);
-	memcpy(conn->classmark.classmark2, classmark2, classmark2_len);
-	conn->classmark.classmark2_len = classmark2_len;
 
 	is_utran = (conn->via_ran == RAN_UTRAN_IU);
 	vlr_proc_acc_req(conn->fi,
@@ -783,8 +792,19 @@ int gsm48_rx_mm_serv_req(struct gsm_subscriber_connection *conn, struct msgb *ms
 			 VLR_PR_ARQ_T_CM_SERV_REQ, mi-1, &lai,
 			 is_utran || conn->network->authentication_required,
 			 is_utran || conn->network->a5_encryption_mask > 0x01,
-			 classmark_is_r99(&conn->classmark),
+			 classmark2_is_r99(classmark2, classmark2_len),
 			 is_utran);
+
+	/* From vlr_proc_acc_req() we expect an implicit dispatch of PR_ARQ_E_START we expect
+	 * msc_vlr_subscr_assoc() to already have been called and completed. Has an error occured? */
+	if (!conn->vsub) {
+		LOGP(DRR, LOGL_ERROR, "%s: subscriber not allowed to do a CM Service Request\n",
+		     mi_string);
+		return -EIO;
+	}
+
+	memcpy(conn->vsub->classmark.classmark2, classmark2, classmark2_len);
+	conn->vsub->classmark.classmark2_len = classmark2_len;
 
 	msc_subscr_conn_complete_layer_3(conn);
 	return 0;
@@ -846,11 +866,6 @@ static int gsm48_rx_mm_imsi_detach_ind(struct gsm_subscriber_connection *conn, s
 		break;
 	}
 
-	/* TODO? We used to remember the subscriber's classmark1 here and
-	 * stored it in the old sqlite db, but now we store it in a conn that
-	 * will be discarded anyway: */
-	conn->classmark.classmark1 = idi->classmark1;
-
 	if (!vsub) {
 		LOGP(DMM, LOGL_ERROR, "IMSI DETACH for unknown subscriber MI(%s)=%s\n",
 		     gsm48_mi_type_name(mi_type), mi_string);
@@ -859,6 +874,9 @@ static int gsm48_rx_mm_imsi_detach_ind(struct gsm_subscriber_connection *conn, s
 
 		if (vsub->cs.is_paging)
 			subscr_paging_cancel(vsub, GSM_PAGING_EXPIRED);
+
+		/* We already got Classmark 1 during Location Updating ... but well, ok */
+		vsub->classmark.classmark1 = idi->classmark1;
 
 		vlr_subscr_rx_imsi_detach(vsub);
 		osmo_signal_dispatch(SS_SUBSCR, S_SUBSCR_DETACHED, vsub);
@@ -986,7 +1004,7 @@ static int gsm48_rx_mm_auth_resp(struct gsm_subscriber_connection *conn, struct 
 	       is_umts ? "UMTS" : "GSM", is_umts ? "res" : "sres",
 	       osmo_hexdump_nospc(res, res_len));
 
-	return vlr_subscr_rx_auth_resp(conn->vsub, classmark_is_r99(&conn->classmark),
+	return vlr_subscr_rx_auth_resp(conn->vsub, classmark_is_r99(&conn->vsub->classmark),
 				       conn->via_ran == RAN_UTRAN_IU,
 				       res, res_len);
 }
@@ -1128,27 +1146,15 @@ static int gsm0408_rcv_mm(struct gsm_subscriber_connection *conn, struct msgb *m
 	return rc;
 }
 
-static uint8_t *gsm48_cm2_get_mi(uint8_t *classmark2_lv, unsigned int tot_len)
-{
-	/* Check the size for the classmark */
-	if (tot_len < 1 + *classmark2_lv)
-		return NULL;
-
-	uint8_t *mi_lv = classmark2_lv + *classmark2_lv + 1;
-	if (tot_len < 2 + *classmark2_lv + mi_lv[0])
-		return NULL;
-
-	return mi_lv;
-}
-
 /* Receive a PAGING RESPONSE message from the MS */
 static int gsm48_rx_rr_pag_resp(struct gsm_subscriber_connection *conn, struct msgb *msg)
 {
 	struct gsm_network *net = conn->network;
 	struct gsm48_hdr *gh = msgb_l3(msg);
 	struct gsm48_pag_resp *resp;
-	uint8_t *classmark2_lv = gh->data + 1;
-	uint8_t *mi_lv;
+	uint8_t classmark2_len = gh->data[1];
+	uint8_t *classmark2 = gh->data+2;
+	uint8_t *mi_lv = classmark2 + classmark2_len;
 	uint8_t mi_type;
 	char mi_string[GSM48_MI_SIZE];
 	struct osmo_location_area_id lai;
@@ -1158,8 +1164,11 @@ static int gsm48_rx_rr_pag_resp(struct gsm_subscriber_connection *conn, struct m
 	lai.lac = conn->lac;
 
 	resp = (struct gsm48_pag_resp *) &gh->data[0];
-	gsm48_paging_extract_mi(resp, msgb_l3len(msg) - sizeof(*gh),
-				mi_string, &mi_type);
+
+	if (gsm48_paging_extract_mi(resp, msgb_l3len(msg) - sizeof(*gh), mi_string, &mi_type) <= 0) {
+		LOGP(DRR, LOGL_ERROR, "PAGING RESPONSE: invalid Mobile Identity\n");
+		return -EINVAL;
+	}
 
 	if (msc_subscr_conn_is_establishing_auth_ciph(conn)) {
 		LOGP(DMM, LOGL_ERROR,
@@ -1174,16 +1183,7 @@ static int gsm48_rx_rr_pag_resp(struct gsm_subscriber_connection *conn, struct m
 
 	DEBUGP(DRR, "PAGING RESPONSE: MI(%s)=%s\n", gsm48_mi_type_name(mi_type), mi_string);
 
-	mi_lv = gsm48_cm2_get_mi(classmark2_lv, msgb_l3len(msg) - sizeof(*gh));
-	if (!mi_lv) {
-		LOGP(DRR, LOGL_ERROR, "PAGING RESPONSE: invalid Mobile Identity\n");
-		return -1;
-	}
-
 	msc_subscr_conn_update_id(conn, COMPLETE_LAYER3_PAGING_RESP, mi_string);
-
-	memcpy(conn->classmark.classmark2, classmark2_lv+1, *classmark2_lv);
-	conn->classmark.classmark2_len = *classmark2_lv;
 
 	is_utran = (conn->via_ran == RAN_UTRAN_IU);
 	vlr_proc_acc_req(conn->fi,
@@ -1192,8 +1192,19 @@ static int gsm48_rx_rr_pag_resp(struct gsm_subscriber_connection *conn, struct m
 			 VLR_PR_ARQ_T_PAGING_RESP, mi_lv, &lai,
 			 is_utran || conn->network->authentication_required,
 			 is_utran || conn->network->a5_encryption_mask > 0x01,
-			 classmark_is_r99(&conn->classmark),
+			 classmark2_is_r99(classmark2, classmark2_len),
 			 is_utran);
+
+	/* From vlr_proc_acc_req() we expect an implicit dispatch of PR_ARQ_E_START we expect
+	 * msc_vlr_subscr_assoc() to already have been called and completed. Has an error occured? */
+	if (!conn->vsub) {
+		LOGP(DRR, LOGL_ERROR, "%s: subscriber not allowed to do a Paging Response\n",
+		     mi_string);
+		return -EIO;
+	}
+
+	memcpy(conn->vsub->classmark.classmark2, classmark2, classmark2_len);
+	conn->vsub->classmark.classmark2_len = classmark2_len;
 
 	msc_subscr_conn_complete_layer_3(conn);
 	return 0;
@@ -1390,10 +1401,10 @@ static bool gsm0407_is_duplicate(struct gsm_subscriber_connection *conn, struct 
 	gh = msgb_l3(msg);
 	pdisc = gsm48_hdr_pdisc(gh);
 
-	if (conn->classmark.classmark1_set && conn->classmark.classmark1.rev_lev < 2) {
-		modulo = gsm0407_determine_nsd_ret_modulo_r98(pdisc, gh->msg_type, &n_sd);
-	} else { /* R99 */
+	if (conn->vsub && classmark_is_r99(&conn->vsub->classmark)) {
 		modulo = gsm0407_determine_nsd_ret_modulo_r99(pdisc, gh->msg_type, &n_sd);
+	} else { /* pre R99 */
+		modulo = gsm0407_determine_nsd_ret_modulo_r98(pdisc, gh->msg_type, &n_sd);
 	}
 	if (modulo == 0)
 		return false;
@@ -1618,7 +1629,7 @@ int msc_vlr_set_ciph_mode(void *msc_conn_ref,
 
 			for (i = 0; i < 8; i++) {
 				if (net->a5_encryption_mask & (1 << i) &&
-				    classmark_supports_a5(&conn->classmark, i))
+				    classmark_supports_a5(&conn->vsub->classmark, i))
 					ei.perm_algo[j++] = vlr_ciph_to_gsm0808_alg_id(i);
 			}
 			ei.perm_algo_len = j;

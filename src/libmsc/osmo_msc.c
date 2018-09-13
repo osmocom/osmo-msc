@@ -147,23 +147,25 @@ void msc_classmark_chg(struct gsm_subscriber_connection *conn,
 		       const uint8_t *cm2, uint8_t cm2_len,
 		       const uint8_t *cm3, uint8_t cm3_len)
 {
+	struct gsm_classmark *cm = &conn->vsub->classmark;
+
 	if (cm2 && cm2_len) {
-		if (cm2_len > sizeof(conn->classmark.classmark2)) {
+		if (cm2_len > sizeof(cm->classmark2)) {
 			LOGP(DRR, LOGL_NOTICE, "%s: classmark2 is %u bytes, truncating at %zu bytes\n",
-			     vlr_subscr_name(conn->vsub), cm2_len, sizeof(conn->classmark.classmark2));
-			cm2_len = sizeof(conn->classmark.classmark2);
+			     vlr_subscr_name(conn->vsub), cm2_len, sizeof(cm->classmark2));
+			cm2_len = sizeof(cm->classmark2);
 		}
-		conn->classmark.classmark2_len = cm2_len;
-		memcpy(conn->classmark.classmark2, cm2, cm2_len);
+		cm->classmark2_len = cm2_len;
+		memcpy(cm->classmark2, cm2, cm2_len);
 	}
 	if (cm3 && cm3_len) {
-		if (cm3_len > sizeof(conn->classmark.classmark3)) {
+		if (cm3_len > sizeof(cm->classmark3)) {
 			LOGP(DRR, LOGL_NOTICE, "%s: classmark3 is %u bytes, truncating at %zu bytes\n",
-			     vlr_subscr_name(conn->vsub), cm3_len, sizeof(conn->classmark.classmark3));
-			cm3_len = sizeof(conn->classmark.classmark3);
+			     vlr_subscr_name(conn->vsub), cm3_len, sizeof(cm->classmark3));
+			cm3_len = sizeof(cm->classmark3);
 		}
-		conn->classmark.classmark3_len = cm3_len;
-		memcpy(conn->classmark.classmark3, cm3, cm3_len);
+		cm->classmark3_len = cm3_len;
+		memcpy(cm->classmark3, cm3, cm3_len);
 	}
 }
 

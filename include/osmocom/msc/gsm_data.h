@@ -127,8 +127,6 @@ struct gsm_subscriber_connection {
 	/* connected via 2G or 3G? */
 	enum ran_type via_ran;
 
-	struct gsm_classmark classmark;
-
 	uint16_t lac;
 	struct gsm_encr encr;
 
