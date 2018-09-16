@@ -723,7 +723,7 @@ int __wrap_a_iface_tx_cipher_mode(const struct gsm_subscriber_connection *conn,
 	btw("sending Ciphering Mode Command for %s: include_imeisv=%d",
 	    vlr_subscr_name(conn->vsub), include_imeisv);
 	for (i = 0; i < ei->perm_algo_len; i++)
-		btw("...perm algo: %u", ei->perm_algo[i]);
+		btw("...perm algo: A5/%u", ei->perm_algo[i] - 1);
 	OSMO_ASSERT(ei->key_len <= sizeof(ei->key));
 	btw("...key: %s", osmo_hexdump_nospc(ei->key, ei->key_len));
 	cipher_mode_cmd_sent = true;

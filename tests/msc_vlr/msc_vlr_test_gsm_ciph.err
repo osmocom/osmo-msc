@@ -68,7 +68,7 @@ DVLR vlr_lu_fsm(LU:901700000004620){VLR_ULA_S_WAIT_AUTH}: vlr_loc_upd_post_auth(
 DVLR vlr_lu_fsm(LU:901700000004620){VLR_ULA_S_WAIT_AUTH}: Set Ciphering Mode
 DMM -> CIPHER MODE COMMAND IMSI:901700000004620
 - sending Ciphering Mode Command for IMSI:901700000004620: include_imeisv=0
-- ...perm algo: 2
+- ...perm algo: A5/1
 - ...key: 61855fb81fc2a800
 DVLR vlr_lu_fsm(LU:901700000004620){VLR_ULA_S_WAIT_AUTH}: state_chg to VLR_ULA_S_WAIT_CIPH
 DREF IMSI:901700000004620: MSC conn use - dtap == 0 (0x0: )
@@ -238,7 +238,7 @@ DVLR Process_Access_Request_VLR(CM_SERVICE_REQ:901700000004620){PR_ARQ_S_WAIT_AU
 DVLR Process_Access_Request_VLR(CM_SERVICE_REQ:901700000004620){PR_ARQ_S_WAIT_AUTH}: Set Ciphering Mode
 DMM -> CIPHER MODE COMMAND MSISDN:46071
 - sending Ciphering Mode Command for MSISDN:46071: include_imeisv=0
-- ...perm algo: 2
+- ...perm algo: A5/1
 - ...key: 07fa7502e07e1c00
 DVLR Process_Access_Request_VLR(CM_SERVICE_REQ:901700000004620){PR_ARQ_S_WAIT_AUTH}: state_chg to PR_ARQ_S_WAIT_CIPH
 DREF MSISDN:46071: MSC conn use - dtap == 0 (0x0: )
@@ -376,7 +376,7 @@ DVLR Process_Access_Request_VLR(PAGING_RESP:901700000004620){PR_ARQ_S_WAIT_AUTH}
 DVLR Process_Access_Request_VLR(PAGING_RESP:901700000004620){PR_ARQ_S_WAIT_AUTH}: Set Ciphering Mode
 DMM -> CIPHER MODE COMMAND MSISDN:46071
 - sending Ciphering Mode Command for MSISDN:46071: include_imeisv=0
-- ...perm algo: 2
+- ...perm algo: A5/1
 - ...key: e2b234f807886400
 DVLR Process_Access_Request_VLR(PAGING_RESP:901700000004620){PR_ARQ_S_WAIT_AUTH}: state_chg to PR_ARQ_S_WAIT_CIPH
 DREF MSISDN:46071: MSC conn use - dtap == 0 (0x0: )
@@ -571,7 +571,7 @@ DVLR vlr_lu_fsm(LU:901700000004620){VLR_ULA_S_WAIT_AUTH}: vlr_loc_upd_post_auth(
 DVLR vlr_lu_fsm(LU:901700000004620){VLR_ULA_S_WAIT_AUTH}: Set Ciphering Mode
 DMM -> CIPHER MODE COMMAND IMSI:901700000004620
 - sending Ciphering Mode Command for IMSI:901700000004620: include_imeisv=0
-- ...perm algo: 2
+- ...perm algo: A5/1
 - ...key: 61855fb81fc2a800
 DVLR vlr_lu_fsm(LU:901700000004620){VLR_ULA_S_WAIT_AUTH}: state_chg to VLR_ULA_S_WAIT_CIPH
 DREF IMSI:901700000004620: MSC conn use - dtap == 0 (0x0: )
@@ -778,7 +778,7 @@ DVLR Process_Access_Request_VLR(CM_SERVICE_REQ:50462976){PR_ARQ_S_WAIT_AUTH}: _p
 DVLR Process_Access_Request_VLR(CM_SERVICE_REQ:50462976){PR_ARQ_S_WAIT_AUTH}: Set Ciphering Mode
 DMM -> CIPHER MODE COMMAND MSISDN:46071
 - sending Ciphering Mode Command for MSISDN:46071: include_imeisv=0
-- ...perm algo: 2
+- ...perm algo: A5/1
 - ...key: 07fa7502e07e1c00
 DVLR Process_Access_Request_VLR(CM_SERVICE_REQ:50462976){PR_ARQ_S_WAIT_AUTH}: state_chg to PR_ARQ_S_WAIT_CIPH
 DREF MSISDN:46071: MSC conn use - dtap == 0 (0x0: )
@@ -916,7 +916,7 @@ DVLR Process_Access_Request_VLR(PAGING_RESP:50462976){PR_ARQ_S_WAIT_AUTH}: _proc
 DVLR Process_Access_Request_VLR(PAGING_RESP:50462976){PR_ARQ_S_WAIT_AUTH}: Set Ciphering Mode
 DMM -> CIPHER MODE COMMAND MSISDN:46071
 - sending Ciphering Mode Command for MSISDN:46071: include_imeisv=0
-- ...perm algo: 2
+- ...perm algo: A5/1
 - ...key: e2b234f807886400
 DVLR Process_Access_Request_VLR(PAGING_RESP:50462976){PR_ARQ_S_WAIT_AUTH}: state_chg to PR_ARQ_S_WAIT_CIPH
 DREF MSISDN:46071: MSC conn use - dtap == 0 (0x0: )
@@ -1111,7 +1111,7 @@ DVLR vlr_lu_fsm(LU:901700000004620){VLR_ULA_S_WAIT_AUTH}: vlr_loc_upd_post_auth(
 DVLR vlr_lu_fsm(LU:901700000004620){VLR_ULA_S_WAIT_AUTH}: Set Ciphering Mode
 DMM -> CIPHER MODE COMMAND IMSI:901700000004620
 - sending Ciphering Mode Command for IMSI:901700000004620: include_imeisv=0
-- ...perm algo: 2
+- ...perm algo: A5/1
 - ...key: 61855fb81fc2a800
 DVLR vlr_lu_fsm(LU:901700000004620){VLR_ULA_S_WAIT_AUTH}: state_chg to VLR_ULA_S_WAIT_CIPH
 DREF IMSI:901700000004620: MSC conn use - dtap == 0 (0x0: )
@@ -1352,7 +1352,7 @@ DVLR vlr_lu_fsm(LU:901700000004620){VLR_ULA_S_WAIT_AUTH}: vlr_loc_upd_post_auth(
 DVLR vlr_lu_fsm(LU:901700000004620){VLR_ULA_S_WAIT_AUTH}: Set Ciphering Mode
 DMM -> CIPHER MODE COMMAND IMSI:901700000004620
 - sending Ciphering Mode Command for IMSI:901700000004620: include_imeisv=1
-- ...perm algo: 2
+- ...perm algo: A5/1
 - ...key: 61855fb81fc2a800
 DVLR vlr_lu_fsm(LU:901700000004620){VLR_ULA_S_WAIT_AUTH}: state_chg to VLR_ULA_S_WAIT_CIPH
 DREF IMSI:901700000004620: MSC conn use - dtap == 0 (0x0: )
@@ -1582,7 +1582,7 @@ DVLR vlr_lu_fsm(LU:901700000004620){VLR_ULA_S_WAIT_AUTH}: vlr_loc_upd_post_auth(
 DVLR vlr_lu_fsm(LU:901700000004620){VLR_ULA_S_WAIT_AUTH}: Set Ciphering Mode
 DMM -> CIPHER MODE COMMAND IMSI:901700000004620
 - sending Ciphering Mode Command for IMSI:901700000004620: include_imeisv=0
-- ...perm algo: 2
+- ...perm algo: A5/1
 - ...key: 61855fb81fc2a800
 DVLR vlr_lu_fsm(LU:901700000004620){VLR_ULA_S_WAIT_AUTH}: state_chg to VLR_ULA_S_WAIT_CIPH
 DREF IMSI:901700000004620: MSC conn use - dtap == 0 (0x0: )
@@ -1856,7 +1856,7 @@ DVLR vlr_lu_fsm(LU:901700000010650){VLR_ULA_S_WAIT_AUTH}: vlr_loc_upd_post_auth(
 DVLR vlr_lu_fsm(LU:901700000010650){VLR_ULA_S_WAIT_AUTH}: Set Ciphering Mode
 DMM -> CIPHER MODE COMMAND IMSI:901700000010650
 - sending Ciphering Mode Command for IMSI:901700000010650: include_imeisv=0
-- ...perm algo: 2
+- ...perm algo: A5/1
 - ...key: 7a75f0ac9b844400
 DVLR vlr_lu_fsm(LU:901700000010650){VLR_ULA_S_WAIT_AUTH}: state_chg to VLR_ULA_S_WAIT_CIPH
 DREF IMSI:901700000010650: MSC conn use - dtap == 0 (0x0: )
@@ -2015,7 +2015,7 @@ DVLR Process_Access_Request_VLR(CM_SERVICE_REQ:901700000010650){PR_ARQ_S_WAIT_AU
 DVLR Process_Access_Request_VLR(CM_SERVICE_REQ:901700000010650){PR_ARQ_S_WAIT_AUTH}: Set Ciphering Mode
 DMM -> CIPHER MODE COMMAND MSISDN:42342
 - sending Ciphering Mode Command for MSISDN:42342: include_imeisv=0
-- ...perm algo: 2
+- ...perm algo: A5/1
 - ...key: da149b11d473f400
 DVLR Process_Access_Request_VLR(CM_SERVICE_REQ:901700000010650){PR_ARQ_S_WAIT_AUTH}: state_chg to PR_ARQ_S_WAIT_CIPH
 DREF MSISDN:42342: MSC conn use - dtap == 0 (0x0: )
@@ -2143,7 +2143,7 @@ DVLR Process_Access_Request_VLR(PAGING_RESP:901700000010650){PR_ARQ_S_WAIT_AUTH}
 DVLR Process_Access_Request_VLR(PAGING_RESP:901700000010650){PR_ARQ_S_WAIT_AUTH}: Set Ciphering Mode
 DMM -> CIPHER MODE COMMAND MSISDN:42342
 - sending Ciphering Mode Command for MSISDN:42342: include_imeisv=0
-- ...perm algo: 2
+- ...perm algo: A5/1
 - ...key: 26ec67fad3073000
 DVLR Process_Access_Request_VLR(PAGING_RESP:901700000010650){PR_ARQ_S_WAIT_AUTH}: state_chg to PR_ARQ_S_WAIT_CIPH
 DREF MSISDN:42342: MSC conn use - dtap == 0 (0x0: )
