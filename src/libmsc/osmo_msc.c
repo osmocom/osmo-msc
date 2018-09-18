@@ -147,7 +147,12 @@ void msc_classmark_chg(struct gsm_subscriber_connection *conn,
 		       const uint8_t *cm2, uint8_t cm2_len,
 		       const uint8_t *cm3, uint8_t cm3_len)
 {
-	struct gsm_classmark *cm = &conn->vsub->classmark;
+	struct gsm_classmark *cm;
+
+	if (!conn->vsub)
+		cm = &conn->temporary_classmark;
+	else
+		cm = &conn->vsub->classmark;
 
 	if (cm2 && cm2_len) {
 		if (cm2_len > sizeof(cm->classmark2)) {

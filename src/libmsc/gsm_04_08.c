@@ -1739,6 +1739,22 @@ static void msc_vlr_subscr_update(struct vlr_subscr *subscr)
 		 subscr->imsi, subscr->msisdn, subscr->use_count);
 }
 
+static void update_classmark(const struct gsm_classmark *src, struct gsm_classmark *dst)
+{
+	if (src->classmark1_set) {
+		dst->classmark1 = src->classmark1;
+		dst->classmark1_set = true;
+	}
+	if (src->classmark2_len) {
+		dst->classmark2_len = src->classmark2_len;
+		memcpy(dst->classmark2, src->classmark2, sizeof(dst->classmark2));
+	}
+	if (src->classmark3_len) {
+		dst->classmark3_len = src->classmark3_len;
+		memcpy(dst->classmark3, src->classmark3, sizeof(dst->classmark3));
+	}
+}
+
 /* VLR informs us that the subscriber has been associated with a conn */
 static void msc_vlr_subscr_assoc(void *msc_conn_ref,
 				 struct vlr_subscr *vsub)
@@ -1749,6 +1765,11 @@ static void msc_vlr_subscr_assoc(void *msc_conn_ref,
 	conn->vsub = vlr_subscr_get(vsub);
 	OSMO_ASSERT(conn->vsub);
 	conn->vsub->cs.attached_via_ran = conn->via_ran;
+
+	/* In case we have already received Classmark Information before the VLR Subscriber was
+	 * associated with the conn: merge the new Classmark into vsub->classmark. Don't overwrite valid
+	 * vsub->classmark with unset classmark, though. */
+	update_classmark(&conn->temporary_classmark, &conn->vsub->classmark);
 }
 
 static int msc_vlr_route_gsup_msg(struct vlr_subscr *vsub,

@@ -181,6 +181,10 @@ struct gsm_subscriber_connection {
 
 		bool waiting_for_clear_complete;
 	} a;
+
+	/* Temporary storage for Classmark Information for times when a connection has no VLR subscriber
+	 * associated yet. It will get copied to the VLR subscriber upon msc_vlr_subscr_assoc(). */
+	struct gsm_classmark temporary_classmark;
 };
 
 
