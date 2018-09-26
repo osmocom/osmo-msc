@@ -543,6 +543,7 @@ int main(int argc, char **argv)
 
 	osmo_ss7_init();
 	osmo_ss7_vty_init_asp(tall_msc_ctx);
+	osmo_sccp_vty_init();
 
 	/* Parse options */
 	handle_options(argc, argv);
