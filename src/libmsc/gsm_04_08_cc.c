@@ -1606,7 +1606,7 @@ static void mncc_recv_rtp(struct gsm_network *net, uint32_t callref,
 
 	rtp->callref = callref;
 	rtp->msg_type = cmd;
-	rtp->ip = addr;
+	rtp->ip = osmo_htonl(addr);
 	rtp->port = port;
 	rtp->payload_type = payload_type;
 	rtp->payload_msg_type = payload_msg_type;
