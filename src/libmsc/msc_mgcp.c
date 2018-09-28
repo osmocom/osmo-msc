@@ -183,6 +183,16 @@ static void _handle_error(struct mgcp_ctx *mgcp_ctx, enum msc_mgcp_cause_code ca
 	LOGPFSMLSRC(mgcp_ctx->fsm, LOGL_ERROR, file, line, "%s -- graceful shutdown...\n",
 		    get_value_string(msc_mgcp_cause_codes_names, cause));
 
+	/* Request the higher layers (gsm_04_08.c) to release the call. If the
+	 * problem occured after msc_mgcp_call_release() was calls, remain
+	 * silent because we already got informed and the higher layers might
+	 * already freed their context information (trans). */
+	if (!mgcp_ctx->free_ctx) {
+		mncc_set_cause(&mncc, GSM48_CAUSE_LOC_TRANS_NET,
+			       GSM48_CC_CAUSE_RESOURCE_UNAVAIL);
+		mncc_tx_to_cc(mgcp_ctx->trans->net, MNCC_REL_REQ, &mncc);
+	}
+
 	/* For the shutdown we have two options. Whenever it makes sense to
 	 * send a DLCX to the MGW in order to be sure that the connection is
 	 * properly cleaned up, the dlcx flag should be set. In other cases
@@ -204,16 +214,6 @@ static void _handle_error(struct mgcp_ctx *mgcp_ctx, enum msc_mgcp_cause_code ca
 		 * msc_mgcp_call_release() */
 		osmo_fsm_inst_state_chg(fi, ST_HALT, 0, 0);
 		osmo_fsm_inst_dispatch(fi, EV_TEARDOWN_ERROR, mgcp_ctx);
-	}
-
-	/* Request the higher layers (gsm_04_08.c) to release the call. If the
-	 * problem occured after msc_mgcp_call_release() was calls, remain
-	 * silent because we already got informed and the higher layers might
-	 * already freed their context information (trans). */
-	if (!mgcp_ctx->free_ctx) {
-		mncc_set_cause(&mncc, GSM48_CAUSE_LOC_TRANS_NET,
-			       GSM48_CC_CAUSE_RESOURCE_UNAVAIL);
-		mncc_tx_to_cc(mgcp_ctx->trans->net, MNCC_REL_REQ, &mncc);
 	}
 }
 
