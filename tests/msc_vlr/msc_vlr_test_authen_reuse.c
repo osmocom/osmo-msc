@@ -85,7 +85,7 @@ static void _test_auth_reuse(enum ran_type via_ran,
 
 	if (via_ran == RAN_GERAN_A) {
 		btw("MS sends Authen Response, VLR accepts and sends GSUP LU Req to HLR");
-		gsup_expect_tx("04010809710000000156f0");
+		gsup_expect_tx("04010809710000000156f0280102");
 		ms_sends_msg("0554" "e229c19e" "2104" "791f2e41");
 		VERBOSE_ASSERT(gsup_tx_confirmed, == true, "%d");
 		VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
@@ -98,7 +98,7 @@ static void _test_auth_reuse(enum ran_type via_ran,
 		VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 		btw("MS sends SecurityModeControl acceptance, VLR accepts and sends GSUP LU Req to HLR");
-		gsup_expect_tx("04010809710000000156f0");
+		gsup_expect_tx("04010809710000000156f0280102");
 		ms_sends_security_mode_complete();
 		VERBOSE_ASSERT(gsup_tx_confirmed, == true, "%d");
 		VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
