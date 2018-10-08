@@ -158,15 +158,7 @@ static void _handle_error(struct mgcp_ctx *mgcp_ctx, enum msc_mgcp_cause_code ca
 {
 	bool dlcx_possible = true;
 	struct osmo_fsm_inst *fi;
-	struct gsm_mncc mncc = {
-		.msg_type = MNCC_REL_REQ,
-		.callref = mgcp_ctx->trans->callref,
-		.cause = {
-			.location = GSM48_CAUSE_LOC_PRN_S_LU,
-			.coding = 0, /* FIXME */
-			.value = GSM48_CC_CAUSE_RESOURCE_UNAVAIL
-		}
-	};
+	struct gsm_mncc mncc;
 
 	OSMO_ASSERT(mgcp_ctx);
 	fi = mgcp_ctx->fsm;
@@ -188,6 +180,16 @@ static void _handle_error(struct mgcp_ctx *mgcp_ctx, enum msc_mgcp_cause_code ca
 	 * silent because we already got informed and the higher layers might
 	 * already freed their context information (trans). */
 	if (!mgcp_ctx->free_ctx) {
+		mncc = (struct gsm_mncc) {
+			.msg_type = MNCC_REL_REQ,
+			.callref = mgcp_ctx->trans->callref,
+			.cause = {
+				.location = GSM48_CAUSE_LOC_PRN_S_LU,
+				.coding = 0, /* FIXME */
+				.value = GSM48_CC_CAUSE_RESOURCE_UNAVAIL
+			}
+		};
+
 		mncc_set_cause(&mncc, GSM48_CAUSE_LOC_TRANS_NET,
 			       GSM48_CC_CAUSE_RESOURCE_UNAVAIL);
 		mncc_tx_to_cc(mgcp_ctx->trans->net, MNCC_REL_REQ, &mncc);
