@@ -23,6 +23,7 @@ enum bsc_vty_node {
 	SMPP_NODE,
 	SMPP_ESME_NODE,
 	HLR_NODE,
+	CFG_SGS_NODE,
 };
 
 int bsc_vty_init_extra(void);

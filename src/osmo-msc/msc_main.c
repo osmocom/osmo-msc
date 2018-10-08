@@ -493,6 +493,12 @@ static const struct log_info_cat msc_default_categories[] = {
 		.description = "BSSAP Protocol (A Interface)",
 		.enabled = 1, .loglevel = LOGL_NOTICE,
 	},
+	[DSGS] = {
+		.name = "DSGS",
+		.description = "SGs Interface (SGsAP)",
+		.enabled = 1, .loglevel = LOGL_NOTICE,
+	},
+
 
 };
 
@@ -516,6 +522,8 @@ const struct log_info log_info = {
 extern void *tall_gsms_ctx;
 extern void *tall_call_ctx;
 extern void *tall_trans_ctx;
+
+extern void *sgs_init(void *ctx);
 
 int main(int argc, char **argv)
 {
@@ -570,6 +578,7 @@ int main(int argc, char **argv)
 	if (smpp_openbsc_alloc_init(tall_msc_ctx) < 0)
 		return -1;
 #endif
+	sgs_init(tall_msc_ctx);
 
 	rc = vty_read_config_file(msc_cmdline_config.config_file, NULL);
 	if (rc < 0) {

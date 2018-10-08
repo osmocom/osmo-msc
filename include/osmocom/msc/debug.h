@@ -21,5 +21,6 @@ enum {
 	DVLR,
 	DIUCS,
 	DBSSAP,
+	DSGS,
 	Debug_LastEntry,
 };

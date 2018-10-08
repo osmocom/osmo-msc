@@ -51,6 +51,7 @@ libmsc_a_SOURCES = \
 	osmo_msc.c \
 	ctrl_commands.c \
 	subscr_conn.c \
+	sgs_iface.c \
 	$(NULL)
 if BUILD_IU
 libmsc_a_SOURCES += \
