@@ -333,6 +333,16 @@ DEFUN(cfg_msc, cfg_msc_cmd,
 	return CMD_SUCCESS;
 }
 
+DEFUN(cfg_msc_mncc_guard_timeout,
+      cfg_msc_mncc_guard_timeout_cmd,
+      "mncc-guard-timeout <0-255>",
+      "Set global guard timer for mncc interface activity\n"
+      "guard timer value (sec.)")
+{
+	gsmnet->mncc_guard_timeout = atoi(argv[0]);
+	return CMD_SUCCESS;
+}
+
 DEFUN(cfg_msc_assign_tmsi, cfg_msc_assign_tmsi_cmd,
       "assign-tmsi",
       "Assign TMSI during Location Updating.\n")
@@ -421,6 +431,8 @@ DEFUN(cfg_msc_emergency_msisdn, cfg_msc_emergency_msisdn_cmd,
 static int config_write_msc(struct vty *vty)
 {
 	vty_out(vty, "msc%s", VTY_NEWLINE);
+	vty_out(vty, " mncc-guard-timeout %i%s",
+		gsmnet->mncc_guard_timeout, VTY_NEWLINE);
 	vty_out(vty, " %sassign-tmsi%s",
 		gsmnet->vlr->cfg.assign_tmsi? "" : "no ", VTY_NEWLINE);
 
@@ -1415,6 +1427,7 @@ void msc_vty_init(struct gsm_network *msc_network)
 	install_element(CONFIG_NODE, &cfg_msc_cmd);
 	install_node(&msc_node, config_write_msc);
 	install_element(MSC_NODE, &cfg_msc_assign_tmsi_cmd);
+	install_element(MSC_NODE, &cfg_msc_mncc_guard_timeout_cmd);
 	install_element(MSC_NODE, &cfg_msc_no_assign_tmsi_cmd);
 	install_element(MSC_NODE, &cfg_msc_auth_tuple_max_reuse_count_cmd);
 	install_element(MSC_NODE, &cfg_msc_auth_tuple_reuse_on_error_cmd);

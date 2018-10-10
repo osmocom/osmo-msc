@@ -73,6 +73,43 @@
 
 static uint32_t new_callref = 0x80000001;
 
+static void gsm48_cc_guard_timeout(void *arg)
+{
+	struct gsm_trans *trans = arg;
+	DEBUGP(DCC, "(sub %s) guard timeout expired\n",
+	       vlr_subscr_msisdn_or_name(trans->vsub));
+	trans_free(trans);
+	return;
+}
+
+static void gsm48_stop_guard_timer(struct gsm_trans *trans)
+{
+	if (osmo_timer_pending(&trans->cc.timer_guard)) {
+		DEBUGP(DCC, "(sub %s) stopping pending guard timer\n",
+		       vlr_subscr_msisdn_or_name(trans->vsub));
+		osmo_timer_del(&trans->cc.timer_guard);
+	}
+}
+
+static void gsm48_start_guard_timer(struct gsm_trans *trans)
+{
+	/* NOTE: The purpose of this timer is to prevent the cc state machine
+	 * from hanging in cases where mncc, gsm48 or both become unresponsive
+	 * for some reason. The timer is started initially with the setup from
+	 * the gsm48 side and then re-started with every incoming mncc message.
+	 * Once the mncc state reaches its active state the timer is stopped.
+	 * So if the cc state machine does not show any activity for an
+	 * extended amount of time during call setup or teardown the guard
+	 * timer will time out and hard-clear the connection. */
+	if (osmo_timer_pending(&trans->cc.timer_guard))
+		gsm48_stop_guard_timer(trans);
+	DEBUGP(DCC, "(sub %s) starting guard timer with %d seconds\n",
+	       vlr_subscr_msisdn_or_name(trans->vsub),
+	       trans->net->mncc_guard_timeout);
+	osmo_timer_setup(&trans->cc.timer_guard, gsm48_cc_guard_timeout, trans);
+	osmo_timer_schedule(&trans->cc.timer_guard,
+			    trans->net->mncc_guard_timeout, 0);
+}
 
 /* Call Control */
 
@@ -149,6 +186,10 @@ static void new_cc_state(struct gsm_trans *trans, int state)
 
 	count_statistics(trans, state);
 	trans->cc.state = state;
+
+	/* Stop the guard timer when a call reaches the active state */
+	if (state == GSM_CSTATE_ACTIVE)
+		gsm48_stop_guard_timer(trans);
 }
 
 static int gsm48_cc_tx_status(struct gsm_trans *trans, void *arg)
@@ -259,6 +300,8 @@ void _gsm48_cc_trans_free(struct gsm_trans *trans)
 	}
 	if (trans->cc.state != GSM_CSTATE_NULL)
 		new_cc_state(trans, GSM_CSTATE_NULL);
+
+	gsm48_stop_guard_timer(trans);
 }
 
 static int gsm48_cc_tx_setup(struct gsm_trans *trans, void *arg);
@@ -473,6 +516,8 @@ static int gsm48_cc_rx_setup(struct gsm_trans *trans, struct msgb *msg)
 	unsigned int payload_len = msgb_l3len(msg) - sizeof(*gh);
 	struct tlv_parsed tp;
 	struct gsm_mncc setup;
+
+	gsm48_start_guard_timer(trans);
 
 	memset(&setup, 0, sizeof(struct gsm_mncc));
 	setup.callref = trans->callref;
@@ -1969,6 +2014,8 @@ int mncc_tx_to_cc(struct gsm_network *net, int msg_type, void *arg)
 		/* update the subscriber we deal with */
 		log_set_context(LOG_CTX_VLR_SUBSCR, trans->vsub);
 	}
+
+	gsm48_start_guard_timer(trans);
 
 	if (trans->conn)
 		conn = trans->conn;

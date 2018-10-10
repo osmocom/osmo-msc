@@ -69,6 +69,7 @@ struct gsm_trans {
 			int Tcurrent;		/* current CC timer */
 			int T308_second;	/* used to send release again */
 			struct osmo_timer_list timer;
+			struct osmo_timer_list timer_guard;
 			struct gsm_mncc msg;	/* stores setup/disconnect/release message */
 		} cc;
 		struct {

@@ -332,6 +332,9 @@ struct gsm_network {
 	/* Periodic location update default value */
 	uint8_t t3212;
 
+	/* Global MNCC guard timer value */
+	int mncc_guard_timeout;
+
 	struct {
 		struct mgcp_client_conf conf;
 		struct mgcp_client *client;

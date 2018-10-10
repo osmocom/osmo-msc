@@ -277,6 +277,7 @@ DREF VLR subscr MSISDN:42342 usage increases to: 3
 DREF MSISDN:42342: MSC conn use + trans_cc == 3 (0x1a: dtap,cm_service,trans_cc)
 DMM MSISDN:42342: rx msg GSM48_MT_CC_SETUP: received_cm_service_request changes to false
 DREF MSISDN:42342: MSC conn use - cm_service == 2 (0x12: dtap,trans_cc)
+DCC (sub 42342) starting guard timer with 180 seconds
 DCC (ti 08 sub MSISDN:42342) new state NULL -> INITIATED
 DCC Subscriber MSISDN:42342 (42342) sends SETUP to 123
 DMNCC transmit message MNCC_SETUP_IND
@@ -287,6 +288,8 @@ DMM Subscr_Conn(CM_SERVICE_REQ:901700000010650){SUBSCR_CONN_S_ACCEPTED}: state_c
 DREF MSISDN:42342: MSC conn use - dtap == 1 (0x10: trans_cc)
 - MNCC says that's fine
 DMNCC receive message MNCC_CALL_PROC_REQ
+DCC (sub 42342) stopping pending guard timer
+DCC (sub 42342) starting guard timer with 180 seconds
 DCC (ti 08 sub 42342) Received 'MNCC_CALL_PROC_REQ' from MNCC in state 1 (INITIATED)
 DCC (ti 08 sub MSISDN:42342) new state INITIATED -> MO_CALL_PROC
 DMSC msc_tx 2 bytes to MSISDN:42342 via RAN_UTRAN_IU
@@ -296,12 +299,16 @@ DMSC msc_tx 2 bytes to MSISDN:42342 via RAN_UTRAN_IU
 - Total time passed: 1.000023 s
 - The other call leg got established (not shown here), MNCC tells us so
 DMNCC receive message MNCC_ALERT_REQ
+DCC (sub 42342) stopping pending guard timer
+DCC (sub 42342) starting guard timer with 180 seconds
 DCC (ti 08 sub 42342) Received 'MNCC_ALERT_REQ' from MNCC in state 3 (MO_CALL_PROC)
 DCC (ti 08 sub MSISDN:42342) new state MO_CALL_PROC -> CALL_DELIVERED
 DMSC msc_tx 2 bytes to MSISDN:42342 via RAN_UTRAN_IU
 - DTAP --RAN_UTRAN_IU--> MS: GSM48_MT_CC_ALERTING: 8301
 - DTAP matches expected message
 DMNCC receive message MNCC_SETUP_RSP
+DCC (sub 42342) stopping pending guard timer
+DCC (sub 42342) starting guard timer with 180 seconds
 DCC (ti 08 sub 42342) Received 'MNCC_SETUP_RSP' from MNCC in state 4 (CALL_DELIVERED)
 DCC starting timer T313 with 30 seconds
 DCC (ti 08 sub MSISDN:42342) new state CALL_DELIVERED -> CONNECT_IND
@@ -314,6 +321,7 @@ DREF MSISDN:42342: MSC conn use + dtap == 2 (0x12: dtap,trans_cc)
 DRLL Dispatching 04.08 message GSM48_MT_CC_CONNECT_ACK (0x3:0xf)
 DCC stopping pending timer T313
 DCC (ti 08 sub MSISDN:42342) new state CONNECT_IND -> ACTIVE
+DCC (sub 42342) stopping pending guard timer
 DMNCC transmit message MNCC_SETUP_COMPL_IND
 DCC Sending 'MNCC_SETUP_COMPL_IND' to MNCC.
   MSC --> MNCC: callref 0x80000001: MNCC_SETUP_COMPL_IND
@@ -334,6 +342,7 @@ DCC Sending 'MNCC_DISC_IND' to MNCC.
 DMM Subscr_Conn(CM_SERVICE_REQ:901700000010650){SUBSCR_CONN_S_COMMUNICATING}: Received Event SUBSCR_CONN_E_COMMUNICATING
 DREF MSISDN:42342: MSC conn use - dtap == 1 (0x10: trans_cc)
 DMNCC receive message MNCC_REL_REQ
+DCC (sub 42342) starting guard timer with 180 seconds
 DCC (ti 08 sub 42342) Received 'MNCC_REL_REQ' from MNCC in state 12 (DISCONNECT_IND)
 DCC starting timer T308 with 10 seconds
 DCC (ti 08 sub MSISDN:42342) new state DISCONNECT_IND -> RELEASE_REQ
@@ -349,6 +358,7 @@ DCC Sending 'MNCC_REL_CNF' to MNCC.
   MSC --> MNCC: callref 0x80000001: MNCC_REL_CNF
   MS <--Call Release-- MSC: subscr=MSISDN:42342 callref=0x0
 DCC (ti 08 sub MSISDN:42342) new state RELEASE_REQ -> NULL
+DCC (sub 42342) stopping pending guard timer
 DREF VLR subscr MSISDN:42342 usage decreases to: 2
 DREF MSISDN:42342: MSC conn use - trans_cc == 1 (0x2: dtap)
 DMM Subscr_Conn(CM_SERVICE_REQ:901700000010650){SUBSCR_CONN_S_COMMUNICATING}: Received Event SUBSCR_CONN_E_COMMUNICATING
@@ -697,8 +707,10 @@ DCC Sending 'MNCC_SETUP_CNF' to MNCC.
 DMM Subscr_Conn(PAGING_RESP:901700000010650){SUBSCR_CONN_S_COMMUNICATING}: Received Event SUBSCR_CONN_E_COMMUNICATING
 DREF MSISDN:42342: MSC conn use - dtap == 1 (0x10: trans_cc)
 DMNCC receive message MNCC_SETUP_COMPL_REQ
+DCC (sub 42342) starting guard timer with 180 seconds
 DCC (ti 00 sub 42342) Received 'MNCC_SETUP_COMPL_REQ' from MNCC in state 8 (CONNECT_REQUEST)
 DCC (ti 00 sub MSISDN:42342) new state CONNECT_REQUEST -> ACTIVE
+DCC (sub 42342) stopping pending guard timer
 DMSC msc_tx 2 bytes to MSISDN:42342 via RAN_UTRAN_IU
 - DTAP --RAN_UTRAN_IU--> MS: GSM48_MT_CC_CONNECT_ACK: 030f
 - DTAP matches expected message
@@ -717,6 +729,7 @@ DCC Sending 'MNCC_DISC_IND' to MNCC.
 DMM Subscr_Conn(PAGING_RESP:901700000010650){SUBSCR_CONN_S_COMMUNICATING}: Received Event SUBSCR_CONN_E_COMMUNICATING
 DREF MSISDN:42342: MSC conn use - dtap == 1 (0x10: trans_cc)
 DMNCC receive message MNCC_REL_REQ
+DCC (sub 42342) starting guard timer with 180 seconds
 DCC (ti 00 sub 42342) Received 'MNCC_REL_REQ' from MNCC in state 12 (DISCONNECT_IND)
 DCC starting timer T308 with 10 seconds
 DCC (ti 00 sub MSISDN:42342) new state DISCONNECT_IND -> RELEASE_REQ
@@ -732,6 +745,7 @@ DCC Sending 'MNCC_REL_CNF' to MNCC.
   MSC --> MNCC: callref 0x423: MNCC_REL_CNF
   MS <--Call Release-- MSC: subscr=MSISDN:42342 callref=0x0
 DCC (ti 00 sub MSISDN:42342) new state RELEASE_REQ -> NULL
+DCC (sub 42342) stopping pending guard timer
 DREF VLR subscr MSISDN:42342 usage decreases to: 2
 DREF MSISDN:42342: MSC conn use - trans_cc == 1 (0x2: dtap)
 DMM Subscr_Conn(PAGING_RESP:901700000010650){SUBSCR_CONN_S_COMMUNICATING}: Received Event SUBSCR_CONN_E_COMMUNICATING
@@ -1078,6 +1092,7 @@ DREF VLR subscr MSISDN:42342 usage decreases to: 3
 DCC stopping pending timer T301
   MS <--Call Release-- MSC: subscr=MSISDN:42342 callref=0x423
 DMNCC receive message MNCC_REL_REQ
+DCC (sub 42342) starting guard timer with 180 seconds
 DCC (ti 00 sub 42342) Received 'MNCC_REL_REQ' from MNCC in state 7 (CALL_RECEIVED)
 DCC starting timer T308 with 10 seconds
 DCC (ti 00 sub MSISDN:42342) new state CALL_RECEIVED -> RELEASE_REQ
@@ -1089,6 +1104,7 @@ DCC Sending 'MNCC_REL_CNF' to MNCC.
   MSC --> MNCC: callref 0x423: MNCC_REL_CNF
 DCC stopping pending timer T308
 DCC (ti 00 sub MSISDN:42342) new state RELEASE_REQ -> NULL
+DCC (sub 42342) stopping pending guard timer
 DREF VLR subscr MSISDN:42342 usage decreases to: 2
 DREF MSISDN:42342: MSC conn use - trans_cc == 1 (0x100: release)
 - Iu Release --RAN_UTRAN_IU--> MS
@@ -1389,6 +1405,7 @@ DREF VLR subscr MSISDN:42342 usage increases to: 3
 DREF MSISDN:42342: MSC conn use + trans_cc == 3 (0x1a: dtap,cm_service,trans_cc)
 DMM MSISDN:42342: rx msg GSM48_MT_CC_SETUP: received_cm_service_request changes to false
 DREF MSISDN:42342: MSC conn use - cm_service == 2 (0x12: dtap,trans_cc)
+DCC (sub 42342) starting guard timer with 180 seconds
 DCC (ti 08 sub MSISDN:42342) new state NULL -> INITIATED
 DCC Subscriber MSISDN:42342 (42342) sends SETUP to 123
 DMNCC transmit message MNCC_SETUP_IND
@@ -1399,6 +1416,8 @@ DMM Subscr_Conn(CM_SERVICE_REQ:901700000010650){SUBSCR_CONN_S_ACCEPTED}: state_c
 DREF MSISDN:42342: MSC conn use - dtap == 1 (0x10: trans_cc)
 - MNCC says that's fine
 DMNCC receive message MNCC_CALL_PROC_REQ
+DCC (sub 42342) stopping pending guard timer
+DCC (sub 42342) starting guard timer with 180 seconds
 DCC (ti 08 sub 42342) Received 'MNCC_CALL_PROC_REQ' from MNCC in state 1 (INITIATED)
 DCC (ti 08 sub MSISDN:42342) new state INITIATED -> MO_CALL_PROC
 DMSC msc_tx 2 bytes to MSISDN:42342 via RAN_UTRAN_IU
@@ -1407,6 +1426,8 @@ DMSC msc_tx 2 bytes to MSISDN:42342 via RAN_UTRAN_IU
   MS <--Call Assignment-- MSC: subscr=MSISDN:42342 callref=0x80000002
 - But the other side's MSISDN could not be resolved, MNCC tells us to cancel
 DMNCC receive message MNCC_REL_REQ
+DCC (sub 42342) stopping pending guard timer
+DCC (sub 42342) starting guard timer with 180 seconds
 DCC (ti 08 sub 42342) Received 'MNCC_REL_REQ' from MNCC in state 3 (MO_CALL_PROC)
 DCC starting timer T308 with 10 seconds
 DCC (ti 08 sub MSISDN:42342) new state MO_CALL_PROC -> RELEASE_REQ
@@ -1427,6 +1448,7 @@ DCC Sending 'MNCC_REL_CNF' to MNCC.
   MSC --> MNCC: callref 0x80000002: MNCC_REL_CNF
   MS <--Call Release-- MSC: subscr=MSISDN:42342 callref=0x0
 DCC (ti 08 sub MSISDN:42342) new state RELEASE_REQ -> NULL
+DCC (sub 42342) stopping pending guard timer
 DREF VLR subscr MSISDN:42342 usage decreases to: 2
 DREF MSISDN:42342: MSC conn use - trans_cc == 1 (0x2: dtap)
 DMM Subscr_Conn(CM_SERVICE_REQ:901700000010650){SUBSCR_CONN_S_COMMUNICATING}: Received Event SUBSCR_CONN_E_COMMUNICATING
@@ -1733,6 +1755,7 @@ DREF VLR subscr MSISDN:42342 usage increases to: 3
 DREF MSISDN:42342: MSC conn use + trans_cc == 3 (0x1a: dtap,cm_service,trans_cc)
 DMM MSISDN:42342: rx msg GSM48_MT_CC_SETUP: received_cm_service_request changes to false
 DREF MSISDN:42342: MSC conn use - cm_service == 2 (0x12: dtap,trans_cc)
+DCC (sub 42342) starting guard timer with 180 seconds
 DCC (ti 08 sub MSISDN:42342) new state NULL -> INITIATED
 DCC Subscriber MSISDN:42342 (42342) sends SETUP to 123
 DMNCC transmit message MNCC_SETUP_IND
@@ -1743,6 +1766,8 @@ DMM Subscr_Conn(CM_SERVICE_REQ:901700000010650){SUBSCR_CONN_S_ACCEPTED}: state_c
 DREF MSISDN:42342: MSC conn use - dtap == 1 (0x10: trans_cc)
 - MNCC says that's fine
 DMNCC receive message MNCC_CALL_PROC_REQ
+DCC (sub 42342) stopping pending guard timer
+DCC (sub 42342) starting guard timer with 180 seconds
 DCC (ti 08 sub 42342) Received 'MNCC_CALL_PROC_REQ' from MNCC in state 1 (INITIATED)
 DCC (ti 08 sub MSISDN:42342) new state INITIATED -> MO_CALL_PROC
 DMSC msc_tx 2 bytes to MSISDN:42342 via RAN_UTRAN_IU
@@ -1751,6 +1776,8 @@ DMSC msc_tx 2 bytes to MSISDN:42342 via RAN_UTRAN_IU
   MS <--Call Assignment-- MSC: subscr=MSISDN:42342 callref=0x80000003
 - But the other side's MSISDN could not be resolved, MNCC tells us to cancel
 DMNCC receive message MNCC_REL_REQ
+DCC (sub 42342) stopping pending guard timer
+DCC (sub 42342) starting guard timer with 180 seconds
 DCC (ti 08 sub 42342) Received 'MNCC_REL_REQ' from MNCC in state 3 (MO_CALL_PROC)
 DCC starting timer T308 with 10 seconds
 DCC (ti 08 sub MSISDN:42342) new state MO_CALL_PROC -> RELEASE_REQ
@@ -1770,6 +1797,7 @@ DMNCC transmit message MNCC_REL_CNF
 DCC Sending 'MNCC_REL_CNF' to MNCC.
   MSC --> MNCC: callref 0x80000003: MNCC_REL_CNF
 DCC (ti 08 sub MSISDN:42342) new state RELEASE_REQ -> NULL
+DCC (sub 42342) stopping pending guard timer
 DREF VLR subscr MSISDN:42342 usage decreases to: 2
 DREF MSISDN:42342: MSC conn use - trans_cc == 0 (0x0: )
 DMM Subscr_Conn(CM_SERVICE_REQ:901700000010650){SUBSCR_CONN_S_COMMUNICATING}: Received Event SUBSCR_CONN_E_UNUSED
