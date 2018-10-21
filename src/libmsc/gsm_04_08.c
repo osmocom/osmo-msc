@@ -1397,7 +1397,8 @@ static bool gsm0407_is_duplicate(struct gsm_subscriber_connection *conn, struct 
 {
 	struct gsm48_hdr *gh;
 	uint8_t pdisc;
-	uint8_t n_sd, modulo, bin;
+	uint8_t n_sd, modulo;
+	int bin;
 
 	gh = msgb_l3(msg);
 	pdisc = gsm48_hdr_pdisc(gh);
