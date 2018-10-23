@@ -21,7 +21,7 @@ arguments:
 	Fork the process as a daemon into background.
 *-c, --config-file 'CONFIGFILE'*::
 	Specify the file and path name of the configuration file to be
-	used. If none is specified, use `openbsc.cfg` in the current
+	used. If none is specified, use `osmo-msc.cfg` in the current
 	working directory.
 *-s, --disable-color*::
 	Disable colors for logging to stderr. This has mostly been
