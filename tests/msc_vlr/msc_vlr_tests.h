@@ -152,7 +152,7 @@ extern msc_vlr_test_func_t msc_vlr_tests[];
 struct msgb *msgb_from_hex(const char *label, uint16_t size, const char *hex);
 
 void clear_vlr();
-bool conn_exists(struct gsm_subscriber_connection *conn);
+bool conn_exists(const struct gsm_subscriber_connection *conn);
 void conn_conclude_cm_service_req(struct gsm_subscriber_connection *conn,
 				  enum ran_type via_ran);
 

@@ -161,13 +161,18 @@ void gsup_rx(const char *rx_hex, const char *expect_tx_hex)
 		OSMO_ASSERT(gsup_tx_confirmed);
 }
 
-bool conn_exists(struct gsm_subscriber_connection *conn)
+bool conn_exists(const struct gsm_subscriber_connection *conn)
 {
 	struct gsm_subscriber_connection *c;
+
+	if (!conn)
+		return false;
+
 	llist_for_each_entry(c, &net->subscr_conns, entry) {
 		if (c == conn)
 			return true;
 	}
+
 	return false;
 }
 
@@ -212,7 +217,7 @@ void rx_from_ms(struct msgb *msg)
 	    ran_type_name(rx_from_ran),
 	    gh_type_name(gh));
 
-	if (g_conn && !conn_exists(g_conn))
+	if (!conn_exists(g_conn))
 		g_conn = NULL;
 
 	if (!g_conn) {
@@ -230,7 +235,7 @@ void rx_from_ms(struct msgb *msg)
 			msc_dtap(g_conn, 23, msg);
 	}
 
-	if (g_conn && !conn_exists(g_conn))
+	if (!conn_exists(g_conn))
 		g_conn = NULL;
 }
 
@@ -258,7 +263,7 @@ void bss_sends_bssap_mgmt(const char *hex)
 	bh->type = BSSAP_MSG_BSS_MANAGEMENT;
 	bh->length = msgb_l3len(msg);
 
-	if (g_conn && !conn_exists(g_conn))
+	if (!conn_exists(g_conn))
 		g_conn = NULL;
 
 	OSMO_ASSERT(g_conn);
