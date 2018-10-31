@@ -1,0 +1,154 @@
+[[net]]
+== Configuring the Core Network
+
+The core network parameters are configured by the config file (as in `osmo-msc
+-c osmo-msc.cfg`). The config file is parsed by the VTY, which is also
+available via telnet in the running `osmo-msc` instance. Be aware that even
+though you may be able to change these parameters without restarting
+`osmo-msc`, some may not take immediate effect, and it is safest to use the
+config file to have these parameters set at startup time.
+
+The core network parameters are found in the `config` / `network`.
+
+A full reference to the available commands can be found in the _OsmoMSC VTY
+reference manual_ <<vty-ref-osmomsc>>. This section describes only the most
+commonly used settings.
+
+Here is an overview of the config items, described in more detail below:
+
+----
+network
+ network country code 262
+ mobile network code 89
+ mm info 1
+ short name OsmoMSC
+ long name OsmoMSC
+ authentication required
+ encryption a5 3
+----
+
+[TIP]
+====
+Use the telnet VTY interface to query the current configuration of a running
+`osmo-msc` process:
+
+----
+$ telnet localhost 4254
+OsmoMSC> enable
+OsmoMSC# show running-config
+----
+
+Some parameters may be changed without restarting `osmo-msc`. To reach the
+`network` node, enter:
+
+----
+OsmoMSC> enable
+OsmoMSC# configure terminal
+OsmoMSC(config)# network
+OsmoMSC(config-net)# short name Example-Name
+OsmoMSC(config-net)# exit
+OsmoMSC(config)#
+----
+
+The telnet VTY features tab-completion as well as context sensitive help shown
+when entering a `?` question mark.
+
+You can always use the `list` VTY command or enter `?` on the blank prompt to
+get a list of all possible commands at the current node.
+====
+
+
+=== MCC/MNC
+
+The key identities of every GSM PLMN is the Mobile Country Code and the Mobile
+Network Code. They are identical over the entire network. In most cases, the
+MCC/MNC will be allocated to the operator by the respective local regulatory
+authority. For example, to set the MCC/MNC of 262-89, have this in your
+osmo-msc.cfg:
+
+----
+network
+ network country code 262
+ mobile network code 89
+----
+
+
+=== Configuring MM INFO
+
+The _MM INFO_ procedure can be used after a successful _LOCATION UPDATE_ in
+order to transmit the human-readable network name as well as local time zone
+information to the MS.  By default, _MM INFO_ is not active, i.e. `0`. Set to `1`
+to activate this feature:
+
+----
+network
+ mm info 1
+ short name OsmoMSC
+ long name OsmoMSC
+----
+
+[NOTE]
+====
+Not all phones support the MM INFO procedure. If a phone is not
+factory-programmed to contain the name for your MCC/MNC, it will likely only
+provide a numeric display of the network name, such as _262-89_, or show the
+country code transformed into a letter, such as _D 89_.
+====
+
+The time information transmitted is determined by the local system time of the
+operating system on which OsmoMSC is running.
+
+
+=== Authentication
+
+Authorized subscribers must be entered in the HLR database, see the _OsmoHLR
+reference manual_ <<userman-osmohlr>>. If authentication tokens (such as KI for
+2G, or K and OP/OPC for UMTS) are present in the HLR, OsmoMSC will only attach
+a subscriber after successful authentication.
+
+If no authentication keys are present in the HLR for a given subscriber,
+OsmoMSC will attach the subscriber _without_ authentication. You can reject
+subscribers that lack authentication info in the HLR with this setting:
+
+----
+network
+ authentication required
+----
+
+=== Ciphering
+
+To enable ciphering on the radio link, authentication must take place first:
+the Kc resulting from authentication is the key used for ciphering. Hence, all
+subscribers must have authentication tokens available in the HLR for ciphering.
+
+The MS, BTS and MSC must agree on a ciphering algorithm to use.
+
+- The MS sends its supported ciphering algorithms via Classmark IEs during
+  Location Updating.
+- Typically the BSC needs to know which A5 ciphers are supported by connected
+  BTSes.
+- Finally, OsmoMSC may impose that specific A5 ciphers shall not be considered.
+
+It is the responsibility of the BSC to then pick an A5 cipher that satisfies
+all requirements.
+
+- In OsmoMSC, A5/0 means that ciphering is turned off.
++
+----
+network
+ encryption a5 0
+----
+
+- A5/1 and A5/3 are currently supported by Osmocom.
++
+----
+network
+ encryption a5 3
+----
+
+- Never use A5/2: it is an "export grade cipher" and has been deprecated for
+  its low ciphering strength.
+
+NOTE: At the time of writing, OsmoMSC supports setting only a single A5 cipher,
+while it should be able to allow a set of ciphers. This is subject to ongoing
+development.

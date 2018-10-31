@@ -76,6 +76,25 @@ then
 	CPPFLAGS="$CPPFLAGS $WERROR_FLAGS"
 fi
 
+# Generate manuals
+AC_ARG_ENABLE(manuals,
+	[AS_HELP_STRING(
+		[--enable-manuals],
+		[Generate manual PDFs [default=no]],
+	)],
+	[osmo_ac_build_manuals=$enableval], [osmo_ac_build_manuals="no"])
+if test x"$osmo_ac_build_manuals" = x"yes"
+then
+	PKG_CHECK_MODULES(OSMOGSMMANUALS, osmo-gsm-manuals)
+	if ! osmo-gsm-manuals-check-depends
+	then
+		AC_MSG_ERROR("missing dependencies for --enable-manuals")
+	fi
+	OSMO_GSM_MANUALS_DIR=$($PKG_CONFIG osmo-gsm-manuals --variable=osmogsmmanualsdir)
+	AC_SUBST([OSMO_GSM_MANUALS_DIR])
+fi
+AM_CONDITIONAL([BUILD_MANUALS], [test x"$osmo_ac_build_manuals" = x"yes"])
+
 # Enable/disable smpp support in the msc?
 AC_ARG_ENABLE([smpp], [AS_HELP_STRING([--enable-smpp], [Build the SMPP interface])],
     [osmo_ac_build_smpp="$enableval"],[osmo_ac_build_smpp="no"])
@@ -219,6 +238,7 @@ AC_OUTPUT(
     tests/msc_vlr/Makefile
     doc/Makefile
     doc/examples/Makefile
+    doc/manuals/Makefile
     contrib/Makefile
     contrib/systemd/Makefile
     Makefile)

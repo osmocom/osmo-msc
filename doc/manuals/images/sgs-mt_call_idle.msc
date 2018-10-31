@@ -1,0 +1,17 @@
+msc {
+	hscale=2;
+	UE, ENB [label="eNodeB"], BSS, MME, VLR [label="MSC/VLR"], PSTN;
+
+	VLR <= PSTN	[label="ISUP IAM or SIP INVITE"];
+	MME <= VLR	[label="SGsAP PAGING REQUEST"];
+	ENB <= MME	[label="Paging"];
+	UE <= MME	[label="Paging"];
+
+	UE => MME	[label="Extended Service Req"];
+	MME => VLR	[label="SGsAP SERVICE REQUEST"];
+	ENB <= MME	[label="Initial UE Ctx Setup"];
+
+	UE => BSS	[label="Paging Response"];
+	BSS => VLR	[label="COMPL L3 (PAGING RESP)"];
+	UE <=> VLR	[label="Normal 2G Voice Call"];
+}
