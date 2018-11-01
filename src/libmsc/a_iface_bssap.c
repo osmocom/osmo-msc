@@ -420,21 +420,22 @@ static int bssmap_rx_ciph_compl(struct gsm_subscriber_connection *conn, struct m
 	return 0;
 }
 
-/* Endpoint to handle BSSMAP cipher mode reject */
+/* Endpoint to handle BSSMAP cipher mode reject, 3GPP TS 08.08 §3.2.1.48 */
 static int bssmap_rx_ciph_rej(struct gsm_subscriber_connection *conn,
 			      struct msgb *msg, struct tlv_parsed *tp)
 {
-	uint8_t cause;
+	enum gsm0808_cause cause;
 
 	LOGPCONN(conn, LOGL_NOTICE, "RX BSSMAP CIPHER MODE REJECT\n");
 
-	if (!TLVP_PRESENT(tp, BSS_MAP_MSG_CIPHER_MODE_REJECT)) {
+	if (!TLVP_PRES_LEN(tp, GSM0808_IE_CAUSE, 1)) {
 		LOGPCONN(conn, LOGL_ERROR, "Cause code is missing -- discarding message!\n");
 		return -EINVAL;
 	}
 
-	cause = TLVP_VAL(tp, BSS_MAP_MSG_CIPHER_MODE_REJECT)[0];
-	LOGPCONN(conn, LOGL_NOTICE, "Cipher mode rejection cause: %i\n", cause);
+	/* FIXME: add support for 2-byte Cause values using libosmocore functions */
+	cause = *TLVP_VAL(tp, GSM0808_IE_CAUSE);
+	LOGPCONN(conn, LOGL_NOTICE, "Cipher mode rejection cause: %s\n", gsm0808_cause_name(cause));
 
 	/* FIXME: Can we do something meaningful here? e.g. report to the
 	 * msc code somehow that the cipher mode command has failed. */
