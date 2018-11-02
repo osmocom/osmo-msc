@@ -216,6 +216,8 @@ enum {
 	MSC_CTR_NC_SS_MO_ESTABLISHED,
 	MSC_CTR_NC_SS_MT_REQUESTS,
 	MSC_CTR_NC_SS_MT_ESTABLISHED,
+	MSC_CTR_BSSMAP_CIPHER_MODE_REJECT,
+	MSC_CTR_BSSMAP_CIPHER_MODE_COMPLETE,
 };
 
 static const struct rate_ctr_desc msc_ctr_description[] = {
@@ -247,6 +249,8 @@ static const struct rate_ctr_desc msc_ctr_description[] = {
 	[MSC_CTR_NC_SS_MO_ESTABLISHED] = 	{"nc_ss:mo_established", "Established MS-initiated call independent SS/USSD sessions."},
 	[MSC_CTR_NC_SS_MT_REQUESTS] = 		{"nc_ss:mt_requests", "Received network-initiated call independent SS/USSD requests."},
 	[MSC_CTR_NC_SS_MT_ESTABLISHED] = 	{"nc_ss:mt_established", "Established network-initiated call independent SS/USSD sessions."},
+	[MSC_CTR_BSSMAP_CIPHER_MODE_REJECT] =	{"bssmap:cipher_mode_reject", "Number of CIPHER MODE REJECT messages processed by BSSMAP layer"},
+	[MSC_CTR_BSSMAP_CIPHER_MODE_COMPLETE] =	{"bssmap:cipher_mode_complete", "Number of CIPHER MODE COMPLETE messages processed by BSSMAP layer"},
 };
 
 static const struct rate_ctr_group_desc msc_ctrg_desc = {

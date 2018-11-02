@@ -400,6 +400,7 @@ static int bssmap_rx_ciph_compl(struct gsm_subscriber_connection *conn, struct m
 	 * This needs to be discussed further! */
 
 	uint8_t alg_id = 1;
+	struct rate_ctr_group *msc = conn->network->msc_ctrs;
 
 	LOGPCONN(conn, LOGL_DEBUG, "Rx BSSMAP CIPHER MODE COMPLETE\n");
 
@@ -414,6 +415,8 @@ static int bssmap_rx_ciph_compl(struct gsm_subscriber_connection *conn, struct m
 		msg = NULL;
 	}
 
+	rate_ctr_inc(&msc->ctr[MSC_CTR_BSSMAP_CIPHER_MODE_COMPLETE]);
+
 	/* Hand over cipher mode complete message to the MSC */
 	msc_cipher_mode_compl(conn, msg, alg_id);
 
@@ -425,6 +428,7 @@ static int bssmap_rx_ciph_rej(struct gsm_subscriber_connection *conn,
 			      struct msgb *msg, struct tlv_parsed *tp)
 {
 	enum gsm0808_cause cause;
+	struct rate_ctr_group *msc = conn->network->msc_ctrs;
 
 	LOGPCONN(conn, LOGL_NOTICE, "RX BSSMAP CIPHER MODE REJECT\n");
 
@@ -432,6 +436,8 @@ static int bssmap_rx_ciph_rej(struct gsm_subscriber_connection *conn,
 		LOGPCONN(conn, LOGL_ERROR, "Cause code is missing -- discarding message!\n");
 		return -EINVAL;
 	}
+
+	rate_ctr_inc(&msc->ctr[MSC_CTR_BSSMAP_CIPHER_MODE_REJECT]);
 
 	/* FIXME: add support for 2-byte Cause values using libosmocore functions */
 	cause = *TLVP_VAL(tp, GSM0808_IE_CAUSE);
