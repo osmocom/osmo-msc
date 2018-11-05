@@ -85,12 +85,6 @@
         <param name='length' doc='Set number of lines on a screen' />
       </params>
     </command>
-    <command id='echo .MESSAGE'>
-      <params>
-        <param name='echo' doc='Echo a message back to the vty' />
-        <param name='.MESSAGE' doc='The message to echo' />
-      </params>
-    </command>
     <command id='who'>
       <params>
         <param name='who' doc='Display who is on vty' />
@@ -141,6 +135,57 @@
         <param name='all' doc='Display all ASs (default)' />
         <param name='m3ua' doc='Display all m3ua ASs' />
         <param name='sua' doc='Display all SUA ASs' />
+      </params>
+    </command>
+    <command id='show cs7 instance &lt;0-15&gt; sccp addressbook'>
+      <params>
+        <param name='show' doc='Show running system information' />
+        <param name='cs7' doc='ITU-T Signaling System 7' />
+        <param name='instance' doc='An instance of the SS7 stack' />
+        <param name='&lt;0-15&gt;' doc='An instance of the SS7 stack' />
+        <param name='sccp' doc='Signalling Connection Control Part' />
+        <param name='addressbook' doc='List all SCCP addressbook entries' />
+      </params>
+    </command>
+    <command id='show cs7 instance &lt;0-15&gt; sccp users'>
+      <params>
+        <param name='show' doc='Show running system information' />
+        <param name='cs7' doc='ITU-T Signaling System 7' />
+        <param name='instance' doc='An instance of the SS7 stack' />
+        <param name='&lt;0-15&gt;' doc='An instance of the SS7 stack' />
+        <param name='sccp' doc='Signalling Connection Control Part' />
+        <param name='users' doc='Show List of SCCP Users registered' />
+      </params>
+    </command>
+    <command id='show cs7 instance &lt;0-15&gt; sccp ssn &lt;0-65535&gt;'>
+      <params>
+        <param name='show' doc='Show running system information' />
+        <param name='cs7' doc='ITU-T Signaling System 7' />
+        <param name='instance' doc='An instance of the SS7 stack' />
+        <param name='&lt;0-15&gt;' doc='An instance of the SS7 stack' />
+        <param name='sccp' doc='Signalling Connection Control Part' />
+        <param name='ssn' doc='Find an SCCP User registered for the given SSN' />
+        <param name='&lt;0-65535&gt;' doc='Subsystem Number (SSN)' />
+      </params>
+    </command>
+    <command id='show cs7 instance &lt;0-15&gt; sccp connections'>
+      <params>
+        <param name='show' doc='Show running system information' />
+        <param name='cs7' doc='ITU-T Signaling System 7' />
+        <param name='instance' doc='An instance of the SS7 stack' />
+        <param name='&lt;0-15&gt;' doc='An instance of the SS7 stack' />
+        <param name='sccp' doc='Signalling Connection Control Part' />
+        <param name='connections' doc='Show List of active SCCP connections' />
+      </params>
+    </command>
+    <command id='show cs7 instance &lt;0-15&gt; sccp timers'>
+      <params>
+        <param name='show' doc='Show running system information' />
+        <param name='cs7' doc='ITU-T Signaling System 7' />
+        <param name='instance' doc='An instance of the SS7 stack' />
+        <param name='&lt;0-15&gt;' doc='An instance of the SS7 stack' />
+        <param name='sccp' doc='Signaling Connection Control Part' />
+        <param name='timers' doc='Show List of SCCP timers' />
       </params>
     </command>
     <command id='logging enable'>
@@ -216,7 +261,7 @@
         <param name='1' doc='Prefix each log message with the log level name' />
       </params>
     </command>
-    <command id='logging print file (0|1|basename)'>
+    <command id='logging print file (0|1|basename) [last]'>
       <params>
         <param name='logging' doc='Configure logging' />
         <param name='print' doc='Log output settings' />
@@ -224,6 +269,7 @@
         <param name='0' doc='Don&apos;t prefix each log message' />
         <param name='1' doc='Prefix each log message with the source file and line' />
         <param name='basename' doc='Prefix each log message with the source file&apos;s basename (strip leading paths) and line' />
+        <param name='[last]' doc='Log source file info at the end of a log line. If omitted, log source file info just before the log text.' />
       </params>
     </command>
     <command id='logging set-log-mask MASK'>
@@ -233,20 +279,10 @@
         <param name='MASK' doc='List of logging categories to log, e.g. &apos;abc:mno:xyz&apos;. Available log categories depend on the specific application, refer to the &apos;logging level&apos; command. Optionally add individual log levels like &apos;abc,1:mno,3:xyz,5&apos;, where the level numbers are LOGL_DEBUG=1 LOGL_INFO=3 LOGL_NOTICE=5 LOGL_ERROR=7 LOGL_FATAL=8' />
       </params>
     </command>
-    <command id='logging set log mask MASK'>
-      <params>
-        <param name='logging' doc='Configure logging' />
-        <param name='set' doc='Decide which categories to output.' />
-        <param name='log' doc='Log commands' />
-        <param name='mask' doc='Mask commands' />
-        <param name='MASK' doc='&apos;set log mask&apos; is deprecated, please refer to the docs of &apos;set-log-mask&apos; instead' />
-      </params>
-    </command>
-    <command id='logging level (all|rll|cc|mm|rr|mncc|pag|msc|mgcp|ho|db|ref|ctrl|smpp|ranap|vlr|iucs|bssap|lglobal|llapd|linp|lmux|lmi|lmib|lsms|lctrl|lgtp|lstats|lgsup|loap|lss7|lsccp|lsua|lm3ua|lmgcp|ljibuf) (everything|debug|info|notice|error|fatal)'>
+    <command id='logging level (rll|cc|mm|rr|mncc|pag|msc|mgcp|ho|db|ref|ctrl|smpp|ranap|vlr|iucs|bssap|lglobal|llapd|linp|lmux|lmi|lmib|lsms|lctrl|lgtp|lstats|lgsup|loap|lss7|lsccp|lsua|lm3ua|lmgcp|ljibuf) (debug|info|notice|error|fatal)'>
       <params>
         <param name='logging' doc='Configure logging' />
         <param name='level' doc='Set the log level for a specified category' />
-        <param name='all' doc='Global setting for all subsystems' />
         <param name='rll' doc='A-bis Radio Link Layer (RLL)' />
         <param name='cc' doc='Layer3 Call Control (CC)' />
         <param name='mm' doc='Layer3 Mobility Management (MM)' />
@@ -282,12 +318,43 @@
         <param name='lm3ua' doc='libosmo-sigtran MTP3 User Adaptation' />
         <param name='lmgcp' doc='libosmo-mgcp Media Gateway Control Protocol' />
         <param name='ljibuf' doc='libosmo-netif Jitter Buffer' />
-        <param name='everything' doc='Don&apos;t use. It doesn&apos;t log anything' />
         <param name='debug' doc='Log debug messages and higher levels' />
         <param name='info' doc='Log informational messages and higher levels' />
         <param name='notice' doc='Log noticeable messages and higher levels' />
         <param name='error' doc='Log error messages and higher levels' />
         <param name='fatal' doc='Log only fatal messages' />
+      </params>
+    </command>
+    <command id='logging level set-all (debug|info|notice|error|fatal)'>
+      <params>
+        <param name='logging' doc='Configure logging' />
+        <param name='level' doc='Set the log level for a specified category' />
+        <param name='set-all' doc='Once-off set all categories to the given log level. There is no single command to take back these changes -- each category is set to the given level, period.' />
+        <param name='debug' doc='Log debug messages and higher levels' />
+        <param name='info' doc='Log informational messages and higher levels' />
+        <param name='notice' doc='Log noticeable messages and higher levels' />
+        <param name='error' doc='Log error messages and higher levels' />
+        <param name='fatal' doc='Log only fatal messages' />
+      </params>
+    </command>
+    <command id='logging level force-all (debug|info|notice|error|fatal)'>
+      <params>
+        <param name='logging' doc='Configure logging' />
+        <param name='level' doc='Set the log level for a specified category' />
+        <param name='force-all' doc='Globally force all logging categories to a specific level. This is released by the &apos;no logging level force-all&apos; command. Note: any &apos;logging level &lt;category&gt; &lt;level&gt;&apos; commands will have no visible effect after this, until the forced level is released.' />
+        <param name='debug' doc='Log debug messages and higher levels' />
+        <param name='info' doc='Log informational messages and higher levels' />
+        <param name='notice' doc='Log noticeable messages and higher levels' />
+        <param name='error' doc='Log error messages and higher levels' />
+        <param name='fatal' doc='Log only fatal messages' />
+      </params>
+    </command>
+    <command id='no logging level force-all'>
+      <params>
+        <param name='no' doc='Negate a command or set its defaults' />
+        <param name='logging' doc='Configure logging' />
+        <param name='level' doc='Set the log level for a specified category' />
+        <param name='force-all' doc='Release any globally forced log level set with &apos;logging level force-all &lt;level&gt;&apos;' />
       </params>
     </command>
     <command id='show logging vty'>
@@ -363,6 +430,12 @@
         <param name='counters' doc='Generate table of all registered counters' />
       </params>
     </command>
+    <command id='show rate-counters'>
+      <params>
+        <param name='show' doc='Show running system information' />
+        <param name='rate-counters' doc='Show all rate counters' />
+      </params>
+    </command>
     <command id='show fsm NAME'>
       <params>
         <param name='show' doc='Show running system information' />
@@ -391,11 +464,12 @@
         <param name='all' doc='Display a list of all FSM instances of all finite state machine' />
       </params>
     </command>
-    <command id='show subscriber (extension|imsi|tmsi|id) ID'>
+    <command id='show subscriber (msisdn|extension|imsi|tmsi|id) ID'>
       <params>
         <param name='show' doc='Show running system information' />
         <param name='subscriber' doc='Operations on a Subscriber' />
-        <param name='extension' doc='Identify subscriber by extension (phone number)' />
+        <param name='msisdn' doc='Identify subscriber by MSISDN (phone number)' />
+        <param name='extension' doc='Legacy alias for &apos;msisdn&apos;' />
         <param name='imsi' doc='Identify subscriber by IMSI' />
         <param name='tmsi' doc='Identify subscriber by TMSI' />
         <param name='id' doc='Identify subscriber by database ID' />
@@ -443,17 +517,19 @@
         <param name='ID' doc='Identifier for the subscriber' />
       </params>
     </command>
-    <command id='subscriber (extension|imsi|tmsi|id) ID sms sender (extension|imsi|tmsi|id) SENDER_ID send .LINE'>
+    <command id='subscriber (msisdn|extension|imsi|tmsi|id) ID sms sender (msisdn|extension|imsi|tmsi|id) SENDER_ID send .LINE'>
       <params>
         <param name='subscriber' doc='Operations on a Subscriber' />
-        <param name='extension' doc='Identify subscriber by extension (phone number)' />
+        <param name='msisdn' doc='Identify subscriber by MSISDN (phone number)' />
+        <param name='extension' doc='Legacy alias for &apos;msisdn&apos;' />
         <param name='imsi' doc='Identify subscriber by IMSI' />
         <param name='tmsi' doc='Identify subscriber by TMSI' />
         <param name='id' doc='Identify subscriber by database ID' />
         <param name='ID' doc='Identifier for the subscriber' />
         <param name='sms' doc='SMS Operations' />
         <param name='sender' doc='Operations on a Subscriber' />
-        <param name='extension' doc='Identify subscriber by extension (phone number)' />
+        <param name='msisdn' doc='Identify subscriber by MSISDN (phone number)' />
+        <param name='extension' doc='Legacy alias for &apos;msisdn&apos;' />
         <param name='imsi' doc='Identify subscriber by IMSI' />
         <param name='tmsi' doc='Identify subscriber by TMSI' />
         <param name='id' doc='Identify subscriber by database ID' />
@@ -462,17 +538,19 @@
         <param name='.LINE' doc='Actual SMS Text' />
       </params>
     </command>
-    <command id='subscriber (extension|imsi|tmsi|id) ID silent-sms sender (extension|imsi|tmsi|id) SENDER_ID send .LINE'>
+    <command id='subscriber (msisdn|extension|imsi|tmsi|id) ID silent-sms sender (msisdn|extension|imsi|tmsi|id) SENDER_ID send .LINE'>
       <params>
         <param name='subscriber' doc='Operations on a Subscriber' />
-        <param name='extension' doc='Identify subscriber by extension (phone number)' />
+        <param name='msisdn' doc='Identify subscriber by MSISDN (phone number)' />
+        <param name='extension' doc='Legacy alias for &apos;msisdn&apos;' />
         <param name='imsi' doc='Identify subscriber by IMSI' />
         <param name='tmsi' doc='Identify subscriber by TMSI' />
         <param name='id' doc='Identify subscriber by database ID' />
         <param name='ID' doc='Identifier for the subscriber' />
         <param name='silent-sms' doc='Silent SMS Operations' />
         <param name='sender' doc='Operations on a Subscriber' />
-        <param name='extension' doc='Identify subscriber by extension (phone number)' />
+        <param name='msisdn' doc='Identify subscriber by MSISDN (phone number)' />
+        <param name='extension' doc='Legacy alias for &apos;msisdn&apos;' />
         <param name='imsi' doc='Identify subscriber by IMSI' />
         <param name='tmsi' doc='Identify subscriber by TMSI' />
         <param name='id' doc='Identify subscriber by database ID' />
@@ -481,10 +559,11 @@
         <param name='.LINE' doc='Actual SMS Text' />
       </params>
     </command>
-    <command id='subscriber (extension|imsi|tmsi|id) ID silent-call start (any|tch/f|tch/any|sdcch)'>
+    <command id='subscriber (msisdn|extension|imsi|tmsi|id) ID silent-call start (any|tch/f|tch/any|sdcch)'>
       <params>
         <param name='subscriber' doc='Operations on a Subscriber' />
-        <param name='extension' doc='Identify subscriber by extension (phone number)' />
+        <param name='msisdn' doc='Identify subscriber by MSISDN (phone number)' />
+        <param name='extension' doc='Legacy alias for &apos;msisdn&apos;' />
         <param name='imsi' doc='Identify subscriber by IMSI' />
         <param name='tmsi' doc='Identify subscriber by TMSI' />
         <param name='id' doc='Identify subscriber by database ID' />
@@ -497,10 +576,11 @@
         <param name='sdcch' doc='SDCCH channel' />
       </params>
     </command>
-    <command id='subscriber (extension|imsi|tmsi|id) ID silent-call stop'>
+    <command id='subscriber (msisdn|extension|imsi|tmsi|id) ID silent-call stop'>
       <params>
         <param name='subscriber' doc='Operations on a Subscriber' />
-        <param name='extension' doc='Identify subscriber by extension (phone number)' />
+        <param name='msisdn' doc='Identify subscriber by MSISDN (phone number)' />
+        <param name='extension' doc='Legacy alias for &apos;msisdn&apos;' />
         <param name='imsi' doc='Identify subscriber by IMSI' />
         <param name='tmsi' doc='Identify subscriber by TMSI' />
         <param name='id' doc='Identify subscriber by database ID' />
@@ -509,10 +589,11 @@
         <param name='stop' doc='Stop silent call' />
       </params>
     </command>
-    <command id='subscriber (extension|imsi|tmsi|id) ID ussd-notify (0|1|2) .TEXT'>
+    <command id='subscriber (msisdn|extension|imsi|tmsi|id) ID ussd-notify (0|1|2) .TEXT'>
       <params>
         <param name='subscriber' doc='Operations on a Subscriber' />
-        <param name='extension' doc='Identify subscriber by extension (phone number)' />
+        <param name='msisdn' doc='Identify subscriber by MSISDN (phone number)' />
+        <param name='extension' doc='Legacy alias for &apos;msisdn&apos;' />
         <param name='imsi' doc='Identify subscriber by IMSI' />
         <param name='tmsi' doc='Identify subscriber by TMSI' />
         <param name='id' doc='Identify subscriber by database ID' />
@@ -524,10 +605,11 @@
         <param name='.TEXT' doc='Text of USSD message to send' />
       </params>
     </command>
-    <command id='subscriber (extension|imsi|tmsi|id) ID ms-test close-loop (a|b|c|d|e|f|i)'>
+    <command id='subscriber (msisdn|extension|imsi|tmsi|id) ID ms-test close-loop (a|b|c|d|e|f|i)'>
       <params>
         <param name='subscriber' doc='Operations on a Subscriber' />
-        <param name='extension' doc='Identify subscriber by extension (phone number)' />
+        <param name='msisdn' doc='Identify subscriber by MSISDN (phone number)' />
+        <param name='extension' doc='Legacy alias for &apos;msisdn&apos;' />
         <param name='imsi' doc='Identify subscriber by IMSI' />
         <param name='tmsi' doc='Identify subscriber by TMSI' />
         <param name='id' doc='Identify subscriber by database ID' />
@@ -543,10 +625,11 @@
         <param name='i' doc='Loop Type I' />
       </params>
     </command>
-    <command id='subscriber (extension|imsi|tmsi|id) ID ms-test open-loop'>
+    <command id='subscriber (msisdn|extension|imsi|tmsi|id) ID ms-test open-loop'>
       <params>
         <param name='subscriber' doc='Operations on a Subscriber' />
-        <param name='extension' doc='Identify subscriber by extension (phone number)' />
+        <param name='msisdn' doc='Identify subscriber by MSISDN (phone number)' />
+        <param name='extension' doc='Legacy alias for &apos;msisdn&apos;' />
         <param name='imsi' doc='Identify subscriber by IMSI' />
         <param name='tmsi' doc='Identify subscriber by TMSI' />
         <param name='id' doc='Identify subscriber by database ID' />
@@ -555,15 +638,16 @@
         <param name='open-loop' doc='Open a TCH Loop inside the MS' />
       </params>
     </command>
-    <command id='subscriber (extension|imsi|tmsi|id) ID update'>
+    <command id='subscriber (msisdn|extension|imsi|tmsi|id) ID paging'>
       <params>
         <param name='subscriber' doc='Operations on a Subscriber' />
-        <param name='extension' doc='Identify subscriber by extension (phone number)' />
+        <param name='msisdn' doc='Identify subscriber by MSISDN (phone number)' />
+        <param name='extension' doc='Legacy alias for &apos;msisdn&apos;' />
         <param name='imsi' doc='Identify subscriber by IMSI' />
         <param name='tmsi' doc='Identify subscriber by TMSI' />
         <param name='id' doc='Identify subscriber by database ID' />
         <param name='ID' doc='Identifier for the subscriber' />
-        <param name='update' doc='Update the subscriber data from the dabase.' />
+        <param name='paging' doc='Issue an empty Paging for the subscriber (for debugging)' />
       </params>
     </command>
     <command id='show statistics'>
@@ -646,12 +730,6 @@
         <param name='length' doc='Set number of lines on a screen' />
       </params>
     </command>
-    <command id='echo .MESSAGE'>
-      <params>
-        <param name='echo' doc='Echo a message back to the vty' />
-        <param name='.MESSAGE' doc='The message to echo' />
-      </params>
-    </command>
     <command id='who'>
       <params>
         <param name='who' doc='Display who is on vty' />
@@ -715,6 +793,57 @@
         <param name='all' doc='Display all ASs (default)' />
         <param name='m3ua' doc='Display all m3ua ASs' />
         <param name='sua' doc='Display all SUA ASs' />
+      </params>
+    </command>
+    <command id='show cs7 instance &lt;0-15&gt; sccp addressbook'>
+      <params>
+        <param name='show' doc='Show running system information' />
+        <param name='cs7' doc='ITU-T Signaling System 7' />
+        <param name='instance' doc='An instance of the SS7 stack' />
+        <param name='&lt;0-15&gt;' doc='An instance of the SS7 stack' />
+        <param name='sccp' doc='Signalling Connection Control Part' />
+        <param name='addressbook' doc='List all SCCP addressbook entries' />
+      </params>
+    </command>
+    <command id='show cs7 instance &lt;0-15&gt; sccp users'>
+      <params>
+        <param name='show' doc='Show running system information' />
+        <param name='cs7' doc='ITU-T Signaling System 7' />
+        <param name='instance' doc='An instance of the SS7 stack' />
+        <param name='&lt;0-15&gt;' doc='An instance of the SS7 stack' />
+        <param name='sccp' doc='Signalling Connection Control Part' />
+        <param name='users' doc='Show List of SCCP Users registered' />
+      </params>
+    </command>
+    <command id='show cs7 instance &lt;0-15&gt; sccp ssn &lt;0-65535&gt;'>
+      <params>
+        <param name='show' doc='Show running system information' />
+        <param name='cs7' doc='ITU-T Signaling System 7' />
+        <param name='instance' doc='An instance of the SS7 stack' />
+        <param name='&lt;0-15&gt;' doc='An instance of the SS7 stack' />
+        <param name='sccp' doc='Signalling Connection Control Part' />
+        <param name='ssn' doc='Find an SCCP User registered for the given SSN' />
+        <param name='&lt;0-65535&gt;' doc='Subsystem Number (SSN)' />
+      </params>
+    </command>
+    <command id='show cs7 instance &lt;0-15&gt; sccp connections'>
+      <params>
+        <param name='show' doc='Show running system information' />
+        <param name='cs7' doc='ITU-T Signaling System 7' />
+        <param name='instance' doc='An instance of the SS7 stack' />
+        <param name='&lt;0-15&gt;' doc='An instance of the SS7 stack' />
+        <param name='sccp' doc='Signalling Connection Control Part' />
+        <param name='connections' doc='Show List of active SCCP connections' />
+      </params>
+    </command>
+    <command id='show cs7 instance &lt;0-15&gt; sccp timers'>
+      <params>
+        <param name='show' doc='Show running system information' />
+        <param name='cs7' doc='ITU-T Signaling System 7' />
+        <param name='instance' doc='An instance of the SS7 stack' />
+        <param name='&lt;0-15&gt;' doc='An instance of the SS7 stack' />
+        <param name='sccp' doc='Signaling Connection Control Part' />
+        <param name='timers' doc='Show List of SCCP timers' />
       </params>
     </command>
     <command id='logging enable'>
@@ -790,7 +919,7 @@
         <param name='1' doc='Prefix each log message with the log level name' />
       </params>
     </command>
-    <command id='logging print file (0|1|basename)'>
+    <command id='logging print file (0|1|basename) [last]'>
       <params>
         <param name='logging' doc='Configure logging' />
         <param name='print' doc='Log output settings' />
@@ -798,6 +927,7 @@
         <param name='0' doc='Don&apos;t prefix each log message' />
         <param name='1' doc='Prefix each log message with the source file and line' />
         <param name='basename' doc='Prefix each log message with the source file&apos;s basename (strip leading paths) and line' />
+        <param name='[last]' doc='Log source file info at the end of a log line. If omitted, log source file info just before the log text.' />
       </params>
     </command>
     <command id='logging set-log-mask MASK'>
@@ -807,20 +937,10 @@
         <param name='MASK' doc='List of logging categories to log, e.g. &apos;abc:mno:xyz&apos;. Available log categories depend on the specific application, refer to the &apos;logging level&apos; command. Optionally add individual log levels like &apos;abc,1:mno,3:xyz,5&apos;, where the level numbers are LOGL_DEBUG=1 LOGL_INFO=3 LOGL_NOTICE=5 LOGL_ERROR=7 LOGL_FATAL=8' />
       </params>
     </command>
-    <command id='logging set log mask MASK'>
-      <params>
-        <param name='logging' doc='Configure logging' />
-        <param name='set' doc='Decide which categories to output.' />
-        <param name='log' doc='Log commands' />
-        <param name='mask' doc='Mask commands' />
-        <param name='MASK' doc='&apos;set log mask&apos; is deprecated, please refer to the docs of &apos;set-log-mask&apos; instead' />
-      </params>
-    </command>
-    <command id='logging level (all|rll|cc|mm|rr|mncc|pag|msc|mgcp|ho|db|ref|ctrl|smpp|ranap|vlr|iucs|bssap|lglobal|llapd|linp|lmux|lmi|lmib|lsms|lctrl|lgtp|lstats|lgsup|loap|lss7|lsccp|lsua|lm3ua|lmgcp|ljibuf) (everything|debug|info|notice|error|fatal)'>
+    <command id='logging level (rll|cc|mm|rr|mncc|pag|msc|mgcp|ho|db|ref|ctrl|smpp|ranap|vlr|iucs|bssap|lglobal|llapd|linp|lmux|lmi|lmib|lsms|lctrl|lgtp|lstats|lgsup|loap|lss7|lsccp|lsua|lm3ua|lmgcp|ljibuf) (debug|info|notice|error|fatal)'>
       <params>
         <param name='logging' doc='Configure logging' />
         <param name='level' doc='Set the log level for a specified category' />
-        <param name='all' doc='Global setting for all subsystems' />
         <param name='rll' doc='A-bis Radio Link Layer (RLL)' />
         <param name='cc' doc='Layer3 Call Control (CC)' />
         <param name='mm' doc='Layer3 Mobility Management (MM)' />
@@ -856,12 +976,43 @@
         <param name='lm3ua' doc='libosmo-sigtran MTP3 User Adaptation' />
         <param name='lmgcp' doc='libosmo-mgcp Media Gateway Control Protocol' />
         <param name='ljibuf' doc='libosmo-netif Jitter Buffer' />
-        <param name='everything' doc='Don&apos;t use. It doesn&apos;t log anything' />
         <param name='debug' doc='Log debug messages and higher levels' />
         <param name='info' doc='Log informational messages and higher levels' />
         <param name='notice' doc='Log noticeable messages and higher levels' />
         <param name='error' doc='Log error messages and higher levels' />
         <param name='fatal' doc='Log only fatal messages' />
+      </params>
+    </command>
+    <command id='logging level set-all (debug|info|notice|error|fatal)'>
+      <params>
+        <param name='logging' doc='Configure logging' />
+        <param name='level' doc='Set the log level for a specified category' />
+        <param name='set-all' doc='Once-off set all categories to the given log level. There is no single command to take back these changes -- each category is set to the given level, period.' />
+        <param name='debug' doc='Log debug messages and higher levels' />
+        <param name='info' doc='Log informational messages and higher levels' />
+        <param name='notice' doc='Log noticeable messages and higher levels' />
+        <param name='error' doc='Log error messages and higher levels' />
+        <param name='fatal' doc='Log only fatal messages' />
+      </params>
+    </command>
+    <command id='logging level force-all (debug|info|notice|error|fatal)'>
+      <params>
+        <param name='logging' doc='Configure logging' />
+        <param name='level' doc='Set the log level for a specified category' />
+        <param name='force-all' doc='Globally force all logging categories to a specific level. This is released by the &apos;no logging level force-all&apos; command. Note: any &apos;logging level &lt;category&gt; &lt;level&gt;&apos; commands will have no visible effect after this, until the forced level is released.' />
+        <param name='debug' doc='Log debug messages and higher levels' />
+        <param name='info' doc='Log informational messages and higher levels' />
+        <param name='notice' doc='Log noticeable messages and higher levels' />
+        <param name='error' doc='Log error messages and higher levels' />
+        <param name='fatal' doc='Log only fatal messages' />
+      </params>
+    </command>
+    <command id='no logging level force-all'>
+      <params>
+        <param name='no' doc='Negate a command or set its defaults' />
+        <param name='logging' doc='Configure logging' />
+        <param name='level' doc='Set the log level for a specified category' />
+        <param name='force-all' doc='Release any globally forced log level set with &apos;logging level force-all &lt;level&gt;&apos;' />
       </params>
     </command>
     <command id='show logging vty'>
@@ -937,6 +1088,12 @@
         <param name='counters' doc='Generate table of all registered counters' />
       </params>
     </command>
+    <command id='show rate-counters'>
+      <params>
+        <param name='show' doc='Show running system information' />
+        <param name='rate-counters' doc='Show all rate counters' />
+      </params>
+    </command>
     <command id='show fsm NAME'>
       <params>
         <param name='show' doc='Show running system information' />
@@ -965,11 +1122,12 @@
         <param name='all' doc='Display a list of all FSM instances of all finite state machine' />
       </params>
     </command>
-    <command id='show subscriber (extension|imsi|tmsi|id) ID'>
+    <command id='show subscriber (msisdn|extension|imsi|tmsi|id) ID'>
       <params>
         <param name='show' doc='Show running system information' />
         <param name='subscriber' doc='Operations on a Subscriber' />
-        <param name='extension' doc='Identify subscriber by extension (phone number)' />
+        <param name='msisdn' doc='Identify subscriber by MSISDN (phone number)' />
+        <param name='extension' doc='Legacy alias for &apos;msisdn&apos;' />
         <param name='imsi' doc='Identify subscriber by IMSI' />
         <param name='tmsi' doc='Identify subscriber by TMSI' />
         <param name='id' doc='Identify subscriber by database ID' />
@@ -1017,17 +1175,19 @@
         <param name='ID' doc='Identifier for the subscriber' />
       </params>
     </command>
-    <command id='subscriber (extension|imsi|tmsi|id) ID sms sender (extension|imsi|tmsi|id) SENDER_ID send .LINE'>
+    <command id='subscriber (msisdn|extension|imsi|tmsi|id) ID sms sender (msisdn|extension|imsi|tmsi|id) SENDER_ID send .LINE'>
       <params>
         <param name='subscriber' doc='Operations on a Subscriber' />
-        <param name='extension' doc='Identify subscriber by extension (phone number)' />
+        <param name='msisdn' doc='Identify subscriber by MSISDN (phone number)' />
+        <param name='extension' doc='Legacy alias for &apos;msisdn&apos;' />
         <param name='imsi' doc='Identify subscriber by IMSI' />
         <param name='tmsi' doc='Identify subscriber by TMSI' />
         <param name='id' doc='Identify subscriber by database ID' />
         <param name='ID' doc='Identifier for the subscriber' />
         <param name='sms' doc='SMS Operations' />
         <param name='sender' doc='Operations on a Subscriber' />
-        <param name='extension' doc='Identify subscriber by extension (phone number)' />
+        <param name='msisdn' doc='Identify subscriber by MSISDN (phone number)' />
+        <param name='extension' doc='Legacy alias for &apos;msisdn&apos;' />
         <param name='imsi' doc='Identify subscriber by IMSI' />
         <param name='tmsi' doc='Identify subscriber by TMSI' />
         <param name='id' doc='Identify subscriber by database ID' />
@@ -1036,17 +1196,19 @@
         <param name='.LINE' doc='Actual SMS Text' />
       </params>
     </command>
-    <command id='subscriber (extension|imsi|tmsi|id) ID silent-sms sender (extension|imsi|tmsi|id) SENDER_ID send .LINE'>
+    <command id='subscriber (msisdn|extension|imsi|tmsi|id) ID silent-sms sender (msisdn|extension|imsi|tmsi|id) SENDER_ID send .LINE'>
       <params>
         <param name='subscriber' doc='Operations on a Subscriber' />
-        <param name='extension' doc='Identify subscriber by extension (phone number)' />
+        <param name='msisdn' doc='Identify subscriber by MSISDN (phone number)' />
+        <param name='extension' doc='Legacy alias for &apos;msisdn&apos;' />
         <param name='imsi' doc='Identify subscriber by IMSI' />
         <param name='tmsi' doc='Identify subscriber by TMSI' />
         <param name='id' doc='Identify subscriber by database ID' />
         <param name='ID' doc='Identifier for the subscriber' />
         <param name='silent-sms' doc='Silent SMS Operations' />
         <param name='sender' doc='Operations on a Subscriber' />
-        <param name='extension' doc='Identify subscriber by extension (phone number)' />
+        <param name='msisdn' doc='Identify subscriber by MSISDN (phone number)' />
+        <param name='extension' doc='Legacy alias for &apos;msisdn&apos;' />
         <param name='imsi' doc='Identify subscriber by IMSI' />
         <param name='tmsi' doc='Identify subscriber by TMSI' />
         <param name='id' doc='Identify subscriber by database ID' />
@@ -1055,10 +1217,11 @@
         <param name='.LINE' doc='Actual SMS Text' />
       </params>
     </command>
-    <command id='subscriber (extension|imsi|tmsi|id) ID silent-call start (any|tch/f|tch/any|sdcch)'>
+    <command id='subscriber (msisdn|extension|imsi|tmsi|id) ID silent-call start (any|tch/f|tch/any|sdcch)'>
       <params>
         <param name='subscriber' doc='Operations on a Subscriber' />
-        <param name='extension' doc='Identify subscriber by extension (phone number)' />
+        <param name='msisdn' doc='Identify subscriber by MSISDN (phone number)' />
+        <param name='extension' doc='Legacy alias for &apos;msisdn&apos;' />
         <param name='imsi' doc='Identify subscriber by IMSI' />
         <param name='tmsi' doc='Identify subscriber by TMSI' />
         <param name='id' doc='Identify subscriber by database ID' />
@@ -1071,10 +1234,11 @@
         <param name='sdcch' doc='SDCCH channel' />
       </params>
     </command>
-    <command id='subscriber (extension|imsi|tmsi|id) ID silent-call stop'>
+    <command id='subscriber (msisdn|extension|imsi|tmsi|id) ID silent-call stop'>
       <params>
         <param name='subscriber' doc='Operations on a Subscriber' />
-        <param name='extension' doc='Identify subscriber by extension (phone number)' />
+        <param name='msisdn' doc='Identify subscriber by MSISDN (phone number)' />
+        <param name='extension' doc='Legacy alias for &apos;msisdn&apos;' />
         <param name='imsi' doc='Identify subscriber by IMSI' />
         <param name='tmsi' doc='Identify subscriber by TMSI' />
         <param name='id' doc='Identify subscriber by database ID' />
@@ -1083,10 +1247,11 @@
         <param name='stop' doc='Stop silent call' />
       </params>
     </command>
-    <command id='subscriber (extension|imsi|tmsi|id) ID ussd-notify (0|1|2) .TEXT'>
+    <command id='subscriber (msisdn|extension|imsi|tmsi|id) ID ussd-notify (0|1|2) .TEXT'>
       <params>
         <param name='subscriber' doc='Operations on a Subscriber' />
-        <param name='extension' doc='Identify subscriber by extension (phone number)' />
+        <param name='msisdn' doc='Identify subscriber by MSISDN (phone number)' />
+        <param name='extension' doc='Legacy alias for &apos;msisdn&apos;' />
         <param name='imsi' doc='Identify subscriber by IMSI' />
         <param name='tmsi' doc='Identify subscriber by TMSI' />
         <param name='id' doc='Identify subscriber by database ID' />
@@ -1098,10 +1263,11 @@
         <param name='.TEXT' doc='Text of USSD message to send' />
       </params>
     </command>
-    <command id='subscriber (extension|imsi|tmsi|id) ID ms-test close-loop (a|b|c|d|e|f|i)'>
+    <command id='subscriber (msisdn|extension|imsi|tmsi|id) ID ms-test close-loop (a|b|c|d|e|f|i)'>
       <params>
         <param name='subscriber' doc='Operations on a Subscriber' />
-        <param name='extension' doc='Identify subscriber by extension (phone number)' />
+        <param name='msisdn' doc='Identify subscriber by MSISDN (phone number)' />
+        <param name='extension' doc='Legacy alias for &apos;msisdn&apos;' />
         <param name='imsi' doc='Identify subscriber by IMSI' />
         <param name='tmsi' doc='Identify subscriber by TMSI' />
         <param name='id' doc='Identify subscriber by database ID' />
@@ -1117,10 +1283,11 @@
         <param name='i' doc='Loop Type I' />
       </params>
     </command>
-    <command id='subscriber (extension|imsi|tmsi|id) ID ms-test open-loop'>
+    <command id='subscriber (msisdn|extension|imsi|tmsi|id) ID ms-test open-loop'>
       <params>
         <param name='subscriber' doc='Operations on a Subscriber' />
-        <param name='extension' doc='Identify subscriber by extension (phone number)' />
+        <param name='msisdn' doc='Identify subscriber by MSISDN (phone number)' />
+        <param name='extension' doc='Legacy alias for &apos;msisdn&apos;' />
         <param name='imsi' doc='Identify subscriber by IMSI' />
         <param name='tmsi' doc='Identify subscriber by TMSI' />
         <param name='id' doc='Identify subscriber by database ID' />
@@ -1129,15 +1296,16 @@
         <param name='open-loop' doc='Open a TCH Loop inside the MS' />
       </params>
     </command>
-    <command id='subscriber (extension|imsi|tmsi|id) ID update'>
+    <command id='subscriber (msisdn|extension|imsi|tmsi|id) ID paging'>
       <params>
         <param name='subscriber' doc='Operations on a Subscriber' />
-        <param name='extension' doc='Identify subscriber by extension (phone number)' />
+        <param name='msisdn' doc='Identify subscriber by MSISDN (phone number)' />
+        <param name='extension' doc='Legacy alias for &apos;msisdn&apos;' />
         <param name='imsi' doc='Identify subscriber by IMSI' />
         <param name='tmsi' doc='Identify subscriber by TMSI' />
         <param name='id' doc='Identify subscriber by database ID' />
         <param name='ID' doc='Identifier for the subscriber' />
-        <param name='update' doc='Update the subscriber data from the dabase.' />
+        <param name='paging' doc='Issue an empty Paging for the subscriber (for debugging)' />
       </params>
     </command>
     <command id='show statistics'>
@@ -1160,30 +1328,16 @@
         <param name='IMSI' doc='IMSI to be used as filter' />
       </params>
     </command>
-    <command id='subscriber (extension|imsi|tmsi|id) ID expire'>
+    <command id='subscriber (msisdn|extension|imsi|tmsi|id) ID expire'>
       <params>
         <param name='subscriber' doc='Operations on a Subscriber' />
-        <param name='extension' doc='Identify subscriber by extension (phone number)' />
+        <param name='msisdn' doc='Identify subscriber by MSISDN (phone number)' />
+        <param name='extension' doc='Legacy alias for &apos;msisdn&apos;' />
         <param name='imsi' doc='Identify subscriber by IMSI' />
         <param name='tmsi' doc='Identify subscriber by TMSI' />
         <param name='id' doc='Identify subscriber by database ID' />
         <param name='ID' doc='Identifier for the subscriber' />
         <param name='expire' doc='Expire the subscriber Now' />
-      </params>
-    </command>
-    <command id='subscriber (extension|imsi|tmsi|id) ID a3a8 (none|xor|comp128v1) [KI]'>
-      <params>
-        <param name='subscriber' doc='Operations on a Subscriber' />
-        <param name='extension' doc='Identify subscriber by extension (phone number)' />
-        <param name='imsi' doc='Identify subscriber by IMSI' />
-        <param name='tmsi' doc='Identify subscriber by TMSI' />
-        <param name='id' doc='Identify subscriber by database ID' />
-        <param name='ID' doc='Identifier for the subscriber' />
-        <param name='a3a8' doc='Set a3a8 parameters for the subscriber' />
-        <param name='none' doc='Use No A3A8 algorithm' />
-        <param name='xor' doc='Use XOR algorithm' />
-        <param name='comp128v1' doc='Use COMP128v1 algorithm' />
-        <param name='[KI]' doc='Encryption Key Ki' />
       </params>
     </command>
     <command id='sms-queue trigger'>
@@ -1212,10 +1366,11 @@
         <param name='&lt;1-500&gt;' doc='Amount' />
       </params>
     </command>
-    <command id='subscriber (extension|imsi|tmsi|id) ID sms pending-send'>
+    <command id='subscriber (msisdn|extension|imsi|tmsi|id) ID sms pending-send'>
       <params>
         <param name='subscriber' doc='Operations on a Subscriber' />
-        <param name='extension' doc='Identify subscriber by extension (phone number)' />
+        <param name='msisdn' doc='Identify subscriber by MSISDN (phone number)' />
+        <param name='extension' doc='Legacy alias for &apos;msisdn&apos;' />
         <param name='imsi' doc='Identify subscriber by IMSI' />
         <param name='tmsi' doc='Identify subscriber by TMSI' />
         <param name='id' doc='Identify subscriber by database ID' />
@@ -1563,7 +1718,7 @@
         <param name='1' doc='Prefix each log message with the log level name' />
       </params>
     </command>
-    <command id='logging print file (0|1|basename)'>
+    <command id='logging print file (0|1|basename) [last]'>
       <params>
         <param name='logging' doc='Configure logging' />
         <param name='print' doc='Log output settings' />
@@ -1571,13 +1726,13 @@
         <param name='0' doc='Don&apos;t prefix each log message' />
         <param name='1' doc='Prefix each log message with the source file and line' />
         <param name='basename' doc='Prefix each log message with the source file&apos;s basename (strip leading paths) and line' />
+        <param name='[last]' doc='Log source file info at the end of a log line. If omitted, log source file info just before the log text.' />
       </params>
     </command>
-    <command id='logging level (all|rll|cc|mm|rr|mncc|pag|msc|mgcp|ho|db|ref|ctrl|smpp|ranap|vlr|iucs|bssap|lglobal|llapd|linp|lmux|lmi|lmib|lsms|lctrl|lgtp|lstats|lgsup|loap|lss7|lsccp|lsua|lm3ua|lmgcp|ljibuf) (everything|debug|info|notice|error|fatal)'>
+    <command id='logging level (rll|cc|mm|rr|mncc|pag|msc|mgcp|ho|db|ref|ctrl|smpp|ranap|vlr|iucs|bssap|lglobal|llapd|linp|lmux|lmi|lmib|lsms|lctrl|lgtp|lstats|lgsup|loap|lss7|lsccp|lsua|lm3ua|lmgcp|ljibuf) (debug|info|notice|error|fatal)'>
       <params>
         <param name='logging' doc='Configure logging' />
         <param name='level' doc='Set the log level for a specified category' />
-        <param name='all' doc='Global setting for all subsystems' />
         <param name='rll' doc='A-bis Radio Link Layer (RLL)' />
         <param name='cc' doc='Layer3 Call Control (CC)' />
         <param name='mm' doc='Layer3 Mobility Management (MM)' />
@@ -1613,12 +1768,43 @@
         <param name='lm3ua' doc='libosmo-sigtran MTP3 User Adaptation' />
         <param name='lmgcp' doc='libosmo-mgcp Media Gateway Control Protocol' />
         <param name='ljibuf' doc='libosmo-netif Jitter Buffer' />
-        <param name='everything' doc='Don&apos;t use. It doesn&apos;t log anything' />
         <param name='debug' doc='Log debug messages and higher levels' />
         <param name='info' doc='Log informational messages and higher levels' />
         <param name='notice' doc='Log noticeable messages and higher levels' />
         <param name='error' doc='Log error messages and higher levels' />
         <param name='fatal' doc='Log only fatal messages' />
+      </params>
+    </command>
+    <command id='logging level set-all (debug|info|notice|error|fatal)'>
+      <params>
+        <param name='logging' doc='Configure logging' />
+        <param name='level' doc='Set the log level for a specified category' />
+        <param name='set-all' doc='Once-off set all categories to the given log level. There is no single command to take back these changes -- each category is set to the given level, period.' />
+        <param name='debug' doc='Log debug messages and higher levels' />
+        <param name='info' doc='Log informational messages and higher levels' />
+        <param name='notice' doc='Log noticeable messages and higher levels' />
+        <param name='error' doc='Log error messages and higher levels' />
+        <param name='fatal' doc='Log only fatal messages' />
+      </params>
+    </command>
+    <command id='logging level force-all (debug|info|notice|error|fatal)'>
+      <params>
+        <param name='logging' doc='Configure logging' />
+        <param name='level' doc='Set the log level for a specified category' />
+        <param name='force-all' doc='Globally force all logging categories to a specific level. This is released by the &apos;no logging level force-all&apos; command. Note: any &apos;logging level &lt;category&gt; &lt;level&gt;&apos; commands will have no visible effect after this, until the forced level is released.' />
+        <param name='debug' doc='Log debug messages and higher levels' />
+        <param name='info' doc='Log informational messages and higher levels' />
+        <param name='notice' doc='Log noticeable messages and higher levels' />
+        <param name='error' doc='Log error messages and higher levels' />
+        <param name='fatal' doc='Log only fatal messages' />
+      </params>
+    </command>
+    <command id='no logging level force-all'>
+      <params>
+        <param name='no' doc='Negate a command or set its defaults' />
+        <param name='logging' doc='Configure logging' />
+        <param name='level' doc='Set the log level for a specified category' />
+        <param name='force-all' doc='Release any globally forced log level set with &apos;logging level force-all &lt;level&gt;&apos;' />
       </params>
     </command>
     <command id='logging filter imsi IMSI'>
@@ -1818,15 +2004,6 @@
         <param name='NAME' doc='Name of AS' />
       </params>
     </command>
-    <command id='show cs7 instance &lt;0-15&gt; sccp-addressbook'>
-      <params>
-        <param name='show' doc='Show running system information' />
-        <param name='cs7' doc='ITU-T Signaling System 7' />
-        <param name='instance' doc='An instance of the SS7 stack' />
-        <param name='&lt;0-15&gt;' doc='An instance of the SS7 stack' />
-        <param name='sccp-addressbook' doc='List all SCCP addressbook entries' />
-      </params>
-    </command>
     <command id='sccp-address NAME'>
       <params>
         <param name='sccp-address' doc='Create/Modify an SCCP addressbook entry' />
@@ -1838,6 +2015,21 @@
         <param name='no' doc='Negate a command or set its defaults' />
         <param name='sccp-address' doc='Delete an SCCP addressbook entry' />
         <param name='NAME' doc='Name of the SCCP Address' />
+      </params>
+    </command>
+    <command id='sccp-timer (conn_est|ias|iar|rel|repeat_rel|int|guard|reset|reassembly) &lt;1-999999&gt;'>
+      <params>
+        <param name='sccp-timer' doc='Configure SCCP timer values, see ITU-T Q.714' />
+        <param name='conn_est' doc='Waiting for connection confirm message, 1 to 2 minutes (default: 60)' />
+        <param name='ias' doc='Send keep-alive: on an idle connection, delay before sending an Idle Timer message, 5 to 10 minutes (default: 420)' />
+        <param name='iar' doc='Receive keep-alive: on an idle connection, delay until considering a connection as stale, 11 to 21 minutes (default: 900)' />
+        <param name='rel' doc='Waiting for release complete message, 10 to 20 seconds (default: 10)' />
+        <param name='repeat_rel' doc='Waiting for release complete message; or to repeat sending released message after the initial expiry, 10 to 20 seconds (default: 10)' />
+        <param name='int' doc='Waiting for release complete message; or to release connection resources, freeze the LRN and alert a maintenance function after the initial expiry, extending to 1 minute (default: 60)' />
+        <param name='guard' doc='Waiting to resume normal procedure for temporary connection sections during the restart procedure, 23 to 25 minutes (default: 1380)' />
+        <param name='reset' doc='Waiting to release temporary connection section or alert maintenance function after reset request message is sent, 10 to 20 seconds (default: 10)' />
+        <param name='reassembly' doc='Waiting to receive all the segments of the remaining segments, single segmented message after receiving the first segment, 10 to 20 seconds (default: 10)' />
+        <param name='&lt;1-999999&gt;' doc='Timer value, in seconds' />
       </params>
     </command>
   </node>
@@ -2176,6 +2368,12 @@
         <param name='assign-tmsi' doc='Assign TMSI during Location Updating.' />
       </params>
     </command>
+    <command id='mncc-guard-timeout &lt;0-255&gt;'>
+      <params>
+        <param name='mncc-guard-timeout' doc='Set global guard timer for mncc interface activity' />
+        <param name='&lt;0-255&gt;' doc='guard timer value (sec.)' />
+      </params>
+    </command>
     <command id='no assign-tmsi'>
       <params>
         <param name='no' doc='Negate a command or set its defaults' />
@@ -2261,49 +2459,6 @@
     <command id='mgw bts-base &lt;0-65534&gt;'>
       <params>
         <param name='mgw' doc='Configure MGCP connection to Media Gateway' />
-        <param name='bts-base' doc='First UDP port allocated for the BTS side' />
-        <param name='&lt;0-65534&gt;' doc='UDP Port number' />
-      </params>
-    </command>
-    <command id='mgcpgw local-ip A.B.C.D'>
-      <params>
-        <param name='mgcpgw' doc='Configure MGCP connection to Media Gateway' />
-        <param name='local-ip' doc='local bind to connect to MGCP gateway with' />
-        <param name='A.B.C.D' doc='local bind IP address' />
-      </params>
-    </command>
-    <command id='mgcpgw local-port &lt;0-65535&gt;'>
-      <params>
-        <param name='mgcpgw' doc='Configure MGCP connection to Media Gateway' />
-        <param name='local-port' doc='local bind to connect to MGCP gateway with' />
-        <param name='&lt;0-65535&gt;' doc='local bind port' />
-      </params>
-    </command>
-    <command id='mgcpgw remote-ip A.B.C.D'>
-      <params>
-        <param name='mgcpgw' doc='Configure MGCP connection to Media Gateway' />
-        <param name='remote-ip' doc='remote bind to connect to MGCP gateway with' />
-        <param name='A.B.C.D' doc='remote bind IP address' />
-      </params>
-    </command>
-    <command id='mgcpgw remote-port &lt;0-65535&gt;'>
-      <params>
-        <param name='mgcpgw' doc='Configure MGCP connection to Media Gateway' />
-        <param name='remote-port' doc='remote bind to connect to MGCP gateway with' />
-        <param name='&lt;0-65535&gt;' doc='remote bind port' />
-      </params>
-    </command>
-    <command id='mgcpgw endpoint-range &lt;1-65534&gt; &lt;1-65534&gt;'>
-      <params>
-        <param name='mgcpgw' doc='Configure MGCP connection to Media Gateway' />
-        <param name='endpoint-range' doc='usable range of endpoint identifiers' />
-        <param name='&lt;1-65534&gt;' doc='set first useable endpoint identifier' />
-        <param name='&lt;1-65534&gt;' doc='set the last useable endpoint identifier' />
-      </params>
-    </command>
-    <command id='mgcpgw bts-base &lt;0-65534&gt;'>
-      <params>
-        <param name='mgcpgw' doc='Configure MGCP connection to Media Gateway' />
         <param name='bts-base' doc='First UDP port allocated for the BTS side' />
         <param name='&lt;0-65534&gt;' doc='UDP Port number' />
       </params>
@@ -2413,8 +2568,7 @@
         <param name='password' doc='Set the password for this ESME' />
         <param name='PASSWORD' doc='Alphanumeric password string' />
       </params>
-    </command>
-    <command id='no password'>
+    </command>    <command id='no password'>
       <params>
         <param name='no' doc='Negate a command or set its defaults' />
         <param name='password' doc='Remove the password for this ESME' />
