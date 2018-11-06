@@ -2,6 +2,7 @@
 #define _GSM_04_11_H
 
 #include <osmocom/gsm/protocol/gsm_04_11.h>
+#include <osmocom/msc/gsm_04_11_gsup.h>
 
 struct vlr_subscr;
 struct ran_conn;

@@ -35,6 +35,7 @@ libmsc_a_SOURCES = \
 	gsm_04_08.c \
 	gsm_04_08_cc.c \
 	gsm_04_11.c \
+	gsm_04_11_gsup.c \
 	gsm_04_14.c \
 	gsm_04_80.c \
 	gsm_09_11.c \

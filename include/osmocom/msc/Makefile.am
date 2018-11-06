@@ -5,6 +5,7 @@ noinst_HEADERS = \
 	debug.h \
 	gsm_04_08.h \
 	gsm_04_11.h \
+	gsm_04_11_gsup.h \
 	gsm_04_14.h \
 	gsm_04_80.h \
 	gsm_09_11.h \
