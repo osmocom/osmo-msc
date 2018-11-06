@@ -587,26 +587,9 @@ int gsm411_send_rp_error(struct gsm_trans *trans, uint8_t msg_ref,
 
 /* Receive a 04.11 TPDU inside RP-DATA / user data */
 static int gsm411_rx_rp_ud(struct msgb *msg, struct gsm_trans *trans,
-			  struct gsm411_rp_hdr *rph,
-			  uint8_t src_len, uint8_t *src,
-			  uint8_t dst_len, uint8_t *dst,
-			  uint8_t tpdu_len, uint8_t *tpdu)
+			  struct gsm411_rp_hdr *rph)
 {
 	int rc = 0;
-
-	if (src_len && src)
-		LOGP(DLSMS, LOGL_ERROR, "RP-DATA (MO) with SRC ?!?\n");
-
-	if (!dst_len || !dst || !tpdu_len || !tpdu) {
-		LOGP(DLSMS, LOGL_ERROR,
-			"RP-DATA (MO) without DST or TPDU ?!?\n");
-		gsm411_send_rp_error(trans, rph->msg_ref,
-				     GSM411_RP_CAUSE_INV_MAND_INF);
-		return -EIO;
-	}
-	msg->l4h = tpdu;
-
-	DEBUGP(DLSMS, "DST(%u,%s)\n", dst_len, osmo_hexdump(dst, dst_len));
 
 	rc = gsm340_rx_tpdu(trans, msg, rph->msg_ref);
 	if (rc == 0)
@@ -639,8 +622,23 @@ static int gsm411_rx_rp_data(struct msgb *msg, struct gsm_trans *trans,
 
 	DEBUGP(DLSMS, "RX_RP-DATA: src_len=%u, dst_len=%u ud_len=%u\n",
 		src_len, dst_len, rpud_len);
-	return gsm411_rx_rp_ud(msg, trans, rph, src_len, src, dst_len, dst,
-				rpud_len, rp_ud);
+
+	if (src_len && src)
+		LOGP(DLSMS, LOGL_ERROR, "RP-DATA (MO) with SRC ?!?\n");
+
+	if (!dst_len || !dst || !rpud_len || !rp_ud) {
+		LOGP(DLSMS, LOGL_ERROR,
+			"RP-DATA (MO) without DST or TPDU ?!?\n");
+		gsm411_send_rp_error(trans, rph->msg_ref,
+				     GSM411_RP_CAUSE_INV_MAND_INF);
+		return -EIO;
+	}
+
+	msg->l4h = rp_ud;
+
+	DEBUGP(DLSMS, "DST(%u,%s)\n", dst_len, osmo_hexdump(dst, dst_len));
+
+	return gsm411_rx_rp_ud(msg, trans, rph);
 }
 
 static struct gsm_sms *sms_report_alloc(struct gsm_sms *sms)
