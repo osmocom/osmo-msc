@@ -54,7 +54,6 @@ static int get_subscriber_list(struct ctrl_cmd *cmd, void *d)
 		cmd->reply = talloc_asprintf_append(cmd->reply, "%s,%s\n",
 						    vsub->imsi, vsub->msisdn);
 	}
-	printf("%s\n", cmd->reply); /* <-- what? */
 	return CTRL_CMD_REPLY;
 }
 CTRL_CMD_DEFINE_RO(subscriber_list, "subscriber-list-active-v1");
