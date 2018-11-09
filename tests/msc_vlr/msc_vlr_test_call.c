@@ -580,13 +580,13 @@ static void test_call_mo_to_unknown_timeout()
 }
 
 
-void test_call_mo_setup_timeout(uint8_t nr, const char *imsi)
+void test_call_mo_setup_timeout()
 {
 	struct gsm_mncc mncc = {
 		.imsi = IMSI,
 	};
 
-	comment_start(nr, imsi);
+	comment_start();
 
 	fake_time_start();
 
@@ -601,7 +601,7 @@ void test_call_mo_setup_timeout(uint8_t nr, const char *imsi)
 		     "03575886" /* classmark 2 */
 		     "089910070000106005" /* IMSI */);
 	OSMO_ASSERT(g_conn);
-	OSMO_ASSERT(g_conn->conn_fsm);
+	OSMO_ASSERT(g_conn->fi);
 	OSMO_ASSERT(g_conn->vsub);
 	VERBOSE_ASSERT(cm_service_result_sent, == RES_NONE, "%d");
 	VERBOSE_ASSERT(auth_request_sent, == true, "%d");
@@ -655,7 +655,7 @@ void test_call_mo_setup_timeout(uint8_t nr, const char *imsi)
 
 	EXPECT_CONN_COUNT(0);
 	clear_vlr();
-	comment_end(nr, imsi);
+	comment_end();
 }
 
 msc_vlr_test_func_t msc_vlr_tests[] = {
