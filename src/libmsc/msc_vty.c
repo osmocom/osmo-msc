@@ -31,6 +31,8 @@
 #include <osmocom/gsm/protocol/gsm_08_58.h>
 #include <osmocom/gsm/protocol/gsm_04_14.h>
 
+#include <osmocom/sigtran/sccp_helpers.h>
+
 #include <osmocom/vty/command.h>
 #include <osmocom/vty/logging.h>
 #include <osmocom/vty/misc.h>
@@ -47,6 +49,7 @@
 #include <osmocom/msc/vlr.h>
 #include <osmocom/msc/transaction.h>
 #include <osmocom/msc/db.h>
+#include <osmocom/msc/a_iface.h>
 #include <osmocom/msc/sms_queue.h>
 #include <osmocom/msc/silent_call.h>
 #include <osmocom/msc/gsm_04_80.h>
@@ -463,6 +466,19 @@ static int config_write_msc(struct vty *vty)
 #ifdef BUILD_IU
 	ranap_iu_vty_config_write(vty, " ");
 #endif
+
+	return CMD_SUCCESS;
+}
+
+DEFUN(show_bsc, show_bsc_cmd,
+	"show bsc", SHOW_STR "BSC\n")
+{
+	struct bsc_context *bsc_ctx;
+	struct osmo_ss7_instance *ss7 = osmo_ss7_instance_find(gsmnet->a.cs7_instance);
+
+	llist_for_each_entry(bsc_ctx, &gsmnet->a.bscs, list) {
+		vty_out(vty, "BSC %s%s", osmo_sccp_addr_name(ss7, &bsc_ctx->bsc_addr), VTY_NEWLINE);
+	}
 
 	return CMD_SUCCESS;
 }
@@ -1446,6 +1462,7 @@ void msc_vty_init(struct gsm_network *msc_network)
 
 	install_element_ve(&show_subscr_cmd);
 	install_element_ve(&show_subscr_cache_cmd);
+	install_element_ve(&show_bsc_cmd);
 	install_element_ve(&show_msc_conn_cmd);
 	install_element_ve(&show_msc_transaction_cmd);
 
