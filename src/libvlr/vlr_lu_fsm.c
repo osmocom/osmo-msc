@@ -79,7 +79,7 @@ static void upd_hlr_vlr_fsm_init(struct osmo_fsm_inst *fi, uint32_t event,
 	OSMO_ASSERT(event == UPD_HLR_VLR_E_START);
 
 	/* Send UpdateLocation to HLR */
-	rc = vlr_subscr_req_lu(vsub, vsub->vlr->cfg.is_ps);
+	rc = vlr_subscr_req_lu(vsub);
 	if (rc < 0)
 		LOGPFSML(fi, LOGL_ERROR, "Failed to send UpdateLocation to HLR\n");
 	osmo_fsm_inst_state_chg(fi, UPD_HLR_VLR_S_WAIT_FOR_DATA,

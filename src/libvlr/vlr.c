@@ -616,7 +616,7 @@ static int vlr_rx_gsup_purge_no_subscr(struct vlr_instance *vlr,
 }
 
 /* VLR internal call to request UpdateLocation from HLR */
-int vlr_subscr_req_lu(struct vlr_subscr *vsub, bool is_ps)
+int vlr_subscr_req_lu(struct vlr_subscr *vsub)
 {
 	struct osmo_gsup_message gsup_msg = {0};
 	int rc;
