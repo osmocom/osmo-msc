@@ -1810,6 +1810,11 @@ static int msc_vlr_route_gsup_msg(struct vlr_subscr *vsub,
 		DEBUGP(DMSC, "Routed to GSM 04.11 MO handler\n");
 		return gsm411_gsup_mo_handler(vsub, gsup_msg);
 
+	/* GSM 04.11 code implementing MT SMS */
+	case OSMO_GSUP_MSGT_MT_FORWARD_SM_REQUEST:
+		DEBUGP(DMSC, "Routed to GSM 04.11 MT handler\n");
+		return gsm411_gsup_mt_handler(vsub, gsup_msg);
+
 	default:
 		LOGP(DMM, LOGL_ERROR, "No handler found for %s, dropping message...\n",
 			osmo_gsup_message_type_name(gsup_msg->message_type));
