@@ -2335,7 +2335,7 @@ DVLR vlr_lu_fsm(LU:901700000004620){VLR_ULA_S_WAIT_AUTH}: Set Ciphering Mode
 DMM -> CIPHER MODE COMMAND IMSI:901700000004620
 DMSC CLASSMARK 2 unknown, assuming MS doesn't support A5/3
 DMM IMSI:901700000004620: cannot start ciphering, no intersection between MSC-configured and MS-supported A5 algorithms
-- ERROR sending ciphering mode command: rc=-95
+- ERROR sending ciphering mode command: rc == -ENOTSUP
 DVLR vlr_lu_fsm(LU:901700000004620){VLR_ULA_S_WAIT_AUTH}: Failed to send Ciphering Mode Command
 - sending LU Reject for IMSI:901700000004620, cause 17
 DVLR vlr_lu_fsm(LU:901700000004620){VLR_ULA_S_WAIT_AUTH}: state_chg to VLR_ULA_S_DONE

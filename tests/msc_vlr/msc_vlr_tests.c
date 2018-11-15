@@ -779,8 +779,25 @@ static int fake_vlr_tx_ciph_mode_cmd(void *msc_conn_ref, bool umts_aka, bool ret
 	} else
 #endif
 	rc = msc_vlr_set_ciph_mode(msc_conn_ref, umts_aka, retrieve_imeisv);
-	if (rc)
-		btw("ERROR sending ciphering mode command: rc=%d", rc);
+	if (rc) {
+		const char *err_str;
+		switch (rc) {
+		case -EINVAL:
+			err_str = "rc == -EINVAL";
+			break;
+		case -ENOTSUP:
+			err_str = "rc == -ENOTSUP";
+			break;
+		default:
+			if (rc < 0)
+				err_str = "rc < 0";
+			else
+				err_str = "rc > 0";
+			break;
+		}
+		btw("ERROR sending ciphering mode command: %s", err_str);
+	}
+
 	return rc;
 }
 
