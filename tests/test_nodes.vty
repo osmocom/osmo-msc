@@ -41,6 +41,8 @@ OsmoMSC(config-msc)# list
   paging response-timer (default|<1-65535>)
   emergency-call route-to-msisdn MSISDN
   ipa-name NAME
+  sms-over-gsup
+  no sms-over-gsup
   mgw local-ip A.B.C.D
   mgw local-port <0-65535>
   mgw remote-ip A.B.C.D

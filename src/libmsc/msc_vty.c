@@ -476,6 +476,24 @@ DEFUN(cfg_msc_ipa_name,
 	return CMD_SUCCESS;
 }
 
+/* TODO: to be deprecated as soon as we rip SMS handling out (see OS#3587) */
+DEFUN(cfg_msc_sms_over_gsup, cfg_msc_sms_over_gsup_cmd,
+      "sms-over-gsup",
+      "Enable routing of SMS messages over GSUP\n")
+{
+	gsmnet->sms_over_gsup = true;
+	return CMD_SUCCESS;
+}
+
+/* TODO: to be deprecated as soon as we rip SMS handling out (see OS#3587) */
+DEFUN(cfg_msc_no_sms_over_gsup, cfg_msc_no_sms_over_gsup_cmd,
+      "no sms-over-gsup",
+      NO_STR "Disable routing of SMS messages over GSUP\n")
+{
+	gsmnet->sms_over_gsup = false;
+	return CMD_SUCCESS;
+}
+
 static int config_write_msc(struct vty *vty)
 {
 	vty_out(vty, "msc%s", VTY_NEWLINE);
@@ -511,6 +529,9 @@ static int config_write_msc(struct vty *vty)
 
 	if (gsmnet->msc_ipa_name)
 		vty_out(vty, " ipa-name %s%s", gsmnet->msc_ipa_name, VTY_NEWLINE);
+
+	if (gsmnet->sms_over_gsup)
+		vty_out(vty, " sms-over-gsup%s", VTY_NEWLINE);
 
 	mgcp_client_config_write(vty, " ");
 #ifdef BUILD_IU
@@ -1533,6 +1554,8 @@ void msc_vty_init(struct gsm_network *msc_network)
 	install_element(MSC_NODE, &cfg_msc_paging_response_timer_cmd);
 	install_element(MSC_NODE, &cfg_msc_emergency_msisdn_cmd);
 	install_element(MSC_NODE, &cfg_msc_ipa_name_cmd);
+	install_element(MSC_NODE, &cfg_msc_sms_over_gsup_cmd);
+	install_element(MSC_NODE, &cfg_msc_no_sms_over_gsup_cmd);
 
 	mgcp_client_vty_init(msc_network, MSC_NODE, &msc_network->mgw.conf);
 #ifdef BUILD_IU

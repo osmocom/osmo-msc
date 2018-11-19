@@ -160,6 +160,14 @@ struct gsm_network {
 
 	struct gsm_sms_queue *sms_queue;
 
+	/* The "SMS over GSUP" kill-switch that basically breaks internal
+	 * SMS routing (i.e. SQLite DB and SMPP), and enables forwarding
+	 * of short messages over GSUP towards ESME (through VLR and HLR).
+	 * Please see OS#3587 for details. This is a temporary solution,
+	 * so it should be removed as soon as we move the SMS processing
+	 * logic to an external process (OsmoSMSC?). REMOVE ME! */
+	bool sms_over_gsup;
+
 	/* control interface */
 	struct ctrl_handle *ctrl;
 
