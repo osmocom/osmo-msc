@@ -173,7 +173,7 @@ int gsm0408_rcvmsg_iucs(struct gsm_network *network, struct msgb *msg,
 		uint8_t pdisc = gh->proto_discr & 0x0f;
 		OSMO_ASSERT(pdisc != GSM48_PDISC_RR);
 
-		msc_dtap(conn, ue_ctx->conn_id, msg);
+		msc_dtap(conn, msg);
 		rc = 0;
 	} else {
 		/* allocate a new connection */

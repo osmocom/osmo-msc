@@ -63,8 +63,7 @@ void msc_sapi_n_reject(struct gsm_subscriber_connection *conn, int dlci);
 int msc_clear_request(struct gsm_subscriber_connection *conn, uint32_t cause);
 int msc_compl_l3(struct gsm_subscriber_connection *conn,
 		 struct msgb *msg, uint16_t chosen_channel);
-void msc_dtap(struct gsm_subscriber_connection *conn, uint8_t link_id,
-	      struct msgb *msg);
+void msc_dtap(struct gsm_subscriber_connection *conn, struct msgb *msg);
 int msc_classmark_request_then_cipher_mode_cmd(struct gsm_subscriber_connection *conn, bool umts_aka,
 					       bool retrieve_imeisv);
 int msc_geran_set_cipher_mode(struct gsm_subscriber_connection *conn, bool umts_aka, bool retrieve_imeisv);

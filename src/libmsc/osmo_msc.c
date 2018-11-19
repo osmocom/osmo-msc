@@ -121,7 +121,7 @@ int msc_compl_l3(struct gsm_subscriber_connection *conn,
 }
 
 /* Receive a DTAP message from BSC */
-void msc_dtap(struct gsm_subscriber_connection *conn, uint8_t link_id, struct msgb *msg)
+void msc_dtap(struct gsm_subscriber_connection *conn, struct msgb *msg)
 {
 	msc_subscr_conn_get(conn, MSC_CONN_USE_DTAP);
 	gsm0408_dispatch(conn, msg);

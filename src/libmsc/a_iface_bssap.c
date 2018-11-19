@@ -686,7 +686,7 @@ static int rx_dtap(const struct osmo_sccp_user *scu, const struct a_conn_info *a
 	OMSC_LINKID_CB(msg) = dtap->link_id;
 
 	/* Forward dtap payload into the msc */
-	msc_dtap(conn, conn->a.conn_id, msg);
+	msc_dtap(conn, msg);
 
 	return 0;
 }

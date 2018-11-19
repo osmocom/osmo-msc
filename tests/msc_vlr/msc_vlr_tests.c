@@ -232,7 +232,7 @@ void rx_from_ms(struct msgb *msg)
 		    && (gsm48_hdr_msg_type(gh) == GSM48_MT_RR_CIPH_M_COMPL))
 			msc_cipher_mode_compl(g_conn, msg, 0);
 		else
-			msc_dtap(g_conn, 23, msg);
+			msc_dtap(g_conn, msg);
 	}
 
 	if (!conn_exists(g_conn))
