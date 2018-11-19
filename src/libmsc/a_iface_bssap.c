@@ -611,7 +611,7 @@ static int rx_bssmap(struct osmo_sccp_user *scu, const struct a_conn_info *a_con
 	}
 	msg_type = msg->l3h[0];
 
-	rc = tlv_parse(&tp, gsm0808_att_tlvdef(), msg->l3h + 1, msgb_l3len(msg) - 1, 0, 0);
+	rc = osmo_bssap_tlv_parse(&tp, msg->l3h + 1, msgb_l3len(msg) - 1);
 	if (rc < 0) {
 		LOGP(DBSSAP, LOGL_ERROR, "Failed parsing TLV -- discarding message! %s\n",
 			osmo_hexdump(msg->l3h, msgb_l3len(msg)));
