@@ -37,7 +37,6 @@ struct gsm_sms *sms_from_text(struct vlr_subscr *receiver,
 			      const char *sender_msisdn,
 			      int dcs, const char *text);
 
-void _gsm411_sms_trans_free(struct gsm_trans *trans);
 int gsm411_send_sms_subscr(struct vlr_subscr *vsub,
 			   struct gsm_sms *sms);
 int gsm411_send_sms(struct gsm_subscriber_connection *conn,

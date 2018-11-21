@@ -31,6 +31,7 @@
 void *tall_trans_ctx;
 
 void _gsm48_cc_trans_free(struct gsm_trans *trans);
+void _gsm411_sms_trans_free(struct gsm_trans *trans);
 void _gsm911_nc_ss_trans_free(struct gsm_trans *trans);
 
 /*! Find a transaction in connection for given protocol + transaction ID
