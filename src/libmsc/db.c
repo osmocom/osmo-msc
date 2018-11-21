@@ -573,9 +573,11 @@ static int check_db_revision(void)
 	case 2:
 		if (update_db_revision_2())
 			goto error;
+	/* fall through */
 	case 3:
 		if (update_db_revision_3())
 			goto error;
+	/* fall through */
 	case 4:
 		if (update_db_revision_4())
 			goto error;
