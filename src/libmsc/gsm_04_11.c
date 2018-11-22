@@ -700,7 +700,7 @@ static void sms_status_report(struct gsm_sms *gsms,
 }
 
 /* Receive a 04.11 RP-ACK message (response to RP-DATA from us) */
-static int gsm411_rx_rp_ack(struct msgb *msg, struct gsm_trans *trans,
+static int gsm411_rx_rp_ack(struct gsm_trans *trans,
 			    struct gsm411_rp_hdr *rph)
 {
 	struct gsm_sms *sms = trans->sms.sms;
@@ -729,7 +729,7 @@ static int gsm411_rx_rp_ack(struct msgb *msg, struct gsm_trans *trans,
 	return 0;
 }
 
-static int gsm411_rx_rp_error(struct msgb *msg, struct gsm_trans *trans,
+static int gsm411_rx_rp_error(struct gsm_trans *trans,
 			      struct gsm411_rp_hdr *rph)
 {
 	struct gsm_network *net = trans->conn->network;
@@ -824,11 +824,11 @@ static int gsm411_rx_rl_report(struct msgb *msg, struct gsm48_hdr *gh,
 	switch (msg_type) {
 	case GSM411_MT_RP_ACK_MO:
 		DEBUGP(DLSMS, "RX SMS RP-ACK (MO)\n");
-		rc = gsm411_rx_rp_ack(msg, trans, rp_data);
+		rc = gsm411_rx_rp_ack(trans, rp_data);
 		break;
 	case GSM411_MT_RP_ERROR_MO:
 		DEBUGP(DLSMS, "RX SMS RP-ERROR (MO)\n");
-		rc = gsm411_rx_rp_error(msg, trans, rp_data);
+		rc = gsm411_rx_rp_error(trans, rp_data);
 		break;
 	default:
 		LOGP(DLSMS, LOGL_NOTICE, "Invalid RP type 0x%02x\n", msg_type);
