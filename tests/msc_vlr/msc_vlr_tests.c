@@ -486,11 +486,6 @@ static struct log_info_cat test_categories[] = {
 		.description = "Layer3 Call Control (CC)",
 		.enabled = 1, .loglevel = LOGL_DEBUG,
 	},
-	[DMM] = {
-		.name = "DMM",
-		.description = "Layer3 Mobility Management (MM)",
-		.enabled = 1, .loglevel = LOGL_DEBUG,
-	},
 	[DVLR] = {
 		.name = "DVLR",
 		.description = "Visitor Location Register",
