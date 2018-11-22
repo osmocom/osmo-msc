@@ -268,7 +268,7 @@ int handle_smpp_submit(struct osmo_esme *esme, struct submit_sm_t *submit,
 		LOGP(DLSMS, LOGL_DEBUG, "SMPP SUBMIT-SM: Forwarding in "
 			"real time (Transaction/Forward mode)\n");
 		sms->smpp.transaction_mode = 1;
-		gsm411_send_sms_subscr(sms->receiver, sms);
+		gsm411_send_sms(net, sms->receiver, sms);
 		rc = 1; /* don't send any response yet */
 		break;
 	}

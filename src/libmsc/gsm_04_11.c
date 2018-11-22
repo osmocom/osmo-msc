@@ -127,6 +127,87 @@ static int gsm411_sendmsg(struct gsm_subscriber_connection *conn, struct msgb *m
 	return msc_tx_dtap(conn, msg);
 }
 
+/* Paging callback for MT SMS (Paging is triggered by SMC) */
+static int paging_cb_mmsms_est_req(unsigned int hooknum, unsigned int event,
+				   struct msgb *msg, void *_conn, void *_trans)
+{
+	struct gsm_subscriber_connection *conn = _conn;
+	struct gsm_trans *trans = _trans;
+	struct gsm_sms *sms = trans->sms.sms;
+	int rc = 0;
+
+	DEBUGP(DLSMS, "paging_cb_mmsms_est_req(hooknum=%u, event=%u, "
+		"conn=%p, trans=%p)\n", hooknum, event, conn, trans);
+
+	if (hooknum != GSM_HOOK_RR_PAGING)
+		return -EINVAL;
+
+	/* Paging procedure has finished */
+	trans->paging_request = NULL;
+
+	switch (event) {
+	case GSM_PAGING_SUCCEEDED:
+		/* Associate transaction with established connection */
+		trans->conn = msc_subscr_conn_get(conn, MSC_CONN_USE_TRANS_SMS);
+		/* FIXME: specify SACCH in case we already have active TCH */
+		trans->dlci = 0x03;
+		/* Confirm successful connection establishment */
+		gsm411_smc_recv(&trans->sms.smc_inst,
+			GSM411_MMSMS_EST_CNF, NULL, 0);
+		break;
+	case GSM_PAGING_EXPIRED:
+	case GSM_PAGING_BUSY:
+		/* Inform SMC about channel establishment failure */
+		gsm411_smc_recv(&trans->sms.smc_inst,
+			GSM411_MMSMS_REL_IND, NULL, 0);
+
+		/* Notify the SMSqueue and free stored SMS */
+		send_signal(S_SMS_UNKNOWN_ERROR, NULL, sms, event);
+		trans->sms.sms = NULL;
+		sms_free(sms);
+
+		/* Destroy this transaction */
+		trans_free(trans);
+		rc = -ETIMEDOUT;
+		break;
+	default:
+		LOGP(DLSMS, LOGL_ERROR, "Unhandled paging event: %d\n", event);
+	}
+
+	return rc;
+}
+
+static int gsm411_mmsms_est_req(struct gsm_trans *trans)
+{
+	/* Subscriber's data shall be associated */
+	OSMO_ASSERT(trans->vsub != NULL);
+
+	/* Check if connection is already established */
+	if (trans->conn != NULL) {
+		LOGP(DLSMS, LOGL_DEBUG, "Using an existing connection "
+			"for %s\n", vlr_subscr_name(trans->vsub));
+		return gsm411_smc_recv(&trans->sms.smc_inst,
+			GSM411_MMSMS_EST_CNF, NULL, 0);
+	}
+
+	/* Initiate Paging procedure */
+	LOGP(DLSMS, LOGL_DEBUG, "Initiating Paging procedure "
+		"for %s due to MMSMS_EST_REQ\n", vlr_subscr_name(trans->vsub));
+	trans->paging_request = subscr_request_conn(trans->vsub,
+		paging_cb_mmsms_est_req, trans, "MT SMS");
+	if (!trans->paging_request) {
+		LOGP(DLSMS, LOGL_ERROR, "Failed to initiate Paging "
+			"procedure for %s\n", vlr_subscr_name(trans->vsub));
+		/* Inform SMC about channel establishment failure */
+		gsm411_smc_recv(&trans->sms.smc_inst,
+			GSM411_MMSMS_REL_IND, NULL, 0);
+		trans_free(trans);
+		return -EIO;
+	}
+
+	return 0;
+}
+
 /* Prefix msg with a 04.08/04.11 CP header */
 static int gsm411_cp_sendmsg(struct msgb *msg, struct gsm_trans *trans,
 			     uint8_t msg_type)
@@ -154,8 +235,7 @@ static int gsm411_mm_send(struct gsm411_smc_inst *inst, int msg_type,
 
 	switch (msg_type) {
 	case GSM411_MMSMS_EST_REQ:
-		/* recycle msg */
-		rc = gsm411_smc_recv(inst, GSM411_MMSMS_EST_CNF, msg, 0);
+		rc = gsm411_mmsms_est_req(trans);
 		msgb_free(msg); /* upper layer does not free msg */
 		break;
 	case GSM411_MMSMS_DATA_REQ:
@@ -899,6 +979,120 @@ static int gsm411_mn_recv(struct gsm411_smc_inst *inst, int msg_type,
 	return rc;
 }
 
+static struct gsm_trans *gsm411_alloc_mt_trans(struct gsm_network *net,
+					       struct vlr_subscr *vsub)
+{
+	struct gsm_subscriber_connection *conn;
+	struct gsm_trans *trans;
+	int tid;
+
+	LOGP(DLSMS, LOGL_INFO, "Going to send a MT SMS\n");
+
+	/* Generate a new transaction ID */
+	tid = trans_assign_trans_id(net, vsub, GSM48_PDISC_SMS, 0);
+	if (tid == -1) {
+		LOGP(DLSMS, LOGL_ERROR, "No available transaction IDs\n");
+		return NULL;
+	}
+
+	/* Allocate a new transaction */
+	trans = trans_alloc(net, vsub, GSM48_PDISC_SMS, tid, new_callref++);
+	if (!trans) {
+		LOGP(DLSMS, LOGL_ERROR, "No memory for trans\n");
+		return NULL;
+	}
+
+	/* Init both SMC and SMR state machines */
+	gsm411_smc_init(&trans->sms.smc_inst, 0, 1,
+		gsm411_mn_recv, gsm411_mm_send);
+	gsm411_smr_init(&trans->sms.smr_inst, 0, 1,
+		gsm411_rl_recv, gsm411_mn_send);
+
+	/* Attempt to find an existing connection */
+	conn = connection_for_subscr(vsub);
+	if (conn) {
+		/* Associate transaction with connection */
+		trans->conn = msc_subscr_conn_get(conn, MSC_CONN_USE_TRANS_SMS);
+		/* Generate unique RP Message Reference */
+		trans->sms.sm_rp_mr = conn->next_rp_ref++;
+	}
+
+	return trans;
+}
+
+/* High-level function to send an SMS to a given subscriber */
+int gsm411_send_sms(struct gsm_network *net,
+		    struct vlr_subscr *vsub,
+		    struct gsm_sms *sms)
+{
+	uint8_t *data, *rp_ud_len;
+	struct gsm_trans *trans;
+	struct msgb *msg;
+	int rc;
+
+	/* Allocate a new transaction for MT SMS */
+	trans = gsm411_alloc_mt_trans(net, vsub);
+	if (!trans) {
+		send_signal(S_SMS_UNKNOWN_ERROR, NULL, sms, 0);
+		sms_free(sms);
+		return -ENOMEM;
+	}
+
+	/* Allocate a message buffer for to be encoded SMS */
+	msg = gsm411_msgb_alloc();
+	if (!msg) {
+		send_signal(S_SMS_UNKNOWN_ERROR, NULL, sms, 0);
+		trans_free(trans);
+		sms_free(sms);
+		return -ENOMEM;
+	}
+
+	/* Hardcode SMSC Originating Address for now */
+	data = (uint8_t *)msgb_put(msg, 8);
+	data[0] = 0x07;	/* originator length == 7 */
+	data[1] = 0x91; /* type of number: international, ISDN */
+	data[2] = 0x44; /* 447785016005 */
+	data[3] = 0x77;
+	data[4] = 0x58;
+	data[5] = 0x10;
+	data[6] = 0x06;
+	data[7] = 0x50;
+
+	/* Hardcoded Destination Address */
+	data = (uint8_t *)msgb_put(msg, 1);
+	data[0] = 0;	/* destination length == 0 */
+
+	/* obtain a pointer for the rp_ud_len, so we can fill it later */
+	rp_ud_len = (uint8_t *)msgb_put(msg, 1);
+
+	if (sms->is_report) {
+		/* generate the 03.40 SMS-STATUS-REPORT TPDU */
+		rc = gsm340_gen_sms_status_report_tpdu(msg, sms);
+	} else {
+		/* generate the 03.40 SMS-DELIVER TPDU */
+		rc = gsm340_gen_sms_deliver_tpdu(msg, sms);
+	}
+	if (rc < 0) {
+		send_signal(S_SMS_UNKNOWN_ERROR, trans, sms, 0);
+		sms_free(sms);
+		trans_free(trans);
+		msgb_free(msg);
+		return rc;
+	}
+
+	*rp_ud_len = rc;
+
+	/* Store a pointer to abstract SMS representation */
+	trans->sms.sms = sms;
+
+	rate_ctr_inc(&net->msc_ctrs->ctr[MSC_CTR_SMS_DELIVERED]);
+	db_sms_inc_deliver_attempts(trans->sms.sms);
+
+	return gsm411_rp_sendmsg(&trans->sms.smr_inst, msg,
+		GSM411_MT_RP_DATA_MT, trans->sms.sm_rp_mr,
+		GSM411_SM_RL_DATA_REQ);
+}
+
 /* Entry point for incoming GSM48_PDISC_SMS from abis_rsl.c */
 int gsm0411_rcv_sms(struct gsm_subscriber_connection *conn,
 		    struct msgb *msg)
@@ -983,159 +1177,6 @@ int gsm0411_rcv_sms(struct gsm_subscriber_connection *conn,
 		msg, msg_type);
 
 	return rc;
-}
-
-/* Take a SMS in gsm_sms structure and send it through an already
- * existing conn. We also assume that the caller ensured this conn already
- * has a SAPI3 RLL connection! */
-int gsm411_send_sms(struct gsm_subscriber_connection *conn, struct gsm_sms *sms)
-{
-	struct msgb *msg = gsm411_msgb_alloc();
-	struct gsm_trans *trans;
-	uint8_t *data, *rp_ud_len;
-	uint8_t msg_ref = conn->next_rp_ref++;
-	int transaction_id;
-	int rc;
-
-	transaction_id =
-		trans_assign_trans_id(conn->network, conn->vsub,
-				      GSM48_PDISC_SMS, 0);
-	if (transaction_id == -1) {
-		LOGP(DLSMS, LOGL_ERROR, "No available transaction ids\n");
-		send_signal(S_SMS_UNKNOWN_ERROR, NULL, sms, 0);
-		sms_free(sms);
-		msgb_free(msg);
-		return -EBUSY;
-	}
-
-	DEBUGP(DLSMS, "%s()\n", __func__);
-
-	/* FIXME: allocate transaction with message reference */
-	trans = trans_alloc(conn->network, conn->vsub,
-			    GSM48_PDISC_SMS,
-			    transaction_id, new_callref++);
-	if (!trans) {
-		LOGP(DLSMS, LOGL_ERROR, "No memory for trans\n");
-		send_signal(S_SMS_UNKNOWN_ERROR, NULL, sms, 0);
-		sms_free(sms);
-		msgb_free(msg);
-		/* FIXME: send some error message */
-		return -ENOMEM;
-	}
-	gsm411_smc_init(&trans->sms.smc_inst, sms->id, 1,
-		gsm411_mn_recv, gsm411_mm_send);
-	gsm411_smr_init(&trans->sms.smr_inst, sms->id, 1,
-		gsm411_rl_recv, gsm411_mn_send);
-	trans->sms.sms = sms;
-
-	trans->conn = msc_subscr_conn_get(conn, MSC_CONN_USE_TRANS_SMS);
-	trans->dlci = 0x03;
-	/* FIXME: specify SACCH in case we already have active TCH */
-
-	/* Hardcode SMSC Originating Address for now */
-	data = (uint8_t *)msgb_put(msg, 8);
-	data[0] = 0x07;	/* originator length == 7 */
-	data[1] = 0x91; /* type of number: international, ISDN */
-	data[2] = 0x44; /* 447785016005 */
-	data[3] = 0x77;
-	data[4] = 0x58;
-	data[5] = 0x10;
-	data[6] = 0x06;
-	data[7] = 0x50;
-
-	/* Hardcoded Destination Address */
-	data = (uint8_t *)msgb_put(msg, 1);
-	data[0] = 0;	/* destination length == 0 */
-
-	/* obtain a pointer for the rp_ud_len, so we can fill it later */
-	rp_ud_len = (uint8_t *)msgb_put(msg, 1);
-
-	if (sms->is_report) {
-		/* generate the 03.40 SMS-STATUS-REPORT TPDU */
-		rc = gsm340_gen_sms_status_report_tpdu(msg, sms);
-	} else {
-		/* generate the 03.40 SMS-DELIVER TPDU */
-		rc = gsm340_gen_sms_deliver_tpdu(msg, sms);
-	}
-	if (rc < 0) {
-		send_signal(S_SMS_UNKNOWN_ERROR, trans, sms, 0);
-		sms_free(sms);
-		trans->sms.sms = NULL;
-		trans_free(trans);
-		msgb_free(msg);
-		return rc;
-	}
-
-	*rp_ud_len = rc;
-
-	DEBUGP(DLSMS, "TX: SMS DELIVER\n");
-
-	rate_ctr_inc(&conn->network->msc_ctrs->ctr[MSC_CTR_SMS_DELIVERED]);
-	db_sms_inc_deliver_attempts(trans->sms.sms);
-
-	return gsm411_rp_sendmsg(&trans->sms.smr_inst, msg,
-		GSM411_MT_RP_DATA_MT, msg_ref, GSM411_SM_RL_DATA_REQ);
-}
-
-/* paging callback. Here we get called if paging a subscriber has
- * succeeded or failed. */
-static int paging_cb_send_sms(unsigned int hooknum, unsigned int event,
-			      struct msgb *msg, void *_conn, void *_sms)
-{
-	struct gsm_subscriber_connection *conn = _conn;
-	struct gsm_sms *sms = _sms;
-	int rc = 0;
-
-	DEBUGP(DLSMS, "paging_cb_send_sms(hooknum=%u, event=%u, msg=%p,"
-		"conn=%p, sms=%p/id: %llu)\n", hooknum, event, msg, conn, sms, sms->id);
-
-	if (hooknum != GSM_HOOK_RR_PAGING)
-		return -EINVAL;
-
-	switch (event) {
-	case GSM_PAGING_SUCCEEDED:
-		gsm411_send_sms(conn, sms);
-		break;
-	case GSM_PAGING_EXPIRED:
-	case GSM_PAGING_BUSY:
-		send_signal(S_SMS_UNKNOWN_ERROR, NULL, sms, event);
-		sms_free(sms);
-		rc = -ETIMEDOUT;
-		break;
-	default:
-		LOGP(DLSMS, LOGL_ERROR, "Unhandled paging event: %d\n", event);
-	}
-
-	return rc;
-}
-
-/* high-level function to send a SMS to a given subscriber. The function
- * will take care of paging the subscriber, establishing the RLL SAPI3
- * connection, etc. */
-int gsm411_send_sms_subscr(struct vlr_subscr *vsub,
-			   struct gsm_sms *sms)
-{
-	struct gsm_subscriber_connection *conn;
-	void *res;
-
-	/* check if we already have an open conn to the subscriber.
-	 * if yes, send the SMS this way */
-	conn = connection_for_subscr(vsub);
-	if (conn) {
-		LOGP(DLSMS, LOGL_DEBUG, "Sending SMS via already open connection %p to %s\n",
-		     conn, vlr_subscr_name(vsub));
-		return gsm411_send_sms(conn, sms);
-	}
-
-	/* if not, we have to start paging */
-	LOGP(DLSMS, LOGL_DEBUG, "Sending SMS: no connection open, start paging %s\n",
-	     vlr_subscr_name(vsub));
-	res = subscr_request_conn(vsub, paging_cb_send_sms, sms, "send SMS");
-	if (!res) {
-		send_signal(S_SMS_UNKNOWN_ERROR, NULL, sms, GSM_PAGING_BUSY);
-		sms_free(sms);
-	}
-	return 0;
 }
 
 void _gsm411_sms_trans_free(struct gsm_trans *trans)

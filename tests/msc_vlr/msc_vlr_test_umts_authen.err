@@ -288,18 +288,20 @@ DMM Subscr_Conn(CM_SERVICE_REQ:901700000010650){SUBSCR_CONN_S_RELEASED}: Dealloc
 DREF VLR subscr MSISDN:42342 usage increases to: 2
   llist_count(&vsub->cs.requests) == 0
 DREF VLR subscr MSISDN:42342 usage increases to: 3
+DCC (ti 00 sub MSISDN:42342 callref 40000001) New transaction
+DREF VLR subscr MSISDN:42342 usage increases to: 4
 DMM Subscriber MSISDN:42342 not paged yet, start paging.
   RAN_GERAN_A sends out paging request to IMSI 901700000010650, TMSI 0x03020100, LAC 23
   strcmp(paging_expecting_imsi, imsi) == 0
-DREF VLR subscr MSISDN:42342 usage increases to: 4
+DREF VLR subscr MSISDN:42342 usage increases to: 5
   llist_count(&vsub->cs.requests) == 1
-DREF VLR subscr MSISDN:42342 usage decreases to: 3
+DREF VLR subscr MSISDN:42342 usage decreases to: 4
   paging_sent == 1
   paging_stopped == 0
 - the subscriber and its pending request should remain
-DREF VLR subscr MSISDN:42342 usage increases to: 4
+DREF VLR subscr MSISDN:42342 usage increases to: 5
   llist_count(&vsub->cs.requests) == 1
-DREF VLR subscr MSISDN:42342 usage decreases to: 3
+DREF VLR subscr MSISDN:42342 usage decreases to: 4
 - MS replies with Paging Response, and VLR sends Auth Request with third key
   MSC <--RAN_GERAN_A-- MS: GSM48_MT_RR_PAG_RESP
   new conn
@@ -312,8 +314,8 @@ DVLR Process_Access_Request_VLR(PAGING_RESP:901700000010650){PR_ARQ_S_INIT}: All
 DVLR Process_Access_Request_VLR(PAGING_RESP:901700000010650){PR_ARQ_S_INIT}: is child of Subscr_Conn(PAGING_RESP:901700000010650)
 DVLR Process_Access_Request_VLR(PAGING_RESP:901700000010650){PR_ARQ_S_INIT}: rev=R99 net=GERAN Auth (no Ciph)
 DVLR Process_Access_Request_VLR(PAGING_RESP:901700000010650){PR_ARQ_S_INIT}: Received Event PR_ARQ_E_START
-DREF VLR subscr MSISDN:42342 usage increases to: 4
 DREF VLR subscr MSISDN:42342 usage increases to: 5
+DREF VLR subscr MSISDN:42342 usage increases to: 6
 DVLR Process_Access_Request_VLR(PAGING_RESP:901700000010650){PR_ARQ_S_INIT}: proc_arq_vlr_fn_post_imsi()
 DVLR Process_Access_Request_VLR(PAGING_RESP:901700000010650){PR_ARQ_S_INIT}: state_chg to PR_ARQ_S_WAIT_AUTH
 DVLR VLR_Authenticate(PAGING_RESP:901700000010650){VLR_SUB_AS_NEEDS_AUTH}: Allocated
@@ -325,7 +327,7 @@ DVLR VLR_Authenticate(PAGING_RESP:901700000010650){VLR_SUB_AS_WAIT_RESP}: got au
 - ...rand=efa9c29a9742148d5c9070348716e1bb
 - ...autn=f9375e6d41e1000096e7fe4ff1c27e39
 - ...expecting res=706f996719ba609c
-DREF VLR subscr MSISDN:42342 usage decreases to: 4
+DREF VLR subscr MSISDN:42342 usage decreases to: 5
 DMM Subscr_Conn(PAGING_RESP:901700000010650){SUBSCR_CONN_S_NEW}: Received Event SUBSCR_CONN_E_COMPLETE_LAYER_3
 DMM Subscr_Conn(PAGING_RESP:901700000010650){SUBSCR_CONN_S_NEW}: state_chg to SUBSCR_CONN_S_AUTH_CIPH
 DREF MSISDN:42342: MSC conn use - compl_l3 == 0 (0x0: )
@@ -370,8 +372,6 @@ DVLR Process_Access_Request_VLR(PAGING_RESP:901700000010650){PR_ARQ_S_DONE}: Pro
 DMM Subscr_Conn(PAGING_RESP:901700000010650){SUBSCR_CONN_S_AUTH_CIPH}: Received Event SUBSCR_CONN_E_ACCEPTED
 DPAG Paging success for MSISDN:42342 (event=0)
 DPAG Calling paging cbfn.
-DCC (ti 00 sub MSISDN:42342 callref 40000001) New transaction
-DREF VLR subscr MSISDN:42342 usage increases to: 5
 DREF MSISDN:42342: MSC conn use + trans_sms == 2 (0x22: dtap,trans_sms)
 DMSC msc_tx 91 bytes to MSISDN:42342 via RAN_GERAN_A
 - DTAP --RAN_GERAN_A--> MS: SMS:0x01: 09015801000791447758100650004c0005802443f2000007101000000000445079da1e1ee7416937485e9ea7c965373d1d6683c270383b3d0ed3d36ff71c949e83c22072799e9687c5ec32a81d96afcbf4b4fb0c7ac3e9e9b7db05
@@ -778,18 +778,20 @@ DMM Subscr_Conn(CM_SERVICE_REQ:901700000010650){SUBSCR_CONN_S_RELEASED}: Dealloc
 DREF VLR subscr MSISDN:42342 usage increases to: 2
   llist_count(&vsub->cs.requests) == 0
 DREF VLR subscr MSISDN:42342 usage increases to: 3
+DCC (ti 00 sub MSISDN:42342 callref 40000002) New transaction
+DREF VLR subscr MSISDN:42342 usage increases to: 4
 DMM Subscriber MSISDN:42342 not paged yet, start paging.
   RAN_UTRAN_IU sends out paging request to IMSI 901700000010650, TMSI 0x03020100, LAC 23
   strcmp(paging_expecting_imsi, imsi) == 0
-DREF VLR subscr MSISDN:42342 usage increases to: 4
+DREF VLR subscr MSISDN:42342 usage increases to: 5
   llist_count(&vsub->cs.requests) == 1
-DREF VLR subscr MSISDN:42342 usage decreases to: 3
+DREF VLR subscr MSISDN:42342 usage decreases to: 4
   paging_sent == 1
   paging_stopped == 0
 - the subscriber and its pending request should remain
-DREF VLR subscr MSISDN:42342 usage increases to: 4
+DREF VLR subscr MSISDN:42342 usage increases to: 5
   llist_count(&vsub->cs.requests) == 1
-DREF VLR subscr MSISDN:42342 usage decreases to: 3
+DREF VLR subscr MSISDN:42342 usage decreases to: 4
 - MS replies with Paging Response, and VLR sends Auth Request with third key
   MSC <--RAN_UTRAN_IU-- MS: GSM48_MT_RR_PAG_RESP
   new conn
@@ -802,8 +804,8 @@ DVLR Process_Access_Request_VLR(PAGING_RESP:901700000010650){PR_ARQ_S_INIT}: All
 DVLR Process_Access_Request_VLR(PAGING_RESP:901700000010650){PR_ARQ_S_INIT}: is child of Subscr_Conn(PAGING_RESP:901700000010650)
 DVLR Process_Access_Request_VLR(PAGING_RESP:901700000010650){PR_ARQ_S_INIT}: rev=R99 net=UTRAN Auth+Ciph
 DVLR Process_Access_Request_VLR(PAGING_RESP:901700000010650){PR_ARQ_S_INIT}: Received Event PR_ARQ_E_START
-DREF VLR subscr MSISDN:42342 usage increases to: 4
 DREF VLR subscr MSISDN:42342 usage increases to: 5
+DREF VLR subscr MSISDN:42342 usage increases to: 6
 DVLR Process_Access_Request_VLR(PAGING_RESP:901700000010650){PR_ARQ_S_INIT}: proc_arq_vlr_fn_post_imsi()
 DVLR Process_Access_Request_VLR(PAGING_RESP:901700000010650){PR_ARQ_S_INIT}: state_chg to PR_ARQ_S_WAIT_AUTH
 DVLR VLR_Authenticate(PAGING_RESP:901700000010650){VLR_SUB_AS_NEEDS_AUTH}: Allocated
@@ -815,7 +817,7 @@ DVLR VLR_Authenticate(PAGING_RESP:901700000010650){VLR_SUB_AS_WAIT_RESP}: got au
 - ...rand=efa9c29a9742148d5c9070348716e1bb
 - ...autn=f9375e6d41e1000096e7fe4ff1c27e39
 - ...expecting res=706f996719ba609c
-DREF VLR subscr MSISDN:42342 usage decreases to: 4
+DREF VLR subscr MSISDN:42342 usage decreases to: 5
 DMM Subscr_Conn(PAGING_RESP:901700000010650){SUBSCR_CONN_S_NEW}: Received Event SUBSCR_CONN_E_COMPLETE_LAYER_3
 DMM Subscr_Conn(PAGING_RESP:901700000010650){SUBSCR_CONN_S_NEW}: state_chg to SUBSCR_CONN_S_AUTH_CIPH
 DREF MSISDN:42342: MSC conn use - compl_l3 == 0 (0x0: )
@@ -875,8 +877,6 @@ DVLR Process_Access_Request_VLR(PAGING_RESP:901700000010650){PR_ARQ_S_DONE}: Pro
 DMM Subscr_Conn(PAGING_RESP:901700000010650){SUBSCR_CONN_S_AUTH_CIPH}: Received Event SUBSCR_CONN_E_ACCEPTED
 DPAG Paging success for MSISDN:42342 (event=0)
 DPAG Calling paging cbfn.
-DCC (ti 00 sub MSISDN:42342 callref 40000002) New transaction
-DREF VLR subscr MSISDN:42342 usage increases to: 5
 DREF MSISDN:42342: MSC conn use + trans_sms == 1 (0x20: trans_sms)
 DMSC msc_tx 91 bytes to MSISDN:42342 via RAN_UTRAN_IU
 - DTAP --RAN_UTRAN_IU--> MS: SMS:0x01: 09015801000791447758100650004c0005802443f2000007101000000000445079da1e1ee7416937485e9ea7c965373d1d6683c270383b3d0ed3d36ff71c949e83c22072799e9687c5ec32a81d96afcbf4b4fb0c7ac3e9e9b7db05

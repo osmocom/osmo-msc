@@ -319,7 +319,7 @@ void send_sms(struct vlr_subscr *receiver,
 	      char *str)
 {
 	struct gsm_sms *sms = sms_from_text(receiver, sender->msisdn, 0, str);
-	gsm411_send_sms_subscr(receiver, sms);
+	gsm411_send_sms(net, receiver, sms);
 }
 
 unsigned char next_rand_byte = 0;

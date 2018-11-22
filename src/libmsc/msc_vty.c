@@ -680,7 +680,7 @@ DEFUN(sms_send_pend,
 			break;
 
 		if (sms->receiver)
-			gsm411_send_sms_subscr(sms->receiver, sms);
+			gsm411_send_sms(gsmnet, sms->receiver, sms);
 
 		sms_id = sms->id + 1;
 	}
@@ -819,7 +819,7 @@ DEFUN(subscriber_send_pending_sms,
 
 	sms = db_sms_get_unsent_for_subscr(vsub, UINT_MAX);
 	if (sms)
-		gsm411_send_sms_subscr(sms->receiver, sms);
+		gsm411_send_sms(gsmnet, sms->receiver, sms);
 
 	vlr_subscr_put(vsub);
 

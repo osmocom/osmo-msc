@@ -186,7 +186,7 @@ static void sms_resend_pending(void *_data)
 			sms_queue_trigger(smsq);
 		} else {
 			pending->resend = 0;
-			gsm411_send_sms_subscr(sms->receiver, sms);
+			gsm411_send_sms(smsq->network, sms->receiver, sms);
 		}
 	}
 }
@@ -311,7 +311,7 @@ static void sms_submit_pending(void *_data)
 		attempted += 1;
 		smsq->pending += 1;
 		llist_add_tail(&pending->entry, &smsq->pending_sms);
-		gsm411_send_sms_subscr(sms->receiver, sms);
+		gsm411_send_sms(smsq->network, sms->receiver, sms);
 	} while (attempted < attempts && rounds < 1000);
 
 	LOGP(DLSMS, LOGL_DEBUG, "SMSqueue added %d messages in %d rounds\n", attempted, rounds);
@@ -349,7 +349,7 @@ static void sms_send_next(struct vlr_subscr *vsub)
 
 	smsq->pending += 1;
 	llist_add_tail(&pending->entry, &smsq->pending_sms);
-	gsm411_send_sms_subscr(sms->receiver, sms);
+	gsm411_send_sms(smsq->network, sms->receiver, sms);
 	return;
 
 no_pending_sms:
@@ -398,7 +398,6 @@ static int sub_ready_for_sm(struct gsm_network *net, struct vlr_subscr *vsub)
 {
 	struct gsm_sms *sms;
 	struct gsm_sms_pending *pending;
-	struct gsm_subscriber_connection *conn;
 
 	/*
 	 * The code used to be very clever and tried to submit
@@ -423,15 +422,12 @@ static int sub_ready_for_sm(struct gsm_network *net, struct vlr_subscr *vsub)
 		return 0;
 	}
 
-	conn = connection_for_subscr(vsub);
-	if (!conn)
-		return -1;
-
 	/* Now try to deliver any pending SMS to this sub */
 	sms = db_sms_get_unsent_for_subscr(vsub, UINT_MAX);
 	if (!sms)
 		return -1;
-	gsm411_send_sms(conn, sms);
+
+	gsm411_send_sms(net, vsub, sms);
 	return 0;
 }
 

@@ -471,32 +471,38 @@ DMM Subscr_Conn(LU:901700000004620){SUBSCR_CONN_S_RELEASED}: Deallocated
 DREF VLR subscr MSISDN:46071 usage increases to: 2
   llist_count(&vsub->cs.requests) == 0
 DREF VLR subscr MSISDN:46071 usage increases to: 3
+DCC (ti 00 sub MSISDN:46071 callref 40000001) New transaction
+DREF VLR subscr MSISDN:46071 usage increases to: 4
 DMM Subscriber MSISDN:46071 not paged yet, start paging.
   RAN_GERAN_A sends out paging request to IMSI 901700000004620, TMSI 0xffffffff, LAC 23
   strcmp(paging_expecting_imsi, imsi) == 0
-DREF VLR subscr MSISDN:46071 usage increases to: 4
+DREF VLR subscr MSISDN:46071 usage increases to: 5
   llist_count(&vsub->cs.requests) == 1
-DREF VLR subscr MSISDN:46071 usage decreases to: 3
+DREF VLR subscr MSISDN:46071 usage decreases to: 4
   paging_sent == 1
   paging_stopped == 0
 - time passes and no paging result is received
 - Total time passed: 9.000000 s
 - the paging timeout has not yet expired
   paging_stopped == 0
-DREF VLR subscr MSISDN:46071 usage increases to: 4
+DREF VLR subscr MSISDN:46071 usage increases to: 5
   vsub->cs.is_paging == 1
 - another request is added to the list but does not cause another paging
-DREF VLR subscr MSISDN:46071 usage increases to: 5
+DREF VLR subscr MSISDN:46071 usage increases to: 6
+DCC (ti 01 sub MSISDN:46071 callref 40000002) New transaction
+DREF VLR subscr MSISDN:46071 usage increases to: 7
 DMM Subscriber MSISDN:46071 already paged.
   llist_count(&vsub->cs.requests) == 2
-DREF VLR subscr MSISDN:46071 usage decreases to: 4
+DREF VLR subscr MSISDN:46071 usage decreases to: 6
   paging_sent == 0
 - the paging timeout expires, the paging as well as the requests are canceled
 - Total time passed: 11.000000 s
 DPAG Paging failure for MSISDN:46071 (event=1)
 DPAG Calling paging cbfn.
-DREF VLR subscr MSISDN:46071 usage decreases to: 3
+DREF VLR subscr MSISDN:46071 usage decreases to: 5
+DREF VLR subscr MSISDN:46071 usage decreases to: 4
 DPAG Calling paging cbfn.
+DREF VLR subscr MSISDN:46071 usage decreases to: 3
 DREF VLR subscr MSISDN:46071 usage decreases to: 2
 DREF VLR subscr MSISDN:46071 usage decreases to: 1
   paging_stopped == 1
@@ -506,12 +512,14 @@ DREF VLR subscr MSISDN:46071 usage increases to: 2
 ---
 - Now that the timeout has expired, another Paging is sent on request
 DREF VLR subscr MSISDN:46071 usage increases to: 3
+DCC (ti 00 sub MSISDN:46071 callref 40000003) New transaction
+DREF VLR subscr MSISDN:46071 usage increases to: 4
 DMM Subscriber MSISDN:46071 not paged yet, start paging.
   RAN_GERAN_A sends out paging request to IMSI 901700000004620, TMSI 0xffffffff, LAC 23
   strcmp(paging_expecting_imsi, imsi) == 0
-DREF VLR subscr MSISDN:46071 usage increases to: 4
+DREF VLR subscr MSISDN:46071 usage increases to: 5
   llist_count(&vsub->cs.requests) == 1
-DREF VLR subscr MSISDN:46071 usage decreases to: 3
+DREF VLR subscr MSISDN:46071 usage decreases to: 4
   paging_sent == 1
   paging_stopped == 0
 ---
@@ -522,10 +530,11 @@ DMM Subscr_Conn{SUBSCR_CONN_S_NEW}: Allocated
 DREF unknown: MSC conn use + compl_l3 == 1 (0x1: compl_l3)
 DRLL Dispatching 04.08 message GSM48_MT_MM_IMSI_DETACH_IND (0x5:0x1)
 DMM IMSI DETACH INDICATION: MI(IMSI)=901700000004620
-DREF VLR subscr MSISDN:46071 usage increases to: 4
+DREF VLR subscr MSISDN:46071 usage increases to: 5
 DMM IMSI DETACH for MSISDN:46071
 DPAG Paging failure for MSISDN:46071 (event=1)
 DPAG Calling paging cbfn.
+DREF VLR subscr MSISDN:46071 usage decreases to: 4
 DREF VLR subscr MSISDN:46071 usage decreases to: 3
 DREF VLR subscr MSISDN:46071 usage decreases to: 2
 DREF VLR subscr MSISDN:46071 usage increases to: 3

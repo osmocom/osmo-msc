@@ -1260,12 +1260,14 @@ DMM Subscr_Conn(LU:901700000004620){SUBSCR_CONN_S_RELEASED}: Deallocated
 DREF VLR subscr MSISDN:46071 usage increases to: 2
   llist_count(&vsub->cs.requests) == 0
 DREF VLR subscr MSISDN:46071 usage increases to: 3
+DCC (ti 00 sub MSISDN:46071 callref 40000001) New transaction
+DREF VLR subscr MSISDN:46071 usage increases to: 4
 DMM Subscriber MSISDN:46071 not paged yet, start paging.
   RAN_GERAN_A sends out paging request to IMSI 901700000004620, TMSI 0xffffffff, LAC 23
   strcmp(paging_expecting_imsi, imsi) == 0
-DREF VLR subscr MSISDN:46071 usage increases to: 4
+DREF VLR subscr MSISDN:46071 usage increases to: 5
   llist_count(&vsub->cs.requests) == 1
-DREF VLR subscr MSISDN:46071 usage decreases to: 3
+DREF VLR subscr MSISDN:46071 usage decreases to: 4
   paging_sent == 1
   paging_stopped == 0
 - MS replies with Paging Response, we deliver the SMS
@@ -1280,8 +1282,8 @@ DVLR Process_Access_Request_VLR(PAGING_RESP:901700000004620){PR_ARQ_S_INIT}: All
 DVLR Process_Access_Request_VLR(PAGING_RESP:901700000004620){PR_ARQ_S_INIT}: is child of Subscr_Conn(PAGING_RESP:901700000004620)
 DVLR Process_Access_Request_VLR(PAGING_RESP:901700000004620){PR_ARQ_S_INIT}: rev=GSM net=GERAN (no Auth)
 DVLR Process_Access_Request_VLR(PAGING_RESP:901700000004620){PR_ARQ_S_INIT}: Received Event PR_ARQ_E_START
-DREF VLR subscr MSISDN:46071 usage increases to: 4
 DREF VLR subscr MSISDN:46071 usage increases to: 5
+DREF VLR subscr MSISDN:46071 usage increases to: 6
 DVLR Process_Access_Request_VLR(PAGING_RESP:901700000004620){PR_ARQ_S_INIT}: proc_arq_vlr_fn_post_imsi()
 DVLR Process_Access_Request_VLR(PAGING_RESP:901700000004620){PR_ARQ_S_INIT}: _proc_arq_vlr_node2()
 DVLR Process_Access_Request_VLR(PAGING_RESP:901700000004620){PR_ARQ_S_INIT}: _proc_arq_vlr_node2_post_ciph()
@@ -1295,8 +1297,6 @@ DVLR Process_Access_Request_VLR(PAGING_RESP:901700000004620){PR_ARQ_S_DONE}: Pro
 DMM Subscr_Conn(PAGING_RESP:901700000004620){SUBSCR_CONN_S_NEW}: Received Event SUBSCR_CONN_E_ACCEPTED
 DPAG Paging success for MSISDN:46071 (event=0)
 DPAG Calling paging cbfn.
-DCC (ti 00 sub MSISDN:46071 callref 40000001) New transaction
-DREF VLR subscr MSISDN:46071 usage increases to: 6
 DREF MSISDN:46071: MSC conn use + trans_sms == 2 (0x21: compl_l3,trans_sms)
 DMSC msc_tx 91 bytes to MSISDN:46071 via RAN_GERAN_A
 - DTAP --RAN_GERAN_A--> MS: SMS:0x01: 09015801000791447758100650004c0005806470f1000007101000000000445079da1e1ee7416937485e9ea7c965373d1d6683c270383b3d0ed3d36ff71c949e83c22072799e9687c5ec32a81d96afcbf4b4fb0c7ac3e9e9b7db05
@@ -1487,12 +1487,14 @@ DMM Subscr_Conn(LU:901700000004620){SUBSCR_CONN_S_RELEASED}: Deallocated
 DREF VLR subscr MSISDN:46071 usage increases to: 2
   llist_count(&vsub->cs.requests) == 0
 DREF VLR subscr MSISDN:46071 usage increases to: 3
+DCC (ti 00 sub MSISDN:46071 callref 40000002) New transaction
+DREF VLR subscr MSISDN:46071 usage increases to: 4
 DMM Subscriber MSISDN:46071 not paged yet, start paging.
   RAN_GERAN_A sends out paging request to IMSI 901700000004620, TMSI 0xffffffff, LAC 23
   strcmp(paging_expecting_imsi, imsi) == 0
-DREF VLR subscr MSISDN:46071 usage increases to: 4
+DREF VLR subscr MSISDN:46071 usage increases to: 5
   llist_count(&vsub->cs.requests) == 1
-DREF VLR subscr MSISDN:46071 usage decreases to: 3
+DREF VLR subscr MSISDN:46071 usage decreases to: 4
   paging_sent == 1
   paging_stopped == 0
 - MS replies with Paging Response, we deliver the SMS
@@ -1507,8 +1509,8 @@ DVLR Process_Access_Request_VLR(PAGING_RESP:901700000004620){PR_ARQ_S_INIT}: All
 DVLR Process_Access_Request_VLR(PAGING_RESP:901700000004620){PR_ARQ_S_INIT}: is child of Subscr_Conn(PAGING_RESP:901700000004620)
 DVLR Process_Access_Request_VLR(PAGING_RESP:901700000004620){PR_ARQ_S_INIT}: rev=GSM net=GERAN (no Auth)
 DVLR Process_Access_Request_VLR(PAGING_RESP:901700000004620){PR_ARQ_S_INIT}: Received Event PR_ARQ_E_START
-DREF VLR subscr MSISDN:46071 usage increases to: 4
 DREF VLR subscr MSISDN:46071 usage increases to: 5
+DREF VLR subscr MSISDN:46071 usage increases to: 6
 DVLR Process_Access_Request_VLR(PAGING_RESP:901700000004620){PR_ARQ_S_INIT}: proc_arq_vlr_fn_post_imsi()
 DVLR Process_Access_Request_VLR(PAGING_RESP:901700000004620){PR_ARQ_S_INIT}: _proc_arq_vlr_node2()
 DVLR Process_Access_Request_VLR(PAGING_RESP:901700000004620){PR_ARQ_S_INIT}: _proc_arq_vlr_node2_post_ciph()
@@ -1522,8 +1524,6 @@ DVLR Process_Access_Request_VLR(PAGING_RESP:901700000004620){PR_ARQ_S_DONE}: Pro
 DMM Subscr_Conn(PAGING_RESP:901700000004620){SUBSCR_CONN_S_NEW}: Received Event SUBSCR_CONN_E_ACCEPTED
 DPAG Paging success for MSISDN:46071 (event=0)
 DPAG Calling paging cbfn.
-DCC (ti 00 sub MSISDN:46071 callref 40000002) New transaction
-DREF VLR subscr MSISDN:46071 usage increases to: 6
 DREF MSISDN:46071: MSC conn use + trans_sms == 2 (0x21: compl_l3,trans_sms)
 DMSC msc_tx 91 bytes to MSISDN:46071 via RAN_GERAN_A
 - DTAP --RAN_GERAN_A--> MS: SMS:0x01: 09015801000791447758100650004c0005806470f1000007101000000000445079da1e1ee7416937485e9ea7c965373d1d6683c270383b3d0ed3d36ff71c949e83c22072799e9687c5ec32a81d96afcbf4b4fb0c7ac3e9e9b7db05
@@ -1734,12 +1734,14 @@ DMM Subscr_Conn(LU:901700000004620){SUBSCR_CONN_S_RELEASED}: Deallocated
 DREF VLR subscr MSISDN:46071 usage increases to: 2
   llist_count(&vsub->cs.requests) == 0
 DREF VLR subscr MSISDN:46071 usage increases to: 3
+DCC (ti 00 sub MSISDN:46071 callref 40000003) New transaction
+DREF VLR subscr MSISDN:46071 usage increases to: 4
 DMM Subscriber MSISDN:46071 not paged yet, start paging.
   RAN_GERAN_A sends out paging request to IMSI 901700000004620, TMSI 0xffffffff, LAC 23
   strcmp(paging_expecting_imsi, imsi) == 0
-DREF VLR subscr MSISDN:46071 usage increases to: 4
+DREF VLR subscr MSISDN:46071 usage increases to: 5
   llist_count(&vsub->cs.requests) == 1
-DREF VLR subscr MSISDN:46071 usage decreases to: 3
+DREF VLR subscr MSISDN:46071 usage decreases to: 4
   paging_sent == 1
   paging_stopped == 0
 - MS replies with Paging Response, we deliver the SMS
@@ -1754,8 +1756,8 @@ DVLR Process_Access_Request_VLR(PAGING_RESP:901700000004620){PR_ARQ_S_INIT}: All
 DVLR Process_Access_Request_VLR(PAGING_RESP:901700000004620){PR_ARQ_S_INIT}: is child of Subscr_Conn(PAGING_RESP:901700000004620)
 DVLR Process_Access_Request_VLR(PAGING_RESP:901700000004620){PR_ARQ_S_INIT}: rev=GSM net=GERAN (no Auth)
 DVLR Process_Access_Request_VLR(PAGING_RESP:901700000004620){PR_ARQ_S_INIT}: Received Event PR_ARQ_E_START
-DREF VLR subscr MSISDN:46071 usage increases to: 4
 DREF VLR subscr MSISDN:46071 usage increases to: 5
+DREF VLR subscr MSISDN:46071 usage increases to: 6
 DVLR Process_Access_Request_VLR(PAGING_RESP:901700000004620){PR_ARQ_S_INIT}: proc_arq_vlr_fn_post_imsi()
 DVLR Process_Access_Request_VLR(PAGING_RESP:901700000004620){PR_ARQ_S_INIT}: _proc_arq_vlr_node2()
 DVLR Process_Access_Request_VLR(PAGING_RESP:901700000004620){PR_ARQ_S_INIT}: _proc_arq_vlr_node2_post_ciph()
@@ -1769,8 +1771,6 @@ DVLR Process_Access_Request_VLR(PAGING_RESP:901700000004620){PR_ARQ_S_DONE}: Pro
 DMM Subscr_Conn(PAGING_RESP:901700000004620){SUBSCR_CONN_S_NEW}: Received Event SUBSCR_CONN_E_ACCEPTED
 DPAG Paging success for MSISDN:46071 (event=0)
 DPAG Calling paging cbfn.
-DCC (ti 00 sub MSISDN:46071 callref 40000003) New transaction
-DREF VLR subscr MSISDN:46071 usage increases to: 6
 DREF MSISDN:46071: MSC conn use + trans_sms == 2 (0x21: compl_l3,trans_sms)
 DMSC msc_tx 91 bytes to MSISDN:46071 via RAN_GERAN_A
 - DTAP --RAN_GERAN_A--> MS: SMS:0x01: 09015801000791447758100650004c0005806470f1000007101000000000445079da1e1ee7416937485e9ea7c965373d1d6683c270383b3d0ed3d36ff71c949e83c22072799e9687c5ec32a81d96afcbf4b4fb0c7ac3e9e9b7db05

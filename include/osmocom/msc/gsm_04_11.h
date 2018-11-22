@@ -27,6 +27,7 @@ struct sms_deliver {
 	uint8_t *smsc;
 };
 
+struct gsm_network;
 struct msgb;
 
 int gsm0411_rcv_sms(struct gsm_subscriber_connection *conn, struct msgb *msg);
@@ -37,9 +38,8 @@ struct gsm_sms *sms_from_text(struct vlr_subscr *receiver,
 			      const char *sender_msisdn,
 			      int dcs, const char *text);
 
-int gsm411_send_sms_subscr(struct vlr_subscr *vsub,
-			   struct gsm_sms *sms);
-int gsm411_send_sms(struct gsm_subscriber_connection *conn,
+int gsm411_send_sms(struct gsm_network *net,
+		    struct vlr_subscr *vsub,
 		    struct gsm_sms *sms);
 void gsm411_sapi_n_reject(struct gsm_subscriber_connection *conn);
 
