@@ -35,7 +35,7 @@ void _gsm411_sms_trans_free(struct gsm_trans *trans);
 void _gsm911_nc_ss_trans_free(struct gsm_trans *trans);
 
 /*! Find a transaction in connection for given protocol + transaction ID
- * \param[in] conn Connection in whihc we want to find transaction
+ * \param[in] conn Connection in which we want to find transaction
  * \param[in] proto Protocol of transaction
  * \param[in] trans_id Transaction ID of transaction
  * \returns Matching transaction, if any
