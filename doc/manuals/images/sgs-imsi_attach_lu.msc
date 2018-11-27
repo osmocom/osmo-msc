@@ -1,0 +1,15 @@
+msc {
+	UE, MME, VLR [label="MSC/VLR"], HSS [label="HSS/HLR"];
+
+	UE => MME [label="Attach Request"];
+	UE box HSS [label="Steps 3..16 of LTE Attach procedure TS 23.401"];
+	MME box MME [label="Derive VLR Number"];
+	MME => VLR [label="LU Request"];
+	VLR box VLR [label="Create SGs Association"];
+	VLR box HSS [label="MAP/GSUP UL / ISD"];
+	MME <= VLR [label="LU Accept"];
+	UE box HSS [label="Steps 17..16 of LTE Attach procedure TS 23.401"];
+	|||;
+	...;
+	MME <= VLR [label="Paging Request"];
+}

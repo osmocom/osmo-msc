@@ -1,0 +1,21 @@
+msc {
+	hscale=2;
+	UE, MME, VLR [label="MSC/VLR"], HSS [label="HSS/HLR"], SMSC;
+
+	UE box HSS	[label="EPS/IMSI attach procedure"];
+	...;
+	UE box MME	[label="UE triggered Service Request"];
+	UE => MME	[label="UL NAS Transport"];
+	MME => VLR	[label="SGsAP UPLINK UNITDATA\n(CP-DATA/RP-DATA/TPDU)"];
+	VLR => SMSC	[label="MAP/GSUP Forward SM"];
+	MME <= VLR	[label="SGsAP DOWNLINK UNITDATA"];
+	UE <= MME	[label="DL NAS Transport"];
+	...;
+
+	VLR <= SMSC	[label="Delivery Report"];
+	MME <= VLR	[label="SGsAP DOWNLINK UNITDATA"];
+	UE <= MME	[label="DL NAS Transport"];
+	UE => MME	[label="UL NAS Transport"];
+	MME => VLR	[label="SGsAP UPLINK UNITDATA"];
+	MME <= VLR	[label="SGsAP RELEASE REQ"];
+}

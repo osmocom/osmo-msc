@@ -1,0 +1,18 @@
+msc {
+	hscale=2;
+	UE, ENB [label="eNodeB"], BSS, MME, VLR [label="MSC/VLR"], HSS [label="HSS/HLR"];
+
+	UE => MME	[label="NAS Extended Service Request"];
+	ENB <= MME	[label="S1-AP UE Context Mod Req with CSFB"];
+	ENB => MME	[label="S1-AP UE Context Mod Resp"];
+	UE <= ENB	[label="NACC (Network Assisted Cell Change)"];
+	ENB => MME	[label="S1-AP S1 UE Context Release Req"];
+	UE box MME	[label="S1 UE Context Release"];
+
+	UE box HSS	[label="UE changes RAT then LA and/or RA update"];
+	UE <=> HSS	[label="PS Suspend (TS 23.060)"];
+
+	UE => BSS	[label="CM SERV REQ"];
+	BSS => VLR	[label="COMPL L3 (CM SERV REQ)"];
+	UE <=> VLR	[label="Normal 2G Voice Call"];
+}
