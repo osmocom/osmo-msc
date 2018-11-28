@@ -1149,7 +1149,9 @@ DEFUN(subscriber_ussd_notify,
 	}
 
 	msc_send_ussd_notify(conn, level, text);
-	msc_send_ussd_release_complete(conn);
+	/* FIXME: since we don't allocate a transaction here,
+	 * we use dummy GSM 04.07 transaction ID. */
+	msc_send_ussd_release_complete(conn, 0x00);
 
 	vlr_subscr_put(vsub);
 	talloc_free(text);

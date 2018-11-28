@@ -78,9 +78,10 @@ int msc_send_ussd_notify(struct ran_conn *conn, int level, const char *text)
 	return msc_tx_dtap(conn, msg);
 }
 
-int msc_send_ussd_release_complete(struct ran_conn *conn)
+int msc_send_ussd_release_complete(struct ran_conn *conn,
+				   uint8_t transaction_id)
 {
-	struct msgb *msg = gsm0480_create_ussd_release_complete();
+	struct msgb *msg = gsm0480_create_release_complete(transaction_id);
 	if (!msg)
 		return -1;
 	return msc_tx_dtap(conn, msg);
