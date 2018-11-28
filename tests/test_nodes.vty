@@ -34,6 +34,7 @@ OsmoMSC(config-msc)# list
   mncc internal
   mncc external MNCC_SOCKET_PATH
   mncc guard-timeout <0-255>
+  ncss guard-timeout <0-255>
   no assign-tmsi
   auth-tuple-max-reuse-count <-1-2147483647>
   auth-tuple-reuse-on-error (0|1)
@@ -49,6 +50,12 @@ OsmoMSC(config-msc)# list
   mgw remote-ip A.B.C.D
   mgw remote-port <0-65535>
 ...
+
+OsmoMSC(config-msc)# ncss?
+  ncss  Configure call independent Supplementary Services
+
+OsmoMSC(config-msc)# ncss ?
+  guard-timeout  Set guard timer for session activity
 
 OsmoMSC(config-msc)# mncc?
   mncc  Configure Mobile Network Call Control
@@ -123,6 +130,7 @@ network
  periodic location update 30
 msc
  mncc guard-timeout 180
+ ncss guard-timeout 30
  assign-tmsi
  cs7-instance-a 0
 ...

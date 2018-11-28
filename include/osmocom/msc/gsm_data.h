@@ -192,6 +192,8 @@ struct gsm_network {
 
 	/* Global MNCC guard timer value */
 	int mncc_guard_timeout;
+	/* Global guard timer value for NCSS sessions */
+	int ncss_guard_timeout;
 
 	struct {
 		struct mgcp_client_conf conf;

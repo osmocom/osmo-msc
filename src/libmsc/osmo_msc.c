@@ -54,6 +54,7 @@ struct gsm_network *gsm_network_init(void *ctx, mncc_recv_cb_t mncc_recv)
 	net->t3212 = 5;
 
 	net->mncc_guard_timeout = 180;
+	net->ncss_guard_timeout = 30;
 
 	net->paging_response_timer = MSC_PAGING_RESPONSE_TIMER_DEFAULT;
 

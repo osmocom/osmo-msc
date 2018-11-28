@@ -87,6 +87,8 @@ struct gsm_trans {
 			 * a subscriber after successful Paging Response
 			 */
 			struct msgb *msg;
+			/* Inactivity timer, triggers transaction release */
+			struct osmo_timer_list timer_guard;
 		} ss;
 	};
 

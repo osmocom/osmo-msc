@@ -51,6 +51,39 @@
 /* FIXME: choose a proper range */
 static uint32_t new_callref = 0x20000001;
 
+static void ncss_session_timeout_handler(void *_trans)
+{
+	struct gsm_trans *trans = (struct gsm_trans *) _trans;
+	struct osmo_gsup_message gsup_msg = { 0 };
+
+	/* The timeout might be disabled from the VTY */
+	if (trans->net->ncss_guard_timeout == 0)
+		return;
+
+	LOGP(DMM, LOGL_NOTICE, "SS/USSD session timeout, releasing "
+		"transaction (trans=%p, callref=%x)\n", trans, trans->callref);
+
+	/* Indicate connection release to subscriber (if active) */
+	if (trans->conn != NULL) {
+		/* This pair of cause location and value is used by commercial networks */
+		msc_send_ussd_release_complete_cause(trans->conn, trans->transaction_id,
+			GSM48_CAUSE_LOC_PUN_S_LU, GSM48_CC_CAUSE_NORMAL_UNSPEC);
+	}
+
+	/* Terminate GSUP session with EUSE */
+	gsup_msg.message_type = OSMO_GSUP_MSGT_PROC_SS_ERROR;
+	OSMO_STRLCPY_ARRAY(gsup_msg.imsi, trans->vsub->imsi);
+
+	gsup_msg.session_state = OSMO_GSUP_SESSION_STATE_END;
+	gsup_msg.session_id = trans->callref;
+	gsup_msg.cause = GMM_CAUSE_NET_FAIL;
+
+	osmo_gsup_client_enc_send(trans->net->vlr->gsup_client, &gsup_msg);
+
+	/* Finally, release this transaction */
+	trans_free(trans);
+}
+
 /* Entry point for call independent MO SS messages */
 int gsm0911_rcv_nc_ss(struct ran_conn *conn, struct msgb *msg)
 {
@@ -108,12 +141,22 @@ int gsm0911_rcv_nc_ss(struct ran_conn *conn, struct msgb *msg)
 			return -ENOMEM;
 		}
 
+		/* Init inactivity timer */
+		osmo_timer_setup(&trans->ss.timer_guard,
+			ncss_session_timeout_handler, trans);
+
 		/* Count active NC SS/USSD sessions */
 		osmo_counter_inc(conn->network->active_nc_ss);
 
 		trans->conn = ran_conn_get(conn, RAN_CONN_USE_TRANS_NC_SS);
 		trans->dlci = OMSC_LINKID_CB(msg);
 		cm_service_request_concludes(conn, msg);
+	}
+
+	/* (Re)schedule the inactivity timer */
+	if (conn->network->ncss_guard_timeout > 0) {
+		osmo_timer_schedule(&trans->ss.timer_guard,
+			conn->network->ncss_guard_timeout, 0);
 	}
 
 	/* Attempt to extract Facility IE */
@@ -233,6 +276,12 @@ static int handle_paging_event(unsigned int hooknum, unsigned int event,
 		transt->conn = ran_conn_get(conn, RAN_CONN_USE_TRANS_NC_SS);
 		transt->paging_request = NULL;
 
+		/* (Re)schedule the inactivity timer */
+		if (conn->network->ncss_guard_timeout > 0) {
+			osmo_timer_schedule(&transt->ss.timer_guard,
+				conn->network->ncss_guard_timeout, 0);
+		}
+
 		/* Send stored message */
 		ss_msg = transt->ss.msg;
 		gh = (struct gsm48_hdr *) msgb_push(ss_msg, sizeof(*gh));
@@ -317,6 +366,10 @@ static struct gsm_trans *establish_nc_ss_trans(struct gsm_network *net,
 	}
 	trans->transaction_id = tid;
 
+	/* Init inactivity timer */
+	osmo_timer_setup(&trans->ss.timer_guard,
+		ncss_session_timeout_handler, trans);
+
 	/* Attempt to find connection */
 	conn = connection_for_subscr(vsub);
 	if (conn) {
@@ -371,6 +424,9 @@ void _gsm911_nc_ss_trans_free(struct gsm_trans *trans)
 	if (trans->ss.msg != NULL)
 		msgb_free(trans->ss.msg);
 
+	/* Stop inactivity timer */
+	osmo_timer_del(&trans->ss.timer_guard);
+
 	/* One session less */
 	osmo_counter_dec(trans->net->active_nc_ss);
 }
@@ -418,6 +474,12 @@ int gsm0911_gsup_handler(struct vlr_subscr *vsub,
 		/* Wait for Paging Response */
 		if (trans->paging_request)
 			return 0;
+	}
+
+	/* (Re)schedule the inactivity timer */
+	if (net->ncss_guard_timeout > 0) {
+		osmo_timer_schedule(&trans->ss.timer_guard,
+			net->ncss_guard_timeout, 0);
 	}
 
 	/* Allocate and prepare a new MT message */

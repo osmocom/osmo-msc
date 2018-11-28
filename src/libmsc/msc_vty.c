@@ -375,6 +375,18 @@ ALIAS_DEPRECATED(cfg_msc_mncc_guard_timeout,
 		 "mncc-guard-timeout <0-255>",
 		 MNCC_GUARD_TIMEOUT_STR MNCC_GUARD_TIMEOUT_VALUE_STR);
 
+#define NCSS_STR "Configure call independent Supplementary Services\n"
+
+DEFUN(cfg_msc_ncss_guard_timeout,
+      cfg_msc_ncss_guard_timeout_cmd,
+      "ncss guard-timeout <0-255>",
+      NCSS_STR "Set guard timer for session activity\n"
+      "guard timer value (sec.), or 0 to disable\n")
+{
+	gsmnet->ncss_guard_timeout = atoi(argv[0]);
+	return CMD_SUCCESS;
+}
+
 DEFUN(cfg_msc_assign_tmsi, cfg_msc_assign_tmsi_cmd,
       "assign-tmsi",
       "Assign TMSI during Location Updating.\n")
@@ -496,6 +508,8 @@ static int config_write_msc(struct vty *vty)
 		vty_out(vty, " mncc external %s%s", gsmnet->mncc_sock_path, VTY_NEWLINE);
 	vty_out(vty, " mncc guard-timeout %i%s",
 		gsmnet->mncc_guard_timeout, VTY_NEWLINE);
+	vty_out(vty, " ncss guard-timeout %i%s",
+		gsmnet->ncss_guard_timeout, VTY_NEWLINE);
 	vty_out(vty, " %sassign-tmsi%s",
 		gsmnet->vlr->cfg.assign_tmsi? "" : "no ", VTY_NEWLINE);
 
@@ -1588,6 +1602,7 @@ void msc_vty_init(struct gsm_network *msc_network)
 	install_element(MSC_NODE, &cfg_msc_mncc_external_cmd);
 	install_element(MSC_NODE, &cfg_msc_mncc_guard_timeout_cmd);
 	install_element(MSC_NODE, &cfg_msc_deprecated_mncc_guard_timeout_cmd);
+	install_element(MSC_NODE, &cfg_msc_ncss_guard_timeout_cmd);
 	install_element(MSC_NODE, &cfg_msc_no_assign_tmsi_cmd);
 	install_element(MSC_NODE, &cfg_msc_auth_tuple_max_reuse_count_cmd);
 	install_element(MSC_NODE, &cfg_msc_auth_tuple_reuse_on_error_cmd);
