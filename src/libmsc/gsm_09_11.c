@@ -237,8 +237,6 @@ static int handle_paging_event(unsigned int hooknum, unsigned int event,
 
 		/* Send stored message */
 		ss_msg = transt->ss.msg;
-		OSMO_ASSERT(ss_msg);
-
 		gh = (struct gsm48_hdr *) msgb_push(ss_msg, sizeof(*gh));
 		gh->proto_discr  = GSM48_PDISC_NC_SS;
 		gh->proto_discr |= transt->transaction_id << 4;
