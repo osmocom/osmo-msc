@@ -44,13 +44,13 @@ libmsc_a_SOURCES = \
 	mncc_sock.c \
 	msc_ifaces.c \
 	msc_mgcp.c \
+	ran_conn.c \
 	rrlp.c \
 	silent_call.c \
 	sms_queue.c \
 	transaction.c \
 	osmo_msc.c \
 	ctrl_commands.c \
-	subscr_conn.c \
 	$(NULL)
 if BUILD_IU
 libmsc_a_SOURCES += \
