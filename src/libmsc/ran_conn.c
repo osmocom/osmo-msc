@@ -25,7 +25,7 @@
 #include <osmocom/core/fsm.h>
 #include <osmocom/core/signal.h>
 
-#include <osmocom/msc/osmo_msc.h>
+#include <osmocom/msc/ran_conn.h>
 #include <osmocom/msc/vlr.h>
 #include <osmocom/msc/debug.h>
 #include <osmocom/msc/transaction.h>

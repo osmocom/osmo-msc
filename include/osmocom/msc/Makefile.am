@@ -22,6 +22,7 @@ noinst_HEADERS = \
 	msc_mgcp.h \
 	a_reset.h \
 	osmo_msc.h \
+	ran_conn.h \
 	rrlp.h \
 	signal.h \
 	silent_call.h \

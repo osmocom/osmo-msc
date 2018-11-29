@@ -2,6 +2,8 @@
 
 #include <osmocom/msc/transaction.h>
 
+struct ranap_ue_conn_ctx;
+
 int gsm0408_rcvmsg_iucs(struct gsm_network *network, struct msgb *msg,
 			uint16_t *lac);
 

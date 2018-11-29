@@ -23,6 +23,8 @@
 #include <osmocom/mgcp_client/mgcp_client.h>
 #include <osmocom/msc/gsm_data.h>
 
+struct ran_conn;
+
 /* MGCP state handler context. This context information stores all information
  * to handle the direction of the RTP streams via MGCP. There is one instance
  * of this context struct per RAN connection.

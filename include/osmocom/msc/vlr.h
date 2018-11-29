@@ -9,7 +9,7 @@
 #include <osmocom/gsm/gsm23003.h>
 #include <osmocom/gsm/gsm0808.h>
 #include <osmocom/gsm/gsup.h>
-#include <osmocom/msc/gsm_data.h>
+#include <osmocom/msc/ran_conn.h>
 // for GSM_NAME_LENGTH
 #include <osmocom/msc/gsm_subscriber.h>
 #include <osmocom/gsupclient/gsup_client.h>
