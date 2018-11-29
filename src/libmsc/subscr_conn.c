@@ -136,7 +136,7 @@ static void subscr_conn_fsm_new(struct osmo_fsm_inst *fi, uint32_t event, void *
 	}
 }
 
-void subscr_conn_fsm_auth_ciph(struct osmo_fsm_inst *fi, uint32_t event, void *data)
+static void subscr_conn_fsm_auth_ciph(struct osmo_fsm_inst *fi, uint32_t event, void *data)
 {
 	/* If accepted, transition the state, all other cases mean failure. */
 	switch (event) {
