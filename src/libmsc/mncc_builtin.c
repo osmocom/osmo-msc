@@ -166,8 +166,7 @@ static int mncc_notify_ind(struct gsm_call *call, int msg_type,
 static int mncc_setup_cnf(struct gsm_call *call, int msg_type,
 			  struct gsm_mncc *connect)
 {
-	struct gsm_mncc connect_ack, frame_recv;
-	struct gsm_network *net = call->net;
+	struct gsm_mncc connect_ack;
 	struct gsm_call *remote;
 	struct gsm_mncc_bridge bridge = { .msg_type = MNCC_BRIDGE };
 
@@ -189,21 +188,7 @@ static int mncc_setup_cnf(struct gsm_call *call, int msg_type,
 	bridge.callref[1] = call->remote_ref;
 	DEBUGP(DMNCC, "(call %x) Bridging with remote.\n", call->callref);
 
-	/* proxy mode */
-	if (!net->handover.active) {
-		/* in the no-handover case, we can bridge, i.e. use
-		 * the old RTP proxy code */
-		return mncc_tx_to_cc(call->net, MNCC_BRIDGE, &bridge);
-	} else {
-		/* in case of handover, we need to re-write the RTP
-		 * SSRC, sequence and timestamp values and thus
-		 * need to enable RTP receive for both directions */
-		memset(&frame_recv, 0, sizeof(struct gsm_mncc));
-		frame_recv.callref = call->callref;
-		mncc_tx_to_cc(call->net, MNCC_FRAME_RECV, &frame_recv);
-		frame_recv.callref = call->remote_ref;
-		return mncc_tx_to_cc(call->net, MNCC_FRAME_RECV, &frame_recv);
-	}
+	return mncc_tx_to_cc(call->net, MNCC_BRIDGE, &bridge);
 }
 
 static int mncc_disc_ind(struct gsm_call *call, int msg_type,

@@ -283,9 +283,6 @@ struct gsm_network {
 	uint8_t a5_encryption_mask;
 	bool authentication_required;
 	int send_mm_info;
-	struct {
-		int active;
-	} handover;
 
 	struct rate_ctr_group *msc_ctrs;
 	struct osmo_counter *active_calls;
