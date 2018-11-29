@@ -1,7 +1,7 @@
 /* MSC subscriber connection implementation */
 
 /*
- * (C) 2016 by sysmocom s.m.f.c. <info@sysmocom.de>
+ * (C) 2016-2018 by sysmocom s.m.f.c. <info@sysmocom.de>
  * All Rights Reserved
  *
  * Author: Neels Hofmeyr
