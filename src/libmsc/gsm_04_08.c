@@ -1663,6 +1663,13 @@ int msc_geran_set_cipher_mode(struct gsm_subscriber_connection *conn, bool umts_
 		memcpy(ei.key, tuple->vec.kc, sizeof(tuple->vec.kc));
 	ei.key_len = sizeof(tuple->vec.kc);
 
+	conn->encr = (struct gsm_encr){};
+	if (ei.key_len <= sizeof(conn->encr.key)) {
+		memcpy(conn->encr.key, ei.key, ei.key_len);
+		conn->encr.key_len = ei.key_len;
+	}
+	/* conn->encr.alg_id remains unknown until we receive a Cipher Mode Complete from the BSC */
+
 	return a_iface_tx_cipher_mode(conn, &ei, retrieve_imeisv);
 }
 
