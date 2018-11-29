@@ -1,4 +1,4 @@
-/* Code to manage MSC subscriber connections over IuCS interface */
+/* Code to manage MSC RAN connections over IuCS interface */
 
 /*
  * (C) 2016,2017 by sysmocom s.f.m.c. GmbH <info@sysmocom.de>
@@ -48,16 +48,16 @@ extern struct msgb *ranap_new_msg_rab_assign_voice(uint8_t rab_id,
 #endif /* BUILD_IU */
 
 /* For A-interface see libbsc/bsc_api.c subscr_con_allocate() */
-static struct gsm_subscriber_connection *subscr_conn_allocate_iu(struct gsm_network *network,
+static struct ran_conn *ran_conn_allocate_iu(struct gsm_network *network,
 								 struct ranap_ue_conn_ctx *ue,
 								 uint16_t lac)
 {
-	struct gsm_subscriber_connection *conn;
+	struct ran_conn *conn;
 
-	DEBUGP(DIUCS, "Allocating IuCS subscriber conn: lac %d, conn_id %" PRIx32 "\n",
+	DEBUGP(DIUCS, "Allocating IuCS RAN conn: lac %d, conn_id %" PRIx32 "\n",
 	       lac, ue->conn_id);
 
-	conn = msc_subscr_conn_alloc(network, RAN_UTRAN_IU, lac);
+	conn = ran_conn_alloc(network, RAN_UTRAN_IU, lac);
 	if (!conn)
 		return NULL;
 
@@ -78,9 +78,9 @@ static inline void log_subscribers(struct gsm_network *network)
 	if (!log_check_level(DIUCS, LOGL_DEBUG))
 		return;
 
-	struct gsm_subscriber_connection *conn;
+	struct ran_conn *conn;
 	int i = 0;
-	llist_for_each_entry(conn, &network->subscr_conns, entry) {
+	llist_for_each_entry(conn, &network->ran_conns, entry) {
 		DEBUGP(DIUCS, "%3d: %s", i, vlr_subscr_name(conn->vsub));
 		switch (conn->via_ran) {
 		case RAN_UTRAN_IU:
@@ -108,19 +108,19 @@ static inline void log_subscribers(struct gsm_network *network)
 	DEBUGP(DIUCS, "subscribers registered: %d\n", i);
 }
 
-/* Return an existing IuCS subscriber connection record for the given
+/* Return an existing IuCS RAN connection record for the given
  * connection IDs, or return NULL if not found. */
-struct gsm_subscriber_connection *subscr_conn_lookup_iu(
+struct ran_conn *ran_conn_lookup_iu(
 						struct gsm_network *network,
 						struct ranap_ue_conn_ctx *ue)
 {
-	struct gsm_subscriber_connection *conn;
+	struct ran_conn *conn;
 
 	DEBUGP(DIUCS, "Looking for IuCS subscriber: conn_id %" PRIx32 "\n",
 	       ue->conn_id);
 	log_subscribers(network);
 
-	llist_for_each_entry(conn, &network->subscr_conns, entry) {
+	llist_for_each_entry(conn, &network->ran_conns, entry) {
 		if (conn->via_ran != RAN_UTRAN_IU)
 			continue;
 		if (!same_ue_conn(conn->iu.ue_ctx, ue))
@@ -143,13 +143,13 @@ int gsm0408_rcvmsg_iucs(struct gsm_network *network, struct msgb *msg,
 			uint16_t *lac)
 {
 	struct ranap_ue_conn_ctx *ue_ctx;
-	struct gsm_subscriber_connection *conn;
+	struct ran_conn *conn;
 
 	ue_ctx = (struct ranap_ue_conn_ctx*)msg->dst;
 
 	/* TODO: are there message types that could allow us to skip this
 	 * search? */
-	conn = subscr_conn_lookup_iu(network, ue_ctx);
+	conn = ran_conn_lookup_iu(network, ue_ctx);
 
 	if (conn && lac && (conn->lac != *lac)) {
 		LOGP(DIUCS, LOGL_ERROR, "IuCS subscriber has changed LAC"
@@ -157,7 +157,7 @@ int gsm0408_rcvmsg_iucs(struct gsm_network *network, struct msgb *msg,
 		     " %s from LAC %d to %d\n",
 		     vlr_subscr_name(conn->vsub), conn->lac, *lac);
 		/* Deallocate conn with previous LAC */
-		msc_subscr_conn_close(conn, GSM_CAUSE_INV_MAND_INFO);
+		ran_conn_close(conn, GSM_CAUSE_INV_MAND_INFO);
 		/* At this point we could be tolerant and allocate a new
 		 * connection, but changing the LAC within the same connection
 		 * is shifty. Rather cancel everything. */
@@ -184,7 +184,7 @@ int gsm0408_rcvmsg_iucs(struct gsm_network *network, struct msgb *msg,
 			return -1;
 		}
 
-		conn = subscr_conn_allocate_iu(network, ue_ctx, *lac);
+		conn = ran_conn_allocate_iu(network, ue_ctx, *lac);
 		if (!conn)
 			abort();
 
@@ -197,7 +197,7 @@ int gsm0408_rcvmsg_iucs(struct gsm_network *network, struct msgb *msg,
 
 int iu_rab_act_cs(struct gsm_trans *trans)
 {
-	struct gsm_subscriber_connection *conn;
+	struct ran_conn *conn;
 	struct msgb *msg;
 	bool use_x213_nsap;
 	uint32_t conn_id;

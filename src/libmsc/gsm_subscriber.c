@@ -59,7 +59,7 @@ int subscr_paging_dispatch(unsigned int hooknum, unsigned int event,
 			   struct msgb *msg, void *data, void *param)
 {
 	struct subscr_request *request, *tmp;
-	struct gsm_subscriber_connection *conn = data;
+	struct ran_conn *conn = data;
 	struct vlr_subscr *vsub = param;
 	struct paging_signal_data sig_data;
 
@@ -189,12 +189,12 @@ void subscr_remove_request(struct subscr_request *request)
 	talloc_free(request);
 }
 
-struct gsm_subscriber_connection *connection_for_subscr(struct vlr_subscr *vsub)
+struct ran_conn *connection_for_subscr(struct vlr_subscr *vsub)
 {
 	struct gsm_network *net = vsub->vlr->user_ctx;
-	struct gsm_subscriber_connection *conn;
+	struct ran_conn *conn;
 
-	llist_for_each_entry(conn, &net->subscr_conns, entry) {
+	llist_for_each_entry(conn, &net->ran_conns, entry) {
 		if (conn->vsub == vsub)
 			return conn;
 	}

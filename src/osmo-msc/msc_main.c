@@ -642,7 +642,7 @@ TODO: we probably want some of the _net_ ctrl commands from bsc_base_ctrl_cmds_i
 		exit(1);
 	}
 
-	msc_subscr_conn_init();
+	ran_conn_init();
 
 	if (db_prepare()) {
 		printf("DB: Failed to prepare database.\n");

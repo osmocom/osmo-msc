@@ -49,7 +49,7 @@ extern bool _log_lines;
 #define comment_start() fprintf(stderr, "===== %s\n", __func__);
 #define comment_end() fprintf(stderr, "===== %s: SUCCESS\n\n", __func__);
 
-extern struct gsm_subscriber_connection *g_conn;
+extern struct ran_conn *g_conn;
 extern struct gsm_network *net;
 extern struct gsm_bts *the_bts;
 extern void *msgb_ctx;
@@ -152,8 +152,8 @@ extern msc_vlr_test_func_t msc_vlr_tests[];
 struct msgb *msgb_from_hex(const char *label, uint16_t size, const char *hex);
 
 void clear_vlr();
-bool conn_exists(const struct gsm_subscriber_connection *conn);
-void conn_conclude_cm_service_req(struct gsm_subscriber_connection *conn,
+bool conn_exists(const struct ran_conn *conn);
+void conn_conclude_cm_service_req(struct ran_conn *conn,
 				  enum ran_type via_ran);
 
 void dtap_expect_tx(const char *hex);
@@ -177,8 +177,8 @@ void thwart_rx_non_initial_requests();
 #define EXPECT_ACCEPTED(expect_accepted) do { \
 		if (g_conn) \
 			OSMO_ASSERT(conn_exists(g_conn)); \
-		bool accepted = msc_subscr_conn_is_accepted(g_conn); \
-		fprintf(stderr, "msc_subscr_conn_is_accepted() == %s\n", \
+		bool accepted = ran_conn_is_accepted(g_conn); \
+		fprintf(stderr, "ran_conn_is_accepted() == %s\n", \
 			accepted ? "true" : "false"); \
 		OSMO_ASSERT(accepted == expect_accepted); \
 	} while (false)
@@ -189,7 +189,7 @@ void thwart_rx_non_initial_requests();
 		OSMO_ASSERT((val) expect_op); \
 	} while (0);
 
-#define EXPECT_CONN_COUNT(N) VERBOSE_ASSERT(llist_count(&net->subscr_conns), == N, "%d")
+#define EXPECT_CONN_COUNT(N) VERBOSE_ASSERT(llist_count(&net->ran_conns), == N, "%d")
 
 #define gsup_expect_tx(hex) do \
 { \

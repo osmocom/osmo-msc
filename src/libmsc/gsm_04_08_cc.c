@@ -310,7 +310,7 @@ static int gsm48_cc_tx_setup(struct gsm_trans *trans, void *arg);
 static int setup_trig_pag_evt(unsigned int hooknum, unsigned int event,
 			      struct msgb *msg, void *_conn, void *_transt)
 {
-	struct gsm_subscriber_connection *conn = _conn;
+	struct ran_conn *conn = _conn;
 	struct gsm_trans *transt = _transt;
 	enum gsm_paging_event paging_event = event;
 
@@ -322,7 +322,7 @@ static int setup_trig_pag_evt(unsigned int hooknum, unsigned int event,
 		       vlr_subscr_msisdn_or_name(transt->vsub));
 		OSMO_ASSERT(conn);
 		/* Assign conn */
-		transt->conn = msc_subscr_conn_get(conn, MSC_CONN_USE_TRANS_CC);
+		transt->conn = ran_conn_get(conn, MSC_CONN_USE_TRANS_CC);
 		transt->paging_request = NULL;
 		/* send SETUP request to called party */
 		gsm48_cc_tx_setup(transt, &transt->cc.msg);
@@ -1755,7 +1755,7 @@ int gsm48_tch_rtp_create(struct gsm_trans *trans)
 	 * mgcp-gw expects the incoming RTP stream from the remote
 	 * end (e.g. Asterisk) is known. */
 
-	struct gsm_subscriber_connection *conn = trans->conn;
+	struct ran_conn *conn = trans->conn;
 	struct gsm_network *network = conn->network;
 
 	mncc_recv_rtp_sock(network, trans, MNCC_RTP_CREATE);
@@ -1859,7 +1859,7 @@ int mncc_tx_to_cc(struct gsm_network *net, int msg_type, void *arg)
 {
 	int i, rc = 0;
 	struct gsm_trans *trans = NULL, *transt;
-	struct gsm_subscriber_connection *conn = NULL;
+	struct ran_conn *conn = NULL;
 	struct gsm_mncc *data = arg, rel;
 
 	DEBUGP(DMNCC, "receive message %s\n", get_mncc_name(msg_type));
@@ -2005,7 +2005,7 @@ int mncc_tx_to_cc(struct gsm_network *net, int msg_type, void *arg)
 		}
 
 		/* Assign conn */
-		trans->conn = msc_subscr_conn_get(conn, MSC_CONN_USE_TRANS_CC);
+		trans->conn = ran_conn_get(conn, MSC_CONN_USE_TRANS_CC);
 		trans->dlci = 0x00; /* SAPI=0, not SACCH */
 		vlr_subscr_put(vsub);
 	} else {
@@ -2112,7 +2112,7 @@ static struct datastate {
 #define DATASLLEN \
 	(sizeof(datastatelist) / sizeof(struct datastate))
 
-int gsm0408_rcv_cc(struct gsm_subscriber_connection *conn, struct msgb *msg)
+int gsm0408_rcv_cc(struct ran_conn *conn, struct msgb *msg)
 {
 	struct gsm48_hdr *gh = msgb_l3(msg);
 	uint8_t msg_type = gsm48_hdr_msg_type(gh);
@@ -2160,7 +2160,7 @@ int gsm0408_rcv_cc(struct gsm_subscriber_connection *conn, struct msgb *msg)
 			return -ENOMEM;
 		}
 		/* Assign transaction */
-		trans->conn = msc_subscr_conn_get(conn, MSC_CONN_USE_TRANS_CC);
+		trans->conn = ran_conn_get(conn, MSC_CONN_USE_TRANS_CC);
 		trans->dlci = OMSC_LINKID_CB(msg); /* DLCI as received from BSC */
 		cm_service_request_concludes(conn, msg);
 	}
@@ -2179,6 +2179,6 @@ int gsm0408_rcv_cc(struct gsm_subscriber_connection *conn, struct msgb *msg)
 
 	rc = datastatelist[i].rout(trans, msg);
 
-	msc_subscr_conn_communicating(conn);
+	ran_conn_communicating(conn);
 	return rc;
 }

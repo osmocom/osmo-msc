@@ -161,14 +161,14 @@ void gsup_rx(const char *rx_hex, const char *expect_tx_hex)
 		OSMO_ASSERT(gsup_tx_confirmed);
 }
 
-bool conn_exists(const struct gsm_subscriber_connection *conn)
+bool conn_exists(const struct ran_conn *conn)
 {
-	struct gsm_subscriber_connection *c;
+	struct ran_conn *c;
 
 	if (!conn)
 		return false;
 
-	llist_for_each_entry(c, &net->subscr_conns, entry) {
+	llist_for_each_entry(c, &net->ran_conns, entry) {
 		if (c == conn)
 			return true;
 	}
@@ -177,7 +177,7 @@ bool conn_exists(const struct gsm_subscriber_connection *conn)
 }
 
 /* Simplified version of the cm_service_request_concludes() */
-void conn_conclude_cm_service_req(struct gsm_subscriber_connection *conn,
+void conn_conclude_cm_service_req(struct ran_conn *conn,
 				  enum ran_type via_ran)
 {
 	btw("Concluding CM Service Request");
@@ -186,17 +186,17 @@ void conn_conclude_cm_service_req(struct gsm_subscriber_connection *conn,
 	OSMO_ASSERT(conn->received_cm_service_request);
 
 	conn->received_cm_service_request = false;
-	msc_subscr_conn_put(conn, MSC_CONN_USE_CM_SERVICE);
+	ran_conn_put(conn, MSC_CONN_USE_CM_SERVICE);
 
 	ASSERT_RELEASE_CLEAR(via_ran);
 }
 
 enum ran_type rx_from_ran = RAN_GERAN_A;
 
-struct gsm_subscriber_connection *conn_new(void)
+struct ran_conn *conn_new(void)
 {
-	struct gsm_subscriber_connection *conn;
-	conn = msc_subscr_conn_alloc(net, rx_from_ran, 23);
+	struct ran_conn *conn;
+	conn = ran_conn_alloc(net, rx_from_ran, 23);
 	if (conn->via_ran == RAN_UTRAN_IU) {
 		struct ranap_ue_conn_ctx *ue_ctx = talloc_zero(conn, struct ranap_ue_conn_ctx);
 		*ue_ctx = (struct ranap_ue_conn_ctx){
@@ -207,7 +207,7 @@ struct gsm_subscriber_connection *conn_new(void)
 	return conn;
 }
 
-struct gsm_subscriber_connection *g_conn = NULL;
+struct ran_conn *g_conn = NULL;
 
 void rx_from_ms(struct msgb *msg)
 {
@@ -643,8 +643,8 @@ int __wrap_a_iface_tx_dtap(struct msgb *msg)
 }
 
 /* override, requires '-Wl,--wrap=a_iface_tx_clear_cmd' */
-int __real_a_iface_tx_clear_cmd(struct gsm_subscriber_connection *conn);
-int __wrap_a_iface_tx_clear_cmd(struct gsm_subscriber_connection *conn)
+int __real_a_iface_tx_clear_cmd(struct ran_conn *conn);
+int __wrap_a_iface_tx_clear_cmd(struct ran_conn *conn)
 {
 	btw("BSSAP Clear --%s--> MS", ran_type_name(RAN_GERAN_A));
 	OSMO_ASSERT(bssap_clear_expected);
@@ -679,7 +679,7 @@ void __wrap_msc_mgcp_call_release(struct gsm_trans *trans)
 
 static int fake_vlr_tx_lu_acc(void *msc_conn_ref, uint32_t send_tmsi)
 {
-	struct gsm_subscriber_connection *conn = msc_conn_ref;
+	struct ran_conn *conn = msc_conn_ref;
 	if (send_tmsi == GSM_RESERVED_TMSI)
 		btw("sending LU Accept for %s", vlr_subscr_name(conn->vsub));
 	else
@@ -691,7 +691,7 @@ static int fake_vlr_tx_lu_acc(void *msc_conn_ref, uint32_t send_tmsi)
 
 static int fake_vlr_tx_lu_rej(void *msc_conn_ref, enum gsm48_reject_value cause)
 {
-	struct gsm_subscriber_connection *conn = msc_conn_ref;
+	struct ran_conn *conn = msc_conn_ref;
 	btw("sending LU Reject for %s, cause %u", vlr_subscr_name(conn->vsub), cause);
 	lu_result_sent |= RES_REJECT;
 	return 0;
@@ -699,7 +699,7 @@ static int fake_vlr_tx_lu_rej(void *msc_conn_ref, enum gsm48_reject_value cause)
 
 static int fake_vlr_tx_cm_serv_acc(void *msc_conn_ref)
 {
-	struct gsm_subscriber_connection *conn = msc_conn_ref;
+	struct ran_conn *conn = msc_conn_ref;
 	btw("sending CM Service Accept for %s", vlr_subscr_name(conn->vsub));
 	cm_service_result_sent |= RES_ACCEPT;
 	return 0;
@@ -707,7 +707,7 @@ static int fake_vlr_tx_cm_serv_acc(void *msc_conn_ref)
 
 static int fake_vlr_tx_cm_serv_rej(void *msc_conn_ref, enum gsm48_reject_value cause)
 {
-	struct gsm_subscriber_connection *conn = msc_conn_ref;
+	struct ran_conn *conn = msc_conn_ref;
 	btw("sending CM Service Reject for %s, cause: %s",
 	    vlr_subscr_name(conn->vsub), gsm48_reject_value_name(cause));
 	cm_service_result_sent |= RES_REJECT;
@@ -717,7 +717,7 @@ static int fake_vlr_tx_cm_serv_rej(void *msc_conn_ref, enum gsm48_reject_value c
 static int fake_vlr_tx_auth_req(void *msc_conn_ref, struct gsm_auth_tuple *at,
 				bool send_autn)
 {
-	struct gsm_subscriber_connection *conn = msc_conn_ref;
+	struct ran_conn *conn = msc_conn_ref;
 	char *hex;
 	bool ok = true;
 	btw("sending %s Auth Request for %s: tuple use_count=%d key_seq=%d auth_types=0x%x and...",
@@ -761,15 +761,15 @@ static int fake_vlr_tx_auth_req(void *msc_conn_ref, struct gsm_auth_tuple *at,
 
 static int fake_vlr_tx_auth_rej(void *msc_conn_ref)
 {
-	struct gsm_subscriber_connection *conn = msc_conn_ref;
+	struct ran_conn *conn = msc_conn_ref;
 	btw("sending Auth Reject for %s", vlr_subscr_name(conn->vsub));
 	return 0;
 }
 
 /* override, requires '-Wl,--wrap=a_iface_tx_cipher_mode' */
-int __real_a_iface_tx_cipher_mode(const struct gsm_subscriber_connection *conn,
+int __real_a_iface_tx_cipher_mode(const struct ran_conn *conn,
 				  struct gsm0808_encrypt_info *ei, int include_imeisv);
-int __wrap_a_iface_tx_cipher_mode(const struct gsm_subscriber_connection *conn,
+int __wrap_a_iface_tx_cipher_mode(const struct ran_conn *conn,
 				  struct gsm0808_encrypt_info *ei, int include_imeisv)
 {
 	int i;
@@ -824,7 +824,7 @@ static int fake_vlr_tx_ciph_mode_cmd(void *msc_conn_ref, bool umts_aka, bool ret
 #ifndef BUILD_IU
 	/* If we built without support for IU, fake the IU part here. The root cause is that we don't
 	 * have differing sets of expected outputs for --enable-iu and --disable-iu. */
-	struct gsm_subscriber_connection *conn = msc_conn_ref;
+	struct ran_conn *conn = msc_conn_ref;
 	if (conn->via_ran == RAN_UTRAN_IU) {
 		DEBUGP(DMM, "-> SECURITY MODE CONTROL %s\n", vlr_subscr_name(conn->vsub));
 		rc = __wrap_ranap_iu_tx_sec_mode_cmd(conn->iu.ue_ctx, &conn->vsub->last_tuple->vec,
@@ -850,7 +850,7 @@ void bss_sends_clear_complete()
 	btw("BSS sends BSSMAP Clear Complete");
 	OSMO_ASSERT(g_conn);
 	OSMO_ASSERT(g_conn->via_ran == RAN_GERAN_A);
-	msc_subscr_conn_rx_bssmap_clear_complete(g_conn);
+	ran_conn_rx_bssmap_clear_complete(g_conn);
 }
 
 void rnc_sends_release_complete()
@@ -858,7 +858,7 @@ void rnc_sends_release_complete()
 	btw("RNC sends Iu Release Complete");
 	OSMO_ASSERT(g_conn);
 	OSMO_ASSERT(g_conn->via_ran == RAN_UTRAN_IU);
-	msc_subscr_conn_rx_iu_release_complete(g_conn);
+	ran_conn_rx_iu_release_complete(g_conn);
 }
 
 const struct timeval fake_time_start_time = { 123, 456 };
@@ -1026,7 +1026,7 @@ int main(int argc, char **argv)
 
 	osmo_fsm_log_addr(false);
 
-	msc_subscr_conn_init();
+	ran_conn_init();
 
 	clear_vlr();
 

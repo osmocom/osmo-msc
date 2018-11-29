@@ -58,13 +58,13 @@ struct subscr_request *subscr_request_conn(struct vlr_subscr *vsub,
 
 void subscr_remove_request(struct subscr_request *req);
 int subscr_rx_paging_response(struct msgb *msg,
-			      struct gsm_subscriber_connection *conn);
+			      struct ran_conn *conn);
 
 void subscr_paging_cancel(struct vlr_subscr *vsub, enum gsm_paging_event event);
 int subscr_paging_dispatch(unsigned int hooknum, unsigned int event,
 			   struct msgb *msg, void *data, void *param);
 
 /* Find an allocated channel for a specified subscriber */
-struct gsm_subscriber_connection *connection_for_subscr(struct vlr_subscr *vsub);
+struct ran_conn *connection_for_subscr(struct vlr_subscr *vsub);
 
 #endif /* _GSM_SUBSCR_H */

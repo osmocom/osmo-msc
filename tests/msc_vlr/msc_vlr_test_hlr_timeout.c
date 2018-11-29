@@ -55,7 +55,7 @@ static void test_hlr_timeout_lu_auth_info()
 	EXPECT_CONN_COUNT(1);
 	expect_bssap_clear();
 	fake_time_passes(1, 235);
-	btw("SUBSCR_CONN_TIMEOUT has passed, conn is gone.");
+	btw("RAN_CONN_TIMEOUT has passed, conn is gone.");
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 	bss_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
@@ -103,7 +103,7 @@ static void test_hlr_timeout_lu_upd_loc_result()
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 	expect_bssap_clear();
 	fake_time_passes(1, 235);
-	btw("SUBSCR_CONN_TIMEOUT has passed, conn is gone.");
+	btw("RAN_CONN_TIMEOUT has passed, conn is gone.");
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 	bss_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);

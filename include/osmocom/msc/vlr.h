@@ -289,7 +289,7 @@ void vlr_loc_update_cancel(struct osmo_fsm_inst *fi,
 			   enum osmo_fsm_term_cause fsm_cause,
 			   uint8_t gsm48_cause);
 
-/* tell the VLR that the subscriber connection is gone */
+/* tell the VLR that the RAN connection is gone */
 int vlr_subscr_disconnected(struct vlr_subscr *vsub);
 bool vlr_subscr_expire(struct vlr_subscr *vsub);
 int vlr_subscr_rx_id_resp(struct vlr_subscr *vsub, const uint8_t *mi, size_t mi_len);

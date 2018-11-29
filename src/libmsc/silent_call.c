@@ -36,7 +36,7 @@
 static int paging_cb_silent(unsigned int hooknum, unsigned int event,
 			    struct msgb *msg, void *_conn, void *_data)
 {
-	struct gsm_subscriber_connection *conn = _conn;
+	struct ran_conn *conn = _conn;
 	struct scall_signal_data sigdata;
 	int rc = 0;
 
@@ -57,7 +57,7 @@ static int paging_cb_silent(unsigned int hooknum, unsigned int event,
 			conn->lchan->ts->nr, conn->lchan->ts->trx->arfcn);
 #endif
 		conn->silent_call = 1;
-		msc_subscr_conn_get(conn, MSC_CONN_USE_SILENT_CALL);
+		ran_conn_get(conn, MSC_CONN_USE_SILENT_CALL);
 		/* increment lchan reference count */
 		osmo_signal_dispatch(SS_SCALL, S_SCALL_SUCCESS, &sigdata);
 		break;
@@ -76,7 +76,7 @@ static int paging_cb_silent(unsigned int hooknum, unsigned int event,
 
 #if 0
 /* receive a layer 3 message from a silent call */
-int silent_call_rx(struct gsm_subscriber_connection *conn, struct msgb *msg)
+int silent_call_rx(struct ran_conn *conn, struct msgb *msg)
 {
 	/* FIXME: do something like sending it through a UDP port */
 	LOGP(DLSMS, LOGL_NOTICE, "Discarding L3 message from a silent call.\n");
@@ -95,7 +95,7 @@ static const struct msg_match silent_call_accept[] = {
 };
 
 /* decide if we need to reroute a message as part of a silent call */
-int silent_call_reroute(struct gsm_subscriber_connection *conn, struct msgb *msg)
+int silent_call_reroute(struct ran_conn *conn, struct msgb *msg)
 {
 	struct gsm48_hdr *gh = msgb_l3(msg);
 	uint8_t pdisc = gsm48_hdr_pdisc(gh);
@@ -138,7 +138,7 @@ int gsm_silent_call_start(struct vlr_subscr *vsub, void *data, int type)
 /* end a silent call with a given subscriber */
 int gsm_silent_call_stop(struct vlr_subscr *vsub)
 {
-	struct gsm_subscriber_connection *conn;
+	struct ran_conn *conn;
 
 	conn = connection_for_subscr(vsub);
 	if (!conn) {
@@ -162,7 +162,7 @@ int gsm_silent_call_stop(struct vlr_subscr *vsub)
 #endif
 
 	conn->silent_call = 0;
-	msc_subscr_conn_put(conn, MSC_CONN_USE_SILENT_CALL);
+	ran_conn_put(conn, MSC_CONN_USE_SILENT_CALL);
 
 	return 0;
 }

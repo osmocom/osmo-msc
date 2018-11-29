@@ -77,16 +77,16 @@
 void *tall_locop_ctx;
 void *tall_authciphop_ctx;
 
-static int gsm0408_loc_upd_acc(struct gsm_subscriber_connection *conn,
+static int gsm0408_loc_upd_acc(struct ran_conn *conn,
 			       uint32_t send_tmsi);
 
 /*! Send a simple GSM 04.08 message without any payload
- * \param      conn      Active subscriber connection
+ * \param      conn      Active RAN connection
  * \param[in]  pdisc     Protocol discriminator
  * \param[in]  msg_type  Message type
  * \return     result of \ref gsm48_conn_sendmsg
  */
-int gsm48_tx_simple(struct gsm_subscriber_connection *conn,
+int gsm48_tx_simple(struct ran_conn *conn,
 		    uint8_t pdisc, uint8_t msg_type)
 {
 	struct msgb *msg = gsm48_msgb_alloc_name("GSM 04.08 TX SIMPLE");
@@ -176,7 +176,7 @@ static int classmark_supports_a5(const struct gsm_classmark *cm, uint8_t a5)
 	}
 }
 
-int gsm48_conn_sendmsg(struct msgb *msg, struct gsm_subscriber_connection *conn, struct gsm_trans *trans)
+int gsm48_conn_sendmsg(struct msgb *msg, struct ran_conn *conn, struct gsm_trans *trans)
 {
 	struct gsm48_hdr *gh = (struct gsm48_hdr *) msg->data;
 
@@ -206,7 +206,7 @@ void gsm0408_clear_all_trans(struct gsm_network *net, int protocol)
 }
 
 /* Chapter 9.2.14 : Send LOCATION UPDATING REJECT */
-static int gsm0408_loc_upd_rej(struct gsm_subscriber_connection *conn, uint8_t cause)
+static int gsm0408_loc_upd_rej(struct ran_conn *conn, uint8_t cause)
 {
 	struct msgb *msg;
 
@@ -223,7 +223,7 @@ static int gsm0408_loc_upd_rej(struct gsm_subscriber_connection *conn, uint8_t c
 }
 
 /* Chapter 9.2.13 : Send LOCATION UPDATE ACCEPT */
-static int gsm0408_loc_upd_acc(struct gsm_subscriber_connection *conn,
+static int gsm0408_loc_upd_acc(struct ran_conn *conn,
 			       uint32_t send_tmsi)
 {
 	struct msgb *msg = gsm48_msgb_alloc_name("GSM 04.08 LOC UPD ACC");
@@ -274,7 +274,7 @@ static int gsm0408_loc_upd_acc(struct gsm_subscriber_connection *conn,
 }
 
 /* Transmit Chapter 9.2.10 Identity Request */
-static int mm_tx_identity_req(struct gsm_subscriber_connection *conn, uint8_t id_type)
+static int mm_tx_identity_req(struct ran_conn *conn, uint8_t id_type)
 {
 	struct msgb *msg = gsm48_msgb_alloc_name("GSM 04.08 ID REQ");
 	struct gsm48_hdr *gh;
@@ -288,7 +288,7 @@ static int mm_tx_identity_req(struct gsm_subscriber_connection *conn, uint8_t id
 }
 
 /* Parse Chapter 9.2.11 Identity Response */
-static int mm_rx_id_resp(struct gsm_subscriber_connection *conn, struct msgb *msg)
+static int mm_rx_id_resp(struct ran_conn *conn, struct msgb *msg)
 {
 	struct gsm48_hdr *gh = msgb_l3(msg);
 	uint8_t mi_type = gh->data[1] & GSM_MI_TYPE_MASK;
@@ -319,7 +319,7 @@ static const struct value_string lupd_names[] = {
 
 /* Chapter 9.2.15: Receive Location Updating Request.
  * Keep this function non-static for direct invocation by unit tests. */
-int mm_rx_loc_upd_req(struct gsm_subscriber_connection *conn, struct msgb *msg)
+int mm_rx_loc_upd_req(struct ran_conn *conn, struct msgb *msg)
 {
 	struct gsm_network *net = conn->network;
 	struct gsm48_hdr *gh = msgb_l3(msg);
@@ -339,7 +339,7 @@ int mm_rx_loc_upd_req(struct gsm_subscriber_connection *conn, struct msgb *msg)
 
 	gsm48_mi_to_string(mi_string, sizeof(mi_string), lu->mi, lu->mi_len);
 
-	if (msc_subscr_conn_is_establishing_auth_ciph(conn)) {
+	if (ran_conn_is_establishing_auth_ciph(conn)) {
 		LOGP(DMM, LOGL_ERROR,
 		     "Cannot accept another LU, conn already busy establishing authenticity;"
 		     " extraneous LOCATION UPDATING REQUEST: MI(%s)=%s type=%s\n",
@@ -347,7 +347,7 @@ int mm_rx_loc_upd_req(struct gsm_subscriber_connection *conn, struct msgb *msg)
 		return -EINVAL;
 	}
 
-	if (msc_subscr_conn_is_accepted(conn)) {
+	if (ran_conn_is_accepted(conn)) {
 		LOGP(DMM, LOGL_ERROR,
 		     "Cannot accept another LU, conn already established;"
 		     " extraneous LOCATION UPDATING REQUEST: MI(%s)=%s type=%s\n",
@@ -355,7 +355,7 @@ int mm_rx_loc_upd_req(struct gsm_subscriber_connection *conn, struct msgb *msg)
 		return -EINVAL;
 	}
 
-	msc_subscr_conn_update_id(conn, COMPLETE_LAYER3_LU, mi_string);
+	ran_conn_update_id(conn, COMPLETE_LAYER3_LU, mi_string);
 
 	DEBUGP(DMM, "LOCATION UPDATING REQUEST: MI(%s)=%s type=%s\n",
 	       gsm48_mi_type_name(mi_type), mi_string,
@@ -406,7 +406,7 @@ int mm_rx_loc_upd_req(struct gsm_subscriber_connection *conn, struct msgb *msg)
 
 	is_utran = (conn->via_ran == RAN_UTRAN_IU);
 	lu_fsm = vlr_loc_update(conn->fi,
-				SUBSCR_CONN_E_ACCEPTED, SUBSCR_CONN_E_CN_CLOSE, NULL,
+				RAN_CONN_E_ACCEPTED, RAN_CONN_E_CN_CLOSE, NULL,
 				net->vlr, conn, vlr_lu_type, tmsi, imsi,
 				&old_lai, &new_lai,
 				is_utran || conn->network->authentication_required,
@@ -433,7 +433,7 @@ int mm_rx_loc_upd_req(struct gsm_subscriber_connection *conn, struct msgb *msg)
 	conn->vsub->classmark.classmark1 = lu->classmark1;
 	conn->vsub->classmark.classmark1_set = true;
 
-	msc_subscr_conn_complete_layer_3(conn);
+	ran_conn_complete_layer_3(conn);
 	return 0;
 }
 
@@ -451,7 +451,7 @@ static uint8_t bcdify(uint8_t value)
 
 
 /* Section 9.2.15a */
-int gsm48_tx_mm_info(struct gsm_subscriber_connection *conn)
+int gsm48_tx_mm_info(struct ran_conn *conn)
 {
 	struct msgb *msg = gsm48_msgb_alloc_name("GSM 04.08 MM INF");
 	struct gsm48_hdr *gh;
@@ -602,7 +602,7 @@ int gsm48_tx_mm_info(struct gsm_subscriber_connection *conn)
 	return gsm48_conn_sendmsg(msg, conn, NULL);
 }
 
-/*! Send an Authentication Request to MS on the given subscriber connection
+/*! Send an Authentication Request to MS on the given RAN connection
  * according to 3GPP/ETSI TS 24.008, Section 9.2.2.
  * \param[in] conn  Subscriber connection to send on.
  * \param[in] rand  Random challenge token to send, must be 16 bytes long.
@@ -610,7 +610,7 @@ int gsm48_tx_mm_info(struct gsm_subscriber_connection *conn)
  * 	send; must be 16 bytes long, or pass NULL for plain GSM auth.
  * \param[in] key_seq  auth tuple's sequence number.
  */
-int gsm48_tx_mm_auth_req(struct gsm_subscriber_connection *conn, uint8_t *rand,
+int gsm48_tx_mm_auth_req(struct ran_conn *conn, uint8_t *rand,
 			 uint8_t *autn, int key_seq)
 {
 	struct msgb *msg = gsm48_msgb_alloc_name("GSM 04.08 AUTH REQ");
@@ -640,7 +640,7 @@ int gsm48_tx_mm_auth_req(struct gsm_subscriber_connection *conn, uint8_t *rand,
 }
 
 /* Section 9.2.1 */
-int gsm48_tx_mm_auth_rej(struct gsm_subscriber_connection *conn)
+int gsm48_tx_mm_auth_rej(struct ran_conn *conn)
 {
 	DEBUGP(DMM, "-> AUTH REJECT\n");
 	return gsm48_tx_simple(conn, GSM48_PDISC_MM, GSM48_MT_MM_AUTH_REJ);
@@ -649,7 +649,7 @@ int gsm48_tx_mm_auth_rej(struct gsm_subscriber_connection *conn)
 static int msc_vlr_tx_cm_serv_acc(void *msc_conn_ref);
 static int msc_vlr_tx_cm_serv_rej(void *msc_conn_ref, enum gsm48_reject_value result);
 
-static int cm_serv_reuse_conn(struct gsm_subscriber_connection *conn, const uint8_t *mi_lv)
+static int cm_serv_reuse_conn(struct ran_conn *conn, const uint8_t *mi_lv)
 {
 	uint8_t mi_type;
 	char mi_string[GSM48_MI_SIZE];
@@ -687,9 +687,9 @@ accept_reuse:
 
 	if (!conn->received_cm_service_request) {
 		conn->received_cm_service_request = true;
-		msc_subscr_conn_get(conn, MSC_CONN_USE_CM_SERVICE);
+		ran_conn_get(conn, MSC_CONN_USE_CM_SERVICE);
 	}
-	msc_subscr_conn_update_id(conn, conn->complete_layer3_type, mi_string);
+	ran_conn_update_id(conn, conn->complete_layer3_type, mi_string);
 	return conn->network->vlr->ops.tx_cm_serv_acc(conn);
 }
 
@@ -704,7 +704,7 @@ accept_reuse:
  *
  * Keep this function non-static for direct invocation by unit tests.
  */
-int gsm48_rx_mm_serv_req(struct gsm_subscriber_connection *conn, struct msgb *msg)
+int gsm48_rx_mm_serv_req(struct ran_conn *conn, struct msgb *msg)
 {
 	struct gsm_network *net = conn->network;
 	uint8_t mi_type;
@@ -771,10 +771,10 @@ int gsm48_rx_mm_serv_req(struct gsm_subscriber_connection *conn, struct msgb *ms
 		return msc_gsm48_tx_mm_serv_rej(conn, GSM48_REJECT_SRV_OPT_NOT_SUPPORTED);
 	}
 
-	if (msc_subscr_conn_is_accepted(conn))
+	if (ran_conn_is_accepted(conn))
 		return cm_serv_reuse_conn(conn, mi_p);
 
-	if (msc_subscr_conn_is_establishing_auth_ciph(conn)) {
+	if (ran_conn_is_establishing_auth_ciph(conn)) {
 		LOGP(DMM, LOGL_ERROR,
 		     "Cannot accept CM Service Request, conn already busy establishing authenticity\n");
 		msc_vlr_tx_cm_serv_rej(conn, GSM48_REJECT_CONGESTION);
@@ -782,13 +782,13 @@ int gsm48_rx_mm_serv_req(struct gsm_subscriber_connection *conn, struct msgb *ms
 		/* or should we accept and note down the service request anyway? */
 	}
 
-	msc_subscr_conn_update_id(conn, COMPLETE_LAYER3_CM_SERVICE_REQ, mi_string);
+	ran_conn_update_id(conn, COMPLETE_LAYER3_CM_SERVICE_REQ, mi_string);
 
 	osmo_signal_dispatch(SS_SUBSCR, S_SUBSCR_IDENTITY, mi_p);
 
 	is_utran = (conn->via_ran == RAN_UTRAN_IU);
 	vlr_proc_acc_req(conn->fi,
-			 SUBSCR_CONN_E_ACCEPTED, SUBSCR_CONN_E_CN_CLOSE, NULL,
+			 RAN_CONN_E_ACCEPTED, RAN_CONN_E_CN_CLOSE, NULL,
 			 net->vlr, conn,
 			 VLR_PR_ARQ_T_CM_SERV_REQ, mi-1, &lai,
 			 is_utran || conn->network->authentication_required,
@@ -807,12 +807,12 @@ int gsm48_rx_mm_serv_req(struct gsm_subscriber_connection *conn, struct msgb *ms
 	memcpy(conn->vsub->classmark.classmark2, classmark2, classmark2_len);
 	conn->vsub->classmark.classmark2_len = classmark2_len;
 
-	msc_subscr_conn_complete_layer_3(conn);
+	ran_conn_complete_layer_3(conn);
 	return 0;
 }
 
 /* Receive a CM Re-establish Request */
-static int gsm48_rx_cm_reest_req(struct gsm_subscriber_connection *conn, struct msgb *msg)
+static int gsm48_rx_cm_reest_req(struct ran_conn *conn, struct msgb *msg)
 {
 	uint8_t mi_type;
 	char mi_string[GSM48_MI_SIZE];
@@ -831,7 +831,7 @@ static int gsm48_rx_cm_reest_req(struct gsm_subscriber_connection *conn, struct 
 	return msc_gsm48_tx_mm_serv_rej(conn, GSM48_REJECT_SRV_OPT_NOT_SUPPORTED);
 }
 
-static int gsm48_rx_mm_imsi_detach_ind(struct gsm_subscriber_connection *conn, struct msgb *msg)
+static int gsm48_rx_mm_imsi_detach_ind(struct ran_conn *conn, struct msgb *msg)
 {
 	struct gsm_network *network = conn->network;
 	struct gsm48_hdr *gh = msgb_l3(msg);
@@ -884,7 +884,7 @@ static int gsm48_rx_mm_imsi_detach_ind(struct gsm_subscriber_connection *conn, s
 		vlr_subscr_put(vsub);
 	}
 
-	msc_subscr_conn_close(conn, 0);
+	ran_conn_close(conn, 0);
 	return 0;
 }
 
@@ -898,7 +898,7 @@ static int gsm48_rx_mm_status(struct msgb *msg)
 }
 
 static int parse_gsm_auth_resp(uint8_t *res, uint8_t *res_len,
-			       struct gsm_subscriber_connection *conn,
+			       struct ran_conn *conn,
 			       struct msgb *msg)
 {
 	struct gsm48_hdr *gh = msgb_l3(msg);
@@ -918,7 +918,7 @@ static int parse_gsm_auth_resp(uint8_t *res, uint8_t *res_len,
 }
 
 static int parse_umts_auth_resp(uint8_t *res, uint8_t *res_len,
-				struct gsm_subscriber_connection *conn,
+				struct ran_conn *conn,
 				struct msgb *msg)
 {
 	struct gsm48_hdr *gh;
@@ -970,7 +970,7 @@ static int parse_umts_auth_resp(uint8_t *res, uint8_t *res_len,
 }
 
 /* Chapter 9.2.3: Authentication Response */
-static int gsm48_rx_mm_auth_resp(struct gsm_subscriber_connection *conn, struct msgb *msg)
+static int gsm48_rx_mm_auth_resp(struct ran_conn *conn, struct msgb *msg)
 {
 	uint8_t res[16];
 	uint8_t res_len;
@@ -980,7 +980,7 @@ static int gsm48_rx_mm_auth_resp(struct gsm_subscriber_connection *conn, struct 
 	if (!conn->vsub) {
 		LOGP(DMM, LOGL_ERROR,
 		     "MM AUTHENTICATION RESPONSE: invalid: no subscriber\n");
-		msc_subscr_conn_close(conn, GSM_CAUSE_AUTH_FAILED);
+		ran_conn_close(conn, GSM_CAUSE_AUTH_FAILED);
 		return -EINVAL;
 	}
 
@@ -1010,7 +1010,7 @@ static int gsm48_rx_mm_auth_resp(struct gsm_subscriber_connection *conn, struct 
 				       res, res_len);
 }
 
-static int gsm48_rx_mm_auth_fail(struct gsm_subscriber_connection *conn, struct msgb *msg)
+static int gsm48_rx_mm_auth_fail(struct ran_conn *conn, struct msgb *msg)
 {
 	struct gsm48_hdr *gh = msgb_l3(msg);
 	uint8_t cause;
@@ -1021,7 +1021,7 @@ static int gsm48_rx_mm_auth_fail(struct gsm_subscriber_connection *conn, struct 
 	if (!conn->vsub) {
 		LOGP(DMM, LOGL_ERROR,
 		     "MM R99 AUTHENTICATION FAILURE: invalid: no subscriber\n");
-		msc_subscr_conn_close(conn, GSM_CAUSE_AUTH_FAILED);
+		ran_conn_close(conn, GSM_CAUSE_AUTH_FAILED);
 		return -EINVAL;
 	}
 
@@ -1030,7 +1030,7 @@ static int gsm48_rx_mm_auth_fail(struct gsm_subscriber_connection *conn, struct 
 		     "%s: MM R99 AUTHENTICATION FAILURE:"
 		     " l3 length invalid: %u\n",
 		     vlr_subscr_name(conn->vsub), msgb_l3len(msg));
-		msc_subscr_conn_close(conn, GSM_CAUSE_AUTH_FAILED);
+		ran_conn_close(conn, GSM_CAUSE_AUTH_FAILED);
 		return -EINVAL;
 	}
 
@@ -1053,7 +1053,7 @@ static int gsm48_rx_mm_auth_fail(struct gsm_subscriber_connection *conn, struct 
 		     "%s: MM R99 AUTHENTICATION FAILURE:"
 		     " invalid Synch Failure: missing AUTS IE\n",
 		     vlr_subscr_name(conn->vsub));
-		msc_subscr_conn_close(conn, GSM_CAUSE_AUTH_FAILED);
+		ran_conn_close(conn, GSM_CAUSE_AUTH_FAILED);
 		return -EINVAL;
 	}
 
@@ -1070,7 +1070,7 @@ static int gsm48_rx_mm_auth_fail(struct gsm_subscriber_connection *conn, struct 
 		     " got IE 0x%02x of %u bytes\n",
 		     vlr_subscr_name(conn->vsub),
 		     GSM48_IE_AUTS, auts_tag, auts_len);
-		msc_subscr_conn_close(conn, GSM_CAUSE_AUTH_FAILED);
+		ran_conn_close(conn, GSM_CAUSE_AUTH_FAILED);
 		return -EINVAL;
 	}
 
@@ -1079,7 +1079,7 @@ static int gsm48_rx_mm_auth_fail(struct gsm_subscriber_connection *conn, struct 
 		     "%s: MM R99 AUTHENTICATION FAILURE:"
 		     " invalid Synch Failure msg: message truncated (%u)\n",
 		     vlr_subscr_name(conn->vsub), msgb_l3len(msg));
-		msc_subscr_conn_close(conn, GSM_CAUSE_AUTH_FAILED);
+		ran_conn_close(conn, GSM_CAUSE_AUTH_FAILED);
 		return -EINVAL;
 	}
 
@@ -1092,7 +1092,7 @@ static int gsm48_rx_mm_auth_fail(struct gsm_subscriber_connection *conn, struct 
 	return vlr_subscr_rx_auth_fail(conn->vsub, auts);
 }
 
-static int gsm48_rx_mm_tmsi_reall_compl(struct gsm_subscriber_connection *conn)
+static int gsm48_rx_mm_tmsi_reall_compl(struct ran_conn *conn)
 {
 	DEBUGP(DMM, "TMSI Reallocation Completed. Subscriber: %s\n",
 	       vlr_subscr_name(conn->vsub));
@@ -1105,7 +1105,7 @@ static int gsm48_rx_mm_tmsi_reall_compl(struct gsm_subscriber_connection *conn)
 }
 
 /* Receive a GSM 04.08 Mobility Management (MM) message */
-static int gsm0408_rcv_mm(struct gsm_subscriber_connection *conn, struct msgb *msg)
+static int gsm0408_rcv_mm(struct ran_conn *conn, struct msgb *msg)
 {
 	struct gsm48_hdr *gh = msgb_l3(msg);
 	int rc = 0;
@@ -1148,7 +1148,7 @@ static int gsm0408_rcv_mm(struct gsm_subscriber_connection *conn, struct msgb *m
 }
 
 /* Receive a PAGING RESPONSE message from the MS */
-static int gsm48_rx_rr_pag_resp(struct gsm_subscriber_connection *conn, struct msgb *msg)
+static int gsm48_rx_rr_pag_resp(struct ran_conn *conn, struct msgb *msg)
 {
 	struct gsm_network *net = conn->network;
 	struct gsm48_hdr *gh = msgb_l3(msg);
@@ -1171,24 +1171,24 @@ static int gsm48_rx_rr_pag_resp(struct gsm_subscriber_connection *conn, struct m
 		return -EINVAL;
 	}
 
-	if (msc_subscr_conn_is_establishing_auth_ciph(conn)) {
+	if (ran_conn_is_establishing_auth_ciph(conn)) {
 		LOGP(DMM, LOGL_ERROR,
 		     "Ignoring Paging Response, conn already busy establishing authenticity\n");
 		return 0;
 	}
 
-	if (msc_subscr_conn_is_accepted(conn)) {
+	if (ran_conn_is_accepted(conn)) {
 		LOGP(DMM, LOGL_ERROR, "Ignoring Paging Response, conn already established\n");
 		return 0;
 	}
 
 	DEBUGP(DRR, "PAGING RESPONSE: MI(%s)=%s\n", gsm48_mi_type_name(mi_type), mi_string);
 
-	msc_subscr_conn_update_id(conn, COMPLETE_LAYER3_PAGING_RESP, mi_string);
+	ran_conn_update_id(conn, COMPLETE_LAYER3_PAGING_RESP, mi_string);
 
 	is_utran = (conn->via_ran == RAN_UTRAN_IU);
 	vlr_proc_acc_req(conn->fi,
-			 SUBSCR_CONN_E_ACCEPTED, SUBSCR_CONN_E_CN_CLOSE, NULL,
+			 RAN_CONN_E_ACCEPTED, RAN_CONN_E_CN_CLOSE, NULL,
 			 net->vlr, conn,
 			 VLR_PR_ARQ_T_PAGING_RESP, mi_lv, &lai,
 			 is_utran || conn->network->authentication_required,
@@ -1207,11 +1207,11 @@ static int gsm48_rx_rr_pag_resp(struct gsm_subscriber_connection *conn, struct m
 	memcpy(conn->vsub->classmark.classmark2, classmark2, classmark2_len);
 	conn->vsub->classmark.classmark2_len = classmark2_len;
 
-	msc_subscr_conn_complete_layer_3(conn);
+	ran_conn_complete_layer_3(conn);
 	return 0;
 }
 
-static int gsm48_rx_rr_app_info(struct gsm_subscriber_connection *conn, struct msgb *msg)
+static int gsm48_rx_rr_app_info(struct ran_conn *conn, struct msgb *msg)
 {
 	struct gsm48_hdr *gh = msgb_l3(msg);
 	uint8_t apdu_id_flags;
@@ -1234,7 +1234,7 @@ static int gsm48_rx_rr_app_info(struct gsm_subscriber_connection *conn, struct m
 }
 
 /* Receive a GSM 04.08 Radio Resource (RR) message */
-static int gsm0408_rcv_rr(struct gsm_subscriber_connection *conn, struct msgb *msg)
+static int gsm0408_rcv_rr(struct ran_conn *conn, struct msgb *msg)
 {
 	struct gsm48_hdr *gh = msgb_l3(msg);
 	int rc = 0;
@@ -1255,7 +1255,7 @@ static int gsm0408_rcv_rr(struct gsm_subscriber_connection *conn, struct msgb *m
 	return rc;
 }
 
-int gsm48_send_rr_app_info(struct gsm_subscriber_connection *conn, uint8_t apdu_id,
+int gsm48_send_rr_app_info(struct ran_conn *conn, uint8_t apdu_id,
 			   uint8_t apdu_len, const uint8_t *apdu)
 {
 	struct msgb *msg = gsm48_msgb_alloc_name("GSM 04.08 APP INF");
@@ -1311,7 +1311,7 @@ static bool msg_is_initially_permitted(const struct gsm48_hdr *hdr)
 	return false;
 }
 
-void cm_service_request_concludes(struct gsm_subscriber_connection *conn,
+void cm_service_request_concludes(struct ran_conn *conn,
 				  struct msgb *msg)
 {
 
@@ -1332,7 +1332,7 @@ void cm_service_request_concludes(struct gsm_subscriber_connection *conn,
 		       gsm48_pdisc_msgtype_name(pdisc, msg_type));
 	}
 	conn->received_cm_service_request = false;
-	msc_subscr_conn_put(conn, MSC_CONN_USE_CM_SERVICE);
+	ran_conn_put(conn, MSC_CONN_USE_CM_SERVICE);
 }
 
 /* TS 24.007 11.2.3.2.3 Message Type Octet / Duplicate Detection */
@@ -1393,7 +1393,7 @@ static uint8_t gsm0407_determine_nsd_ret_modulo_r98(uint8_t pdisc, uint8_t msg_t
 }
 
 /* TS 24.007 11.2.3.2 Message Type Octet / Duplicate Detection */
-static bool gsm0407_is_duplicate(struct gsm_subscriber_connection *conn, struct msgb *msg)
+static bool gsm0407_is_duplicate(struct ran_conn *conn, struct msgb *msg)
 {
 	struct gsm48_hdr *gh;
 	uint8_t pdisc;
@@ -1425,10 +1425,10 @@ static bool gsm0407_is_duplicate(struct gsm_subscriber_connection *conn, struct 
 	}
 }
 
-extern int gsm0408_rcv_cc(struct gsm_subscriber_connection *conn, struct msgb *msg);
+extern int gsm0408_rcv_cc(struct ran_conn *conn, struct msgb *msg);
 
 /* Main entry point for GSM 04.08/44.008 Layer 3 data (e.g. from the BSC). */
-int gsm0408_dispatch(struct gsm_subscriber_connection *conn, struct msgb *msg)
+int gsm0408_dispatch(struct ran_conn *conn, struct msgb *msg)
 {
 	struct gsm48_hdr *gh;
 	uint8_t pdisc;
@@ -1451,7 +1451,7 @@ int gsm0408_dispatch(struct gsm_subscriber_connection *conn, struct msgb *msg)
 	     gsm48_pdisc_msgtype_name(pdisc, gsm48_hdr_msg_type(gh)),
 	     pdisc, gsm48_hdr_msg_type(gh));
 
-	if (!msc_subscr_conn_is_accepted(conn)
+	if (!ran_conn_is_accepted(conn)
 	    && !msg_is_initially_permitted(gh)) {
 		LOGP(DRLL, LOGL_ERROR,
 		     "subscr %s: Message not permitted for initial conn: %s\n",
@@ -1518,7 +1518,7 @@ int gsm0408_dispatch(struct gsm_subscriber_connection *conn, struct msgb *msg)
 static int msc_vlr_tx_auth_req(void *msc_conn_ref, struct gsm_auth_tuple *at,
 			       bool send_autn)
 {
-	struct gsm_subscriber_connection *conn = msc_conn_ref;
+	struct ran_conn *conn = msc_conn_ref;
 	return gsm48_tx_mm_auth_req(conn, at->vec.rand,
 				    send_autn? at->vec.autn : NULL,
 				    at->key_seq);
@@ -1527,48 +1527,48 @@ static int msc_vlr_tx_auth_req(void *msc_conn_ref, struct gsm_auth_tuple *at,
 /* VLR asks us to send an authentication reject */
 static int msc_vlr_tx_auth_rej(void *msc_conn_ref)
 {
-	struct gsm_subscriber_connection *conn = msc_conn_ref;
+	struct ran_conn *conn = msc_conn_ref;
 	return gsm48_tx_mm_auth_rej(conn);
 }
 
 /* VLR asks us to transmit an Identity Request of given type */
 static int msc_vlr_tx_id_req(void *msc_conn_ref, uint8_t mi_type)
 {
-	struct gsm_subscriber_connection *conn = msc_conn_ref;
+	struct ran_conn *conn = msc_conn_ref;
 	return mm_tx_identity_req(conn, mi_type);
 }
 
 /* VLR asks us to transmit a Location Update Accept */
 static int msc_vlr_tx_lu_acc(void *msc_conn_ref, uint32_t send_tmsi)
 {
-	struct gsm_subscriber_connection *conn = msc_conn_ref;
+	struct ran_conn *conn = msc_conn_ref;
 	return gsm0408_loc_upd_acc(conn, send_tmsi);
 }
 
 /* VLR asks us to transmit a Location Update Reject */
 static int msc_vlr_tx_lu_rej(void *msc_conn_ref, enum gsm48_reject_value cause)
 {
-	struct gsm_subscriber_connection *conn = msc_conn_ref;
+	struct ran_conn *conn = msc_conn_ref;
 	return gsm0408_loc_upd_rej(conn, cause);
 }
 
 /* VLR asks us to transmit a CM Service Accept */
 static int msc_vlr_tx_cm_serv_acc(void *msc_conn_ref)
 {
-	struct gsm_subscriber_connection *conn = msc_conn_ref;
+	struct ran_conn *conn = msc_conn_ref;
 	return msc_gsm48_tx_mm_serv_ack(conn);
 }
 
 static int msc_vlr_tx_common_id(void *msc_conn_ref)
 {
-	struct gsm_subscriber_connection *conn = msc_conn_ref;
+	struct ran_conn *conn = msc_conn_ref;
 	return msc_tx_common_id(conn);
 }
 
 /* VLR asks us to transmit MM info. */
 static int msc_vlr_tx_mm_info(void *msc_conn_ref)
 {
-	struct gsm_subscriber_connection *conn = msc_conn_ref;
+	struct ran_conn *conn = msc_conn_ref;
 	if (!conn->network->send_mm_info)
 		return 0;
 	return gsm48_tx_mm_info(conn);
@@ -1577,14 +1577,14 @@ static int msc_vlr_tx_mm_info(void *msc_conn_ref)
 /* VLR asks us to transmit a CM Service Reject */
 static int msc_vlr_tx_cm_serv_rej(void *msc_conn_ref, enum gsm48_reject_value cause)
 {
-	struct gsm_subscriber_connection *conn = msc_conn_ref;
+	struct ran_conn *conn = msc_conn_ref;
 	int rc;
 
 	rc = msc_gsm48_tx_mm_serv_rej(conn, cause);
 
 	if (conn->received_cm_service_request) {
 		conn->received_cm_service_request = false;
-		msc_subscr_conn_put(conn, MSC_CONN_USE_CM_SERVICE);
+		ran_conn_put(conn, MSC_CONN_USE_CM_SERVICE);
 	}
 
 	return rc;
@@ -1594,7 +1594,7 @@ static int msc_vlr_tx_cm_serv_rej(void *msc_conn_ref, enum gsm48_reject_value ca
 osmo_static_assert(sizeof(((struct gsm0808_encrypt_info*)0)->key) >= sizeof(((struct osmo_auth_vector*)0)->kc),
 		   gsm0808_encrypt_info_key_fits_osmo_auth_vec_kc);
 
-int msc_geran_set_cipher_mode(struct gsm_subscriber_connection *conn, bool umts_aka, bool retrieve_imeisv)
+int msc_geran_set_cipher_mode(struct ran_conn *conn, bool umts_aka, bool retrieve_imeisv)
 {
 	struct gsm_network *net = conn->network;
 	struct gsm0808_encrypt_info ei;
@@ -1679,7 +1679,7 @@ int msc_vlr_set_ciph_mode(void *msc_conn_ref,
 			  bool umts_aka,
 			  bool retrieve_imeisv)
 {
-	struct gsm_subscriber_connection *conn = msc_conn_ref;
+	struct ran_conn *conn = msc_conn_ref;
 	struct vlr_subscr *vsub;
 	struct gsm_auth_tuple *tuple;
 
@@ -1723,7 +1723,7 @@ int msc_vlr_set_ciph_mode(void *msc_conn_ref,
 	return -ENOTSUP;
 }
 
-void msc_rx_sec_mode_compl(struct gsm_subscriber_connection *conn)
+void msc_rx_sec_mode_compl(struct ran_conn *conn)
 {
 	struct vlr_ciph_result vlr_res = {};
 
@@ -1767,7 +1767,7 @@ static void update_classmark(const struct gsm_classmark *src, struct gsm_classma
 static void msc_vlr_subscr_assoc(void *msc_conn_ref,
 				 struct vlr_subscr *vsub)
 {
-	struct gsm_subscriber_connection *conn = msc_conn_ref;
+	struct ran_conn *conn = msc_conn_ref;
 	OSMO_ASSERT(vsub);
 	OSMO_ASSERT(!conn->vsub);
 	conn->vsub = vlr_subscr_get(vsub);

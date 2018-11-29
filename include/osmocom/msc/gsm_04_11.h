@@ -4,7 +4,7 @@
 #include <osmocom/gsm/protocol/gsm_04_11.h>
 
 struct vlr_subscr;
-struct gsm_subscriber_connection;
+struct ran_conn;
 struct gsm_trans;
 
 #define UM_SAPI_SMS 3	/* See GSM 04.05/04.06 */
@@ -30,7 +30,7 @@ struct sms_deliver {
 struct gsm_network;
 struct msgb;
 
-int gsm0411_rcv_sms(struct gsm_subscriber_connection *conn, struct msgb *msg);
+int gsm0411_rcv_sms(struct ran_conn *conn, struct msgb *msg);
 
 struct gsm_sms *sms_alloc(void);
 void sms_free(struct gsm_sms *sms);
@@ -41,7 +41,7 @@ struct gsm_sms *sms_from_text(struct vlr_subscr *receiver,
 int gsm411_send_sms(struct gsm_network *net,
 		    struct vlr_subscr *vsub,
 		    struct gsm_sms *sms);
-void gsm411_sapi_n_reject(struct gsm_subscriber_connection *conn);
+void gsm411_sapi_n_reject(struct ran_conn *conn);
 
 int gsm411_send_rp_ack(struct gsm_trans *trans, uint8_t msg_ref);
 int gsm411_send_rp_error(struct gsm_trans *trans, uint8_t msg_ref,

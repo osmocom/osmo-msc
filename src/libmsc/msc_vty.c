@@ -489,7 +489,7 @@ static void vty_conn_hdr(struct vty *vty)
 		VTY_NEWLINE);
 }
 
-static void vty_dump_one_conn(struct vty *vty, const struct gsm_subscriber_connection *conn)
+static void vty_dump_one_conn(struct vty *vty, const struct ran_conn *conn)
 {
 	vty_out(vty, "%08x %22s %3s %5u %3u %08x %c /%1u %27s %s",
 		conn->a.conn_id,
@@ -507,10 +507,10 @@ static void vty_dump_one_conn(struct vty *vty, const struct gsm_subscriber_conne
 DEFUN(show_msc_conn, show_msc_conn_cmd,
 	"show connection", SHOW_STR "Subscriber Connections\n")
 {
-	struct gsm_subscriber_connection *conn;
+	struct ran_conn *conn;
 
 	vty_conn_hdr(vty);
-	llist_for_each_entry(conn, &gsmnet->subscr_conns, entry)
+	llist_for_each_entry(conn, &gsmnet->ran_conns, entry)
 		vty_dump_one_conn(vty, conn);
 
 	return CMD_SUCCESS;
@@ -628,7 +628,7 @@ static void subscr_dump_full_vty(struct vty *vty, struct vlr_subscr *vsub)
 
 	/* Connection */
 	if (vsub->msc_conn_ref) {
-		struct gsm_subscriber_connection *conn = vsub->msc_conn_ref;
+		struct ran_conn *conn = vsub->msc_conn_ref;
 		vty_conn_hdr(vty);
 		vty_dump_one_conn(vty, conn);
 	}
@@ -1003,7 +1003,7 @@ DEFUN(subscriber_ussd_notify,
       "Text of USSD message to send\n")
 {
 	char *text;
-	struct gsm_subscriber_connection *conn;
+	struct ran_conn *conn;
 	struct vlr_subscr *vsub = get_vsub_by_argv(gsmnet, argv[0], argv[1]);
 	int level;
 
@@ -1095,7 +1095,7 @@ DEFUN(subscriber_mstest_close,
       "Loop Type F\n"
       "Loop Type I\n")
 {
-	struct gsm_subscriber_connection *conn;
+	struct ran_conn *conn;
 	struct vlr_subscr *vsub = get_vsub_by_argv(gsmnet, argv[0], argv[1]);
 	const char *loop_str;
 	int loop_mode;
@@ -1128,7 +1128,7 @@ DEFUN(subscriber_mstest_open,
       SUBSCR_HELP "Send a TS 04.14 MS Test Command to subscriber\n"
       "Open a TCH Loop inside the MS\n")
 {
-	struct gsm_subscriber_connection *conn;
+	struct ran_conn *conn;
 	struct vlr_subscr *vsub = get_vsub_by_argv(gsmnet, argv[0], argv[1]);
 
 	if (!vsub) {

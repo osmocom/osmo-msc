@@ -536,7 +536,7 @@ void smpp_cmd_flush_pending(struct osmo_esme *esme)
 
 void smpp_cmd_ack(struct osmo_smpp_cmd *cmd)
 {
-	struct gsm_subscriber_connection *conn;
+	struct ran_conn *conn;
 	struct gsm_trans *trans;
 
 	if (cmd->is_report)
@@ -562,7 +562,7 @@ out:
 
 void smpp_cmd_err(struct osmo_smpp_cmd *cmd, uint32_t status)
 {
-	struct gsm_subscriber_connection *conn;
+	struct ran_conn *conn;
 	struct gsm_trans *trans;
 	int gsm411_cause;
 
@@ -636,7 +636,7 @@ struct osmo_smpp_cmd *smpp_cmd_find_by_seqnum(struct osmo_esme *esme,
 }
 
 static int deliver_to_esme(struct osmo_esme *esme, struct gsm_sms *sms,
-			   struct gsm_subscriber_connection *conn)
+			   struct ran_conn *conn)
 {
 	struct deliver_sm_t deliver;
 	int mode, ret;
@@ -731,13 +731,13 @@ static int deliver_to_esme(struct osmo_esme *esme, struct gsm_sms *sms,
 
 static struct smsc *g_smsc;
 
-int smpp_route_smpp_first(struct gsm_sms *sms, struct gsm_subscriber_connection *conn)
+int smpp_route_smpp_first(struct gsm_sms *sms, struct ran_conn *conn)
 {
 	return g_smsc->smpp_first;
 }
 
 int smpp_try_deliver(struct gsm_sms *sms,
-		     struct gsm_subscriber_connection *conn)
+		     struct ran_conn *conn)
 {
 	struct osmo_esme *esme;
 	struct osmo_smpp_addr dst;

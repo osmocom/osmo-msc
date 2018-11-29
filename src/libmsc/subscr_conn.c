@@ -1,4 +1,4 @@
-/* MSC subscriber connection implementation */
+/* MSC RAN connection implementation */
 
 /*
  * (C) 2016-2018 by sysmocom s.m.f.c. <info@sysmocom.de>
@@ -40,23 +40,23 @@
 #include <osmocom/msc/iu_dummy.h>
 #endif
 
-#define SUBSCR_CONN_TIMEOUT 5 /* seconds */
+#define RAN_CONN_TIMEOUT 5 /* seconds */
 
-static const struct value_string subscr_conn_fsm_event_names[] = {
-	OSMO_VALUE_STRING(SUBSCR_CONN_E_COMPLETE_LAYER_3),
-	OSMO_VALUE_STRING(SUBSCR_CONN_E_CLASSMARK_UPDATE),
-	OSMO_VALUE_STRING(SUBSCR_CONN_E_ACCEPTED),
-	OSMO_VALUE_STRING(SUBSCR_CONN_E_COMMUNICATING),
-	OSMO_VALUE_STRING(SUBSCR_CONN_E_RELEASE_WHEN_UNUSED),
-	OSMO_VALUE_STRING(SUBSCR_CONN_E_MO_CLOSE),
-	OSMO_VALUE_STRING(SUBSCR_CONN_E_CN_CLOSE),
-	OSMO_VALUE_STRING(SUBSCR_CONN_E_UNUSED),
+static const struct value_string ran_conn_fsm_event_names[] = {
+	OSMO_VALUE_STRING(RAN_CONN_E_COMPLETE_LAYER_3),
+	OSMO_VALUE_STRING(RAN_CONN_E_CLASSMARK_UPDATE),
+	OSMO_VALUE_STRING(RAN_CONN_E_ACCEPTED),
+	OSMO_VALUE_STRING(RAN_CONN_E_COMMUNICATING),
+	OSMO_VALUE_STRING(RAN_CONN_E_RELEASE_WHEN_UNUSED),
+	OSMO_VALUE_STRING(RAN_CONN_E_MO_CLOSE),
+	OSMO_VALUE_STRING(RAN_CONN_E_CN_CLOSE),
+	OSMO_VALUE_STRING(RAN_CONN_E_UNUSED),
 	{ 0, NULL }
 };
 
 static void update_counters(struct osmo_fsm_inst *fi, bool conn_accepted)
 {
-	struct gsm_subscriber_connection *conn = fi->priv;
+	struct ran_conn *conn = fi->priv;
 	switch (conn->complete_layer3_type) {
 	case COMPLETE_LAYER3_LU:
 		rate_ctr_inc(&conn->network->msc_ctrs->ctr[
@@ -80,7 +80,7 @@ static void update_counters(struct osmo_fsm_inst *fi, bool conn_accepted)
 
 static void evaluate_acceptance_outcome(struct osmo_fsm_inst *fi, bool conn_accepted)
 {
-	struct gsm_subscriber_connection *conn = fi->priv;
+	struct ran_conn *conn = fi->priv;
 
 	update_counters(fi, conn_accepted);
 
@@ -94,7 +94,7 @@ static void evaluate_acceptance_outcome(struct osmo_fsm_inst *fi, bool conn_acce
 	if (conn->complete_layer3_type == COMPLETE_LAYER3_CM_SERVICE_REQ
 	    && conn_accepted) {
 		conn->received_cm_service_request = true;
-		msc_subscr_conn_get(conn, MSC_CONN_USE_CM_SERVICE);
+		ran_conn_get(conn, MSC_CONN_USE_CM_SERVICE);
 	}
 
 	if (conn_accepted)
@@ -110,25 +110,25 @@ static void log_close_event(struct osmo_fsm_inst *fi, uint32_t event, void *data
 	LOGPFSML(fi, LOGL_NOTICE, "Close event, cause: %s\n", gsm48_reject_value_name(*cause));
 }
 
-static void subscr_conn_fsm_new(struct osmo_fsm_inst *fi, uint32_t event, void *data)
+static void ran_conn_fsm_new(struct osmo_fsm_inst *fi, uint32_t event, void *data)
 {
 	switch (event) {
-	case SUBSCR_CONN_E_COMPLETE_LAYER_3:
-		osmo_fsm_inst_state_chg(fi, SUBSCR_CONN_S_AUTH_CIPH, SUBSCR_CONN_TIMEOUT, 0);
+	case RAN_CONN_E_COMPLETE_LAYER_3:
+		osmo_fsm_inst_state_chg(fi, RAN_CONN_S_AUTH_CIPH, RAN_CONN_TIMEOUT, 0);
 		return;
 
-	case SUBSCR_CONN_E_ACCEPTED:
+	case RAN_CONN_E_ACCEPTED:
 		evaluate_acceptance_outcome(fi, true);
-		osmo_fsm_inst_state_chg(fi, SUBSCR_CONN_S_ACCEPTED, SUBSCR_CONN_TIMEOUT, 0);
+		osmo_fsm_inst_state_chg(fi, RAN_CONN_S_ACCEPTED, RAN_CONN_TIMEOUT, 0);
 		return;
 
-	case SUBSCR_CONN_E_MO_CLOSE:
-	case SUBSCR_CONN_E_CN_CLOSE:
+	case RAN_CONN_E_MO_CLOSE:
+	case RAN_CONN_E_CN_CLOSE:
 		log_close_event(fi, event, data);
 		evaluate_acceptance_outcome(fi, false);
 		/* fall through */
-	case SUBSCR_CONN_E_UNUSED:
-		osmo_fsm_inst_state_chg(fi, SUBSCR_CONN_S_RELEASING, SUBSCR_CONN_TIMEOUT, 0);
+	case RAN_CONN_E_UNUSED:
+		osmo_fsm_inst_state_chg(fi, RAN_CONN_S_RELEASING, RAN_CONN_TIMEOUT, 0);
 		return;
 
 	default:
@@ -136,25 +136,25 @@ static void subscr_conn_fsm_new(struct osmo_fsm_inst *fi, uint32_t event, void *
 	}
 }
 
-static void subscr_conn_fsm_auth_ciph(struct osmo_fsm_inst *fi, uint32_t event, void *data)
+static void ran_conn_fsm_auth_ciph(struct osmo_fsm_inst *fi, uint32_t event, void *data)
 {
 	/* If accepted, transition the state, all other cases mean failure. */
 	switch (event) {
-	case SUBSCR_CONN_E_ACCEPTED:
+	case RAN_CONN_E_ACCEPTED:
 		evaluate_acceptance_outcome(fi, true);
-		osmo_fsm_inst_state_chg(fi, SUBSCR_CONN_S_ACCEPTED, SUBSCR_CONN_TIMEOUT, 0);
+		osmo_fsm_inst_state_chg(fi, RAN_CONN_S_ACCEPTED, RAN_CONN_TIMEOUT, 0);
 		return;
 
-	case SUBSCR_CONN_E_UNUSED:
+	case RAN_CONN_E_UNUSED:
 		LOGPFSML(fi, LOGL_DEBUG, "Awaiting results for Auth+Ciph, overruling event %s\n",
 			 osmo_fsm_event_name(fi->fsm, event));
 		return;
 
-	case SUBSCR_CONN_E_MO_CLOSE:
-	case SUBSCR_CONN_E_CN_CLOSE:
+	case RAN_CONN_E_MO_CLOSE:
+	case RAN_CONN_E_CN_CLOSE:
 		log_close_event(fi, event, data);
 		evaluate_acceptance_outcome(fi, false);
-		osmo_fsm_inst_state_chg(fi, SUBSCR_CONN_S_RELEASING, SUBSCR_CONN_TIMEOUT, 0);
+		osmo_fsm_inst_state_chg(fi, RAN_CONN_S_RELEASING, RAN_CONN_TIMEOUT, 0);
 		return;
 
 
@@ -163,7 +163,7 @@ static void subscr_conn_fsm_auth_ciph(struct osmo_fsm_inst *fi, uint32_t event, 
 	}
 }
 
-int msc_classmark_request_then_cipher_mode_cmd(struct gsm_subscriber_connection *conn, bool umts_aka,
+int msc_classmark_request_then_cipher_mode_cmd(struct ran_conn *conn, bool umts_aka,
 					       bool retrieve_imeisv)
 {
 	int rc;
@@ -177,15 +177,15 @@ int msc_classmark_request_then_cipher_mode_cmd(struct gsm_subscriber_connection 
 		return -EIO;
 	}
 
-	osmo_fsm_inst_state_chg(conn->fi, SUBSCR_CONN_S_WAIT_CLASSMARK_UPDATE, SUBSCR_CONN_TIMEOUT, 0);
+	osmo_fsm_inst_state_chg(conn->fi, RAN_CONN_S_WAIT_CLASSMARK_UPDATE, RAN_CONN_TIMEOUT, 0);
 	return 0;
 }
 
-static void subscr_conn_fsm_wait_classmark_update(struct osmo_fsm_inst *fi, uint32_t event, void *data)
+static void ran_conn_fsm_wait_classmark_update(struct osmo_fsm_inst *fi, uint32_t event, void *data)
 {
-	struct gsm_subscriber_connection *conn = fi->priv;
+	struct ran_conn *conn = fi->priv;
 	switch (event) {
-	case SUBSCR_CONN_E_CLASSMARK_UPDATE:
+	case RAN_CONN_E_CLASSMARK_UPDATE:
 		/* Theoretically, this event can be used for requesting Classmark in various situations.
 		 * So far though, the only time we send a Classmark Request is during Ciphering. As soon
 		 * as more such situations arise, we need to add state to indicate what action should
@@ -196,7 +196,7 @@ static void subscr_conn_fsm_wait_classmark_update(struct osmo_fsm_inst *fi, uint
 
 		/* During Ciphering, we needed Classmark information. The Classmark Update has come in,
 		 * go back into the Set Ciphering Command procedure. */
-		osmo_fsm_inst_state_chg(fi, SUBSCR_CONN_S_AUTH_CIPH, SUBSCR_CONN_TIMEOUT, 0);
+		osmo_fsm_inst_state_chg(fi, RAN_CONN_S_AUTH_CIPH, RAN_CONN_TIMEOUT, 0);
 		if (msc_geran_set_cipher_mode(conn, conn->geran_set_cipher_mode.umts_aka,
 					      conn->geran_set_cipher_mode.retrieve_imeisv)) {
 			LOGPFSML(fi, LOGL_ERROR,
@@ -206,16 +206,16 @@ static void subscr_conn_fsm_wait_classmark_update(struct osmo_fsm_inst *fi, uint
 		}
 		return;
 
-	case SUBSCR_CONN_E_UNUSED:
+	case RAN_CONN_E_UNUSED:
 		LOGPFSML(fi, LOGL_DEBUG, "Awaiting results for Auth+Ciph, overruling event %s\n",
 			 osmo_fsm_event_name(fi->fsm, event));
 		return;
 
-	case SUBSCR_CONN_E_MO_CLOSE:
-	case SUBSCR_CONN_E_CN_CLOSE:
+	case RAN_CONN_E_MO_CLOSE:
+	case RAN_CONN_E_CN_CLOSE:
 		log_close_event(fi, event, data);
 		evaluate_acceptance_outcome(fi, false);
-		osmo_fsm_inst_state_chg(fi, SUBSCR_CONN_S_RELEASING, SUBSCR_CONN_TIMEOUT, 0);
+		osmo_fsm_inst_state_chg(fi, RAN_CONN_S_RELEASING, RAN_CONN_TIMEOUT, 0);
 		return;
 
 	default:
@@ -223,9 +223,9 @@ static void subscr_conn_fsm_wait_classmark_update(struct osmo_fsm_inst *fi, uint
 	}
 }
 
-static bool subscr_conn_fsm_has_active_transactions(struct osmo_fsm_inst *fi)
+static bool ran_conn_fsm_has_active_transactions(struct osmo_fsm_inst *fi)
 {
-	struct gsm_subscriber_connection *conn = fi->priv;
+	struct ran_conn *conn = fi->priv;
 	struct gsm_trans *trans;
 
 	if (conn->silent_call) {
@@ -260,9 +260,9 @@ static bool subscr_conn_fsm_has_active_transactions(struct osmo_fsm_inst *fi)
 	return false;
 }
 
-static void subscr_conn_fsm_accepted_enter(struct osmo_fsm_inst *fi, uint32_t prev_state)
+static void ran_conn_fsm_accepted_enter(struct osmo_fsm_inst *fi, uint32_t prev_state)
 {
-	struct gsm_subscriber_connection *conn = fi->priv;
+	struct ran_conn *conn = fi->priv;
 
 	/* Stop Location Update expiry for this subscriber. While the subscriber
 	 * has an open connection the LU expiry timer must remain disabled.
@@ -271,29 +271,29 @@ static void subscr_conn_fsm_accepted_enter(struct osmo_fsm_inst *fi, uint32_t pr
 	 * The LU expiry timer will restart once the connection is closed. */
 	conn->vsub->expire_lu = VLR_SUBSCRIBER_NO_EXPIRATION;
 
-	if (!subscr_conn_fsm_has_active_transactions(fi))
-		osmo_fsm_inst_dispatch(fi, SUBSCR_CONN_E_UNUSED, NULL);
+	if (!ran_conn_fsm_has_active_transactions(fi))
+		osmo_fsm_inst_dispatch(fi, RAN_CONN_E_UNUSED, NULL);
 }
 
-static void subscr_conn_fsm_accepted(struct osmo_fsm_inst *fi, uint32_t event, void *data)
+static void ran_conn_fsm_accepted(struct osmo_fsm_inst *fi, uint32_t event, void *data)
 {
 	switch (event) {
-	case SUBSCR_CONN_E_COMPLETE_LAYER_3:
+	case RAN_CONN_E_COMPLETE_LAYER_3:
 		/* When Authentication is off, we may already be in the Accepted state when the code
 		 * evaluates the Compl L3. Simply ignore. This just cosmetically mutes the error log
 		 * about the useless event. */
 		return;
 
-	case SUBSCR_CONN_E_COMMUNICATING:
-		osmo_fsm_inst_state_chg(fi, SUBSCR_CONN_S_COMMUNICATING, 0, 0);
+	case RAN_CONN_E_COMMUNICATING:
+		osmo_fsm_inst_state_chg(fi, RAN_CONN_S_COMMUNICATING, 0, 0);
 		return;
 
-	case SUBSCR_CONN_E_MO_CLOSE:
-	case SUBSCR_CONN_E_CN_CLOSE:
+	case RAN_CONN_E_MO_CLOSE:
+	case RAN_CONN_E_CN_CLOSE:
 		log_close_event(fi, event, data);
 		/* fall through */
-	case SUBSCR_CONN_E_UNUSED:
-		osmo_fsm_inst_state_chg(fi, SUBSCR_CONN_S_RELEASING, SUBSCR_CONN_TIMEOUT, 0);
+	case RAN_CONN_E_UNUSED:
+		osmo_fsm_inst_state_chg(fi, RAN_CONN_S_RELEASING, RAN_CONN_TIMEOUT, 0);
 		return;
 
 	default:
@@ -301,19 +301,19 @@ static void subscr_conn_fsm_accepted(struct osmo_fsm_inst *fi, uint32_t event, v
 	}
 }
 
-static void subscr_conn_fsm_communicating(struct osmo_fsm_inst *fi, uint32_t event, void *data)
+static void ran_conn_fsm_communicating(struct osmo_fsm_inst *fi, uint32_t event, void *data)
 {
 	switch (event) {
-	case SUBSCR_CONN_E_COMMUNICATING:
+	case RAN_CONN_E_COMMUNICATING:
 		/* no-op */
 		return;
 
-	case SUBSCR_CONN_E_MO_CLOSE:
-	case SUBSCR_CONN_E_CN_CLOSE:
+	case RAN_CONN_E_MO_CLOSE:
+	case RAN_CONN_E_CN_CLOSE:
 		log_close_event(fi, event, data);
 		/* fall through */
-	case SUBSCR_CONN_E_UNUSED:
-		osmo_fsm_inst_state_chg(fi, SUBSCR_CONN_S_RELEASING, SUBSCR_CONN_TIMEOUT, 0);
+	case RAN_CONN_E_UNUSED:
+		osmo_fsm_inst_state_chg(fi, RAN_CONN_S_RELEASING, RAN_CONN_TIMEOUT, 0);
 		return;
 
 	default:
@@ -321,33 +321,33 @@ static void subscr_conn_fsm_communicating(struct osmo_fsm_inst *fi, uint32_t eve
 	}
 }
 
-static int subscr_conn_fsm_timeout(struct osmo_fsm_inst *fi)
+static int ran_conn_fsm_timeout(struct osmo_fsm_inst *fi)
 {
-	struct gsm_subscriber_connection *conn = fi->priv;
-	if (msc_subscr_conn_in_release(conn)) {
+	struct ran_conn *conn = fi->priv;
+	if (ran_conn_in_release(conn)) {
 		LOGPFSML(fi, LOGL_ERROR, "Timeout while releasing, discarding right now\n");
 		osmo_fsm_inst_term(fi, OSMO_FSM_TERM_TIMEOUT, NULL);
 	} else {
 		enum gsm48_reject_value cause = GSM48_REJECT_CONGESTION;
-		osmo_fsm_inst_dispatch(fi, SUBSCR_CONN_E_CN_CLOSE, &cause);
+		osmo_fsm_inst_dispatch(fi, RAN_CONN_E_CN_CLOSE, &cause);
 	}
 	return 0;
 }
 
-static void subscr_conn_fsm_releasing_onenter(struct osmo_fsm_inst *fi, uint32_t prev_state)
+static void ran_conn_fsm_releasing_onenter(struct osmo_fsm_inst *fi, uint32_t prev_state)
 {
-	struct gsm_subscriber_connection *conn = fi->priv;
+	struct ran_conn *conn = fi->priv;
 
 	/* Use count for either conn->a.waiting_for_clear_complete or
 	 * conn->iu.waiting_for_release_complete. 'get' it early, so we don't deallocate after tearing
 	 * down active transactions. Safeguard against double-get (though it shouldn't happen). */
-	if (!msc_subscr_conn_used_by(conn, MSC_CONN_USE_RELEASE))
-		msc_subscr_conn_get(conn, MSC_CONN_USE_RELEASE);
+	if (!ran_conn_used_by(conn, MSC_CONN_USE_RELEASE))
+		ran_conn_get(conn, MSC_CONN_USE_RELEASE);
 
 	/* Cancel pending CM Service Requests */
 	if (conn->received_cm_service_request) {
 		conn->received_cm_service_request = false;
-		msc_subscr_conn_put(conn, MSC_CONN_USE_CM_SERVICE);
+		ran_conn_put(conn, MSC_CONN_USE_CM_SERVICE);
 	}
 
 	/* Cancel all VLR FSMs, if any */
@@ -388,110 +388,110 @@ static void subscr_conn_fsm_releasing_onenter(struct osmo_fsm_inst *fi, uint32_t
 	}
 }
 
-static void subscr_conn_fsm_releasing(struct osmo_fsm_inst *fi, uint32_t event, void *data)
+static void ran_conn_fsm_releasing(struct osmo_fsm_inst *fi, uint32_t event, void *data)
 {
-	OSMO_ASSERT(event == SUBSCR_CONN_E_UNUSED);
-	osmo_fsm_inst_state_chg(fi, SUBSCR_CONN_S_RELEASED, 0, 0);
+	OSMO_ASSERT(event == RAN_CONN_E_UNUSED);
+	osmo_fsm_inst_state_chg(fi, RAN_CONN_S_RELEASED, 0, 0);
 }
 
-static void subscr_conn_fsm_released(struct osmo_fsm_inst *fi, uint32_t prev_state)
+static void ran_conn_fsm_released(struct osmo_fsm_inst *fi, uint32_t prev_state)
 {
-	/* Terminate, deallocate and also deallocate the gsm_subscriber_connection, which is allocated as
+	/* Terminate, deallocate and also deallocate the ran_conn, which is allocated as
 	 * a talloc child of fi. Also calls the cleanup function. */
 	osmo_fsm_inst_term(fi, OSMO_FSM_TERM_REGULAR, NULL);
 }
 
 #define S(x)	(1 << (x))
 
-static const struct osmo_fsm_state subscr_conn_fsm_states[] = {
-	[SUBSCR_CONN_S_NEW] = {
-		.name = OSMO_STRINGIFY(SUBSCR_CONN_S_NEW),
-		.in_event_mask = S(SUBSCR_CONN_E_COMPLETE_LAYER_3) |
-				 S(SUBSCR_CONN_E_ACCEPTED) |
-				 S(SUBSCR_CONN_E_MO_CLOSE) |
-				 S(SUBSCR_CONN_E_CN_CLOSE) |
-				 S(SUBSCR_CONN_E_UNUSED),
-		.out_state_mask = S(SUBSCR_CONN_S_AUTH_CIPH) |
-				  S(SUBSCR_CONN_S_ACCEPTED) |
-				  S(SUBSCR_CONN_S_RELEASING),
-		.action = subscr_conn_fsm_new,
+static const struct osmo_fsm_state ran_conn_fsm_states[] = {
+	[RAN_CONN_S_NEW] = {
+		.name = OSMO_STRINGIFY(RAN_CONN_S_NEW),
+		.in_event_mask = S(RAN_CONN_E_COMPLETE_LAYER_3) |
+				 S(RAN_CONN_E_ACCEPTED) |
+				 S(RAN_CONN_E_MO_CLOSE) |
+				 S(RAN_CONN_E_CN_CLOSE) |
+				 S(RAN_CONN_E_UNUSED),
+		.out_state_mask = S(RAN_CONN_S_AUTH_CIPH) |
+				  S(RAN_CONN_S_ACCEPTED) |
+				  S(RAN_CONN_S_RELEASING),
+		.action = ran_conn_fsm_new,
 	},
-	[SUBSCR_CONN_S_AUTH_CIPH] = {
-		.name = OSMO_STRINGIFY(SUBSCR_CONN_S_AUTH_CIPH),
-		.in_event_mask = S(SUBSCR_CONN_E_ACCEPTED) |
-				 S(SUBSCR_CONN_E_MO_CLOSE) |
-				 S(SUBSCR_CONN_E_CN_CLOSE) |
-				 S(SUBSCR_CONN_E_UNUSED),
-		.out_state_mask = S(SUBSCR_CONN_S_WAIT_CLASSMARK_UPDATE) |
-				  S(SUBSCR_CONN_S_ACCEPTED) |
-				  S(SUBSCR_CONN_S_RELEASING),
-		.action = subscr_conn_fsm_auth_ciph,
+	[RAN_CONN_S_AUTH_CIPH] = {
+		.name = OSMO_STRINGIFY(RAN_CONN_S_AUTH_CIPH),
+		.in_event_mask = S(RAN_CONN_E_ACCEPTED) |
+				 S(RAN_CONN_E_MO_CLOSE) |
+				 S(RAN_CONN_E_CN_CLOSE) |
+				 S(RAN_CONN_E_UNUSED),
+		.out_state_mask = S(RAN_CONN_S_WAIT_CLASSMARK_UPDATE) |
+				  S(RAN_CONN_S_ACCEPTED) |
+				  S(RAN_CONN_S_RELEASING),
+		.action = ran_conn_fsm_auth_ciph,
 	},
-	[SUBSCR_CONN_S_WAIT_CLASSMARK_UPDATE] = {
-		.name = OSMO_STRINGIFY(SUBSCR_CONN_S_WAIT_CLASSMARK_UPDATE),
-		.in_event_mask = S(SUBSCR_CONN_E_CLASSMARK_UPDATE) |
-				 S(SUBSCR_CONN_E_MO_CLOSE) |
-				 S(SUBSCR_CONN_E_CN_CLOSE) |
-				 S(SUBSCR_CONN_E_UNUSED),
-		.out_state_mask = S(SUBSCR_CONN_S_AUTH_CIPH) |
-				  S(SUBSCR_CONN_S_RELEASING),
-		.action = subscr_conn_fsm_wait_classmark_update,
+	[RAN_CONN_S_WAIT_CLASSMARK_UPDATE] = {
+		.name = OSMO_STRINGIFY(RAN_CONN_S_WAIT_CLASSMARK_UPDATE),
+		.in_event_mask = S(RAN_CONN_E_CLASSMARK_UPDATE) |
+				 S(RAN_CONN_E_MO_CLOSE) |
+				 S(RAN_CONN_E_CN_CLOSE) |
+				 S(RAN_CONN_E_UNUSED),
+		.out_state_mask = S(RAN_CONN_S_AUTH_CIPH) |
+				  S(RAN_CONN_S_RELEASING),
+		.action = ran_conn_fsm_wait_classmark_update,
 	},
-	[SUBSCR_CONN_S_ACCEPTED] = {
-		.name = OSMO_STRINGIFY(SUBSCR_CONN_S_ACCEPTED),
+	[RAN_CONN_S_ACCEPTED] = {
+		.name = OSMO_STRINGIFY(RAN_CONN_S_ACCEPTED),
 		/* allow everything to release for any odd behavior */
-		.in_event_mask = S(SUBSCR_CONN_E_COMPLETE_LAYER_3) |
-				 S(SUBSCR_CONN_E_COMMUNICATING) |
-		                 S(SUBSCR_CONN_E_RELEASE_WHEN_UNUSED) |
-				 S(SUBSCR_CONN_E_ACCEPTED) |
-				 S(SUBSCR_CONN_E_MO_CLOSE) |
-				 S(SUBSCR_CONN_E_CN_CLOSE) |
-				 S(SUBSCR_CONN_E_UNUSED),
-		.out_state_mask = S(SUBSCR_CONN_S_RELEASING) |
-				  S(SUBSCR_CONN_S_COMMUNICATING),
-		.onenter = subscr_conn_fsm_accepted_enter,
-		.action = subscr_conn_fsm_accepted,
+		.in_event_mask = S(RAN_CONN_E_COMPLETE_LAYER_3) |
+				 S(RAN_CONN_E_COMMUNICATING) |
+		                 S(RAN_CONN_E_RELEASE_WHEN_UNUSED) |
+				 S(RAN_CONN_E_ACCEPTED) |
+				 S(RAN_CONN_E_MO_CLOSE) |
+				 S(RAN_CONN_E_CN_CLOSE) |
+				 S(RAN_CONN_E_UNUSED),
+		.out_state_mask = S(RAN_CONN_S_RELEASING) |
+				  S(RAN_CONN_S_COMMUNICATING),
+		.onenter = ran_conn_fsm_accepted_enter,
+		.action = ran_conn_fsm_accepted,
 	},
-	[SUBSCR_CONN_S_COMMUNICATING] = {
-		.name = OSMO_STRINGIFY(SUBSCR_CONN_S_COMMUNICATING),
+	[RAN_CONN_S_COMMUNICATING] = {
+		.name = OSMO_STRINGIFY(RAN_CONN_S_COMMUNICATING),
 		/* allow everything to release for any odd behavior */
-		.in_event_mask = S(SUBSCR_CONN_E_RELEASE_WHEN_UNUSED) |
-				 S(SUBSCR_CONN_E_ACCEPTED) |
-				 S(SUBSCR_CONN_E_COMMUNICATING) |
-				 S(SUBSCR_CONN_E_MO_CLOSE) |
-				 S(SUBSCR_CONN_E_CN_CLOSE) |
-				 S(SUBSCR_CONN_E_UNUSED),
-		.out_state_mask = S(SUBSCR_CONN_S_RELEASING),
-		.action = subscr_conn_fsm_communicating,
+		.in_event_mask = S(RAN_CONN_E_RELEASE_WHEN_UNUSED) |
+				 S(RAN_CONN_E_ACCEPTED) |
+				 S(RAN_CONN_E_COMMUNICATING) |
+				 S(RAN_CONN_E_MO_CLOSE) |
+				 S(RAN_CONN_E_CN_CLOSE) |
+				 S(RAN_CONN_E_UNUSED),
+		.out_state_mask = S(RAN_CONN_S_RELEASING),
+		.action = ran_conn_fsm_communicating,
 	},
-	[SUBSCR_CONN_S_RELEASING] = {
-		.name = OSMO_STRINGIFY(SUBSCR_CONN_S_RELEASING),
-		.in_event_mask = S(SUBSCR_CONN_E_UNUSED),
-		.out_state_mask = S(SUBSCR_CONN_S_RELEASED),
-		.onenter = subscr_conn_fsm_releasing_onenter,
-		.action = subscr_conn_fsm_releasing,
+	[RAN_CONN_S_RELEASING] = {
+		.name = OSMO_STRINGIFY(RAN_CONN_S_RELEASING),
+		.in_event_mask = S(RAN_CONN_E_UNUSED),
+		.out_state_mask = S(RAN_CONN_S_RELEASED),
+		.onenter = ran_conn_fsm_releasing_onenter,
+		.action = ran_conn_fsm_releasing,
 	},
-	[SUBSCR_CONN_S_RELEASED] = {
-		.name = OSMO_STRINGIFY(SUBSCR_CONN_S_RELEASED),
-		.onenter = subscr_conn_fsm_released,
+	[RAN_CONN_S_RELEASED] = {
+		.name = OSMO_STRINGIFY(RAN_CONN_S_RELEASED),
+		.onenter = ran_conn_fsm_released,
 	},
 };
 
-static void subscr_conn_fsm_cleanup(struct osmo_fsm_inst *fi, enum osmo_fsm_term_cause cause);
+static void ran_conn_fsm_cleanup(struct osmo_fsm_inst *fi, enum osmo_fsm_term_cause cause);
 
-static struct osmo_fsm subscr_conn_fsm = {
-	.name = "Subscr_Conn",
-	.states = subscr_conn_fsm_states,
-	.num_states = ARRAY_SIZE(subscr_conn_fsm_states),
+static struct osmo_fsm ran_conn_fsm = {
+	.name = "RAN_conn",
+	.states = ran_conn_fsm_states,
+	.num_states = ARRAY_SIZE(ran_conn_fsm_states),
 	.allstate_event_mask = 0,
 	.allstate_action = NULL,
 	.log_subsys = DMM,
-	.event_names = subscr_conn_fsm_event_names,
-	.cleanup = subscr_conn_fsm_cleanup,
-	.timer_cb = subscr_conn_fsm_timeout,
+	.event_names = ran_conn_fsm_event_names,
+	.cleanup = ran_conn_fsm_cleanup,
+	.timer_cb = ran_conn_fsm_timeout,
 };
 
-char *msc_subscr_conn_get_conn_id(struct gsm_subscriber_connection *conn)
+char *ran_conn_get_conn_id(struct ran_conn *conn)
 {
 	char *id;
 
@@ -511,64 +511,64 @@ char *msc_subscr_conn_get_conn_id(struct gsm_subscriber_connection *conn)
 }
 
 /* Tidy up before the FSM deallocates */
-static void subscr_conn_fsm_cleanup(struct osmo_fsm_inst *fi, enum osmo_fsm_term_cause cause)
+static void ran_conn_fsm_cleanup(struct osmo_fsm_inst *fi, enum osmo_fsm_term_cause cause)
 {
-	struct gsm_subscriber_connection *conn = fi->priv;
+	struct ran_conn *conn = fi->priv;
 
-	if (subscr_conn_fsm_has_active_transactions(fi))
+	if (ran_conn_fsm_has_active_transactions(fi))
 		LOGPFSML(fi, LOGL_ERROR, "Deallocating despite active transactions\n");
 
 	if (!conn) {
-		LOGP(DRLL, LOGL_ERROR, "Freeing NULL subscriber connection\n");
+		LOGP(DRLL, LOGL_ERROR, "Freeing NULL RAN connection\n");
 		return;
 	}
 
 	if (conn->vsub) {
-		DEBUGP(DRLL, "%s: Freeing subscriber connection\n", vlr_subscr_name(conn->vsub));
+		DEBUGP(DRLL, "%s: Freeing RAN connection\n", vlr_subscr_name(conn->vsub));
 		conn->vsub->lu_fsm = NULL;
 		conn->vsub->msc_conn_ref = NULL;
 		vlr_subscr_put(conn->vsub);
 		conn->vsub = NULL;
 	} else
-		DEBUGP(DRLL, "Freeing subscriber connection with NULL subscriber\n");
+		DEBUGP(DRLL, "Freeing RAN connection with NULL subscriber\n");
 
 	llist_del(&conn->entry);
 }
 
 /* Signal success of Complete Layer 3. Allow to keep the conn open for Auth and Ciph. */
-void msc_subscr_conn_complete_layer_3(struct gsm_subscriber_connection *conn)
+void ran_conn_complete_layer_3(struct ran_conn *conn)
 {
 	if (!conn)
 		return;
-	osmo_fsm_inst_dispatch(conn->fi, SUBSCR_CONN_E_COMPLETE_LAYER_3, NULL);
+	osmo_fsm_inst_dispatch(conn->fi, RAN_CONN_E_COMPLETE_LAYER_3, NULL);
 }
 
-void subscr_conn_release_when_unused(struct gsm_subscriber_connection *conn)
+void ran_conn_release_when_unused(struct ran_conn *conn)
 {
 	if (!conn)
 		return;
-	if (msc_subscr_conn_in_release(conn)) {
+	if (ran_conn_in_release(conn)) {
 		DEBUGP(DMM, "%s: %s: conn already in release (%s)\n",
 		       vlr_subscr_name(conn->vsub), __func__,
 		       osmo_fsm_inst_state_name(conn->fi));
 		return;
 	}
-	if (conn->fi->state == SUBSCR_CONN_S_NEW) {
+	if (conn->fi->state == RAN_CONN_S_NEW) {
 		DEBUGP(DMM, "%s: %s: conn still being established (%s)\n",
 		       vlr_subscr_name(conn->vsub), __func__,
 		       osmo_fsm_inst_state_name(conn->fi));
 		return;
 	}
-	osmo_fsm_inst_dispatch(conn->fi, SUBSCR_CONN_E_RELEASE_WHEN_UNUSED, NULL);
+	osmo_fsm_inst_dispatch(conn->fi, RAN_CONN_E_RELEASE_WHEN_UNUSED, NULL);
 }
 
-static void conn_close(struct gsm_subscriber_connection *conn, uint32_t cause, uint32_t event)
+static void conn_close(struct ran_conn *conn, uint32_t cause, uint32_t event)
 {
 	if (!conn) {
 		LOGP(DMM, LOGL_ERROR, "Cannot release NULL connection\n");
 		return;
 	}
-	if (msc_subscr_conn_in_release(conn)) {
+	if (ran_conn_in_release(conn)) {
 		DEBUGP(DMM, "%s(vsub=%s, cause=%u): already in release, ignore.\n",
 		       __func__, vlr_subscr_name(conn->vsub), cause);
 		return;
@@ -576,75 +576,75 @@ static void conn_close(struct gsm_subscriber_connection *conn, uint32_t cause, u
 	osmo_fsm_inst_dispatch(conn->fi, event, &cause);
 }
 
-void msc_subscr_conn_close(struct gsm_subscriber_connection *conn, uint32_t cause)
+void ran_conn_close(struct ran_conn *conn, uint32_t cause)
 {
-	return conn_close(conn, cause, SUBSCR_CONN_E_CN_CLOSE);
+	return conn_close(conn, cause, RAN_CONN_E_CN_CLOSE);
 }
 
-void msc_subscr_conn_mo_close(struct gsm_subscriber_connection *conn, uint32_t cause)
+void ran_conn_mo_close(struct ran_conn *conn, uint32_t cause)
 {
-	return conn_close(conn, cause, SUBSCR_CONN_E_MO_CLOSE);
+	return conn_close(conn, cause, RAN_CONN_E_MO_CLOSE);
 }
 
-bool msc_subscr_conn_in_release(struct gsm_subscriber_connection *conn)
+bool ran_conn_in_release(struct ran_conn *conn)
 {
 	if (!conn || !conn->fi)
 		return true;
-	if (conn->fi->state == SUBSCR_CONN_S_RELEASING)
+	if (conn->fi->state == RAN_CONN_S_RELEASING)
 		return true;
-	if (conn->fi->state == SUBSCR_CONN_S_RELEASED)
+	if (conn->fi->state == RAN_CONN_S_RELEASED)
 		return true;
 	return false;
 }
 
-bool msc_subscr_conn_is_accepted(const struct gsm_subscriber_connection *conn)
+bool ran_conn_is_accepted(const struct ran_conn *conn)
 {
 	if (!conn)
 		return false;
 	if (!conn->vsub)
 		return false;
-	if (!(conn->fi->state == SUBSCR_CONN_S_ACCEPTED
-	      || conn->fi->state == SUBSCR_CONN_S_COMMUNICATING))
+	if (!(conn->fi->state == RAN_CONN_S_ACCEPTED
+	      || conn->fi->state == RAN_CONN_S_COMMUNICATING))
 		return false;
 	return true;
 }
 
 /* Indicate that *some* communication is happening with the phone, so that the conn FSM no longer times
  * out to release within a few seconds. */
-void msc_subscr_conn_communicating(struct gsm_subscriber_connection *conn)
+void ran_conn_communicating(struct ran_conn *conn)
 {
-	osmo_fsm_inst_dispatch(conn->fi, SUBSCR_CONN_E_COMMUNICATING, NULL);
+	osmo_fsm_inst_dispatch(conn->fi, RAN_CONN_E_COMMUNICATING, NULL);
 }
 
-void msc_subscr_conn_init(void)
+void ran_conn_init(void)
 {
-	osmo_fsm_register(&subscr_conn_fsm);
+	osmo_fsm_register(&ran_conn_fsm);
 }
 
-/* Allocate a new subscriber conn and FSM.
- * Deallocation is by msc_subscr_conn_put(): when the use count reaches zero, the
- * SUBSCR_CONN_E_RELEASE_COMPLETE event is dispatched, the FSM terminates and deallocates both FSM and
+/* Allocate a new RAN conn and FSM.
+ * Deallocation is by ran_conn_put(): when the use count reaches zero, the
+ * RAN_CONN_E_RELEASE_COMPLETE event is dispatched, the FSM terminates and deallocates both FSM and
  * conn. As long as the FSM is waiting for responses from the subscriber, it will itself hold a use count
  * on the conn. */
-struct gsm_subscriber_connection *msc_subscr_conn_alloc(struct gsm_network *network,
+struct ran_conn *ran_conn_alloc(struct gsm_network *network,
 							enum ran_type via_ran, uint16_t lac)
 {
-	struct gsm_subscriber_connection *conn;
+	struct ran_conn *conn;
 	struct osmo_fsm_inst *fi;
 
-	fi = osmo_fsm_inst_alloc(&subscr_conn_fsm, network, NULL, LOGL_DEBUG, NULL);
+	fi = osmo_fsm_inst_alloc(&ran_conn_fsm, network, NULL, LOGL_DEBUG, NULL);
 	if (!fi) {
 		LOGP(DMM, LOGL_ERROR, "Failed to allocate conn FSM\n");
 		return NULL;
 	}
 
-	conn = talloc_zero(fi, struct gsm_subscriber_connection);
+	conn = talloc_zero(fi, struct ran_conn);
 	if (!conn) {
 		osmo_fsm_inst_free(fi);
 		return NULL;
 	}
 
-	*conn = (struct gsm_subscriber_connection){
+	*conn = (struct ran_conn){
 		.network = network,
 		.via_ran = via_ran,
 		.lac = lac,
@@ -652,15 +652,15 @@ struct gsm_subscriber_connection *msc_subscr_conn_alloc(struct gsm_network *netw
 	};
 
 	fi->priv = conn;
-	llist_add_tail(&conn->entry, &network->subscr_conns);
+	llist_add_tail(&conn->entry, &network->ran_conns);
 	return conn;
 }
 
-bool msc_subscr_conn_is_establishing_auth_ciph(const struct gsm_subscriber_connection *conn)
+bool ran_conn_is_establishing_auth_ciph(const struct ran_conn *conn)
 {
 	if (!conn)
 		return false;
-	return conn->fi->state == SUBSCR_CONN_S_AUTH_CIPH;
+	return conn->fi->state == RAN_CONN_S_AUTH_CIPH;
 }
 
 
@@ -672,7 +672,7 @@ const struct value_string complete_layer3_type_names[] = {
 	{ 0, NULL }
 };
 
-void msc_subscr_conn_update_id(struct gsm_subscriber_connection *conn,
+void ran_conn_update_id(struct ran_conn *conn,
 			       enum complete_layer3_type from, const char *id)
 {
        conn->complete_layer3_type = from;
@@ -680,11 +680,11 @@ void msc_subscr_conn_update_id(struct gsm_subscriber_connection *conn,
        LOGPFSML(conn->fi, LOGL_DEBUG, "Updated ID\n");
 }
 
-static void rx_close_complete(struct gsm_subscriber_connection *conn, const char *label, bool *flag)
+static void rx_close_complete(struct ran_conn *conn, const char *label, bool *flag)
 {
 	if (!conn)
 		return;
-	if (!msc_subscr_conn_in_release(conn)) {
+	if (!ran_conn_in_release(conn)) {
 		LOGPFSML(conn->fi, LOGL_ERROR, "Received unexpected %s, discarding right now\n",
 			 label);
 		trans_conn_closed(conn);
@@ -693,16 +693,16 @@ static void rx_close_complete(struct gsm_subscriber_connection *conn, const char
 	}
 	if (*flag) {
 		*flag = false;
-		msc_subscr_conn_put(conn, MSC_CONN_USE_RELEASE);
+		ran_conn_put(conn, MSC_CONN_USE_RELEASE);
 	}
 }
 
-void msc_subscr_conn_rx_bssmap_clear_complete(struct gsm_subscriber_connection *conn)
+void ran_conn_rx_bssmap_clear_complete(struct ran_conn *conn)
 {
 	rx_close_complete(conn, "BSSMAP Clear Complete", &conn->a.waiting_for_clear_complete);
 }
 
-void msc_subscr_conn_rx_iu_release_complete(struct gsm_subscriber_connection *conn)
+void ran_conn_rx_iu_release_complete(struct ran_conn *conn)
 {
 	rx_close_complete(conn, "Iu Release Complete", &conn->iu.waiting_for_release_complete);
 }

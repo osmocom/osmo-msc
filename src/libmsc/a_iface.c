@@ -142,12 +142,12 @@ static struct bsc_context *get_bsc_context_by_sccp_addr(const struct osmo_sccp_a
 /* Send DTAP message via A-interface, take ownership of msg */
 int a_iface_tx_dtap(struct msgb *msg)
 {
-	struct gsm_subscriber_connection *conn;
+	struct ran_conn *conn;
 	struct msgb *msg_resp;
 
 	uint8_t link_id = OMSC_LINKID_CB(msg);
 	OSMO_ASSERT(msg);
-	conn = (struct gsm_subscriber_connection *)msg->dst;
+	conn = (struct ran_conn *)msg->dst;
 	OSMO_ASSERT(conn);
 	OSMO_ASSERT(conn->a.scu);
 
@@ -171,7 +171,7 @@ int a_iface_tx_dtap(struct msgb *msg)
 }
 
 /* Send Cipher mode command via A-interface */
-int a_iface_tx_cipher_mode(const struct gsm_subscriber_connection *conn,
+int a_iface_tx_cipher_mode(const struct ran_conn *conn,
 			   struct gsm0808_encrypt_info *ei, int include_imeisv)
 {
 	/* TODO generalize for A- and Iu interfaces, don't name after 08.08 */
@@ -358,7 +358,7 @@ static int enc_speech_codec_list(struct gsm0808_speech_codec_list *scl, const st
 /* Send assignment request via A-interface */
 int a_iface_tx_assignment(const struct gsm_trans *trans)
 {
-	struct gsm_subscriber_connection *conn;
+	struct ran_conn *conn;
 	struct gsm0808_channel_type ct;
 	struct gsm0808_speech_codec_list scl;
 	uint32_t *ci_ptr = NULL;
@@ -412,7 +412,7 @@ int a_iface_tx_assignment(const struct gsm_trans *trans)
 }
 
 /* Send clear command via A-interface */
-int a_iface_tx_clear_cmd(struct gsm_subscriber_connection *conn)
+int a_iface_tx_clear_cmd(struct ran_conn *conn)
 {
 	struct msgb *msg;
 
@@ -422,7 +422,7 @@ int a_iface_tx_clear_cmd(struct gsm_subscriber_connection *conn)
 	return osmo_sccp_tx_data_msg(conn->a.scu, conn->a.conn_id, msg);
 }
 
-int a_iface_tx_classmark_request(const struct gsm_subscriber_connection *conn)
+int a_iface_tx_classmark_request(const struct ran_conn *conn)
 {
 	struct msgb *msg;
 
@@ -443,7 +443,7 @@ static void a_reset_cb(const void *priv)
 	if (!gsm_network)
 		return;
 
-	/* Clear all now orphaned subscriber connections */
+	/* Clear all now orphaned RAN connections */
 	a_clear_all(bsc_ctx->sccp_user, &bsc_ctx->bsc_addr);
 
 	/* Send reset to the remote BSC */
@@ -612,22 +612,22 @@ static int sccp_sap_up(struct osmo_prim_hdr *oph, void *_scu)
 	return rc;
 }
 
-/* Clear all subscriber connections on a specified BSC */
+/* Clear all RAN connections on a specified BSC */
 void a_clear_all(struct osmo_sccp_user *scu, const struct osmo_sccp_addr *bsc_addr)
 {
-	struct gsm_subscriber_connection *conn;
-	struct gsm_subscriber_connection *conn_temp;
+	struct ran_conn *conn;
+	struct ran_conn *conn_temp;
 	struct gsm_network *network = gsm_network;
 
 	OSMO_ASSERT(scu);
 	OSMO_ASSERT(bsc_addr);
 
-	llist_for_each_entry_safe(conn, conn_temp, &network->subscr_conns, entry) {
+	llist_for_each_entry_safe(conn, conn_temp, &network->ran_conns, entry) {
 		/* Clear only A connections and connections that actually
 		 * belong to the specified BSC */
 		if (conn->via_ran == RAN_GERAN_A && memcmp(bsc_addr, &conn->a.bsc_addr, sizeof(conn->a.bsc_addr)) == 0) {
 			uint32_t conn_id = conn->a.conn_id;
-			LOGPCONN(conn, LOGL_NOTICE, "Dropping orphaned subscriber connection\n");
+			LOGPCONN(conn, LOGL_NOTICE, "Dropping orphaned RAN connection\n");
 			/* This call will/may talloc_free(conn), so we must save conn_id above */
 			msc_clear_request(conn, GSM48_CC_CAUSE_SWITCH_CONG);
 

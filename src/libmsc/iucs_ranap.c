@@ -43,9 +43,9 @@
 #include <asn1c/asn1helpers.h>
 
 /* To continue authorization after a Security Mode Complete */
-int gsm0408_authorize(struct gsm_subscriber_connection *conn);
+int gsm0408_authorize(struct ran_conn *conn);
 
-static int iucs_rx_rab_assign(struct gsm_subscriber_connection *conn, RANAP_RAB_SetupOrModifiedItemIEs_t * setup_ies)
+static int iucs_rx_rab_assign(struct ran_conn *conn, RANAP_RAB_SetupOrModifiedItemIEs_t * setup_ies)
 {
 	uint8_t rab_id;
 	RANAP_RAB_SetupOrModifiedItem_t *item = &setup_ies->raB_SetupOrModifiedItem;
@@ -89,7 +89,7 @@ static int iucs_rx_rab_assign(struct gsm_subscriber_connection *conn, RANAP_RAB_
 	return 0;
 }
 
-int iucs_rx_sec_mode_compl(struct gsm_subscriber_connection *conn,
+int iucs_rx_sec_mode_compl(struct ran_conn *conn,
 			   RANAP_SecurityModeCompleteIEs_t *ies)
 {
 	OSMO_ASSERT(conn->via_ran == RAN_UTRAN_IU);
@@ -103,9 +103,9 @@ int iucs_rx_sec_mode_compl(struct gsm_subscriber_connection *conn,
 int iucs_rx_ranap_event(struct gsm_network *network,
 			struct ranap_ue_conn_ctx *ue_ctx, int type, void *data)
 {
-	struct gsm_subscriber_connection *conn;
+	struct ran_conn *conn;
 
-	conn = subscr_conn_lookup_iu(network, ue_ctx);
+	conn = ran_conn_lookup_iu(network, ue_ctx);
 
 	if (!conn) {
 		LOGP(DRANAP, LOGL_ERROR, "Cannot find subscriber for IU event %u\n", type);
@@ -117,7 +117,7 @@ int iucs_rx_ranap_event(struct gsm_network *network,
 	case RANAP_IU_EVENT_LINK_INVALIDATED:
 		LOGP(DIUCS, LOGL_INFO, "IuCS release for %s\n",
 		     vlr_subscr_name(conn->vsub));
-		msc_subscr_conn_rx_iu_release_complete(conn);
+		ran_conn_rx_iu_release_complete(conn);
 		return 0;
 
 	case RANAP_IU_EVENT_SECURITY_MODE_COMPLETE:

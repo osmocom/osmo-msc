@@ -36,7 +36,7 @@
 /*! Send a MT RELEASE COMPLETE message with Reject component
  *  (see section 3.6.1) and given error code (see section 3.6.7).
  *
- * \param[in]  conn            Active subscriber connection
+ * \param[in]  conn            Active RAN connection
  * \param[in]  transaction_id  Transaction ID with TI flag set
  * \param[in]  invoke_id       InvokeID of the request
  * \param[in]  problem_tag     Problem code tag (table 3.13)
@@ -47,7 +47,7 @@
  * failed, any incorrect value can be passed (0x00 > x > 0xff), so
  * the universal NULL-tag (see table 3.6) will be used instead.
  */
-int msc_send_ussd_reject(struct gsm_subscriber_connection *conn,
+int msc_send_ussd_reject(struct ran_conn *conn,
 			     uint8_t transaction_id, int invoke_id,
 			     uint8_t problem_tag, uint8_t problem_code)
 {
@@ -70,7 +70,7 @@ int msc_send_ussd_reject(struct gsm_subscriber_connection *conn,
 	return msc_tx_dtap(conn, msg);
 }
 
-int msc_send_ussd_notify(struct gsm_subscriber_connection *conn, int level, const char *text)
+int msc_send_ussd_notify(struct ran_conn *conn, int level, const char *text)
 {
 	struct msgb *msg = gsm0480_create_ussd_notify(level, text);
 	if (!msg)
@@ -78,7 +78,7 @@ int msc_send_ussd_notify(struct gsm_subscriber_connection *conn, int level, cons
 	return msc_tx_dtap(conn, msg);
 }
 
-int msc_send_ussd_release_complete(struct gsm_subscriber_connection *conn)
+int msc_send_ussd_release_complete(struct ran_conn *conn)
 {
 	struct msgb *msg = gsm0480_create_ussd_release_complete();
 	if (!msg)

@@ -60,7 +60,7 @@ struct gsm_network *gsm_network_init(void *ctx, mncc_recv_cb_t mncc_recv)
 
 	INIT_LLIST_HEAD(&net->trans_list);
 	INIT_LLIST_HEAD(&net->upqueue);
-	INIT_LLIST_HEAD(&net->subscr_conns);
+	INIT_LLIST_HEAD(&net->ran_conns);
 
 	/* init statistics */
 	net->msc_ctrs = rate_ctr_group_alloc(net, &msc_ctrg_desc, 0);
@@ -79,7 +79,7 @@ struct gsm_network *gsm_network_init(void *ctx, mncc_recv_cb_t mncc_recv)
 }
 
 /* Receive a SAPI-N-REJECT from BSC */
-void msc_sapi_n_reject(struct gsm_subscriber_connection *conn, int dlci)
+void msc_sapi_n_reject(struct ran_conn *conn, int dlci)
 {
 	int sapi = dlci & 0x7;
 
@@ -90,25 +90,25 @@ void msc_sapi_n_reject(struct gsm_subscriber_connection *conn, int dlci)
 /* receive a Level 3 Complete message.
  * Ownership of the conn is completely passed to the conn FSM, i.e. for both acceptance and rejection,
  * the conn FSM shall decide when to release this conn. It may already be discarded before this exits. */
-void msc_compl_l3(struct gsm_subscriber_connection *conn,
+void msc_compl_l3(struct ran_conn *conn,
 		  struct msgb *msg, uint16_t chosen_channel)
 {
-	msc_subscr_conn_get(conn, MSC_CONN_USE_COMPL_L3);
+	ran_conn_get(conn, MSC_CONN_USE_COMPL_L3);
 	gsm0408_dispatch(conn, msg);
-	msc_subscr_conn_put(conn, MSC_CONN_USE_COMPL_L3);
+	ran_conn_put(conn, MSC_CONN_USE_COMPL_L3);
 }
 
 /* Receive a DTAP message from BSC */
-void msc_dtap(struct gsm_subscriber_connection *conn, struct msgb *msg)
+void msc_dtap(struct ran_conn *conn, struct msgb *msg)
 {
-	msc_subscr_conn_get(conn, MSC_CONN_USE_DTAP);
+	ran_conn_get(conn, MSC_CONN_USE_DTAP);
 	gsm0408_dispatch(conn, msg);
 
-	msc_subscr_conn_put(conn, MSC_CONN_USE_DTAP);
+	ran_conn_put(conn, MSC_CONN_USE_DTAP);
 }
 
 /* Receive an ASSIGNMENT COMPLETE from BSC */
-void msc_assign_compl(struct gsm_subscriber_connection *conn,
+void msc_assign_compl(struct ran_conn *conn,
 		      uint8_t rr_cause, uint8_t chosen_channel,
 		      uint8_t encr_alg_id, uint8_t speec)
 {
@@ -116,14 +116,14 @@ void msc_assign_compl(struct gsm_subscriber_connection *conn,
 }
 
 /* Receive an ASSIGNMENT FAILURE from BSC */
-void msc_assign_fail(struct gsm_subscriber_connection *conn,
+void msc_assign_fail(struct ran_conn *conn,
 		     uint8_t cause, uint8_t *rr_cause)
 {
 	LOGP(DRR, LOGL_DEBUG, "MSC assign failure (do nothing).\n");
 }
 
 /* Receive a CLASSMARK CHANGE from BSC */
-void msc_classmark_chg(struct gsm_subscriber_connection *conn,
+void msc_classmark_chg(struct ran_conn *conn,
 		       const uint8_t *cm2, uint8_t cm2_len,
 		       const uint8_t *cm3, uint8_t cm3_len)
 {
@@ -154,12 +154,12 @@ void msc_classmark_chg(struct gsm_subscriber_connection *conn,
 	}
 
 	/* bump subscr conn FSM in case it is waiting for a Classmark Update */
-	if (conn->fi->state == SUBSCR_CONN_S_WAIT_CLASSMARK_UPDATE)
-		osmo_fsm_inst_dispatch(conn->fi, SUBSCR_CONN_E_CLASSMARK_UPDATE, NULL);
+	if (conn->fi->state == RAN_CONN_S_WAIT_CLASSMARK_UPDATE)
+		osmo_fsm_inst_dispatch(conn->fi, RAN_CONN_E_CLASSMARK_UPDATE, NULL);
 }
 
 /* Receive a CIPHERING MODE COMPLETE from BSC */
-void msc_cipher_mode_compl(struct gsm_subscriber_connection *conn,
+void msc_cipher_mode_compl(struct ran_conn *conn,
 			   struct msgb *msg, uint8_t alg_id)
 {
 	struct vlr_ciph_result ciph_res = { .cause = VLR_CIPH_REJECT };
@@ -207,13 +207,13 @@ void msc_cipher_mode_compl(struct gsm_subscriber_connection *conn,
 }
 
 /* Receive a CLEAR REQUEST from BSC */
-int msc_clear_request(struct gsm_subscriber_connection *conn, uint32_t cause)
+int msc_clear_request(struct ran_conn *conn, uint32_t cause)
 {
-	msc_subscr_conn_close(conn, cause);
+	ran_conn_close(conn, cause);
 	return 1;
 }
 
-static const char *used_ref_counts_str(struct gsm_subscriber_connection *conn)
+static const char *used_ref_counts_str(struct ran_conn *conn)
 {
 	static char buf[256];
 	int bit_nr;
@@ -237,7 +237,7 @@ static const char *used_ref_counts_str(struct gsm_subscriber_connection *conn)
 
 	for (bit_nr = 0; (1 << bit_nr) <= conn->use_tokens; bit_nr++) {
 		if (conn->use_tokens & (1 << bit_nr)) {
-			APPEND_STR("%s", get_value_string(msc_subscr_conn_use_names, bit_nr));
+			APPEND_STR("%s", get_value_string(ran_conn_use_names, bit_nr));
 		}
 	}
 	return buf;
@@ -245,10 +245,8 @@ static const char *used_ref_counts_str(struct gsm_subscriber_connection *conn)
 }
 
 /* increment the ref-count. Needs to be called by every user */
-struct gsm_subscriber_connection *
-_msc_subscr_conn_get(struct gsm_subscriber_connection *conn,
-		     enum msc_subscr_conn_use balance_token,
-		     const char *file, int line)
+struct ran_conn *_ran_conn_get(struct ran_conn *conn, enum ran_conn_use balance_token,
+			       const char *file, int line)
 {
 	OSMO_ASSERT(conn);
 
@@ -259,22 +257,22 @@ _msc_subscr_conn_get(struct gsm_subscriber_connection *conn,
 			LOGPSRC(DREF, LOGL_ERROR, file, line,
 				"%s: MSC conn use error: using an already used token: %s\n",
 				vlr_subscr_name(conn->vsub),
-				msc_subscr_conn_use_name(balance_token));
+				ran_conn_use_name(balance_token));
 		conn->use_tokens |= flag;
 	}
 
 	conn->use_count++;
 	LOGPSRC(DREF, LOGL_DEBUG, file, line,
 		"%s: MSC conn use + %s == %u (0x%x: %s)\n",
-		vlr_subscr_name(conn->vsub), msc_subscr_conn_use_name(balance_token),
+		vlr_subscr_name(conn->vsub), ran_conn_use_name(balance_token),
 		conn->use_count, conn->use_tokens, used_ref_counts_str(conn));
 
 	return conn;
 }
 
 /* decrement the ref-count. Once it reaches zero, we release */
-void _msc_subscr_conn_put(struct gsm_subscriber_connection *conn,
-			  enum msc_subscr_conn_use balance_token,
+void _ran_conn_put(struct ran_conn *conn,
+			  enum ran_conn_use balance_token,
 			  const char *file, int line)
 {
 	OSMO_ASSERT(conn);
@@ -286,7 +284,7 @@ void _msc_subscr_conn_put(struct gsm_subscriber_connection *conn,
 			LOGPSRC(DREF, LOGL_ERROR, file, line,
 				"%s: MSC conn use error: freeing an unused token: %s\n",
 				vlr_subscr_name(conn->vsub),
-				msc_subscr_conn_use_name(balance_token));
+				ran_conn_use_name(balance_token));
 		conn->use_tokens &= ~flag;
 	}
 
@@ -294,26 +292,26 @@ void _msc_subscr_conn_put(struct gsm_subscriber_connection *conn,
 		LOGPSRC(DREF, LOGL_ERROR, file, line,
 			"%s: MSC conn use - %s failed: is already 0\n",
 			vlr_subscr_name(conn->vsub),
-			msc_subscr_conn_use_name(balance_token));
+			ran_conn_use_name(balance_token));
 		return;
 	}
 
 	conn->use_count--;
 	LOGPSRC(DREF, LOGL_DEBUG, file, line,
 		"%s: MSC conn use - %s == %u (0x%x: %s)\n",
-		vlr_subscr_name(conn->vsub), msc_subscr_conn_use_name(balance_token),
+		vlr_subscr_name(conn->vsub), ran_conn_use_name(balance_token),
 		conn->use_count, conn->use_tokens, used_ref_counts_str(conn));
 
 	if (conn->use_count == 0)
-		osmo_fsm_inst_dispatch(conn->fi, SUBSCR_CONN_E_UNUSED, NULL);
+		osmo_fsm_inst_dispatch(conn->fi, RAN_CONN_E_UNUSED, NULL);
 }
 
-bool msc_subscr_conn_used_by(struct gsm_subscriber_connection *conn, enum msc_subscr_conn_use token)
+bool ran_conn_used_by(struct ran_conn *conn, enum ran_conn_use token)
 {
 	return conn && (conn->use_tokens & (1 << token));
 }
 
-const struct value_string msc_subscr_conn_use_names[] = {
+const struct value_string ran_conn_use_names[] = {
 	{MSC_CONN_USE_UNTRACKED,	"UNTRACKED"},
 	{MSC_CONN_USE_COMPL_L3,		"compl_l3"},
 	{MSC_CONN_USE_DTAP,		"dtap"},

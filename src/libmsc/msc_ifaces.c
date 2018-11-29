@@ -46,7 +46,7 @@ const struct value_string ran_type_names[] = {
 	{ 0, NULL }
 };
 
-static int msc_tx(struct gsm_subscriber_connection *conn, struct msgb *msg)
+static int msc_tx(struct ran_conn *conn, struct msgb *msg)
 {
 	if (!msg)
 		return -EINVAL;
@@ -77,7 +77,7 @@ static int msc_tx(struct gsm_subscriber_connection *conn, struct msgb *msg)
 }
 
 
-int msc_tx_dtap(struct gsm_subscriber_connection *conn,
+int msc_tx_dtap(struct ran_conn *conn,
 		struct msgb *msg)
 {
 	return msc_tx(conn, msg);
@@ -85,7 +85,7 @@ int msc_tx_dtap(struct gsm_subscriber_connection *conn,
 
 
 /* 9.2.5 CM service accept */
-int msc_gsm48_tx_mm_serv_ack(struct gsm_subscriber_connection *conn)
+int msc_gsm48_tx_mm_serv_ack(struct ran_conn *conn)
 {
 	struct msgb *msg;
 	struct gsm48_hdr *gh;
@@ -106,7 +106,7 @@ int msc_gsm48_tx_mm_serv_ack(struct gsm_subscriber_connection *conn)
 }
 
 /* 9.2.6 CM service reject */
-int msc_gsm48_tx_mm_serv_rej(struct gsm_subscriber_connection *conn,
+int msc_gsm48_tx_mm_serv_rej(struct ran_conn *conn,
 			     enum gsm48_reject_value value)
 {
 	struct msgb *msg;
@@ -125,7 +125,7 @@ int msc_gsm48_tx_mm_serv_rej(struct gsm_subscriber_connection *conn,
 	return msc_tx_dtap(conn, msg);
 }
 
-int msc_tx_common_id(struct gsm_subscriber_connection *conn)
+int msc_tx_common_id(struct ran_conn *conn)
 {
 	if (!conn)
 		return -EINVAL;

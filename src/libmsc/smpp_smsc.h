@@ -158,10 +158,10 @@ int smpp_determine_scheme(uint8_t dcs, uint8_t *data_coding, int *mode);
 
 
 struct gsm_sms;
-struct gsm_subscriber_connection;
+struct ran_conn;
 
 int smpp_route_smpp_first(struct gsm_sms *sms,
-			    struct gsm_subscriber_connection *conn);
+			    struct ran_conn *conn);
 int smpp_try_deliver(struct gsm_sms *sms,
-		     struct gsm_subscriber_connection *conn);
+		     struct ran_conn *conn);
 #endif

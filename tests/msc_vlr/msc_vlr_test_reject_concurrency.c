@@ -25,7 +25,7 @@
 
 static void test_reject_2nd_conn()
 {
-	struct gsm_subscriber_connection *conn1;
+	struct ran_conn *conn1;
 	comment_start();
 
 	btw("Location Update Request on one connection");

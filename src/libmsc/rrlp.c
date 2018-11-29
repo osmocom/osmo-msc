@@ -58,7 +58,7 @@ const char *msc_rrlp_mode_name(enum rrlp_mode mode)
 	return get_value_string(rrlp_mode_names, mode);
 }
 
-static int send_rrlp_req(struct gsm_subscriber_connection *conn)
+static int send_rrlp_req(struct ran_conn *conn)
 {
 	struct gsm_network *net = conn->network;
 	const uint8_t *req;
@@ -89,7 +89,7 @@ static int subscr_sig_cb(unsigned int subsys, unsigned int signal,
 			 void *handler_data, void *signal_data)
 {
 	struct vlr_subscr *vsub;
-	struct gsm_subscriber_connection *conn;
+	struct ran_conn *conn;
 
 	switch (signal) {
 	case S_SUBSCR_ATTACHED:

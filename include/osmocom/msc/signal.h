@@ -83,11 +83,11 @@ struct paging_signal_data {
 	int paging_result;
 
 	/* NULL in case the paging didn't work */
-	struct gsm_subscriber_connection *conn;
+	struct ran_conn *conn;
 };
 
 struct scall_signal_data {
-	struct gsm_subscriber_connection *conn;
+	struct ran_conn *conn;
 	void *data;
 };
 struct sms_signal_data {

@@ -25,8 +25,8 @@
 
 /* MGCP state handler context. This context information stores all information
  * to handle the direction of the RTP streams via MGCP. There is one instance
- * of this context struct per subscriber connection.
- * (see also struct gsm_subscriber_connection) */
+ * of this context struct per RAN connection.
+ * (see also struct ran_conn) */
 struct mgcp_ctx {
 	/* FSM instance, which handles the connection switching procedure */
 	struct osmo_fsm_inst *fsm;
@@ -56,6 +56,6 @@ struct mgcp_ctx {
 };
 
 int msc_mgcp_call_assignment(struct gsm_trans *trans);
-int msc_mgcp_ass_complete(struct gsm_subscriber_connection *conn, uint16_t port, char *addr);
+int msc_mgcp_ass_complete(struct ran_conn *conn, uint16_t port, char *addr);
 int msc_mgcp_call_complete(struct gsm_trans *trans, uint16_t port, char *addr);
 int msc_mgcp_call_release(struct gsm_trans *trans);

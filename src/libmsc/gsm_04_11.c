@@ -120,7 +120,7 @@ static void send_signal(int sig_no,
 	osmo_signal_dispatch(SS_SMS, sig_no, &sig);
 }
 
-static int gsm411_sendmsg(struct gsm_subscriber_connection *conn, struct msgb *msg)
+static int gsm411_sendmsg(struct ran_conn *conn, struct msgb *msg)
 {
 	DEBUGP(DLSMS, "GSM4.11 TX %s\n", msgb_hexdump(msg));
 	msg->l3h = msg->data;
@@ -131,7 +131,7 @@ static int gsm411_sendmsg(struct gsm_subscriber_connection *conn, struct msgb *m
 static int paging_cb_mmsms_est_req(unsigned int hooknum, unsigned int event,
 				   struct msgb *msg, void *_conn, void *_trans)
 {
-	struct gsm_subscriber_connection *conn = _conn;
+	struct ran_conn *conn = _conn;
 	struct gsm_trans *trans = _trans;
 	struct gsm_sms *sms = trans->sms.sms;
 	int rc = 0;
@@ -148,7 +148,7 @@ static int paging_cb_mmsms_est_req(unsigned int hooknum, unsigned int event,
 	switch (event) {
 	case GSM_PAGING_SUCCEEDED:
 		/* Associate transaction with established connection */
-		trans->conn = msc_subscr_conn_get(conn, MSC_CONN_USE_TRANS_SMS);
+		trans->conn = ran_conn_get(conn, MSC_CONN_USE_TRANS_SMS);
 		/* Confirm successful connection establishment */
 		gsm411_smc_recv(&trans->sms.smc_inst,
 			GSM411_MMSMS_EST_CNF, NULL, 0);
@@ -404,7 +404,7 @@ static int gsm340_gen_sms_status_report_tpdu(struct msgb *msg,
 	return msg->len - old_msg_len;
 }
 
-static int sms_route_mt_sms(struct gsm_subscriber_connection *conn,
+static int sms_route_mt_sms(struct ran_conn *conn,
 			    struct gsm_sms *gsms)
 {
 	int rc;
@@ -475,7 +475,7 @@ try_local:
 static int gsm340_rx_tpdu(struct gsm_trans *trans, struct msgb *msg,
 			  uint32_t gsm411_msg_ref)
 {
-	struct gsm_subscriber_connection *conn = trans->conn;
+	struct ran_conn *conn = trans->conn;
 	uint8_t *smsp = msgb_sms(msg);
 	struct gsm_sms *gsms;
 	unsigned int sms_alphabet;
@@ -753,7 +753,7 @@ static struct gsm_sms *sms_report_alloc(struct gsm_sms *sms)
 }
 
 static void sms_status_report(struct gsm_sms *gsms,
-			      struct gsm_subscriber_connection *conn)
+			      struct ran_conn *conn)
 {
 	struct gsm_sms *sms_report;
 	int rc;
@@ -980,7 +980,7 @@ static int gsm411_mn_recv(struct gsm411_smc_inst *inst, int msg_type,
 static struct gsm_trans *gsm411_alloc_mt_trans(struct gsm_network *net,
 					       struct vlr_subscr *vsub)
 {
-	struct gsm_subscriber_connection *conn;
+	struct ran_conn *conn;
 	struct gsm_trans *trans;
 	int tid;
 
@@ -1010,7 +1010,7 @@ static struct gsm_trans *gsm411_alloc_mt_trans(struct gsm_network *net,
 	conn = connection_for_subscr(vsub);
 	if (conn) {
 		/* Associate transaction with connection */
-		trans->conn = msc_subscr_conn_get(conn, MSC_CONN_USE_TRANS_SMS);
+		trans->conn = ran_conn_get(conn, MSC_CONN_USE_TRANS_SMS);
 		/* Generate unique RP Message Reference */
 		trans->sms.sm_rp_mr = conn->next_rp_ref++;
 	}
@@ -1095,7 +1095,7 @@ int gsm411_send_sms(struct gsm_network *net,
 }
 
 /* Entry point for incoming GSM48_PDISC_SMS from abis_rsl.c */
-int gsm0411_rcv_sms(struct gsm_subscriber_connection *conn,
+int gsm0411_rcv_sms(struct ran_conn *conn,
 		    struct msgb *msg)
 {
 	struct gsm48_hdr *gh = msgb_l3(msg);
@@ -1140,7 +1140,7 @@ int gsm0411_rcv_sms(struct gsm_subscriber_connection *conn,
 		gsm411_smr_init(&trans->sms.smr_inst, 0, 1,
 			gsm411_rl_recv, gsm411_mn_send);
 
-		trans->conn = msc_subscr_conn_get(conn, MSC_CONN_USE_TRANS_SMS);
+		trans->conn = ran_conn_get(conn, MSC_CONN_USE_TRANS_SMS);
 		trans->dlci = OMSC_LINKID_CB(msg); /* DLCI as received from BSC */
 
 		new_trans = 1;
@@ -1171,7 +1171,7 @@ int gsm0411_rcv_sms(struct gsm_subscriber_connection *conn,
 		}
 	}
 
-	msc_subscr_conn_communicating(conn);
+	ran_conn_communicating(conn);
 
 	gsm411_smc_recv(&trans->sms.smc_inst,
 		(new_trans) ? GSM411_MMSMS_EST_IND : GSM411_MMSMS_DATA_IND,
@@ -1200,7 +1200,7 @@ void _gsm411_sms_trans_free(struct gsm_trans *trans)
 }
 
 /* Process incoming SAPI N-REJECT from BSC */
-void gsm411_sapi_n_reject(struct gsm_subscriber_connection *conn)
+void gsm411_sapi_n_reject(struct ran_conn *conn)
 {
 	struct gsm_network *net;
 	struct gsm_trans *trans, *tmp;

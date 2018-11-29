@@ -90,11 +90,11 @@ static inline const char *complete_layer3_type_name(enum complete_layer3_type va
 }
 
 /* active radio connection of a mobile subscriber */
-struct gsm_subscriber_connection {
-	/* global linked list of subscriber_connections */
+struct ran_conn {
+	/* global linked list of ran_conn instances */
 	struct llist_head entry;
 
-	/* FSM instance to control the subscriber connection's permissions and lifetime. */
+	/* FSM instance to control the RAN connection's permissions and lifetime. */
 	struct osmo_fsm_inst *fi;
 	enum complete_layer3_type complete_layer3_type;
 
@@ -168,12 +168,12 @@ struct gsm_subscriber_connection {
 		struct osmo_sccp_user *scu;
 
 		/* The address of the BSC that is associated
-		 * with this subscriber connection */
+		 * with this RAN connection */
 		struct osmo_sccp_addr bsc_addr;
 
 		/* The connection identifier that is used
 		 * to reference the SCCP connection that is
-		 * associated with this subscriber connection */
+		 * associated with this RAN connection */
 		uint32_t conn_id;
 
 		bool waiting_for_clear_complete;
@@ -293,9 +293,9 @@ struct gsm_network {
 	mncc_recv_cb_t mncc_recv;
 	struct llist_head upqueue;
 	/*
-	 * TODO: Move the trans_list into the subscriber connection and
+	 * TODO: Move the trans_list into the RAN connection and
 	 * create a pending list for MT transactions. These exist before
-	 * we have a subscriber connection.
+	 * we have a RAN connection.
 	 */
 	struct llist_head trans_list;
 
@@ -311,8 +311,8 @@ struct gsm_network {
 	/* control interface */
 	struct ctrl_handle *ctrl;
 
-	/* all active subscriber connections. */
-	struct llist_head subscr_conns;
+	/* all active RAN connections. */
+	struct llist_head ran_conns;
 
 	/* if override is nonzero, this timezone data is used for all MM
 	 * contexts. */

@@ -45,16 +45,16 @@
  * Helper functions to lookup and allocate subscribers
  */
 
-/* Allocate a new subscriber connection */
-static struct gsm_subscriber_connection *subscr_conn_allocate_a(const struct a_conn_info *a_conn_info,
+/* Allocate a new RAN connection */
+static struct ran_conn *ran_conn_allocate_a(const struct a_conn_info *a_conn_info,
 								struct gsm_network *network,
 								uint16_t lac, struct osmo_sccp_user *scu, int conn_id)
 {
-	struct gsm_subscriber_connection *conn;
+	struct ran_conn *conn;
 
-	LOGP(DMSC, LOGL_DEBUG, "Allocating A-Interface subscriber conn: lac %i, conn_id %i\n", lac, conn_id);
+	LOGP(DMSC, LOGL_DEBUG, "Allocating A-Interface RAN conn: lac %i, conn_id %i\n", lac, conn_id);
 
-	conn = msc_subscr_conn_alloc(network, RAN_GERAN_A, lac);
+	conn = ran_conn_alloc(network, RAN_GERAN_A, lac);
 	if (!conn)
 		return NULL;
 
@@ -62,18 +62,18 @@ static struct gsm_subscriber_connection *subscr_conn_allocate_a(const struct a_c
 	conn->a.scu = scu;
 
 	/* Also backup the calling address of the BSC, this allows us to
-	 * identify later which BSC is responsible for this subscriber connection */
+	 * identify later which BSC is responsible for this RAN connection */
 	memcpy(&conn->a.bsc_addr, &a_conn_info->bsc->bsc_addr, sizeof(conn->a.bsc_addr));
 
-	LOGPCONN(conn, LOGL_DEBUG, "A-Interface subscriber connection successfully allocated!\n");
+	LOGPCONN(conn, LOGL_DEBUG, "A-Interface RAN connection successfully allocated!\n");
 	return conn;
 }
 
-/* Return an existing A subscriber connection record for the given
+/* Return an existing A RAN connection record for the given
  * connection IDs, or return NULL if not found. */
-static struct gsm_subscriber_connection *subscr_conn_lookup_a(const struct gsm_network *network, int conn_id)
+static struct ran_conn *ran_conn_lookup_a(const struct gsm_network *network, int conn_id)
 {
-	struct gsm_subscriber_connection *conn;
+	struct ran_conn *conn;
 
 	OSMO_ASSERT(network);
 
@@ -83,7 +83,7 @@ static struct gsm_subscriber_connection *subscr_conn_lookup_a(const struct gsm_n
 	 * maybe this function should be public to reach it from here? */
 	/* log_subscribers(network); */
 
-	llist_for_each_entry(conn, &network->subscr_conns, entry) {
+	llist_for_each_entry(conn, &network->ran_conns, entry) {
 		if (conn->via_ran == RAN_GERAN_A && conn->a.conn_id == conn_id) {
 			LOGPCONN(conn, LOGL_DEBUG, "Found A subscriber for conn_id %i\n", conn_id);
 			return conn;
@@ -111,7 +111,7 @@ static void bssmap_rx_reset(struct osmo_sccp_user *scu, const struct a_conn_info
 	osmo_sccp_tx_unitdata_msg(scu, &a_conn_info->bsc->msc_addr, &a_conn_info->bsc->bsc_addr,
 				  gsm0808_create_reset_ack());
 
-	/* Make sure all orphand subscriber connections will be cleard */
+	/* Make sure all orphand RAN connections will be cleard */
 	a_clear_all(scu, &a_conn_info->bsc->bsc_addr);
 
 	if (!a_conn_info->bsc->reset_fsm)
@@ -213,7 +213,7 @@ void a_sccp_rx_udt(struct osmo_sccp_user *scu, const struct a_conn_info *a_conn_
  */
 
 /* Endpoint to handle BSSMAP clear request */
-static int bssmap_rx_clear_rqst(struct gsm_subscriber_connection *conn,
+static int bssmap_rx_clear_rqst(struct ran_conn *conn,
 				struct msgb *msg, struct tlv_parsed *tp)
 {
 	uint8_t cause;
@@ -226,7 +226,7 @@ static int bssmap_rx_clear_rqst(struct gsm_subscriber_connection *conn,
 	}
 	cause = TLVP_VAL(tp, GSM0808_IE_CAUSE)[0];
 
-	msc_subscr_conn_mo_close(conn, cause);
+	ran_conn_mo_close(conn, cause);
 
 	return 0;
 }
@@ -234,14 +234,14 @@ static int bssmap_rx_clear_rqst(struct gsm_subscriber_connection *conn,
 /* Endpoint to handle BSSMAP clear complete */
 static int bssmap_rx_clear_complete(struct osmo_sccp_user *scu,
 				    const struct a_conn_info *a_conn_info,
-				    struct gsm_subscriber_connection *conn)
+				    struct ran_conn *conn)
 {
 	int rc;
 
 	LOGPCONN(conn, LOGL_INFO, "Rx BSSMAP CLEAR COMPLETE, releasing SCCP connection\n");
 
 	if (conn)
-		msc_subscr_conn_rx_bssmap_clear_complete(conn);
+		ran_conn_rx_bssmap_clear_complete(conn);
 
 	rc = osmo_sccp_tx_disconn(scu, a_conn_info->conn_id,
 				  NULL, SCCP_RELEASE_CAUSE_END_USER_ORIGINATED);
@@ -261,7 +261,7 @@ static int bssmap_rx_l3_compl(struct osmo_sccp_user *scu, const struct a_conn_in
 	uint8_t data_length;
 	const uint8_t *data;
 	struct gsm_network *network = a_conn_info->network;
-	struct gsm_subscriber_connection *conn;
+	struct ran_conn *conn;
 
 	LOGP(DBSSAP, LOGL_INFO, "Rx BSSMAP COMPLETE L3 INFO (conn_id=%i)\n", a_conn_info->conn_id);
 
@@ -340,7 +340,7 @@ static int bssmap_rx_l3_compl(struct osmo_sccp_user *scu, const struct a_conn_in
 	}
 
 	/* Create new subscriber context */
-	conn = subscr_conn_allocate_a(a_conn_info, network, lac, scu, a_conn_info->conn_id);
+	conn = ran_conn_allocate_a(a_conn_info, network, lac, scu, a_conn_info->conn_id);
 
 	/* Handover location update to the MSC code */
 	msc_compl_l3(conn, msg, 0);
@@ -348,7 +348,7 @@ static int bssmap_rx_l3_compl(struct osmo_sccp_user *scu, const struct a_conn_in
 }
 
 /* Endpoint to handle BSSMAP classmark update */
-static int bssmap_rx_classmark_upd(struct gsm_subscriber_connection *conn, struct msgb *msg,
+static int bssmap_rx_classmark_upd(struct ran_conn *conn, struct msgb *msg,
 				   struct tlv_parsed *tp)
 {
 	const uint8_t *cm2 = NULL;
@@ -378,7 +378,7 @@ static int bssmap_rx_classmark_upd(struct gsm_subscriber_connection *conn, struc
 }
 
 /* Endpoint to handle BSSMAP cipher mode complete */
-static int bssmap_rx_ciph_compl(struct gsm_subscriber_connection *conn, struct msgb *msg,
+static int bssmap_rx_ciph_compl(struct ran_conn *conn, struct msgb *msg,
 				struct tlv_parsed *tp)
 {
 	/* FIXME: The field GSM0808_IE_LAYER_3_MESSAGE_CONTENTS is optional by
@@ -413,7 +413,7 @@ static int bssmap_rx_ciph_compl(struct gsm_subscriber_connection *conn, struct m
 }
 
 /* Endpoint to handle BSSMAP cipher mode reject, 3GPP TS 08.08 §3.2.1.48 */
-static int bssmap_rx_ciph_rej(struct gsm_subscriber_connection *conn,
+static int bssmap_rx_ciph_rej(struct ran_conn *conn,
 			      struct msgb *msg, struct tlv_parsed *tp)
 {
 	int rc;
@@ -440,7 +440,7 @@ static int bssmap_rx_ciph_rej(struct gsm_subscriber_connection *conn,
 }
 
 /* Endpoint to handle BSSMAP assignment failure */
-static int bssmap_rx_ass_fail(struct gsm_subscriber_connection *conn, struct msgb *msg,
+static int bssmap_rx_ass_fail(struct ran_conn *conn, struct msgb *msg,
 			      struct tlv_parsed *tp)
 {
 	uint8_t cause;
@@ -473,7 +473,7 @@ static int bssmap_rx_ass_fail(struct gsm_subscriber_connection *conn, struct msg
 }
 
 /* Endpoint to handle sapi "n" reject */
-static int bssmap_rx_sapi_n_rej(struct gsm_subscriber_connection *conn, struct msgb *msg,
+static int bssmap_rx_sapi_n_rej(struct ran_conn *conn, struct msgb *msg,
 				struct tlv_parsed *tp)
 {
 	uint8_t dlci;
@@ -538,7 +538,7 @@ static enum mgcp_codecs mgcp_codec_from_sc(struct gsm0808_speech_codec *sc)
 }
 
 /* Endpoint to handle assignment complete */
-static int bssmap_rx_ass_compl(struct gsm_subscriber_connection *conn, struct msgb *msg,
+static int bssmap_rx_ass_compl(struct ran_conn *conn, struct msgb *msg,
 			       struct tlv_parsed *tp)
 {
 	struct sockaddr_storage rtp_addr;
@@ -590,7 +590,7 @@ static int bssmap_rx_ass_compl(struct gsm_subscriber_connection *conn, struct ms
 /* Handle incoming connection oriented BSSMAP messages */
 static int rx_bssmap(struct osmo_sccp_user *scu, const struct a_conn_info *a_conn_info, struct msgb *msg)
 {
-	struct gsm_subscriber_connection *conn;
+	struct ran_conn *conn;
 	struct tlv_parsed tp;
 	int rc;
 	uint8_t msg_type;
@@ -616,11 +616,11 @@ static int rx_bssmap(struct osmo_sccp_user *scu, const struct a_conn_info *a_con
 		break;
 	}
 
-	conn = subscr_conn_lookup_a(a_conn_info->network, a_conn_info->conn_id);
+	conn = ran_conn_lookup_a(a_conn_info->network, a_conn_info->conn_id);
 	if (!conn) {
-		LOGP(DBSSAP, LOGL_ERROR, "Couldn't find subscr_conn for conn_id=%d\n", a_conn_info->conn_id);
+		LOGP(DBSSAP, LOGL_ERROR, "Couldn't find ran_conn for conn_id=%d\n", a_conn_info->conn_id);
 		/* We expect a Clear Complete to come in on a valid conn. But if for some reason we still
-		 * have the SCCP connection while the subscriber connection data is already gone, at
+		 * have the SCCP connection while the RAN connection data is already gone, at
 		 * least close the SCCP conn. */
 
 		if (msg_type == BSS_MAP_MSG_CLEAR_COMPLETE)
@@ -660,10 +660,10 @@ static int rx_bssmap(struct osmo_sccp_user *scu, const struct a_conn_info *a_con
 static int rx_dtap(const struct osmo_sccp_user *scu, const struct a_conn_info *a_conn_info, struct msgb *msg)
 {
 	struct gsm_network *network = a_conn_info->network;
-	struct gsm_subscriber_connection *conn;
+	struct ran_conn *conn;
 	struct dtap_header *dtap = (struct dtap_header *) msg->l2h;
 
-	conn = subscr_conn_lookup_a(network, a_conn_info->conn_id);
+	conn = ran_conn_lookup_a(network, a_conn_info->conn_id);
 	if (!conn) {
 		return -EINVAL;
 	}

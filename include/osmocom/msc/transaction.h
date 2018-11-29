@@ -38,7 +38,7 @@ struct gsm_trans {
 	struct vlr_subscr *vsub;
 
 	/* The associated connection we are using to transmit messages */
-	struct gsm_subscriber_connection *conn;
+	struct ran_conn *conn;
 
 	/* reference from MNCC or other application */
 	uint32_t callref;
@@ -98,11 +98,11 @@ struct gsm_trans {
 
 
 
-struct gsm_trans *trans_find_by_id(struct gsm_subscriber_connection *conn,
+struct gsm_trans *trans_find_by_id(struct ran_conn *conn,
 				   uint8_t proto, uint8_t trans_id);
 struct gsm_trans *trans_find_by_callref(struct gsm_network *net,
 					uint32_t callref);
-struct gsm_trans *trans_find_by_sm_rp_mr(struct gsm_subscriber_connection *conn,
+struct gsm_trans *trans_find_by_sm_rp_mr(struct ran_conn *conn,
 					 uint8_t sm_rp_mr);
 
 struct gsm_trans *trans_alloc(struct gsm_network *net,
@@ -113,7 +113,7 @@ void trans_free(struct gsm_trans *trans);
 
 int trans_assign_trans_id(struct gsm_network *net, struct vlr_subscr *vsub,
 			  uint8_t protocol, uint8_t ti_flag);
-struct gsm_trans *trans_has_conn(const struct gsm_subscriber_connection *conn);
-void trans_conn_closed(struct gsm_subscriber_connection *conn);
+struct gsm_trans *trans_has_conn(const struct ran_conn *conn);
+void trans_conn_closed(struct ran_conn *conn);
 
 #endif

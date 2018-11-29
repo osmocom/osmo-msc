@@ -1168,7 +1168,7 @@ int vlr_subscr_rx_imsi_detach(struct vlr_subscr *vsub)
  * message before the entire connection is torn down.
  * \param[in] vsub  subscriber to tear down
  */
-void vlr_subscr_conn_timeout(struct vlr_subscr *vsub)
+void vlr_ran_conn_timeout(struct vlr_subscr *vsub)
 {
 	vlr_subscr_cancel_attach_fsm(vsub, OSMO_FSM_TERM_TIMEOUT, GSM48_REJECT_CONGESTION);
 }

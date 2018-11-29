@@ -53,7 +53,7 @@
 static uint32_t new_callref = 0x20000001;
 
 /* Entry point for call independent MO SS messages */
-int gsm0911_rcv_nc_ss(struct gsm_subscriber_connection *conn, struct msgb *msg)
+int gsm0911_rcv_nc_ss(struct ran_conn *conn, struct msgb *msg)
 {
 	struct gsm48_hdr *gh = msgb_l3(msg);
 	struct osmo_gsup_message gsup_msg;
@@ -113,7 +113,7 @@ int gsm0911_rcv_nc_ss(struct gsm_subscriber_connection *conn, struct msgb *msg)
 		/* Count active NC SS/USSD sessions */
 		osmo_counter_inc(conn->network->active_nc_ss);
 
-		trans->conn = msc_subscr_conn_get(conn, MSC_CONN_USE_TRANS_NC_SS);
+		trans->conn = ran_conn_get(conn, MSC_CONN_USE_TRANS_NC_SS);
 		trans->dlci = OMSC_LINKID_CB(msg);
 		cm_service_request_concludes(conn, msg);
 	}
@@ -193,7 +193,7 @@ int gsm0911_rcv_nc_ss(struct gsm_subscriber_connection *conn, struct msgb *msg)
 	if (msg_type == GSM0480_MTYPE_RELEASE_COMPLETE)
 		trans_free(trans);
 	else
-		msc_subscr_conn_communicating(conn);
+		ran_conn_communicating(conn);
 
 	/* Count established MS-initiated NC SS/USSD sessions */
 	if (msg_type == GSM0480_MTYPE_REGISTER)
@@ -217,7 +217,7 @@ error:
 static int handle_paging_event(unsigned int hooknum, unsigned int event,
 			      struct msgb *msg, void *_conn, void *_transt)
 {
-	struct gsm_subscriber_connection *conn = _conn;
+	struct ran_conn *conn = _conn;
 	enum gsm_paging_event paging_event = event;
 	struct gsm_trans *transt = _transt;
 	struct gsm48_hdr *gh;
@@ -232,7 +232,7 @@ static int handle_paging_event(unsigned int hooknum, unsigned int event,
 			vlr_subscr_msisdn_or_name(transt->vsub));
 
 		/* Assign connection */
-		transt->conn = msc_subscr_conn_get(conn, MSC_CONN_USE_TRANS_NC_SS);
+		transt->conn = ran_conn_get(conn, MSC_CONN_USE_TRANS_NC_SS);
 		transt->paging_request = NULL;
 
 		/* Send stored message */
@@ -272,7 +272,7 @@ static int handle_paging_event(unsigned int hooknum, unsigned int event,
 static struct gsm_trans *establish_nc_ss_trans(struct gsm_network *net,
 	struct vlr_subscr *vsub, struct osmo_gsup_message *gsup_msg)
 {
-	struct gsm_subscriber_connection *conn;
+	struct ran_conn *conn;
 	struct gsm_trans *trans, *transt;
 	int tid;
 
@@ -324,7 +324,7 @@ static struct gsm_trans *establish_nc_ss_trans(struct gsm_network *net,
 	conn = connection_for_subscr(vsub);
 	if (conn) {
 		/* Assign connection */
-		trans->conn = msc_subscr_conn_get(conn, MSC_CONN_USE_TRANS_NC_SS);
+		trans->conn = ran_conn_get(conn, MSC_CONN_USE_TRANS_NC_SS);
 		trans->dlci = 0x00; /* SAPI=0, not SACCH */
 		return trans;
 	}

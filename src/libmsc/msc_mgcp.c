@@ -280,7 +280,7 @@ static void fsm_crcx_ran_cb(struct osmo_fsm_inst *fi, uint32_t event, void *data
 	struct msgb *msg;
 	int rc;
 	struct gsm_trans *trans;
-	struct gsm_subscriber_connection *conn;
+	struct ran_conn *conn;
 
 	OSMO_ASSERT(mgcp_ctx);
 	mgcp = mgcp_ctx->mgcp;
@@ -338,7 +338,7 @@ static void mgw_crcx_ran_resp_cb(struct mgcp_response *r, void *priv)
 	struct mgcp_ctx *mgcp_ctx = priv;
 	int rc;
 	struct gsm_trans *trans;
-	struct gsm_subscriber_connection *conn;
+	struct ran_conn *conn;
 
 	/* NOTE: In case of error, we will not be able to perform any DLCX
 	 * operation because until we either get a parseable message that
@@ -393,7 +393,7 @@ static void fsm_crcx_cn_cb(struct osmo_fsm_inst *fi, uint32_t event, void *data)
 	struct msgb *msg;
 	int rc;
 	struct gsm_trans *trans;
-	struct gsm_subscriber_connection *conn;
+	struct ran_conn *conn;
 
 	OSMO_ASSERT(mgcp_ctx);
 	mgcp = mgcp_ctx->mgcp;
@@ -447,7 +447,7 @@ static void mgw_crcx_cn_resp_cb(struct mgcp_response *r, void *priv)
 	struct mgcp_ctx *mgcp_ctx = priv;
 	int rc;
 	struct gsm_trans *trans;
-	struct gsm_subscriber_connection *conn;
+	struct ran_conn *conn;
 
 	OSMO_ASSERT(mgcp_ctx);
 	trans = mgcp_ctx->trans;
@@ -487,7 +487,7 @@ static void fsm_crcx_compl(struct osmo_fsm_inst *fi, uint32_t event, void *data)
 {
 	struct mgcp_ctx *mgcp_ctx = data;
 	struct gsm_trans *trans;
-	struct gsm_subscriber_connection *conn;
+	struct ran_conn *conn;
 
 	OSMO_ASSERT(mgcp_ctx);
 	trans = mgcp_ctx->trans;
@@ -548,7 +548,7 @@ static void fsm_mdcx_cn_cb(struct osmo_fsm_inst *fi, uint32_t event, void *data)
 	struct mgcp_ctx *mgcp_ctx = data;
 	struct mgcp_client *mgcp;
 	struct gsm_trans *trans;
-	struct gsm_subscriber_connection *conn;
+	struct ran_conn *conn;
 	struct mgcp_msg mgcp_msg;
 	struct msgb *msg;
 	int rc;
@@ -631,7 +631,7 @@ static void mgw_mdcx_cn_resp_cb(struct mgcp_response *r, void *priv)
 static void fsm_mdcx_cn_compl_cb(struct osmo_fsm_inst *fi, uint32_t event, void *data)
 {
 	struct mgcp_ctx *mgcp_ctx = data;
-	struct gsm_subscriber_connection *conn;
+	struct ran_conn *conn;
 	struct gsm_trans *trans;
 
 	OSMO_ASSERT(mgcp_ctx);
@@ -667,7 +667,7 @@ static void fsm_mdcx_ran_cb(struct osmo_fsm_inst *fi, uint32_t event, void *data
 	struct mgcp_ctx *mgcp_ctx = data;
 	struct mgcp_client *mgcp;
 	struct gsm_trans *trans;
-	struct gsm_subscriber_connection *conn;
+	struct ran_conn *conn;
 	struct mgcp_msg mgcp_msg;
 	struct msgb *msg;
 	int rc;
@@ -959,7 +959,7 @@ int msc_mgcp_call_assignment(struct gsm_trans *trans)
 	struct mgcp_ctx *mgcp_ctx;
 	char name[32];
 	static bool fsm_registered = false;
-	struct gsm_subscriber_connection *conn;
+	struct ran_conn *conn;
 	struct mgcp_client *mgcp;
 
 	OSMO_ASSERT(trans);
@@ -1027,11 +1027,11 @@ int msc_mgcp_call_assignment(struct gsm_trans *trans)
 
 /* Inform the FSM that the assignment (RAN connection) is now complete.
  * Parameter:
- * conn: subscriber connection context.
+ * conn: RAN connection context.
  * port: port number of the remote leg.
  * addr: IP-address of the remote leg.
  * Returns -EINVAL on error, 0 on success. */
-int msc_mgcp_ass_complete(struct gsm_subscriber_connection *conn, uint16_t port, char *addr)
+int msc_mgcp_ass_complete(struct ran_conn *conn, uint16_t port, char *addr)
 {
 	struct mgcp_ctx *mgcp_ctx;
 
@@ -1081,7 +1081,7 @@ int msc_mgcp_ass_complete(struct gsm_subscriber_connection *conn, uint16_t port,
 int msc_mgcp_call_complete(struct gsm_trans *trans, uint16_t port, char *addr)
 {
 	struct mgcp_ctx *mgcp_ctx;
-	struct gsm_subscriber_connection *conn;
+	struct ran_conn *conn;
 
 	OSMO_ASSERT(trans);
 	OSMO_ASSERT(addr);
