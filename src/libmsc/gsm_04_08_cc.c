@@ -1723,8 +1723,6 @@ static int tch_rtp_create(struct gsm_network *net, uint32_t callref)
 		return 0;
 	}
 
-	trans->conn->mncc_rtp_bridge = 1;
-
 	/* When we call msc_mgcp_call_assignment() we will trigger, depending
 	 * on the RAN type the call assignment on the A or Iu interface.
 	 * msc_mgcp_call_assignment() also takes care about sending the CRCX

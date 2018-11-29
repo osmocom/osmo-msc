@@ -118,9 +118,6 @@ struct gsm_subscriber_connection {
 	/* Are we part of a special "silent" call */
 	int silent_call;
 
-	/* MNCC rtp bridge markers */
-	int mncc_rtp_bridge;
-
 	/* back pointers */
 	struct gsm_network *network;
 
