@@ -10,25 +10,6 @@
 
 struct ran_conn;
 
-#define GSM_MIN_EXTEN 20000
-#define GSM_MAX_EXTEN 49999
-
-#define GSM_SUBSCRIBER_FIRST_CONTACT	0x00000001
-/* gprs_sgsn.h defines additional flags including and above bit 16 (0x10000) */
-
-enum gsm_subscriber_field {
-	GSM_SUBSCRIBER_IMSI,
-	GSM_SUBSCRIBER_TMSI,
-	GSM_SUBSCRIBER_EXTENSION,
-	GSM_SUBSCRIBER_ID,
-};
-
-enum gsm_subscriber_update_reason {
-	GSM_SUBSCRIBER_UPDATE_ATTACHED,
-	GSM_SUBSCRIBER_UPDATE_DETACHED,
-	GSM_SUBSCRIBER_UPDATE_EQUIPMENT,
-};
-
 /*
  * Struct for pending channel requests. This is managed in the
  * llist_head requests of each subscriber. The reference counting
@@ -46,8 +27,6 @@ struct subscr_request {
        void *param;
 };
 
-int subscr_update(struct vlr_subscr *vsub, int reason);
-
 /*
  * Paging handling with authentication
  */
@@ -56,8 +35,6 @@ struct subscr_request *subscr_request_conn(struct vlr_subscr *vsub,
 					   const char *label);
 
 void subscr_remove_request(struct subscr_request *req);
-int subscr_rx_paging_response(struct msgb *msg,
-			      struct ran_conn *conn);
 
 void subscr_paging_cancel(struct vlr_subscr *vsub, enum gsm_paging_event event);
 int subscr_paging_dispatch(unsigned int hooknum, unsigned int event,
