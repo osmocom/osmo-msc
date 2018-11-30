@@ -40,11 +40,6 @@ enum subscr_conn_fsm_state {
 	SUBSCR_CONN_S_RELEASED,
 };
 
-enum msc_compl_l3_rc {
-	MSC_CONN_ACCEPT = 0,
-	MSC_CONN_REJECT = 1,
-};
-
 struct gsm_subscriber_connection *msc_subscr_conn_alloc(struct gsm_network *network,
 							enum ran_type via_ran, uint16_t lac);
 
@@ -59,8 +54,8 @@ int msc_vlr_start(struct gsm_network *net);
 
 void msc_sapi_n_reject(struct gsm_subscriber_connection *conn, int dlci);
 int msc_clear_request(struct gsm_subscriber_connection *conn, uint32_t cause);
-int msc_compl_l3(struct gsm_subscriber_connection *conn,
-		 struct msgb *msg, uint16_t chosen_channel);
+void msc_compl_l3(struct gsm_subscriber_connection *conn,
+		  struct msgb *msg, uint16_t chosen_channel);
 void msc_dtap(struct gsm_subscriber_connection *conn, struct msgb *msg);
 int msc_classmark_request_then_cipher_mode_cmd(struct gsm_subscriber_connection *conn, bool umts_aka,
 					       bool retrieve_imeisv);

@@ -142,7 +142,6 @@ struct gsm_subscriber_connection *subscr_conn_lookup_iu(
 int gsm0408_rcvmsg_iucs(struct gsm_network *network, struct msgb *msg,
 			uint16_t *lac)
 {
-	int rc;
 	struct ranap_ue_conn_ctx *ue_ctx;
 	struct gsm_subscriber_connection *conn;
 
@@ -174,7 +173,6 @@ int gsm0408_rcvmsg_iucs(struct gsm_network *network, struct msgb *msg,
 		OSMO_ASSERT(pdisc != GSM48_PDISC_RR);
 
 		msc_dtap(conn, msg);
-		rc = 0;
 	} else {
 		/* allocate a new connection */
 
@@ -191,10 +189,10 @@ int gsm0408_rcvmsg_iucs(struct gsm_network *network, struct msgb *msg,
 			abort();
 
 		/* ownership of conn hereby goes to the MSC: */
-		rc = msc_compl_l3(conn, msg, 0);
+		msc_compl_l3(conn, msg, 0);
 	}
 
-	return rc;
+	return 0;
 }
 
 int iu_rab_act_cs(struct gsm_trans *trans)

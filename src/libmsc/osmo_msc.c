@@ -87,37 +87,15 @@ void msc_sapi_n_reject(struct gsm_subscriber_connection *conn, int dlci)
 		gsm411_sapi_n_reject(conn);
 }
 
-/* receive a Level 3 Complete message and return MSC_CONN_ACCEPT or
- * MSC_CONN_REJECT */
-int msc_compl_l3(struct gsm_subscriber_connection *conn,
-		 struct msgb *msg, uint16_t chosen_channel)
+/* receive a Level 3 Complete message.
+ * Ownership of the conn is completely passed to the conn FSM, i.e. for both acceptance and rejection,
+ * the conn FSM shall decide when to release this conn. It may already be discarded before this exits. */
+void msc_compl_l3(struct gsm_subscriber_connection *conn,
+		  struct msgb *msg, uint16_t chosen_channel)
 {
 	msc_subscr_conn_get(conn, MSC_CONN_USE_COMPL_L3);
 	gsm0408_dispatch(conn, msg);
-
 	msc_subscr_conn_put(conn, MSC_CONN_USE_COMPL_L3);
-
-	/* Always return acceptance, because even if the conn was not accepted,
-	 * we assumed ownership of it and the caller shall not interfere with
-	 * that. We may even already have discarded the conn. */
-	return MSC_CONN_ACCEPT;
-
-#if 0
-	/*
-	 * If this is a silent call we want the channel to remain open as long as
-	 * possible and this is why we accept this connection regardless of any
-	 * pending transaction or ongoing operation.
-	 */
-	if (conn->silent_call)
-		return MSC_CONN_ACCEPT;
-	if (conn->loc_operation || conn->sec_operation || conn->anch_operation)
-		return MSC_CONN_ACCEPT;
-	if (trans_has_conn(conn))
-		return MSC_CONN_ACCEPT;
-
-	LOGP(DRR, LOGL_INFO, "MSC Complete L3: Rejecting connection.\n");
-	return MSC_CONN_REJECT;
-#endif
 }
 
 /* Receive a DTAP message from BSC */

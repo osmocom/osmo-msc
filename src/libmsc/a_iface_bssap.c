@@ -260,8 +260,6 @@ static int bssmap_rx_l3_compl(struct osmo_sccp_user *scu, const struct a_conn_in
 	uint16_t lac = 0;
 	uint8_t data_length;
 	const uint8_t *data;
-	int rc;
-
 	struct gsm_network *network = a_conn_info->network;
 	struct gsm_subscriber_connection *conn;
 
@@ -345,17 +343,8 @@ static int bssmap_rx_l3_compl(struct osmo_sccp_user *scu, const struct a_conn_in
 	conn = subscr_conn_allocate_a(a_conn_info, network, lac, scu, a_conn_info->conn_id);
 
 	/* Handover location update to the MSC code */
-	rc = msc_compl_l3(conn, msg, 0);
-
-	if (rc == MSC_CONN_ACCEPT) {
-		LOGP(DMSC, LOGL_INFO, "User has been accepted by MSC.\n");
-		return 0;
-	} else if (rc == MSC_CONN_REJECT)
-		LOGP(DMSC, LOGL_INFO, "User has been rejected by MSC.\n");
-	else
-		LOGP(DMSC, LOGL_INFO, "User has been rejected by MSC (unknown error)\n");
-
-	return -EINVAL;
+	msc_compl_l3(conn, msg, 0);
+	return 0;
 }
 
 /* Endpoint to handle BSSMAP classmark update */
