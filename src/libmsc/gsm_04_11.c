@@ -149,8 +149,6 @@ static int paging_cb_mmsms_est_req(unsigned int hooknum, unsigned int event,
 	case GSM_PAGING_SUCCEEDED:
 		/* Associate transaction with established connection */
 		trans->conn = msc_subscr_conn_get(conn, MSC_CONN_USE_TRANS_SMS);
-		/* FIXME: specify SACCH in case we already have active TCH */
-		trans->dlci = 0x03;
 		/* Confirm successful connection establishment */
 		gsm411_smc_recv(&trans->sms.smc_inst,
 			GSM411_MMSMS_EST_CNF, NULL, 0);
@@ -1016,6 +1014,9 @@ static struct gsm_trans *gsm411_alloc_mt_trans(struct gsm_network *net,
 		/* Generate unique RP Message Reference */
 		trans->sms.sm_rp_mr = conn->next_rp_ref++;
 	}
+
+	/* Use SAPI 3 (see GSM 04.11, section 2.3) */
+	trans->dlci = UM_SAPI_SMS;
 
 	return trans;
 }
