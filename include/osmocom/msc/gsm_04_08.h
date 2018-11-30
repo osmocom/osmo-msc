@@ -26,7 +26,6 @@ void cm_service_request_concludes(struct gsm_subscriber_connection *conn,
 				  struct msgb *msg);
 
 /* config options controlling the behaviour of the lower leves */
-void gsm0408_allow_everyone(int allow);
 void gsm0408_clear_all_trans(struct gsm_network *net, int protocol);
 int gsm0408_dispatch(struct gsm_subscriber_connection *conn, struct msgb *msg);
 
