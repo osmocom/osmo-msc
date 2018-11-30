@@ -9,6 +9,10 @@
 #include <osmocom/msc/gsm_data.h>
 
 struct ran_conn;
+struct msgb;
+
+typedef int gsm_cbfn(unsigned int hooknum, unsigned int event, struct msgb *msg,
+		     void *data, void *param);
 
 /*
  * Struct for pending channel requests. This is managed in the

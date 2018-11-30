@@ -36,12 +36,6 @@ struct vlr_subscr;
 
 #define tmsi_from_string(str) strtoul(str, NULL, 10)
 
-struct msgb;
-typedef int gsm_cbfn(unsigned int hooknum,
-		     unsigned int event,
-		     struct msgb *msg,
-		     void *data, void *param);
-
 enum {
 	MSC_CTR_LOC_UPDATE_TYPE_ATTACH,
 	MSC_CTR_LOC_UPDATE_TYPE_NORMAL,
