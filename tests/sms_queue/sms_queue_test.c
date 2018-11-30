@@ -25,6 +25,7 @@
 
 #include <osmocom/msc/debug.h>
 #include <osmocom/msc/vlr.h>
+#include <osmocom/msc/gsm_data.h>
 
 static void *talloc_ctx = NULL;
 
@@ -129,7 +130,7 @@ void show_fake_sms_db()
 static void test_next_sms()
 {
 	int i;
-	char last_msisdn[GSM_EXTENSION_LENGTH+1] = "";
+	char last_msisdn[VLR_MSISDN_LENGTH+1] = "";
 
 	printf("Testing smsq_take_next_sms()\n");
 

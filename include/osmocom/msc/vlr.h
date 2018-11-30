@@ -10,8 +10,7 @@
 #include <osmocom/gsm/gsm0808.h>
 #include <osmocom/gsm/gsup.h>
 #include <osmocom/msc/ran_conn.h>
-// for GSM_NAME_LENGTH
-#include <osmocom/msc/gsm_subscriber.h>
+#include <osmocom/msc/msc_common.h>
 #include <osmocom/gsupclient/gsup_client.h>
 
 #define LOGGSUPP(level, gsup, fmt, args...)				\
@@ -111,6 +110,9 @@ enum vlr_lu_type {
 struct sgsn_mm_ctx;
 struct vlr_instance;
 
+#define VLR_NAME_LENGTH 160
+#define VLR_MSISDN_LENGTH 15
+
 /* The VLR subscriber is the part of the GSM subscriber state in VLR (CS) or
  * SGSN (PS), particularly while interacting with the HLR via GSUP */
 struct vlr_subscr {
@@ -123,8 +125,8 @@ struct vlr_subscr {
 	/* Data from HLR */				/* 3GPP TS 23.008 */
 	/* Always use vlr_subscr_set_imsi() to write to imsi[] */
 	char imsi[GSM23003_IMSI_MAX_DIGITS+1];		/* 2.1.1.1 */
-	char msisdn[GSM_EXTENSION_LENGTH+1];		/* 2.1.2 */
-	char name[GSM_NAME_LENGTH+1];			/* proprietary */
+	char msisdn[VLR_MSISDN_LENGTH+1];		/* 2.1.2 */
+	char name[VLR_NAME_LENGTH+1];			/* proprietary */
 	OSMO_LBUF_DECL(hlr, 16);			/* 2.4.7 */
 	uint32_t periodic_lu_timer;			/* 2.4.24 */
 	uint32_t age_indicator;				/* 2.17.1 */

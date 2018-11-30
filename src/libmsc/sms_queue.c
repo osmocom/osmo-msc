@@ -65,7 +65,7 @@ struct gsm_sms_queue {
 
 	struct llist_head pending_sms;
 
-	char last_msisdn[GSM_EXTENSION_LENGTH+1];
+	char last_msisdn[VLR_MSISDN_LENGTH+1];
 };
 
 static int sms_subscr_cb(unsigned int, unsigned int, void *, void *);
