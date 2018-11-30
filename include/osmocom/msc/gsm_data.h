@@ -13,9 +13,9 @@
 #include <osmocom/gsm/gsm48.h>
 #include <osmocom/crypt/auth.h>
 
-#include <osmocom/msc/common.h>
-#include <osmocom/msc/common_cs.h>
 #include <osmocom/mgcp_client/mgcp_client.h>
+
+#include <osmocom/msc/msc_common.h>
 
 #include "gsm_data_shared.h"
 

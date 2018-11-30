@@ -21,12 +21,10 @@
  *
  */
 
-#include <osmocom/msc/osmo_msc.h>
 #include <osmocom/msc/debug.h>
 #include <osmocom/msc/transaction.h>
 #include <osmocom/msc/db.h>
 #include <osmocom/msc/vlr.h>
-#include <osmocom/msc/osmo_msc.h>
 #include <osmocom/msc/a_iface.h>
 #include <osmocom/msc/gsm_04_08.h>
 #include <osmocom/msc/gsm_04_11.h>

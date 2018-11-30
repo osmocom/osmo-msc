@@ -37,7 +37,6 @@
 #include <osmocom/msc/iucs.h>
 #include <osmocom/msc/vlr.h>
 #include <osmocom/msc/iucs_ranap.h>
-#include <osmocom/msc/osmo_msc.h>
 #include <osmocom/msc/msc_mgcp.h>
 
 #include <asn1c/asn1helpers.h>

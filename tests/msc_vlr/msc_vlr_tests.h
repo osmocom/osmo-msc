@@ -27,7 +27,6 @@
 #include <stdio.h>
 
 #include <osmocom/msc/gsm_data.h>
-#include <osmocom/msc/osmo_msc.h>
 #include <osmocom/msc/vlr.h>
 #include <osmocom/msc/mncc.h>
 

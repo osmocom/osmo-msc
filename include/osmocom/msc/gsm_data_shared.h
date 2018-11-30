@@ -12,8 +12,6 @@
 #include <osmocom/gsm/tlv.h>
 #include <osmocom/gsm/protocol/gsm_04_08.h>
 
-#include <osmocom/msc/common_cs.h>
-
 struct osmo_bsc_data;
 
 struct osmo_bsc_sccp_con;

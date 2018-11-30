@@ -29,7 +29,6 @@
 #include <osmocom/msc/debug.h>
 #include <osmocom/msc/gsm_data.h>
 #include <osmocom/msc/gsm_subscriber.h>
-#include <osmocom/msc/osmo_msc.h>
 #include <osmocom/msc/vlr.h>
 
 /* paging of the requested subscriber has completed */

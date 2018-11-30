@@ -31,7 +31,6 @@
 #include <osmocom/msc/gsm_data.h>
 #include <osmocom/msc/gsm_subscriber.h>
 #include <osmocom/msc/transaction.h>
-#include <osmocom/msc/osmo_msc.h>
 #include <osmocom/msc/vlr.h>
 #include <osmocom/core/byteswap.h>
 

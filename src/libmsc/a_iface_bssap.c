@@ -31,7 +31,6 @@
 #include <osmocom/msc/gsm_data.h>
 #include <osmocom/msc/a_iface_bssap.h>
 #include <osmocom/msc/a_iface.h>
-#include <osmocom/msc/osmo_msc.h>
 #include <osmocom/core/byteswap.h>
 #include <osmocom/msc/a_reset.h>
 #include <osmocom/msc/transaction.h>

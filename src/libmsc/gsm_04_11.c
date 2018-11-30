@@ -52,7 +52,6 @@
 #include <osmocom/msc/db.h>
 #include <osmocom/msc/transaction.h>
 #include <osmocom/msc/msc_ifaces.h>
-#include <osmocom/msc/osmo_msc.h>
 #include <osmocom/msc/vlr.h>
 
 #ifdef BUILD_SMPP

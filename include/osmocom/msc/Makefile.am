@@ -1,8 +1,6 @@
 noinst_HEADERS = \
 	a_iface.h \
 	a_iface_bssap.h \
-	common.h \
-	common_cs.h \
 	db.h \
 	debug.h \
 	gsm_04_08.h \
@@ -18,10 +16,10 @@ noinst_HEADERS = \
 	iu_dummy.h \
 	mncc.h \
 	mncc_int.h \
+	msc_common.h \
 	msc_ifaces.h \
 	msc_mgcp.h \
 	a_reset.h \
-	osmo_msc.h \
 	ran_conn.h \
 	rrlp.h \
 	signal.h \

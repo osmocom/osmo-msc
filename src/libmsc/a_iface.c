@@ -39,7 +39,6 @@
 #include <osmocom/core/byteswap.h>
 #include <osmocom/sccp/sccp_types.h>
 #include <osmocom/msc/a_reset.h>
-#include <osmocom/msc/osmo_msc.h>
 #include <osmocom/msc/vlr.h>
 
 #include <errno.h>

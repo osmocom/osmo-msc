@@ -46,7 +46,6 @@
 #include <osmocom/msc/signal.h>
 #include <osmocom/msc/db.h>
 #include <osmocom/msc/vlr.h>
-#include <osmocom/msc/osmo_msc.h>
 #include <osmocom/msc/msc_ifaces.h>
 #include <osmocom/msc/a_iface.h>
 

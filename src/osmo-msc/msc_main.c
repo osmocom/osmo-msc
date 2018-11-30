@@ -46,7 +46,6 @@
 #include <osmocom/abis/e1_input.h>
 #include <osmocom/core/talloc.h>
 #include <osmocom/msc/signal.h>
-#include <osmocom/msc/osmo_msc.h>
 #include <osmocom/msc/sms_queue.h>
 #include <osmocom/vty/telnet_interface.h>
 #include <osmocom/vty/ports.h>

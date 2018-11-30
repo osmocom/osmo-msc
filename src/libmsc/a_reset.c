@@ -27,6 +27,7 @@
 #include <string.h>
 #include <osmocom/msc/debug.h>
 #include <osmocom/msc/a_reset.h>
+#include <osmocom/msc/msc_common.h>
 
 #define RESET_RESEND_INTERVAL 2		/* sec */
 #define RESET_RESEND_TIMER_NO 16	/* See also 3GPP TS 48.008 Chapter 3.1.4.1.3.2 */
