@@ -29,7 +29,6 @@
 #include <osmocom/core/linuxlist.h>
 
 struct msgb;
-struct gsm_auth_tuple;
 struct RANAP_Cause;
 struct osmo_auth_vector;
 

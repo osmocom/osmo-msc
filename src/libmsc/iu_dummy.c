@@ -34,7 +34,6 @@
 
 struct msgb;
 struct ranap_ue_conn_ctx;
-struct gsm_auth_tuple;
 struct RANAP_Cause;
 struct osmo_auth_vector;
 

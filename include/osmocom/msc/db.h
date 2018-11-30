@@ -24,10 +24,7 @@
 
 #include "gsm_subscriber.h"
 
-struct gsm_equipment;
 struct gsm_network;
-struct gsm_auth_info;
-struct gsm_auth_tuple;
 struct gsm_sms;
 
 /* one time initialisation */
