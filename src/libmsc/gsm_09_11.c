@@ -113,7 +113,7 @@ int gsm0911_rcv_nc_ss(struct ran_conn *conn, struct msgb *msg)
 		/* Count active NC SS/USSD sessions */
 		osmo_counter_inc(conn->network->active_nc_ss);
 
-		trans->conn = ran_conn_get(conn, MSC_CONN_USE_TRANS_NC_SS);
+		trans->conn = ran_conn_get(conn, RAN_CONN_USE_TRANS_NC_SS);
 		trans->dlci = OMSC_LINKID_CB(msg);
 		cm_service_request_concludes(conn, msg);
 	}
@@ -232,7 +232,7 @@ static int handle_paging_event(unsigned int hooknum, unsigned int event,
 			vlr_subscr_msisdn_or_name(transt->vsub));
 
 		/* Assign connection */
-		transt->conn = ran_conn_get(conn, MSC_CONN_USE_TRANS_NC_SS);
+		transt->conn = ran_conn_get(conn, RAN_CONN_USE_TRANS_NC_SS);
 		transt->paging_request = NULL;
 
 		/* Send stored message */
@@ -324,7 +324,7 @@ static struct gsm_trans *establish_nc_ss_trans(struct gsm_network *net,
 	conn = connection_for_subscr(vsub);
 	if (conn) {
 		/* Assign connection */
-		trans->conn = ran_conn_get(conn, MSC_CONN_USE_TRANS_NC_SS);
+		trans->conn = ran_conn_get(conn, RAN_CONN_USE_TRANS_NC_SS);
 		trans->dlci = 0x00; /* SAPI=0, not SACCH */
 		return trans;
 	}

@@ -629,7 +629,7 @@ void a_clear_all(struct osmo_sccp_user *scu, const struct osmo_sccp_addr *bsc_ad
 			uint32_t conn_id = conn->a.conn_id;
 			LOGPCONN(conn, LOGL_NOTICE, "Dropping orphaned RAN connection\n");
 			/* This call will/may talloc_free(conn), so we must save conn_id above */
-			msc_clear_request(conn, GSM48_CC_CAUSE_SWITCH_CONG);
+			ran_conn_clear_request(conn, GSM48_CC_CAUSE_SWITCH_CONG);
 
 			/* If there is still an SCCP connection active, remove it now */
 			if (check_connection_active(conn_id)) {

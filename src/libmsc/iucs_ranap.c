@@ -96,7 +96,7 @@ int iucs_rx_sec_mode_compl(struct ran_conn *conn,
 
 	/* TODO evalute ies */
 
-	msc_rx_sec_mode_compl(conn);
+	ran_conn_rx_sec_mode_compl(conn);
 	return 0;
 }
 

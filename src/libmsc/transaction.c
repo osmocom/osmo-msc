@@ -140,21 +140,21 @@ struct gsm_trans *trans_alloc(struct gsm_network *net,
  */
 void trans_free(struct gsm_trans *trans)
 {
-	enum ran_conn_use conn_usage_token = MSC_CONN_USE_UNTRACKED;
+	enum ran_conn_use conn_usage_token = RAN_CONN_USE_UNTRACKED;
 	struct ran_conn *conn;
 
 	switch (trans->protocol) {
 	case GSM48_PDISC_CC:
 		_gsm48_cc_trans_free(trans);
-		conn_usage_token = MSC_CONN_USE_TRANS_CC;
+		conn_usage_token = RAN_CONN_USE_TRANS_CC;
 		break;
 	case GSM48_PDISC_SMS:
 		_gsm411_sms_trans_free(trans);
-		conn_usage_token = MSC_CONN_USE_TRANS_SMS;
+		conn_usage_token = RAN_CONN_USE_TRANS_SMS;
 		break;
 	case GSM48_PDISC_NC_SS:
 		_gsm911_nc_ss_trans_free(trans);
-		conn_usage_token = MSC_CONN_USE_TRANS_NC_SS;
+		conn_usage_token = RAN_CONN_USE_TRANS_NC_SS;
 		break;
 	}
 

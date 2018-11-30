@@ -148,7 +148,7 @@ static int paging_cb_mmsms_est_req(unsigned int hooknum, unsigned int event,
 	switch (event) {
 	case GSM_PAGING_SUCCEEDED:
 		/* Associate transaction with established connection */
-		trans->conn = ran_conn_get(conn, MSC_CONN_USE_TRANS_SMS);
+		trans->conn = ran_conn_get(conn, RAN_CONN_USE_TRANS_SMS);
 		/* Confirm successful connection establishment */
 		gsm411_smc_recv(&trans->sms.smc_inst,
 			GSM411_MMSMS_EST_CNF, NULL, 0);
@@ -1010,7 +1010,7 @@ static struct gsm_trans *gsm411_alloc_mt_trans(struct gsm_network *net,
 	conn = connection_for_subscr(vsub);
 	if (conn) {
 		/* Associate transaction with connection */
-		trans->conn = ran_conn_get(conn, MSC_CONN_USE_TRANS_SMS);
+		trans->conn = ran_conn_get(conn, RAN_CONN_USE_TRANS_SMS);
 		/* Generate unique RP Message Reference */
 		trans->sms.sm_rp_mr = conn->next_rp_ref++;
 	}
@@ -1140,7 +1140,7 @@ int gsm0411_rcv_sms(struct ran_conn *conn,
 		gsm411_smr_init(&trans->sms.smr_inst, 0, 1,
 			gsm411_rl_recv, gsm411_mn_send);
 
-		trans->conn = ran_conn_get(conn, MSC_CONN_USE_TRANS_SMS);
+		trans->conn = ran_conn_get(conn, RAN_CONN_USE_TRANS_SMS);
 		trans->dlci = OMSC_LINKID_CB(msg); /* DLCI as received from BSC */
 
 		new_trans = 1;

@@ -50,22 +50,20 @@ void ran_conn_complete_layer_3(struct ran_conn *conn);
 int msc_vlr_alloc(struct gsm_network *net);
 int msc_vlr_start(struct gsm_network *net);
 
-void msc_sapi_n_reject(struct ran_conn *conn, int dlci);
-int msc_clear_request(struct ran_conn *conn, uint32_t cause);
-void msc_compl_l3(struct ran_conn *conn,
-		  struct msgb *msg, uint16_t chosen_channel);
-void msc_dtap(struct ran_conn *conn, struct msgb *msg);
-int msc_classmark_request_then_cipher_mode_cmd(struct ran_conn *conn, bool umts_aka,
-					       bool retrieve_imeisv);
-int msc_geran_set_cipher_mode(struct ran_conn *conn, bool umts_aka, bool retrieve_imeisv);
-void msc_cipher_mode_compl(struct ran_conn *conn,
-			   struct msgb *msg, uint8_t alg_id);
-void msc_rx_sec_mode_compl(struct ran_conn *conn);
-void msc_classmark_chg(struct ran_conn *conn,
-		       const uint8_t *cm2, uint8_t cm2_len,
-		       const uint8_t *cm3, uint8_t cm3_len);
-void msc_assign_fail(struct ran_conn *conn,
-		     uint8_t cause, uint8_t *rr_cause);
+void ran_conn_sapi_n_reject(struct ran_conn *conn, int dlci);
+int ran_conn_clear_request(struct ran_conn *conn, uint32_t cause);
+void ran_conn_compl_l3(struct ran_conn *conn,
+		       struct msgb *msg, uint16_t chosen_channel);
+void ran_conn_dtap(struct ran_conn *conn, struct msgb *msg);
+int ran_conn_classmark_request_then_cipher_mode_cmd(struct ran_conn *conn, bool umts_aka,
+						    bool retrieve_imeisv);
+int ran_conn_geran_set_cipher_mode(struct ran_conn *conn, bool umts_aka, bool retrieve_imeisv);
+void ran_conn_cipher_mode_compl(struct ran_conn *conn, struct msgb *msg, uint8_t alg_id);
+void ran_conn_rx_sec_mode_compl(struct ran_conn *conn);
+void ran_conn_classmark_chg(struct ran_conn *conn,
+			    const uint8_t *cm2, uint8_t cm2_len,
+			    const uint8_t *cm3, uint8_t cm3_len);
+void ran_conn_assign_fail(struct ran_conn *conn, uint8_t cause, uint8_t *rr_cause);
 
 void ran_conn_init(void);
 bool ran_conn_is_accepted(const struct ran_conn *conn);
@@ -79,16 +77,16 @@ void ran_conn_rx_bssmap_clear_complete(struct ran_conn *conn);
 void ran_conn_rx_iu_release_complete(struct ran_conn *conn);
 
 enum ran_conn_use {
-	MSC_CONN_USE_UNTRACKED = -1,
-	MSC_CONN_USE_COMPL_L3,
-	MSC_CONN_USE_DTAP,
-	MSC_CONN_USE_AUTH_CIPH,
-	MSC_CONN_USE_CM_SERVICE,
-	MSC_CONN_USE_TRANS_CC,
-	MSC_CONN_USE_TRANS_SMS,
-	MSC_CONN_USE_TRANS_NC_SS,
-	MSC_CONN_USE_SILENT_CALL,
-	MSC_CONN_USE_RELEASE,
+	RAN_CONN_USE_UNTRACKED = -1,
+	RAN_CONN_USE_COMPL_L3,
+	RAN_CONN_USE_DTAP,
+	RAN_CONN_USE_AUTH_CIPH,
+	RAN_CONN_USE_CM_SERVICE,
+	RAN_CONN_USE_TRANS_CC,
+	RAN_CONN_USE_TRANS_SMS,
+	RAN_CONN_USE_TRANS_NC_SS,
+	RAN_CONN_USE_SILENT_CALL,
+	RAN_CONN_USE_RELEASE,
 };
 
 extern const struct value_string ran_conn_use_names[];

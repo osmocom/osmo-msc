@@ -322,7 +322,7 @@ static int setup_trig_pag_evt(unsigned int hooknum, unsigned int event,
 		       vlr_subscr_msisdn_or_name(transt->vsub));
 		OSMO_ASSERT(conn);
 		/* Assign conn */
-		transt->conn = ran_conn_get(conn, MSC_CONN_USE_TRANS_CC);
+		transt->conn = ran_conn_get(conn, RAN_CONN_USE_TRANS_CC);
 		transt->paging_request = NULL;
 		/* send SETUP request to called party */
 		gsm48_cc_tx_setup(transt, &transt->cc.msg);
@@ -2005,7 +2005,7 @@ int mncc_tx_to_cc(struct gsm_network *net, int msg_type, void *arg)
 		}
 
 		/* Assign conn */
-		trans->conn = ran_conn_get(conn, MSC_CONN_USE_TRANS_CC);
+		trans->conn = ran_conn_get(conn, RAN_CONN_USE_TRANS_CC);
 		trans->dlci = 0x00; /* SAPI=0, not SACCH */
 		vlr_subscr_put(vsub);
 	} else {
@@ -2160,7 +2160,7 @@ int gsm0408_rcv_cc(struct ran_conn *conn, struct msgb *msg)
 			return -ENOMEM;
 		}
 		/* Assign transaction */
-		trans->conn = ran_conn_get(conn, MSC_CONN_USE_TRANS_CC);
+		trans->conn = ran_conn_get(conn, RAN_CONN_USE_TRANS_CC);
 		trans->dlci = OMSC_LINKID_CB(msg); /* DLCI as received from BSC */
 		cm_service_request_concludes(conn, msg);
 	}

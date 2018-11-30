@@ -94,7 +94,7 @@ static void evaluate_acceptance_outcome(struct osmo_fsm_inst *fi, bool conn_acce
 	if (conn->complete_layer3_type == COMPLETE_LAYER3_CM_SERVICE_REQ
 	    && conn_accepted) {
 		conn->received_cm_service_request = true;
-		ran_conn_get(conn, MSC_CONN_USE_CM_SERVICE);
+		ran_conn_get(conn, RAN_CONN_USE_CM_SERVICE);
 	}
 
 	if (conn_accepted)
@@ -163,7 +163,7 @@ static void ran_conn_fsm_auth_ciph(struct osmo_fsm_inst *fi, uint32_t event, voi
 	}
 }
 
-int msc_classmark_request_then_cipher_mode_cmd(struct ran_conn *conn, bool umts_aka,
+int ran_conn_classmark_request_then_cipher_mode_cmd(struct ran_conn *conn, bool umts_aka,
 					       bool retrieve_imeisv)
 {
 	int rc;
@@ -190,14 +190,14 @@ static void ran_conn_fsm_wait_classmark_update(struct osmo_fsm_inst *fi, uint32_
 		 * So far though, the only time we send a Classmark Request is during Ciphering. As soon
 		 * as more such situations arise, we need to add state to indicate what action should
 		 * follow after a Classmark Update is received (e.g.
-		 * msc_classmark_request_then_cipher_mode_cmd() sets an enum value to indicate that
+		 * ran_conn_classmark_request_then_cipher_mode_cmd() sets an enum value to indicate that
 		 * Ciphering should continue afterwards). But right now, it is accurate to always
 		 * continue with Ciphering: */
 
 		/* During Ciphering, we needed Classmark information. The Classmark Update has come in,
 		 * go back into the Set Ciphering Command procedure. */
 		osmo_fsm_inst_state_chg(fi, RAN_CONN_S_AUTH_CIPH, RAN_CONN_TIMEOUT, 0);
-		if (msc_geran_set_cipher_mode(conn, conn->geran_set_cipher_mode.umts_aka,
+		if (ran_conn_geran_set_cipher_mode(conn, conn->geran_set_cipher_mode.umts_aka,
 					      conn->geran_set_cipher_mode.retrieve_imeisv)) {
 			LOGPFSML(fi, LOGL_ERROR,
 				 "Sending Cipher Mode Command failed, aborting attach\n");
@@ -341,13 +341,13 @@ static void ran_conn_fsm_releasing_onenter(struct osmo_fsm_inst *fi, uint32_t pr
 	/* Use count for either conn->a.waiting_for_clear_complete or
 	 * conn->iu.waiting_for_release_complete. 'get' it early, so we don't deallocate after tearing
 	 * down active transactions. Safeguard against double-get (though it shouldn't happen). */
-	if (!ran_conn_used_by(conn, MSC_CONN_USE_RELEASE))
-		ran_conn_get(conn, MSC_CONN_USE_RELEASE);
+	if (!ran_conn_used_by(conn, RAN_CONN_USE_RELEASE))
+		ran_conn_get(conn, RAN_CONN_USE_RELEASE);
 
 	/* Cancel pending CM Service Requests */
 	if (conn->received_cm_service_request) {
 		conn->received_cm_service_request = false;
-		ran_conn_put(conn, MSC_CONN_USE_CM_SERVICE);
+		ran_conn_put(conn, RAN_CONN_USE_CM_SERVICE);
 	}
 
 	/* Cancel all VLR FSMs, if any */
@@ -693,7 +693,7 @@ static void rx_close_complete(struct ran_conn *conn, const char *label, bool *fl
 	}
 	if (*flag) {
 		*flag = false;
-		ran_conn_put(conn, MSC_CONN_USE_RELEASE);
+		ran_conn_put(conn, RAN_CONN_USE_RELEASE);
 	}
 }
 

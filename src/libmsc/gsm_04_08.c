@@ -687,7 +687,7 @@ accept_reuse:
 
 	if (!conn->received_cm_service_request) {
 		conn->received_cm_service_request = true;
-		ran_conn_get(conn, MSC_CONN_USE_CM_SERVICE);
+		ran_conn_get(conn, RAN_CONN_USE_CM_SERVICE);
 	}
 	ran_conn_update_id(conn, conn->complete_layer3_type, mi_string);
 	return conn->network->vlr->ops.tx_cm_serv_acc(conn);
@@ -1332,7 +1332,7 @@ void cm_service_request_concludes(struct ran_conn *conn,
 		       gsm48_pdisc_msgtype_name(pdisc, msg_type));
 	}
 	conn->received_cm_service_request = false;
-	ran_conn_put(conn, MSC_CONN_USE_CM_SERVICE);
+	ran_conn_put(conn, RAN_CONN_USE_CM_SERVICE);
 }
 
 /* TS 24.007 11.2.3.2.3 Message Type Octet / Duplicate Detection */
@@ -1584,7 +1584,7 @@ static int msc_vlr_tx_cm_serv_rej(void *msc_conn_ref, enum gsm48_reject_value ca
 
 	if (conn->received_cm_service_request) {
 		conn->received_cm_service_request = false;
-		ran_conn_put(conn, MSC_CONN_USE_CM_SERVICE);
+		ran_conn_put(conn, RAN_CONN_USE_CM_SERVICE);
 	}
 
 	return rc;
@@ -1594,7 +1594,7 @@ static int msc_vlr_tx_cm_serv_rej(void *msc_conn_ref, enum gsm48_reject_value ca
 osmo_static_assert(sizeof(((struct gsm0808_encrypt_info*)0)->key) >= sizeof(((struct osmo_auth_vector*)0)->kc),
 		   gsm0808_encrypt_info_key_fits_osmo_auth_vec_kc);
 
-int msc_geran_set_cipher_mode(struct ran_conn *conn, bool umts_aka, bool retrieve_imeisv)
+int ran_conn_geran_set_cipher_mode(struct ran_conn *conn, bool umts_aka, bool retrieve_imeisv)
 {
 	struct gsm_network *net = conn->network;
 	struct gsm0808_encrypt_info ei;
@@ -1640,7 +1640,7 @@ int msc_geran_set_cipher_mode(struct ran_conn *conn, bool umts_aka, bool retriev
 		     vlr_subscr_name(conn->vsub), request_classmark_for_a5_n,
 		     request_classmark);
 
-		return msc_classmark_request_then_cipher_mode_cmd(conn, umts_aka, retrieve_imeisv);
+		return ran_conn_classmark_request_then_cipher_mode_cmd(conn, umts_aka, retrieve_imeisv);
 	}
 
 	if (ei.perm_algo_len == 0) {
@@ -1701,7 +1701,7 @@ int msc_vlr_set_ciph_mode(void *msc_conn_ref,
 
 	switch (conn->via_ran) {
 	case RAN_GERAN_A:
-		return msc_geran_set_cipher_mode(conn, umts_aka, retrieve_imeisv);
+		return ran_conn_geran_set_cipher_mode(conn, umts_aka, retrieve_imeisv);
 
 	case RAN_UTRAN_IU:
 #ifdef BUILD_IU
@@ -1723,7 +1723,7 @@ int msc_vlr_set_ciph_mode(void *msc_conn_ref,
 	return -ENOTSUP;
 }
 
-void msc_rx_sec_mode_compl(struct ran_conn *conn)
+void ran_conn_rx_sec_mode_compl(struct ran_conn *conn)
 {
 	struct vlr_ciph_result vlr_res = {};
 

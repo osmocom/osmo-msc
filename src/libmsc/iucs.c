@@ -172,7 +172,7 @@ int gsm0408_rcvmsg_iucs(struct gsm_network *network, struct msgb *msg,
 		uint8_t pdisc = gh->proto_discr & 0x0f;
 		OSMO_ASSERT(pdisc != GSM48_PDISC_RR);
 
-		msc_dtap(conn, msg);
+		ran_conn_dtap(conn, msg);
 	} else {
 		/* allocate a new connection */
 
@@ -189,7 +189,7 @@ int gsm0408_rcvmsg_iucs(struct gsm_network *network, struct msgb *msg,
 			abort();
 
 		/* ownership of conn hereby goes to the MSC: */
-		msc_compl_l3(conn, msg, 0);
+		ran_conn_compl_l3(conn, msg, 0);
 	}
 
 	return 0;

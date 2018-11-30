@@ -186,7 +186,7 @@ void conn_conclude_cm_service_req(struct ran_conn *conn,
 	OSMO_ASSERT(conn->received_cm_service_request);
 
 	conn->received_cm_service_request = false;
-	ran_conn_put(conn, MSC_CONN_USE_CM_SERVICE);
+	ran_conn_put(conn, RAN_CONN_USE_CM_SERVICE);
 
 	ASSERT_RELEASE_CLEAR(via_ran);
 }
@@ -225,14 +225,14 @@ void rx_from_ms(struct msgb *msg)
 		g_conn = conn_new();
 		reset_l3_seq_nr();
 		patch_l3_seq_nr(msg);
-		msc_compl_l3(g_conn, msg, 23);
+		ran_conn_compl_l3(g_conn, msg, 23);
 	} else {
 		patch_l3_seq_nr(msg);
 		if ((gsm48_hdr_pdisc(gh) == GSM48_PDISC_RR)
 		    && (gsm48_hdr_msg_type(gh) == GSM48_MT_RR_CIPH_M_COMPL))
-			msc_cipher_mode_compl(g_conn, msg, 0);
+			ran_conn_cipher_mode_compl(g_conn, msg, 0);
 		else
-			msc_dtap(g_conn, msg);
+			ran_conn_dtap(g_conn, msg);
 	}
 
 	if (!conn_exists(g_conn))
@@ -842,7 +842,7 @@ void ms_sends_security_mode_complete()
 	OSMO_ASSERT(g_conn);
 	OSMO_ASSERT(g_conn->via_ran == RAN_UTRAN_IU);
 	OSMO_ASSERT(g_conn->iu.ue_ctx);
-	msc_rx_sec_mode_compl(g_conn);
+	ran_conn_rx_sec_mode_compl(g_conn);
 }
 
 void bss_sends_clear_complete()

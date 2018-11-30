@@ -79,7 +79,7 @@ struct gsm_network *gsm_network_init(void *ctx, mncc_recv_cb_t mncc_recv)
 }
 
 /* Receive a SAPI-N-REJECT from BSC */
-void msc_sapi_n_reject(struct ran_conn *conn, int dlci)
+void ran_conn_sapi_n_reject(struct ran_conn *conn, int dlci)
 {
 	int sapi = dlci & 0x7;
 
@@ -90,21 +90,21 @@ void msc_sapi_n_reject(struct ran_conn *conn, int dlci)
 /* receive a Level 3 Complete message.
  * Ownership of the conn is completely passed to the conn FSM, i.e. for both acceptance and rejection,
  * the conn FSM shall decide when to release this conn. It may already be discarded before this exits. */
-void msc_compl_l3(struct ran_conn *conn,
-		  struct msgb *msg, uint16_t chosen_channel)
+void ran_conn_compl_l3(struct ran_conn *conn,
+		       struct msgb *msg, uint16_t chosen_channel)
 {
-	ran_conn_get(conn, MSC_CONN_USE_COMPL_L3);
+	ran_conn_get(conn, RAN_CONN_USE_COMPL_L3);
 	gsm0408_dispatch(conn, msg);
-	ran_conn_put(conn, MSC_CONN_USE_COMPL_L3);
+	ran_conn_put(conn, RAN_CONN_USE_COMPL_L3);
 }
 
 /* Receive a DTAP message from BSC */
-void msc_dtap(struct ran_conn *conn, struct msgb *msg)
+void ran_conn_dtap(struct ran_conn *conn, struct msgb *msg)
 {
-	ran_conn_get(conn, MSC_CONN_USE_DTAP);
+	ran_conn_get(conn, RAN_CONN_USE_DTAP);
 	gsm0408_dispatch(conn, msg);
 
-	ran_conn_put(conn, MSC_CONN_USE_DTAP);
+	ran_conn_put(conn, RAN_CONN_USE_DTAP);
 }
 
 /* Receive an ASSIGNMENT COMPLETE from BSC */
@@ -116,16 +116,15 @@ void msc_assign_compl(struct ran_conn *conn,
 }
 
 /* Receive an ASSIGNMENT FAILURE from BSC */
-void msc_assign_fail(struct ran_conn *conn,
-		     uint8_t cause, uint8_t *rr_cause)
+void ran_conn_assign_fail(struct ran_conn *conn, uint8_t cause, uint8_t *rr_cause)
 {
 	LOGP(DRR, LOGL_DEBUG, "MSC assign failure (do nothing).\n");
 }
 
 /* Receive a CLASSMARK CHANGE from BSC */
-void msc_classmark_chg(struct ran_conn *conn,
-		       const uint8_t *cm2, uint8_t cm2_len,
-		       const uint8_t *cm3, uint8_t cm3_len)
+void ran_conn_classmark_chg(struct ran_conn *conn,
+			    const uint8_t *cm2, uint8_t cm2_len,
+			    const uint8_t *cm3, uint8_t cm3_len)
 {
 	struct gsm_classmark *cm;
 
@@ -159,8 +158,7 @@ void msc_classmark_chg(struct ran_conn *conn,
 }
 
 /* Receive a CIPHERING MODE COMPLETE from BSC */
-void msc_cipher_mode_compl(struct ran_conn *conn,
-			   struct msgb *msg, uint8_t alg_id)
+void ran_conn_cipher_mode_compl(struct ran_conn *conn, struct msgb *msg, uint8_t alg_id)
 {
 	struct vlr_ciph_result ciph_res = { .cause = VLR_CIPH_REJECT };
 
@@ -207,7 +205,7 @@ void msc_cipher_mode_compl(struct ran_conn *conn,
 }
 
 /* Receive a CLEAR REQUEST from BSC */
-int msc_clear_request(struct ran_conn *conn, uint32_t cause)
+int ran_conn_clear_request(struct ran_conn *conn, uint32_t cause)
 {
 	ran_conn_close(conn, cause);
 	return 1;
@@ -250,7 +248,7 @@ struct ran_conn *_ran_conn_get(struct ran_conn *conn, enum ran_conn_use balance_
 {
 	OSMO_ASSERT(conn);
 
-	if (balance_token != MSC_CONN_USE_UNTRACKED) {
+	if (balance_token != RAN_CONN_USE_UNTRACKED) {
 		uint32_t flag = 1 << balance_token;
 		OSMO_ASSERT(balance_token < 32);
 		if (conn->use_tokens & flag)
@@ -271,13 +269,12 @@ struct ran_conn *_ran_conn_get(struct ran_conn *conn, enum ran_conn_use balance_
 }
 
 /* decrement the ref-count. Once it reaches zero, we release */
-void _ran_conn_put(struct ran_conn *conn,
-			  enum ran_conn_use balance_token,
-			  const char *file, int line)
+void _ran_conn_put(struct ran_conn *conn, enum ran_conn_use balance_token,
+		   const char *file, int line)
 {
 	OSMO_ASSERT(conn);
 
-	if (balance_token != MSC_CONN_USE_UNTRACKED) {
+	if (balance_token != RAN_CONN_USE_UNTRACKED) {
 		uint32_t flag = 1 << balance_token;
 		OSMO_ASSERT(balance_token < 32);
 		if (!(conn->use_tokens & flag))
@@ -312,16 +309,16 @@ bool ran_conn_used_by(struct ran_conn *conn, enum ran_conn_use token)
 }
 
 const struct value_string ran_conn_use_names[] = {
-	{MSC_CONN_USE_UNTRACKED,	"UNTRACKED"},
-	{MSC_CONN_USE_COMPL_L3,		"compl_l3"},
-	{MSC_CONN_USE_DTAP,		"dtap"},
-	{MSC_CONN_USE_AUTH_CIPH,	"auth+ciph"},
-	{MSC_CONN_USE_CM_SERVICE,	"cm_service"},
-	{MSC_CONN_USE_TRANS_CC,		"trans_cc"},
-	{MSC_CONN_USE_TRANS_SMS,	"trans_sms"},
-	{MSC_CONN_USE_TRANS_NC_SS,	"trans_nc_ss"},
-	{MSC_CONN_USE_SILENT_CALL,	"silent_call"},
-	{MSC_CONN_USE_RELEASE,		"release"},
+	{RAN_CONN_USE_UNTRACKED,	"UNTRACKED"},
+	{RAN_CONN_USE_COMPL_L3,		"compl_l3"},
+	{RAN_CONN_USE_DTAP,		"dtap"},
+	{RAN_CONN_USE_AUTH_CIPH,	"auth+ciph"},
+	{RAN_CONN_USE_CM_SERVICE,	"cm_service"},
+	{RAN_CONN_USE_TRANS_CC,		"trans_cc"},
+	{RAN_CONN_USE_TRANS_SMS,	"trans_sms"},
+	{RAN_CONN_USE_TRANS_NC_SS,	"trans_nc_ss"},
+	{RAN_CONN_USE_SILENT_CALL,	"silent_call"},
+	{RAN_CONN_USE_RELEASE,		"release"},
 	{0, NULL},
 };
 

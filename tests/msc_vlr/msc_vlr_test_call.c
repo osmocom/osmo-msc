@@ -404,7 +404,7 @@ static void test_call_mt2()
 	cc_to_mncc_expect_tx("", MNCC_REL_CNF);
 	dtap_expect_tx("032d"); /* CC: Release */
 	expect_iu_release();
-	msc_clear_request(g_conn, 0);
+	ran_conn_clear_request(g_conn, 0);
 	OSMO_ASSERT(cc_to_mncc_tx_confirmed);
 	OSMO_ASSERT(iu_release_sent);
 

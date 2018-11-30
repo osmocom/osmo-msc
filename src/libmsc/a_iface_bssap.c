@@ -343,7 +343,7 @@ static int bssmap_rx_l3_compl(struct osmo_sccp_user *scu, const struct a_conn_in
 	conn = ran_conn_allocate_a(a_conn_info, network, lac, scu, a_conn_info->conn_id);
 
 	/* Handover location update to the MSC code */
-	msc_compl_l3(conn, msg, 0);
+	ran_conn_compl_l3(conn, msg, 0);
 	return 0;
 }
 
@@ -372,7 +372,7 @@ static int bssmap_rx_classmark_upd(struct ran_conn *conn, struct msgb *msg,
 	}
 
 	/* Inform MSC about the classmark change */
-	msc_classmark_chg(conn, cm2, cm2_len, cm3, cm3_len);
+	ran_conn_classmark_chg(conn, cm2, cm2_len, cm3, cm3_len);
 
 	return 0;
 }
@@ -383,9 +383,9 @@ static int bssmap_rx_ciph_compl(struct ran_conn *conn, struct msgb *msg,
 {
 	/* FIXME: The field GSM0808_IE_LAYER_3_MESSAGE_CONTENTS is optional by
 	 * means of the specification. So there can be messages without L3 info.
-	 * In this case, the code will crash becrause msc_cipher_mode_compl()
+	 * In this case, the code will crash becrause ran_conn_cipher_mode_compl()
 	 * is not able to deal with msg = NULL and apperently
-	 * msc_cipher_mode_compl() was never meant to be used without L3 data.
+	 * ran_conn_cipher_mode_compl() was never meant to be used without L3 data.
 	 * This needs to be discussed further! */
 
 	uint8_t alg_id = 1;
@@ -407,7 +407,7 @@ static int bssmap_rx_ciph_compl(struct ran_conn *conn, struct msgb *msg,
 	rate_ctr_inc(&msc->ctr[MSC_CTR_BSSMAP_CIPHER_MODE_COMPLETE]);
 
 	/* Hand over cipher mode complete message to the MSC */
-	msc_cipher_mode_compl(conn, msg, alg_id);
+	ran_conn_cipher_mode_compl(conn, msg, alg_id);
 
 	return 0;
 }
@@ -462,12 +462,12 @@ static int bssmap_rx_ass_fail(struct ran_conn *conn, struct msgb *msg,
 
 	/* FIXME: In AoIP, the Assignment failure will carry also an optional
 	 * Codec List (BSS Supported) element. It has to be discussed if we
-	 * can ignore this element. If not, The msc_assign_fail() function
-	 * call has to change. However msc_assign_fail() does nothing in the
+	 * can ignore this element. If not, The ran_conn_assign_fail() function
+	 * call has to change. However ran_conn_assign_fail() does nothing in the
 	 * end. So probably we can just leave it as it is. Even for AoIP */
 
 	/* Inform the MSC about the assignment failure event */
-	msc_assign_fail(conn, cause, rr_cause_ptr);
+	ran_conn_assign_fail(conn, cause, rr_cause_ptr);
 
 	return 0;
 }
@@ -494,7 +494,7 @@ static int bssmap_rx_sapi_n_rej(struct ran_conn *conn, struct msgb *msg,
 	dlci = TLVP_VAL(tp, GSM0808_IE_DLCI)[0];
 
 	/* Inform the MSC about the sapi "n" reject event */
-	msc_sapi_n_reject(conn, dlci);
+	ran_conn_sapi_n_reject(conn, dlci);
 
 	return 0;
 }
@@ -582,7 +582,7 @@ static int bssmap_rx_ass_compl(struct ran_conn *conn, struct msgb *msg,
 
 	/* FIXME: Seems to be related to authentication or,
 	   encryption. Is this really in the right place? */
-	msc_rx_sec_mode_compl(conn);
+	ran_conn_rx_sec_mode_compl(conn);
 
 	return 0;
 }
@@ -670,12 +670,12 @@ static int rx_dtap(const struct osmo_sccp_user *scu, const struct a_conn_info *a
 
 	LOGPCONN(conn, LOGL_DEBUG, "Rx DTAP %s\n", msgb_hexdump_l2(msg));
 
-	/* msc_dtap expects the dtap payload in l3h */
+	/* ran_conn_dtap expects the dtap payload in l3h */
 	msg->l3h = msg->l2h + 3;
 	OMSC_LINKID_CB(msg) = dtap->link_id;
 
 	/* Forward dtap payload into the msc */
-	msc_dtap(conn, msg);
+	ran_conn_dtap(conn, msg);
 
 	return 0;
 }
