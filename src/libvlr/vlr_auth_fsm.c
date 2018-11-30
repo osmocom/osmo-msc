@@ -65,13 +65,13 @@ struct auth_fsm_priv {
  * least used auth tuple without enforcing a maximum use count.  If there are
  * no auth tuples, return NULL.
  */
-static struct gsm_auth_tuple *
+static struct vlr_auth_tuple *
 _vlr_subscr_next_auth_tuple(struct vlr_subscr *vsub, int max_reuse_count)
 {
 	unsigned int count;
 	unsigned int idx;
-	struct gsm_auth_tuple *at = NULL;
-	unsigned int key_seq = GSM_KEY_SEQ_INVAL;
+	struct vlr_auth_tuple *at = NULL;
+	unsigned int key_seq = VLR_KEY_SEQ_INVAL;
 
 	if (!vsub)
 		return NULL;
@@ -79,7 +79,7 @@ _vlr_subscr_next_auth_tuple(struct vlr_subscr *vsub, int max_reuse_count)
 	if (vsub->last_tuple)
 		key_seq = vsub->last_tuple->key_seq;
 
-	if (key_seq == GSM_KEY_SEQ_INVAL)
+	if (key_seq == VLR_KEY_SEQ_INVAL)
 		/* Start with 0 after increment modulo array size */
 		idx = ARRAY_SIZE(vsub->auth_tuples) - 1;
 	else
@@ -88,7 +88,7 @@ _vlr_subscr_next_auth_tuple(struct vlr_subscr *vsub, int max_reuse_count)
 	for (count = ARRAY_SIZE(vsub->auth_tuples); count > 0; count--) {
 		idx = (idx + 1) % ARRAY_SIZE(vsub->auth_tuples);
 
-		if (vsub->auth_tuples[idx].key_seq == GSM_KEY_SEQ_INVAL)
+		if (vsub->auth_tuples[idx].key_seq == VLR_KEY_SEQ_INVAL)
 			continue;
 
 		if (!at || vsub->auth_tuples[idx].use_count < at->use_count)
@@ -102,10 +102,10 @@ _vlr_subscr_next_auth_tuple(struct vlr_subscr *vsub, int max_reuse_count)
 }
 
 /* Return an auth tuple and increment its use count. */
-static struct gsm_auth_tuple *
+static struct vlr_auth_tuple *
 vlr_subscr_get_auth_tuple(struct vlr_subscr *vsub, int max_reuse_count)
 {
-	struct gsm_auth_tuple *at = _vlr_subscr_next_auth_tuple(vsub,
+	struct vlr_auth_tuple *at = _vlr_subscr_next_auth_tuple(vsub,
 							       max_reuse_count);
 	if (!at)
 		return NULL;
@@ -124,7 +124,7 @@ static bool check_auth_resp(struct vlr_subscr *vsub, bool is_r99,
 			    bool is_utran, const uint8_t *res,
 			    uint8_t res_len)
 {
-	struct gsm_auth_tuple *at = vsub->last_tuple;
+	struct vlr_auth_tuple *at = vsub->last_tuple;
 	struct osmo_auth_vector *vec = &at->vec;
 	bool check_umts;
 	bool res_is_umts_aka;
@@ -263,7 +263,7 @@ static int _vlr_subscr_authenticate(struct osmo_fsm_inst *fi)
 {
 	struct auth_fsm_priv *afp = fi->priv;
 	struct vlr_subscr *vsub = afp->vsub;
-	struct gsm_auth_tuple *at;
+	struct vlr_auth_tuple *at;
 	bool use_umts_aka;
 
 	/* Caller ensures we have vectors available */

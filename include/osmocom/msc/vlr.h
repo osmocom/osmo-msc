@@ -77,6 +77,14 @@ enum vlr_ciph_result_cause {
 	VLR_CIPH_COMPL,
 };
 
+struct vlr_auth_tuple {
+	int use_count;
+	int key_seq;
+	struct osmo_auth_vector vec;
+};
+#define VLR_KEY_SEQ_INVAL	7	/* GSM 04.08 - 10.5.1.2 */
+
+
 struct vlr_ciph_result {
 	enum vlr_ciph_result_cause cause;
 	char imeisv[GSM48_MI_SIZE];
@@ -122,8 +130,8 @@ struct vlr_subscr {
 	uint32_t age_indicator;				/* 2.17.1 */
 
 	/* Authentication Data */
-	struct gsm_auth_tuple auth_tuples[5];		/* 2.3.1-2.3.4 */
-	struct gsm_auth_tuple *last_tuple;
+	struct vlr_auth_tuple auth_tuples[5];		/* 2.3.1-2.3.4 */
+	struct vlr_auth_tuple *last_tuple;
 	enum vlr_subscr_security_context sec_ctx;
 
 	/* Data local to VLR is below */
@@ -205,7 +213,7 @@ struct vlr_ops {
 	 * \param[in] at  auth tuple providing rand, key_seq and autn.
 	 * \param[in] send_autn  True to send AUTN, for r99 UMTS auth.
 	 */
-	int (*tx_auth_req)(void *msc_conn_ref, struct gsm_auth_tuple *at,
+	int (*tx_auth_req)(void *msc_conn_ref, struct vlr_auth_tuple *at,
 			   bool send_autn);
 	/* encode + transmit an AUTH REJECT towards the MS */
 	int (*tx_auth_rej)(void *msc_conn_ref);

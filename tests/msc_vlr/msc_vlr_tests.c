@@ -714,7 +714,7 @@ static int fake_vlr_tx_cm_serv_rej(void *msc_conn_ref, enum gsm48_reject_value c
 	return 0;
 }
 
-static int fake_vlr_tx_auth_req(void *msc_conn_ref, struct gsm_auth_tuple *at,
+static int fake_vlr_tx_auth_req(void *msc_conn_ref, struct vlr_auth_tuple *at,
 				bool send_autn)
 {
 	struct ran_conn *conn = msc_conn_ref;

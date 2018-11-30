@@ -602,7 +602,7 @@ static void subscr_dump_full_vty(struct vty *vty, struct vlr_subscr *vsub)
 #endif
 
 	if (vsub->last_tuple) {
-		struct gsm_auth_tuple *t = vsub->last_tuple;
+		struct vlr_auth_tuple *t = vsub->last_tuple;
 		vty_out(vty, "    A3A8 last tuple (used %d times):%s",
 			t->use_count, VTY_NEWLINE);
 		vty_out(vty, "     seq # : %d%s",

@@ -1514,7 +1514,7 @@ int gsm0408_dispatch(struct ran_conn *conn, struct msgb *msg)
  ***********************************************************************/
 
 /* VLR asks us to send an authentication request */
-static int msc_vlr_tx_auth_req(void *msc_conn_ref, struct gsm_auth_tuple *at,
+static int msc_vlr_tx_auth_req(void *msc_conn_ref, struct vlr_auth_tuple *at,
 			       bool send_autn)
 {
 	struct ran_conn *conn = msc_conn_ref;
@@ -1600,7 +1600,7 @@ int ran_conn_geran_set_cipher_mode(struct ran_conn *conn, bool umts_aka, bool re
 	int i, j = 0;
 	int request_classmark = 0;
 	int request_classmark_for_a5_n = 0;
-	struct gsm_auth_tuple *tuple = conn->vsub->last_tuple;
+	struct vlr_auth_tuple *tuple = conn->vsub->last_tuple;
 
 	if (!conn || !conn->vsub || !conn->vsub->last_tuple) {
 		/* This should really never happen, because we checked this in msc_vlr_set_ciph_mode()
@@ -1680,7 +1680,7 @@ int msc_vlr_set_ciph_mode(void *msc_conn_ref,
 {
 	struct ran_conn *conn = msc_conn_ref;
 	struct vlr_subscr *vsub;
-	struct gsm_auth_tuple *tuple;
+	struct vlr_auth_tuple *tuple;
 
 	if (!conn || !conn->vsub) {
 		LOGP(DMM, LOGL_ERROR, "Cannot send Ciphering Mode Command to"

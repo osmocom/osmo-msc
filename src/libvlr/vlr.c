@@ -242,7 +242,7 @@ static struct vlr_subscr *_vlr_subscr_alloc(struct vlr_instance *vlr)
 	vsub->tmsi_new = GSM_RESERVED_TMSI;
 
 	for (i = 0; i < ARRAY_SIZE(vsub->auth_tuples); i++)
-		vsub->auth_tuples[i].key_seq = GSM_KEY_SEQ_INVAL;
+		vsub->auth_tuples[i].key_seq = VLR_KEY_SEQ_INVAL;
 
 	INIT_LLIST_HEAD(&vsub->cs.requests);
 	INIT_LLIST_HEAD(&vsub->ps.pdp_list);
@@ -661,7 +661,7 @@ void vlr_subscr_update_tuples(struct vlr_subscr *vsub,
 	if (gsup->num_auth_vectors) {
 		memset(&vsub->auth_tuples, 0, sizeof(vsub->auth_tuples));
 		for (i = 0; i < ARRAY_SIZE(vsub->auth_tuples); i++)
-			vsub->auth_tuples[i].key_seq = GSM_KEY_SEQ_INVAL;
+			vsub->auth_tuples[i].key_seq = VLR_KEY_SEQ_INVAL;
 	}
 
 	got_tuples = 0;

@@ -42,13 +42,6 @@ typedef int gsm_cbfn(unsigned int hooknum,
 		     struct msgb *msg,
 		     void *data, void *param);
 
-struct gsm_auth_tuple {
-	int use_count;
-	int key_seq;
-	struct osmo_auth_vector vec;
-};
-#define GSM_KEY_SEQ_INVAL	7	/* GSM 04.08 - 10.5.1.2 */
-
 enum {
 	MSC_CTR_LOC_UPDATE_TYPE_ATTACH,
 	MSC_CTR_LOC_UPDATE_TYPE_NORMAL,
