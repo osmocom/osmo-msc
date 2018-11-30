@@ -222,7 +222,7 @@ void msc_cipher_mode_compl(struct gsm_subscriber_connection *conn,
 		}
 	}
 
-	conn->encr.alg_id = alg_id;
+	conn->geran_encr.alg_id = alg_id;
 
 	ciph_res.cause = VLR_CIPH_COMPL;
 	vlr_subscr_rx_ciph_res(conn->vsub, &ciph_res);

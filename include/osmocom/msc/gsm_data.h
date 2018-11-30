@@ -125,7 +125,7 @@ struct gsm_subscriber_connection {
 	enum ran_type via_ran;
 
 	uint16_t lac;
-	struct gsm_encr encr;
+	struct geran_encr geran_encr;
 
 	/* "Temporary" storage for the case the VLR asked for Cipher Mode Command, but the MSC still
 	 * wants to request a Classmark Update first. */

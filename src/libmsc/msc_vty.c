@@ -499,7 +499,7 @@ static void vty_dump_one_conn(struct vty *vty, const struct gsm_subscriber_conne
 		conn->use_count,
 		conn->use_tokens,
 		conn->received_cm_service_request ? 'C' : '-',
-		conn->encr.alg_id,
+		conn->geran_encr.alg_id,
 		conn->fi ? osmo_fsm_inst_state_name(conn->fi) : "-",
 		VTY_NEWLINE);
 }
