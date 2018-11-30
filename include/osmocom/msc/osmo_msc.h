@@ -12,8 +12,6 @@
 #define MSC_HLR_REMOTE_PORT_DEFAULT OSMO_GSUP_PORT
 
 enum subscr_conn_fsm_event {
-	/* Mark 0 as invalid to catch uninitialized vars */
-	SUBSCR_CONN_E_INVALID = 0,
 	/* Accepted the initial Complete Layer 3 (starting to evaluate Authentication and Ciphering) */
 	SUBSCR_CONN_E_COMPLETE_LAYER_3,
 	/* Received Classmark Update, typically neede for Ciphering Mode Command */
