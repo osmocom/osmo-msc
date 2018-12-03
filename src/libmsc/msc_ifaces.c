@@ -28,6 +28,7 @@
 #include <osmocom/mgcp_client/mgcp_client.h>
 #include <osmocom/msc/vlr.h>
 #include <osmocom/msc/a_iface.h>
+#include <osmocom/msc/sgs_iface.h>
 #include <osmocom/msc/gsm_04_08.h>
 #include <osmocom/msc/msc_mgcp.h>
 
@@ -59,6 +60,10 @@ static int msc_tx(struct ran_conn *conn, struct msgb *msg)
 	case OSMO_RAT_UTRAN_IU:
 		msg->dst = conn->iu.ue_ctx;
 		return ranap_iu_tx(msg, 0);
+
+	case OSMO_RAT_EUTRAN_SGS:
+		msg->dst = conn;
+		return sgs_iface_tx_dtap_ud(msg);
 
 	default:
 		LOGP(DMSC, LOGL_ERROR,

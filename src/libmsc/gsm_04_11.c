@@ -193,7 +193,9 @@ static int gsm411_mmsms_est_req(struct gsm_trans *trans)
 	LOGP(DLSMS, LOGL_DEBUG, "Initiating Paging procedure "
 		"for %s due to MMSMS_EST_REQ\n", vlr_subscr_name(trans->vsub));
 	trans->paging_request = subscr_request_conn(trans->vsub,
-		paging_cb_mmsms_est_req, trans, "MT SMS");
+						    paging_cb_mmsms_est_req,
+						    trans, "MT SMS",
+						    SGSAP_SERV_IND_SMS);
 	if (!trans->paging_request) {
 		LOGP(DLSMS, LOGL_ERROR, "Failed to initiate Paging "
 			"procedure for %s\n", vlr_subscr_name(trans->vsub));

@@ -17,6 +17,7 @@ AM_CFLAGS = \
 	$(LIBOSMOMGCPCLIENT_CFLAGS) \
 	$(LIBOSMOGSUPCLIENT_CFLAGS) \
 	$(LIBOSMORANAP_CFLAGS) \
+	$(LIBOSMONETIF_CFLAGS) \
 	$(NULL)
 
 noinst_HEADERS = \
@@ -52,6 +53,9 @@ libmsc_a_SOURCES = \
 	transaction.c \
 	osmo_msc.c \
 	ctrl_commands.c \
+	sgs_iface.c \
+	sgs_server.c \
+	sgs_vty.c \
 	$(NULL)
 if BUILD_IU
 libmsc_a_SOURCES += \

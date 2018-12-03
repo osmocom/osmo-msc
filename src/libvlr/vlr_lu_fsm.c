@@ -27,6 +27,7 @@
 #include "vlr_core.h"
 #include "vlr_auth_fsm.h"
 #include "vlr_lu_fsm.h"
+#include "vlr_sgs_fsm.h"
 
 #define S(x)	(1 << (x))
 
@@ -362,6 +363,7 @@ static void vlr_lu_compl_fsm_success(struct osmo_fsm_inst *fi)
 		vlr_subscr_get(vsub);
 	}
 	_vlr_lu_compl_fsm_done(fi, VLR_FSM_RESULT_SUCCESS, 0);
+	vlr_sgs_fsm_update_id(vsub);
 }
 
 static void vlr_lu_compl_fsm_failure(struct osmo_fsm_inst *fi, uint8_t cause)
@@ -1054,6 +1056,11 @@ static void lu_fsm_idle(struct osmo_fsm_inst *fi, uint32_t event,
 		return; /* error. FSM already terminated. */
 
 	OSMO_ASSERT(lfp->vsub);
+
+	/* At this point we know for which subscriber the location update is,
+	 * we now must inform SGs-UE FSM that we received a location update
+	 * via A, IU or Gs interface. */
+	osmo_fsm_inst_dispatch(lfp->vsub->sgs_fsm, SGS_UE_E_RX_LU_FROM_A_IU_GS, NULL);
 
 	/* See 3GPP TS 23.012, procedure Retrieve_IMEISV_If_Required */
 	if ((!vlr->cfg.retrieve_imeisv_early)

@@ -77,5 +77,6 @@ int gsm48_multirate_config(uint8_t *lv, const struct amr_multirate_conf *mr, con
 
 int gsm48_tch_rtp_create(struct gsm_trans *trans);
 int gsm48_conn_sendmsg(struct msgb *msg, struct ran_conn *conn, struct gsm_trans *trans);
+struct msgb *gsm48_create_mm_info(struct gsm_network *net);
 
 #endif

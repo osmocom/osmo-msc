@@ -4,6 +4,7 @@ OsmoMSC(config)# list
 ...
   network
   msc
+  sgs
   mncc-int
   hlr
 ...
@@ -92,6 +93,18 @@ OsmoMSC(config)# exit
 OsmoMSC# configure terminal
 OsmoMSC(config)# network
 OsmoMSC(config-net)# end
+
+OsmoMSC# configure terminal
+OsmoMSC(config)# sgs
+OsmoMSC(config-sgs)# list
+...
+  local-ip A.B.C.D
+  local-port <0-65535>
+  timer (ts5|ts6-2|ts7|ts11|ts14|ts15) <1-120>
+  counter (ns7|ns11) <0-255>
+  vlr-name FQDN
+OsmoMSC(config-sgs)# end
+
 OsmoMSC# disable
 OsmoMSC> enable
 
@@ -125,4 +138,7 @@ mncc-int
 hlr
  remote-ip 127.0.0.1
  remote-port 4222
+sgs
+ local-ip 0.0.0.0
+ vlr-name vlr.example.net
 end

@@ -48,6 +48,7 @@
 #include <osmocom/msc/vlr.h>
 #include <osmocom/msc/msc_ifaces.h>
 #include <osmocom/msc/a_iface.h>
+#include <osmocom/msc/sgs_iface.h>
 
 void subscr_paging_cancel(struct vlr_subscr *vsub, enum gsm_paging_event event)
 {
@@ -109,7 +110,9 @@ int subscr_paging_dispatch(unsigned int hooknum, unsigned int event,
 	return 0;
 }
 
-static int msc_paging_request(struct vlr_subscr *vsub)
+/* Execute a paging on the currently active RAN. Returns the number of
+ * delivered paging requests or -EINVAL in case of failure. */
+static int msc_paging_request(struct vlr_subscr *vsub, enum sgsap_service_ind serv_ind)
 {
 	/* The subscriber was last seen in subscr->lac. Find out which
 	 * BSCs/RNCs are responsible and send them a paging request via open
@@ -122,6 +125,8 @@ static int msc_paging_request(struct vlr_subscr *vsub)
 					vsub->tmsi == GSM_RESERVED_TMSI?
 					NULL : &vsub->tmsi,
 					vsub->cgi.lai.lac);
+	case OSMO_RAT_EUTRAN_SGS:
+		return sgs_iface_tx_paging(vsub, serv_ind);
 	default:
 		break;
 	}
@@ -142,10 +147,11 @@ static void paging_response_timer_cb(void *data)
  * \param cbfn  function to call when the conn is established.
  * \param param  caller defined param to pass to cbfn().
  * \param label  human readable label of the request kind used for logging.
+ * \param serv_ind  sgsap service indicator (in case SGs interface is used to page).
  */
 struct subscr_request *subscr_request_conn(struct vlr_subscr *vsub,
 					   gsm_cbfn *cbfn, void *param,
-					   const char *label)
+					   const char *label, enum sgsap_service_ind serv_ind)
 {
 	int rc;
 	struct subscr_request *request;
@@ -155,7 +161,7 @@ struct subscr_request *subscr_request_conn(struct vlr_subscr *vsub,
 	if (!vsub->cs.is_paging) {
 		LOGP(DMM, LOGL_DEBUG, "Subscriber %s not paged yet, start paging.\n",
 		     vlr_subscr_name(vsub));
-		rc = msc_paging_request(vsub);
+		rc = msc_paging_request(vsub, serv_ind);
 		if (rc <= 0) {
 			LOGP(DMM, LOGL_ERROR, "Subscriber %s paging failed: %d\n",
 			     vlr_subscr_name(vsub), rc);

@@ -56,6 +56,8 @@
 #include <osmocom/msc/signal.h>
 #include <osmocom/msc/mncc_int.h>
 #include <osmocom/msc/rrlp.h>
+#include <osmocom/msc/vlr_sgs.h>
+#include <osmocom/msc/sgs_vty.h>
 
 static struct gsm_network *gsmnet = NULL;
 
@@ -565,7 +567,7 @@ static void vty_dump_one_conn(struct vty *vty, const struct ran_conn *conn)
 {
 	vty_out(vty, "%08x %3s %5u %3u %08x %c /%1u %27s %22s%s",
 		conn->a.conn_id,
-		conn->via_ran == OSMO_RAT_UTRAN_IU ? "Iu" : "A",
+		osmo_rat_type_name(conn->via_ran),
 		conn->lac,
 		conn->use_count,
 		conn->use_tokens,
@@ -729,6 +731,15 @@ static void subscr_dump_full_vty(struct vty *vty, struct vlr_subscr *vsub)
 		reqs += 1;
 	vty_out(vty, "    Paging: %s paging for %d requests%s",
 		vsub->cs.is_paging ? "is" : "not", reqs, VTY_NEWLINE);
+
+	/* SGs related */
+	vty_out(vty, "    SGs-state: %s%s",
+		osmo_fsm_inst_state_name(vsub->sgs_fsm), VTY_NEWLINE);
+	if (vsub->sgs.mme_name && strlen(vsub->sgs.mme_name))
+		vty_out(vty, "    SGs-MME: %s%s", vsub->sgs.mme_name, VTY_NEWLINE);
+	else
+		vty_out(vty, "    SGs-MME: (none)%s", VTY_NEWLINE);
+
 	vty_out(vty, "    Use count: %u%s", vsub->use_count, VTY_NEWLINE);
 
 	/* Connection */
@@ -1159,7 +1170,7 @@ DEFUN(subscriber_paging,
 		return CMD_WARNING;
 	}
 
-	req = subscr_request_conn(vsub, NULL, NULL, "manual Paging from VTY");
+	req = subscr_request_conn(vsub, NULL, NULL, "manual Paging from VTY", SGSAP_SERV_IND_CS_CALL);
 	if (req)
 		vty_out(vty, "%% paging subscriber%s", VTY_NEWLINE);
 	else
@@ -1590,6 +1601,7 @@ void msc_vty_init(struct gsm_network *msc_network)
 #ifdef BUILD_IU
 	ranap_iu_vty_init(MSC_NODE, &msc_network->iu.rab_assign_addr_enc);
 #endif
+	sgs_vty_init();
 	osmo_fsm_vty_add_cmds();
 
 	osmo_signal_register_handler(SS_SCALL, scall_cbfn, NULL);

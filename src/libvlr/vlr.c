@@ -30,6 +30,7 @@
 #include <osmocom/gsm/ipa.h>
 #include <osmocom/msc/gsm_subscriber.h>
 #include <osmocom/gsupclient/gsup_client.h>
+#include <osmocom/msc/vlr_sgs.h>
 #include <osmocom/msc/vlr.h>
 #include <osmocom/msc/debug.h>
 
@@ -42,6 +43,7 @@
 #include "vlr_auth_fsm.h"
 #include "vlr_lu_fsm.h"
 #include "vlr_access_req_fsm.h"
+#include "vlr_sgs_fsm.h"
 
 #define SGSN_SUBSCR_MAX_RETRIES 3
 #define SGSN_SUBSCR_RETRY_INTERVAL 10
@@ -262,6 +264,11 @@ static struct vlr_subscr *_vlr_subscr_alloc(struct vlr_instance *vlr)
 	INIT_LLIST_HEAD(&vsub->cs.requests);
 	INIT_LLIST_HEAD(&vsub->ps.pdp_list);
 
+	/* Create an SGs FSM, which is needed to control CSFB,
+	 * in cases where CSFB/SGs is not in use, this FSM will
+	 * just do nothing. (see also: sgs_iface.c) */
+	vlr_sgs_fsm_create(vsub);
+
 	llist_add_tail(&vsub->list, &vlr->subscribers);
 	return vsub;
 }
@@ -307,6 +314,13 @@ void vlr_subscr_free(struct vlr_subscr *vsub)
 {
 	llist_del(&vsub->list);
 	DEBUGP(DREF, "freeing VLR subscr %s\n", vlr_subscr_name(vsub));
+
+	/* Make sure SGs timer Ts5 is removed */
+	osmo_timer_del(&vsub->sgs.Ts5);
+
+	/* Remove SGs FSM (see also: sgs_iface.c) */
+	vlr_sgs_fsm_remove(vsub);
+
 	talloc_free(vsub);
 }
 
@@ -854,7 +868,13 @@ static int vlr_subscr_handle_isd_req(struct vlr_subscr *vsub,
 static int vlr_subscr_handle_lu_res(struct vlr_subscr *vsub,
 				    const struct osmo_gsup_message *gsup)
 {
-	if (!vsub->lu_fsm) {
+	struct sgs_lu_response sgs_lu_response;
+	bool sgs_lu_in_progress = false;
+
+	if (vsub->sgs_fsm->state == SGS_UE_ST_LA_UPD_PRES)
+		sgs_lu_in_progress = true;
+
+	if (!vsub->lu_fsm && !sgs_lu_in_progress) {
 		LOGVSUBP(LOGL_ERROR, vsub, "Rx GSUP LU Result "
 			 "without LU in progress\n");
 		return -ENODEV;
@@ -865,7 +885,12 @@ static int vlr_subscr_handle_lu_res(struct vlr_subscr *vsub,
 	 * nested INSERT SUBSCRIBER DATA transaction */
 	vlr_subscr_gsup_insert_data(vsub, gsup);
 
-	osmo_fsm_inst_dispatch(vsub->lu_fsm, VLR_ULA_E_HLR_LU_RES, NULL);
+	if (sgs_lu_in_progress) {
+		sgs_lu_response.accepted = true;
+		sgs_lu_response.vsub = vsub;
+		vsub->sgs.response_cb(&sgs_lu_response);
+	} else
+		osmo_fsm_inst_dispatch(vsub->lu_fsm, VLR_ULA_E_HLR_LU_RES, NULL);
 
 	return 0;
 }
@@ -874,7 +899,13 @@ static int vlr_subscr_handle_lu_res(struct vlr_subscr *vsub,
 static int vlr_subscr_handle_lu_err(struct vlr_subscr *vsub,
 				    const struct osmo_gsup_message *gsup)
 {
-	if (!vsub->lu_fsm) {
+	struct sgs_lu_response sgs_lu_response;
+	bool sgs_lu_in_progress = false;
+
+	if (vsub->sgs_fsm->state == SGS_UE_ST_LA_UPD_PRES)
+		sgs_lu_in_progress = true;
+
+	if (!vsub->lu_fsm && !sgs_lu_in_progress) {
 		LOGVSUBP(LOGL_ERROR, vsub, "Rx GSUP LU Error "
 			 "without LU in progress\n");
 		return -ENODEV;
@@ -883,9 +914,13 @@ static int vlr_subscr_handle_lu_err(struct vlr_subscr *vsub,
 	LOGVSUBP(LOGL_DEBUG, vsub, "UpdateLocation failed; gmm_cause: %s\n",
 		 get_value_string(gsm48_gmm_cause_names, gsup->cause));
 
-	osmo_fsm_inst_dispatch(vsub->lu_fsm, VLR_ULA_E_HLR_LU_RES,
-				(void *)&gsup->cause);
-
+	if (sgs_lu_in_progress) {
+		sgs_lu_response.accepted = false;
+		sgs_lu_response.vsub = vsub;
+		vsub->sgs.response_cb(&sgs_lu_response);
+	} else
+		osmo_fsm_inst_dispatch(vsub->lu_fsm, VLR_ULA_E_HLR_LU_RES,
+					(void *)&gsup->cause);
 	return 0;
 }
 
@@ -1225,6 +1260,9 @@ int vlr_subscr_rx_imsi_detach(struct vlr_subscr *vsub)
 	vsub->imsi_detached_flag = true;
 	vsub->expire_lu = VLR_SUBSCRIBER_NO_EXPIRATION;
 
+	/* Inform the UE-SGs FSM that the subscriber has been detached */
+	osmo_fsm_inst_dispatch(vsub->sgs_fsm, SGS_UE_E_RX_DETACH_IND_FROM_UE, NULL);
+
 	vlr_subscr_expire(vsub);
 
 	return 0;
@@ -1273,6 +1311,8 @@ struct vlr_instance *vlr_alloc(void *ctx, const struct vlr_ops *ops)
 	vlr_lu_fsm_init();
 	/* vlr_access_request_fsm.c */
 	vlr_parq_fsm_init();
+	/* vlr_sgs_fsm.c */
+	vlr_sgs_fsm_init();
 
 	return vlr;
 }

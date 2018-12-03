@@ -343,7 +343,8 @@ static struct gsm_trans *establish_nc_ss_trans(struct gsm_network *net,
 
 	/* Trigger Paging Request */
 	trans->paging_request = subscr_request_conn(vsub,
-		&handle_paging_event, trans, "GSM 09.11 SS/USSD");
+		&handle_paging_event, trans, "GSM 09.11 SS/USSD",
+	        SGSAP_SERV_IND_CS_CALL);
 	if (!trans->paging_request) {
 		LOGP(DMM, LOGL_ERROR, "Failed to allocate paging token\n");
 		trans_free(trans);

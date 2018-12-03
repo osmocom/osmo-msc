@@ -23,11 +23,15 @@ noinst_HEADERS = \
 	a_reset.h \
 	ran_conn.h \
 	rrlp.h \
+	sgs_iface.h \
+	sgs_server.h \
+	sgs_vty.h \
 	signal.h \
 	silent_call.h \
 	smpp.h \
 	sms_queue.h \
 	transaction.h \
 	vlr.h \
+	vlr_sgs.h \
 	vty.h \
 	$(NULL)

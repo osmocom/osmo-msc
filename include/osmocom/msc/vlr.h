@@ -13,6 +13,7 @@
 #include <osmocom/msc/ran_conn.h>
 #include <osmocom/msc/msc_common.h>
 #include <osmocom/gsupclient/gsup_client.h>
+#include <osmocom/msc/vlr_sgs.h>
 
 #define LOGGSUPP(level, gsup, fmt, args...)				\
 	LOGP(DVLR, level, "GSUP(%s) " fmt, (gsup)->imsi, ## args)
@@ -162,6 +163,7 @@ struct vlr_subscr {
 	struct osmo_fsm_inst *lu_fsm;
 	struct osmo_fsm_inst *auth_fsm;
 	struct osmo_fsm_inst *proc_arq_fsm;
+	struct osmo_fsm_inst *sgs_fsm;
 
 	bool lu_complete;
 	time_t expire_lu;
@@ -182,6 +184,17 @@ struct vlr_subscr {
 		uint8_t lac;
 		enum osmo_rat_type attached_via_ran;
 	} cs;
+	/* SGs (MME) specific parts */
+	struct {
+		struct vlr_sgs_cfg cfg;
+		char mme_name[SGS_MME_NAME_LEN + 1];
+		struct osmo_location_area_id lai;
+		vlr_sgs_lu_response_cb_t response_cb;
+		vlr_sgs_lu_paging_cb_t paging_cb;
+		vlr_sgs_lu_mminfo_cb_t mminfo_cb;
+		enum sgsap_service_ind paging_serv_ind;
+		struct osmo_timer_list Ts5;
+	} sgs;
 
 	struct gsm_classmark classmark;
 };

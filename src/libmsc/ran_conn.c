@@ -31,6 +31,7 @@
 #include <osmocom/msc/transaction.h>
 #include <osmocom/msc/signal.h>
 #include <osmocom/msc/a_iface.h>
+#include <osmocom/msc/sgs_iface.h>
 #include <osmocom/msc/iucs.h>
 
 #include "../../bscconfig.h"
@@ -338,6 +339,13 @@ static void ran_conn_fsm_releasing_onenter(struct osmo_fsm_inst *fi, uint32_t pr
 {
 	struct ran_conn *conn = fi->priv;
 
+	/* The SGs interface needs to access vsub struct members to send the
+	 * release message, however the following release procedures will
+	 * remove conn->vsub, so we need to send the release right now. */
+	if (conn->via_ran == OSMO_RAT_EUTRAN_SGS) {
+		sgs_iface_tx_release(conn);
+	}
+
 	/* Use count for either conn->a.waiting_for_clear_complete or
 	 * conn->iu.waiting_for_release_complete. 'get' it early, so we don't deallocate after tearing
 	 * down active transactions. Safeguard against double-get (though it shouldn't happen). */
@@ -380,6 +388,12 @@ static void ran_conn_fsm_releasing_onenter(struct osmo_fsm_inst *fi, uint32_t pr
 			break;
 		}
 		conn->iu.waiting_for_release_complete = true;
+		break;
+	case OSMO_RAT_EUTRAN_SGS:
+		/* Release message is already sent at the beginning of this
+		 * functions (see above), but we still need to notify the
+		 * conn that a release has been sent / is in progress. */
+		ran_conn_sgs_release_sent(conn);
 		break;
 	default:
 		LOGP(DMM, LOGL_ERROR, "%s: Unknown RAN type, cannot tx release/clear\n",
@@ -667,6 +681,8 @@ struct ran_conn *ran_conn_alloc(struct gsm_network *network,
 	case OSMO_RAT_UTRAN_IU:
 		conn->log_subsys = DRANAP;
 		break;
+	case OSMO_RAT_EUTRAN_SGS:
+		conn->log_subsys = DSGS;
 	default:
 		conn->log_subsys = DMSC;
 		break;
@@ -771,4 +787,12 @@ void ran_conn_rx_bssmap_clear_complete(struct ran_conn *conn)
 void ran_conn_rx_iu_release_complete(struct ran_conn *conn)
 {
 	rx_close_complete(conn, "Iu Release Complete", &conn->iu.waiting_for_release_complete);
+}
+
+void ran_conn_sgs_release_sent(struct ran_conn *conn)
+{
+	bool dummy_waiting_for_release_complete = true;
+
+	/* Note: In SGsAP there is no confirmation of a release. */
+	rx_close_complete(conn, "SGs Release Complete", &dummy_waiting_for_release_complete);
 }

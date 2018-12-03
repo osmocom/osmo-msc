@@ -21,6 +21,7 @@
  */
 
 #include "msc_vlr_tests.h"
+#include "stubs.h"
 
 #define IMSI "901700000004620"
 

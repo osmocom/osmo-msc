@@ -208,6 +208,7 @@ bool ran_conn_in_release(struct ran_conn *conn);
 
 void ran_conn_rx_bssmap_clear_complete(struct ran_conn *conn);
 void ran_conn_rx_iu_release_complete(struct ran_conn *conn);
+void ran_conn_sgs_release_sent(struct ran_conn *conn);
 
 enum ran_conn_use {
 	RAN_CONN_USE_UNTRACKED = -1,

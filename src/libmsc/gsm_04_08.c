@@ -469,13 +469,12 @@ static uint8_t bcdify(uint8_t value)
         return ret;
 }
 
-
-/* Section 9.2.15a */
-int gsm48_tx_mm_info(struct ran_conn *conn)
+/* Generate a message buffer that contains a valid MM info message,
+ * See also 3GPP TS 24.008, chapter 9.2.15a */
+struct msgb *gsm48_create_mm_info(struct gsm_network *net)
 {
 	struct msgb *msg = gsm48_msgb_alloc_name("GSM 04.08 MM INF");
 	struct gsm48_hdr *gh;
-	struct gsm_network *net = conn->network;
 	uint8_t *ptr8;
 	int name_len, name_pad;
 
@@ -617,8 +616,18 @@ int gsm48_tx_mm_info(struct ran_conn *conn)
 		ptr8[2] = dst;
 	}
 
-	LOG_RAN_CONN(conn, LOGL_DEBUG, "Tx MM INFO\n");
+	return msg;
+}
 
+/* Section 9.2.15a */
+int gsm48_tx_mm_info(struct ran_conn *conn)
+{
+	struct gsm_network *net = conn->network;
+	struct msgb *msg;
+
+        msg = gsm48_create_mm_info(net);
+
+	LOG_RAN_CONN(conn, LOGL_DEBUG, "Tx MM INFO\n");
 	return gsm48_conn_sendmsg(msg, conn, NULL);
 }
 

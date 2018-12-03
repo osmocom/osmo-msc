@@ -128,7 +128,8 @@ int gsm_silent_call_start(struct vlr_subscr *vsub, void *data, int type)
 	 * This doesn't apply to the situation after MSCSPLIT with an
 	 * A-interface. */
 	req = subscr_request_conn(vsub, paging_cb_silent, data,
-				  "establish silent call");
+				  "establish silent call",
+				  SGSAP_SERV_IND_CS_CALL);
 	if (!req)
 		return -ENODEV;
 	return 0;

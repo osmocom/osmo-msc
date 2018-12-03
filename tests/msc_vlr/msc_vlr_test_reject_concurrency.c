@@ -22,6 +22,7 @@
  */
 
 #include "msc_vlr_tests.h"
+#include "stubs.h"
 
 static void test_reject_2nd_conn()
 {

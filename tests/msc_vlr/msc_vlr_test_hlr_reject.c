@@ -22,6 +22,7 @@
  */
 
 #include "msc_vlr_tests.h"
+#include "stubs.h"
 
 static void test_hlr_rej_auth_info_unknown_imsi()
 {

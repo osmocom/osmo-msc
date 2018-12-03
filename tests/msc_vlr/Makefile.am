@@ -57,6 +57,7 @@ LDADD = \
 
 noinst_HEADERS = \
 	msc_vlr_tests.h \
+	stubs.h \
 	$(NULL)
 
 EXTRA_DIST = \

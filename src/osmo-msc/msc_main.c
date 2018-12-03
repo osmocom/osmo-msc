@@ -61,6 +61,7 @@
 #include <osmocom/msc/smpp.h>
 #include <osmocom/sigtran/osmo_ss7.h>
 #include <osmocom/mgcp_client/mgcp_client.h>
+#include <osmocom/msc/sgs_iface.h>
 
 #ifdef BUILD_IU
 #include <osmocom/ranap/iu_client.h>
@@ -491,6 +492,12 @@ static const struct log_info_cat msc_default_categories[] = {
 		.description = "BSSAP Protocol (A Interface)",
 		.enabled = 1, .loglevel = LOGL_NOTICE,
 	},
+	[DSGS] = {
+		.name = "DSGS",
+		.description = "SGs Interface (SGsAP)",
+		.enabled = 1, .loglevel = LOGL_NOTICE,
+	},
+
 
 };
 
@@ -566,6 +573,7 @@ int main(int argc, char **argv)
 	if (smpp_openbsc_alloc_init(tall_msc_ctx) < 0)
 		return -1;
 #endif
+	sgs_iface_init(tall_msc_ctx, msc_network);
 
 	rc = vty_read_config_file(msc_cmdline_config.config_file, NULL);
 	if (rc < 0) {

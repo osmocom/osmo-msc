@@ -5,6 +5,7 @@
 
 #include <osmocom/core/linuxlist.h>
 #include <osmocom/gsm/protocol/gsm_23_003.h>
+#include <osmocom/gsm/protocol/gsm_29_118.h>
 
 #include <osmocom/msc/gsm_data.h>
 
@@ -36,8 +37,8 @@ struct subscr_request {
  */
 struct subscr_request *subscr_request_conn(struct vlr_subscr *vsub,
 					   gsm_cbfn *cbfn, void *param,
-					   const char *label);
-
+					   const char *label,
+					   enum sgsap_service_ind serv_ind);
 void subscr_remove_request(struct subscr_request *req);
 
 void subscr_paging_cancel(struct vlr_subscr *vsub, enum gsm_paging_event event);
