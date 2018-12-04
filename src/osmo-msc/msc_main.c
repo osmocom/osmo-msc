@@ -96,11 +96,9 @@ static struct {
 	const char *mncc_sock_path;
 	int use_db_counter;
 } msc_cmdline_config = {
-	"sms.db",
-	"osmo-msc.cfg",
-	0,
-	0,
-	1
+	.database_name = "sms.db",
+	.config_file = "osmo-msc.cfg",
+	.use_db_counter = 1,
 };
 
 /* timer to store statistics */
