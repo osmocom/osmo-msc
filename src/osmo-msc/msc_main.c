@@ -545,11 +545,9 @@ int main(int argc, char **argv)
 	/* Parse options */
 	handle_options(argc, argv);
 
-	/* Allocate global gsm_network struct; choose socket/internal MNCC */
-	msc_network = msc_network_alloc(tall_msc_ctx,
-				        msc_cmdline_config.mncc_sock_path?
-						mncc_sock_from_cc
-						: int_mncc_recv);
+	/* Allocate global gsm_network struct.
+	 * At first use the internal MNCC by default, may be changed later according to cfg or cmdline option. */
+	msc_network = msc_network_alloc(tall_msc_ctx, int_mncc_recv);
 	if (!msc_network)
 		return -ENOMEM;
 
@@ -577,6 +575,7 @@ int main(int argc, char **argv)
 
 	/* Initialize MNCC socket if appropriate */
 	if (msc_cmdline_config.mncc_sock_path) {
+		msc_network->mncc_recv = mncc_sock_from_cc;
 		rc = mncc_sock_init(msc_network,
 				    msc_cmdline_config.mncc_sock_path);
 		if (rc) {
