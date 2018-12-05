@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 
 # (C) 2013 by Jacob Erlbeck <jerlbeck@sysmocom.de>
 # (C) 2014 by Holger Hans Peter Freyther
