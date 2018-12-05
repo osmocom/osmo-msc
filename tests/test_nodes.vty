@@ -30,7 +30,7 @@ OsmoMSC(config)# msc
 OsmoMSC(config-msc)# list
 ...
   assign-tmsi
-  mncc-guard-timeout <0-255>
+  mncc guard-timeout <0-255>
   no assign-tmsi
   auth-tuple-max-reuse-count <-1-2147483647>
   auth-tuple-reuse-on-error (0|1)
@@ -96,7 +96,7 @@ network
  mm info 1
  periodic location update 30
 msc
- mncc-guard-timeout 180
+ mncc guard-timeout 180
  assign-tmsi
  cs7-instance-a 0
  cs7-instance-iu 0
