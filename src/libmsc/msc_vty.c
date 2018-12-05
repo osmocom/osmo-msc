@@ -335,15 +335,24 @@ DEFUN(cfg_msc, cfg_msc_cmd,
 	return CMD_SUCCESS;
 }
 
+#define MNCC_STR "Configure Mobile Network Call Control\n"
+#define MNCC_GUARD_TIMEOUT_STR "Set global guard timer for mncc interface activity\n"
+#define MNCC_GUARD_TIMEOUT_VALUE_STR "guard timer value (sec.)\n"
+
 DEFUN(cfg_msc_mncc_guard_timeout,
       cfg_msc_mncc_guard_timeout_cmd,
-      "mncc-guard-timeout <0-255>",
-      "Set global guard timer for mncc interface activity\n"
-      "guard timer value (sec.)")
+      "mncc guard-timeout <0-255>",
+      MNCC_STR
+      MNCC_GUARD_TIMEOUT_STR MNCC_GUARD_TIMEOUT_VALUE_STR)
 {
 	gsmnet->mncc_guard_timeout = atoi(argv[0]);
 	return CMD_SUCCESS;
 }
+
+ALIAS_DEPRECATED(cfg_msc_mncc_guard_timeout,
+	         cfg_msc_deprecated_mncc_guard_timeout_cmd,
+		 "mncc-guard-timeout <0-255>",
+		 MNCC_GUARD_TIMEOUT_STR MNCC_GUARD_TIMEOUT_VALUE_STR);
 
 DEFUN(cfg_msc_assign_tmsi, cfg_msc_assign_tmsi_cmd,
       "assign-tmsi",
@@ -433,7 +442,7 @@ DEFUN(cfg_msc_emergency_msisdn, cfg_msc_emergency_msisdn_cmd,
 static int config_write_msc(struct vty *vty)
 {
 	vty_out(vty, "msc%s", VTY_NEWLINE);
-	vty_out(vty, " mncc-guard-timeout %i%s",
+	vty_out(vty, " mncc guard-timeout %i%s",
 		gsmnet->mncc_guard_timeout, VTY_NEWLINE);
 	vty_out(vty, " %sassign-tmsi%s",
 		gsmnet->vlr->cfg.assign_tmsi? "" : "no ", VTY_NEWLINE);
@@ -1443,6 +1452,7 @@ void msc_vty_init(struct gsm_network *msc_network)
 	install_node(&msc_node, config_write_msc);
 	install_element(MSC_NODE, &cfg_msc_assign_tmsi_cmd);
 	install_element(MSC_NODE, &cfg_msc_mncc_guard_timeout_cmd);
+	install_element(MSC_NODE, &cfg_msc_deprecated_mncc_guard_timeout_cmd);
 	install_element(MSC_NODE, &cfg_msc_no_assign_tmsi_cmd);
 	install_element(MSC_NODE, &cfg_msc_auth_tuple_max_reuse_count_cmd);
 	install_element(MSC_NODE, &cfg_msc_auth_tuple_reuse_on_error_cmd);
