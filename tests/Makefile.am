@@ -43,19 +43,54 @@ DISTCLEANFILES = \
 	$(NULL)
 
 if ENABLE_EXT_TESTS
+# don't run multiple tests concurrently so that the ports don't conflict
 python-tests: $(BUILT_SOURCES)
-	osmotestvty.py -p $(abs_top_srcdir) -w $(abs_top_builddir) -v
-	osmotestconfig.py -p $(abs_top_srcdir) -w $(abs_top_builddir) -v
-	$(srcdir)/vty_test_runner.py -w $(abs_top_builddir) -v
-	$(srcdir)/ctrl_test_runner.py -w $(abs_top_builddir) -v
+	$(MAKE) vty-test
+	$(MAKE) ctrl-test
 if BUILD_SMPP
-	$(srcdir)/smpp_test_runner.py -w $(abs_top_builddir) -v
+	$(MAKE) smpp-test
 endif
-	rm -f $(top_builddir)/sms.db
+
 else
 python-tests: $(BUILT_SOURCES)
 	echo "Not running python-based tests (determined at configure-time)"
 endif
+
+vty-python-test: $(BUILT_SOURCES)
+	osmotestvty.py -p $(abs_top_srcdir) -w $(abs_top_builddir) -v
+	osmotestconfig.py -p $(abs_top_srcdir) -w $(abs_top_builddir) -v
+	$(srcdir)/vty_test_runner.py -w $(abs_top_builddir) -v
+	rm -f $(top_builddir)/sms.db
+
+# To update the VTY script from current application behavior,
+# pass -u to vty_script_runner.py by doing:
+#   make vty-transcript-test U=-u
+vty-transcript-test:
+	echo "No vty-transcript-test exists yet"
+
+# don't run multiple tests concurrently so that the ports don't conflict
+vty-test:
+	$(MAKE) vty-python-test
+	$(MAKE) vty-transcript-test
+
+ctrl-python-test: $(BUILT_SOURCES)
+	$(srcdir)/ctrl_test_runner.py -w $(abs_top_builddir) -v
+	rm -f $(top_builddir)/sms.db
+
+# To update the CTRL script from current application behavior,
+# pass -u to ctrl_script_runner.py by doing:
+#   make ctrl-transcript-test U=-u
+ctrl-transcript-test:
+	echo "No ctrl-transcript-test exists yet"
+
+# don't run multiple tests concurrently so that the ports don't conflict
+ctrl-test:
+	$(MAKE) ctrl-python-test
+	$(MAKE) ctrl-transcript-test
+
+smpp-test:
+	$(srcdir)/smpp_test_runner.py -w $(abs_top_builddir) -v
+	rm -f $(top_builddir)/sms.db
 
 check-local: atconfig $(TESTSUITE)
 	$(SHELL) '$(TESTSUITE)' $(TESTSUITEFLAGS)
