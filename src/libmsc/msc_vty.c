@@ -339,6 +339,25 @@ DEFUN(cfg_msc, cfg_msc_cmd,
 #define MNCC_GUARD_TIMEOUT_STR "Set global guard timer for mncc interface activity\n"
 #define MNCC_GUARD_TIMEOUT_VALUE_STR "guard timer value (sec.)\n"
 
+DEFUN(cfg_msc_mncc_internal,
+      cfg_msc_mncc_internal_cmd,
+      "mncc internal",
+      MNCC_STR "Use internal MNCC handler (default; changes need a program restart)\n")
+{
+	gsm_network_set_mncc_sock_path(gsmnet, NULL);
+	return CMD_SUCCESS;
+}
+
+DEFUN(cfg_msc_mncc_external,
+      cfg_msc_mncc_external_cmd,
+      "mncc external MNCC_SOCKET_PATH",
+      MNCC_STR "Use external MNCC handler (changes need a program restart)\n"
+      "File system path to create the MNCC unix domain socket at\n")
+{
+	gsm_network_set_mncc_sock_path(gsmnet, argv[0]);
+	return CMD_SUCCESS;
+}
+
 DEFUN(cfg_msc_mncc_guard_timeout,
       cfg_msc_mncc_guard_timeout_cmd,
       "mncc guard-timeout <0-255>",
@@ -442,6 +461,8 @@ DEFUN(cfg_msc_emergency_msisdn, cfg_msc_emergency_msisdn_cmd,
 static int config_write_msc(struct vty *vty)
 {
 	vty_out(vty, "msc%s", VTY_NEWLINE);
+	if (gsmnet->mncc_sock_path)
+		vty_out(vty, " mncc external %s%s", gsmnet->mncc_sock_path, VTY_NEWLINE);
 	vty_out(vty, " mncc guard-timeout %i%s",
 		gsmnet->mncc_guard_timeout, VTY_NEWLINE);
 	vty_out(vty, " %sassign-tmsi%s",
@@ -1451,6 +1472,8 @@ void msc_vty_init(struct gsm_network *msc_network)
 	install_element(CONFIG_NODE, &cfg_msc_cmd);
 	install_node(&msc_node, config_write_msc);
 	install_element(MSC_NODE, &cfg_msc_assign_tmsi_cmd);
+	install_element(MSC_NODE, &cfg_msc_mncc_internal_cmd);
+	install_element(MSC_NODE, &cfg_msc_mncc_external_cmd);
 	install_element(MSC_NODE, &cfg_msc_mncc_guard_timeout_cmd);
 	install_element(MSC_NODE, &cfg_msc_deprecated_mncc_guard_timeout_cmd);
 	install_element(MSC_NODE, &cfg_msc_no_assign_tmsi_cmd);

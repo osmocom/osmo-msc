@@ -30,6 +30,8 @@ OsmoMSC(config)# msc
 OsmoMSC(config-msc)# list
 ...
   assign-tmsi
+  mncc internal
+  mncc external MNCC_SOCKET_PATH
   mncc guard-timeout <0-255>
   no assign-tmsi
   auth-tuple-max-reuse-count <-1-2147483647>
@@ -45,6 +47,29 @@ OsmoMSC(config-msc)# list
   mgw endpoint-range <1-65534> <1-65534>
   mgw bts-base <0-65534>
 ...
+
+OsmoMSC(config-msc)# mncc?
+  mncc  Configure Mobile Network Call Control
+
+OsmoMSC(config-msc)# mncc ?
+  internal       Use internal MNCC handler (default; changes need a program restart)
+  external       Use external MNCC handler (changes need a program restart)
+  guard-timeout  Set global guard timer for mncc interface activity
+
+OsmoMSC(config-msc)# mncc external ?
+  MNCC_SOCKET_PATH  File system path to create the MNCC unix domain socket at
+
+OsmoMSC(config-msc)# mncc external /path/not/used
+OsmoMSC(config-msc)# show running-config
+...
+msc
+...
+ mncc external /path/not/used
+...
+
+OsmoMSC(config-msc)# mncc internal
+OsmoMSC(config-msc)# show running-config
+... ! mncc external
 
 OsmoMSC(config-msc)# exit
 OsmoMSC(config)# mncc-int
