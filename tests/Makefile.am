@@ -34,6 +34,7 @@ EXTRA_DIST = \
 	vty_test_runner.py \
 	ctrl_test_runner.py \
 	smpp_test_runner.py \
+	test_nodes.vty \
 	$(NULL)
 
 TESTSUITE = $(srcdir)/testsuite
@@ -66,7 +67,11 @@ vty-python-test: $(BUILT_SOURCES)
 # pass -u to vty_script_runner.py by doing:
 #   make vty-transcript-test U=-u
 vty-transcript-test:
-	echo "No vty-transcript-test exists yet"
+	osmo_verify_transcript_vty.py -v \
+		-n OsmoMSC -p 4254 \
+		-r "$(top_builddir)/src/osmo-msc/osmo-msc -c $(top_srcdir)/doc/examples/osmo-msc/osmo-msc.cfg" \
+		$(U) $(srcdir)/*.vty
+	rm -f $(builddir)/sms.db
 
 # don't run multiple tests concurrently so that the ports don't conflict
 vty-test:

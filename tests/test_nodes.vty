@@ -1,0 +1,101 @@
+OsmoMSC> enable
+OsmoMSC# configure terminal
+OsmoMSC(config)# list
+...
+  network
+  msc
+  mncc-int
+  hlr
+...
+
+OsmoMSC(config)# network
+OsmoMSC(config-net)# list
+...
+  network country code <1-999>
+  mobile network code <0-999>
+  short name NAME
+  long name NAME
+  encryption a5 <0-3> [<0-3>] [<0-3>] [<0-3>]
+  authentication (optional|required)
+  rrlp mode (none|ms-based|ms-preferred|ass-preferred)
+  mm info (0|1)
+  timezone <-19-19> (0|15|30|45)
+  timezone <-19-19> (0|15|30|45) <0-2>
+  no timezone
+  periodic location update <6-1530>
+  no periodic location update
+
+OsmoMSC(config-net)# exit
+OsmoMSC(config)# msc
+OsmoMSC(config-msc)# list
+...
+  assign-tmsi
+  mncc-guard-timeout <0-255>
+  no assign-tmsi
+  auth-tuple-max-reuse-count <-1-2147483647>
+  auth-tuple-reuse-on-error (0|1)
+  cs7-instance-a <0-15>
+  cs7-instance-iu <0-15>
+  paging response-timer (default|<1-65535>)
+  emergency-call route-to-msisdn MSISDN
+  mgw local-ip A.B.C.D
+  mgw local-port <0-65535>
+  mgw remote-ip A.B.C.D
+  mgw remote-port <0-65535>
+  mgw endpoint-range <1-65534> <1-65534>
+  mgw bts-base <0-65534>
+...
+
+OsmoMSC(config-msc)# exit
+OsmoMSC(config)# mncc-int
+OsmoMSC(config-mncc-int)# list
+...
+  default-codec tch-f (fr|efr|amr)
+  default-codec tch-h (hr|amr)
+
+OsmoMSC(config-mncc-int)# exit
+OsmoMSC(config)# hlr
+OsmoMSC(config-hlr)# list
+...
+  remote-ip A.B.C.D
+  remote-port <1-65535>
+
+OsmoMSC(config-hlr)# exit
+OsmoMSC(config)# exit
+OsmoMSC# configure terminal
+OsmoMSC(config)# network
+OsmoMSC(config-net)# end
+OsmoMSC# disable
+OsmoMSC> enable
+
+OsmoMSC# ! Punching some '...' holes because of optional SMPP, Iu
+OsmoMSC# show running-config
+...
+network
+ network country code 001
+ mobile network code 01
+ short name OsmoMSC
+ long name OsmoMSC
+ encryption a5 0
+ authentication optional
+ rrlp mode none
+ mm info 1
+ periodic location update 30
+msc
+ mncc-guard-timeout 180
+ assign-tmsi
+ cs7-instance-a 0
+...
+ auth-tuple-max-reuse-count 3
+ auth-tuple-reuse-on-error 1
+ mgw local-port 2728
+ mgw remote-ip 10.23.24.1
+ mgw remote-port 2427
+mncc-int
+ default-codec tch-f fr
+ default-codec tch-h hr
+...
+hlr
+ remote-ip 127.0.0.1
+ remote-port 4222
+end
