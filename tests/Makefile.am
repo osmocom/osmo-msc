@@ -44,18 +44,45 @@ DISTCLEANFILES = \
 
 if ENABLE_EXT_TESTS
 python-tests: $(BUILT_SOURCES)
-	osmotestvty.py -p $(abs_top_srcdir) -w $(abs_top_builddir) -v
-	osmotestconfig.py -p $(abs_top_srcdir) -w $(abs_top_builddir) -v
-	$(PYTHON) $(srcdir)/vty_test_runner.py -w $(abs_top_builddir) -v
-	$(PYTHON) $(srcdir)/ctrl_test_runner.py -w $(abs_top_builddir) -v
-if BUILD_SMPP
-	$(PYTHON) $(srcdir)/smpp_test_runner.py -w $(abs_top_builddir) -v
-endif
-	rm -f $(top_builddir)/sms.db
+# don't run vty and ctrl tests concurrently so that the ports don't conflict
+	$(MAKE) vty-test
+	$(MAKE) ctrl-test
 else
 python-tests: $(BUILT_SOURCES)
 	echo "Not running python-based tests (determined at configure-time)"
 endif
+
+vty-python-test: $(BUILT_SOURCES)
+	if [ -z "$(PYTHON)" ]; then echo "ERROR: python not configured, for manual invocation use 'make PYTHON=/usr/bin/python'"; exit 1; fi
+	osmotestvty.py -p $(abs_top_srcdir) -w $(abs_top_builddir) -v
+	osmotestconfig.py -p $(abs_top_srcdir) -w $(abs_top_builddir) -v
+	$(PYTHON) $(srcdir)/vty_test_runner.py -w $(abs_top_builddir) -v
+	rm -f $(top_builddir)/sms.db
+
+# To update the VTY script from current application behavior,
+# pass -u to vty_script_runner.py by doing:
+#   make vty-transcript-test U=-u
+vty-transcript-test:
+	echo "No vty-transcript-test exists yet"
+
+vty-test:
+	$(MAKE) vty-python-test
+	$(MAKE) vty-transcript-test
+
+ctrl-python-test: $(BUILT_SOURCES)
+	if [ -z "$(PYTHON)" ]; then echo "ERROR: python not configured, for manual invocation use 'make PYTHON=/usr/bin/python'"; exit 1; fi
+	$(PYTHON) $(srcdir)/ctrl_test_runner.py -w $(abs_top_builddir) -v
+	rm -f $(top_builddir)/sms.db
+
+# To update the CTRL script from current application behavior,
+# pass -u to ctrl_script_runner.py by doing:
+#   make ctrl-transcript-test U=-u
+ctrl-transcript-test:
+	echo "No ctrl-transcript-test exists yet"
+
+ctrl-test:
+	$(MAKE) ctrl-python-test
+	$(MAKE) ctrl-transcript-test
 
 check-local: atconfig $(TESTSUITE)
 	$(SHELL) '$(TESTSUITE)' $(TESTSUITEFLAGS)
