@@ -109,7 +109,7 @@ int subscr_paging_dispatch(unsigned int hooknum, unsigned int event,
 	return 0;
 }
 
-int msc_paging_request(struct vlr_subscr *vsub)
+static int msc_paging_request(struct vlr_subscr *vsub)
 {
 	/* The subscriber was last seen in subscr->lac. Find out which
 	 * BSCs/RNCs are responsible and send them a paging request via open
