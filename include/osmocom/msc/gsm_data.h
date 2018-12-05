@@ -140,6 +140,7 @@ struct gsm_network {
 	struct osmo_counter *active_nc_ss;
 
 	/* layer 4 */
+	char *mncc_sock_path;
 	struct mncc_sock_state *mncc_state;
 	mncc_recv_cb_t mncc_recv;
 	struct llist_head upqueue;

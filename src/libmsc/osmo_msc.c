@@ -76,6 +76,13 @@ struct gsm_network *gsm_network_init(void *ctx, mncc_recv_cb_t mncc_recv)
 	return net;
 }
 
+void gsm_network_set_mncc_sock_path(struct gsm_network *net, const char *mncc_sock_path)
+{
+	if (net->mncc_sock_path)
+		talloc_free(net->mncc_sock_path);
+	net->mncc_sock_path = mncc_sock_path ? talloc_strdup(net, mncc_sock_path) : NULL;
+}
+
 /* Receive a SAPI-N-REJECT from BSC */
 void ran_conn_sapi_n_reject(struct ran_conn *conn, int dlci)
 {

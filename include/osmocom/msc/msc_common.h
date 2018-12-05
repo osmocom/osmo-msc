@@ -15,6 +15,7 @@ enum nsap_addr_enc {
 typedef int (*mncc_recv_cb_t)(struct gsm_network *, struct msgb *);
 
 struct gsm_network *gsm_network_init(void *ctx, mncc_recv_cb_t mncc_recv);
+void gsm_network_set_mncc_sock_path(struct gsm_network *net, const char *mncc_sock_path);
 
 int msc_vlr_alloc(struct gsm_network *net);
 int msc_vlr_start(struct gsm_network *net);

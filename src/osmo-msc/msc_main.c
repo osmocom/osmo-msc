@@ -573,11 +573,20 @@ int main(int argc, char **argv)
 		return 1;
 	}
 
-	/* Initialize MNCC socket if appropriate */
+	/* Initialize MNCC socket if appropriate. If the cmdline option -M is present, it overrides the .cfg file
+	 * setting 'msc' / 'mncc external MNCC_SOCKET_PATH'. Note that when -M is given, it "bleeds" back into the vty
+	 * 'write' command and is reflected in the written out 'mncc external' cfg. */
 	if (msc_cmdline_config.mncc_sock_path) {
+		LOGP(DMNCC, LOGL_NOTICE,
+		     "MNCC socket path is configured from commandline argument -M."
+		     " This affects a written-back config file. Instead consider using the config file directly"
+		     " ('msc' / 'mncc external MNCC_SOCKET_PATH').\n");
+		gsm_network_set_mncc_sock_path(msc_network, msc_cmdline_config.mncc_sock_path);
+	}
+	if (msc_network->mncc_sock_path) {
 		msc_network->mncc_recv = mncc_sock_from_cc;
 		rc = mncc_sock_init(msc_network,
-				    msc_cmdline_config.mncc_sock_path);
+				    msc_network->mncc_sock_path);
 		if (rc) {
 			fprintf(stderr, "MNCC socket initialization failed. exiting.\n");
 			exit(1);
