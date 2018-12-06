@@ -9,6 +9,7 @@
 #include <osmocom/gsm/gsm23003.h>
 #include <osmocom/gsm/gsm0808.h>
 #include <osmocom/gsm/gsup.h>
+#include <osmocom/gsm/ipa.h>
 #include <osmocom/msc/ran_conn.h>
 #include <osmocom/msc/msc_common.h>
 #include <osmocom/gsupclient/gsup_client.h>
@@ -312,7 +313,7 @@ int vlr_subscr_rx_tmsi_reall_compl(struct vlr_subscr *vsub);
 int vlr_subscr_rx_imsi_detach(struct vlr_subscr *vsub);
 
 struct vlr_instance *vlr_alloc(void *ctx, const struct vlr_ops *ops);
-int vlr_start(const char *gsup_unit_name, struct vlr_instance *vlr,
+int vlr_start(struct ipaccess_unit *ipa_dev, struct vlr_instance *vlr,
 	      const char *gsup_server_addr_str, uint16_t gsup_server_port);
 
 /* internal use only */

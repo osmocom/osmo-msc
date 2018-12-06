@@ -1,5 +1,5 @@
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 12
+talloc_total_blocks(tall_bsc_ctx) == 13
 
 ===== test_hlr_timeout_lu_auth_info
 - Total time passed: 0.000000 s
@@ -87,7 +87,7 @@ DMM RAN_conn(LU:901700000004620){RAN_CONN_S_RELEASED}: Deallocated
 ===== test_hlr_timeout_lu_auth_info: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 12
+talloc_total_blocks(tall_bsc_ctx) == 13
 
 ===== test_hlr_timeout_lu_upd_loc_result
 - Total time passed: 0.000000 s
@@ -194,8 +194,8 @@ DMM RAN_conn(LU:901700000004620){RAN_CONN_S_RELEASED}: Deallocated
 ===== test_hlr_timeout_lu_upd_loc_result: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 12
+talloc_total_blocks(tall_bsc_ctx) == 13
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 12
+talloc_total_blocks(tall_bsc_ctx) == 13
 

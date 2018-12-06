@@ -458,6 +458,18 @@ DEFUN(cfg_msc_emergency_msisdn, cfg_msc_emergency_msisdn_cmd,
 	return CMD_SUCCESS;
 }
 
+DEFUN(cfg_msc_ipa_name,
+      cfg_msc_ipa_name_cmd,
+      "ipa-name NAME",
+      "Set the IPA name of this MSC\n"
+      "A unique name for this MSC. For example: PLMN + redundancy server number: MSC-901-70-0. "
+      "This name is used for GSUP routing and must be set if more than one MSC is connected to the HLR. "
+      "The default is 'MSC-00-00-00-00-00-00'.\n")
+{
+	gsmnet->msc_ipa_name = talloc_strdup(gsmnet, argv[0]);
+	return CMD_SUCCESS;
+}
+
 static int config_write_msc(struct vty *vty)
 {
 	vty_out(vty, "msc%s", VTY_NEWLINE);
@@ -490,6 +502,9 @@ static int config_write_msc(struct vty *vty)
 		vty_out(vty, " emergency-call route-to-msisdn %s%s",
 			gsmnet->emergency.route_to_msisdn, VTY_NEWLINE);
 	}
+
+	if (gsmnet->msc_ipa_name)
+		vty_out(vty, " ipa-name %s%s", gsmnet->msc_ipa_name, VTY_NEWLINE);
 
 	mgcp_client_config_write(vty, " ");
 #ifdef BUILD_IU
@@ -1483,6 +1498,7 @@ void msc_vty_init(struct gsm_network *msc_network)
 	install_element(MSC_NODE, &cfg_msc_cs7_instance_iu_cmd);
 	install_element(MSC_NODE, &cfg_msc_paging_response_timer_cmd);
 	install_element(MSC_NODE, &cfg_msc_emergency_msisdn_cmd);
+	install_element(MSC_NODE, &cfg_msc_ipa_name_cmd);
 
 	mgcp_client_vty_init(msc_network, MSC_NODE, &msc_network->mgw.conf);
 #ifdef BUILD_IU

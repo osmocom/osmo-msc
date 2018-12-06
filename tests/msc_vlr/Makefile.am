@@ -19,7 +19,7 @@ AM_CFLAGS = \
 	$(NULL)
 
 AM_LDFLAGS = \
-	-Wl,--wrap=osmo_gsup_client_create \
+	-Wl,--wrap=osmo_gsup_client_create2 \
 	-Wl,--wrap=osmo_gsup_client_send \
 	-Wl,--wrap=a_iface_tx_dtap \
 	-Wl,--wrap=a_iface_tx_clear_cmd \

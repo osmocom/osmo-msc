@@ -1,5 +1,5 @@
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 12
+talloc_total_blocks(tall_bsc_ctx) == 13
 
 ===== test_gsm_authen
 - Location Update request causes a GSUP Send Auth Info request to HLR
@@ -442,7 +442,7 @@ DMM RAN_conn{RAN_CONN_S_RELEASED}: Deallocated
 ===== test_gsm_authen: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 12
+talloc_total_blocks(tall_bsc_ctx) == 13
 
 ===== test_gsm_authen_tmsi
 - Location Update request causes a GSUP Send Auth Info request to HLR
@@ -1086,7 +1086,7 @@ DMM RAN_conn{RAN_CONN_S_RELEASED}: Deallocated
 ===== test_gsm_authen_tmsi: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 12
+talloc_total_blocks(tall_bsc_ctx) == 13
 
 ===== test_gsm_authen_imei
 - Location Update request causes a GSUP Send Auth Info request to HLR
@@ -1315,7 +1315,7 @@ DMM RAN_conn{RAN_CONN_S_RELEASED}: Deallocated
 ===== test_gsm_authen_imei: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 12
+talloc_total_blocks(tall_bsc_ctx) == 13
 
 ===== test_gsm_authen_tmsi_imei
 - Location Update request causes a GSUP Send Auth Info request to HLR
@@ -1576,7 +1576,7 @@ DMM RAN_conn{RAN_CONN_S_RELEASED}: Deallocated
 ===== test_gsm_authen_tmsi_imei: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 12
+talloc_total_blocks(tall_bsc_ctx) == 13
 
 ===== test_gsm_milenage_authen
 - Location Update request causes a GSUP Send Auth Info request to HLR
@@ -2000,7 +2000,7 @@ DMM RAN_conn{RAN_CONN_S_RELEASED}: Deallocated
 ===== test_gsm_milenage_authen: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 12
+talloc_total_blocks(tall_bsc_ctx) == 13
 
 ===== test_wrong_sres_length
 - Total time passed: 0.000000 s
@@ -2118,8 +2118,8 @@ DMM RAN_conn(LU:901700000004620){RAN_CONN_S_RELEASED}: Deallocated
 ===== test_wrong_sres_length: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 12
+talloc_total_blocks(tall_bsc_ctx) == 13
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 12
+talloc_total_blocks(tall_bsc_ctx) == 13
 

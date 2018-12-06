@@ -40,6 +40,7 @@ OsmoMSC(config-msc)# list
   cs7-instance-iu <0-15>
   paging response-timer (default|<1-65535>)
   emergency-call route-to-msisdn MSISDN
+  ipa-name NAME
   mgw local-ip A.B.C.D
   mgw local-port <0-65535>
   mgw remote-ip A.B.C.D

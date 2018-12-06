@@ -27,6 +27,7 @@
 #include <osmocom/gsm/gsup.h>
 #include <osmocom/gsm/apn.h>
 #include <osmocom/gsm/gsm48.h>
+#include <osmocom/gsm/ipa.h>
 #include <osmocom/msc/gsm_subscriber.h>
 #include <osmocom/gsupclient/gsup_client.h>
 #include <osmocom/msc/vlr.h>
@@ -1212,15 +1213,15 @@ struct vlr_instance *vlr_alloc(void *ctx, const struct vlr_ops *ops)
 	return vlr;
 }
 
-int vlr_start(const char *gsup_unit_name, struct vlr_instance *vlr,
+int vlr_start(struct ipaccess_unit *ipa_dev, struct vlr_instance *vlr,
 	      const char *gsup_server_addr_str, uint16_t gsup_server_port)
 {
 	OSMO_ASSERT(vlr);
 
-	vlr->gsup_client = osmo_gsup_client_create(vlr, gsup_unit_name,
-						   gsup_server_addr_str,
-						   gsup_server_port,
-						   &vlr_gsupc_read_cb, NULL);
+	vlr->gsup_client = osmo_gsup_client_create2(vlr, ipa_dev,
+						    gsup_server_addr_str,
+						    gsup_server_port,
+						    &vlr_gsupc_read_cb, NULL);
 	if (!vlr->gsup_client)
 		return -ENOMEM;
 	vlr->gsup_client->data = vlr;

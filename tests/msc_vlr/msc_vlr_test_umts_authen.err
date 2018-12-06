@@ -1,5 +1,5 @@
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 12
+talloc_total_blocks(tall_bsc_ctx) == 13
 
 ===== test_umts_authen_geran
 - Location Update request causes a GSUP Send Auth Info request to HLR
@@ -456,7 +456,7 @@ DMM RAN_conn{RAN_CONN_S_RELEASED}: Deallocated
 ===== test_umts_authen_geran: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 12
+talloc_total_blocks(tall_bsc_ctx) == 13
 
 ===== test_umts_authen_utran
 - Location Update request causes a GSUP Send Auth Info request to HLR
@@ -951,7 +951,7 @@ DMM RAN_conn{RAN_CONN_S_RELEASED}: Deallocated
 ===== test_umts_authen_utran: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 12
+talloc_total_blocks(tall_bsc_ctx) == 13
 
 ===== test_umts_authen_resync_geran
 - Location Update request causes a GSUP Send Auth Info request to HLR
@@ -1162,7 +1162,7 @@ DREF freeing VLR subscr MSISDN:42342
 ===== test_umts_authen_resync_geran: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 12
+talloc_total_blocks(tall_bsc_ctx) == 13
 
 ===== test_umts_authen_resync_utran
 - Location Update request causes a GSUP Send Auth Info request to HLR
@@ -1385,7 +1385,7 @@ DREF freeing VLR subscr MSISDN:42342
 ===== test_umts_authen_resync_utran: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 12
+talloc_total_blocks(tall_bsc_ctx) == 13
 
 ===== test_umts_authen_too_short_res_geran
 - Location Update request causes a GSUP Send Auth Info request to HLR
@@ -1483,7 +1483,7 @@ DMM RAN_conn(LU:901700000010650){RAN_CONN_S_RELEASED}: Deallocated
 ===== test_umts_authen_too_short_res_geran: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 12
+talloc_total_blocks(tall_bsc_ctx) == 13
 
 ===== test_umts_authen_too_short_res_utran
 - Location Update request causes a GSUP Send Auth Info request to HLR
@@ -1581,7 +1581,7 @@ DMM RAN_conn(LU:901700000010650){RAN_CONN_S_RELEASED}: Deallocated
 ===== test_umts_authen_too_short_res_utran: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 12
+talloc_total_blocks(tall_bsc_ctx) == 13
 
 ===== test_umts_authen_too_long_res_geran
 - Location Update request causes a GSUP Send Auth Info request to HLR
@@ -1679,7 +1679,7 @@ DMM RAN_conn(LU:901700000010650){RAN_CONN_S_RELEASED}: Deallocated
 ===== test_umts_authen_too_long_res_geran: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 12
+talloc_total_blocks(tall_bsc_ctx) == 13
 
 ===== test_umts_authen_too_long_res_utran
 - Location Update request causes a GSUP Send Auth Info request to HLR
@@ -1777,7 +1777,7 @@ DMM RAN_conn(LU:901700000010650){RAN_CONN_S_RELEASED}: Deallocated
 ===== test_umts_authen_too_long_res_utran: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 12
+talloc_total_blocks(tall_bsc_ctx) == 13
 
 ===== test_umts_authen_only_sres_geran
 - Location Update request causes a GSUP Send Auth Info request to HLR
@@ -1875,7 +1875,7 @@ DMM RAN_conn(LU:901700000010650){RAN_CONN_S_RELEASED}: Deallocated
 ===== test_umts_authen_only_sres_geran: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 12
+talloc_total_blocks(tall_bsc_ctx) == 13
 
 ===== test_umts_authen_only_sres_utran
 - Location Update request causes a GSUP Send Auth Info request to HLR
@@ -1973,8 +1973,8 @@ DMM RAN_conn(LU:901700000010650){RAN_CONN_S_RELEASED}: Deallocated
 ===== test_umts_authen_only_sres_utran: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 12
+talloc_total_blocks(tall_bsc_ctx) == 13
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 12
+talloc_total_blocks(tall_bsc_ctx) == 13
 

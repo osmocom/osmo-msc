@@ -212,6 +212,12 @@ struct gsm_network {
 		/* MSISDN to which to route MO emergency calls */
 		char *route_to_msisdn;
 	} emergency;
+
+	/* This is transmitted as IPA Serial Number tag, which is used for GSUP routing (e.g. in OsmoHLR).
+         * For inter-MSC handover, the remote MSC's neighbor configuration requires to match this name.
+	 * If no name is set, the IPA Serial Number will be the same as the Unit Name,
+	 * and will be of the form 'MSC-00-00-00-00-00-00' */
+	char *msc_ipa_name;
 };
 
 struct osmo_esme;

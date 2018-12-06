@@ -1828,9 +1828,15 @@ int msc_vlr_alloc(struct gsm_network *net)
 /* Launch the VLR, i.e. its GSUP connection */
 int msc_vlr_start(struct gsm_network *net)
 {
+	struct ipaccess_unit *ipa_dev;
+
 	OSMO_ASSERT(net->vlr);
-	return vlr_start("MSC", net->vlr, net->gsup_server_addr_str,
-			 net->gsup_server_port);
+
+	ipa_dev = talloc_zero(net->vlr, struct ipaccess_unit);
+	ipa_dev->unit_name = "MSC";
+	ipa_dev->serno = net->msc_ipa_name; /* NULL unless configured via VTY */
+
+	return vlr_start(ipa_dev, net->vlr, net->gsup_server_addr_str, net->gsup_server_port);
 }
 
 struct msgb *gsm48_create_mm_serv_rej(enum gsm48_reject_value value)

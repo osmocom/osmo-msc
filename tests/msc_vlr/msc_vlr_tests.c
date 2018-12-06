@@ -546,15 +546,14 @@ int mncc_recv(struct gsm_network *net, struct msgb *msg)
 	return 0;
 }
 
-/* override, requires '-Wl,--wrap=gsup_client_create' */
 struct osmo_gsup_client *
-__real_osmo_gsup_client_create(const char *ip_addr, unsigned int tcp_port,
-			  osmo_gsup_client_read_cb_t read_cb,
-			  struct osmo_oap_client_config *oap_config);
+__real_osmo_gsup_client_create2(struct ipaccess_unit *ipa_dev, const char *ip_addr,
+				unsigned int tcp_port, osmo_gsup_client_read_cb_t read_cb,
+				struct osmo_oap_client_config *oap_config);
 struct osmo_gsup_client *
-__wrap_osmo_gsup_client_create(const char *ip_addr, unsigned int tcp_port,
-			  osmo_gsup_client_read_cb_t read_cb,
-			  struct osmo_oap_client_config *oap_config)
+__wrap_osmo_gsup_client_create2(struct ipaccess_unit *ipa_dev, const char *ip_addr,
+				unsigned int tcp_port, osmo_gsup_client_read_cb_t read_cb,
+				struct osmo_oap_client_config *oap_config)
 {
 	struct osmo_gsup_client *gsupc;
 	gsupc = talloc_zero(msc_vlr_tests_ctx, struct osmo_gsup_client);
@@ -882,24 +881,25 @@ static void check_talloc(void *msgb_ctx, void *msc_vlr_tests_ctx)
 	/* Verifying that the msgb context is empty */
 	talloc_report_full(msgb_ctx, stderr);
 	/* Expecting these to stick around in msc_vlr_tests_ctx:
-	 * talloc_total_blocks(tall_bsc_ctx) == 12
-	 * full talloc report on 'msc_vlr_tests_ctx' (total   3636 bytes in  12 blocks)
-	 *     struct osmo_gsup_client        contains    248 bytes in   1 blocks (ref 0) 0x563a489c05f0
-	 *     struct gsm_network             contains   2031 bytes in   4 blocks (ref 0) 0x563a489bfbb0
-	 *         struct vlr_instance            contains    168 bytes in   1 blocks (ref 0) 0x563a489c04e0
-	 *         no_gsup_server                 contains     15 bytes in   1 blocks (ref 0) 0x563a489c0460
-	 *         ../../../src/libosmocore/src/rate_ctr.c:228 contains   1552 bytes in   1 blocks (ref 0) 0x563a489bfd40
-	 *     logging                        contains   1357 bytes in   5 blocks (ref 0) 0x563a489bf440
-	 *         struct log_target              contains    228 bytes in   2 blocks (ref 0) 0x563a489bf9f0
-	 *             struct log_category            contains     68 bytes in   1 blocks (ref 0) 0x563a489bfb00
-	 *         struct log_info                contains   1128 bytes in   2 blocks (ref 0) 0x563a489bf4b0
-	 *             struct log_info_cat            contains   1088 bytes in   1 blocks (ref 0) 0x563a489bf540
-	 *     msgb                           contains      0 bytes in   1 blocks (ref 0) 0x563a489bf3d0
-	 * (That's 12 counting the root ctx)
+	 * talloc_total_blocks(tall_bsc_ctx) == 13
+	 * full talloc report on 'msc_vlr_tests_ctx' (total   4638 bytes in  13 blocks)
+	 *     struct osmo_gsup_client        contains    256 bytes in   1 blocks (ref 0) 0x61300000dd20
+	 *     struct gsm_network             contains   2983 bytes in   5 blocks (ref 0) 0x61400000fea0
+	 *         struct vlr_instance            contains    320 bytes in   2 blocks (ref 0) 0x61300000dee0
+	 *             struct ipaccess_unit           contains     64 bytes in   1 blocks (ref 0) 0x60e0000244c0
+	 *         no_gsup_server                 contains     15 bytes in   1 blocks (ref 0) 0x60b00000af40
+	 *         rate_ctr.c:234                 contains   2352 bytes in   1 blocks (ref 0) 0x61e00000f0e0
+	 *     logging                        contains   1399 bytes in   5 blocks (ref 0) 0x60b00000aff0
+	 *         struct log_target              contains    238 bytes in   2 blocks (ref 0) 0x61200000bf20
+	 *             struct log_category            contains     70 bytes in   1 blocks (ref 0) 0x60f00000efb0
+	 *         struct log_info                contains   1160 bytes in   2 blocks (ref 0) 0x60d00000cfd0
+	 *             struct log_info_cat            contains   1120 bytes in   1 blocks (ref 0) 0x61a00001f2e0
+	 *     msgb                           contains      0 bytes in   1 blocks (ref 0) 0x60800000bf80
+	 * (That's 13 counting the root ctx)
 	 */
 	fprintf(stderr, "talloc_total_blocks(tall_bsc_ctx) == %zu\n",
 		talloc_total_blocks(msc_vlr_tests_ctx));
-	if (talloc_total_blocks(msc_vlr_tests_ctx) != 12)
+	if (talloc_total_blocks(msc_vlr_tests_ctx) != 13)
 		talloc_report_full(msc_vlr_tests_ctx, stderr);
 	fprintf(stderr, "\n");
 }

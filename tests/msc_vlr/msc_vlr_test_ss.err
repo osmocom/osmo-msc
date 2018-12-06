@@ -1,5 +1,5 @@
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 12
+talloc_total_blocks(tall_bsc_ctx) == 13
 
 ===== test_ss_ussd_mo_geran
 - Location Update request causes a GSUP LU request to HLR
@@ -195,7 +195,7 @@ DREF freeing VLR subscr MSISDN:46071
 ===== test_ss_ussd_mo_geran: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 12
+talloc_total_blocks(tall_bsc_ctx) == 13
 
 ===== test_ss_ussd_no_geran
 - Location Update request causes a GSUP LU request to HLR
@@ -420,8 +420,8 @@ DREF freeing VLR subscr MSISDN:46071
 ===== test_ss_ussd_no_geran: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 12
+talloc_total_blocks(tall_bsc_ctx) == 13
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 12
+talloc_total_blocks(tall_bsc_ctx) == 13
 

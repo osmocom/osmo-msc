@@ -1,5 +1,5 @@
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 12
+talloc_total_blocks(tall_bsc_ctx) == 13
 
 ===== test_hlr_rej_auth_info_unknown_imsi
 - Location Update request causes a GSUP Send Auth Info request to HLR
@@ -79,7 +79,7 @@ DMM RAN_conn(LU:901700000004620){RAN_CONN_S_RELEASED}: Deallocated
 ===== test_hlr_rej_auth_info_unknown_imsi: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 12
+talloc_total_blocks(tall_bsc_ctx) == 13
 
 ===== test_hlr_rej_auth_info_net_fail
 - Location Update request causes a GSUP Send Auth Info request to HLR
@@ -159,7 +159,7 @@ DMM RAN_conn(LU:901700000004620){RAN_CONN_S_RELEASED}: Deallocated
 ===== test_hlr_rej_auth_info_net_fail: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 12
+talloc_total_blocks(tall_bsc_ctx) == 13
 
 ===== test_hlr_rej_auth_info_net_fail_reuse_tuples
 ---
@@ -456,7 +456,7 @@ DREF freeing VLR subscr MSISDN:46071
 ===== test_hlr_rej_auth_info_net_fail_reuse_tuples: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 12
+talloc_total_blocks(tall_bsc_ctx) == 13
 
 ===== test_hlr_rej_auth_info_net_fail_no_reuse_tuples
 ---
@@ -685,7 +685,7 @@ DREF freeing VLR subscr MSISDN:46071
 ===== test_hlr_rej_auth_info_net_fail_no_reuse_tuples: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 12
+talloc_total_blocks(tall_bsc_ctx) == 13
 
 ===== test_hlr_rej_auth_info_unkown_imsi_no_reuse_tuples
 ---
@@ -915,7 +915,7 @@ DREF freeing VLR subscr MSISDN:46071
 ===== test_hlr_rej_auth_info_unkown_imsi_no_reuse_tuples: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 12
+talloc_total_blocks(tall_bsc_ctx) == 13
 
 ===== test_hlr_acc_but_no_auth_tuples
 - Location Update request causes a GSUP Send Auth Info request to HLR
@@ -994,7 +994,7 @@ DMM RAN_conn(LU:901700000004620){RAN_CONN_S_RELEASED}: Deallocated
 ===== test_hlr_acc_but_no_auth_tuples: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 12
+talloc_total_blocks(tall_bsc_ctx) == 13
 
 ===== test_hlr_rej_lu
 - Location Update request causes a GSUP LU request to HLR
@@ -1076,7 +1076,7 @@ DMM RAN_conn(LU:901700000004620){RAN_CONN_S_RELEASED}: Deallocated
 ===== test_hlr_rej_lu: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 12
+talloc_total_blocks(tall_bsc_ctx) == 13
 
 ===== test_hlr_no_insert_data
 - Location Update request causes a GSUP LU request to HLR
@@ -1173,8 +1173,8 @@ DREF freeing VLR subscr IMSI:901700000004620
 ===== test_hlr_no_insert_data: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 12
+talloc_total_blocks(tall_bsc_ctx) == 13
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 12
+talloc_total_blocks(tall_bsc_ctx) == 13
 

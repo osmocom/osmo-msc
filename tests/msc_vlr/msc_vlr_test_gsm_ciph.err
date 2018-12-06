@@ -1,5 +1,5 @@
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 12
+talloc_total_blocks(tall_bsc_ctx) == 13
 
 ===== test_ciph
 - Location Update request causes a GSUP Send Auth Info request to HLR
@@ -494,7 +494,7 @@ DMM RAN_conn{RAN_CONN_S_RELEASED}: Deallocated
 ===== test_ciph: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 12
+talloc_total_blocks(tall_bsc_ctx) == 13
 
 ===== test_ciph_tmsi
 - Location Update request causes a GSUP Send Auth Info request to HLR
@@ -1026,7 +1026,7 @@ DMM RAN_conn{RAN_CONN_S_RELEASED}: Deallocated
 ===== test_ciph_tmsi: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 12
+talloc_total_blocks(tall_bsc_ctx) == 13
 
 ===== test_ciph_imei
 - Location Update request causes a GSUP Send Auth Info request to HLR
@@ -1259,7 +1259,7 @@ DMM RAN_conn{RAN_CONN_S_RELEASED}: Deallocated
 ===== test_ciph_imei: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 12
+talloc_total_blocks(tall_bsc_ctx) == 13
 
 ===== test_ciph_imeisv
 - Location Update request causes a GSUP Send Auth Info request to HLR
@@ -1481,7 +1481,7 @@ DMM RAN_conn{RAN_CONN_S_RELEASED}: Deallocated
 ===== test_ciph_imeisv: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 12
+talloc_total_blocks(tall_bsc_ctx) == 13
 
 ===== test_ciph_tmsi_imei
 - Location Update request causes a GSUP Send Auth Info request to HLR
@@ -1746,7 +1746,7 @@ DMM RAN_conn{RAN_CONN_S_RELEASED}: Deallocated
 ===== test_ciph_tmsi_imei: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 12
+talloc_total_blocks(tall_bsc_ctx) == 13
 
 ===== test_gsm_ciph_in_umts_env
 - Location Update request causes a GSUP Send Auth Info request to HLR
@@ -2210,7 +2210,7 @@ DMM RAN_conn{RAN_CONN_S_RELEASED}: Deallocated
 ===== test_gsm_ciph_in_umts_env: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 12
+talloc_total_blocks(tall_bsc_ctx) == 13
 
 ===== test_a5_3_supported
 - Location Update request causes a GSUP Send Auth Info request to HLR
@@ -2702,7 +2702,7 @@ DMM RAN_conn{RAN_CONN_S_RELEASED}: Deallocated
 ===== test_a5_3_supported: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 12
+talloc_total_blocks(tall_bsc_ctx) == 13
 
 ===== test_cm_service_needs_classmark_update
 - Location Update request causes a GSUP Send Auth Info request to HLR
@@ -3185,8 +3185,8 @@ DMM RAN_conn{RAN_CONN_S_RELEASED}: Deallocated
 ===== test_cm_service_needs_classmark_update: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 12
+talloc_total_blocks(tall_bsc_ctx) == 13
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 12
+talloc_total_blocks(tall_bsc_ctx) == 13
 

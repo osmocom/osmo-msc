@@ -1,5 +1,5 @@
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 12
+talloc_total_blocks(tall_bsc_ctx) == 13
 
 ===== test_ms_timeout_lu_auth_resp
 - Total time passed: 0.000000 s
@@ -107,7 +107,7 @@ DMM RAN_conn(LU:901700000004620){RAN_CONN_S_RELEASED}: Deallocated
 ===== test_ms_timeout_lu_auth_resp: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 12
+talloc_total_blocks(tall_bsc_ctx) == 13
 
 ===== test_ms_timeout_cm_auth_resp
 - Total time passed: 0.000000 s
@@ -345,7 +345,7 @@ DREF freeing VLR subscr MSISDN:46071
 ===== test_ms_timeout_cm_auth_resp: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 12
+talloc_total_blocks(tall_bsc_ctx) == 13
 
 ===== test_ms_timeout_paging
 - Total time passed: 0.000000 s
@@ -545,7 +545,7 @@ DMM RAN_conn{RAN_CONN_S_RELEASED}: Deallocated
 ===== test_ms_timeout_paging: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 12
+talloc_total_blocks(tall_bsc_ctx) == 13
 
 ===== test_classmark_update_timeout
 - Total time passed: 0.000000 s
@@ -675,8 +675,8 @@ DMM RAN_conn(LU:901700000004620){RAN_CONN_S_RELEASED}: Deallocated
 ===== test_classmark_update_timeout: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 12
+talloc_total_blocks(tall_bsc_ctx) == 13
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 12
+talloc_total_blocks(tall_bsc_ctx) == 13
 
