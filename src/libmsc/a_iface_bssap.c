@@ -579,10 +579,6 @@ static int bssmap_rx_ass_compl(struct ran_conn *conn, struct msgb *msg,
 		return -EINVAL;
 	}
 
-	/* FIXME: Seems to be related to authentication or,
-	   encryption. Is this really in the right place? */
-	ran_conn_rx_sec_mode_compl(conn);
-
 	return 0;
 }
 
