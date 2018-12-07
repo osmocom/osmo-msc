@@ -256,6 +256,7 @@ AC_OUTPUT(
     doc/Makefile
     doc/examples/Makefile
     doc/manuals/Makefile
+    doc/sequence_charts/Makefile
     contrib/Makefile
     contrib/systemd/Makefile
     Makefile)

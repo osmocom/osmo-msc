@@ -31,10 +31,4 @@ enum gsm_hooks {
 	GSM_HOOK_RR_SECURITY,
 };
 
-enum gsm_paging_event {
-	GSM_PAGING_SUCCEEDED,
-	GSM_PAGING_EXPIRED,
-	GSM_PAGING_BUSY,
-};
-
 #endif

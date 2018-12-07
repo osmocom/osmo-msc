@@ -21,21 +21,10 @@ AM_CFLAGS = \
 AM_LDFLAGS = \
 	-Wl,--wrap=osmo_gsup_client_create2 \
 	-Wl,--wrap=osmo_gsup_client_send \
-	-Wl,--wrap=a_iface_tx_dtap \
-	-Wl,--wrap=a_iface_tx_clear_cmd \
-	-Wl,--wrap=a_iface_tx_paging \
-	-Wl,--wrap=ranap_iu_tx \
-	-Wl,--wrap=ranap_iu_tx_release \
-	-Wl,--wrap=ranap_iu_tx_common_id \
-	-Wl,--wrap=ranap_iu_page_cs \
-	-Wl,--wrap=msc_stop_paging \
 	-Wl,--wrap=gsm340_gen_scts \
 	-Wl,--wrap=osmo_get_rand_id \
-	-Wl,--wrap=msc_mgcp_call_release \
-	-Wl,--wrap=msc_mgcp_try_call_assignment \
-	-Wl,--wrap=a_iface_tx_cipher_mode \
-	-Wl,--wrap=ranap_iu_tx_sec_mode_cmd \
-	-Wl,--wrap=osmo_sccp_tx_data_msg \
+	-Wl,--wrap=ran_peers_down_paging \
+	-Wl,--wrap=call_leg_ensure_ci \
 	$(NULL)
 
 LDADD = \
@@ -48,6 +37,7 @@ LDADD = \
 	$(LIBOSMOABIS_LIBS) \
 	$(LIBOSMOSIGTRAN_LIBS) \
 	$(LIBOSMORANAP_LIBS) \
+	$(LIBASN1C_LIBS) \
 	$(LIBOSMOMGCPCLIENT_LIBS) \
 	$(LIBOSMOGSUPCLIENT_LIBS) \
 	$(LIBRARY_GSM) \

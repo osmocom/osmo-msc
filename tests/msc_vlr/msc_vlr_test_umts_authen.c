@@ -57,7 +57,7 @@ static void _test_umts_authen(enum osmo_rat_type via_ran)
 
 	btw("Location Update request causes a GSUP Send Auth Info request to HLR");
 	lu_result_sent = RES_NONE;
-	gsup_expect_tx("080108" "09710000000156f0");
+	gsup_expect_tx("080108" "09710000000156f0" VLR_TO_HLR);
 	ms_sends_msg("0508" /* MM LU */
 		     "7" /* ciph key seq: no key available */
 		     "0" /* LU type: normal */
@@ -118,14 +118,14 @@ static void _test_umts_authen(enum osmo_rat_type via_ran)
 			"2310" "65af0527fda95b0dc5ae4aa515cdf32f"
 			"2410" "537c3b35a3b13b08d08eeb28098f45cc"
 			"2510" "4bf4e564f75300009bc796706bc65744"
-			"2708" "0edb0eadbea94ac2",
+			"2708" "0edb0eadbea94ac2" HLR_TO_VLR,
 		NULL);
 	VERBOSE_ASSERT(auth_request_sent, == true, "%d");
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	if (via_ran == OSMO_RAT_GERAN_A) {
 		btw("MS sends Authen Response, VLR accepts and sends GSUP LU Req to HLR");
-		gsup_expect_tx("04010809710000000156f0280102");
+		gsup_expect_tx("04010809710000000156f0280102" VLR_TO_HLR);
 		ms_sends_msg("0554" "e229c19e" "2104" "791f2e41");
 		VERBOSE_ASSERT(gsup_tx_confirmed, == true, "%d");
 		VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
@@ -138,19 +138,19 @@ static void _test_umts_authen(enum osmo_rat_type via_ran)
 		VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 		btw("MS sends SecurityModeControl acceptance, VLR accepts and sends GSUP LU Req to HLR");
-		gsup_expect_tx("04010809710000000156f0280102");
+		gsup_expect_tx("04010809710000000156f0280102" VLR_TO_HLR);
 		ms_sends_security_mode_complete();
 		VERBOSE_ASSERT(gsup_tx_confirmed, == true, "%d");
 		VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 	}
 
 	btw("HLR sends _INSERT_DATA_REQUEST, VLR responds with _INSERT_DATA_RESULT");
-	gsup_rx("10010809710000000156f00804032443f2",
-		"12010809710000000156f0");
+	gsup_rx("10010809710000000156f00804032443f2" HLR_TO_VLR,
+		"12010809710000000156f0" VLR_TO_HLR);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("HLR also sends GSUP _UPDATE_LOCATION_RESULT");
-	gsup_rx("06010809710000000156f0", NULL);
+	gsup_rx("06010809710000000156f0" HLR_TO_VLR, NULL);
 
 	VERBOSE_ASSERT(lu_result_sent, == RES_ACCEPT, "%d");
 
@@ -171,7 +171,7 @@ static void _test_umts_authen(enum osmo_rat_type via_ran)
 	expect_release_clear(via_ran);
 	ms_sends_msg("055b");
 	ASSERT_RELEASE_CLEAR(via_ran);
-	bss_rnc_sends_release_clear_complete(via_ran);
+	ran_sends_clear_complete(via_ran);
 
 	btw("LU was successful, and the conn has already been closed");
 	EXPECT_CONN_COUNT(0);
@@ -181,12 +181,9 @@ static void _test_umts_authen(enum osmo_rat_type via_ran)
 	auth_request_expect_rand = "c187a53a5e6b9d573cac7c74451fd46d";
 	auth_request_expect_autn = "1843a645b98d00005b2d666af46c45d9";
 	cm_service_result_sent = RES_NONE;
-	ms_sends_msg("052478"
+	ms_sends_msg("052474"
 		     "03575886" /* classmark 2 */
 		     "089910070000106005" /* IMSI */);
-	OSMO_ASSERT(g_conn);
-	OSMO_ASSERT(g_conn->fi);
-	OSMO_ASSERT(g_conn->vsub);
 	VERBOSE_ASSERT(cm_service_result_sent, == RES_NONE, "%d");
 	VERBOSE_ASSERT(auth_request_sent, == true, "%d");
 
@@ -214,8 +211,8 @@ static void _test_umts_authen(enum osmo_rat_type via_ran)
 
 	/* Release connection */
 	expect_release_clear(via_ran);
-	conn_conclude_cm_service_req(g_conn, via_ran);
-	bss_rnc_sends_release_clear_complete(via_ran);
+	conn_conclude_cm_service_req(g_msub, MSC_A_USE_CM_SERVICE_SMS);
+	ran_sends_clear_complete(via_ran);
 
 	btw("all requests serviced, conn has been released");
 	EXPECT_CONN_COUNT(0);
@@ -235,7 +232,6 @@ static void _test_umts_authen(enum osmo_rat_type via_ran)
 	vlr_subscr_put(vsub, __func__);
 	vsub = NULL;
 	VERBOSE_ASSERT(paging_sent, == true, "%d");
-	VERBOSE_ASSERT(paging_stopped, == false, "%d");
 
 	btw("the subscriber and its pending request should remain");
 	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi, __func__);
@@ -261,19 +257,16 @@ static void _test_umts_authen(enum osmo_rat_type via_ran)
 		dtap_expect_tx(sms);
 		ms_sends_msg("0554" "706f9967" "2104" "19ba609c"); /* 3nd vector's res, s.a. */
 		VERBOSE_ASSERT(dtap_tx_confirmed, == true, "%d");
-		VERBOSE_ASSERT(paging_stopped, == true, "%d");
 	} else {
 		/* On UTRAN */
 		btw("MS sends Authen Response, VLR accepts and sends SecurityModeControl");
 		expect_security_mode_ctrl(NULL, "eb50e770ddcc3060101d2f43b6c2b884");
 		ms_sends_msg("0554" "706f9967" "2104" "19ba609c"); /* 3nd vector's res, s.a. */
 		VERBOSE_ASSERT(security_mode_ctrl_sent, == true, "%d");
-		VERBOSE_ASSERT(paging_stopped, == false, "%d");
 
 		btw("MS sends SecurityModeControl acceptance, VLR accepts and sends SMS");
 		dtap_expect_tx(sms);
 		ms_sends_security_mode_complete();
-		VERBOSE_ASSERT(paging_stopped, == true, "%d");
 	}
 
 	btw("SMS was delivered, no requests pending for subscr");
@@ -295,7 +288,7 @@ static void _test_umts_authen(enum osmo_rat_type via_ran)
 	ms_sends_msg("890106020041020000");
 	VERBOSE_ASSERT(dtap_tx_confirmed, == true, "%d");
 	ASSERT_RELEASE_CLEAR(via_ran);
-	bss_rnc_sends_release_clear_complete(via_ran);
+	ran_sends_clear_complete(via_ran);
 
 	btw("SMS is done, conn is gone");
 	EXPECT_CONN_COUNT(0);
@@ -305,7 +298,7 @@ static void _test_umts_authen(enum osmo_rat_type via_ran)
 	ms_sends_msg("050130"
 		     "089910070000106005" /* IMSI */);
 	ASSERT_RELEASE_CLEAR(via_ran);
-	bss_rnc_sends_release_clear_complete(via_ran);
+	ran_sends_clear_complete(via_ran);
 
 	EXPECT_CONN_COUNT(0);
 	clear_vlr();
@@ -346,7 +339,7 @@ static void _test_umts_authen_resync(enum osmo_rat_type via_ran)
 
 	btw("Location Update request causes a GSUP Send Auth Info request to HLR");
 	lu_result_sent = RES_NONE;
-	gsup_expect_tx("080108" "09710000000156f0");
+	gsup_expect_tx("080108" "09710000000156f0" VLR_TO_HLR);
 	ms_sends_msg("0508" /* MM LU */
 		     "7" /* ciph key seq: no key available */
 		     "0" /* LU type: normal */
@@ -383,7 +376,7 @@ static void _test_umts_authen_resync(enum osmo_rat_type via_ran)
 			"2510" "8704f5ba55f30000d2ee44b22c8ea919"
 		/*       TL     RES */
 			"2708" "e229c19e791f2e41"
-		,NULL);
+		 HLR_TO_VLR,NULL);
 	VERBOSE_ASSERT(auth_request_sent, == true, "%d");
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
@@ -447,7 +440,8 @@ static void _test_umts_authen_resync(enum osmo_rat_type via_ran)
 	gsup_expect_tx("08" /* OSMO_GSUP_MSGT_SEND_AUTH_INFO_REQUEST */
 		       "0108" "09710000000156f0" /* IMSI */
 		       "260e" "979498b1f72d3e28c59fa2e72f9c" /* AUTS */
-		       "2010" "39fa2f4e3d523d8619a73b4f65c3e14d" /* RAND */);
+		       "2010" "39fa2f4e3d523d8619a73b4f65c3e14d" /* RAND */
+		       VLR_TO_HLR);
 	ms_sends_msg("051c" /* 05 = MM; 1c = Auth Failure */
 		     "15"   /* cause = Synch Failure */
 		     "220e" "979498b1f72d3e28c59fa2e72f9c" /* AUTS */);
@@ -487,14 +481,14 @@ static void _test_umts_authen_resync(enum osmo_rat_type via_ran)
 			"2510" "8a43b91898e500002cf354c6f5d1f8c3"
 		/*       TL     RES */
 			"2708" "f748a7078f5018db"
-		,NULL);
+		 HLR_TO_VLR,NULL);
 
 	VERBOSE_ASSERT(auth_request_sent, == true, "%d");
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	if (via_ran == OSMO_RAT_GERAN_A) {
 		btw("MS sends Authen Response, VLR accepts and sends GSUP LU Req to HLR");
-		gsup_expect_tx("04010809710000000156f0280102");
+		gsup_expect_tx("04010809710000000156f0280102" VLR_TO_HLR);
 		ms_sends_msg("0554" "1df5f0b4" "2104" "f22b696e");
 		VERBOSE_ASSERT(gsup_tx_confirmed, == true, "%d");
 		VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
@@ -507,19 +501,19 @@ static void _test_umts_authen_resync(enum osmo_rat_type via_ran)
 		VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 		btw("MS sends SecurityModeControl acceptance, VLR accepts and sends GSUP LU Req to HLR");
-		gsup_expect_tx("04010809710000000156f0280102");
+		gsup_expect_tx("04010809710000000156f0280102" VLR_TO_HLR);
 		ms_sends_security_mode_complete();
 		VERBOSE_ASSERT(gsup_tx_confirmed, == true, "%d");
 		VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 	}
 
 	btw("HLR sends _INSERT_DATA_REQUEST, VLR responds with _INSERT_DATA_RESULT");
-	gsup_rx("10010809710000000156f00804032443f2",
-		"12010809710000000156f0");
+	gsup_rx("10010809710000000156f00804032443f2" HLR_TO_VLR,
+		"12010809710000000156f0" VLR_TO_HLR);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("HLR also sends GSUP _UPDATE_LOCATION_RESULT");
-	gsup_rx("06010809710000000156f0", NULL);
+	gsup_rx("06010809710000000156f0" HLR_TO_VLR, NULL);
 
 	VERBOSE_ASSERT(lu_result_sent, == RES_ACCEPT, "%d");
 
@@ -540,7 +534,7 @@ static void _test_umts_authen_resync(enum osmo_rat_type via_ran)
 	expect_release_clear(via_ran);
 	ms_sends_msg("055b");
 	ASSERT_RELEASE_CLEAR(via_ran);
-	bss_rnc_sends_release_clear_complete(via_ran);
+	ran_sends_clear_complete(via_ran);
 
 	btw("LU was successful, and the conn has already been closed");
 	EXPECT_CONN_COUNT(0);
@@ -570,7 +564,7 @@ static void _test_umts_authen_too_short_res(enum osmo_rat_type via_ran)
 
 	btw("Location Update request causes a GSUP Send Auth Info request to HLR");
 	lu_result_sent = RES_NONE;
-	gsup_expect_tx("080108" "09710000000156f0");
+	gsup_expect_tx("080108" "09710000000156f0" VLR_TO_HLR);
 	ms_sends_msg("0508" /* MM LU */
 		     "7" /* ciph key seq: no key available */
 		     "0" /* LU type: normal */
@@ -631,18 +625,18 @@ static void _test_umts_authen_too_short_res(enum osmo_rat_type via_ran)
 			"2310" "65af0527fda95b0dc5ae4aa515cdf32f"
 			"2410" "537c3b35a3b13b08d08eeb28098f45cc"
 			"2510" "4bf4e564f75300009bc796706bc65744"
-			"2708" "0edb0eadbea94ac2",
+			"2708" "0edb0eadbea94ac2" HLR_TO_VLR,
 		NULL);
 	VERBOSE_ASSERT(auth_request_sent, == true, "%d");
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("MS sends Authen Response of wrong RES size, VLR thwarts");
-	gsup_expect_tx("0b010809710000000156f0"); /* OSMO_GSUP_MSGT_AUTH_FAIL_REPORT */
+	gsup_expect_tx("0b010809710000000156f0" VLR_TO_HLR); /* OSMO_GSUP_MSGT_AUTH_FAIL_REPORT */
 	expect_release_clear(via_ran);
 	ms_sends_msg("0554" "e229c19e" "2103" "791f2e" /* nipped one byte */);
 	VERBOSE_ASSERT(lu_result_sent, == RES_REJECT, "%d");
 	ASSERT_RELEASE_CLEAR(via_ran);
-	bss_rnc_sends_release_clear_complete(via_ran);
+	ran_sends_clear_complete(via_ran);
 
 	EXPECT_CONN_COUNT(0);
 	clear_vlr();
@@ -670,7 +664,7 @@ static void _test_umts_authen_too_long_res(enum osmo_rat_type via_ran)
 
 	btw("Location Update request causes a GSUP Send Auth Info request to HLR");
 	lu_result_sent = RES_NONE;
-	gsup_expect_tx("080108" "09710000000156f0");
+	gsup_expect_tx("080108" "09710000000156f0" VLR_TO_HLR);
 	ms_sends_msg("0508" /* MM LU */
 		     "7" /* ciph key seq: no key available */
 		     "0" /* LU type: normal */
@@ -731,18 +725,18 @@ static void _test_umts_authen_too_long_res(enum osmo_rat_type via_ran)
 			"2310" "65af0527fda95b0dc5ae4aa515cdf32f"
 			"2410" "537c3b35a3b13b08d08eeb28098f45cc"
 			"2510" "4bf4e564f75300009bc796706bc65744"
-			"2708" "0edb0eadbea94ac2",
+			"2708" "0edb0eadbea94ac2" HLR_TO_VLR,
 		NULL);
 	VERBOSE_ASSERT(auth_request_sent, == true, "%d");
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("MS sends Authen Response of wrong RES size, VLR thwarts");
-	gsup_expect_tx("0b010809710000000156f0"); /* OSMO_GSUP_MSGT_AUTH_FAIL_REPORT */
+	gsup_expect_tx("0b010809710000000156f0" VLR_TO_HLR); /* OSMO_GSUP_MSGT_AUTH_FAIL_REPORT */
 	expect_release_clear(via_ran);
 	ms_sends_msg("0554" "e229c19e" "2105" "791f2e4123" /* added one byte */);
 	VERBOSE_ASSERT(lu_result_sent, == RES_REJECT, "%d");
 	ASSERT_RELEASE_CLEAR(via_ran);
-	bss_rnc_sends_release_clear_complete(via_ran);
+	ran_sends_clear_complete(via_ran);
 
 	EXPECT_CONN_COUNT(0);
 	clear_vlr();
@@ -770,7 +764,7 @@ static void _test_umts_authen_only_sres(enum osmo_rat_type via_ran)
 
 	btw("Location Update request causes a GSUP Send Auth Info request to HLR");
 	lu_result_sent = RES_NONE;
-	gsup_expect_tx("080108" "09710000000156f0");
+	gsup_expect_tx("080108" "09710000000156f0" VLR_TO_HLR);
 	ms_sends_msg("0508" /* MM LU */
 		     "7" /* ciph key seq: no key available */
 		     "0" /* LU type: normal */
@@ -831,7 +825,7 @@ static void _test_umts_authen_only_sres(enum osmo_rat_type via_ran)
 			"2310" "65af0527fda95b0dc5ae4aa515cdf32f"
 			"2410" "537c3b35a3b13b08d08eeb28098f45cc"
 			"2510" "4bf4e564f75300009bc796706bc65744"
-			"2708" "0edb0eadbea94ac2",
+			"2708" "0edb0eadbea94ac2" HLR_TO_VLR,
 		NULL);
 	VERBOSE_ASSERT(auth_request_sent, == true, "%d");
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
@@ -842,12 +836,12 @@ static void _test_umts_authen_only_sres(enum osmo_rat_type via_ran)
 	else
 		btw("MS sends Authen Response of wrong RES size, VLR thwarts:"
 		    " UTRAN disallows GSM AKA altogether");
-	gsup_expect_tx("0b010809710000000156f0"); /* OSMO_GSUP_MSGT_AUTH_FAIL_REPORT */
+	gsup_expect_tx("0b010809710000000156f0" VLR_TO_HLR); /* OSMO_GSUP_MSGT_AUTH_FAIL_REPORT */
 	expect_release_clear(via_ran);
 	ms_sends_msg("0554" "e229c19e" /* Only the SRES half of the RES */);
 	VERBOSE_ASSERT(lu_result_sent, == RES_REJECT, "%d");
 	ASSERT_RELEASE_CLEAR(via_ran);
-	bss_rnc_sends_release_clear_complete(via_ran);
+	ran_sends_clear_complete(via_ran);
 
 	EXPECT_CONN_COUNT(0);
 	clear_vlr();

@@ -44,7 +44,7 @@ static void _test_auth_reuse(enum osmo_rat_type via_ran,
 
 	btw("Location Update request causes a GSUP Send Auth Info request to HLR");
 	lu_result_sent = RES_NONE;
-	gsup_expect_tx("080108" "09710000000156f0");
+	gsup_expect_tx("080108" "09710000000156f0" VLR_TO_HLR);
 	ms_sends_msg("0508" /* MM LU */
 		     "7" /* ciph key seq: no key available */
 		     "0" /* LU type: normal */
@@ -79,14 +79,14 @@ static void _test_auth_reuse(enum osmo_rat_type via_ran,
 		/*       TL     AUTN */
 			"2510" "8704f5ba55f30000d2ee44b22c8ea919"
 		/*       TL     RES */
-			"2708" "e229c19e791f2e41",
+			"2708" "e229c19e791f2e41" HLR_TO_VLR,
 		NULL);
 	VERBOSE_ASSERT(auth_request_sent, == true, "%d");
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	if (via_ran == OSMO_RAT_GERAN_A) {
 		btw("MS sends Authen Response, VLR accepts and sends GSUP LU Req to HLR");
-		gsup_expect_tx("04010809710000000156f0280102");
+		gsup_expect_tx("04010809710000000156f0280102" VLR_TO_HLR);
 		ms_sends_msg("0554" "e229c19e" "2104" "791f2e41");
 		VERBOSE_ASSERT(gsup_tx_confirmed, == true, "%d");
 		VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
@@ -99,19 +99,19 @@ static void _test_auth_reuse(enum osmo_rat_type via_ran,
 		VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 		btw("MS sends SecurityModeControl acceptance, VLR accepts and sends GSUP LU Req to HLR");
-		gsup_expect_tx("04010809710000000156f0280102");
+		gsup_expect_tx("04010809710000000156f0280102" VLR_TO_HLR);
 		ms_sends_security_mode_complete();
 		VERBOSE_ASSERT(gsup_tx_confirmed, == true, "%d");
 		VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 	}
 
 	btw("HLR sends _INSERT_DATA_REQUEST, VLR responds with _INSERT_DATA_RESULT");
-	gsup_rx("10010809710000000156f00804032443f2",
-		"12010809710000000156f0");
+	gsup_rx("10010809710000000156f00804032443f2" HLR_TO_VLR,
+		"12010809710000000156f0" VLR_TO_HLR);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("HLR also sends GSUP _UPDATE_LOCATION_RESULT");
-	gsup_rx("06010809710000000156f0", NULL);
+	gsup_rx("06010809710000000156f0" HLR_TO_VLR, NULL);
 
 	VERBOSE_ASSERT(lu_result_sent, == RES_ACCEPT, "%d");
 
@@ -132,7 +132,7 @@ static void _test_auth_reuse(enum osmo_rat_type via_ran,
 	expect_release_clear(via_ran);
 	ms_sends_msg("055b");
 	ASSERT_RELEASE_CLEAR(via_ran);
-	bss_rnc_sends_release_clear_complete(via_ran);
+	ran_sends_clear_complete(via_ran);
 
 	btw("LU was successful, and the conn has already been closed");
 	EXPECT_CONN_COUNT(0);
@@ -151,12 +151,9 @@ static void _test_auth_reuse(enum osmo_rat_type via_ran,
 		    " and reuses old auth vector");
 		auth_request_sent = true;
 		cm_service_result_sent = RES_NONE;
-		ms_sends_msg("052478"
+		ms_sends_msg("052474"
 			     "03575886" /* classmark 2 */
 			     "089910070000106005" /* IMSI */);
-		OSMO_ASSERT(g_conn);
-		OSMO_ASSERT(g_conn->fi);
-		OSMO_ASSERT(g_conn->vsub);
 		VERBOSE_ASSERT(cm_service_result_sent, == RES_NONE, "%d");
 		VERBOSE_ASSERT(auth_request_sent, == true, "%d");
 
@@ -180,8 +177,8 @@ static void _test_auth_reuse(enum osmo_rat_type via_ran,
 
 		/* Release connection */
 		expect_release_clear(via_ran);
-		conn_conclude_cm_service_req(g_conn, via_ran);
-		bss_rnc_sends_release_clear_complete(via_ran);
+		conn_conclude_cm_service_req(g_msub, MSC_A_USE_CM_SERVICE_SMS);
+		ran_sends_clear_complete(via_ran);
 
 		btw("all requests serviced, conn has been released");
 		EXPECT_CONN_COUNT(0);
@@ -199,13 +196,10 @@ static void _test_auth_reuse(enum osmo_rat_type via_ran,
 		    " and needs to request a second auth vector from HLR");
 		auth_request_sent = false;
 		cm_service_result_sent = RES_NONE;
-		gsup_expect_tx("080108" "09710000000156f0");
-		ms_sends_msg("052478"
+		gsup_expect_tx("080108" "09710000000156f0" VLR_TO_HLR);
+		ms_sends_msg("052474"
 			     "03575886" /* classmark 2 */
 			     "089910070000106005" /* IMSI */);
-		OSMO_ASSERT(g_conn);
-		OSMO_ASSERT(g_conn->fi);
-		OSMO_ASSERT(g_conn->vsub);
 		VERBOSE_ASSERT(cm_service_result_sent, == RES_NONE, "%d");
 		VERBOSE_ASSERT(auth_request_sent, == false, "%d");
 		VERBOSE_ASSERT(gsup_tx_confirmed, == true, "%d");
@@ -227,7 +221,7 @@ static void _test_auth_reuse(enum osmo_rat_type via_ran,
 				"2310" "1159ec926a50e98c034a6b7d7c9f418d"
 				"2410" "df3a03d9ca5335641efc8e36d76cd20b"
 				"2510" "1843a645b98d00005b2d666af46c45d9"
-				"2708" "7db47cf7f81e4dc7",
+				"2708" "7db47cf7f81e4dc7" HLR_TO_VLR,
 			NULL);
 		VERBOSE_ASSERT(auth_request_sent, == true, "%d");
 		VERBOSE_ASSERT(cm_service_result_sent, == RES_NONE, "%d");
@@ -252,8 +246,8 @@ static void _test_auth_reuse(enum osmo_rat_type via_ran,
 
 		/* Release connection */
 		expect_release_clear(via_ran);
-		conn_conclude_cm_service_req(g_conn, via_ran);
-		bss_rnc_sends_release_clear_complete(via_ran);
+		conn_conclude_cm_service_req(g_msub, MSC_A_USE_CM_SERVICE_SMS);
+		ran_sends_clear_complete(via_ran);
 
 		btw("all requests serviced, conn has been released");
 		EXPECT_CONN_COUNT(0);
@@ -264,7 +258,7 @@ static void _test_auth_reuse(enum osmo_rat_type via_ran,
 	ms_sends_msg("050130"
 		     "089910070000106005" /* IMSI */);
 	ASSERT_RELEASE_CLEAR(via_ran);
-	bss_rnc_sends_release_clear_complete(via_ran);
+	ran_sends_clear_complete(via_ran);
 
 	EXPECT_CONN_COUNT(0);
 	clear_vlr();

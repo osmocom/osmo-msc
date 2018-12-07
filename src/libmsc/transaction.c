@@ -25,6 +25,10 @@
 #include <osmocom/core/talloc.h>
 #include <osmocom/msc/gsm_04_08.h>
 #include <osmocom/msc/vlr.h>
+#include <osmocom/msc/msc_a.h>
+#include <osmocom/msc/msub.h>
+#include <osmocom/msc/paging.h>
+#include <osmocom/msc/silent_call.h>
 
 void *tall_trans_ctx;
 
@@ -32,22 +36,35 @@ void _gsm48_cc_trans_free(struct gsm_trans *trans);
 void _gsm411_sms_trans_free(struct gsm_trans *trans);
 void _gsm911_nc_ss_trans_free(struct gsm_trans *trans);
 
+struct gsm_trans *trans_find_by_type(const struct msc_a *msc_a, enum trans_type type)
+{
+	struct gsm_trans *trans;
+	struct gsm_network *net = msc_a_net(msc_a);
+	struct vlr_subscr *vsub = msc_a_vsub(msc_a);
+
+	llist_for_each_entry(trans, &net->trans_list, entry) {
+		if (trans->vsub == vsub && trans->type == type)
+			return trans;
+	}
+	return NULL;
+}
+
 /*! Find a transaction in connection for given protocol + transaction ID
  * \param[in] conn Connection in which we want to find transaction
  * \param[in] proto Protocol of transaction
  * \param[in] trans_id Transaction ID of transaction
  * \returns Matching transaction, if any
  */
-struct gsm_trans *trans_find_by_id(const struct ran_conn *conn,
-				   uint8_t proto, uint8_t trans_id)
+struct gsm_trans *trans_find_by_id(const struct msc_a *msc_a,
+				   enum trans_type type, uint8_t trans_id)
 {
 	struct gsm_trans *trans;
-	struct gsm_network *net = conn->network;
-	struct vlr_subscr *vsub = conn->vsub;
+	struct gsm_network *net = msc_a_net(msc_a);
+	struct vlr_subscr *vsub = msc_a_vsub(msc_a);
 
 	llist_for_each_entry(trans, &net->trans_list, entry) {
 		if (trans->vsub == vsub &&
-		    trans->protocol == proto &&
+		    trans->type == type &&
 		    trans->transaction_id == trans_id)
 			return trans;
 	}
@@ -85,7 +102,7 @@ struct gsm_trans *trans_find_by_sm_rp_mr(const struct gsm_network *net,
 
 	llist_for_each_entry(trans, &net->trans_list, entry) {
 		if (trans->vsub == vsub &&
-		    trans->protocol == GSM48_PDISC_SMS &&
+		    trans->type == TRANS_SMS &&
 		    trans->sms.sm_rp_mr == sm_rp_mr)
 			return trans;
 	}
@@ -93,9 +110,9 @@ struct gsm_trans *trans_find_by_sm_rp_mr(const struct gsm_network *net,
 	return NULL;
 }
 
-static const char *trans_vsub_use(uint8_t proto)
+static const char *trans_vsub_use(enum trans_type type)
 {
-	return get_value_string_or_null(gsm48_pdisc_names, proto) ? : "trans-proto-unknown";
+	return get_value_string_or_null(trans_type_names, type) ? : "trans-type-unknown";
 }
 
 /*! Allocate a new transaction and add it to network list
@@ -107,7 +124,7 @@ static const char *trans_vsub_use(uint8_t proto)
  */
 struct gsm_trans *trans_alloc(struct gsm_network *net,
 			      struct vlr_subscr *vsub,
-			      uint8_t protocol, uint8_t trans_id,
+			      enum trans_type type, uint8_t trans_id,
 			      uint32_t callref)
 {
 	struct gsm_trans *trans = NULL; /* (NULL for LOG_TRANS() before allocation) */
@@ -122,9 +139,9 @@ struct gsm_trans *trans_alloc(struct gsm_network *net,
 	if (!trans)
 		return NULL;
 
-	vlr_subscr_get(vsub, trans_vsub_use(protocol));
+	vlr_subscr_get(vsub, trans_vsub_use(type));
 	trans->vsub = vsub;
-	trans->protocol = protocol;
+	trans->type = type;
 	trans->transaction_id = trans_id;
 	trans->callref = callref;
 
@@ -140,46 +157,51 @@ struct gsm_trans *trans_alloc(struct gsm_network *net,
  */
 void trans_free(struct gsm_trans *trans)
 {
-	enum ran_conn_use conn_usage_token;
-	struct ran_conn *conn;
+	const char *usage_token;
+	struct msc_a *msc_a;
 
 	LOG_TRANS(trans, LOGL_DEBUG, "Freeing transaction\n");
 
-	switch (trans->protocol) {
-	case GSM48_PDISC_CC:
+	switch (trans->type) {
+	case TRANS_CC:
 		_gsm48_cc_trans_free(trans);
-		conn_usage_token = RAN_CONN_USE_TRANS_CC;
+		usage_token = MSC_A_USE_CC;
 		break;
-	case GSM48_PDISC_SMS:
+	case TRANS_SMS:
 		_gsm411_sms_trans_free(trans);
-		conn_usage_token = RAN_CONN_USE_TRANS_SMS;
+		usage_token = MSC_A_USE_SMS;
 		break;
-	case GSM48_PDISC_NC_SS:
+	case TRANS_USSD:
 		_gsm911_nc_ss_trans_free(trans);
-		conn_usage_token = RAN_CONN_USE_TRANS_NC_SS;
+		usage_token = MSC_A_USE_NC_SS;
+		break;
+	case TRANS_SILENT_CALL:
+		trans_silent_call_free(trans);
+		usage_token = MSC_A_USE_SILENT_CALL;
 		break;
 	default:
-		conn_usage_token = RAN_CONN_USE_UNTRACKED;
+		usage_token = NULL;
 		break;
 	}
 
 	if (trans->paging_request) {
-		subscr_remove_request(trans->paging_request);
+		paging_request_remove(trans->paging_request);
 		trans->paging_request = NULL;
 	}
 
 	if (trans->vsub) {
-		vlr_subscr_put(trans->vsub, trans_vsub_use(trans->protocol));
+		vlr_subscr_put(trans->vsub, trans_vsub_use(trans->type));
 		trans->vsub = NULL;
 	}
 
-	conn = trans->conn;
-	trans->conn = NULL;
+	msc_a = trans->msc_a;
+	trans->msc_a = NULL;
+
 	llist_del(&trans->entry);
 	talloc_free(trans);
 
-	if (conn)
-		ran_conn_put(conn, conn_usage_token);
+	if (msc_a && usage_token)
+		msc_a_put(msc_a, usage_token);
 }
 
 /*! allocate an unused transaction ID for the given subscriber
@@ -190,16 +212,17 @@ void trans_free(struct gsm_trans *trans)
  * \param[in] protocol Protocol of to be assigned TID
  */
 int trans_assign_trans_id(const struct gsm_network *net, const struct vlr_subscr *vsub,
-			  uint8_t protocol)
+			  enum trans_type type)
 {
 	struct gsm_trans *trans;
 	unsigned int used_tid_bitmask = 0;
 	int i, j, h;
+	uint8_t proto = trans_type_to_gsm48_proto(type);
 
 	/* generate bitmask of already-used TIDs for this (subscr,proto) */
 	llist_for_each_entry(trans, &net->trans_list, entry) {
 		if (trans->vsub != vsub ||
-		    trans->protocol != protocol ||
+		    proto != trans_type_to_gsm48_proto(trans->type) ||
 		    trans->transaction_id == TRANS_ID_UNASSIGNED)
 			continue;
 		used_tid_bitmask |= (1 << trans->transaction_id);
@@ -222,12 +245,13 @@ int trans_assign_trans_id(const struct gsm_network *net, const struct vlr_subscr
  * \param[in] conn Connection to check
  * \returns transaction pointer if found, NULL otherwise
  */
-struct gsm_trans *trans_has_conn(const struct ran_conn *conn)
+struct gsm_trans *trans_has_conn(const struct msc_a *msc_a)
 {
 	struct gsm_trans *trans;
+	struct gsm_network *net = msc_a_net(msc_a);
 
-	llist_for_each_entry(trans, &conn->network->trans_list, entry)
-		if (trans->conn == conn)
+	llist_for_each_entry(trans, &net->trans_list, entry)
+		if (trans->msc_a == msc_a)
 			return trans;
 
 	return NULL;
@@ -238,19 +262,37 @@ struct gsm_trans *trans_has_conn(const struct ran_conn *conn)
  * facilities, which will then send the necessary release indications.
  * \param[in] conn Connection that is going to be closed.
  */
-void trans_conn_closed(const struct ran_conn *conn)
+void trans_conn_closed(const struct msc_a *msc_a)
 {
-	struct gsm_trans *trans;
-
 	/* As part of the CC REL_IND the remote leg might be released and this
 	 * will trigger another call to trans_free. This is something the llist
 	 * macro can not handle and we need to re-iterate the list every time.
 	 */
-restart:
-	llist_for_each_entry(trans, &conn->network->trans_list, entry) {
-		if (trans->conn == conn) {
-			trans_free(trans);
-			goto restart;
-		}
+	struct gsm_trans *trans;
+	while ((trans = trans_has_conn(msc_a)))
+		trans_free(trans);
+}
+
+const struct value_string trans_type_names[] = {
+	{ TRANS_CC, "CC" },
+	{ TRANS_SMS, "SMS" },
+	{ TRANS_USSD, "NCSS" },
+	{ TRANS_SILENT_CALL, "silent-call" },
+	{}
+};
+
+uint8_t trans_type_to_gsm48_proto(enum trans_type type)
+{
+	switch (type) {
+	case TRANS_CC:
+	case TRANS_SILENT_CALL:
+		return GSM48_PDISC_CC;
+	case TRANS_SMS:
+		return GSM48_PDISC_SMS;
+	case TRANS_USSD:
+		return GSM48_PDISC_NC_SS;
+	default:
+		return GSM48_PDISC_TEST;
 	}
+
 }

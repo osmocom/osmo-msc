@@ -91,11 +91,6 @@ struct vlr_auth_tuple {
 #define VLR_KEY_SEQ_INVAL	7	/* GSM 04.08 - 10.5.1.2 */
 
 
-struct vlr_ciph_result {
-	enum vlr_ciph_result_cause cause;
-	char imeisv[GSM48_MI_SIZE];
-};
-
 enum vlr_subscr_security_context {
 	VLR_SEC_CTX_NONE,
 	VLR_SEC_CTX_GSM,
@@ -162,7 +157,8 @@ struct vlr_subscr {
 	bool la_allowed;
 
 	struct osmo_use_count use_count;
-	struct osmo_use_count_entry use_count_buf[10];
+	struct osmo_use_count_entry use_count_buf[8];
+	int32_t max_total_use_count;
 
 	struct osmo_fsm_inst *lu_fsm;
 	struct osmo_fsm_inst *auth_fsm;
@@ -200,20 +196,19 @@ struct vlr_subscr {
 		struct osmo_timer_list Ts5;
 	} sgs;
 
-	struct gsm_classmark classmark;
+	struct osmo_gsm48_classmark classmark;
 };
 
 enum vlr_ciph {
-	VLR_CIPH_NONE, /*< A5/0, no encryption */
-	VLR_CIPH_A5_1, /*< A5/1, encryption */
-	VLR_CIPH_A5_2, /*< A5/2, deprecated export-grade encryption */
-	VLR_CIPH_A5_3, /*< A5/3, 'new secure' encryption */
+	VLR_CIPH_NONE = 0, /*< A5/0, no encryption */
+	VLR_CIPH_A5_1 = 1, /*< A5/1, encryption */
+	VLR_CIPH_A5_2 = 2, /*< A5/2, deprecated export-grade encryption */
+	VLR_CIPH_A5_3 = 3, /*< A5/3, 'new secure' encryption */
 };
 
 static inline uint8_t vlr_ciph_to_gsm0808_alg_id(enum vlr_ciph ciph)
 {
 	switch (ciph) {
-	default:
 	case VLR_CIPH_NONE:
 		return GSM0808_ALG_ID_A5_0;
 	case VLR_CIPH_A5_1:
@@ -222,6 +217,8 @@ static inline uint8_t vlr_ciph_to_gsm0808_alg_id(enum vlr_ciph ciph)
 		return GSM0808_ALG_ID_A5_2;
 	case VLR_CIPH_A5_3:
 		return GSM0808_ALG_ID_A5_3;
+	default:
+		return GSM0808_ALG_ID_A5_7;
 	}
 }
 
@@ -240,12 +237,12 @@ struct vlr_ops {
 
 	int (*tx_lu_acc)(void *msc_conn_ref, uint32_t send_tmsi);
 	int (*tx_lu_rej)(void *msc_conn_ref, enum gsm48_reject_value cause);
-	int (*tx_cm_serv_acc)(void *msc_conn_ref);
-	int (*tx_cm_serv_rej)(void *msc_conn_ref, enum gsm48_reject_value cause);
+	int (*tx_cm_serv_acc)(void *msc_conn_ref, enum osmo_cm_service_type cm_service_type);
+	int (*tx_cm_serv_rej)(void *msc_conn_ref, enum osmo_cm_service_type cm_service_type,
+			      enum gsm48_reject_value cause);
 
 	int (*set_ciph_mode)(void *msc_conn_ref, bool umts_aka, bool retrieve_imeisv);
 
-	/* UTRAN: send Common Id (when auth+ciph are complete) */
 	int (*tx_common_id)(void *msc_conn_ref);
 
 	int (*tx_mm_info)(void *msc_conn_ref);
@@ -255,9 +252,6 @@ struct vlr_ops {
 	/* notify MSC/SGSN that the given subscriber has been associated
 	 * with this msc_conn_ref */
 	int (*subscr_assoc)(void *msc_conn_ref, struct vlr_subscr *vsub);
-
-	/* Forward a parsed GSUP message towards MSC message router */
-	int (*forward_gsup_msg)(struct vlr_subscr *vsub, struct osmo_gsup_message *gsup_msg);
 };
 
 enum vlr_timer {
@@ -271,7 +265,7 @@ enum vlr_timer {
 struct vlr_instance {
 	struct llist_head subscribers;
 	struct llist_head operations;
-	struct osmo_gsup_client *gsup_client;
+	struct gsup_client_mux *gcm;
 	struct vlr_ops ops;
 	struct osmo_timer_list lu_expire_timer;
 	struct {
@@ -323,13 +317,13 @@ int vlr_subscr_rx_auth_resp(struct vlr_subscr *vsub, bool is_r99, bool is_utran,
 			    const uint8_t *res, uint8_t res_len);
 int vlr_subscr_rx_auth_fail(struct vlr_subscr *vsub, const uint8_t *auts);
 int vlr_subscr_tx_auth_fail_rep(const struct vlr_subscr *vsub) __attribute__((warn_unused_result));
-void vlr_subscr_rx_ciph_res(struct vlr_subscr *vsub, struct vlr_ciph_result *res);
+void vlr_subscr_rx_ciph_res(struct vlr_subscr *vsub, enum vlr_ciph_result_cause result);
 int vlr_subscr_rx_tmsi_reall_compl(struct vlr_subscr *vsub);
 int vlr_subscr_rx_imsi_detach(struct vlr_subscr *vsub);
 
 struct vlr_instance *vlr_alloc(void *ctx, const struct vlr_ops *ops);
-int vlr_start(struct ipaccess_unit *ipa_dev, struct vlr_instance *vlr,
-	      const char *gsup_server_addr_str, uint16_t gsup_server_port);
+int vlr_start(struct vlr_instance *vlr, struct gsup_client_mux *gcm);
+int vlr_gsup_rx(struct gsup_client_mux *gcm, void *data, const struct osmo_gsup_message *gsup_msg);
 
 /* internal use only */
 
@@ -351,6 +345,7 @@ lu_compl_vlr_proc_start(struct osmo_fsm_inst *parent,
 
 
 const char *vlr_subscr_name(const struct vlr_subscr *vsub);
+const char *vlr_subscr_short_name(const struct vlr_subscr *vsub, unsigned int maxlen);
 const char *vlr_subscr_msisdn_or_name(const struct vlr_subscr *vsub);
 
 #define vlr_subscr_find_by_imsi(vlr, imsi, USE) \
@@ -454,7 +449,8 @@ vlr_proc_acc_req(struct osmo_fsm_inst *parent,
 		 uint32_t parent_event_failure,
 		 void *parent_event_data,
 		 struct vlr_instance *vlr, void *msc_conn_ref,
-		 enum vlr_parq_type type, const uint8_t *mi_lv,
+		 enum vlr_parq_type type, enum osmo_cm_service_type cm_service_type,
+		 const uint8_t *mi_lv,
 		 const struct osmo_location_area_id *lai,
 		 bool authentication_required,
 		 bool ciphering_required,

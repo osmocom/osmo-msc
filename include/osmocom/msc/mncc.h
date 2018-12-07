@@ -1,4 +1,4 @@
-/* GSM Mobile Radio Interface Layer 3 messages on the A-bis interface 
+/* GSM Mobile Radio Interface Layer 3 messages on the A-bis interface
  * 3GPP TS 04.08 version 7.21.0 Release 1998 / ETSI TS 100 940 V7.21.0 */
 
 /* (C) 2008-2009 by Harald Welte <laforge@gnumonks.org>
@@ -31,6 +31,7 @@
 
 struct gsm_network;
 struct msgb;
+struct gsm0808_channel_type;
 
 
 /* One end of a call */
@@ -196,6 +197,15 @@ struct gsm_mncc_bridge {
 	uint32_t	callref[2];
 };
 
+union mncc_msg {
+	uint32_t msg_type;
+	struct gsm_mncc signal;
+	struct gsm_mncc_hello hello;
+	struct gsm_data_frame data_frame;
+	struct gsm_mncc_rtp rtp;
+	struct gsm_mncc_bridge bridge;
+};
+
 const char *get_mncc_name(int value);
 void mncc_set_cause(struct gsm_mncc *data, int loc, int val);
 void cc_tx_to_mncc(struct gsm_network *net, struct msgb *msg);
@@ -216,5 +226,7 @@ int mncc_sock_init(struct gsm_network *net, const char *sock_path);
 		|| msg_type == GSM_BAD_FRAME)
 
 int mncc_prim_check(const struct gsm_mncc *mncc_prim, unsigned int len);
+
+int mncc_bearer_cap_to_channel_type(struct gsm0808_channel_type *ct, const struct gsm_mncc_bearer_cap *bc);
 
 #endif

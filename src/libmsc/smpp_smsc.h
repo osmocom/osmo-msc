@@ -19,6 +19,8 @@
 #define MODE_7BIT	7
 #define MODE_8BIT	8
 
+struct msc_a;
+
 enum esme_read_state {
 	READ_ST_IN_LEN = 0,
 	READ_ST_IN_MSG = 1,
@@ -161,8 +163,6 @@ int smpp_determine_scheme(uint8_t dcs, uint8_t *data_coding, int *mode);
 struct gsm_sms;
 struct ran_conn;
 
-int smpp_route_smpp_first(struct gsm_sms *sms,
-			    struct ran_conn *conn);
-int smpp_try_deliver(struct gsm_sms *sms,
-		     struct ran_conn *conn);
+bool smpp_route_smpp_first();
+int smpp_try_deliver(struct gsm_sms *sms, struct msc_a *msc_a);
 #endif

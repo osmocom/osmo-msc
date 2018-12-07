@@ -1,0 +1,36 @@
+msc {
+	hscale=2;
+	bsca [label="BSC-A"], i[label="MSC-I"], a[label="MSC-A"], t[label="MSC-T"], bscb[label="BSC-B"];
+
+	i note t [label="'MSC-A,I,T' are explained in 3GPP TS 49.008 '4.3 Roles of MSC-A, MSC-I and MSC-T'"];
+	i note i [label="I = Internal; the MSC that does BSSMAP to the BSC (may change to a remote MSC-B after HO)"];
+	a note a [label="A = first; the MSC that has MM control BSSMAP to the BSC (never changes)"];
+	t note t [label="T = transitory; the MSC that a handover is going towards (may be MSC-A for inter-BSC HO, may be a remote MSC-B)"];
+
+	bsca => i [label="BSSMAP Handover Required"];
+	i -> a [label="BSSMAP Handover Required"];
+
+	a -> t [label="MAP Prepare Handover"];
+	t => bscb [label="BSSMAP Handover Request"];
+	t <= bscb [label="BSSMAP Handover Request ACK"];
+	a <- t [label="MAP Prepare Handover Response"];
+	i <- a [label="MAP Prepare Handover Response"];
+	bsca <= i [label="BSSMAP Handover Command"];
+
+	--- [label="MS sends RACH to new cell"];
+
+	t <= bscb [label="BSSMAP Handover Detected"];
+	a <- t [label="MAP Access Signaling Request"];
+
+	t <= bscb [label="BSSMAP Handover Complete"];
+	a <- t [label="MAP Send End Signal"];
+	
+
+	a abox a [label="MSC-A accepts the new BSC"];
+	i note t [label="previous MSC-I gets dropped, MSC-T becomes the new MSC-I"];
+	i abox i [label="discard"];
+	t abox t [label="MSC-I"];
+
+	bsca <= i [label="BSSMAP Clear Command"];
+
+}

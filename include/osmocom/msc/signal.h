@@ -28,6 +28,9 @@
 
 #include <osmocom/core/signal.h>
 
+struct msc_a;
+struct vty;
+
 /*
  * Signalling subsystems
  */
@@ -63,7 +66,7 @@ enum signal_subscr {
 /* SS_SCALL signals */
 enum signal_scall {
 	S_SCALL_SUCCESS,
-	S_SCALL_EXPIRED,
+	S_SCALL_FAILED,
 	S_SCALL_DETACHED,
 };
 
@@ -78,23 +81,18 @@ enum signal_global {
 
 struct paging_signal_data {
 	struct vlr_subscr *vsub;
-	struct gsm_bts *bts;
-
-	int paging_result;
-
-	/* NULL in case the paging didn't work */
-	struct ran_conn *conn;
+	struct msc_a *msc_a;
 };
 
 struct scall_signal_data {
-	struct ran_conn *conn;
-	void *data;
+	struct msc_a *msc_a;
+	struct vty *vty;
 };
 struct sms_signal_data {
 	/* The transaction where this occured */
 	struct gsm_trans *trans;
 	/* Can be NULL for SMMA */
 	struct gsm_sms *sms;
-	/* int paging result. Only the ones with > 0 */
-	int paging_result;
+	/* true when paging was successful */
+	bool paging_result;
 };

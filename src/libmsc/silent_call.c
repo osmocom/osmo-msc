@@ -32,115 +32,59 @@
 #include <osmocom/msc/gsm_data.h>
 #include <osmocom/msc/gsm_subscriber.h>
 #include <osmocom/msc/vlr.h>
+#include <osmocom/msc/msc_a.h>
+#include <osmocom/msc/paging.h>
+#include <osmocom/msc/transaction.h>
+#include <osmocom/msc/silent_call.h>
 
 #include <osmocom/sigtran/sccp_helpers.h>
 
-struct silent_call_data {
-	struct gsm0808_channel_type ct;
-
-	char traffic_ip[INET_ADDRSTRLEN];
-	uint16_t traffic_port;
-
-	void *data;
-
-	struct osmo_timer_list timer;
-	struct ran_conn *conn;
-};
-
-static void timer_cb(void *data)
-{
-	struct silent_call_data *scd = (struct silent_call_data *)data;
-	ran_conn_communicating(scd->conn);
-	talloc_free(scd);
-}
-
 /* paging of the requested subscriber has completed */
-static int paging_cb_silent(unsigned int hooknum, unsigned int event,
-			    struct msgb *msg, void *_conn, void *_data)
+void paging_cb_silent(struct msc_a *msc_a, struct gsm_trans *trans)
 {
-	struct silent_call_data *scd = (struct silent_call_data *)_data;
-	struct ran_conn *conn = _conn;
-	struct scall_signal_data sigdata;
-	struct msgb *msg_ass;
-	int rc = 0;
-	int i;
+	struct scall_signal_data sigdata = {
+		.msc_a = msc_a,
+		.vty = trans->silent_call.from_vty,
+	};
+	struct ran_msg assignment;
 
-	if (hooknum != GSM_HOOK_RR_PAGING)
-		return -EINVAL;
-
-	DEBUGP(DLSMS, "paging_cb_silent: ");
-
-	sigdata.conn = conn;
-	sigdata.data = scd->data;
-
-	switch (event) {
-	case GSM_PAGING_SUCCEEDED:
-#if BEFORE_MSCSPLIT
-		/* Re-enable this log output once we can obtain this information via
-		 * A-interface, see OS#2391. */
-		DEBUGPC(DLSMS, "success, using Timeslot %u on ARFCN %u\n",
-			conn->lchan->ts->nr, conn->lchan->ts->trx->arfcn);
-#endif
-		conn->silent_call = 1;
-
-		/* Increment lchan reference count and mark as active*/
-		ran_conn_get(conn, RAN_CONN_USE_SILENT_CALL);
-
-		/* Schedule a timer to mark it as active */
-			/* This is a hack we we can't call ran_conn_communicating
-			 * from here because we're in the call back context of
-			 * a RAN FSM event but before it actually changes its own
-			 * state and it's not ready to accept this.
-			 * Of all alternatives considered, making the call in an
-			 * 'immediate timer' is the least disruptive and least ugly
-			 * way to do it I could find.
-			 */
-		scd->conn = conn;
-		osmo_timer_setup(&scd->timer, timer_cb, scd);
-		osmo_timer_schedule(&scd->timer, 0, 0);
-
-		/* Manually craft an assignement message with requested mode */
-		if (scd->ct.ch_indctr == GSM0808_CHAN_SPEECH) {
-			struct gsm0808_speech_codec_list scl;
-			union {
-				struct sockaddr_storage st;
-				struct sockaddr_in in;
-			} rtp_addr;
-
-			memset(&rtp_addr, 0, sizeof(rtp_addr));
-			rtp_addr.in.sin_family = AF_INET;
-			rtp_addr.in.sin_port = osmo_htons(scd->traffic_port);
-			rtp_addr.in.sin_addr.s_addr = inet_addr(scd->traffic_ip);
-
-			for (i = 0; i < scd->ct.perm_spch_len; i++)
-				gsm0808_speech_codec_from_chan_type(&scl.codec[i], scd->ct.perm_spch[i]);
-			scl.len = scd->ct.perm_spch_len;
-
-			msg_ass = gsm0808_create_ass(&scd->ct, NULL, &rtp_addr.st, &scl, NULL);
-		} else {
-			msg_ass = gsm0808_create_ass(&scd->ct, NULL, NULL, NULL, NULL);
-		}
-
-		/* Send assignement message, hoping it will work */
-		osmo_sccp_tx_data_msg(conn->a.scu, conn->a.conn_id, msg_ass);
-
-		/* Signal completion */
-		osmo_signal_dispatch(SS_SCALL, S_SCALL_SUCCESS, &sigdata);
-		return 0;
-
-	case GSM_PAGING_EXPIRED:
-	case GSM_PAGING_BUSY:
-		DEBUGP(DLSMS, "expired\n");
-		osmo_signal_dispatch(SS_SCALL, S_SCALL_EXPIRED, &sigdata);
-		break;
-	default:
-		rc = -EINVAL;
-		break;
+	if (!msc_a) {
+		LOG_MSC_A(msc_a, LOGL_ERROR, "Silent call: MS not responding to Paging\n");
+		osmo_signal_dispatch(SS_SCALL, S_SCALL_FAILED, &sigdata);
+		trans_free(trans);
+		return;
 	}
 
-	talloc_free(scd);
+	LOG_MSC_A(msc_a, LOGL_INFO, "Silent call: MS responding to Paging\n");
 
-	return rc;
+	trans->msc_a = msc_a;
+	msc_a_get(msc_a, MSC_A_USE_SILENT_CALL);
+
+	osmo_fsm_inst_dispatch(msc_a->c.fi, MSC_A_EV_TRANSACTION_ACCEPTED, trans);
+
+	assignment = (struct ran_msg){
+		.msg_type = RAN_MSG_ASSIGNMENT_COMMAND,
+		.assignment_command = {
+			.channel_type = &trans->silent_call.ct,
+			.cn_rtp = &trans->silent_call.rtp_cn,
+		},
+	};
+	if (msc_a_ran_down(msc_a, MSC_ROLE_I, &assignment)) {
+		LOG_MSC_A(msc_a, LOGL_ERROR, "Silent call failed\n");
+		osmo_signal_dispatch(SS_SCALL, S_SCALL_FAILED, &sigdata);
+		trans_free(trans);
+	} else {
+		osmo_signal_dispatch(SS_SCALL, S_SCALL_SUCCESS, &sigdata);
+	}
+}
+
+void trans_silent_call_free(struct gsm_trans *trans)
+{
+	struct scall_signal_data sigdata = {
+		.msc_a = trans->msc_a,
+		.vty = trans->silent_call.from_vty,
+	};
+	osmo_signal_dispatch(SS_SCALL, S_SCALL_DETACHED, &sigdata);
 }
 
 #if 0
@@ -193,27 +137,20 @@ int silent_call_reroute(struct ran_conn *conn, struct msgb *msg)
 int gsm_silent_call_start(struct vlr_subscr *vsub,
 	const struct gsm0808_channel_type *ct,
 	const char *traffic_dst_ip, uint16_t traffic_dst_port,
-	void *data)
+	struct vty *vty)
 {
-	struct subscr_request *req;
-	struct silent_call_data *scd;
+	struct gsm_network *net = vsub->vlr->user_ctx;
+	struct gsm_trans *trans = trans_alloc(net, vsub, TRANS_SILENT_CALL, 0, 0);
 
-	scd = talloc_zero(vsub, struct silent_call_data);
-
-	memcpy(&scd->ct, ct, sizeof(scd->ct));
-
+	trans->silent_call.ct = *ct;
 	if (traffic_dst_ip) {
-		osmo_strlcpy(scd->traffic_ip, traffic_dst_ip, sizeof(scd->traffic_ip));
-		scd->traffic_port = traffic_dst_port;
+		osmo_sockaddr_str_from_str(&trans->silent_call.rtp_cn, traffic_dst_ip, traffic_dst_port);
 	}
+	trans->silent_call.from_vty = vty;
 
-	scd->data = data;
-
-	req = subscr_request_conn(vsub, paging_cb_silent, scd,
-				  "establish silent call",
-				  SGSAP_SERV_IND_CS_CALL);
-	if (!req) {
-		talloc_free(scd);
+	if (!paging_request_start(vsub, PAGING_CAUSE_CALL_BACKGROUND, paging_cb_silent, trans,
+				  "establish silent call")) {
+		trans_free(trans);
 		return -ENODEV;
 	}
 
@@ -223,31 +160,21 @@ int gsm_silent_call_start(struct vlr_subscr *vsub,
 /* end a silent call with a given subscriber */
 int gsm_silent_call_stop(struct vlr_subscr *vsub)
 {
-	struct ran_conn *conn;
-
-	conn = connection_for_subscr(vsub);
-	if (!conn) {
+	struct msc_a *msc_a = msc_a_for_vsub(vsub, true);
+	struct gsm_trans *trans;
+	if (!msc_a) {
 		LOGP(DMM, LOGL_ERROR, "%s: Cannot stop silent call, no connection for subscriber\n",
 		     vlr_subscr_name(vsub));
 		return -ENODEV;
 	}
 
 	/* did we actually establish a silent call for this guy? */
-	if (!conn->silent_call) {
-		LOGP(DMM, LOGL_ERROR, "%s: Cannot stop silent call, subscriber has no active silent call\n",
-		     vlr_subscr_name(vsub));
+	trans = trans_find_by_type(msc_a, TRANS_SILENT_CALL);
+	if (!trans) {
+		LOG_MSC_A(msc_a, LOGL_ERROR, "Cannot stop silent call, subscriber has no active silent call\n");
 		return -ENOENT;
 	}
 
-#if BEFORE_MSCSPLIT
-	/* Re-enable this log output once we can obtain this information via
-	 * A-interface, see OS#2391. */
-	DEBUGPC(DLSMS, "Stopping silent call using Timeslot %u on ARFCN %u\n",
-		conn->lchan->ts->nr, conn->lchan->ts->trx->arfcn);
-#endif
-
-	conn->silent_call = 0;
-	ran_conn_put(conn, RAN_CONN_USE_SILENT_CALL);
-
+	trans_free(trans);
 	return 0;
 }

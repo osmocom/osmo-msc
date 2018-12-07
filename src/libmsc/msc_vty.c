@@ -28,6 +28,8 @@
 #include <inttypes.h>
 #include <limits.h>
 
+#include <osmocom/core/use_count.h>
+
 #include <osmocom/gsm/protocol/gsm_08_58.h>
 #include <osmocom/gsm/protocol/gsm_04_14.h>
 #include <osmocom/gsm/protocol/gsm_08_08.h>
@@ -46,10 +48,11 @@
 #include <osmocom/msc/vty.h>
 #include <osmocom/msc/gsm_data.h>
 #include <osmocom/msc/gsm_subscriber.h>
+#include <osmocom/msc/msub.h>
+#include <osmocom/msc/msc_a.h>
 #include <osmocom/msc/vlr.h>
 #include <osmocom/msc/transaction.h>
 #include <osmocom/msc/db.h>
-#include <osmocom/msc/a_iface.h>
 #include <osmocom/msc/sms_queue.h>
 #include <osmocom/msc/silent_call.h>
 #include <osmocom/msc/gsm_04_80.h>
@@ -59,6 +62,8 @@
 #include <osmocom/msc/rrlp.h>
 #include <osmocom/msc/vlr_sgs.h>
 #include <osmocom/msc/sgs_vty.h>
+#include <osmocom/msc/sccp_ran.h>
+#include <osmocom/msc/ran_peer.h>
 
 static struct gsm_network *gsmnet = NULL;
 
@@ -504,6 +509,45 @@ DEFUN(cfg_msc_no_sms_over_gsup, cfg_msc_no_sms_over_gsup_cmd,
 	return CMD_SUCCESS;
 }
 
+DEFUN(cfg_msc_handover_number_range, cfg_msc_handover_number_range_cmd,
+      "handover-number range MSISDN_FIRST MSISDN_LAST",
+      "Configure a range of MSISDN to be assigned to incoming inter-MSC Handovers for call forwarding.\n"
+      "First Handover Number MSISDN\n"
+      "Last Handover Number MSISDN\n")
+{
+	char *endp;
+	uint64_t range_start;
+	uint64_t range_end;
+
+	/* FIXME leading zeros?? */
+
+	errno = 0;
+	range_start = strtoull(argv[0], &endp, 10);
+	if (errno || *endp != '\0') {
+		vty_out(vty, "%% Error parsing handover-number range start: %s%s",
+			argv[0], VTY_NEWLINE);
+		return CMD_WARNING;
+	}
+
+	errno = 0;
+	range_end = strtoull(argv[1], &endp, 10);
+	if (errno || *endp != '\0') {
+		vty_out(vty, "%% Error parsing handover-number range end: %s%s",
+			argv[1], VTY_NEWLINE);
+		return CMD_WARNING;
+	}
+
+	if (range_start > range_end) {
+		vty_out(vty, "%% Error: handover-number range end must be > than the range start, but"
+			" %"PRIu64" > %"PRIu64"%s", range_start, range_end, VTY_NEWLINE);
+		return CMD_WARNING;
+	}
+
+	gsmnet->handover_number.range_start = range_start;
+	gsmnet->handover_number.range_end = range_end;
+	return CMD_SUCCESS;
+}
+
 static int config_write_msc(struct vty *vty)
 {
 	vty_out(vty, "msc%s", VTY_NEWLINE);
@@ -546,6 +590,11 @@ static int config_write_msc(struct vty *vty)
 	if (gsmnet->sms_over_gsup)
 		vty_out(vty, " sms-over-gsup%s", VTY_NEWLINE);
 
+	if (gsmnet->handover_number.range_start || gsmnet->handover_number.range_end)
+		vty_out(vty, " handover-number range %"PRIu64" %"PRIu64"%s",
+			gsmnet->handover_number.range_start, gsmnet->handover_number.range_end,
+			VTY_NEWLINE);
+
 	mgcp_client_config_write(vty, " ");
 #ifdef BUILD_IU
 	ranap_iu_vty_config_write(vty, " ");
@@ -557,81 +606,81 @@ static int config_write_msc(struct vty *vty)
 DEFUN(show_bsc, show_bsc_cmd,
 	"show bsc", SHOW_STR "BSC\n")
 {
-	struct bsc_context *bsc_ctx;
-	struct osmo_ss7_instance *ss7 = osmo_ss7_instance_find(gsmnet->a.cs7_instance);
-
-	llist_for_each_entry(bsc_ctx, &gsmnet->a.bscs, list) {
-		vty_out(vty, "BSC %s%s", osmo_sccp_addr_name(ss7, &bsc_ctx->bsc_addr), VTY_NEWLINE);
+	struct ran_peer *rp;
+	llist_for_each_entry(rp, &gsmnet->a.sri->ran_peers, entry) {
+		vty_out(vty, "BSC %s %s%s",
+			osmo_sccp_inst_addr_name(gsmnet->a.sri->sccp, &rp->peer_addr),
+			osmo_fsm_inst_state_name(rp->fi),
+			VTY_NEWLINE);
 	}
 
 	return CMD_SUCCESS;
 }
 
-static void vty_conn_hdr(struct vty *vty)
+/*
+_Subscriber_______________________________________ _LAC_ _RAN___________________ _MSC-A_state_________ _MSC-A_use_
+IMSI-123456789012345:MSISDN-12345:TMSI-0x12345678  1     GERAN-A-4294967295:A5-3 WAIT_CLASSMARK_UPDATE 2=cm_service,trans_cc
+IMSI-123456789012356:MSISDN-234567:TMSI-0x123ABC78 65535 UTRAN-Iu-4294967295     COMMUNICATING         2=cm_service,trans_sms
+IMSI-123456789012367:MSISDN-98712345890:TMSI-0xF.. -     EUTRAN-SGs              RELEASING             0=none
+IMSI-123456789012378:HONR-12345432101              2     MSC-901-700-423:9876    REMOTE_MSC_A          1=inter_msc
+*/
+static void vty_dump_one_conn(struct vty *vty, const struct msub *msub, int *idx)
 {
-	unsigned lnum = 0;
-	struct ran_conn *conn;
+	struct msc_a *msc_a = msub_msc_a(msub);
+	struct vlr_subscr *vsub = msub_vsub(msub);
+	char buf[128];
 
-	llist_for_each_entry(conn, &gsmnet->ran_conns, entry)
-		lnum++;
-
-	if (lnum)
-		vty_out(vty, "--ConnId RAN --LAC Use --Tokens C A5    State                    ------------ Subscriber%s",
+	if (!(*idx))
+		vty_out(vty,
+			"_Subscriber_______________________________________ _LAC_ _RAN___________________"
+			" _MSC-A_state_________ _MSC-A_use_%s",
 			VTY_NEWLINE);
-}
+	(*idx)++;
 
-static void vty_dump_one_conn(struct vty *vty, const struct ran_conn *conn)
-{
-	vty_out(vty, "%08x %3s %5u %3u %08x %c /%1u %27s %22s%s",
-		conn->a.conn_id,
-		osmo_rat_type_name(conn->via_ran),
-		conn->lac,
-		conn->use_count,
-		conn->use_tokens,
-		conn->received_cm_service_request ? 'C' : '-',
-		conn->geran_encr.alg_id,
-		conn->fi ? osmo_fsm_inst_state_name(conn->fi) : "-",
-		conn->vsub ? vlr_subscr_name(conn->vsub) : "-",
+	vty_out(vty, "%50s %5u %23s %20s %d=%s%s",
+		vlr_subscr_short_name(msub_vsub(msub), 50),
+		vsub ? vsub->cgi.lai.lac : 0,
+		msub_ran_conn_name(msub),
+		osmo_fsm_inst_state_name(msc_a->c.fi),
+		osmo_use_count_total(&msc_a->use_count),
+		osmo_use_count_name_buf(buf, sizeof(buf), &msc_a->use_count),
 		VTY_NEWLINE);
 }
 
 DEFUN(show_msc_conn, show_msc_conn_cmd,
 	"show connection", SHOW_STR "Subscriber Connections\n")
 {
-	struct ran_conn *conn;
-
-	vty_conn_hdr(vty);
-	llist_for_each_entry(conn, &gsmnet->ran_conns, entry)
-		vty_dump_one_conn(vty, conn);
-
+	struct msub *msub;
+	int idx = 0;
+	llist_for_each_entry(msub, &msub_list, entry) {
+		vty_dump_one_conn(vty, msub, &idx);
+	}
 	return CMD_SUCCESS;
 }
 
 static void vty_trans_hdr(struct vty *vty)
 {
-	unsigned lnum = 0;
-	struct gsm_trans *trans;
+	if (llist_empty(&gsmnet->trans_list))
+		return;
 
-	llist_for_each_entry(trans, &gsmnet->trans_list, entry)
-		lnum++;
-
-	if (lnum)
-		vty_out(vty, "--ConnId -P TI -CallRef [---  Proto   ---] ------------ Subscriber%s",
-			VTY_NEWLINE);
+	vty_out(vty,
+		"_Subscriber_______________________________________ _RAN___________________"
+		" _P__ TI CallRef_ _state_%s",
+		VTY_NEWLINE);
 }
 
 static const char *get_trans_proto_str(const struct gsm_trans *trans)
 {
 	static char buf[256];
 
-	switch (trans->protocol) {
-	case GSM48_PDISC_CC:
+	switch (trans->type) {
+	case TRANS_CC:
 		snprintf(buf, sizeof(buf), "%s %4u %4u",
 			 gsm48_cc_state_name(trans->cc.state),
 			 trans->cc.Tcurrent,
 			 trans->cc.T308_second);
 		break;
-	case GSM48_PDISC_SMS:
+	case TRANS_SMS:
 		snprintf(buf, sizeof(buf), "%s %s",
 			gsm411_cp_state_name(trans->sms.smc_inst.cp_state),
 			gsm411_rp_state_name(trans->sms.smr_inst.rp_state));
@@ -646,13 +695,13 @@ static const char *get_trans_proto_str(const struct gsm_trans *trans)
 
 static void vty_dump_one_trans(struct vty *vty, const struct gsm_trans *trans)
 {
-	vty_out(vty, "%08x %s %02u %08x [%s] %22s%s",
-		trans->conn ? trans->conn->a.conn_id : 0,
-		gsm48_pdisc_name(trans->protocol),
+	vty_out(vty, "%50s %23s %4s %02u %08x %s%s",
+		vlr_subscr_short_name(msc_a_vsub(trans->msc_a), 50),
+		msub_ran_conn_name(trans->msc_a->c.msub),
+		trans_type_name(trans->type),
 		trans->transaction_id,
 		trans->callref,
 		get_trans_proto_str(trans),
-		trans->vsub ? vlr_subscr_name(trans->vsub) : "-",
 		VTY_NEWLINE);
 }
 
@@ -715,18 +764,6 @@ static void subscr_dump_full_vty(struct vty *vty, struct vlr_subscr *vsub)
 	vty_out(vty, "     LA allowed:                %s%s",
 		vsub->la_allowed ? "true" : "false", VTY_NEWLINE);
 
-#if 0
-	/* TODO: add this to vlr_subscr? */
-	if (vsub->auth_info.auth_algo != AUTH_ALGO_NONE) {
-		struct gsm_auth_info *i = &vsub->auth_info;
-		vty_out(vty, "    A3A8 algorithm id: %d%s",
-			i->auth_algo, VTY_NEWLINE);
-		vty_out(vty, "    A3A8 Ki: %s%s",
-			osmo_hexdump(i->a3a8_ki, i->a3a8_ki_len),
-			VTY_NEWLINE);
-	}
-#endif
-
 	if (vsub->last_tuple) {
 		struct vlr_auth_tuple *t = vsub->last_tuple;
 		vty_out(vty, "    A3A8 last tuple (used %d times):%s",
@@ -762,9 +799,11 @@ static void subscr_dump_full_vty(struct vty *vty, struct vlr_subscr *vsub)
 
 	/* Connection */
 	if (vsub->msc_conn_ref) {
-		struct ran_conn *conn = vsub->msc_conn_ref;
-		vty_conn_hdr(vty);
-		vty_dump_one_conn(vty, conn);
+		struct msub *msub = vsub->msc_conn_ref;
+		int idx = 0;
+		if (msub) {
+			vty_dump_one_conn(vty, msub, &idx);
+		}
 	}
 
 	/* Transactions */
@@ -1214,7 +1253,7 @@ DEFUN(subscriber_ussd_notify,
       "Text of USSD message to send\n")
 {
 	char *text;
-	struct ran_conn *conn;
+	struct msc_a *msc_a;
 	struct vlr_subscr *vsub = get_vsub_by_argv(gsmnet, argv[0], argv[1]);
 	int level;
 
@@ -1231,19 +1270,19 @@ DEFUN(subscriber_ussd_notify,
 		return CMD_WARNING;
 	}
 
-	conn = connection_for_subscr(vsub);
-	if (!conn) {
-		vty_out(vty, "%% An active connection is required for %s %s%s",
+	msc_a = msc_a_for_vsub(vsub, true);
+	if (!msc_a || msc_a->c.remote_to) {
+		vty_out(vty, "%% An active connection and local MSC-A role is required for %s %s%s",
 			argv[0], argv[1], VTY_NEWLINE);
 		vlr_subscr_put(vsub, VSUB_USE_VTY);
 		talloc_free(text);
 		return CMD_WARNING;
 	}
 
-	msc_send_ussd_notify(conn, level, text);
+	msc_send_ussd_notify(msc_a, level, text);
 	/* FIXME: since we don't allocate a transaction here,
 	 * we use dummy GSM 04.07 transaction ID. */
-	msc_send_ussd_release_complete(conn, 0x00);
+	msc_send_ussd_release_complete(msc_a, 0x00);
 
 	vlr_subscr_put(vsub, VSUB_USE_VTY);
 	talloc_free(text);
@@ -1256,7 +1295,7 @@ DEFUN(subscriber_paging,
       SUBSCR_HELP "Issue an empty Paging for the subscriber (for debugging)\n")
 {
 	struct vlr_subscr *vsub = get_vsub_by_argv(gsmnet, argv[0], argv[1]);
-	struct subscr_request *req;
+	struct paging_request *req;
 
 	if (!vsub) {
 		vty_out(vty, "%% No subscriber found for %s %s%s",
@@ -1264,7 +1303,8 @@ DEFUN(subscriber_paging,
 		return CMD_WARNING;
 	}
 
-	req = subscr_request_conn(vsub, NULL, NULL, "manual Paging from VTY", SGSAP_SERV_IND_CS_CALL);
+	req = paging_request_start(vsub, PAGING_CAUSE_CALL_CONVERSATIONAL,
+				   NULL, NULL, "manual Paging from VTY");
 	if (req)
 		vty_out(vty, "%% paging subscriber%s", VTY_NEWLINE);
 	else
@@ -1308,7 +1348,7 @@ DEFUN(subscriber_mstest_close,
       "Loop Type F\n"
       "Loop Type I\n")
 {
-	struct ran_conn *conn;
+	struct msc_a *msc_a;
 	struct vlr_subscr *vsub = get_vsub_by_argv(gsmnet, argv[0], argv[1]);
 	const char *loop_str;
 	int loop_mode;
@@ -1322,15 +1362,15 @@ DEFUN(subscriber_mstest_close,
 	loop_str = argv[2];
 	loop_mode = loop_by_char(loop_str[0]);
 
-	conn = connection_for_subscr(vsub);
-	if (!conn) {
+	msc_a = msc_a_for_vsub(vsub, true);
+	if (!msc_a) {
 		vty_out(vty, "%% An active connection is required for %s %s%s",
 			argv[0], argv[1], VTY_NEWLINE);
 		vlr_subscr_put(vsub, VSUB_USE_VTY);
 		return CMD_WARNING;
 	}
 
-	gsm0414_tx_close_tch_loop_cmd(conn, loop_mode);
+	gsm0414_tx_close_tch_loop_cmd(msc_a, loop_mode);
 
 	return CMD_SUCCESS;
 }
@@ -1341,7 +1381,7 @@ DEFUN(subscriber_mstest_open,
       SUBSCR_HELP "Send a TS 04.14 MS Test Command to subscriber\n"
       "Open a TCH Loop inside the MS\n")
 {
-	struct ran_conn *conn;
+	struct msc_a *msc_a;
 	struct vlr_subscr *vsub = get_vsub_by_argv(gsmnet, argv[0], argv[1]);
 
 	if (!vsub) {
@@ -1350,15 +1390,15 @@ DEFUN(subscriber_mstest_open,
 		return CMD_WARNING;
 	}
 
-	conn = connection_for_subscr(vsub);
-	if (!conn) {
+	msc_a = msc_a_for_vsub(vsub, true);
+	if (!msc_a) {
 		vty_out(vty, "%% An active connection is required for %s %s%s",
 			argv[0], argv[1], VTY_NEWLINE);
 		vlr_subscr_put(vsub, VSUB_USE_VTY);
 		return CMD_WARNING;
 	}
 
-	gsm0414_tx_open_loop_cmd(conn);
+	gsm0414_tx_open_loop_cmd(msc_a);
 
 	return CMD_SUCCESS;
 }
@@ -1394,14 +1434,20 @@ static int scall_cbfn(unsigned int subsys, unsigned int signal,
 			void *handler_data, void *signal_data)
 {
 	struct scall_signal_data *sigdata = signal_data;
-	struct vty *vty = sigdata->data;
+	struct vty *vty = sigdata->vty;
+
+	if (!vty_is_active(vty))
+		return 0;
 
 	switch (signal) {
 	case S_SCALL_SUCCESS:
-		vty_out(vty, "%% silent call success%s", VTY_NEWLINE);
+		vty_out(vty, "%% Silent call success%s", VTY_NEWLINE);
 		break;
-	case S_SCALL_EXPIRED:
-		vty_out(vty, "%% silent call expired paging%s", VTY_NEWLINE);
+	case S_SCALL_FAILED:
+		vty_out(vty, "%% Silent call failed%s", VTY_NEWLINE);
+		break;
+	case S_SCALL_DETACHED:
+		vty_out(vty, "%% Silent call ended%s", VTY_NEWLINE);
 		break;
 	}
 	return 0;
@@ -1692,12 +1738,16 @@ void msc_vty_init(struct gsm_network *msc_network)
 	install_element(MSC_NODE, &cfg_msc_emergency_msisdn_cmd);
 	install_element(MSC_NODE, &cfg_msc_sms_over_gsup_cmd);
 	install_element(MSC_NODE, &cfg_msc_no_sms_over_gsup_cmd);
+	install_element(MSC_NODE, &cfg_msc_handover_number_range_cmd);
+
+	neighbor_ident_vty_init(msc_network);
 
 	mgcp_client_vty_init(msc_network, MSC_NODE, &msc_network->mgw.conf);
 #ifdef BUILD_IU
-	ranap_iu_vty_init(MSC_NODE, &msc_network->iu.rab_assign_addr_enc);
+	ranap_iu_vty_init(MSC_NODE, (enum ranap_nsap_addr_enc*)&msc_network->iu.rab_assign_addr_enc);
 #endif
 	sgs_vty_init();
+
 	osmo_fsm_vty_add_cmds();
 
 	osmo_signal_register_handler(SS_SCALL, scall_cbfn, NULL);

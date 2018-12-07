@@ -6,6 +6,7 @@ struct gsm_sms_queue;
 struct vty;
 
 #define VSUB_USE_SMS_PENDING "SMS-pending"
+#define MSC_A_USE_SMS_PENDING "SMS-pending"
 
 int sms_queue_start(struct gsm_network *, int in_flight);
 int sms_queue_trigger(struct gsm_sms_queue *);

@@ -16,16 +16,9 @@
 #include <osmocom/mgcp_client/mgcp_client.h>
 
 #include <osmocom/msc/msc_common.h>
+#include <osmocom/msc/neighbor_ident.h>
 
 #include "gsm_data_shared.h"
-
-/* TS 48.008 DLCI containing DCCH/ACCH + SAPI */
-#define OMSC_LINKID_CB(__msgb)   (__msgb)->cb[3]
-
-#include "../../bscconfig.h"
-#if BUILD_IU
-#include <osmocom/ranap/iu_client.h>
-#endif
 
 /** annotations for msgb ownership */
 #define __uses
@@ -33,6 +26,7 @@
 struct mncc_sock_state;
 struct vlr_instance;
 struct vlr_subscr;
+struct gsup_client_mux;
 
 #define tmsi_from_string(str) strtoul(str, NULL, 10)
 
@@ -144,6 +138,7 @@ struct gsm_network {
 	struct mncc_sock_state *mncc_state;
 	mncc_recv_cb_t mncc_recv;
 	struct llist_head upqueue;
+	struct osmo_tdef *mncc_tdefs;
 	/*
 	 * TODO: Move the trans_list into the RAN connection and
 	 * create a pending list for MT transactions. These exist before
@@ -171,9 +166,6 @@ struct gsm_network {
 	/* control interface */
 	struct ctrl_handle *ctrl;
 
-	/* all active RAN connections. */
-	struct llist_head ran_conns;
-
 	/* if override is nonzero, this timezone data is used for all MM
 	 * contexts. */
 	/* TODO: in OsmoNITB, tz-override used to be BTS-specific. To enable
@@ -184,6 +176,7 @@ struct gsm_network {
 	/* MSC: GSUP server address of the HLR */
 	const char *gsup_server_addr_str;
 	uint16_t gsup_server_port;
+	struct gsup_client_mux *gcm;
 
 	struct vlr_instance *vlr;
 
@@ -196,27 +189,29 @@ struct gsm_network {
 	int ncss_guard_timeout;
 
 	struct {
+		struct osmo_tdef *tdefs;
 		struct mgcp_client_conf conf;
 		struct mgcp_client *client;
 	} mgw;
 
-#if BUILD_IU
 	struct {
 		/* CS7 instance id number (set via VTY) */
 		uint32_t cs7_instance;
-		enum ranap_nsap_addr_enc rab_assign_addr_enc;
-		struct osmo_sccp_instance *sccp;
+		enum nsap_addr_enc rab_assign_addr_enc;
+
+		struct sccp_ran_inst *sri;
 	} iu;
-#endif
 
 	struct {
 		/* CS7 instance id number (set via VTY) */
 		uint32_t cs7_instance;
-		/* A list with the context information about
-		 * all BSCs we have connections with */
-		struct llist_head bscs;
-		struct osmo_sccp_instance *sccp;
+
+		struct sccp_ran_inst *sri;
 	} a;
+
+	/* A list of neighbor BSCs. This list is defined statically via VTY and does not
+	* necessarily correspond to BSCs attached to the A interface at a given moment. */
+	struct neighbor_ident_list *neighbor_list;
 
 	struct {
 		/* MSISDN to which to route MO emergency calls */
@@ -228,6 +223,14 @@ struct gsm_network {
 	 * If no name is set, the IPA Serial Number will be the same as the Unit Name,
 	 * and will be of the form 'MSC-00-00-00-00-00-00' */
 	char *msc_ipa_name;
+
+	struct llist_head neighbor_ident_list;
+
+	struct {
+		uint64_t range_start;
+		uint64_t range_end;
+		uint64_t next;
+	} handover_number;
 };
 
 struct osmo_esme;

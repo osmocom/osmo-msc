@@ -1,7 +1,9 @@
 #pragma once
 
-#include <osmocom/core/msgb.h>
-#include <osmocom/gsm/gsup.h>
+struct msc_a;
+struct mgsb;
+struct gsup_client_mux;
+struct osmo_gsup_message;
 
-int gsm0911_rcv_nc_ss(struct ran_conn *conn, struct msgb *msg);
-int gsm0911_gsup_handler(struct vlr_subscr *vsub, struct osmo_gsup_message *gsup);
+int gsm0911_rcv_nc_ss(struct msc_a *msc_a, struct msgb *msg);
+int gsm0911_gsup_rx(struct gsup_client_mux *gcm, void *data, const struct osmo_gsup_message *msg);

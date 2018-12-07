@@ -1133,36 +1133,28 @@ static void lu_fsm_wait_auth(struct osmo_fsm_inst *fi, uint32_t event,
 static void lu_fsm_wait_ciph(struct osmo_fsm_inst *fi, uint32_t event,
 			     void *data)
 {
-	struct lu_fsm_priv *lfp = lu_fsm_fi_priv(fi);
-	struct vlr_subscr *vsub = lfp->vsub;
-	struct vlr_ciph_result res = { .cause = VLR_CIPH_REJECT };
+	enum vlr_ciph_result_cause result = VLR_CIPH_REJECT;
 
 	OSMO_ASSERT(event == VLR_ULA_E_CIPH_RES);
 
 	if (!data)
 		LOGPFSML(fi, LOGL_ERROR, "invalid ciphering result: NULL\n");
 	else
-		res = *(struct vlr_ciph_result*)data;
+		result = *(enum vlr_ciph_result_cause*)data;
 
-	switch (res.cause) {
+	switch (result) {
 	case VLR_CIPH_COMPL:
-		break;
+		vlr_loc_upd_post_ciph(fi);
+		return;
 	case VLR_CIPH_REJECT:
 		LOGPFSM(fi, "ciphering rejected\n");
 		lu_fsm_failure(fi, GSM48_REJECT_INVALID_MANDANTORY_INF);
 		return;
 	default:
-		LOGPFSML(fi, LOGL_ERROR, "invalid ciphering result: %d\n",
-			 res.cause);
+		LOGPFSML(fi, LOGL_ERROR, "invalid ciphering result: %d\n", result);
 		lu_fsm_failure(fi, GSM48_REJECT_INVALID_MANDANTORY_INF);
 		return;
 	}
-
-	if (*res.imeisv) {
-		LOGPFSM(fi, "got IMEISV: %s\n", res.imeisv);
-		vlr_subscr_set_imeisv(vsub, res.imeisv);
-	}
-	vlr_loc_upd_post_ciph(fi);
 }
 
 static void lu_fsm_wait_imsi(struct osmo_fsm_inst *fi, uint32_t event,
@@ -1516,8 +1508,8 @@ void vlr_loc_update_cancel(struct osmo_fsm_inst *fi,
 
 void vlr_lu_fsm_init(void)
 {
-	osmo_fsm_register(&vlr_lu_fsm);
-	osmo_fsm_register(&upd_hlr_vlr_fsm);
-	osmo_fsm_register(&sub_pres_vlr_fsm);
-	osmo_fsm_register(&lu_compl_vlr_fsm);
+	OSMO_ASSERT(osmo_fsm_register(&vlr_lu_fsm) == 0);
+	OSMO_ASSERT(osmo_fsm_register(&upd_hlr_vlr_fsm) == 0);
+	OSMO_ASSERT(osmo_fsm_register(&sub_pres_vlr_fsm) == 0);
+	OSMO_ASSERT(osmo_fsm_register(&lu_compl_vlr_fsm) == 0);
 }

@@ -45,6 +45,10 @@ OsmoMSC(config-msc)# list
   emergency-call route-to-msisdn MSISDN
   sms-over-gsup
   no sms-over-gsup
+  neighbor (a|iu) lac <0-65535> (ran-pc|msc-ipa-name) RAN_PC_OR_MSC_IPA_NAME
+  neighbor (a|iu) lac-ci <0-65535> <0-65535> (ran-pc|msc-ipa-name) RAN_PC_OR_MSC_IPA_NAME
+  neighbor (a|iu) cgi <0-999> <0-999> <0-65535> <0-65535> (ran-pc|msc-ipa-name) RAN_PC_OR_MSC_IPA_NAME
+  no neighbor (a|iu) (ran-pc|msc-ipa-name) RAN_PC_OR_MSC_IPA_NAME
   mgw local-ip A.B.C.D
   mgw local-port <0-65535>
   mgw remote-ip A.B.C.D

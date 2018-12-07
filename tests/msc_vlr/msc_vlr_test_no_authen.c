@@ -28,7 +28,6 @@ static void test_no_authen()
 {
 	struct vlr_subscr *vsub;
 	const char *imsi = "901700000004620";
-	
 	/* No auth only works on GERAN */
 	rx_from_ran = OSMO_RAT_GERAN_A;
 
@@ -36,14 +35,14 @@ static void test_no_authen()
 
 	btw("Location Update request causes a GSUP LU request to HLR");
 	lu_result_sent = RES_NONE;
-	gsup_expect_tx("04010809710000004026f0280102");
+	gsup_expect_tx("04010809710000004026f0280102" VLR_TO_HLR);
 	ms_sends_msg("050802008168000130089910070000006402");
 	OSMO_ASSERT(gsup_tx_confirmed);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("HLR sends _INSERT_DATA_REQUEST, VLR responds with _INSERT_DATA_RESULT");
-	gsup_rx("10010809710000004026f00804036470f1",
-		"12010809710000004026f0");
+	gsup_rx("10010809710000004026f00804036470f1" HLR_TO_VLR,
+		"12010809710000004026f0" VLR_TO_HLR);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("having received subscriber data does not mean acceptance");
@@ -55,30 +54,27 @@ static void test_no_authen()
 
 	btw("HLR also sends GSUP _UPDATE_LOCATION_RESULT");
 	expect_bssap_clear();
-	gsup_rx("06010809710000004026f0", NULL);
+	gsup_rx("06010809710000004026f0" HLR_TO_VLR, NULL);
 
 	btw("LU was successful, and the conn has already been closed");
 	VERBOSE_ASSERT(lu_result_sent, == RES_ACCEPT, "%d");
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
-	bss_sends_clear_complete();
+	ran_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 
-	BTW("after a while, a new conn sends a CM Service Request");
+	BTW("after a while, a new conn sends a CM Service Request (MO SMS)");
 	cm_service_result_sent = RES_NONE;
-	ms_sends_msg("05247803305886089910070000006402");
-	OSMO_ASSERT(g_conn);
-	OSMO_ASSERT(g_conn->fi);
-	OSMO_ASSERT(g_conn->vsub);
+	ms_sends_msg("05 24 74 03 30 58 86 08 99 10 07 00 00 00 64 02");
 	VERBOSE_ASSERT(cm_service_result_sent, == RES_ACCEPT, "%d");
 	EXPECT_ACCEPTED(true);
 
 	/* Release connection */
 	expect_bssap_clear(OSMO_RAT_GERAN_A);
-	conn_conclude_cm_service_req(g_conn, OSMO_RAT_GERAN_A);
+	conn_conclude_cm_service_req(g_msub, MSC_A_USE_CM_SERVICE_SMS);
 
 	btw("all requests serviced, conn has been released");
-	bss_sends_clear_complete();
+	ran_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 
 	BTW("an SMS is sent, MS is paged");
@@ -96,7 +92,6 @@ static void test_no_authen()
 	vlr_subscr_put(vsub, __func__);
 	vsub = NULL;
 	VERBOSE_ASSERT(paging_sent, == true, "%d");
-	VERBOSE_ASSERT(paging_stopped, == false, "%d");
 
 	btw("the subscriber and its pending request should remain");
 	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi, __func__);
@@ -128,7 +123,6 @@ static void test_no_authen()
 		       "0c7ac3e9e9b7db05");
 	ms_sends_msg("06270703305882089910070000006402");
 	VERBOSE_ASSERT(dtap_tx_confirmed, == true, "%d");
-	VERBOSE_ASSERT(paging_stopped, == true, "%d");
 
 	btw("SMS was delivered, no requests pending for subscr");
 	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi, __func__);
@@ -151,7 +145,7 @@ static void test_no_authen()
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
 	btw("SMS is done, conn is gone");
-	bss_sends_clear_complete();
+	ran_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 
 	BTW("subscriber detaches");
@@ -159,7 +153,7 @@ static void test_no_authen()
 	ms_sends_msg("050130089910070000006402");
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
-	bss_sends_clear_complete();
+	ran_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 	clear_vlr();
 	comment_end();
@@ -178,14 +172,14 @@ static void test_no_authen_tmsi()
 
 	btw("Location Update request causes a GSUP LU request to HLR");
 	lu_result_sent = RES_NONE;
-	gsup_expect_tx("04010809710000004026f0280102");
+	gsup_expect_tx("04010809710000004026f0280102" VLR_TO_HLR);
 	ms_sends_msg("050802008168000130089910070000006402");
 	OSMO_ASSERT(gsup_tx_confirmed);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("HLR sends _INSERT_DATA_REQUEST, VLR responds with _INSERT_DATA_RESULT");
-	gsup_rx("10010809710000004026f00804036470f1",
-		"12010809710000004026f0");
+	gsup_rx("10010809710000004026f00804036470f1" HLR_TO_VLR,
+		"12010809710000004026f0" VLR_TO_HLR);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("having received subscriber data does not mean acceptance");
@@ -194,7 +188,7 @@ static void test_no_authen_tmsi()
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("HLR also sends GSUP _UPDATE_LOCATION_RESULT");
-	gsup_rx("06010809710000004026f0", NULL);
+	gsup_rx("06010809710000004026f0" HLR_TO_VLR, NULL);
 
 	btw("a LU Accept with a new TMSI was sent, waiting for TMSI Realloc Compl");
 	EXPECT_CONN_COUNT(1);
@@ -216,7 +210,7 @@ static void test_no_authen_tmsi()
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
 	btw("LU was successful, and the conn has already been closed");
-	bss_sends_clear_complete();
+	ran_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 
 	btw("Subscriber has the new TMSI");
@@ -229,19 +223,16 @@ static void test_no_authen_tmsi()
 
 	BTW("after a while, a new conn sends a CM Service Request using above TMSI");
 	cm_service_result_sent = RES_NONE;
-	ms_sends_msg("05247803305886" "05f4" "03020100");
-	OSMO_ASSERT(g_conn);
-	OSMO_ASSERT(g_conn->fi);
-	OSMO_ASSERT(g_conn->vsub);
+	ms_sends_msg("05247403305886" "05f4" "03020100");
 	VERBOSE_ASSERT(cm_service_result_sent, == RES_ACCEPT, "%d");
 	EXPECT_ACCEPTED(true);
 
 	/* Release connection */
 	expect_bssap_clear(OSMO_RAT_GERAN_A);
-	conn_conclude_cm_service_req(g_conn, OSMO_RAT_GERAN_A);
+	conn_conclude_cm_service_req(g_msub, MSC_A_USE_CM_SERVICE_SMS);
 
 	btw("all requests serviced, conn has been released");
-	bss_sends_clear_complete();
+	ran_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 
 	BTW("an SMS is sent, MS is paged using above TMSI");
@@ -259,7 +250,6 @@ static void test_no_authen_tmsi()
 	vlr_subscr_put(vsub, __func__);
 	vsub = NULL;
 	VERBOSE_ASSERT(paging_sent, == true, "%d");
-	VERBOSE_ASSERT(paging_stopped, == false, "%d");
 
 	btw("the subscriber and its pending request should remain");
 	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi, __func__);
@@ -291,7 +281,6 @@ static void test_no_authen_tmsi()
 		       "0c7ac3e9e9b7db05");
 	ms_sends_msg("06270703305882" "05f4" "03020100");
 	VERBOSE_ASSERT(dtap_tx_confirmed, == true, "%d");
-	VERBOSE_ASSERT(paging_stopped, == true, "%d");
 
 	btw("SMS was delivered, no requests pending for subscr");
 	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi, __func__);
@@ -314,7 +303,7 @@ static void test_no_authen_tmsi()
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
 	btw("SMS is done, conn is gone");
-	bss_sends_clear_complete();
+	ran_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 
 	/* TODO: when the subscriber detaches, the vlr_subscr gets
@@ -328,14 +317,14 @@ static void test_no_authen_tmsi()
 	BTW("subscriber sends LU Request, this time with the TMSI");
 	btw("Location Update request causes a GSUP LU request to HLR");
 	lu_result_sent = RES_NONE;
-	gsup_expect_tx("04010809710000004026f0280102");
+	gsup_expect_tx("04010809710000004026f0280102" VLR_TO_HLR);
 	ms_sends_msg("050802008168000130" "05f4" "03020100");
 	OSMO_ASSERT(gsup_tx_confirmed);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("HLR sends _INSERT_DATA_REQUEST, VLR responds with _INSERT_DATA_RESULT");
-	gsup_rx("10010809710000004026f00804036470f1",
-		"12010809710000004026f0");
+	gsup_rx("10010809710000004026f00804036470f1" HLR_TO_VLR,
+		"12010809710000004026f0" VLR_TO_HLR);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("having received subscriber data does not mean acceptance");
@@ -344,7 +333,7 @@ static void test_no_authen_tmsi()
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("HLR also sends GSUP _UPDATE_LOCATION_RESULT");
-	gsup_rx("06010809710000004026f0", NULL);
+	gsup_rx("06010809710000004026f0" HLR_TO_VLR, NULL);
 
 	btw("a LU Accept with a new TMSI was sent, waiting for TMSI Realloc Compl");
 	EXPECT_CONN_COUNT(1);
@@ -366,7 +355,7 @@ static void test_no_authen_tmsi()
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
 	btw("LU was successful, and the conn has already been closed");
-	bss_sends_clear_complete();
+	ran_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 
 	btw("subscriber has the new TMSI");
@@ -382,7 +371,7 @@ static void test_no_authen_tmsi()
 	ms_sends_msg("050130" "05f4" "07060504");
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
-	bss_sends_clear_complete();
+	ran_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 	clear_vlr();
 	comment_end();
@@ -401,14 +390,14 @@ static void test_no_authen_imei()
 
 	btw("Location Update request causes a GSUP LU request to HLR");
 	lu_result_sent = RES_NONE;
-	gsup_expect_tx("04010809710000004026f0280102");
+	gsup_expect_tx("04010809710000004026f0280102" VLR_TO_HLR);
 	ms_sends_msg("050802008168000130089910070000006402");
 	OSMO_ASSERT(gsup_tx_confirmed);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("HLR sends _INSERT_DATA_REQUEST, VLR responds with _INSERT_DATA_RESULT");
-	gsup_rx("10010809710000004026f00804036470f1",
-		"12010809710000004026f0");
+	gsup_rx("10010809710000004026f00804036470f1" HLR_TO_VLR,
+		"12010809710000004026f0" VLR_TO_HLR);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("having received subscriber data does not mean acceptance");
@@ -418,7 +407,7 @@ static void test_no_authen_imei()
 
 	btw("HLR also sends GSUP _UPDATE_LOCATION_RESULT, and we send an ID Request for the IMEI to the MS");
 	dtap_expect_tx("051802");
-	gsup_rx("06010809710000004026f0", NULL);
+	gsup_rx("06010809710000004026f0" HLR_TO_VLR, NULL);
 
 	btw("We will only do business when the IMEI is known");
 	EXPECT_CONN_COUNT(1);
@@ -430,19 +419,19 @@ static void test_no_authen_imei()
 	thwart_rx_non_initial_requests();
 
 	btw("MS replies with an Identity Response, VLR sends the IMEI to HLR");
-	gsup_expect_tx("30010809710000004026f050090824433224433224f0");
+	gsup_expect_tx("30010809710000004026f050090824433224433224f0" VLR_TO_HLR);
 	/* 3GPP TS 23.003: 6.2.1 Composition of IMEI: the IMEI ends with a
 	 * spare digit that shall be sent as zero by the MS. */
 	ms_sends_msg("0559084a32244332244302");
 
 	btw("HLR accepts the IMEI");
 	expect_bssap_clear();
-	gsup_rx("32010809710000004026f0510100", NULL);
+	gsup_rx("32010809710000004026f0510100" HLR_TO_VLR, NULL);
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
 	btw("LU was successful, and the conn has already been closed");
 	VERBOSE_ASSERT(lu_result_sent, == RES_ACCEPT, "%d");
-	bss_sends_clear_complete();
+	ran_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 
 	btw("Subscriber has the IMEI");
@@ -456,7 +445,7 @@ static void test_no_authen_imei()
 	ms_sends_msg("050130089910070000006402");
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
-	bss_sends_clear_complete();
+	ran_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 	clear_vlr();
 	comment_end();
@@ -476,14 +465,14 @@ static void test_no_authen_tmsi_imei()
 
 	btw("Location Update request causes a GSUP LU request to HLR");
 	lu_result_sent = RES_NONE;
-	gsup_expect_tx("04010809710000004026f0280102");
+	gsup_expect_tx("04010809710000004026f0280102" VLR_TO_HLR);
 	ms_sends_msg("050802008168000130089910070000006402");
 	OSMO_ASSERT(gsup_tx_confirmed);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("HLR sends _INSERT_DATA_REQUEST, VLR responds with _INSERT_DATA_RESULT");
-	gsup_rx("10010809710000004026f00804036470f1",
-		"12010809710000004026f0");
+	gsup_rx("10010809710000004026f00804036470f1" HLR_TO_VLR,
+		"12010809710000004026f0" VLR_TO_HLR);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("having received subscriber data does not mean acceptance");
@@ -493,7 +482,7 @@ static void test_no_authen_tmsi_imei()
 
 	btw("HLR also sends GSUP _UPDATE_LOCATION_RESULT, and we send an ID Request for the IMEI to the MS");
 	dtap_expect_tx("051802");
-	gsup_rx("06010809710000004026f0", NULL);
+	gsup_rx("06010809710000004026f0" HLR_TO_VLR, NULL);
 
 	btw("We will only do business when the IMEI is known");
 	EXPECT_CONN_COUNT(1);
@@ -505,11 +494,11 @@ static void test_no_authen_tmsi_imei()
 	thwart_rx_non_initial_requests();
 
 	btw("MS replies with an Identity Response, VLR sends the IMEI to HLR");
-	gsup_expect_tx("30010809710000004026f050090824433224433224f0");
+	gsup_expect_tx("30010809710000004026f050090824433224433224f0" VLR_TO_HLR);
 	ms_sends_msg("0559084a32244332244302");
 
 	btw("HLR accepts the IMEI");
-	gsup_rx("32010809710000004026f0510100", NULL);
+	gsup_rx("32010809710000004026f0510100" HLR_TO_VLR, NULL);
 
 	btw("a LU Accept with a new TMSI was sent, waiting for TMSI Realloc Compl");
 	EXPECT_CONN_COUNT(1);
@@ -524,7 +513,7 @@ static void test_no_authen_tmsi_imei()
 
 	btw("LU was successful, and the conn has already been closed");
 	VERBOSE_ASSERT(lu_result_sent, == RES_ACCEPT, "%d");
-	bss_sends_clear_complete();
+	ran_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 
 	btw("Subscriber has the IMEI and TMSI");
@@ -539,7 +528,7 @@ static void test_no_authen_tmsi_imei()
 	ms_sends_msg("050130089910070000006402");
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
-	bss_sends_clear_complete();
+	ran_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 	clear_vlr();
 	comment_end();
@@ -549,7 +538,7 @@ static void test_no_authen_imeisv()
 {
 	struct vlr_subscr *vsub;
 	const char *imsi = "901700000004620";
-	
+
 	/* No auth only works on GERAN */
 	rx_from_ran = OSMO_RAT_GERAN_A;
 
@@ -564,7 +553,7 @@ static void test_no_authen_imeisv()
 	OSMO_ASSERT(dtap_tx_confirmed);
 
 	btw("MS replies with an Identity Response, causes LU to commence with a GSUP LU request to HLR");
-	gsup_expect_tx("04010809710000004026f0280102");
+	gsup_expect_tx("04010809710000004026f0280102" VLR_TO_HLR);
 	ms_sends_msg("0559094332244332244372f5");
 	OSMO_ASSERT(gsup_tx_confirmed);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
@@ -576,8 +565,8 @@ static void test_no_authen_imeisv()
 	vlr_subscr_put(vsub, __func__);
 
 	btw("HLR sends _INSERT_DATA_REQUEST, VLR responds with _INSERT_DATA_RESULT");
-	gsup_rx("10010809710000004026f00804036470f1",
-		"12010809710000004026f0");
+	gsup_rx("10010809710000004026f00804036470f1" HLR_TO_VLR,
+		"12010809710000004026f0" VLR_TO_HLR);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("having received subscriber data does not mean acceptance");
@@ -589,12 +578,12 @@ static void test_no_authen_imeisv()
 
 	btw("HLR also sends GSUP _UPDATE_LOCATION_RESULT");
 	expect_bssap_clear();
-	gsup_rx("06010809710000004026f0", NULL);
+	gsup_rx("06010809710000004026f0" HLR_TO_VLR, NULL);
 
 	btw("LU was successful, and the conn has already been closed");
 	VERBOSE_ASSERT(lu_result_sent, == RES_ACCEPT, "%d");
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
-	bss_sends_clear_complete();
+	ran_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 
 	BTW("subscriber detaches");
@@ -602,7 +591,7 @@ static void test_no_authen_imeisv()
 	ms_sends_msg("050130089910070000006402");
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
-	bss_sends_clear_complete();
+	ran_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 	clear_vlr();
 	comment_end();
@@ -627,7 +616,7 @@ static void test_no_authen_imeisv_imei()
 	OSMO_ASSERT(dtap_tx_confirmed);
 
 	btw("MS replies with an Identity Response, causes LU to commence with a GSUP LU request to HLR");
-	gsup_expect_tx("04010809710000004026f0280102");
+	gsup_expect_tx("04010809710000004026f0280102" VLR_TO_HLR);
 	ms_sends_msg("0559094332244332244372f5");
 	OSMO_ASSERT(gsup_tx_confirmed);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
@@ -639,8 +628,8 @@ static void test_no_authen_imeisv_imei()
 	vlr_subscr_put(vsub, __func__);
 
 	btw("HLR sends _INSERT_DATA_REQUEST, VLR responds with _INSERT_DATA_RESULT");
-	gsup_rx("10010809710000004026f00804036470f1",
-		"12010809710000004026f0");
+	gsup_rx("10010809710000004026f00804036470f1" HLR_TO_VLR,
+		"12010809710000004026f0" VLR_TO_HLR);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("having received subscriber data does not mean acceptance");
@@ -650,7 +639,7 @@ static void test_no_authen_imeisv_imei()
 
 	btw("HLR also sends GSUP _UPDATE_LOCATION_RESULT, and we send an ID Request for the IMEI to the MS");
 	dtap_expect_tx("051802");
-	gsup_rx("06010809710000004026f0", NULL);
+	gsup_rx("06010809710000004026f0" HLR_TO_VLR, NULL);
 
 	btw("We will only do business when the IMEI is known");
 	EXPECT_CONN_COUNT(1);
@@ -662,17 +651,17 @@ static void test_no_authen_imeisv_imei()
 	thwart_rx_non_initial_requests();
 
 	btw("MS replies with an Identity Response, VLR sends the IMEI to HLR");
-	gsup_expect_tx("30010809710000004026f050090824433224433224f0");
+	gsup_expect_tx("30010809710000004026f050090824433224433224f0" VLR_TO_HLR);
 	ms_sends_msg("0559084a32244332244302");
 
 	btw("HLR accepts the IMEI");
 	expect_bssap_clear();
-	gsup_rx("32010809710000004026f0510100", NULL);
+	gsup_rx("32010809710000004026f0510100" HLR_TO_VLR, NULL);
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
 	btw("LU was successful, and the conn has already been closed");
 	VERBOSE_ASSERT(lu_result_sent, == RES_ACCEPT, "%d");
-	bss_sends_clear_complete();
+	ran_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 
 	btw("Subscriber has the IMEI");
@@ -686,7 +675,7 @@ static void test_no_authen_imeisv_imei()
 	ms_sends_msg("050130089910070000006402");
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
-	bss_sends_clear_complete();
+	ran_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 	clear_vlr();
 	comment_end();
@@ -711,7 +700,7 @@ static void test_no_authen_imeisv_tmsi()
 	OSMO_ASSERT(dtap_tx_confirmed);
 
 	btw("MS replies with an Identity Response, causes LU to commence with a GSUP LU request to HLR");
-	gsup_expect_tx("04010809710000004026f0280102");
+	gsup_expect_tx("04010809710000004026f0280102" VLR_TO_HLR);
 	ms_sends_msg("0559094332244332244372f5");
 	OSMO_ASSERT(gsup_tx_confirmed);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
@@ -723,8 +712,8 @@ static void test_no_authen_imeisv_tmsi()
 	vlr_subscr_put(vsub, __func__);
 
 	btw("HLR sends _INSERT_DATA_REQUEST, VLR responds with _INSERT_DATA_RESULT");
-	gsup_rx("10010809710000004026f00804036470f1",
-		"12010809710000004026f0");
+	gsup_rx("10010809710000004026f00804036470f1" HLR_TO_VLR,
+		"12010809710000004026f0" VLR_TO_HLR);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("having received subscriber data does not mean acceptance");
@@ -733,7 +722,7 @@ static void test_no_authen_imeisv_tmsi()
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("HLR also sends GSUP _UPDATE_LOCATION_RESULT");
-	gsup_rx("06010809710000004026f0", NULL);
+	gsup_rx("06010809710000004026f0" HLR_TO_VLR, NULL);
 
 	btw("a LU Accept with a new TMSI was sent, waiting for TMSI Realloc Compl");
 	EXPECT_CONN_COUNT(1);
@@ -755,7 +744,7 @@ static void test_no_authen_imeisv_tmsi()
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
 	btw("LU was successful, and the conn has already been closed");
-	bss_sends_clear_complete();
+	ran_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 
 
@@ -767,7 +756,7 @@ static void test_no_authen_imeisv_tmsi()
 	OSMO_ASSERT(dtap_tx_confirmed);
 
 	btw("MS replies with an Identity Response, causes LU to commence with a GSUP LU request to HLR");
-	gsup_expect_tx("04010809710000004026f0280102");
+	gsup_expect_tx("04010809710000004026f0280102" VLR_TO_HLR);
 	ms_sends_msg("0559095332244332244372f6");
 	OSMO_ASSERT(gsup_tx_confirmed);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
@@ -779,8 +768,8 @@ static void test_no_authen_imeisv_tmsi()
 	vlr_subscr_put(vsub, __func__);
 
 	btw("HLR sends _INSERT_DATA_REQUEST, VLR responds with _INSERT_DATA_RESULT");
-	gsup_rx("10010809710000004026f00804036470f1",
-		"12010809710000004026f0");
+	gsup_rx("10010809710000004026f00804036470f1" HLR_TO_VLR,
+		"12010809710000004026f0" VLR_TO_HLR);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("having received subscriber data does not mean acceptance");
@@ -789,7 +778,7 @@ static void test_no_authen_imeisv_tmsi()
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("HLR also sends GSUP _UPDATE_LOCATION_RESULT");
-	gsup_rx("06010809710000004026f0", NULL);
+	gsup_rx("06010809710000004026f0" HLR_TO_VLR, NULL);
 
 	btw("a LU Accept with a new TMSI was sent, waiting for TMSI Realloc Compl");
 	EXPECT_CONN_COUNT(1);
@@ -811,7 +800,7 @@ static void test_no_authen_imeisv_tmsi()
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
 	btw("LU was successful, and the conn has already been closed");
-	bss_sends_clear_complete();
+	ran_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 
 	btw("subscriber has the new TMSI");
@@ -827,7 +816,7 @@ static void test_no_authen_imeisv_tmsi()
 	ms_sends_msg("050130" "05f4" "07060504");
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
-	bss_sends_clear_complete();
+	ran_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 	clear_vlr();
 	comment_end();
@@ -853,7 +842,7 @@ static void test_no_authen_imeisv_tmsi_imei()
 	OSMO_ASSERT(dtap_tx_confirmed);
 
 	btw("MS replies with an Identity Response, causes LU to commence with a GSUP LU request to HLR");
-	gsup_expect_tx("04010809710000004026f0280102");
+	gsup_expect_tx("04010809710000004026f0280102" VLR_TO_HLR);
 	ms_sends_msg("0559094332244332244372f5");
 	OSMO_ASSERT(gsup_tx_confirmed);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
@@ -865,8 +854,8 @@ static void test_no_authen_imeisv_tmsi_imei()
 	vlr_subscr_put(vsub, __func__);
 
 	btw("HLR sends _INSERT_DATA_REQUEST, VLR responds with _INSERT_DATA_RESULT");
-	gsup_rx("10010809710000004026f00804036470f1",
-		"12010809710000004026f0");
+	gsup_rx("10010809710000004026f00804036470f1" HLR_TO_VLR,
+		"12010809710000004026f0" VLR_TO_HLR);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("having received subscriber data does not mean acceptance");
@@ -876,7 +865,7 @@ static void test_no_authen_imeisv_tmsi_imei()
 
 	btw("HLR also sends GSUP _UPDATE_LOCATION_RESULT, and we send an ID Request for the IMEI to the MS");
 	dtap_expect_tx("051802");
-	gsup_rx("06010809710000004026f0", NULL);
+	gsup_rx("06010809710000004026f0" HLR_TO_VLR, NULL);
 
 	btw("We will only do business when the IMEI is known");
 	EXPECT_CONN_COUNT(1);
@@ -888,11 +877,11 @@ static void test_no_authen_imeisv_tmsi_imei()
 	thwart_rx_non_initial_requests();
 
 	btw("MS replies with an Identity Response, VLR sends the IMEI to HLR");
-	gsup_expect_tx("30010809710000004026f050090824433224433224f0");
+	gsup_expect_tx("30010809710000004026f050090824433224433224f0" VLR_TO_HLR);
 	ms_sends_msg("0559084a32244332244302");
 
 	btw("HLR accepts the IMEI");
-	gsup_rx("32010809710000004026f0510100", NULL);
+	gsup_rx("32010809710000004026f0510100" HLR_TO_VLR, NULL);
 
 	btw("a LU Accept with a new TMSI was sent, waiting for TMSI Realloc Compl");
 	EXPECT_CONN_COUNT(1);
@@ -907,7 +896,7 @@ static void test_no_authen_imeisv_tmsi_imei()
 
 	btw("LU was successful, and the conn has already been closed");
 	VERBOSE_ASSERT(lu_result_sent, == RES_ACCEPT, "%d");
-	bss_sends_clear_complete();
+	ran_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 
 	btw("Subscriber has the IMEISV, IMEI and TMSI");
@@ -923,7 +912,7 @@ static void test_no_authen_imeisv_tmsi_imei()
 	ms_sends_msg("050130089910070000006402");
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
-	bss_sends_clear_complete();
+	ran_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 	clear_vlr();
 	comment_end();
@@ -951,25 +940,25 @@ static void test_no_authen_subscr_expire()
 
 	btw("Location Update request causes a GSUP LU request to HLR");
 	lu_result_sent = RES_NONE;
-	gsup_expect_tx("04010809710000004026f0280102");
+	gsup_expect_tx("04010809710000004026f0280102" VLR_TO_HLR);
 	ms_sends_msg("050802008168000130089910070000006402");
 	OSMO_ASSERT(gsup_tx_confirmed);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("HLR sends _INSERT_DATA_REQUEST, VLR responds with _INSERT_DATA_RESULT");
-	gsup_rx("10010809710000004026f00804036470f1",
-		"12010809710000004026f0");
+	gsup_rx("10010809710000004026f00804036470f1" HLR_TO_VLR,
+		"12010809710000004026f0" VLR_TO_HLR);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("HLR also sends GSUP _UPDATE_LOCATION_RESULT");
 	expect_bssap_clear();
-	gsup_rx("06010809710000004026f0", NULL);
+	gsup_rx("06010809710000004026f0" HLR_TO_VLR, NULL);
 
 	btw("LU was successful, and the conn has already been closed");
 	VERBOSE_ASSERT(lu_result_sent, == RES_ACCEPT, "%d");
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
-	bss_sends_clear_complete();
+	ran_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 
 	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi, __func__);

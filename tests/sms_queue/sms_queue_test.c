@@ -22,6 +22,7 @@
  */
 
 #include <osmocom/core/application.h>
+#include <osmocom/netif/stream.h>
 
 #include <osmocom/msc/debug.h>
 #include <osmocom/msc/vlr.h>

@@ -28,6 +28,8 @@
 
 #include <osmocom/msc/gsm_data.h>
 #include <osmocom/msc/vlr.h>
+#include <osmocom/msc/msub.h>
+#include <osmocom/msc/msc_a.h>
 #include <osmocom/msc/mncc.h>
 
 extern bool _log_lines;
@@ -41,16 +43,15 @@ extern bool _log_lines;
 
 /* btw means "by the way", the test tells the log what's happening.
  * BTW() marks a larger section, btw() is the usual logging. */
-#define BTW(fmt, args...) _log("---\n- " fmt, ## args )
+#define BTW(fmt, args...) _log("\n\n- " fmt, ## args )
 #define btw(fmt, args...) _log("- " fmt, ## args )
 #define log(fmt, args...) _log("  " fmt, ## args )
 
 #define comment_start() fprintf(stderr, "===== %s\n", __func__);
 #define comment_end() fprintf(stderr, "===== %s: SUCCESS\n\n", __func__);
 
-extern struct ran_conn *g_conn;
+extern struct msub *g_msub;
 extern struct gsm_network *net;
-extern struct gsm_bts *the_bts;
 extern void *msgb_ctx;
 
 extern enum osmo_rat_type rx_from_ran;
@@ -99,7 +100,6 @@ static inline void expect_security_mode_ctrl(const char *ck, const char *ik)
 }
 
 extern bool paging_sent;
-extern bool paging_stopped;
 
 extern bool iu_release_expected;
 extern bool iu_release_sent;
@@ -151,33 +151,32 @@ extern msc_vlr_test_func_t msc_vlr_tests[];
 struct msgb *msgb_from_hex(const char *label, uint16_t size, const char *hex);
 
 void clear_vlr();
-bool conn_exists(const struct ran_conn *conn);
-void conn_conclude_cm_service_req(struct ran_conn *conn,
-				  enum osmo_rat_type via_ran);
+bool conn_exists(const struct msub *msub);
+void conn_conclude_cm_service_req(struct msub *msub, const char *cm_service_use);
 
 void dtap_expect_tx(const char *hex);
 void dtap_expect_tx_ussd(char *ussd_text);
 void paging_expect_imsi(const char *imsi);
 void paging_expect_tmsi(uint32_t tmsi);
 
-void bss_sends_bssap_mgmt(const char *hex);
 void ms_sends_msg(const char *hex);
+void ms_sends_classmark_update(const struct osmo_gsm48_classmark *classmark);
+void ms_sends_ciphering_mode_complete(const char *inner_nas_msg);
 void ms_sends_security_mode_complete();
 void gsup_rx(const char *rx_hex, const char *expect_tx_hex);
 void send_sms(struct vlr_subscr *receiver,
 	      struct vlr_subscr *sender,
 	      char *str);
 
-void bss_sends_clear_complete();
-void rnc_sends_release_complete();
+void ran_sends_clear_complete();
 
 void thwart_rx_non_initial_requests();
 
 #define EXPECT_ACCEPTED(expect_accepted) do { \
-		if (g_conn) \
-			OSMO_ASSERT(conn_exists(g_conn)); \
-		bool accepted = ran_conn_is_accepted(g_conn); \
-		fprintf(stderr, "ran_conn_is_accepted() == %s\n", \
+		if (g_msub) \
+			OSMO_ASSERT(conn_exists(g_msub)); \
+		bool accepted = msc_a_is_accepted(msub_msc_a(g_msub)); \
+		fprintf(stderr, "msc_a_is_accepted() == %s\n", \
 			accepted ? "true" : "false"); \
 		OSMO_ASSERT(accepted == expect_accepted); \
 	} while (false)
@@ -190,7 +189,7 @@ void thwart_rx_non_initial_requests();
 
 #define VERBOSE_ASSERT(val, expect_op, fmt) VAL_ASSERT(#val, val, expect_op, fmt)
 
-#define EXPECT_CONN_COUNT(N) VERBOSE_ASSERT(llist_count(&net->ran_conns), == N, "%d")
+#define EXPECT_CONN_COUNT(N) VERBOSE_ASSERT(llist_count(&msub_list), == N, "%d")
 
 #define gsup_expect_tx(hex) do \
 { \
@@ -245,17 +244,7 @@ extern const struct timeval fake_time_start_time;
 		break; \
 	}
 
-static inline void bss_rnc_sends_release_clear_complete(enum osmo_rat_type via_ran)
-{
-	switch (via_ran) {
-	case OSMO_RAT_GERAN_A:
-		bss_sends_clear_complete();
-		return;
-	case OSMO_RAT_UTRAN_IU:
-		rnc_sends_release_complete();
-		return;
-	default:
-		OSMO_ASSERT(false);
-		break;
-	}
-}
+#define HLR_TO_VLR "0a0101"
+#define VLR_TO_HLR "0a0101"
+#define EUSE_TO_MSC_USSD "0a0103"
+#define MSC_USSD_TO_EUSE "0a0103"

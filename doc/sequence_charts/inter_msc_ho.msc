@@ -1,0 +1,82 @@
+msc {
+	hscale=2;
+	bsca [label="BSC-A"], ai[label="MSC-I (at MSC-A)"], a[label="MSC-A"], bt[label="MSC-T (at MSC-B)"], bi[label="MSC-I (at MSC-B)"], bscb[label="BSC-B"],
+	ct[label="MSC-T (at MSC-C)"], bscc[label="BSC-C"];
+
+	ai note bt [label="'MSC-A,I,T' are explained in 3GPP TS 49.008 '4.3 Roles of MSC-A, MSC-I and MSC-T'"];
+	ai note ai [label="I = Internal; the MSC that does BSSMAP to the BSC (may change to a remote MSC-B after HO)"];
+	a note a [label="A = first; the MSC that has MM control (never changes)"];
+	bt note bi [label="B = second; the MSC that acts as BSS relay for MSC-A"];
+	bt note bt [label="T = transitory; the MSC that a handover is going towards (may be MSC-A for inter-BSC HO, may be a remote MSC-B)"];
+
+	bsca => ai [label="BSSMAP Handover Required"];
+	ai -> a [label="BSSMAP Handover Required"];
+
+	a rbox a [label="MSC-A routes all MSC-T messages to remote MSC-B."];
+
+	a => bt [label="MAP Prepare Handover"];
+	a note bt [label="in Osmocom, MAP messages are actually sent as GSUP, to the HLR"];
+
+	bt rbox bt [label="MSC-B routes all MSC-A type messages back to MSC-A."];
+	bt rbox bt [label="MSC-B generates a Handover MSISDN"];
+
+	bt => bscb [label="BSSMAP Handover Request"];
+	bt <= bscb [label="BSSMAP Handover Request ACK"];
+	a <= bt [label="MAP Prepare Handover Response"];
+
+	a => bt [label="establish SIP call to Handover MSISDN via external MNCC"];
+
+	ai <- a [label="BSSMAP Handover Command"];
+	bsca <= ai [label="BSSMAP Handover Command"];
+
+	--- [label="MS sends RACH to new cell"];
+
+	bt <= bscb [label="BSSMAP Handover Detected"];
+	a <= bt [label="MAP Access Signaling Request"];
+
+	bt <= bscb [label="BSSMAP Handover Complete"];
+	a <= bt [label="MAP Send End Signal"];
+	bt rbox bt [label="MSC-B drops the generated Handover MSISDN"];
+
+	a abox a [label="MSC-A accepts the new MSC-B and BSC"];
+	ai note bt [label="previous MSC-I (A) gets dropped, MSC-T (B) becomes the new MSC-I"];
+	ai rbox a [label="MSC-A performs all MSC-I tasks via MAP at remote MSC-B's MSC-I."];
+	bt abox bi [label="MSC-I"];
+	ai abox ai [label="discard"];
+	bsca <= ai [label="BSSMAP Clear Command"];
+	
+	...;
+	...;
+
+	--- [label="Another inter-MSC handover"];
+	a note bi [label="MSC-A remains in charge"];
+
+	bscb => bi [label="BSSMAP Handover Required"];
+	bi => a [label="BSSMAP Handover Required"];
+
+	a rbox a [label="MSC-A routes all MSC-T messages to remote MSC-C."];
+
+	a => ct [label="MAP Prepare Handover"];
+	ct rbox ct [label="MSC-C routes all MSC-A type messages back to MSC-A."];
+	ct => bscc [label="BSSMAP Handover Request"];
+	ct <= bscc [label="BSSMAP Handover Request ACK"];
+	a <= ct [label="MAP Prepare Handover Response"];
+	a => bi [label="MAP Prepare Handover Response"];
+	bscb <= bi [label="BSSMAP Handover Command"];
+
+	--- [label="MS sends RACH to new cell"];
+
+	ct <= bscc [label="BSSMAP Handover Detected"];
+	a <= ct [label="MAP Access Signaling Request"];
+
+	ct <= bscc [label="BSSMAP Handover Complete"];
+	a <= ct [label="MAP Send End Signal"];
+	
+	a abox a [label="MSC-A accepts the new MSC-C and BSC"];
+	bi note ct [label="previous MSC-I (B) gets dropped, MSC-T (B) becomes the new MSC-I"];
+	ai rbox a [label="MSC-A performs all MSC-I tasks via MAP at remote MSC-C's MSC-I."];
+	ct abox ct [label="MSC-I"];
+	bi abox bi [label="discard"];
+	bscb <= bi [label="BSSMAP Clear Command"];
+
+}

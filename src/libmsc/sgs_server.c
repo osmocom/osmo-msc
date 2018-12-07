@@ -18,6 +18,8 @@
  *
  */
 
+#include <errno.h>
+
 #include <osmocom/msc/sgs_iface.h>
 #include <osmocom/msc/debug.h>
 #include <osmocom/msc/sgs_server.h>

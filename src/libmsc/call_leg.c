@@ -1,0 +1,356 @@
+/* Implementation to manage two RTP streams that make up an MO or MT call leg's RTP forwarding. */
+/*
+ * (C) 2019 by sysmocom - s.m.f.c. GmbH <info@sysmocom.de>
+ * All Rights Reserved
+ *
+ * Author: Neels Hofmeyr
+ *
+ * SPDX-License-Identifier: GPL-2.0+
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+#include <osmocom/core/fsm.h>
+#include <osmocom/mgcp_client/mgcp_client_endpoint_fsm.h>
+
+#include <osmocom/msc/debug.h>
+#include <osmocom/msc/gsm_data.h>
+#include <osmocom/msc/msc_a.h>
+
+#include <osmocom/msc/call_leg.h>
+#include <osmocom/msc/rtp_stream.h>
+
+#define LOG_CALL_LEG(cl, level, fmt, args...) \
+	LOGPFSML(cl ? cl->fi : NULL, level, fmt, ##args)
+
+static struct gsm_network *gsmnet = NULL;
+
+enum call_leg_state {
+	CALL_LEG_ST_ESTABLISHING,
+	CALL_LEG_ST_ESTABLISHED,
+	CALL_LEG_ST_RELEASING,
+};
+
+struct osmo_tdef g_mgw_tdefs[] = {
+	{ .T=-1, .default_val=4, .desc="MGCP response timeout" },
+	{ .T=-2, .default_val=30, .desc="RTP stream establishing timeout" },
+	{}
+};
+
+static const struct osmo_tdef_state_timeout call_leg_fsm_timeouts[32] = {
+	[CALL_LEG_ST_ESTABLISHING] = { .T = -2 },
+	[CALL_LEG_ST_RELEASING] = { .T = -2 },
+};
+
+#define call_leg_state_chg(cl, state) \
+	osmo_tdef_fsm_inst_state_chg((cl)->fi, state, call_leg_fsm_timeouts, g_mgw_tdefs, 10)
+
+static struct osmo_fsm call_leg_fsm;
+
+void call_leg_init(struct gsm_network *net)
+{
+	gsmnet = net;
+	OSMO_ASSERT( osmo_fsm_register(&call_leg_fsm) == 0 );
+}
+
+struct call_leg *call_leg_alloc(struct osmo_fsm_inst *parent_fi,
+				uint32_t parent_event_term,
+				uint32_t parent_event_rtp_addr_available,
+				uint32_t parent_event_rtp_complete,
+				uint32_t parent_event_rtp_released)
+{
+	struct call_leg *cl;
+	struct osmo_fsm_inst *fi = osmo_fsm_inst_alloc_child(&call_leg_fsm, parent_fi, parent_event_term);
+
+	OSMO_ASSERT(fi);
+
+	cl = talloc_zero(fi, struct call_leg);
+	OSMO_ASSERT(cl);
+	fi->priv = cl;
+	*cl = (struct call_leg){
+		.fi = fi,
+		.parent_event_rtp_addr_available = parent_event_rtp_addr_available,
+		.parent_event_rtp_complete = parent_event_rtp_complete,
+		.parent_event_rtp_released = parent_event_rtp_released,
+	};
+
+	return cl;
+}
+
+void call_leg_reparent(struct call_leg *cl,
+		       struct osmo_fsm_inst *new_parent_fi,
+		       uint32_t parent_event_term,
+		       uint32_t parent_event_rtp_addr_available,
+		       uint32_t parent_event_rtp_complete,
+		       uint32_t parent_event_rtp_released)
+{
+	LOG_CALL_LEG(cl, LOGL_DEBUG, "Reparenting from parent %s to parent %s\n",
+		     cl->fi->proc.parent->name, new_parent_fi->name);
+	osmo_fsm_inst_change_parent(cl->fi, new_parent_fi, parent_event_term);
+	talloc_steal(new_parent_fi, cl->fi);
+	cl->parent_event_rtp_addr_available = parent_event_rtp_addr_available;
+	cl->parent_event_rtp_complete = parent_event_rtp_complete;
+	cl->parent_event_rtp_released = parent_event_rtp_released;
+}
+
+static int call_leg_fsm_timer_cb(struct osmo_fsm_inst *fi)
+{
+	struct call_leg *cl = fi->priv;
+	call_leg_release(cl);
+	return 0;
+}
+
+void call_leg_release(struct call_leg *cl)
+{
+	if (!cl)
+		return;
+	if (cl->fi->state == CALL_LEG_ST_RELEASING)
+		return;
+	call_leg_state_chg(cl, CALL_LEG_ST_RELEASING);
+}
+
+static void call_leg_mgw_endpoint_gone(struct call_leg *cl)
+{
+	int i;
+	cl->mgw_endpoint = NULL;
+	for (i = 0; i < ARRAY_SIZE(cl->rtp); i++) {
+		if (!cl->rtp[i])
+			continue;
+		cl->rtp[i]->ci = NULL;
+	}
+}
+
+static void call_leg_fsm_establishing_established(struct osmo_fsm_inst *fi, uint32_t event, void *data)
+{
+	struct call_leg *cl = fi->priv;
+	struct rtp_stream *rtps;
+	int i;
+	bool established;
+
+	switch (event) {
+
+	case CALL_LEG_EV_RTP_STREAM_ESTABLISHED:
+		established = true;
+		for (i = 0; i < ARRAY_SIZE(cl->rtp); i++) {
+			if (!rtp_stream_is_established(cl->rtp[i])) {
+				established = false;
+				break;
+			}
+		}
+		if (!established)
+			break;
+		if (cl->fi->state != CALL_LEG_ST_ESTABLISHED)
+			call_leg_state_chg(cl, CALL_LEG_ST_ESTABLISHED);
+		break;
+
+	case CALL_LEG_EV_RTP_STREAM_ADDR_AVAILABLE:
+		rtps = data;
+		osmo_fsm_inst_dispatch(fi->proc.parent, cl->parent_event_rtp_addr_available, rtps);
+		break;
+
+	case CALL_LEG_EV_RTP_STREAM_GONE:
+		call_leg_release(cl);
+		break;
+
+	case CALL_LEG_EV_MGW_ENDPOINT_GONE:
+		call_leg_mgw_endpoint_gone(cl);
+		call_leg_release(cl);
+		break;
+
+	default:
+		OSMO_ASSERT(false);
+	}
+}
+
+void call_leg_fsm_established_onenter(struct osmo_fsm_inst *fi, uint32_t prev_state)
+{
+	struct call_leg *cl = fi->priv;
+	osmo_fsm_inst_dispatch(fi->proc.parent, cl->parent_event_rtp_complete, cl);
+}
+
+void call_leg_fsm_releasing_onenter(struct osmo_fsm_inst *fi, uint32_t prev_state)
+{
+	osmo_fsm_inst_term(fi, OSMO_FSM_TERM_REGULAR, NULL);
+}
+
+static void call_leg_fsm_releasing(struct osmo_fsm_inst *fi, uint32_t event, void *data)
+{
+	struct call_leg *cl = fi->priv;
+
+	switch (event) {
+
+	case CALL_LEG_EV_RTP_STREAM_GONE:
+		/* We're already terminating, child RTP streams will also terminate, there is nothing left to do. */
+		break;
+
+	case CALL_LEG_EV_MGW_ENDPOINT_GONE:
+		call_leg_mgw_endpoint_gone(cl);
+		break;
+
+	default:
+		break;
+	}
+}
+
+static const struct value_string call_leg_fsm_event_names[] = {
+	OSMO_VALUE_STRING(CALL_LEG_EV_RTP_STREAM_ADDR_AVAILABLE),
+	OSMO_VALUE_STRING(CALL_LEG_EV_RTP_STREAM_ESTABLISHED),
+	OSMO_VALUE_STRING(CALL_LEG_EV_RTP_STREAM_GONE),
+	OSMO_VALUE_STRING(CALL_LEG_EV_MGW_ENDPOINT_GONE),
+	{}
+};
+
+#define S(x)	(1 << (x))
+
+static const struct osmo_fsm_state call_leg_fsm_states[] = {
+	[CALL_LEG_ST_ESTABLISHING] = {
+		.name = "ESTABLISHING",
+		.in_event_mask = 0
+			| S(CALL_LEG_EV_RTP_STREAM_ADDR_AVAILABLE)
+			| S(CALL_LEG_EV_RTP_STREAM_ESTABLISHED)
+			| S(CALL_LEG_EV_RTP_STREAM_GONE)
+			| S(CALL_LEG_EV_MGW_ENDPOINT_GONE)
+			,
+		.out_state_mask = 0
+			| S(CALL_LEG_ST_ESTABLISHED)
+			| S(CALL_LEG_ST_RELEASING)
+			,
+		.action = call_leg_fsm_establishing_established,
+	},
+	[CALL_LEG_ST_ESTABLISHED] = {
+		.name = "ESTABLISHED",
+		.in_event_mask = 0
+			| S(CALL_LEG_EV_RTP_STREAM_ADDR_AVAILABLE)
+			| S(CALL_LEG_EV_RTP_STREAM_ESTABLISHED)
+			| S(CALL_LEG_EV_RTP_STREAM_GONE)
+			| S(CALL_LEG_EV_MGW_ENDPOINT_GONE)
+			,
+		.out_state_mask = 0
+			| S(CALL_LEG_ST_ESTABLISHING)
+			| S(CALL_LEG_ST_RELEASING)
+			,
+		.onenter = call_leg_fsm_established_onenter,
+		.action = call_leg_fsm_establishing_established, /* same action function as above */
+	},
+	[CALL_LEG_ST_RELEASING] = {
+		.name = "RELEASING",
+		.in_event_mask = 0
+			| S(CALL_LEG_EV_RTP_STREAM_GONE)
+			| S(CALL_LEG_EV_MGW_ENDPOINT_GONE)
+			,
+		.onenter = call_leg_fsm_releasing_onenter,
+		.action = call_leg_fsm_releasing, /* same action function as above */
+	},
+};
+
+static struct osmo_fsm call_leg_fsm = {
+	.name = "call_leg",
+	.states = call_leg_fsm_states,
+	.num_states = ARRAY_SIZE(call_leg_fsm_states),
+	.log_subsys = DCC,
+	.event_names = call_leg_fsm_event_names,
+	.timer_cb = call_leg_fsm_timer_cb,
+};
+
+const struct value_string rtp_direction_names[] = {
+	OSMO_VALUE_STRING(RTP_TO_RAN),
+	OSMO_VALUE_STRING(RTP_TO_CN),
+	{}
+};
+
+static int call_leg_rtp_alloc(struct call_leg *cl, enum rtp_direction dir, uint32_t call_id, struct gsm_trans *for_trans)
+{
+	if (cl->rtp[dir])
+		return 0;
+
+	if (!cl->mgw_endpoint)
+		cl->mgw_endpoint = osmo_mgcpc_ep_alloc(cl->fi, CALL_LEG_EV_MGW_ENDPOINT_GONE,
+						       gsmnet->mgw.client, gsmnet->mgw.tdefs, cl->fi->id,
+						       "%s", mgcp_client_rtpbridge_wildcard(gsmnet->mgw.client));
+	if (!cl->mgw_endpoint) {
+		LOG_CALL_LEG(cl, LOGL_ERROR, "failed to setup MGW endpoint\n");
+		return -EIO;
+	}
+
+	cl->rtp[dir] = rtp_stream_alloc(cl, dir, call_id, for_trans);
+	return 0;
+}
+
+int call_leg_ensure_rtp_alloc(struct call_leg *cl, enum rtp_direction dir, uint32_t call_id, struct gsm_trans *for_trans)
+{
+	if (!cl->rtp[dir]) {
+		if (call_leg_rtp_alloc(cl, dir, call_id, for_trans))
+			return -EIO;
+	}
+	OSMO_ASSERT(cl->rtp[dir]);
+	return 0;
+}
+
+struct osmo_sockaddr_str *call_leg_local_ip(struct call_leg *cl, enum rtp_direction dir)
+{
+	struct rtp_stream *rtps;
+	if (!cl)
+		return NULL;
+	rtps = cl->rtp[dir];
+	if (!rtps)
+		return NULL;
+	if (!osmo_sockaddr_str_is_set(&rtps->local))
+		return NULL;
+	return &rtps->local;
+}
+
+/* Make sure an MGW endpoint CI is set up for an RTP connection.
+ * This is the one-stop for all to either completely set up a new endpoint connection, or to modify an existing one.
+ * If not yet present, allocate the rtp_stream for the given direction.
+ * Then, call rtp_stream_set_codec() if codec_if_known is non-NULL, and/or rtp_stream_set_remote_addr() if
+ * remote_addr_if_known is non-NULL.
+ * Finally make sure that a CRCX is sent out for this direction, if this has not already happened.
+ * If the CRCX has already happened but new codec / remote_addr data was passed, call rtp_stream_commit() to trigger an
+ * MDCX.
+ */
+int call_leg_ensure_ci(struct call_leg *cl, enum rtp_direction dir, uint32_t call_id, struct gsm_trans *for_trans,
+		       const enum mgcp_codecs *codec_if_known, const struct osmo_sockaddr_str *remote_addr_if_known)
+{
+	if (call_leg_ensure_rtp_alloc(cl, dir, call_id, for_trans))
+		return -EIO;
+	cl->rtp[dir]->crcx_conn_mode = cl->crcx_conn_mode[dir];
+	if (codec_if_known)
+		rtp_stream_set_codec(cl->rtp[dir], *codec_if_known);
+	if (remote_addr_if_known && osmo_sockaddr_str_is_set(remote_addr_if_known))
+		rtp_stream_set_remote_addr(cl->rtp[dir], remote_addr_if_known);
+	return rtp_stream_ensure_ci(cl->rtp[dir], cl->mgw_endpoint);
+}
+
+int call_leg_local_bridge(struct call_leg *cl1, uint32_t call_id1, struct gsm_trans *trans1,
+			  struct call_leg *cl2, uint32_t call_id2, struct gsm_trans *trans2)
+{
+	enum mgcp_codecs codec;
+
+	cl1->local_bridge = cl2;
+	cl2->local_bridge = cl1;
+
+	/* We may just copy the codec info we have for the RAN side of the first leg to the CN side of both legs. This
+	 * also means that if both legs use different codecs the MGW must perform transcoding on the second leg. */
+	if (!cl1->rtp[RTP_TO_RAN] || !cl1->rtp[RTP_TO_RAN]->codec_known) {
+		LOG_CALL_LEG(cl1, LOGL_ERROR, "RAN-side RTP stream codec is not known, not ready for bridging\n");
+		return -EINVAL;
+	}
+	codec = cl1->rtp[RTP_TO_RAN]->codec;
+
+	call_leg_ensure_ci(cl1, RTP_TO_CN, call_id1, trans1,
+			   &codec, &cl2->rtp[RTP_TO_CN]->local);
+	call_leg_ensure_ci(cl2, RTP_TO_CN, call_id2, trans2,
+			   &codec, &cl1->rtp[RTP_TO_CN]->local);
+	return 0;
+}

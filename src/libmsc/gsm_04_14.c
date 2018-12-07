@@ -30,7 +30,7 @@
 #include <osmocom/msc/gsm_data.h>
 #include <osmocom/msc/gsm_subscriber.h>
 #include <osmocom/msc/gsm_04_08.h>
-#include <osmocom/msc/msc_ifaces.h>
+#include <osmocom/msc/msc_a.h>
 
 #include <osmocom/gsm/gsm48.h>
 #include <osmocom/gsm/gsm_utils.h>
@@ -51,21 +51,21 @@ static struct msgb *create_gsm0414_msg(uint8_t msg_type)
 	return msg;
 }
 
-static int gsm0414_conn_sendmsg(struct ran_conn *conn, struct msgb *msg)
+static int gsm0414_conn_sendmsg(struct msc_a *msc_a, struct msgb *msg)
 {
-	return msc_tx_dtap(conn, msg);
+	return msc_a_tx_dtap_to_i(msc_a, msg);
 }
 
-static int gsm0414_tx_simple(struct ran_conn *conn, uint8_t msg_type)
+static int gsm0414_tx_simple(struct msc_a *msc_a, uint8_t msg_type)
 {
 	struct msgb *msg = create_gsm0414_msg(msg_type);
 
-	return gsm0414_conn_sendmsg(conn, msg);
+	return gsm0414_conn_sendmsg(msc_a, msg);
 }
 
 
 /* Send a CLOSE_TCH_LOOOP_CMD according to Section 8.1 */
-int gsm0414_tx_close_tch_loop_cmd(struct ran_conn *conn,
+int gsm0414_tx_close_tch_loop_cmd(struct msc_a *msc_a,
 				  enum gsm414_tch_loop_mode loop_mode)
 {
 	struct msgb *msg = create_gsm0414_msg(GSM414_MT_CLOSE_TCH_LOOP_CMD);
@@ -74,49 +74,49 @@ int gsm0414_tx_close_tch_loop_cmd(struct ran_conn *conn,
 	subch = (loop_mode << 1);
 	msgb_put_u8(msg, subch);
 
-	return gsm0414_conn_sendmsg(conn, msg);
+	return gsm0414_conn_sendmsg(msc_a, msg);
 }
 
 /* Send a OPEN_LOOP_CMD according to Section 8.3 */
-int gsm0414_tx_open_loop_cmd(struct ran_conn *conn)
+int gsm0414_tx_open_loop_cmd(struct msc_a *msc_a)
 {
-	return gsm0414_tx_simple(conn, GSM414_MT_OPEN_LOOP_CMD);
+	return gsm0414_tx_simple(msc_a, GSM414_MT_OPEN_LOOP_CMD);
 }
 
 /* Send a ACT_EMMI_CMD according to Section 8.8 */
-int gsm0414_tx_act_emmi_cmd(struct ran_conn *conn)
+int gsm0414_tx_act_emmi_cmd(struct msc_a *msc_a)
 {
-	return gsm0414_tx_simple(conn, GSM414_MT_ACT_EMMI_CMD);
+	return gsm0414_tx_simple(msc_a, GSM414_MT_ACT_EMMI_CMD);
 }
 
 /* Send a DEACT_EMMI_CMD according to Section 8.10 */
-int gsm0414_tx_deact_emmi_cmd(struct ran_conn *conn)
+int gsm0414_tx_deact_emmi_cmd(struct msc_a *msc_a)
 {
-	return gsm0414_tx_simple(conn, GSM414_MT_DEACT_EMMI_CMD);
+	return gsm0414_tx_simple(msc_a, GSM414_MT_DEACT_EMMI_CMD);
 }
 
 /* Send a TEST_INTERFACE according to Section 8.11 */
-int gsm0414_tx_test_interface(struct ran_conn *conn,
+int gsm0414_tx_test_interface(struct msc_a *msc_a,
 			      uint8_t tested_devs)
 {
 	struct msgb *msg = create_gsm0414_msg(GSM414_MT_TEST_INTERFACE);
 	msgb_put_u8(msg, tested_devs);
-	return gsm0414_conn_sendmsg(conn, msg);
+	return gsm0414_conn_sendmsg(msc_a, msg);
 }
 
 /* Send a RESET_MS_POSITION_STORED according to Section 8.11 */
-int gsm0414_tx_reset_ms_pos_store(struct ran_conn *conn,
+int gsm0414_tx_reset_ms_pos_store(struct msc_a *msc_a,
 				  uint8_t technology)
 {
 	struct msgb *msg = create_gsm0414_msg(GSM414_MT_RESET_MS_POS_STORED);
 	msgb_put_u8(msg, technology);
-	return gsm0414_conn_sendmsg(conn, msg);
+	return gsm0414_conn_sendmsg(msc_a, msg);
 }
 
 
 
 /* Entry point for incoming GSM48_PDISC_TEST received from MS */
-int gsm0414_rcv_test(struct ran_conn *conn,
+int gsm0414_rcv_test(struct msc_a *msc_a,
 		     struct msgb *msg)
 {
 	struct gsm48_hdr *gh = msgb_l3(msg);
