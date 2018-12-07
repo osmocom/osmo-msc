@@ -34,7 +34,6 @@
 #include <osmocom/core/byteswap.h>
 #include <osmocom/msc/a_reset.h>
 #include <osmocom/msc/transaction.h>
-#include <osmocom/msc/msc_mgcp.h>
 
 #include <errno.h>
 
@@ -498,51 +497,12 @@ static int bssmap_rx_sapi_n_rej(struct ran_conn *conn, struct msgb *msg,
 	return 0;
 }
 
-/* Use the speech codec info we go with the assignment complete to dtermine
- * which codec we will signal to the MGW */
-static enum mgcp_codecs mgcp_codec_from_sc(struct gsm0808_speech_codec *sc)
-{
-	switch (sc->type) {
-	case GSM0808_SCT_FR1:
-		return CODEC_GSM_8000_1;
-		break;
-	case GSM0808_SCT_FR2:
-		return CODEC_GSMEFR_8000_1;
-		break;
-	case GSM0808_SCT_FR3:
-		return CODEC_AMR_8000_1;
-		break;
-	case GSM0808_SCT_FR4:
-		return CODEC_AMRWB_16000_1;
-		break;
-	case GSM0808_SCT_FR5:
-		return CODEC_AMRWB_16000_1;
-		break;
-	case GSM0808_SCT_HR1:
-		return CODEC_GSMHR_8000_1;
-		break;
-	case GSM0808_SCT_HR3:
-		return CODEC_AMR_8000_1;
-		break;
-	case GSM0808_SCT_HR4:
-		return CODEC_AMRWB_16000_1;
-		break;
-	case GSM0808_SCT_HR6:
-		return CODEC_AMRWB_16000_1;
-		break;
-	default:
-		return CODEC_PCMU_8000_1;
-		break;
-	}
-}
-
 /* Endpoint to handle assignment complete */
 static int bssmap_rx_ass_compl(struct ran_conn *conn, struct msgb *msg,
 			       struct tlv_parsed *tp)
 {
 	struct sockaddr_storage rtp_addr;
 	struct gsm0808_speech_codec sc;
-	struct sockaddr_in *rtp_addr_in;
 	int rc;
 
 	LOGPCONN(conn, LOGL_INFO, "Rx BSSMAP ASSIGNMENT COMPLETE message\n");
@@ -567,18 +527,8 @@ static int bssmap_rx_ass_compl(struct ran_conn *conn, struct msgb *msg,
 		LOGPCONN(conn, LOGL_ERROR, "Unable to decode speech codec (choosen).\n");
 		return -EINVAL;
 	}
-	conn->rtp.codec_ran = mgcp_codec_from_sc(&sc);
 
-	/* use address / port supplied with the AoIP
-	 * transport address element */
-	if (rtp_addr.ss_family == AF_INET) {
-		rtp_addr_in = (struct sockaddr_in *)&rtp_addr;
-		msc_mgcp_ass_complete(conn, osmo_ntohs(rtp_addr_in->sin_port), inet_ntoa(rtp_addr_in->sin_addr));
-	} else {
-		LOGPCONN(conn, LOGL_ERROR, "Unsopported addressing scheme. (supports only IPV4)\n");
-		return -EINVAL;
-	}
-
+	ran_conn_assign_compl(conn, &sc, &rtp_addr);
 	return 0;
 }
 
