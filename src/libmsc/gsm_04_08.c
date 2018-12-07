@@ -1296,7 +1296,8 @@ static bool msg_is_initially_permitted(const struct gsm48_hdr *hdr)
 		break;
 	case GSM48_PDISC_RR:
 		switch (msg_type) {
-		case GSM48_MT_RR_CIPH_M_COMPL:
+		/* GSM48_MT_RR_CIPH_M_COMPL is actually handled in bssmap_rx_ciph_compl() and gets redirected in the
+		 * BSSAP layer to ran_conn_cipher_mode_compl() (before this here is reached) */
 		case GSM48_MT_RR_PAG_RESP:
 			return true;
 		default:
