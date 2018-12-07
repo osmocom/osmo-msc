@@ -51,6 +51,7 @@ osmo_msc_LDADD = \
 	$(NULL)
 if BUILD_IU
 osmo_msc_LDADD += \
+	$(LIBASN1C_LIBS) \
 	$(LIBOSMORANAP_LIBS) \
 	$(NULL)
 endif

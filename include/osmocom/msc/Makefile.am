@@ -1,8 +1,9 @@
 noinst_HEADERS = \
-	a_iface.h \
-	a_iface_bssap.h \
+	call_leg.h \
+	cell_id_list.h \
 	db.h \
 	debug.h \
+	e_link.h \
 	gsm_04_08.h \
 	gsm_04_11.h \
 	gsm_04_11_gsup.h \
@@ -12,17 +13,31 @@ noinst_HEADERS = \
 	gsm_data.h \
 	gsm_data_shared.h \
 	gsm_subscriber.h \
-	iucs.h \
-	iucs_ranap.h \
-	iu_dummy.h \
+	gsup_client_mux.h \
 	mncc.h \
+	mncc_call.h \
 	mncc_int.h \
+	msc_a.h \
+	msc_a_remote.h \
 	msc_common.h \
-	msc_ifaces.h \
-	msc_mgcp.h \
-	a_reset.h \
+	msc_ho.h \
+	msc_i.h \
+	msc_i_remote.h \
+	msc_roles.h \
+	msc_t.h \
+	msc_t_remote.h \
+	msub.h \
+	neighbor_ident.h \
+	paging.h \
 	ran_conn.h \
+	ran_infra.h \
+	ran_msg.h \
+	ran_msg_a.h \
+	ran_msg_iu.h \
+	ran_peer.h \
 	rrlp.h \
+	rtp_stream.h \
+	sccp_ran.h \
 	sgs_iface.h \
 	sgs_server.h \
 	sgs_vty.h \

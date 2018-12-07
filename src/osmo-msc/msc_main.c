@@ -1,7 +1,7 @@
 /* OsmoMSC - Circuit-Switched Core Network (MSC+VLR+HLR+SMSC) implementation
  */
 
-/* (C) 2016 by sysmocom s.f.m.c. GmbH <info@sysmocom.de>
+/* (C) 2016-2019 by sysmocom s.f.m.c. GmbH <info@sysmocom.de>
  * All Rights Reserved
  *
  * Based on OsmoNITB:
@@ -63,15 +63,20 @@
 #include <osmocom/mgcp_client/mgcp_client.h>
 #include <osmocom/msc/sgs_iface.h>
 #include <osmocom/msc/sgs_server.h>
+#include <osmocom/msc/ran_infra.h>
+#include <osmocom/msc/ran_peer.h>
+#include <osmocom/msc/ran_msg_a.h>
+#include <osmocom/msc/msub.h>
+#include <osmocom/msc/call_leg.h>
+#include <osmocom/msc/msc_ho.h>
+#include <osmocom/msc/gsup_client_mux.h>
+#include <osmocom/msc/e_link.h>
+#include <osmocom/msc/mncc_call.h>
 
 #ifdef BUILD_IU
 #include <osmocom/ranap/iu_client.h>
+#include <asn1c/asn_internal.h>
 #endif
-
-#include <osmocom/msc/msc_ifaces.h>
-#include <osmocom/msc/iucs.h>
-#include <osmocom/msc/iucs_ranap.h>
-#include <osmocom/msc/a_iface.h>
 
 static const char * const osmomsc_copyright =
 	"OsmoMSC - Osmocom Circuit-Switched Core Network implementation\r\n"
@@ -216,6 +221,7 @@ struct gsm_network *msc_network_alloc(void *ctx,
 	net->gsup_server_port = MSC_HLR_REMOTE_PORT_DEFAULT;
 
 	mgcp_client_conf_init(&net->mgw.conf);
+	net->mgw.tdefs = g_mgw_tdefs;
 
 	return net;
 }
@@ -320,27 +326,6 @@ static struct vty_app_info msc_vty_info = {
 	.is_config_node	= msc_vty_is_config_node,
 };
 
-#ifdef BUILD_IU
-static int rcvmsg_iu_cs(struct msgb *msg, struct gprs_ra_id *ra_id, uint16_t *sai)
-{
-	DEBUGP(DIUCS, "got IuCS message %d bytes: %s\n", msg->len, msgb_hexdump(msg));
-	if (ra_id) {
-		DEBUGP(DIUCS, "got IuCS message on %s\n", osmo_rai_name(ra_id));
-	}
-
-	return gsm0408_rcvmsg_iucs(msc_network, msg, ra_id? &ra_id->lac : NULL);
-}
-
-static int rx_iu_event(struct ranap_ue_conn_ctx *ctx, enum ranap_iu_event_type type,
-		       void *data)
-{
-	DEBUGP(DIUCS, "got IuCS event %u: %s\n", type,
-	       ranap_iu_event_type_str(type));
-
-	return iucs_rx_ranap_event(msc_network, ctx, type, data);
-}
-#endif
-
 #define DEFAULT_M3UA_REMOTE_IP "127.0.0.1"
 #define DEFAULT_PC "0.23.1"
 
@@ -361,42 +346,38 @@ static struct osmo_sccp_instance *sccp_setup(void *ctx, uint32_t cs7_instance,
 	 * Similarly, 'cs7' / 'listen' can specify the local IP address. */
 }
 
-static int ss7_setup(void *ctx)
+static int ss7_setup(void *ctx, struct osmo_sccp_instance **sccp_a, struct osmo_sccp_instance **sccp_iu)
 {
-	uint32_t cs7_instance_a = msc_network->a.cs7_instance;
+	uint32_t i_a = msc_network->a.cs7_instance;
+	uint32_t i_iu = msc_network->iu.cs7_instance;
+
+	const char *name_a = "OsmoMSC-A";
+	const char *name_iu = NULL;
+
 #if BUILD_IU
-	uint32_t cs7_instance_iu = msc_network->iu.cs7_instance;
-
-	if (cs7_instance_a == cs7_instance_iu) {
-		/* Create one single SCCP instance which will be used for both,
-		 * Iu and A at the same time, under the same point-code */
-		LOGP(DMSC, LOGL_NOTICE, "CS7 Instance identifiers: A = Iu = %u\n", cs7_instance_a);
-
-		msc_network->a.sccp = sccp_setup(ctx, cs7_instance_a, "OsmoMSC-A-Iu", DEFAULT_PC);
-		if (!msc_network->a.sccp)
-			return -EINVAL;
-
-		msc_network->iu.sccp = msc_network->a.sccp;
-	} else {
-		/* Create two separate SCCP instances to run A and Iu independently on different
-		 * pointcodes */
-		LOGP(DMSC, LOGL_NOTICE, "CS7 Instance identifiers: A = %u, Iu = %u\n",
-		     cs7_instance_a, cs7_instance_iu);
-
-		msc_network->a.sccp = sccp_setup(ctx, cs7_instance_a, "OsmoMSC-A", DEFAULT_PC);
-		if (!msc_network->a.sccp)
-			return -EINVAL;
-
-		msc_network->iu.sccp = sccp_setup(ctx, cs7_instance_iu, "OsmoMSC-Iu", DEFAULT_PC);
-		if (!msc_network->iu.sccp)
-			return -EINVAL;
-	}
-#else
-	/* No Iu support, just open up an A instance */
-	msc_network->a.sccp = sccp_setup(ctx, cs7_instance_a, "OsmoMSC-A", DEFAULT_PC);
-	if (!msc_network->a.sccp)
-		return -EINVAL;
+	if (i_a == i_iu)
+		name_a = name_iu = "OsmoMSC-A-Iu";
+	else
+		name_iu = "OsmoMSC-Iu";
 #endif
+
+	*sccp_a = sccp_setup(ctx, i_a, name_a, DEFAULT_PC);
+	if (!*sccp_a)
+		return -EINVAL;
+
+	if (!name_iu) {
+		*sccp_iu = NULL;
+		return 0;
+	}
+
+	if (i_a == i_iu) {
+		*sccp_iu = *sccp_a;
+		return 0;
+	}
+
+	*sccp_iu = sccp_setup(ctx, i_iu, name_iu, DEFAULT_PC);
+	if (!*sccp_iu)
+		return -EINVAL;
 
 	return 0;
 }
@@ -451,6 +432,7 @@ static const struct log_info_cat msc_default_categories[] = {
 	[DHO] = {
 		.name = "DHO",
 		.description = "Hand-Over",
+		.color = "\033[1;38m",
 		.enabled = 1, .loglevel = LOGL_NOTICE,
 	},
 	[DDB] = {
@@ -527,6 +509,9 @@ int main(int argc, char **argv)
 {
 	int rc;
 
+	struct osmo_sccp_instance *sccp_a;
+	struct osmo_sccp_instance *sccp_iu;
+
 	/* Track the use of talloc NULL memory contexts */
 	talloc_enable_null_tracking();
 
@@ -544,6 +529,10 @@ int main(int argc, char **argv)
 	tall_trans_ctx = talloc_named_const(tall_msc_ctx, 0, "transaction");
 
 	osmo_init_logging2(tall_msc_ctx, &log_info);
+
+	osmo_fsm_log_timeouts(true);
+	osmo_fsm_log_addr(true);
+
 	osmo_stats_init(tall_msc_ctx);
 
 	/* For --version, vty_init() must be called before handling options */
@@ -561,6 +550,9 @@ int main(int argc, char **argv)
 	msc_network = msc_network_alloc(tall_msc_ctx, int_mncc_recv);
 	if (!msc_network)
 		return -ENOMEM;
+
+	call_leg_init(msc_network);
+	mncc_call_fsm_init(msc_network);
 
 	if (msc_vlr_alloc(msc_network)) {
 		fprintf(stderr, "Failed to allocate VLR\n");
@@ -653,13 +645,17 @@ TODO: we probably want some of the _net_ ctrl commands from bsc_base_ctrl_cmds_i
 		return 4;
 	}
 
-	osmo_fsm_log_addr(true);
+	if (msc_gsup_client_start(msc_network)) {
+		fprintf(stderr, "Failed to start GSUP client\n");
+		exit(1);
+	}
+
+	msc_a_i_t_gsup_init(msc_network);
+
 	if (msc_vlr_start(msc_network)) {
 		fprintf(stderr, "Failed to start VLR\n");
 		exit(1);
 	}
-
-	ran_conn_init();
 
 	if (db_prepare()) {
 		printf("DB: Failed to prepare database.\n");
@@ -690,7 +686,7 @@ TODO: we probably want some of the _net_ ctrl commands from bsc_base_ctrl_cmds_i
 		return 7;
 	}
 
-	if (ss7_setup(tall_msc_ctx)) {
+	if (ss7_setup(tall_msc_ctx, &sccp_a, &sccp_iu)) {
 		printf("Setting up SCCP client failed.\n");
 		return 8;
 	}
@@ -700,13 +696,37 @@ TODO: we probably want some of the _net_ ctrl commands from bsc_base_ctrl_cmds_i
 		return 9;
 	}
 
-#ifdef BUILD_IU
-	/* Set up IuCS */
-	ranap_iu_init(tall_msc_ctx, DRANAP, "OsmoMSC-IuCS", msc_network->iu.sccp, rcvmsg_iu_cs, rx_iu_event);
-#endif
+	msc_network->a.sri = sccp_ran_init(msc_network, sccp_a, OSMO_SCCP_SSN_BSSAP,
+					   "OsmoMSC-A", &msc_ran_infra[OSMO_RAT_GERAN_A],
+					   msc_network);
+	if (!msc_network->a.sri) {
+		printf("Setting up A receiver failed\n");
+		return 10;
+	}
+	LOGP(DMSC, LOGL_NOTICE, "A-interface: SCCP user %s, cs7-instance %u (%s)\n",
+	     osmo_sccp_user_name(msc_network->a.sri->scu),
+	     osmo_sccp_get_ss7(msc_network->a.sri->sccp)->cfg.id,
+	     osmo_sccp_get_ss7(msc_network->a.sri->sccp)->cfg.name);
 
-	/* Set up A interface */
-	a_init(msc_network->a.sccp, msc_network);
+#ifdef BUILD_IU
+	talloc_asn1_ctx = talloc_named_const(tall_msc_ctx, 0, "asn1");
+
+	msc_network->iu.sri = sccp_ran_init(msc_network, sccp_iu, OSMO_SCCP_SSN_RANAP,
+					   "OsmoMSC-IuCS", &msc_ran_infra[OSMO_RAT_UTRAN_IU],
+					   msc_network);
+	if (!msc_network->iu.sri) {
+		printf("Setting up IuCS receiver failed\n");
+		return 11;
+	}
+
+	/* Compatibility with legacy osmo-hnbgw that was unable to properly handle RESET messages. */
+	msc_network->iu.sri->ignore_missing_reset = true;
+
+	LOGP(DMSC, LOGL_NOTICE, "Iu-interface: SCCP user %s, cs7-instance %u (%s)\n",
+	     osmo_sccp_user_name(msc_network->iu.sri->scu),
+	     osmo_sccp_get_ss7(msc_network->iu.sri->sccp)->cfg.id,
+	     osmo_sccp_get_ss7(msc_network->iu.sri->sccp)->cfg.name);
+#endif
 
 	/* Init RRLP handlers */
 	msc_rrlp_init();

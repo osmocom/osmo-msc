@@ -60,6 +60,7 @@ struct proc_arq_priv {
 	void *parent_event_data;
 
 	enum vlr_parq_type type;
+	enum osmo_cm_service_type cm_service_type;
 	enum gsm48_reject_value result; /*< 0 on success */
 	bool by_tmsi;
 	char imsi[16];
@@ -121,7 +122,8 @@ static void proc_arq_vlr_dispatch_result(struct osmo_fsm_inst *fi,
 	if (par->type == VLR_PR_ARQ_T_CM_SERV_REQ) {
 		if (success
 		    && !par->implicitly_accepted_parq_by_ciphering_cmd) {
-			rc = par->vlr->ops.tx_cm_serv_acc(par->msc_conn_ref);
+			rc = par->vlr->ops.tx_cm_serv_acc(par->msc_conn_ref,
+							  par->cm_service_type);
 			if (rc) {
 				LOGPFSML(fi, LOGL_ERROR,
 					 "Failed to send CM Service Accept\n");
@@ -130,6 +132,7 @@ static void proc_arq_vlr_dispatch_result(struct osmo_fsm_inst *fi,
 		}
 		if (!success) {
 			rc = par->vlr->ops.tx_cm_serv_rej(par->msc_conn_ref,
+							  par->cm_service_type,
 							  par->result);
 			if (rc)
 				LOGPFSML(fi, LOGL_ERROR,
@@ -445,37 +448,28 @@ static void proc_arq_vlr_fn_w_auth(struct osmo_fsm_inst *fi,
 static void proc_arq_vlr_fn_w_ciph(struct osmo_fsm_inst *fi,
 				   uint32_t event, void *data)
 {
-	struct proc_arq_priv *par = fi->priv;
-	struct vlr_subscr *vsub = par->vsub;
-	struct vlr_ciph_result res = { .cause = VLR_CIPH_REJECT };
+	enum vlr_ciph_result_cause result = VLR_CIPH_REJECT;
 
 	OSMO_ASSERT(event == PR_ARQ_E_CIPH_RES);
 
 	if (!data)
 		LOGPFSML(fi, LOGL_ERROR, "invalid ciphering result: NULL\n");
 	else
-		res = *(struct vlr_ciph_result*)data;
+		result = *(enum vlr_ciph_result_cause*)data;
 
-	switch (res.cause) {
+	switch (result) {
 	case VLR_CIPH_COMPL:
-		break;
+		_proc_arq_vlr_node2_post_ciph(fi);
+		return;
 	case VLR_CIPH_REJECT:
 		LOGPFSM(fi, "ciphering rejected\n");
 		proc_arq_fsm_done(fi, GSM48_REJECT_ILLEGAL_MS);
 		return;
 	default:
-		LOGPFSML(fi, LOGL_ERROR, "invalid ciphering result: %d\n",
-			 res.cause);
+		LOGPFSML(fi, LOGL_ERROR, "invalid ciphering result: %d\n", result);
 		proc_arq_fsm_done(fi, GSM48_REJECT_ILLEGAL_MS);
 		return;
 	}
-
-
-	if (*res.imeisv) {
-		LOGPFSM(fi, "got IMEISV: %s\n", res.imeisv);
-		vlr_subscr_set_imeisv(vsub, res.imeisv);
-	}
-	_proc_arq_vlr_node2_post_ciph(fi);
 }
 
 /* Update_Location_Child_VLR has completed */
@@ -637,7 +631,8 @@ vlr_proc_acc_req(struct osmo_fsm_inst *parent,
 		 uint32_t parent_event_failure,
 		 void *parent_event_data,
 		 struct vlr_instance *vlr, void *msc_conn_ref,
-		 enum vlr_parq_type type, const uint8_t *mi_lv,
+		 enum vlr_parq_type type, enum osmo_cm_service_type cm_service_type,
+		 const uint8_t *mi_lv,
 		 const struct osmo_location_area_id *lai,
 		 bool authentication_required,
 		 bool ciphering_required,
@@ -659,6 +654,7 @@ vlr_proc_acc_req(struct osmo_fsm_inst *parent,
 	par->vlr = vlr;
 	par->msc_conn_ref = msc_conn_ref;
 	par->type = type;
+	par->cm_service_type = cm_service_type;
 	par->lai = *lai;
 	par->parent_event_success = parent_event_success;
 	par->parent_event_failure = parent_event_failure;
@@ -779,6 +775,6 @@ static struct osmo_fsm upd_loc_child_vlr_fsm = {
 
 void vlr_parq_fsm_init(void)
 {
-	//osmo_fsm_register(&upd_loc_child_vlr_fsm);
-	osmo_fsm_register(&proc_arq_vlr_fsm);
+	//OSMO_ASSERT(osmo_fsm_register(&upd_loc_child_vlr_fsm) == 0);
+	OSMO_ASSERT(osmo_fsm_register(&proc_arq_vlr_fsm) == 0);
 }

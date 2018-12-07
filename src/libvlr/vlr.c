@@ -33,6 +33,7 @@
 #include <osmocom/msc/vlr_sgs.h>
 #include <osmocom/msc/vlr.h>
 #include <osmocom/msc/debug.h>
+#include <osmocom/msc/gsup_client_mux.h>
 
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -110,6 +111,18 @@ const char *vlr_subscr_name(const struct vlr_subscr *vsub)
 	return buf;
 }
 
+const char *vlr_subscr_short_name(const struct vlr_subscr *vsub, unsigned int maxlen)
+{
+	/* cast away the const so we can shorten the string within the static buffer */
+	char *name = (char*)vlr_subscr_name(vsub);
+	size_t len = strlen(name);
+	if (maxlen < 2)
+		return "-";
+	if (len > maxlen)
+		strcpy(name + maxlen - 2, "..");
+	return name;
+}
+
 const char *vlr_subscr_msisdn_or_name(const struct vlr_subscr *vsub)
 {
 	if (!vsub || !vsub->msisdn[0])
@@ -174,31 +187,6 @@ struct vlr_subscr *_vlr_subscr_find_by_msisdn(struct vlr_instance *vlr,
 	return NULL;
 }
 
-/* Transmit GSUP message to HLR */
-static int vlr_tx_gsup_message(const struct vlr_instance *vlr,
-			       const struct osmo_gsup_message *gsup_msg)
-{
-	struct msgb *msg = osmo_gsup_client_msgb_alloc();
-
-	int rc = osmo_gsup_encode(msg, gsup_msg);
-	if (rc < 0) {
-		LOGP(DVLR, LOGL_ERROR, "GSUP encoding failure: %s\n", strerror(-rc));
-		return rc;
-	}
-
-	if (!vlr->gsup_client) {
-		LOGP(DVLR, LOGL_NOTICE, "GSUP link is down, cannot "
-			"send GSUP: %s\n", msgb_hexdump(msg));
-		msgb_free(msg);
-		return -ENOTSUP;
-	}
-
-	LOGP(DVLR, LOGL_DEBUG, "GSUP tx: %s\n",
-	     osmo_hexdump_nospc(msg->data, msg->len));
-
-	return osmo_gsup_client_send(vlr->gsup_client, msg);
-}
-
 /* Transmit GSUP message for subscriber to HLR, using IMSI from subscriber */
 static int vlr_subscr_tx_gsup_message(const struct vlr_subscr *vsub,
 				      struct osmo_gsup_message *gsup_msg)
@@ -208,40 +196,39 @@ static int vlr_subscr_tx_gsup_message(const struct vlr_subscr *vsub,
 	if (strlen(gsup_msg->imsi) == 0)
 		OSMO_STRLCPY_ARRAY(gsup_msg->imsi, vsub->imsi);
 
-	return vlr_tx_gsup_message(vlr, gsup_msg);
-}
+	gsup_msg->message_class = OSMO_GSUP_MESSAGE_CLASS_SUBSCRIBER_MANAGEMENT;
 
-/* Transmit GSUP error in response to original message */
-static int vlr_tx_gsup_error_reply(const struct vlr_instance *vlr,
-				   struct osmo_gsup_message *gsup_orig,
-				   enum gsm48_gmm_cause cause)
-{
-	struct osmo_gsup_message gsup_reply = {0};
-
-	OSMO_STRLCPY_ARRAY(gsup_reply.imsi, gsup_orig->imsi);
-	gsup_reply.cause = cause;
-	gsup_reply.message_type =
-		OSMO_GSUP_TO_MSGT_ERROR(gsup_orig->message_type);
-
-	return vlr_tx_gsup_message(vlr, &gsup_reply);
+	return gsup_client_mux_tx(vlr->gcm, gsup_msg);
 }
 
 static int vlr_subscr_use_cb(struct osmo_use_count_entry *e, int32_t old_use_count, const char *file, int line)
 {
 	struct vlr_subscr *vsub = e->use_count->talloc_object;
 	char buf[128];
+	int32_t total;
+	int level;
 
 	if (!e->use)
 		return -EINVAL;
 
-	LOGPSRC(DREF, LOGL_DEBUG, file, line, "VLR subscr %s %s %s: now used by %s\n",
+	total = osmo_use_count_total(&vsub->use_count);
+
+	if (total == 0
+	    || (total == 1 && old_use_count == 0 && e->count == 1))
+		level = LOGL_INFO;
+	else
+		level = LOGL_DEBUG;
+
+	LOGPSRC(DREF, level, file, line, "VLR subscr %s %s %s: now used by %s\n",
 		vlr_subscr_name(vsub), (e->count - old_use_count) > 0? "+" : "-", e->use,
 		osmo_use_count_name_buf(buf, sizeof(buf), e->use_count));
 
 	if (e->count < 0)
 		return -ERANGE;
 
-	if (osmo_use_count_total(e->use_count) <= 0)
+	vsub->max_total_use_count = OSMO_MAX(vsub->max_total_use_count, total);
+
+	if (total <= 0)
 		vlr_subscr_free(vsub);
 	return 0;
 }
@@ -261,6 +248,7 @@ static struct vlr_subscr *_vlr_subscr_alloc(struct vlr_instance *vlr)
 			.talloc_object = vsub,
 			.use_cb = vlr_subscr_use_cb,
 		},
+		.expire_lu = VLR_SUBSCRIBER_NO_EXPIRATION,
 	};
 	osmo_use_count_make_static_entries(&vsub->use_count, vsub->use_count_buf, ARRAY_SIZE(vsub->use_count_buf));
 
@@ -314,7 +302,8 @@ void vlr_subscr_cancel_attach_fsm(struct vlr_subscr *vsub,
 void vlr_subscr_free(struct vlr_subscr *vsub)
 {
 	llist_del(&vsub->list);
-	DEBUGP(DREF, "freeing VLR subscr %s\n", vlr_subscr_name(vsub));
+	DEBUGP(DVLR, "freeing VLR subscr %s (max total use count was %d)\n", vlr_subscr_name(vsub),
+	       vsub->max_total_use_count);
 
 	/* Make sure SGs timer Ts5 is removed */
 	osmo_timer_del(&vsub->sgs.Ts5);
@@ -611,17 +600,14 @@ vlr_subscr_pdp_data_get_by_id(struct vlr_subscr *vsub, unsigned context_id)
  ***********************************************************************/
 
 static int vlr_rx_gsup_unknown_imsi(struct vlr_instance *vlr,
-				   struct osmo_gsup_message *gsup_msg)
+				    const struct osmo_gsup_message *gsup_msg)
 {
 	if (OSMO_GSUP_IS_MSGT_REQUEST(gsup_msg->message_type)) {
-		int rc = vlr_tx_gsup_error_reply(vlr, gsup_msg, GMM_CAUSE_IMSI_UNKNOWN);
-		if (rc < 0)
-			LOGP(DVLR, LOGL_ERROR, "Failed to send error reply for IMSI %s\n", gsup_msg->imsi);
-
 		LOGP(DVLR, LOGL_NOTICE,
 		     "Unknown IMSI %s, discarding GSUP request "
 		     "of type 0x%02x\n",
 		     gsup_msg->imsi, gsup_msg->message_type);
+		gsup_client_mux_tx_error_reply(vlr->gcm, gsup_msg, GMM_CAUSE_IMSI_UNKNOWN);
 	} else if (OSMO_GSUP_IS_MSGT_ERROR(gsup_msg->message_type)) {
 		LOGP(DVLR, LOGL_NOTICE,
 		     "Unknown IMSI %s, discarding GSUP error "
@@ -640,7 +626,7 @@ static int vlr_rx_gsup_unknown_imsi(struct vlr_instance *vlr,
 }
 
 static int vlr_rx_gsup_purge_no_subscr(struct vlr_instance *vlr,
-				struct osmo_gsup_message *gsup_msg)
+				       const struct osmo_gsup_message *gsup_msg)
 {
 	if (OSMO_GSUP_IS_MSGT_ERROR(gsup_msg->message_type)) {
 		LOGGSUPP(LOGL_NOTICE, gsup_msg,
@@ -682,7 +668,9 @@ int vlr_subscr_req_sai(struct vlr_subscr *vsub,
 /* Initiate Check_IMEI_VLR Procedure (23.018 Chapter 7.1.2.9) */
 int vlr_subscr_tx_req_check_imei(const struct vlr_subscr *vsub)
 {
-	struct osmo_gsup_message gsup_msg = {0};
+	struct osmo_gsup_message gsup_msg = {
+		.message_class = OSMO_GSUP_MESSAGE_CLASS_SUBSCRIBER_MANAGEMENT,
+	};
 	uint8_t imei_enc[GSM23003_IMEI_NUM_DIGITS+2]; /* +2: IE header */
 	int len;
 
@@ -698,17 +686,19 @@ int vlr_subscr_tx_req_check_imei(const struct vlr_subscr *vsub)
 	/* Send CHECK_IMEI_REQUEST */
 	gsup_msg.message_type = OSMO_GSUP_MSGT_CHECK_IMEI_REQUEST;
 	OSMO_STRLCPY_ARRAY(gsup_msg.imsi, vsub->imsi);
-	return vlr_tx_gsup_message(vsub->vlr, &gsup_msg);
+	return gsup_client_mux_tx(vsub->vlr->gcm, &gsup_msg);
 }
 
 /* Tell HLR that authentication failure occurred */
 int vlr_subscr_tx_auth_fail_rep(const struct vlr_subscr *vsub)
 {
-	struct osmo_gsup_message gsup_msg = {0};
+	struct osmo_gsup_message gsup_msg = {
+		.message_class = OSMO_GSUP_MESSAGE_CLASS_SUBSCRIBER_MANAGEMENT,
+	};
 
 	gsup_msg.message_type = OSMO_GSUP_MSGT_AUTH_FAIL_REPORT;
 	OSMO_STRLCPY_ARRAY(gsup_msg.imsi, vsub->imsi);
-	return vlr_tx_gsup_message(vsub->vlr, &gsup_msg);
+	return gsup_client_mux_tx(vsub->vlr->gcm, &gsup_msg);
 }
 
 /* Update the subscriber with GSUP-received auth tuples */
@@ -771,21 +761,6 @@ static int vlr_subscr_handle_sai_res(struct vlr_subscr *vsub,
 	return 0;
 }
 
-static int decode_bcd_number_safe(char *output, int output_len,
-				  const uint8_t *bcd_lv, int input_len,
-				  int h_len)
-{
-	uint8_t len;
-	OSMO_ASSERT(output_len >= 1);
-	*output = '\0';
-	if (input_len < 1)
-		return -EIO;
-	len = bcd_lv[0];
-	if (input_len < len)
-		return -EIO;
-	return gsm48_decode_bcd_number(output, output_len, bcd_lv, h_len);
-}
-
 static void vlr_subscr_gsup_insert_data(struct vlr_subscr *vsub,
 					const struct osmo_gsup_message *gsup_msg)
 {
@@ -793,9 +768,9 @@ static void vlr_subscr_gsup_insert_data(struct vlr_subscr *vsub,
 	int rc;
 
 	if (gsup_msg->msisdn_enc) {//FIXME: vlr_subscr_set_msisdn()?
-		decode_bcd_number_safe(vsub->msisdn, sizeof(vsub->msisdn),
-				       gsup_msg->msisdn_enc,
-				       gsup_msg->msisdn_enc_len, 0);
+		gsm48_decode_bcd_number2(vsub->msisdn, sizeof(vsub->msisdn),
+					 gsup_msg->msisdn_enc,
+					 gsup_msg->msisdn_enc_len, 0);
 		LOGP(DVLR, LOGL_DEBUG, "IMSI:%s has MSISDN:%s\n",
 		     vsub->imsi, vsub->msisdn);
 	}
@@ -1033,7 +1008,7 @@ static void gmm_cause_to_fsm_and_mm_cause(enum gsm48_gmm_cause gmm_cause,
 
 /* Handle LOCATION CANCEL request from HLR */
 static int vlr_subscr_handle_cancel_req(struct vlr_subscr *vsub,
-					struct osmo_gsup_message *gsup_msg)
+					const struct osmo_gsup_message *gsup_msg)
 {
 	enum gsm48_reject_value gsm48_rej;
 	enum osmo_fsm_term_cause fsm_cause;
@@ -1081,87 +1056,59 @@ static int vlr_subscr_handle_check_imei(struct vlr_subscr *vsub, const struct os
 
 /* Incoming handler for GSUP from HLR.
  * Keep this function non-static for direct invocation by unit tests. */
-int vlr_gsupc_read_cb(struct osmo_gsup_client *gsupc, struct msgb *msg)
+int vlr_gsup_rx(struct gsup_client_mux *gcm, void *data, const struct osmo_gsup_message *gsup)
 {
-	struct vlr_instance *vlr = (struct vlr_instance *) gsupc->data;
+	struct vlr_instance *vlr = data;
 	struct vlr_subscr *vsub;
-	struct osmo_gsup_message gsup;
 	int rc;
 
-	DEBUGP(DVLR, "GSUP rx %u: %s\n", msgb_l2len(msg),
-	       osmo_hexdump_nospc(msgb_l2(msg), msgb_l2len(msg)));
-
-	rc = osmo_gsup_decode(msgb_l2(msg), msgb_l2len(msg), &gsup);
-	if (rc < 0) {
-		LOGP(DVLR, LOGL_ERROR,
-			"decoding GSUP message fails with error '%s' (%d)\n",
-			get_value_string(gsm48_gmm_cause_names, -rc), -rc);
-		goto msgb_free_and_return;
-	}
-
-	if (!gsup.imsi[0]) {
-		LOGP(DVLR, LOGL_ERROR, "Missing IMSI in GSUP message\n");
-		if (OSMO_GSUP_IS_MSGT_REQUEST(gsup.message_type)) {
-			rc = vlr_tx_gsup_error_reply(vlr, &gsup, GMM_CAUSE_INV_MAND_INFO);
-			if (rc < 0)
-				LOGP(DVLR, LOGL_ERROR, "Failed to send error reply for IMSI %s\n", gsup.imsi);
-		}
-		rc = -GMM_CAUSE_INV_MAND_INFO;
-		goto msgb_free_and_return;
-	}
-
-	vsub = vlr_subscr_find_by_imsi(vlr, gsup.imsi, __func__);
+	vsub = vlr_subscr_find_by_imsi(vlr, gsup->imsi, __func__);
 	if (!vsub) {
-		switch (gsup.message_type) {
+		switch (gsup->message_type) {
 		case OSMO_GSUP_MSGT_PURGE_MS_RESULT:
 		case OSMO_GSUP_MSGT_PURGE_MS_ERROR:
-			rc = vlr_rx_gsup_purge_no_subscr(vlr, &gsup);
-			goto msgb_free_and_return;
+			return vlr_rx_gsup_purge_no_subscr(vlr, gsup);
 		default:
-			rc = vlr_rx_gsup_unknown_imsi(vlr, &gsup);
-			goto msgb_free_and_return;
+			return vlr_rx_gsup_unknown_imsi(vlr, gsup);
 		}
 	}
 
-	switch (gsup.message_type) {
+	switch (gsup->message_type) {
 	case OSMO_GSUP_MSGT_SEND_AUTH_INFO_RESULT:
 	case OSMO_GSUP_MSGT_SEND_AUTH_INFO_ERROR:
-		rc = vlr_subscr_handle_sai_res(vsub, &gsup);
+		rc = vlr_subscr_handle_sai_res(vsub, gsup);
 		break;
 	case OSMO_GSUP_MSGT_INSERT_DATA_REQUEST:
-		rc = vlr_subscr_handle_isd_req(vsub, &gsup);
+		rc = vlr_subscr_handle_isd_req(vsub, gsup);
 		break;
 	case OSMO_GSUP_MSGT_LOCATION_CANCEL_REQUEST:
-		rc = vlr_subscr_handle_cancel_req(vsub, &gsup);
+		rc = vlr_subscr_handle_cancel_req(vsub, gsup);
 		break;
 	case OSMO_GSUP_MSGT_UPDATE_LOCATION_RESULT:
-		rc = vlr_subscr_handle_lu_res(vsub, &gsup);
+		rc = vlr_subscr_handle_lu_res(vsub, gsup);
 		break;
 	case OSMO_GSUP_MSGT_UPDATE_LOCATION_ERROR:
-		rc = vlr_subscr_handle_lu_err(vsub, &gsup);
+		rc = vlr_subscr_handle_lu_err(vsub, gsup);
 		break;
 	case OSMO_GSUP_MSGT_PURGE_MS_ERROR:
 	case OSMO_GSUP_MSGT_PURGE_MS_RESULT:
 	case OSMO_GSUP_MSGT_DELETE_DATA_REQUEST:
 		LOGVSUBP(LOGL_ERROR, vsub,
 			"Rx GSUP msg_type=%d not yet implemented\n",
-			gsup.message_type);
+			gsup->message_type);
 		rc = -GMM_CAUSE_MSGT_NOTEXIST_NOTIMPL;
 		break;
 	case OSMO_GSUP_MSGT_CHECK_IMEI_ERROR:
 	case OSMO_GSUP_MSGT_CHECK_IMEI_RESULT:
-		rc = vlr_subscr_handle_check_imei(vsub, &gsup);
+		rc = vlr_subscr_handle_check_imei(vsub, gsup);
 		break;
 	default:
-		/* Forward message towards MSC */
-		rc = vlr->ops.forward_gsup_msg(vsub, &gsup);
+		LOGP(DLGSUP, LOGL_ERROR, "GSUP Message type not handled by VLR: %d\n", gsup->message_type);
+		rc = -EINVAL;
 		break;
 	}
 
 	vlr_subscr_put(vsub, __func__);
-
-msgb_free_and_return:
-	msgb_free(msg);
 	return rc;
 }
 
@@ -1304,7 +1251,6 @@ struct vlr_instance *vlr_alloc(void *ctx, const struct vlr_ops *ops)
 	OSMO_ASSERT(ops->tx_common_id);
 	OSMO_ASSERT(ops->subscr_update);
 	OSMO_ASSERT(ops->subscr_assoc);
-	OSMO_ASSERT(ops->forward_gsup_msg);
 
 	INIT_LLIST_HEAD(&vlr->subscribers);
 	INIT_LLIST_HEAD(&vlr->operations);
@@ -1314,7 +1260,7 @@ struct vlr_instance *vlr_alloc(void *ctx, const struct vlr_ops *ops)
 	vlr->cfg.assign_tmsi = true;
 
 	/* osmo_auth_fsm.c */
-	osmo_fsm_register(&vlr_auth_fsm);
+	OSMO_ASSERT(osmo_fsm_register(&vlr_auth_fsm) == 0);
 	/* osmo_lu_fsm.c */
 	vlr_lu_fsm_init();
 	/* vlr_access_request_fsm.c */
@@ -1325,18 +1271,15 @@ struct vlr_instance *vlr_alloc(void *ctx, const struct vlr_ops *ops)
 	return vlr;
 }
 
-int vlr_start(struct ipaccess_unit *ipa_dev, struct vlr_instance *vlr,
-	      const char *gsup_server_addr_str, uint16_t gsup_server_port)
+int vlr_start(struct vlr_instance *vlr, struct gsup_client_mux *gcm)
 {
 	OSMO_ASSERT(vlr);
 
-	vlr->gsup_client = osmo_gsup_client_create2(vlr, ipa_dev,
-						    gsup_server_addr_str,
-						    gsup_server_port,
-						    &vlr_gsupc_read_cb, NULL);
-	if (!vlr->gsup_client)
-		return -ENOMEM;
-	vlr->gsup_client->data = vlr;
+	vlr->gcm = gcm;
+	gcm->rx_cb[OSMO_GSUP_MESSAGE_CLASS_SUBSCRIBER_MANAGEMENT] = (struct gsup_client_mux_rx_cb){
+		.func = vlr_gsup_rx,
+		.data = vlr,
+	};
 
 	osmo_timer_setup(&vlr->lu_expire_timer, vlr_subscr_expire_lu, vlr);
 	osmo_timer_schedule(&vlr->lu_expire_timer, VLR_SUBSCRIBER_LU_EXPIRATION_INTERVAL, 0);
@@ -1383,14 +1326,13 @@ int vlr_subscr_rx_auth_resp(struct vlr_subscr *vsub, bool is_r99,
 }
 
 /* MSC->VLR: Receive result of Ciphering Mode Command from MS */
-void vlr_subscr_rx_ciph_res(struct vlr_subscr *vsub, struct vlr_ciph_result *res)
+void vlr_subscr_rx_ciph_res(struct vlr_subscr *vsub, enum vlr_ciph_result_cause result)
 {
 	if (vsub->lu_fsm && vsub->lu_fsm->state == VLR_ULA_S_WAIT_CIPH)
-		osmo_fsm_inst_dispatch(vsub->lu_fsm, VLR_ULA_E_CIPH_RES, res);
+		osmo_fsm_inst_dispatch(vsub->lu_fsm, VLR_ULA_E_CIPH_RES, &result);
 	if (vsub->proc_arq_fsm
 	    && vsub->proc_arq_fsm->state == PR_ARQ_S_WAIT_CIPH)
-		osmo_fsm_inst_dispatch(vsub->proc_arq_fsm, PR_ARQ_E_CIPH_RES,
-				       res);
+		osmo_fsm_inst_dispatch(vsub->proc_arq_fsm, PR_ARQ_E_CIPH_RES, &result);
 }
 
 /* Internal evaluation of requested ciphering mode.

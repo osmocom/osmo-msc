@@ -46,7 +46,10 @@
 #include <osmocom/msc/gsm_04_08.h>
 #include <osmocom/msc/transaction.h>
 #include <osmocom/gsupclient/gsup_client.h>
-#include <osmocom/msc/msc_ifaces.h>
+#include <osmocom/msc/msc_a.h>
+#include <osmocom/msc/msub.h>
+#include <osmocom/msc/paging.h>
+#include <osmocom/msc/gsup_client_mux.h>
 
 /* FIXME: choose a proper range */
 static uint32_t new_callref = 0x20000001;
@@ -63,50 +66,65 @@ static void ncss_session_timeout_handler(void *_trans)
 	LOG_TRANS(trans, LOGL_NOTICE, "SS/USSD session timeout, releasing\n");
 
 	/* Indicate connection release to subscriber (if active) */
-	if (trans->conn != NULL) {
+	if (trans->msc_a != NULL) {
 		/* This pair of cause location and value is used by commercial networks */
-		msc_send_ussd_release_complete_cause(trans->conn, trans->transaction_id,
+		msc_send_ussd_release_complete_cause(trans->msc_a, trans->transaction_id,
 			GSM48_CAUSE_LOC_PUN_S_LU, GSM48_CC_CAUSE_NORMAL_UNSPEC);
 	}
 
 	/* Terminate GSUP session with EUSE */
-	gsup_msg.message_type = OSMO_GSUP_MSGT_PROC_SS_ERROR;
+	gsup_msg = (struct osmo_gsup_message){
+		.message_type = OSMO_GSUP_MSGT_PROC_SS_ERROR,
+
+		.session_state = OSMO_GSUP_SESSION_STATE_END,
+		.session_id = trans->callref,
+		.cause = GMM_CAUSE_NET_FAIL,
+
+		.message_class = OSMO_GSUP_MESSAGE_CLASS_USSD,
+	};
+
 	OSMO_STRLCPY_ARRAY(gsup_msg.imsi, trans->vsub->imsi);
 
-	gsup_msg.session_state = OSMO_GSUP_SESSION_STATE_END;
-	gsup_msg.session_id = trans->callref;
-	gsup_msg.cause = GMM_CAUSE_NET_FAIL;
-
-	osmo_gsup_client_enc_send(trans->net->vlr->gsup_client, &gsup_msg);
+	gsup_client_mux_tx(trans->net->gcm, &gsup_msg);
 
 	/* Finally, release this transaction */
 	trans_free(trans);
 }
 
 /* Entry point for call independent MO SS messages */
-int gsm0911_rcv_nc_ss(struct ran_conn *conn, struct msgb *msg)
+int gsm0911_rcv_nc_ss(struct msc_a *msc_a, struct msgb *msg)
 {
+	struct gsm_network *net;
+	struct vlr_subscr *vsub;
 	struct gsm48_hdr *gh = msgb_l3(msg);
 	struct osmo_gsup_message gsup_msg;
 	struct gsm_trans *trans;
-	struct msgb *gsup_msgb;
 	uint16_t facility_ie_len;
 	uint8_t *facility_ie;
 	uint8_t tid;
 	uint8_t msg_type;
 	int rc;
 
+	net = msc_a_net(msc_a);
+	OSMO_ASSERT(net);
+
+	vsub = msc_a_vsub(msc_a);
+	if (!vsub) {
+		LOG_MSC_A(msc_a, LOGL_ERROR, "No vlr_subscr set for this conn\n");
+		return -EINVAL;
+	}
+
 	msg_type = gsm48_hdr_msg_type(gh);
 	tid = gsm48_hdr_trans_id_flip_ti(gh);
 
 	/* Associate logging messages with this subscriber */
-	log_set_context(LOG_CTX_VLR_SUBSCR, conn->vsub);
+	log_set_context(LOG_CTX_VLR_SUBSCR, vsub);
 
 	/* Reuse existing transaction, or create a new one */
-	trans = trans_find_by_id(conn, GSM48_PDISC_NC_SS, tid);
+	trans = trans_find_by_id(msc_a, TRANS_USSD, tid);
 	if (!trans) {
 		/* Count MS-initiated attempts to establish a NC SS/USSD session */
-		rate_ctr_inc(&conn->network->msc_ctrs->ctr[MSC_CTR_NC_SS_MO_REQUESTS]);
+		rate_ctr_inc(&net->msc_ctrs->ctr[MSC_CTR_NC_SS_MO_REQUESTS]);
 
 		/**
 		 * According to GSM TS 04.80, section 2.4.2 "Register
@@ -119,17 +137,16 @@ int gsm0911_rcv_nc_ss(struct ran_conn *conn, struct msgb *msg)
 		if (msg_type != GSM0480_MTYPE_REGISTER) {
 			LOG_TRANS(trans, LOGL_ERROR, "Rx wrong SS/USSD message type for new transaction: %s\n",
 				  gsm48_pdisc_msgtype_name(GSM48_PDISC_NC_SS, msg_type));
-			gsm48_tx_simple(conn,
+			gsm48_tx_simple(msc_a,
 				GSM48_PDISC_NC_SS | (tid << 4),
 				GSM0480_MTYPE_RELEASE_COMPLETE);
 			return -EINVAL;
 		}
 
-		trans = trans_alloc(conn->network, conn->vsub,
-				    GSM48_PDISC_NC_SS, tid, new_callref++);
+		trans = trans_alloc(net, vsub, TRANS_USSD, tid, new_callref++);
 		if (!trans) {
 			LOG_TRANS(trans, LOGL_ERROR, " -> No memory for trans\n");
-			gsm48_tx_simple(conn,
+			gsm48_tx_simple(msc_a,
 				GSM48_PDISC_NC_SS | (tid << 4),
 				GSM0480_MTYPE_RELEASE_COMPLETE);
 			return -ENOMEM;
@@ -140,20 +157,28 @@ int gsm0911_rcv_nc_ss(struct ran_conn *conn, struct msgb *msg)
 			ncss_session_timeout_handler, trans);
 
 		/* Count active NC SS/USSD sessions */
-		osmo_counter_inc(conn->network->active_nc_ss);
+		osmo_counter_inc(net->active_nc_ss);
 
-		trans->conn = ran_conn_get(conn, RAN_CONN_USE_TRANS_NC_SS);
 		trans->dlci = OMSC_LINKID_CB(msg);
-		cm_service_request_concludes(conn, msg);
+		trans->msc_a = msc_a;
+		msc_a_get(msc_a, MSC_A_USE_NC_SS);
+
+		osmo_fsm_inst_dispatch(msc_a->c.fi, MSC_A_EV_TRANSACTION_ACCEPTED, trans);
+
+		/* An earlier CM Service Request for this SS message now has concluded */
+		if (!osmo_use_count_by(&msc_a->use_count, MSC_A_USE_CM_SERVICE_SS))
+			LOG_MSC_A(msc_a, LOGL_ERROR,
+				  "Creating new MO SS transaction without prior CM Service Request\n");
+		else
+			msc_a_put(msc_a, MSC_A_USE_CM_SERVICE_SS);
 	}
 
 	LOG_TRANS(trans, LOGL_DEBUG, "Received SS/USSD msg %s\n",
 		  gsm48_pdisc_msgtype_name(GSM48_PDISC_NC_SS, msg_type));
 
 	/* (Re)schedule the inactivity timer */
-	if (conn->network->ncss_guard_timeout > 0) {
-		osmo_timer_schedule(&trans->ss.timer_guard,
-			conn->network->ncss_guard_timeout, 0);
+	if (net->ncss_guard_timeout > 0) {
+		osmo_timer_schedule(&trans->ss.timer_guard, net->ncss_guard_timeout, 0);
 	}
 
 	/* Attempt to extract Facility IE */
@@ -175,9 +200,11 @@ int gsm0911_rcv_nc_ss(struct ran_conn *conn, struct msgb *msg)
 	}
 
 	/* Compose a mew GSUP message */
-	memset(&gsup_msg, 0x00, sizeof(gsup_msg));
-	gsup_msg.message_type = OSMO_GSUP_MSGT_PROC_SS_REQUEST;
-	gsup_msg.session_id = trans->callref;
+	gsup_msg = (struct osmo_gsup_message){
+		.message_type = OSMO_GSUP_MSGT_PROC_SS_REQUEST,
+		.session_id = trans->callref,
+		.message_class = OSMO_GSUP_MESSAGE_CLASS_USSD,
+	};
 
 	/**
 	 * Perform A-interface to GSUP-interface mapping,
@@ -202,45 +229,23 @@ int gsm0911_rcv_nc_ss(struct ran_conn *conn, struct msgb *msg)
 	}
 
 	/* Fill in subscriber's IMSI */
-	OSMO_STRLCPY_ARRAY(gsup_msg.imsi, conn->vsub->imsi);
+	OSMO_STRLCPY_ARRAY(gsup_msg.imsi, vsub->imsi);
 
-	/* Allocate GSUP message buffer */
-	gsup_msgb = osmo_gsup_client_msgb_alloc();
-	if (!gsup_msgb) {
-		LOG_TRANS(trans, LOGL_ERROR, "Couldn't allocate GSUP message\n");
-		rc = -ENOMEM;
-		goto error;
-	}
-
-	/* Encode GSUP message */
-	rc = osmo_gsup_encode(gsup_msgb, &gsup_msg);
-	if (rc) {
-		LOG_TRANS(trans, LOGL_ERROR, "Couldn't encode GSUP message\n");
-		goto error;
-	}
-
-	/* Finally send */
-	rc = osmo_gsup_client_send(conn->network->vlr->gsup_client, gsup_msgb);
-	if (rc) {
-		LOG_TRANS(trans, LOGL_ERROR, "Couldn't send GSUP message\n");
-		goto error;
-	}
+	rc = gsup_client_mux_tx(trans->net->gcm, &gsup_msg);
 
 	/* Should we release connection? Or wait for response? */
 	if (msg_type == GSM0480_MTYPE_RELEASE_COMPLETE)
 		trans_free(trans);
-	else
-		ran_conn_communicating(conn);
 
 	/* Count established MS-initiated NC SS/USSD sessions */
 	if (msg_type == GSM0480_MTYPE_REGISTER)
-		rate_ctr_inc(&conn->network->msc_ctrs->ctr[MSC_CTR_NC_SS_MO_ESTABLISHED]);
+		rate_ctr_inc(&net->msc_ctrs->ctr[MSC_CTR_NC_SS_MO_ESTABLISHED]);
 
 	return 0;
 
 error:
 	/* Abort transaction on DTAP-interface */
-	msc_send_ussd_reject(conn, tid, -1,
+	msc_send_ussd_reject(msc_a, tid, -1,
 		GSM_0480_PROBLEM_CODE_TAG_GENERAL,
 		GSM_0480_GEN_PROB_CODE_UNRECOGNISED);
 	if (trans)
@@ -251,76 +256,69 @@ error:
 }
 
 /* Call-back from paging the B-end of the connection */
-static int handle_paging_event(unsigned int hooknum, unsigned int event,
-			      struct msgb *msg, void *_conn, void *_transt)
+static void ss_paging_cb(struct msc_a *msc_a, struct gsm_trans *trans)
 {
-	struct ran_conn *conn = _conn;
-	enum gsm_paging_event paging_event = event;
-	struct gsm_trans *transt = _transt;
 	struct gsm48_hdr *gh;
 	struct msgb *ss_msg;
 
-	OSMO_ASSERT(!transt->conn);
-	OSMO_ASSERT(transt->ss.msg);
+	if (trans->msc_a) {
+		LOG_MSC_A_CAT(msc_a, DPAG, LOGL_ERROR,
+			      "Handle paging error: transaction already associated with subsciber,"
+			      " apparently it was already handled. Skip.\n");
+		return;
+	}
+	OSMO_ASSERT(trans->ss.msg);
 
-	switch (paging_event) {
-	case GSM_PAGING_SUCCEEDED:
-		DEBUGP(DMM, "Paging subscr %s succeeded!\n",
-			vlr_subscr_msisdn_or_name(transt->vsub));
+	if (msc_a) {
+		struct gsm_network *net = msc_a_net(msc_a);
+		LOG_MSC_A_CAT(msc_a, DMM, LOGL_DEBUG, "Paging succeeded\n");
 
 		/* Assign connection */
-		transt->conn = ran_conn_get(conn, RAN_CONN_USE_TRANS_NC_SS);
-		transt->paging_request = NULL;
+		msc_a_get(msc_a, MSC_A_USE_NC_SS);
+		trans->msc_a = msc_a;
+		trans->paging_request = NULL;
 
 		/* (Re)schedule the inactivity timer */
-		if (conn->network->ncss_guard_timeout > 0) {
-			osmo_timer_schedule(&transt->ss.timer_guard,
-				conn->network->ncss_guard_timeout, 0);
+		if (net->ncss_guard_timeout > 0) {
+			osmo_timer_schedule(&trans->ss.timer_guard, net->ncss_guard_timeout, 0);
 		}
 
 		/* Send stored message */
-		ss_msg = transt->ss.msg;
+		ss_msg = trans->ss.msg;
 		gh = (struct gsm48_hdr *) msgb_push(ss_msg, sizeof(*gh));
 		gh->proto_discr  = GSM48_PDISC_NC_SS;
-		gh->proto_discr |= transt->transaction_id << 4;
+		gh->proto_discr |= trans->transaction_id << 4;
 		gh->msg_type = GSM0480_MTYPE_REGISTER;
 
 		/* Sent to the MS, give ownership of ss_msg */
-		msc_tx_dtap(transt->conn, ss_msg);
-		transt->ss.msg = NULL;
+		msc_a_tx_dtap_to_i(msc_a, ss_msg);
+		trans->ss.msg = NULL;
 
 		/* Count established network-initiated NC SS/USSD sessions */
-		rate_ctr_inc(&conn->network->msc_ctrs->ctr[MSC_CTR_NC_SS_MT_ESTABLISHED]);
-		break;
-	case GSM_PAGING_EXPIRED:
-	case GSM_PAGING_BUSY:
-		DEBUGP(DMM, "Paging subscr %s %s!\n",
-			vlr_subscr_msisdn_or_name(transt->vsub),
-			paging_event == GSM_PAGING_EXPIRED ? "expired" : "busy");
+		rate_ctr_inc(&net->msc_ctrs->ctr[MSC_CTR_NC_SS_MT_ESTABLISHED]);
+	} else {
+		LOG_MSC_A_CAT(msc_a, DMM, LOGL_DEBUG, "Paging expired\n");
 
 		/* TODO: inform HLR about this failure */
 
-		msgb_free(transt->ss.msg);
-		transt->ss.msg = NULL;
+		msgb_free(trans->ss.msg);
+		trans->ss.msg = NULL;
 
-		transt->callref = 0;
-		transt->paging_request = NULL;
-		trans_free(transt);
-		break;
+		trans->callref = 0;
+		trans->paging_request = NULL;
+		trans_free(trans);
 	}
-
-	return 0;
 }
 
 static struct gsm_trans *establish_nc_ss_trans(struct gsm_network *net,
-	struct vlr_subscr *vsub, struct osmo_gsup_message *gsup_msg)
+	struct vlr_subscr *vsub, const struct osmo_gsup_message *gsup_msg)
 {
-	struct ran_conn *conn;
+	struct msc_a *msc_a;
 	struct gsm_trans *trans, *transt;
 	int tid;
 
 	/* Allocate transaction first, for log context */
-	trans = trans_alloc(net, vsub, GSM48_PDISC_NC_SS,
+	trans = trans_alloc(net, vsub, TRANS_USSD,
 		TRANS_ID_UNASSIGNED, gsup_msg->session_id);
 
 	if (!trans) {
@@ -355,7 +353,7 @@ static struct gsm_trans *establish_nc_ss_trans(struct gsm_network *net,
 	osmo_counter_inc(net->active_nc_ss);
 
 	/* Assign transaction ID */
-	tid = trans_assign_trans_id(trans->net, trans->vsub, GSM48_PDISC_NC_SS);
+	tid = trans_assign_trans_id(trans->net, trans->vsub, TRANS_USSD);
 	if (tid < 0) {
 		LOG_TRANS(trans, LOGL_ERROR, "No free transaction ID\n");
 		/* TODO: inform HLR about this */
@@ -371,10 +369,11 @@ static struct gsm_trans *establish_nc_ss_trans(struct gsm_network *net,
 		ncss_session_timeout_handler, trans);
 
 	/* Attempt to find connection */
-	conn = connection_for_subscr(vsub);
-	if (conn) {
+	msc_a = msc_a_for_vsub(vsub, true);
+	if (msc_a) {
 		/* Assign connection */
-		trans->conn = ran_conn_get(conn, RAN_CONN_USE_TRANS_NC_SS);
+		msc_a_get(msc_a, MSC_A_USE_NC_SS);
+		trans->msc_a = msc_a;
 		trans->dlci = 0x00; /* SAPI=0, not SACCH */
 		return trans;
 	}
@@ -390,13 +389,14 @@ static struct gsm_trans *establish_nc_ss_trans(struct gsm_network *net,
 		LOG_TRANS(trans, LOGL_ERROR, "Paging already started, "
 			"rejecting message...\n");
 		trans_free(trans);
+		/* FIXME: WTF IS THIS!? This is completely insane. Presence of a trans doesn't indicate Paging, and even
+		 * if, why drop the current request??? */
 		return NULL;
 	}
 
 	/* Trigger Paging Request */
-	trans->paging_request = subscr_request_conn(vsub,
-		&handle_paging_event, trans, "GSM 09.11 SS/USSD",
-	        SGSAP_SERV_IND_CS_CALL);
+	trans->paging_request = paging_request_start(vsub, PAGING_CAUSE_SIGNALLING_HIGH_PRIO,
+						     ss_paging_cb, trans, "GSM 09.11 SS/USSD");
 	if (!trans->paging_request) {
 		LOG_TRANS(trans, LOGL_ERROR, "Failed to allocate paging token\n");
 		trans_free(trans);
@@ -431,15 +431,21 @@ void _gsm911_nc_ss_trans_free(struct gsm_trans *trans)
 	osmo_counter_dec(trans->net->active_nc_ss);
 }
 
-int gsm0911_gsup_handler(struct vlr_subscr *vsub,
-			 struct osmo_gsup_message *gsup_msg)
+int gsm0911_gsup_rx(struct gsup_client_mux *gcm, void *data, const struct osmo_gsup_message *gsup_msg)
 {
-	struct vlr_instance *vlr;
+	struct vlr_instance *vlr = data;
 	struct gsm_network *net;
 	struct gsm_trans *trans;
 	struct gsm48_hdr *gh;
 	struct msgb *ss_msg;
 	bool trans_end;
+	struct msc_a *msc_a;
+	struct vlr_subscr *vsub = vlr_subscr_find_by_imsi(vlr, gsup_msg->imsi, __func__);
+
+	if (!vsub) {
+		gsup_client_mux_tx_error_reply(gcm, gsup_msg, GMM_CAUSE_IMSI_UNKNOWN);
+		return -GMM_CAUSE_IMSI_UNKNOWN;
+	}
 
 	/* Associate logging messages with this subscriber */
 	log_set_context(LOG_CTX_VLR_SUBSCR, vsub);
@@ -542,7 +548,13 @@ int gsm0911_gsup_handler(struct vlr_subscr *vsub,
 	trans_end = (gh->msg_type == GSM0480_MTYPE_RELEASE_COMPLETE);
 
 	/* Sent to the MS, give ownership of ss_msg */
-	msc_tx_dtap(trans->conn, ss_msg);
+	msc_a = trans->msc_a;
+	if (!msc_a) {
+		LOG_TRANS(trans, LOGL_ERROR, "Cannot send SS message, no local MSC-A role defined for subscriber\n");
+		msgb_free(ss_msg);
+		return -EINVAL;
+	}
+	msc_a_tx_dtap_to_i(msc_a, ss_msg);
 
 	/* Release transaction if required */
 	if (trans_end)

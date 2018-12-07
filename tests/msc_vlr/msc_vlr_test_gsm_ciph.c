@@ -24,6 +24,11 @@
 #include "msc_vlr_tests.h"
 #include "stubs.h"
 
+static const struct osmo_gsm48_classmark classmark = {
+	// TODO
+	//bss_sends_bssap_mgmt("541203505886130b6014042f6503b8800d2100");
+};
+
 static void test_ciph()
 {
 	struct vlr_subscr *vsub;
@@ -36,7 +41,7 @@ static void test_ciph()
 
 	btw("Location Update request causes a GSUP Send Auth Info request to HLR");
 	lu_result_sent = RES_NONE;
-	gsup_expect_tx("08010809710000004026f0");
+	gsup_expect_tx("08010809710000004026f0" VLR_TO_HLR);
 	ms_sends_msg("050802008168000130089910070000006402");
 	OSMO_ASSERT(gsup_tx_confirmed);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
@@ -61,7 +66,7 @@ static void test_ciph()
 		"0322"  "2010" "fa8f20b781b5881329d4fea26b1a3c51"
 			"2104" "5afc8d72" "2208" "2392f14f709ae000"
 		"0322"  "2010" "0fd4cc8dbe8715d1f439e304edfd68dc"
-			"2104" "bc8d1c5b" "2208" "da7cdd6bfe2d7000",
+			"2104" "bc8d1c5b" "2208" "da7cdd6bfe2d7000" HLR_TO_VLR,
 		NULL);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 	VERBOSE_ASSERT(auth_request_sent, == true, "%d");
@@ -78,33 +83,30 @@ static void test_ciph()
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("MS sends Ciphering Mode Complete, VLR accepts and sends GSUP LU Req to HLR");
-	gsup_expect_tx("04010809710000004026f0280102");
-	ms_sends_msg("0632");
+	gsup_expect_tx("04010809710000004026f0280102" VLR_TO_HLR);
+	ms_sends_ciphering_mode_complete(NULL);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("HLR sends _INSERT_DATA_REQUEST, VLR responds with _INSERT_DATA_RESULT");
-	gsup_rx("10010809710000004026f00804036470f1",
-		"12010809710000004026f0");
+	gsup_rx("10010809710000004026f00804036470f1" HLR_TO_VLR,
+		"12010809710000004026f0" VLR_TO_HLR);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("HLR also sends GSUP _UPDATE_LOCATION_RESULT");
 	expect_bssap_clear();
-	gsup_rx("06010809710000004026f0", NULL);
+	gsup_rx("06010809710000004026f0" HLR_TO_VLR, NULL);
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
 	btw("LU was successful, and the conn has already been closed");
 	VERBOSE_ASSERT(lu_result_sent, == RES_ACCEPT, "%d");
-	bss_sends_clear_complete();
+	ran_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 
 	BTW("after a while, a new conn sends a CM Service Request. VLR responds with Auth Req, 2nd auth vector");
 	cm_service_result_sent = RES_NONE;
 	auth_request_sent = false;
 	auth_request_expect_rand = "12aca96fb4ffdea5c985cbafa9b6e18b";
-	ms_sends_msg("05247803305886089910070000006402");
-	OSMO_ASSERT(g_conn);
-	OSMO_ASSERT(g_conn->fi);
-	OSMO_ASSERT(g_conn->vsub);
+	ms_sends_msg("05247403305886089910070000006402");
 	VERBOSE_ASSERT(auth_request_sent, == true, "%d");
 	VERBOSE_ASSERT(cm_service_result_sent, == RES_NONE, "%d");
 
@@ -123,15 +125,15 @@ static void test_ciph()
 	thwart_rx_non_initial_requests();
 
 	btw("MS sends Ciphering Mode Complete, VLR accepts; above Ciphering is an implicit CM Service Accept");
-	ms_sends_msg("0632");
+	ms_sends_ciphering_mode_complete(NULL);
 	VERBOSE_ASSERT(cm_service_result_sent, == RES_NONE, "%d");
 
 	/* Release connection */
 	expect_bssap_clear(OSMO_RAT_GERAN_A);
-	conn_conclude_cm_service_req(g_conn, OSMO_RAT_GERAN_A);
+	conn_conclude_cm_service_req(g_msub, MSC_A_USE_CM_SERVICE_SMS);
 
 	btw("all requests serviced, conn has been released");
-	bss_sends_clear_complete();
+	ran_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 
 	BTW("an SMS is sent, MS is paged");
@@ -149,7 +151,6 @@ static void test_ciph()
 	vlr_subscr_put(vsub, __func__);
 	vsub = NULL;
 	VERBOSE_ASSERT(paging_sent, == true, "%d");
-	VERBOSE_ASSERT(paging_stopped, == false, "%d");
 
 	btw("the subscriber and its pending request should remain");
 	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi, __func__);
@@ -198,9 +199,8 @@ static void test_ciph()
 		       "5079da1e1ee7416937485e9ea7c965373d1d6683c270383b3d0e"
 		       "d3d36ff71c949e83c22072799e9687c5ec32a81d96afcbf4b4fb"
 		       "0c7ac3e9e9b7db05");
-	ms_sends_msg("0632");
+	ms_sends_ciphering_mode_complete(NULL);
 	VERBOSE_ASSERT(dtap_tx_confirmed, == true, "%d");
-	VERBOSE_ASSERT(paging_stopped, == true, "%d");
 
 	btw("SMS was delivered, no requests pending for subscr");
 	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi, __func__);
@@ -223,7 +223,7 @@ static void test_ciph()
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
 	btw("SMS is done, conn is gone");
-	bss_sends_clear_complete();
+	ran_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 
 	BTW("subscriber detaches");
@@ -231,7 +231,7 @@ static void test_ciph()
 	ms_sends_msg("050130089910070000006402");
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
-	bss_sends_clear_complete();
+	ran_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 	clear_vlr();
 	comment_end();
@@ -250,7 +250,7 @@ static void test_ciph_tmsi()
 
 	btw("Location Update request causes a GSUP Send Auth Info request to HLR");
 	lu_result_sent = RES_NONE;
-	gsup_expect_tx("08010809710000004026f0");
+	gsup_expect_tx("08010809710000004026f0" VLR_TO_HLR);
 	ms_sends_msg("050802008168000130089910070000006402");
 	OSMO_ASSERT(gsup_tx_confirmed);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
@@ -275,7 +275,7 @@ static void test_ciph_tmsi()
 		"0322"  "2010" "fa8f20b781b5881329d4fea26b1a3c51"
 			"2104" "5afc8d72" "2208" "2392f14f709ae000"
 		"0322"  "2010" "0fd4cc8dbe8715d1f439e304edfd68dc"
-			"2104" "bc8d1c5b" "2208" "da7cdd6bfe2d7000",
+			"2104" "bc8d1c5b" "2208" "da7cdd6bfe2d7000" HLR_TO_VLR,
 		NULL);
 	VERBOSE_ASSERT(auth_request_sent, == true, "%d");
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
@@ -293,17 +293,17 @@ static void test_ciph_tmsi()
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("MS sends Ciphering Mode Complete, VLR accepts and sends GSUP LU Req to HLR");
-	gsup_expect_tx("04010809710000004026f0280102");
-	ms_sends_msg("0632");
+	gsup_expect_tx("04010809710000004026f0280102" VLR_TO_HLR);
+	ms_sends_ciphering_mode_complete(NULL);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("HLR sends _INSERT_DATA_REQUEST, VLR responds with _INSERT_DATA_RESULT");
-	gsup_rx("10010809710000004026f00804036470f1",
-		"12010809710000004026f0");
+	gsup_rx("10010809710000004026f00804036470f1" HLR_TO_VLR,
+		"12010809710000004026f0" VLR_TO_HLR);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("HLR also sends GSUP _UPDATE_LOCATION_RESULT");
-	gsup_rx("06010809710000004026f0", NULL);
+	gsup_rx("06010809710000004026f0" HLR_TO_VLR, NULL);
 
 	btw("a LU Accept with a new TMSI was sent, waiting for TMSI Realloc Compl");
 	EXPECT_CONN_COUNT(1);
@@ -325,7 +325,7 @@ static void test_ciph_tmsi()
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
 	btw("LU was successful, and the conn has already been closed");
-	bss_sends_clear_complete();
+	ran_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 
 	btw("Subscriber has the new TMSI");
@@ -341,10 +341,7 @@ static void test_ciph_tmsi()
 	auth_request_sent = false;
 	auth_request_expect_rand = "12aca96fb4ffdea5c985cbafa9b6e18b";
 	auth_request_expect_autn = NULL;
-	ms_sends_msg("05247803305886" "05f4" "03020100");
-	OSMO_ASSERT(g_conn);
-	OSMO_ASSERT(g_conn->fi);
-	OSMO_ASSERT(g_conn->vsub);
+	ms_sends_msg("05247403305886" "05f4" "03020100");
 	VERBOSE_ASSERT(auth_request_sent, == true, "%d");
 	VERBOSE_ASSERT(cm_service_result_sent, == RES_NONE, "%d");
 
@@ -363,15 +360,15 @@ static void test_ciph_tmsi()
 	thwart_rx_non_initial_requests();
 
 	btw("MS sends Ciphering Mode Complete, VLR accepts; above Ciphering is an implicit CM Service Accept");
-	ms_sends_msg("0632");
+	ms_sends_ciphering_mode_complete(NULL);
 	VERBOSE_ASSERT(cm_service_result_sent, == RES_NONE, "%d");
 
 	/* Release connection */
 	expect_bssap_clear(OSMO_RAT_GERAN_A);
-	conn_conclude_cm_service_req(g_conn, OSMO_RAT_GERAN_A);
+	conn_conclude_cm_service_req(g_msub, MSC_A_USE_CM_SERVICE_SMS);
 
 	btw("all requests serviced, conn has been released");
-	bss_sends_clear_complete();
+	ran_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 
 	BTW("an SMS is sent, MS is paged");
@@ -389,7 +386,6 @@ static void test_ciph_tmsi()
 	vlr_subscr_put(vsub, __func__);
 	vsub = NULL;
 	VERBOSE_ASSERT(paging_sent, == true, "%d");
-	VERBOSE_ASSERT(paging_stopped, == false, "%d");
 
 	btw("the subscriber and its pending request should remain");
 	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi, __func__);
@@ -438,9 +434,8 @@ static void test_ciph_tmsi()
 		       "5079da1e1ee7416937485e9ea7c965373d1d6683c270383b3d0e"
 		       "d3d36ff71c949e83c22072799e9687c5ec32a81d96afcbf4b4fb"
 		       "0c7ac3e9e9b7db05");
-	ms_sends_msg("0632");
+	ms_sends_ciphering_mode_complete(NULL);
 	VERBOSE_ASSERT(dtap_tx_confirmed, == true, "%d");
-	VERBOSE_ASSERT(paging_stopped, == true, "%d");
 
 	btw("SMS was delivered, no requests pending for subscr");
 	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi, __func__);
@@ -463,7 +458,7 @@ static void test_ciph_tmsi()
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
 	btw("SMS is done, conn is gone");
-	bss_sends_clear_complete();
+	ran_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 
 	BTW("subscriber detaches, using TMSI");
@@ -471,7 +466,7 @@ static void test_ciph_tmsi()
 	ms_sends_msg("050130" "05f4" "03020100");
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
-	bss_sends_clear_complete();
+	ran_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 	clear_vlr();
 	comment_end();
@@ -490,7 +485,7 @@ static void test_ciph_imei()
 
 	btw("Location Update request causes a GSUP Send Auth Info request to HLR");
 	lu_result_sent = RES_NONE;
-	gsup_expect_tx("08010809710000004026f0");
+	gsup_expect_tx("08010809710000004026f0" VLR_TO_HLR);
 	ms_sends_msg("050802008168000130089910070000006402");
 	OSMO_ASSERT(gsup_tx_confirmed);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
@@ -515,7 +510,7 @@ static void test_ciph_imei()
 		"0322"  "2010" "fa8f20b781b5881329d4fea26b1a3c51"
 			"2104" "5afc8d72" "2208" "2392f14f709ae000"
 		"0322"  "2010" "0fd4cc8dbe8715d1f439e304edfd68dc"
-			"2104" "bc8d1c5b" "2208" "da7cdd6bfe2d7000",
+			"2104" "bc8d1c5b" "2208" "da7cdd6bfe2d7000" HLR_TO_VLR,
 		NULL);
 	VERBOSE_ASSERT(auth_request_sent, == true, "%d");
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
@@ -532,18 +527,18 @@ static void test_ciph_imei()
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("MS sends Ciphering Mode Complete, VLR accepts and sends GSUP LU Req to HLR");
-	gsup_expect_tx("04010809710000004026f0280102");
-	ms_sends_msg("0632");
+	gsup_expect_tx("04010809710000004026f0280102" VLR_TO_HLR);
+	ms_sends_ciphering_mode_complete(NULL);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("HLR sends _INSERT_DATA_REQUEST, VLR responds with _INSERT_DATA_RESULT");
-	gsup_rx("10010809710000004026f00804036470f1",
-		"12010809710000004026f0");
+	gsup_rx("10010809710000004026f00804036470f1" HLR_TO_VLR,
+		"12010809710000004026f0" VLR_TO_HLR);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("HLR also sends GSUP _UPDATE_LOCATION_RESULT, and we send an ID Request for the IMEI to the MS");
 	dtap_expect_tx("051802");
-	gsup_rx("06010809710000004026f0", NULL);
+	gsup_rx("06010809710000004026f0" HLR_TO_VLR, NULL);
 
 	btw("We will only do business when the IMEI is known");
 	EXPECT_CONN_COUNT(1);
@@ -555,19 +550,19 @@ static void test_ciph_imei()
 	thwart_rx_non_initial_requests();
 
 	btw("MS replies with an Identity Response, VLR sends the IMEI to HLR");
-	gsup_expect_tx("30010809710000004026f050090824433224433224f0");
+	gsup_expect_tx("30010809710000004026f050090824433224433224f0" VLR_TO_HLR);
 	ms_sends_msg("0559084a32244332244302");
 	EXPECT_ACCEPTED(false);
 	thwart_rx_non_initial_requests();
 
 	btw("HLR accepts the IMEI");
 	expect_bssap_clear();
-	gsup_rx("32010809710000004026f0510100", NULL);
+	gsup_rx("32010809710000004026f0510100" HLR_TO_VLR, NULL);
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
 	btw("LU was successful, and the conn has already been closed");
 	VERBOSE_ASSERT(lu_result_sent, == RES_ACCEPT, "%d");
-	bss_sends_clear_complete();
+	ran_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 
 	btw("Subscriber has the IMEI");
@@ -581,7 +576,7 @@ static void test_ciph_imei()
 	ms_sends_msg("050130089910070000006402");
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
-	bss_sends_clear_complete();
+	ran_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 	clear_vlr();
 	comment_end();
@@ -600,7 +595,7 @@ static void test_ciph_imeisv()
 
 	btw("Location Update request causes a GSUP Send Auth Info request to HLR");
 	lu_result_sent = RES_NONE;
-	gsup_expect_tx("08010809710000004026f0");
+	gsup_expect_tx("08010809710000004026f0" VLR_TO_HLR);
 	ms_sends_msg("050802008168000130089910070000006402");
 	OSMO_ASSERT(gsup_tx_confirmed);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
@@ -625,7 +620,7 @@ static void test_ciph_imeisv()
 		"0322"  "2010" "fa8f20b781b5881329d4fea26b1a3c51"
 			"2104" "5afc8d72" "2208" "2392f14f709ae000"
 		"0322"  "2010" "0fd4cc8dbe8715d1f439e304edfd68dc"
-			"2104" "bc8d1c5b" "2208" "da7cdd6bfe2d7000",
+			"2104" "bc8d1c5b" "2208" "da7cdd6bfe2d7000" HLR_TO_VLR,
 		NULL);
 	VERBOSE_ASSERT(auth_request_sent, == true, "%d");
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
@@ -648,8 +643,8 @@ static void test_ciph_imeisv()
 	vlr_subscr_put(vsub, __func__);
 
 	btw("MS sends Ciphering Mode Complete with IMEISV, VLR accepts and sends GSUP LU Req to HLR");
-	gsup_expect_tx("04010809710000004026f0280102");
-	ms_sends_msg("063217094b32244332244372f5");
+	gsup_expect_tx("04010809710000004026f0280102" VLR_TO_HLR);
+	ms_sends_ciphering_mode_complete("063217094b32244332244372f5");
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("Subscriber has the IMEISV");
@@ -662,18 +657,18 @@ static void test_ciph_imeisv()
 	thwart_rx_non_initial_requests();
 
 	btw("HLR sends _INSERT_DATA_REQUEST, VLR responds with _INSERT_DATA_RESULT");
-	gsup_rx("10010809710000004026f00804036470f1",
-		"12010809710000004026f0");
+	gsup_rx("10010809710000004026f00804036470f1" HLR_TO_VLR,
+		"12010809710000004026f0" VLR_TO_HLR);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("HLR also sends GSUP _UPDATE_LOCATION_RESULT");
 	expect_bssap_clear();
-	gsup_rx("06010809710000004026f0", NULL);
+	gsup_rx("06010809710000004026f0" HLR_TO_VLR, NULL);
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
 	btw("LU was successful, and the conn has already been closed");
 	VERBOSE_ASSERT(lu_result_sent, == RES_ACCEPT, "%d");
-	bss_sends_clear_complete();
+	ran_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 
 	BTW("subscriber detaches");
@@ -681,7 +676,7 @@ static void test_ciph_imeisv()
 	ms_sends_msg("050130089910070000006402");
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
-	bss_sends_clear_complete();
+	ran_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 	clear_vlr();
 	comment_end();
@@ -701,7 +696,7 @@ static void test_ciph_tmsi_imei()
 
 	btw("Location Update request causes a GSUP Send Auth Info request to HLR");
 	lu_result_sent = RES_NONE;
-	gsup_expect_tx("08010809710000004026f0");
+	gsup_expect_tx("08010809710000004026f0" VLR_TO_HLR);
 	ms_sends_msg("050802008168000130089910070000006402");
 	OSMO_ASSERT(gsup_tx_confirmed);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
@@ -726,7 +721,7 @@ static void test_ciph_tmsi_imei()
 		"0322"  "2010" "fa8f20b781b5881329d4fea26b1a3c51"
 			"2104" "5afc8d72" "2208" "2392f14f709ae000"
 		"0322"  "2010" "0fd4cc8dbe8715d1f439e304edfd68dc"
-			"2104" "bc8d1c5b" "2208" "da7cdd6bfe2d7000",
+			"2104" "bc8d1c5b" "2208" "da7cdd6bfe2d7000" HLR_TO_VLR,
 		NULL);
 	VERBOSE_ASSERT(auth_request_sent, == true, "%d");
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
@@ -743,18 +738,18 @@ static void test_ciph_tmsi_imei()
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("MS sends Ciphering Mode Complete, VLR accepts and sends GSUP LU Req to HLR");
-	gsup_expect_tx("04010809710000004026f0280102");
-	ms_sends_msg("0632");
+	gsup_expect_tx("04010809710000004026f0280102" VLR_TO_HLR);
+	ms_sends_ciphering_mode_complete(NULL);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("HLR sends _INSERT_DATA_REQUEST, VLR responds with _INSERT_DATA_RESULT");
-	gsup_rx("10010809710000004026f00804036470f1",
-		"12010809710000004026f0");
+	gsup_rx("10010809710000004026f00804036470f1" HLR_TO_VLR,
+		"12010809710000004026f0" VLR_TO_HLR);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("HLR also sends GSUP _UPDATE_LOCATION_RESULT, and we send an ID Request for the IMEI to the MS");
 	dtap_expect_tx("051802");
-	gsup_rx("06010809710000004026f0", NULL);
+	gsup_rx("06010809710000004026f0" HLR_TO_VLR, NULL);
 
 	btw("We will only do business when the IMEI is known");
 	EXPECT_CONN_COUNT(1);
@@ -766,13 +761,13 @@ static void test_ciph_tmsi_imei()
 	thwart_rx_non_initial_requests();
 
 	btw("MS replies with an Identity Response, VLR sends the IMEI to HLR");
-	gsup_expect_tx("30010809710000004026f050090824433224433224f0");
+	gsup_expect_tx("30010809710000004026f050090824433224433224f0" VLR_TO_HLR);
 	ms_sends_msg("0559084a32244332244302");
 	EXPECT_ACCEPTED(false);
 	thwart_rx_non_initial_requests();
 
 	btw("HLR accepts the IMEI");
-	gsup_rx("32010809710000004026f0510100", NULL);
+	gsup_rx("32010809710000004026f0510100" HLR_TO_VLR, NULL);
 
 	btw("a LU Accept with a new TMSI was sent, waiting for TMSI Realloc Compl");
 	EXPECT_CONN_COUNT(1);
@@ -794,7 +789,7 @@ static void test_ciph_tmsi_imei()
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
 	btw("LU was successful, and the conn has already been closed");
-	bss_sends_clear_complete();
+	ran_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 
 	btw("Subscriber has the IMEI and TMSI");
@@ -809,7 +804,7 @@ static void test_ciph_tmsi_imei()
 	ms_sends_msg("050130" "05f4" "03020100");
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
-	bss_sends_clear_complete();
+	ran_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 	clear_vlr();
 	comment_end();
@@ -850,7 +845,7 @@ static void test_gsm_ciph_in_umts_env()
 
 	btw("Location Update request causes a GSUP Send Auth Info request to HLR");
 	lu_result_sent = RES_NONE;
-	gsup_expect_tx("080108" "09710000000156f0");
+	gsup_expect_tx("080108" "09710000000156f0" VLR_TO_HLR);
 	ms_sends_msg("0508" /* MM LU */
 		     "7" /* ciph key seq: no key available */
 		     "0" /* LU type: normal */
@@ -916,7 +911,7 @@ static void test_gsm_ciph_in_umts_env()
 		       "2310" "fa5d70f929ff298efb160413698dc107"
 		       "2410" "ae9a3d8ce70ce13bac297bdb91cd6c68"
 		       "2510" "5c0dc2eeaefa0000396882a1fe2cf80b"
-		       "2708" "65ab1cad216bfe87",
+		       "2708" "65ab1cad216bfe87" HLR_TO_VLR,
 		NULL);
 	VERBOSE_ASSERT(auth_request_sent, == true, "%d");
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
@@ -928,23 +923,23 @@ static void test_gsm_ciph_in_umts_env()
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("MS sends Ciphering Mode Complete, VLR accepts and sends GSUP LU Req to HLR");
-	gsup_expect_tx("04010809710000000156f0280102");
-	ms_sends_msg("0632");
+	gsup_expect_tx("04010809710000000156f0280102" VLR_TO_HLR);
+	ms_sends_ciphering_mode_complete(NULL);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("HLR sends _INSERT_DATA_REQUEST, VLR responds with _INSERT_DATA_RESULT");
-	gsup_rx("10010809710000000156f00804032443f2",
-		"12010809710000000156f0");
+	gsup_rx("10010809710000000156f00804032443f2" HLR_TO_VLR,
+		"12010809710000000156f0" VLR_TO_HLR);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("HLR also sends GSUP _UPDATE_LOCATION_RESULT");
 	expect_bssap_clear();
-	gsup_rx("06010809710000000156f0", NULL);
+	gsup_rx("06010809710000000156f0" HLR_TO_VLR, NULL);
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
 	btw("LU was successful, and the conn has already been closed");
 	VERBOSE_ASSERT(lu_result_sent, == RES_ACCEPT, "%d");
-	bss_sends_clear_complete();
+	ran_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 
 	BTW("after a while, a new conn sends a CM Service Request. VLR responds with *UMTS AKA* Auth Req, 2nd auth vector");
@@ -952,12 +947,9 @@ static void test_gsm_ciph_in_umts_env()
 	auth_request_expect_rand = "b2661531b97b12c5a2edc21a0ed16fc5";
 	auth_request_expect_autn = "78cdd96c60840000322f421b3bb778b1";
 	cm_service_result_sent = RES_NONE;
-	ms_sends_msg("052478"
+	ms_sends_msg("052474"
 		     "03575886" /* classmark 2 */
 		     "089910070000106005" /* IMSI */);
-	OSMO_ASSERT(g_conn);
-	OSMO_ASSERT(g_conn->fi);
-	OSMO_ASSERT(g_conn->vsub);
 	VERBOSE_ASSERT(cm_service_result_sent, == RES_NONE, "%d");
 	VERBOSE_ASSERT(auth_request_sent, == true, "%d");
 
@@ -972,15 +964,15 @@ static void test_gsm_ciph_in_umts_env()
 	VERBOSE_ASSERT(cipher_mode_cmd_sent, == true, "%d");
 
 	btw("MS sends Ciphering Mode Complete, VLR accepts; above Ciphering is an implicit CM Service Accept");
-	ms_sends_msg("0632");
+	ms_sends_ciphering_mode_complete(NULL);
 	VERBOSE_ASSERT(cm_service_result_sent, == RES_NONE, "%d");
 
 	/* Release connection */
 	expect_bssap_clear(OSMO_RAT_GERAN_A);
-	conn_conclude_cm_service_req(g_conn, OSMO_RAT_GERAN_A);
+	conn_conclude_cm_service_req(g_msub, MSC_A_USE_CM_SERVICE_SMS);
 
 	btw("all requests serviced, conn has been released");
-	bss_sends_clear_complete();
+	ran_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 
 	BTW("an SMS is sent, MS is paged");
@@ -998,7 +990,6 @@ static void test_gsm_ciph_in_umts_env()
 	vlr_subscr_put(vsub, __func__);
 	vsub = NULL;
 	VERBOSE_ASSERT(paging_sent, == true, "%d");
-	VERBOSE_ASSERT(paging_stopped, == false, "%d");
 
 	btw("the subscriber and its pending request should remain");
 	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi, __func__);
@@ -1026,9 +1017,8 @@ static void test_gsm_ciph_in_umts_env()
 
 	btw("MS sends Ciphering Mode Complete, VLR accepts and sends pending SMS");
 	dtap_expect_tx(sms);
-	ms_sends_msg("0632");
+	ms_sends_ciphering_mode_complete(NULL);
 	VERBOSE_ASSERT(dtap_tx_confirmed, == true, "%d");
-	VERBOSE_ASSERT(paging_stopped, == true, "%d");
 
 	btw("SMS was delivered, no requests pending for subscr");
 	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi, __func__);
@@ -1051,7 +1041,7 @@ static void test_gsm_ciph_in_umts_env()
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
 	btw("SMS is done, conn is gone");
-	bss_sends_clear_complete();
+	ran_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 
 	BTW("subscriber detaches");
@@ -1060,7 +1050,7 @@ static void test_gsm_ciph_in_umts_env()
 		     "089910070000106005" /* IMSI */);
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
-	bss_sends_clear_complete();
+	ran_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 	clear_vlr();
 	comment_end();
@@ -1078,7 +1068,7 @@ static void test_a5_3_supported()
 
 	btw("Location Update request causes a GSUP Send Auth Info request to HLR");
 	lu_result_sent = RES_NONE;
-	gsup_expect_tx("08010809710000004026f0");
+	gsup_expect_tx("08010809710000004026f0" VLR_TO_HLR);
 	ms_sends_msg("050802008168000130089910070000006402");
 	OSMO_ASSERT(gsup_tx_confirmed);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
@@ -1103,7 +1093,7 @@ static void test_a5_3_supported()
 		"0322"  "2010" "fa8f20b781b5881329d4fea26b1a3c51"
 			"2104" "5afc8d72" "2208" "2392f14f709ae000"
 		"0322"  "2010" "0fd4cc8dbe8715d1f439e304edfd68dc"
-			"2104" "bc8d1c5b" "2208" "da7cdd6bfe2d7000",
+			"2104" "bc8d1c5b" "2208" "da7cdd6bfe2d7000" HLR_TO_VLR,
 		NULL);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 	VERBOSE_ASSERT(auth_request_sent, == true, "%d");
@@ -1117,38 +1107,35 @@ static void test_a5_3_supported()
 
 	btw("BSC sends back a BSSMAP Classmark Update, that triggers the Ciphering Mode Command in A5/3");
 	expect_cipher_mode_cmd("61855fb81fc2a800");
-	bss_sends_bssap_mgmt("541203505886130b6014042f6503b8800d2100");
+	ms_sends_classmark_update(&classmark);
 	OSMO_ASSERT(cipher_mode_cmd_sent);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("MS sends Ciphering Mode Complete, VLR accepts and sends GSUP LU Req to HLR");
-	gsup_expect_tx("04010809710000004026f0280102");
-	ms_sends_msg("0632");
+	gsup_expect_tx("04010809710000004026f0280102" VLR_TO_HLR);
+	ms_sends_ciphering_mode_complete(NULL);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("HLR sends _INSERT_DATA_REQUEST, VLR responds with _INSERT_DATA_RESULT");
-	gsup_rx("10010809710000004026f00804032443f2",
-		"12010809710000004026f0");
+	gsup_rx("10010809710000004026f00804032443f2" HLR_TO_VLR,
+		"12010809710000004026f0" VLR_TO_HLR);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("HLR also sends GSUP _UPDATE_LOCATION_RESULT");
 	expect_bssap_clear();
-	gsup_rx("06010809710000004026f0", NULL);
+	gsup_rx("06010809710000004026f0" HLR_TO_VLR, NULL);
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
 	btw("LU was successful, and the conn has already been closed");
 	VERBOSE_ASSERT(lu_result_sent, == RES_ACCEPT, "%d");
-	bss_sends_clear_complete();
+	ran_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 
 	BTW("after a while, a new conn sends a CM Service Request. VLR responds with Auth Req, 2nd auth vector");
 	cm_service_result_sent = RES_NONE;
 	auth_request_sent = false;
 	auth_request_expect_rand = "12aca96fb4ffdea5c985cbafa9b6e18b";
-	ms_sends_msg("05247803305886089910070000006402");
-	OSMO_ASSERT(g_conn);
-	OSMO_ASSERT(g_conn->fi);
-	OSMO_ASSERT(g_conn->vsub);
+	ms_sends_msg("05247403305886089910070000006402");
 	VERBOSE_ASSERT(auth_request_sent, == true, "%d");
 	VERBOSE_ASSERT(cm_service_result_sent, == RES_NONE, "%d");
 
@@ -1168,15 +1155,15 @@ static void test_a5_3_supported()
 	thwart_rx_non_initial_requests();
 
 	btw("MS sends Ciphering Mode Complete, VLR accepts; above Ciphering is an implicit CM Service Accept");
-	ms_sends_msg("0632");
+	ms_sends_ciphering_mode_complete(NULL);
 	VERBOSE_ASSERT(cm_service_result_sent, == RES_NONE, "%d");
 
 	/* Release connection */
 	expect_bssap_clear(OSMO_RAT_GERAN_A);
-	conn_conclude_cm_service_req(g_conn, OSMO_RAT_GERAN_A);
+	conn_conclude_cm_service_req(g_msub, MSC_A_USE_CM_SERVICE_SMS);
 
 	btw("all requests serviced, conn has been released");
-	bss_sends_clear_complete();
+	ran_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 
 	BTW("an SMS is sent, MS is paged");
@@ -1194,7 +1181,6 @@ static void test_a5_3_supported()
 	vlr_subscr_put(vsub, __func__);
 	vsub = NULL;
 	VERBOSE_ASSERT(paging_sent, == true, "%d");
-	VERBOSE_ASSERT(paging_stopped, == false, "%d");
 
 	btw("the subscriber and its pending request should remain");
 	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi, __func__);
@@ -1243,9 +1229,8 @@ static void test_a5_3_supported()
 		       "5079da1e1ee7416937485e9ea7c965373d1d6683c270383b3d0e"
 		       "d3d36ff71c949e83c22072799e9687c5ec32a81d96afcbf4b4fb"
 		       "0c7ac3e9e9b7db05");
-	ms_sends_msg("0632");
+	ms_sends_ciphering_mode_complete(NULL);
 	VERBOSE_ASSERT(dtap_tx_confirmed, == true, "%d");
-	VERBOSE_ASSERT(paging_stopped, == true, "%d");
 
 	btw("SMS was delivered, no requests pending for subscr");
 	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi, __func__);
@@ -1268,7 +1253,7 @@ static void test_a5_3_supported()
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
 	btw("SMS is done, conn is gone");
-	bss_sends_clear_complete();
+	ran_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 
 	BTW("subscriber detaches");
@@ -1276,7 +1261,7 @@ static void test_a5_3_supported()
 	ms_sends_msg("050130089910070000006402");
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
-	bss_sends_clear_complete();
+	ran_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 	clear_vlr();
 	comment_end();
@@ -1299,7 +1284,7 @@ static void test_cm_service_needs_classmark_update()
 
 	btw("Location Update request causes a GSUP Send Auth Info request to HLR");
 	lu_result_sent = RES_NONE;
-	gsup_expect_tx("08010809710000004026f0");
+	gsup_expect_tx("08010809710000004026f0" VLR_TO_HLR);
 	ms_sends_msg("050802008168000130089910070000006402");
 	OSMO_ASSERT(gsup_tx_confirmed);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
@@ -1324,7 +1309,7 @@ static void test_cm_service_needs_classmark_update()
 		"0322"  "2010" "fa8f20b781b5881329d4fea26b1a3c51"
 			"2104" "5afc8d72" "2208" "2392f14f709ae000"
 		"0322"  "2010" "0fd4cc8dbe8715d1f439e304edfd68dc"
-			"2104" "bc8d1c5b" "2208" "da7cdd6bfe2d7000",
+			"2104" "bc8d1c5b" "2208" "da7cdd6bfe2d7000" HLR_TO_VLR,
 		NULL);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 	VERBOSE_ASSERT(auth_request_sent, == true, "%d");
@@ -1338,28 +1323,28 @@ static void test_cm_service_needs_classmark_update()
 
 	btw("BSC sends back a BSSMAP Classmark Update, that triggers the Ciphering Mode Command in A5/3");
 	expect_cipher_mode_cmd("61855fb81fc2a800");
-	bss_sends_bssap_mgmt("541203505886130b6014042f6503b8800d2100");
+	ms_sends_classmark_update(&classmark);
 	OSMO_ASSERT(cipher_mode_cmd_sent);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("MS sends Ciphering Mode Complete, VLR accepts and sends GSUP LU Req to HLR");
-	gsup_expect_tx("04010809710000004026f0280102");
-	ms_sends_msg("0632");
+	gsup_expect_tx("04010809710000004026f0280102" VLR_TO_HLR);
+	ms_sends_ciphering_mode_complete(NULL);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("HLR sends _INSERT_DATA_REQUEST, VLR responds with _INSERT_DATA_RESULT");
-	gsup_rx("10010809710000004026f00804032443f2",
-		"12010809710000004026f0");
+	gsup_rx("10010809710000004026f00804032443f2" HLR_TO_VLR,
+		"12010809710000004026f0" VLR_TO_HLR);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("HLR also sends GSUP _UPDATE_LOCATION_RESULT");
 	expect_bssap_clear();
-	gsup_rx("06010809710000004026f0", NULL);
+	gsup_rx("06010809710000004026f0" HLR_TO_VLR, NULL);
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
 	btw("LU was successful, and the conn has already been closed");
 	VERBOSE_ASSERT(lu_result_sent, == RES_ACCEPT, "%d");
-	bss_sends_clear_complete();
+	ran_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 
 
@@ -1367,10 +1352,7 @@ static void test_cm_service_needs_classmark_update()
 	cm_service_result_sent = RES_NONE;
 	auth_request_sent = false;
 	auth_request_expect_rand = "12aca96fb4ffdea5c985cbafa9b6e18b";
-	ms_sends_msg("05247803305886089910070000006402");
-	OSMO_ASSERT(g_conn);
-	OSMO_ASSERT(g_conn->fi);
-	OSMO_ASSERT(g_conn->vsub);
+	ms_sends_msg("05247403305886089910070000006402");
 	VERBOSE_ASSERT(auth_request_sent, == true, "%d");
 	VERBOSE_ASSERT(cm_service_result_sent, == RES_NONE, "%d");
 
@@ -1390,15 +1372,15 @@ static void test_cm_service_needs_classmark_update()
 	thwart_rx_non_initial_requests();
 
 	btw("MS sends Ciphering Mode Complete, VLR accepts; above Ciphering is an implicit CM Service Accept");
-	ms_sends_msg("0632");
+	ms_sends_ciphering_mode_complete(NULL);
 	VERBOSE_ASSERT(cm_service_result_sent, == RES_NONE, "%d");
 
 	/* Release connection */
 	expect_bssap_clear(OSMO_RAT_GERAN_A);
-	conn_conclude_cm_service_req(g_conn, OSMO_RAT_GERAN_A);
+	conn_conclude_cm_service_req(g_msub, MSC_A_USE_CM_SERVICE_SMS);
 
 	btw("all requests serviced, conn has been released");
-	bss_sends_clear_complete();
+	ran_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 
 	BTW("an SMS is sent, MS is paged");
@@ -1414,7 +1396,6 @@ static void test_cm_service_needs_classmark_update()
 	vlr_subscr_put(vsub, __func__);
 	vsub = NULL;
 	VERBOSE_ASSERT(paging_sent, == true, "%d");
-	VERBOSE_ASSERT(paging_stopped, == false, "%d");
 
 	btw("the subscriber and its pending request should remain");
 	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi, __func__);
@@ -1434,7 +1415,6 @@ static void test_cm_service_needs_classmark_update()
 	vsub->classmark.classmark2_len = 0;
 	vsub->classmark.classmark3_len = 0;
 	vlr_subscr_put(vsub, __func__);
-	
 
 	btw("MS sends Authen Response, VLR accepts and requests Ciphering");
 	btw("MS sends Authen Response, VLR accepts and requests Ciphering."
@@ -1446,7 +1426,7 @@ static void test_cm_service_needs_classmark_update()
 
 	btw("BSC sends back a BSSMAP Classmark Update, that triggers the Ciphering Mode Command in A5/3");
 	expect_cipher_mode_cmd("e2b234f807886400");
-	bss_sends_bssap_mgmt("541203505886130b6014042f6503b8800d2100");
+	ms_sends_classmark_update(&classmark);
 	OSMO_ASSERT(cipher_mode_cmd_sent);
 
 	btw("needs ciph, not yet accepted");
@@ -1474,9 +1454,8 @@ static void test_cm_service_needs_classmark_update()
 		       "5079da1e1ee7416937485e9ea7c965373d1d6683c270383b3d0e"
 		       "d3d36ff71c949e83c22072799e9687c5ec32a81d96afcbf4b4fb"
 		       "0c7ac3e9e9b7db05");
-	ms_sends_msg("0632");
+	ms_sends_ciphering_mode_complete(NULL);
 	VERBOSE_ASSERT(dtap_tx_confirmed, == true, "%d");
-	VERBOSE_ASSERT(paging_stopped, == true, "%d");
 
 	btw("SMS was delivered, no requests pending for subscr");
 	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi, __func__);
@@ -1499,7 +1478,7 @@ static void test_cm_service_needs_classmark_update()
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
 	btw("SMS is done, conn is gone");
-	bss_sends_clear_complete();
+	ran_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 
 	BTW("subscriber detaches");
@@ -1507,7 +1486,7 @@ static void test_cm_service_needs_classmark_update()
 	ms_sends_msg("050130089910070000006402");
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
-	bss_sends_clear_complete();
+	ran_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 	clear_vlr();
 	comment_end();

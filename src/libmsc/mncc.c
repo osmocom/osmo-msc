@@ -286,3 +286,103 @@ int mncc_prim_check(const struct gsm_mncc *mncc_prim, unsigned int len)
 	}
 	return 0;
 }
+
+static uint8_t mncc_speech_ver_to_perm_speech(int speech_ver)
+{
+	/* The speech versions that are transmitted in the Bearer capability
+	 * information element, that is transmitted on the Layer 3 (CC)
+	 * use a different encoding than the permitted speech version
+	 * identifier, that is signalled in the channel type element on the A
+	 * interface. (See also 3GPP TS 48.008, 3.2.2.1 and 3GPP TS 24.008,
+	 * 10.5.103 */
+
+	switch (speech_ver) {
+	case GSM48_BCAP_SV_FR:
+		return GSM0808_PERM_FR1;
+	case GSM48_BCAP_SV_HR:
+		return GSM0808_PERM_HR1;
+	case GSM48_BCAP_SV_EFR:
+		return GSM0808_PERM_FR2;
+	case GSM48_BCAP_SV_AMR_F:
+		return GSM0808_PERM_FR3;
+	case GSM48_BCAP_SV_AMR_H:
+		return GSM0808_PERM_HR3;
+	case GSM48_BCAP_SV_AMR_OFW:
+		return GSM0808_PERM_FR4;
+	case GSM48_BCAP_SV_AMR_OHW:
+		return GSM0808_PERM_HR4;
+	case GSM48_BCAP_SV_AMR_FW:
+		return GSM0808_PERM_FR5;
+	case GSM48_BCAP_SV_AMR_OH:
+		return GSM0808_PERM_HR6;
+	}
+
+	/* If nothing matches, tag the result as invalid */
+	LOGP(DBSSAP, LOGL_ERROR, "Invalid permitted speech version: %d\n", speech_ver);
+	return 0xFF;
+}
+
+/* Convert speech preference field */
+static uint8_t mncc_bc_radio_to_speech_pref(int radio)
+{
+	/* The Radio channel requirement field that is transmitted in the
+	 * Bearer capability information element, that is transmitted on the
+	 * Layer 3 (CC) uses a different encoding than the Channel rate and
+	 * type field that is signalled in the channel type element on the A
+	 * interface. (See also 3GPP TS 48.008, 3.2.2.1 and 3GPP TS 24.008,
+	 * 10.5.102 */
+
+	switch (radio) {
+	case GSM48_BCAP_RRQ_FR_ONLY:
+		return GSM0808_SPEECH_FULL_BM;
+	case GSM48_BCAP_RRQ_DUAL_FR:
+		return GSM0808_SPEECH_FULL_PREF;
+	case GSM48_BCAP_RRQ_DUAL_HR:
+		return GSM0808_SPEECH_HALF_PREF;
+	}
+
+	LOGP(DBSSAP, LOGL_ERROR, "Invalid radio channel preference: %d; defaulting to full rate.\n", radio);
+	return GSM0808_SPEECH_FULL_BM;
+}
+
+int mncc_bearer_cap_to_channel_type(struct gsm0808_channel_type *ct, const struct gsm_mncc_bearer_cap *bc)
+{
+	unsigned int i;
+	uint8_t sv;
+	unsigned int count = 0;
+	bool only_gsm_hr = true;
+
+	ct->ch_indctr = GSM0808_CHAN_SPEECH;
+
+	for (i = 0; i < ARRAY_SIZE(bc->speech_ver); i++) {
+		if (bc->speech_ver[i] == -1)
+			break;
+		sv = mncc_speech_ver_to_perm_speech(bc->speech_ver[i]);
+		if (sv != 0xFF) {
+			/* Detect if something else than
+			 * GSM HR V1 is supported */
+			if (sv == GSM0808_PERM_HR2 ||
+			    sv == GSM0808_PERM_HR3 || sv == GSM0808_PERM_HR4 || sv == GSM0808_PERM_HR6)
+				only_gsm_hr = false;
+
+			ct->perm_spch[count] = sv;
+			count++;
+		}
+	}
+	ct->perm_spch_len = count;
+
+	if (only_gsm_hr)
+		/* Note: We must avoid the usage of GSM HR1 as this
+		 * codec only offers very poor audio quality. If the
+		 * MS only supports GSM HR1 (and full rate), and has
+		 * a preference for half rate. Then we will ignore the
+		 * preference and assume a preference for full rate. */
+		ct->ch_rate_type = GSM0808_SPEECH_FULL_BM;
+	else
+		ct->ch_rate_type = mncc_bc_radio_to_speech_pref(bc->radio);
+
+	if (count)
+		return 0;
+	else
+		return -EINVAL;
+}

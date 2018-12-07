@@ -36,7 +36,7 @@ static void test_hlr_timeout_lu_auth_info()
 
 	btw("Location Update request causes a GSUP Send Auth Info request to HLR");
 	lu_result_sent = RES_NONE;
-	gsup_expect_tx("08010809710000004026f0");
+	gsup_expect_tx("08010809710000004026f0" VLR_TO_HLR);
 	ms_sends_msg("050802008168000130089910070000006402");
 	OSMO_ASSERT(gsup_tx_confirmed);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
@@ -58,7 +58,7 @@ static void test_hlr_timeout_lu_auth_info()
 	fake_time_passes(1, 235);
 	btw("RAN_CONN_TIMEOUT has passed, conn is gone.");
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
-	bss_sends_clear_complete();
+	ran_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 	VERBOSE_ASSERT(lu_result_sent, == RES_REJECT, "%d");
 
@@ -74,14 +74,14 @@ static void test_hlr_timeout_lu_upd_loc_result()
 
 	btw("Location Update request causes a GSUP LU request to HLR");
 	lu_result_sent = RES_NONE;
-	gsup_expect_tx("04010809710000004026f0280102");
+	gsup_expect_tx("04010809710000004026f0280102" VLR_TO_HLR);
 	ms_sends_msg("050802008168000130089910070000006402");
 	OSMO_ASSERT(gsup_tx_confirmed);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("HLR sends _INSERT_DATA_REQUEST, VLR responds with _INSERT_DATA_RESULT");
-	gsup_rx("10010809710000004026f00804036470f1",
-		"12010809710000004026f0");
+	gsup_rx("10010809710000004026f00804036470f1" HLR_TO_VLR,
+		"12010809710000004026f0" VLR_TO_HLR);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	BTW("HLR never sends GSUP _UPDATE_LOCATION_RESULT");
@@ -106,7 +106,7 @@ static void test_hlr_timeout_lu_upd_loc_result()
 	fake_time_passes(1, 235);
 	btw("RAN_CONN_TIMEOUT has passed, conn is gone.");
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
-	bss_sends_clear_complete();
+	ran_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 	VERBOSE_ASSERT(lu_result_sent, == RES_REJECT, "%d");
 

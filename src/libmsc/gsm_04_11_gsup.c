@@ -31,6 +31,8 @@
 #include <osmocom/msc/msc_common.h>
 #include <osmocom/msc/debug.h>
 #include <osmocom/msc/vlr.h>
+#include <osmocom/msc/msub.h>
+#include <osmocom/msc/gsup_client_mux.h>
 
 /* Common helper for preparing to be encoded GSUP message */
 static void gsup_sm_msg_init(struct osmo_gsup_message *gsup_msg,
@@ -38,11 +40,11 @@ static void gsup_sm_msg_init(struct osmo_gsup_message *gsup_msg,
 	uint8_t *sm_rp_mr)
 {
 	/* Init a mew GSUP message */
-	memset(gsup_msg, 0x00, sizeof(*gsup_msg));
-	gsup_msg->message_type = msg_type;
-
-	/* SM-RP-MR (Message Reference) */
-	gsup_msg->sm_rp_mr = sm_rp_mr;
+	*gsup_msg = (struct osmo_gsup_message){
+		.message_type = msg_type,
+		.sm_rp_mr = sm_rp_mr,
+		.message_class = OSMO_GSUP_MESSAGE_CLASS_SMS,
+	};
 
 	/* Fill in subscriber's IMSI */
 	OSMO_STRLCPY_ARRAY(gsup_msg->imsi, imsi);
@@ -89,7 +91,7 @@ int gsm411_gsup_mo_fwd_sm_req(struct gsm_trans *trans, struct msgb *msg,
 	gsup_msg.sm_rp_ui_len = msgb_l4len(msg);
 	gsup_msg.sm_rp_ui = (uint8_t *) msgb_sms(msg);
 
-	return osmo_gsup_client_enc_send(trans->net->vlr->gsup_client, &gsup_msg);
+	return gsup_client_mux_tx(trans->net->gcm, &gsup_msg);
 }
 
 int gsm411_gsup_mo_ready_for_sm_req(struct gsm_trans *trans, uint8_t sm_rp_mr)
@@ -111,12 +113,12 @@ int gsm411_gsup_mo_ready_for_sm_req(struct gsm_trans *trans, uint8_t sm_rp_mr)
 	/* Indicate SMMA as the Alert Reason */
 	gsup_msg.sm_alert_rsn = OSMO_GSUP_SMS_SM_ALERT_RSN_MEM_AVAIL;
 
-	return osmo_gsup_client_enc_send(trans->net->vlr->gsup_client, &gsup_msg);
+	return gsup_client_mux_tx(trans->net->gcm, &gsup_msg);
 }
 
 /* Triggers either RP-ACK or RP-ERROR on response from SMSC */
-int gsm411_gsup_mo_handler(struct vlr_subscr *vsub,
-	struct osmo_gsup_message *gsup_msg)
+static int gsm411_gsup_mo_handler(struct vlr_subscr *vsub,
+	const struct osmo_gsup_message *gsup_msg)
 {
 	struct vlr_instance *vlr;
 	struct gsm_network *net;
@@ -203,7 +205,7 @@ int gsm411_gsup_mt_fwd_sm_res(struct gsm_trans *trans, uint8_t sm_rp_mr)
 	gsup_sm_msg_init(&gsup_msg, OSMO_GSUP_MSGT_MT_FORWARD_SM_RESULT,
 		trans->vsub->imsi, &sm_rp_mr);
 
-	return osmo_gsup_client_enc_send(trans->net->vlr->gsup_client, &gsup_msg);
+	return gsup_client_mux_tx(trans->net->gcm, &gsup_msg);
 }
 
 int gsm411_gsup_mt_fwd_sm_err(struct gsm_trans *trans,
@@ -224,12 +226,12 @@ int gsm411_gsup_mt_fwd_sm_err(struct gsm_trans *trans,
 	gsup_msg.sm_rp_cause = &cause;
 
 	/* TODO: include optional SM-RP-UI field if present */
-	return osmo_gsup_client_enc_send(trans->net->vlr->gsup_client, &gsup_msg);
+	return gsup_client_mux_tx(trans->net->gcm, &gsup_msg);
 }
 
 /* Handles MT SMS (and triggers Paging Request if required) */
-int gsm411_gsup_mt_handler(struct vlr_subscr *vsub,
-	struct osmo_gsup_message *gsup_msg)
+static int gsm411_gsup_mt_handler(struct vlr_subscr *vsub,
+	const struct osmo_gsup_message *gsup_msg)
 {
 	struct vlr_instance *vlr;
 	struct gsm_network *net;
@@ -284,4 +286,35 @@ msg_error:
 	/* TODO: notify sender about that? */
 	LOGP(DLSMS, LOGL_NOTICE, "RX malformed MT-forwardSM-Req\n");
 	return -EINVAL;
+}
+
+int gsm411_gsup_rx(struct gsup_client_mux *gcm, void *data, const struct osmo_gsup_message *gsup_msg)
+{
+	struct vlr_instance *vlr = data;
+	struct vlr_subscr *vsub = vlr_subscr_find_by_imsi(vlr, gsup_msg->imsi, __func__);
+
+	if (!vsub) {
+		gsup_client_mux_tx_error_reply(gcm, gsup_msg, GMM_CAUSE_IMSI_UNKNOWN);
+		return -GMM_CAUSE_IMSI_UNKNOWN;
+	}
+
+	switch (gsup_msg->message_type) {
+	/* GSM 04.11 code implementing MO SMS */
+	case OSMO_GSUP_MSGT_MO_FORWARD_SM_ERROR:
+	case OSMO_GSUP_MSGT_MO_FORWARD_SM_RESULT:
+	case OSMO_GSUP_MSGT_READY_FOR_SM_ERROR:
+	case OSMO_GSUP_MSGT_READY_FOR_SM_RESULT:
+		DEBUGP(DMSC, "Routed to GSM 04.11 MO handler\n");
+		return gsm411_gsup_mo_handler(vsub, gsup_msg);
+
+	/* GSM 04.11 code implementing MT SMS */
+	case OSMO_GSUP_MSGT_MT_FORWARD_SM_REQUEST:
+		DEBUGP(DMSC, "Routed to GSM 04.11 MT handler\n");
+		return gsm411_gsup_mt_handler(vsub, gsup_msg);
+
+	default:
+		LOGP(DMM, LOGL_ERROR, "No handler found for %s, dropping message...\n",
+			osmo_gsup_message_type_name(gsup_msg->message_type));
+		return -GMM_CAUSE_MSGT_NOTEXIST_NOTIMPL;
+	}
 }

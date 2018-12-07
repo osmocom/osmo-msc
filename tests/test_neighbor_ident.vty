@@ -1,0 +1,237 @@
+OsmoMSC> enable
+OsmoMSC# list
+...
+  show neighbor
+  show neighbor (a|iu) (ran-pc|msc-ipa-name) RAN_PC_OR_MSC_IPA_NAME
+  show neighbor (a|iu)
+  show neighbor (a|iu) lac <0-65535>
+  show neighbor (a|iu) lac-ci <0-65535> <0-65535>
+  show neighbor (a|iu) cgi <0-999> <0-999> <0-65535> <0-65535>
+  show neighbor lac <0-65535>
+  show neighbor lac-ci <0-65535> <0-65535>
+  show neighbor cgi <0-999> <0-999> <0-65535> <0-65535>
+...
+
+OsmoMSC# configure terminal
+OsmoMSC(config)# msc
+
+OsmoMSC(config-msc)# list
+...
+  neighbor (a|iu) lac <0-65535> (ran-pc|msc-ipa-name) RAN_PC_OR_MSC_IPA_NAME
+  neighbor (a|iu) lac-ci <0-65535> <0-65535> (ran-pc|msc-ipa-name) RAN_PC_OR_MSC_IPA_NAME
+  neighbor (a|iu) cgi <0-999> <0-999> <0-65535> <0-65535> (ran-pc|msc-ipa-name) RAN_PC_OR_MSC_IPA_NAME
+  no neighbor (a|iu) (ran-pc|msc-ipa-name) RAN_PC_OR_MSC_IPA_NAME
+...
+
+OsmoMSC(config-msc)# neighbor?
+  neighbor  Add Handover target configuration
+
+OsmoMSC(config-msc)# neighbor ?
+  a   Neighbor on GERAN-A
+  iu  Neighbor on UTRAN-Iu
+
+OsmoMSC(config-msc)# neighbor a ?
+  lac     Handover target cell by LAC
+  lac-ci  Handover target cell by LAC and CI
+  cgi     Handover target cell by Cell-Global Identifier (MCC, MNC, LAC, CI)
+
+OsmoMSC(config-msc)# neighbor a lac ?
+  <0-65535>  LAC
+
+OsmoMSC(config-msc)# neighbor a lac 1 ?
+  ran-pc        SCCP point code of RAN peer
+  msc-ipa-name  GSUP IPA name of target MSC
+
+OsmoMSC(config-msc)# neighbor a lac 1 ran-pc ?
+  RAN_PC_OR_MSC_IPA_NAME  Point code or MSC IPA name value
+
+OsmoMSC(config-msc)# neighbor iu lac-ci ?
+  <0-65535>  LAC
+
+OsmoMSC(config-msc)# neighbor iu lac-ci 1 ?
+  <0-65535>  CI
+
+OsmoMSC(config-msc)# neighbor iu lac-ci 1 2 ?
+  ran-pc        SCCP point code of RAN peer
+  msc-ipa-name  GSUP IPA name of target MSC
+
+OsmoMSC(config-msc)# neighbor iu lac-ci 1 2 msc-ipa-name ?
+  RAN_PC_OR_MSC_IPA_NAME  Point code or MSC IPA name value
+
+OsmoMSC(config-msc)# neighbor a cgi ?
+  <0-999>  MCC
+
+OsmoMSC(config-msc)# neighbor a cgi 1 ?
+  <0-999>  MNC
+
+OsmoMSC(config-msc)# neighbor a cgi 1 2 ?
+  <0-65535>  LAC
+
+OsmoMSC(config-msc)# neighbor a cgi 1 2 3 ?
+  <0-65535>  CI
+
+OsmoMSC(config-msc)# neighbor a lac 11 ran-pc 1.2.3
+OsmoMSC(config-msc)# neighbor a lac-ci 11 12 ran-pc 1.2.3
+OsmoMSC(config-msc)# neighbor a cgi 901 70 11 13 ran-pc 1.2.3
+
+OsmoMSC(config-msc)# neighbor iu lac 11 ran-pc 2.3.4
+OsmoMSC(config-msc)# neighbor iu lac-ci 11 22 ran-pc 2.3.4
+OsmoMSC(config-msc)# neighbor iu cgi 901 070 11 23 ran-pc 2.3.4
+
+OsmoMSC(config-msc)# neighbor a lac 65535 msc-ipa-name msc-901-70-2
+OsmoMSC(config-msc)# neighbor a lac-ci 65535 65533 msc-ipa-name msc-901-70-2
+OsmoMSC(config-msc)# neighbor a cgi 901 70 65535 65531 msc-ipa-name msc-901-70-2
+
+OsmoMSC(config-msc)# neighbor iu lac 65529 msc-ipa-name msc-901-70-2
+OsmoMSC(config-msc)# neighbor iu lac-ci 65529 65528 msc-ipa-name msc-901-70-2
+OsmoMSC(config-msc)# neighbor iu cgi 901 070 65529 65527 msc-ipa-name msc-901-70-2
+
+
+OsmoMSC(config-msc)# #  Add the same entries again, but expect them to exist only once below
+OsmoMSC(config-msc)# neighbor a lac 11 ran-pc 1.2.3
+OsmoMSC(config-msc)# neighbor a lac-ci 11 12 ran-pc 1.2.3
+OsmoMSC(config-msc)# neighbor a cgi 901 70 11 13 ran-pc 1.2.3
+
+OsmoMSC(config-msc)# neighbor iu lac 11 ran-pc 2.3.4
+OsmoMSC(config-msc)# neighbor iu lac-ci 11 22 ran-pc 2.3.4
+OsmoMSC(config-msc)# neighbor iu cgi 901 070 11 23 ran-pc 2.3.4
+
+OsmoMSC(config-msc)# neighbor a lac 65535 msc-ipa-name msc-901-70-2
+OsmoMSC(config-msc)# neighbor a lac-ci 65535 65533 msc-ipa-name msc-901-70-2
+OsmoMSC(config-msc)# neighbor a cgi 901 70 65535 65531 msc-ipa-name msc-901-70-2
+
+OsmoMSC(config-msc)# neighbor iu lac 65529 msc-ipa-name msc-901-70-2
+OsmoMSC(config-msc)# neighbor iu lac-ci 65529 65528 msc-ipa-name msc-901-70-2
+OsmoMSC(config-msc)# neighbor iu cgi 901 070 65529 65527 msc-ipa-name msc-901-70-2
+
+OsmoMSC(config-msc)# do show neighbor
+ neighbor a lac 11 ran-pc 1.2.3
+ neighbor a lac-ci 11 12 ran-pc 1.2.3
+ neighbor a cgi 901 70 11 13 ran-pc 1.2.3
+ neighbor iu lac 11 ran-pc 2.3.4
+ neighbor iu lac-ci 11 22 ran-pc 2.3.4
+ neighbor iu cgi 901 070 11 23 ran-pc 2.3.4
+ neighbor a lac 65535 msc-ipa-name msc-901-70-2
+ neighbor a lac-ci 65535 65533 msc-ipa-name msc-901-70-2
+ neighbor a cgi 901 70 65535 65531 msc-ipa-name msc-901-70-2
+ neighbor iu lac 65529 msc-ipa-name msc-901-70-2
+ neighbor iu lac-ci 65529 65528 msc-ipa-name msc-901-70-2
+ neighbor iu cgi 901 070 65529 65527 msc-ipa-name msc-901-70-2
+
+OsmoMSC(config-msc)# do show neighbor a
+ neighbor a lac 11 ran-pc 1.2.3
+ neighbor a lac-ci 11 12 ran-pc 1.2.3
+ neighbor a cgi 901 70 11 13 ran-pc 1.2.3
+ neighbor a lac 65535 msc-ipa-name msc-901-70-2
+ neighbor a lac-ci 65535 65533 msc-ipa-name msc-901-70-2
+ neighbor a cgi 901 70 65535 65531 msc-ipa-name msc-901-70-2
+
+OsmoMSC(config-msc)# do show neighbor iu
+ neighbor iu lac 11 ran-pc 2.3.4
+ neighbor iu lac-ci 11 22 ran-pc 2.3.4
+ neighbor iu cgi 901 070 11 23 ran-pc 2.3.4
+ neighbor iu lac 65529 msc-ipa-name msc-901-70-2
+ neighbor iu lac-ci 65529 65528 msc-ipa-name msc-901-70-2
+ neighbor iu cgi 901 070 65529 65527 msc-ipa-name msc-901-70-2
+
+OsmoMSC(config-msc)# do show neighbor a ran-pc 1.2.3
+ neighbor a lac 11 ran-pc 1.2.3
+ neighbor a lac-ci 11 12 ran-pc 1.2.3
+ neighbor a cgi 901 70 11 13 ran-pc 1.2.3
+
+OsmoMSC(config-msc)# do show neighbor iu ran-pc 2.3.4
+ neighbor iu lac 11 ran-pc 2.3.4
+ neighbor iu lac-ci 11 22 ran-pc 2.3.4
+ neighbor iu cgi 901 070 11 23 ran-pc 2.3.4
+
+OsmoMSC(config-msc)# #  A cell id that has no ci matches any entries that feature the LAC.
+OsmoMSC(config-msc)# #  Ambiguous matches are user config error, permitted here but cause error logging during HO
+OsmoMSC(config-msc)# do show neighbor a lac 11
+ neighbor a lac 11 ran-pc 1.2.3
+ neighbor a lac-ci 11 12 ran-pc 1.2.3
+ neighbor a cgi 901 70 11 13 ran-pc 1.2.3
+
+OsmoMSC(config-msc)# #  The fuzzy matching goes both ways. Same as above.
+OsmoMSC(config-msc)# do show neighbor a lac-ci 11 12
+ neighbor a lac 11 ran-pc 1.2.3
+ neighbor a lac-ci 11 12 ran-pc 1.2.3
+
+OsmoMSC(config-msc)# do show neighbor a lac-ci 11 13
+ neighbor a lac 11 ran-pc 1.2.3
+ neighbor a cgi 901 70 11 13 ran-pc 1.2.3
+
+OsmoMSC(config-msc)# do show neighbor a cgi 901 70 11 13
+ neighbor a lac 11 ran-pc 1.2.3
+ neighbor a cgi 901 70 11 13 ran-pc 1.2.3
+
+OsmoMSC(config-msc)# do show neighbor iu lac 11
+ neighbor iu lac 11 ran-pc 2.3.4
+ neighbor iu lac-ci 11 22 ran-pc 2.3.4
+ neighbor iu cgi 901 070 11 23 ran-pc 2.3.4
+
+OsmoMSC(config-msc)# do show neighbor iu lac-ci 11 22
+ neighbor iu lac 11 ran-pc 2.3.4
+ neighbor iu lac-ci 11 22 ran-pc 2.3.4
+
+OsmoMSC(config-msc)# do show neighbor iu lac-ci 11 23
+ neighbor iu lac 11 ran-pc 2.3.4
+ neighbor iu cgi 901 070 11 23 ran-pc 2.3.4
+
+OsmoMSC(config-msc)# do show neighbor iu cgi 901 70 11 23
+ neighbor iu lac 11 ran-pc 2.3.4
+OsmoMSC(config-msc)# do show neighbor iu cgi 901 070 11 23
+ neighbor iu lac 11 ran-pc 2.3.4
+ neighbor iu cgi 901 070 11 23 ran-pc 2.3.4
+
+OsmoMSC(config-msc)# do show neighbor lac 11
+ neighbor a lac 11 ran-pc 1.2.3
+ neighbor a lac-ci 11 12 ran-pc 1.2.3
+ neighbor a cgi 901 70 11 13 ran-pc 1.2.3
+ neighbor iu lac 11 ran-pc 2.3.4
+ neighbor iu lac-ci 11 22 ran-pc 2.3.4
+ neighbor iu cgi 901 070 11 23 ran-pc 2.3.4
+
+OsmoMSC(config-msc)# do show neighbor lac-ci 11 12
+ neighbor a lac 11 ran-pc 1.2.3
+ neighbor a lac-ci 11 12 ran-pc 1.2.3
+ neighbor iu lac 11 ran-pc 2.3.4
+
+OsmoMSC(config-msc)# do show neighbor lac-ci 11 13
+ neighbor a lac 11 ran-pc 1.2.3
+ neighbor a cgi 901 70 11 13 ran-pc 1.2.3
+ neighbor iu lac 11 ran-pc 2.3.4
+
+OsmoMSC(config-msc)# do show neighbor cgi 901 70 11 13
+ neighbor a lac 11 ran-pc 1.2.3
+ neighbor a cgi 901 70 11 13 ran-pc 1.2.3
+ neighbor iu lac 11 ran-pc 2.3.4
+
+OsmoMSC(config-msc)# do show neighbor lac-ci 11 22
+ neighbor a lac 11 ran-pc 1.2.3
+ neighbor iu lac 11 ran-pc 2.3.4
+ neighbor iu lac-ci 11 22 ran-pc 2.3.4
+
+OsmoMSC(config-msc)# do show neighbor lac-ci 11 23
+ neighbor a lac 11 ran-pc 1.2.3
+ neighbor iu lac 11 ran-pc 2.3.4
+ neighbor iu cgi 901 070 11 23 ran-pc 2.3.4
+
+OsmoMSC(config-msc)# do show neighbor cgi 901 70 11 23
+ neighbor a lac 11 ran-pc 1.2.3
+ neighbor iu lac 11 ran-pc 2.3.4
+OsmoMSC(config-msc)# do show neighbor cgi 901 070 11 23
+ neighbor a lac 11 ran-pc 1.2.3
+ neighbor iu lac 11 ran-pc 2.3.4
+ neighbor iu cgi 901 070 11 23 ran-pc 2.3.4
+
+OsmoMSC(config-msc)# #  Ambiguous neighbor config is permitted
+OsmoMSC(config-msc)# #  This config maps LAC 65535 to two distinct MSCs as well as a local RAN cell.
+OsmoMSC(config-msc)# #  It is a user config mistake, will cause error logging during handover.
+OsmoMSC(config-msc)# neighbor a lac 65535 ran-pc 6.6.6
+OsmoMSC(config-msc)# neighbor a lac-ci 65535 65533 msc-ipa-name different-msc
+OsmoMSC(config-msc)# do show neighbor a lac 65535
+ neighbor a lac 65535 msc-ipa-name msc-901-70-2
+ neighbor a lac-ci 65535 65533 msc-ipa-name msc-901-70-2
+ neighbor a cgi 901 70 65535 65531 msc-ipa-name msc-901-70-2
+ neighbor a lac 65535 ran-pc 6.6.6
+ neighbor a lac-ci 65535 65533 msc-ipa-name different-msc

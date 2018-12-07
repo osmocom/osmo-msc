@@ -18,6 +18,8 @@
  *
  */
 
+#include <errno.h>
+
 #include <osmocom/core/utils.h>
 #include <osmocom/core/fsm.h>
 #include <osmocom/msc/debug.h>
@@ -247,7 +249,7 @@ void vlr_sgs_pag_rej(struct vlr_instance *vlr, const char *imsi, enum sgsap_sgs_
 
 	osmo_fsm_inst_dispatch(vsub->sgs_fsm, SGS_UE_E_RX_PAGING_FAILURE, &cause);
 	/* Balance ref count increment from vlr_sgs_pag() */
-	vlr_subscr_put(vsub, VSUB_USE_SGS_PAGING);
+	vlr_subscr_put(vsub, VSUB_USE_SGS_PAGING_REQ);
 
 	vlr_subscr_put(vsub, __func__);
 }
@@ -265,7 +267,7 @@ void vlr_sgs_pag_ack(struct vlr_instance *vlr, const char *imsi)
 	/* Stop Ts5 and and consider the paging as successful */
 	osmo_timer_del(&vsub->sgs.Ts5);
 	/* Balance ref count increment from vlr_sgs_pag() */
-	vlr_subscr_put(vsub, VSUB_USE_SGS_PAGING);
+	vlr_subscr_put(vsub, VSUB_USE_SGS_PAGING_REQ);
 
 	vlr_subscr_put(vsub, __func__);
 }
@@ -306,7 +308,7 @@ static void Ts5_timeout_cb(void *arg)
 	     vlr_subscr_msisdn_or_name(vsub), vlr_sgs_state_timer_name(SGS_STATE_TS5));
 
 	/* Balance ref count increment from vlr_sgs_pag() */
-	vlr_subscr_put(vsub, VSUB_USE_SGS_PAGING);
+	vlr_subscr_put(vsub, VSUB_USE_SGS_PAGING_REQ);
 
 	return;
 }
@@ -346,7 +348,7 @@ void vlr_sgs_pag(struct vlr_subscr *vsub, enum sgsap_service_ind serv_ind)
 	/* Ensure that the reference count is increased by one while the
 	 * paging is happening. We will balance this again in vlr_sgs_pag_rej()
 	 * and vlr_sgs_pag_ack(); */
-	vlr_subscr_get(vsub, VSUB_USE_SGS_PAGING);
+	vlr_subscr_get(vsub, VSUB_USE_SGS_PAGING_REQ);
 }
 
 /*! Check if the SGs interface is currently paging

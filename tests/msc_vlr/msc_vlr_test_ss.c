@@ -48,19 +48,19 @@ static void perform_lu(void)
 
 	btw("Location Update request causes a GSUP LU request to HLR");
 	lu_result_sent = RES_NONE;
-	gsup_expect_tx("04010809710000004026f0280102");
+	gsup_expect_tx("04010809710000004026f0280102" VLR_TO_HLR);
 	ms_sends_msg("050802008168000130089910070000006402");
 	OSMO_ASSERT(gsup_tx_confirmed);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("HLR sends _INSERT_DATA_REQUEST, VLR responds with _INSERT_DATA_RESULT");
-	gsup_rx("10010809710000004026f00804036470f1",
-		"12010809710000004026f0");
+	gsup_rx("10010809710000004026f00804036470f1" HLR_TO_VLR,
+		"12010809710000004026f0" VLR_TO_HLR);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("HLR also sends GSUP _UPDATE_LOCATION_RESULT");
 	expect_bssap_clear();
-	gsup_rx("06010809710000004026f0", NULL);
+	gsup_rx("06010809710000004026f0"HLR_TO_VLR, NULL);
 
 	btw("LU was successful, and the conn has already been closed");
 	VERBOSE_ASSERT(lu_result_sent, == RES_ACCEPT, "%d");
@@ -72,7 +72,7 @@ static void perform_lu(void)
 	VAL_ASSERT("LAC", vsub->cgi.lai.lac, == 23, "%u");
 	vlr_subscr_put(vsub, __func__);
 
-	bss_sends_clear_complete();
+	ran_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 }
 
@@ -88,9 +88,6 @@ static void _test_ss_ussd_mo(enum osmo_rat_type via_ran)
 
 	cm_service_result_sent = RES_NONE;
 	ms_sends_msg("05247803305886089910070000006402");
-	OSMO_ASSERT(g_conn);
-	OSMO_ASSERT(g_conn->fi);
-	OSMO_ASSERT(g_conn->vsub);
 	VERBOSE_ASSERT(cm_service_result_sent, == RES_ACCEPT, "%d");
 	EXPECT_ACCEPTED(true);
 
@@ -99,7 +96,7 @@ static void _test_ss_ussd_mo(enum osmo_rat_type via_ran)
 		"0108" "09710000004026f0" /* IMSI TLV */
 		"3004" "20000001" /* Session ID TLV */
 		"3101" "01" /* Session state: BEGIN */
-		"3515" FACILITY_IE_REQ);
+		"3515" FACILITY_IE_REQ MSC_USSD_TO_EUSE);
 	dtap_expect_tx("8b2a" "1c27" FACILITY_IE_RSP);
 	expect_release_clear(via_ran);
 
@@ -109,12 +106,12 @@ static void _test_ss_ussd_mo(enum osmo_rat_type via_ran)
 		"0108" "09710000004026f0" /* IMSI TLV */
 		"3004" "20000001" /* Session ID TLV */
 		"3101" "03" /* Session state: END */
-		"3527" FACILITY_IE_RSP, NULL);
+		"3527" FACILITY_IE_RSP EUSE_TO_MSC_USSD, NULL);
 	VERBOSE_ASSERT(dtap_tx_confirmed, == true, "%d");
 	ASSERT_RELEASE_CLEAR(via_ran);
 
 	btw("all requests serviced, conn has been released");
-	bss_sends_clear_complete();
+	ran_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 }
 
@@ -141,13 +138,12 @@ static void _test_ss_ussd_no(enum osmo_rat_type via_ran)
 		"0108" "09710000004026f0" /* IMSI TLV */
 		"3004" "20000101" /* Session ID TLV */
 		"3101" "01" /* Session state: BEGIN */
-		"3515" FACILITY_IE_REQ, NULL);
+		"3515" FACILITY_IE_REQ EUSE_TO_MSC_USSD, NULL);
 
 	VERBOSE_ASSERT(llist_count(&vsub->cs.requests), == 1, "%d");
 	vlr_subscr_put(vsub, __func__);
 	vsub = NULL;
 	VERBOSE_ASSERT(paging_sent, == true, "%d");
-	VERBOSE_ASSERT(paging_stopped, == false, "%d");
 
 	btw("the subscriber and its pending request should remain");
 	vsub = vlr_subscr_find_by_imsi(net->vlr, IMSI, __func__);
@@ -160,7 +156,6 @@ static void _test_ss_ussd_no(enum osmo_rat_type via_ran)
 	dtap_expect_tx("0b3b" "1c15" FACILITY_IE_REQ);
 	ms_sends_msg("06270703305882089910070000006402");
 	VERBOSE_ASSERT(dtap_tx_confirmed, == true, "%d");
-	VERBOSE_ASSERT(paging_stopped, == true, "%d");
 
 	btw("MS responds to SS/USSD request");
 
@@ -169,10 +164,9 @@ static void _test_ss_ussd_no(enum osmo_rat_type via_ran)
 		"0108" "09710000004026f0" /* IMSI TLV */
 		"3004" "20000101" /* Session ID TLV */
 		"3101" "02" /* Session state: CONTINUE */
-		"3527" FACILITY_IE_RSP);
+		"3527" FACILITY_IE_RSP MSC_USSD_TO_EUSE);
 	ms_sends_msg("8b3a" "27" FACILITY_IE_RSP);
 	VERBOSE_ASSERT(dtap_tx_confirmed, == true, "%d");
-	VERBOSE_ASSERT(paging_stopped, == true, "%d");
 
 	btw("HLR terminates the session");
 
@@ -182,13 +176,13 @@ static void _test_ss_ussd_no(enum osmo_rat_type via_ran)
 	gsup_rx("20" /* OSMO_GSUP_MSGT_PROC_SS_REQUEST */
 		"0108" "09710000004026f0" /* IMSI TLV */
 		"3004" "20000101" /* Session ID TLV */
-		"3101" "03", /* Session state: END */
+		"3101" "03" EUSE_TO_MSC_USSD, /* Session state: END */
 		NULL);
 	VERBOSE_ASSERT(dtap_tx_confirmed, == true, "%d");
 	ASSERT_RELEASE_CLEAR(via_ran);
 
 	btw("all requests serviced, conn has been released");
-	bss_sends_clear_complete();
+	ran_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 }
 

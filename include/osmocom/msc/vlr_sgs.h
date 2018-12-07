@@ -27,7 +27,7 @@ struct vlr_subscr;
 struct vlr_instance;
 
 #define VSUB_USE_SGS "SGs"
-#define VSUB_USE_SGS_PAGING "SGs-paging"
+#define VSUB_USE_SGS_PAGING_REQ "SGs-paging-req"
 
 /* See also 3GPP TS 29.118, chapter 4.2.2 States at the VLR */
 enum sgs_ue_fsm_state {

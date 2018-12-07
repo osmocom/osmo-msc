@@ -56,15 +56,6 @@ int mncc_sock_from_cc(struct gsm_network *net, struct msgb *msg)
 	if (net->mncc_state->conn_bfd.fd < 0) {
 		LOGP(DMNCC, LOGL_ERROR, "mncc_sock receives %s for external CC app "
 			"but socket is gone\n", get_mncc_name(msg_type));
-		if (!mncc_is_data_frame(msg_type)) {
-			/* release the request */
-			struct gsm_mncc mncc_out;
-			memset(&mncc_out, 0, sizeof(mncc_out));
-			mncc_out.callref = mncc_in->callref;
-			mncc_set_cause(&mncc_out, GSM48_CAUSE_LOC_PRN_S_LU,
-					GSM48_CC_CAUSE_TEMP_FAILURE);
-			mncc_tx_to_cc(net, MNCC_REL_REQ, &mncc_out);
-		}
 		/* free the original message */
 		msgb_free(msg);
 		return -1;
@@ -92,7 +83,7 @@ static void mncc_sock_close(struct mncc_sock_state *state)
 	state->listen_bfd.when |= BSC_FD_READ;
 
 	/* release all exisitng calls */
-	gsm0408_clear_all_trans(state->net, GSM48_PDISC_CC);
+	gsm0408_clear_all_trans(state->net, TRANS_CC);
 
 	/* flush the queue */
 	while (!llist_empty(&state->net->upqueue)) {

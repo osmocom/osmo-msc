@@ -26,44 +26,44 @@
 
 static void test_reject_2nd_conn()
 {
-	struct ran_conn *conn1;
+	struct msub *conn1;
 	comment_start();
 
 	btw("Location Update Request on one connection");
 	lu_result_sent = RES_NONE;
-	gsup_expect_tx("04010809710000004026f0280102");
+	gsup_expect_tx("04010809710000004026f0280102" VLR_TO_HLR);
 	ms_sends_msg("050802008168000130089910070000006402");
 	OSMO_ASSERT(gsup_tx_confirmed);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 	EXPECT_CONN_COUNT(1);
 
 	btw("Another Location Update Request from the same subscriber on another connection is rejected");
-	conn1 = g_conn;
-	g_conn = NULL;
+	conn1 = g_msub;
+	g_msub = NULL;
 	expect_bssap_clear();
 	ms_sends_msg("050802008168000130089910070000006402");
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 	VERBOSE_ASSERT(lu_result_sent, == RES_REJECT, "%d");
-	bss_sends_clear_complete();
+	ran_sends_clear_complete();
 	EXPECT_CONN_COUNT(1);
 
 
 	BTW("The first connection can still complete its LU");
 	btw("HLR sends _INSERT_DATA_REQUEST, VLR responds with _INSERT_DATA_RESULT");
-	g_conn = conn1;
+	g_msub = conn1;
 	lu_result_sent = RES_NONE;
-	gsup_rx("10010809710000004026f00804036470f1",
-		"12010809710000004026f0");
+	gsup_rx("10010809710000004026f00804036470f1" HLR_TO_VLR,
+		"12010809710000004026f0" VLR_TO_HLR);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("HLR also sends GSUP _UPDATE_LOCATION_RESULT");
 	expect_bssap_clear();
-	gsup_rx("06010809710000004026f0", NULL);
+	gsup_rx("06010809710000004026f0"HLR_TO_VLR, NULL);
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
 	btw("LU was successful, and the conn has already been closed");
 	VERBOSE_ASSERT(lu_result_sent, == RES_ACCEPT, "%d");
-	bss_sends_clear_complete();
+	ran_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 
 	clear_vlr();
@@ -74,7 +74,7 @@ static void _normal_lu_part1()
 {
 	btw("Location Update Request");
 	lu_result_sent = RES_NONE;
-	gsup_expect_tx("04010809710000004026f0280102");
+	gsup_expect_tx("04010809710000004026f0280102" VLR_TO_HLR);
 	ms_sends_msg("050802008168000130089910070000006402");
 	OSMO_ASSERT(gsup_tx_confirmed);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
@@ -85,18 +85,18 @@ static void _normal_lu_part2()
 {
 	btw("HLR sends _INSERT_DATA_REQUEST, VLR responds with _INSERT_DATA_RESULT");
 	lu_result_sent = RES_NONE;
-	gsup_rx("10010809710000004026f00804036470f1",
-		"12010809710000004026f0");
+	gsup_rx("10010809710000004026f00804036470f1" HLR_TO_VLR,
+		"12010809710000004026f0" VLR_TO_HLR);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("HLR also sends GSUP _UPDATE_LOCATION_RESULT");
 	expect_bssap_clear();
-	gsup_rx("06010809710000004026f0", NULL);
+	gsup_rx("06010809710000004026f0" HLR_TO_VLR, NULL);
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
 	btw("LU was successful, and the conn has already been closed");
 	VERBOSE_ASSERT(lu_result_sent, == RES_ACCEPT, "%d");
-	bss_sends_clear_complete();
+	ran_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 }
 
@@ -111,10 +111,7 @@ static void _normal_cm_service_req()
 {
 	BTW("Subscriber does a normal CM Service Request");
 	cm_service_result_sent = RES_NONE;
-	ms_sends_msg("05247803305886089910070000006402");
-	OSMO_ASSERT(g_conn);
-	OSMO_ASSERT(g_conn->fi);
-	OSMO_ASSERT(g_conn->vsub);
+	ms_sends_msg("05247403305886089910070000006402");
 	VERBOSE_ASSERT(cm_service_result_sent, == RES_ACCEPT, "%d");
 	EXPECT_ACCEPTED(true);
 }
@@ -139,7 +136,6 @@ static void _page()
 	vlr_subscr_put(vsub, __func__);
 	vsub = NULL;
 	VERBOSE_ASSERT(paging_sent, == true, "%d");
-	VERBOSE_ASSERT(paging_stopped, == false, "%d");
 }
 
 static void _paging_resp_part1()
@@ -168,7 +164,6 @@ static void _paging_resp_part1()
 		       "0c7ac3e9e9b7db05");
 	ms_sends_msg("06270703305882089910070000006402");
 	VERBOSE_ASSERT(dtap_tx_confirmed, == true, "%d");
-	VERBOSE_ASSERT(paging_stopped, == true, "%d");
 
 	btw("conn is still open to wait for SMS ack dance");
 	EXPECT_CONN_COUNT(1);
@@ -188,7 +183,7 @@ static void _paging_resp_part2(int expect_conn_count, bool expect_clear)
 	VERBOSE_ASSERT(dtap_tx_confirmed, == true, "%d");
 	if (expect_clear) {
 		VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
-		bss_sends_clear_complete();
+		ran_sends_clear_complete();
 	}
 
 	btw("SMS is done");
@@ -221,11 +216,9 @@ static void test_reject_cm_during_lu()
 
 	BTW("A CM Service Request in the middle of a LU is rejected");
 	cm_service_result_sent = RES_NONE;
-	dtap_expect_tx("052216");
-	ms_sends_msg("05247803305886089910070000006402");
+	ms_sends_msg("05247403305886089910070000006402");
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
-	VERBOSE_ASSERT(cm_service_result_sent, == RES_NONE, "%d");
-	VERBOSE_ASSERT(dtap_tx_confirmed, == true, "%d");
+	VERBOSE_ASSERT(cm_service_result_sent, == RES_REJECT, "%d");
 	EXPECT_CONN_COUNT(1);
 
 	BTW("The first LU can still complete");
@@ -271,7 +264,7 @@ static void test_reject_lu_during_cm()
 	expect_bssap_clear();
 	ms_sends_msg("050130089910070000006402");
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
-	bss_sends_clear_complete();
+	ran_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 
 	clear_vlr();
@@ -287,7 +280,7 @@ static void test_reject_cm_during_cm()
 
 	btw("A second CM Service Request on the same conn is accepted without another auth dance");
 	cm_service_result_sent = RES_NONE;
-	ms_sends_msg("05247803305886089910070000006402");
+	ms_sends_msg("05247403305886089910070000006402");
 	VERBOSE_ASSERT(cm_service_result_sent, == RES_ACCEPT, "%d");
 	EXPECT_CONN_COUNT(1);
 
@@ -295,7 +288,7 @@ static void test_reject_cm_during_cm()
 	expect_bssap_clear();
 	ms_sends_msg("050130089910070000006402");
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
-	bss_sends_clear_complete();
+	ran_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 
 	clear_vlr();
@@ -317,10 +310,10 @@ static void test_reject_paging_resp_during_cm()
 
 	/* Release connection */
 	expect_bssap_clear(OSMO_RAT_GERAN_A);
-	conn_conclude_cm_service_req(g_conn, OSMO_RAT_GERAN_A);
+	conn_conclude_cm_service_req(g_msub, MSC_A_USE_CM_SERVICE_SMS);
 
 	btw("all requests serviced, conn has been released");
-	bss_sends_clear_complete();
+	ran_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 
 	clear_vlr();
@@ -374,10 +367,10 @@ static void test_accept_cm_during_paging_resp()
 
 	BTW("CM Service Request during open connection is accepted");
 	cm_service_result_sent = RES_NONE;
-	ms_sends_msg("05247803305886089910070000006402");
+	ms_sends_msg("05247403305886089910070000006402");
 	VERBOSE_ASSERT(cm_service_result_sent, == RES_ACCEPT, "%d");
 	EXPECT_CONN_COUNT(1);
-	VERBOSE_ASSERT(g_conn->received_cm_service_request, == true, "%d");
+	VERBOSE_ASSERT(osmo_use_count_by(&msub_msc_a(g_msub)->use_count, MSC_A_USE_CM_SERVICE_SMS), == 1, "%d");
 
 	_paging_resp_part2(1, false);
 
@@ -385,7 +378,7 @@ static void test_accept_cm_during_paging_resp()
 	expect_bssap_clear();
 	ms_sends_msg("050130089910070000006402");
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
-	bss_sends_clear_complete();
+	ran_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 
 	clear_vlr();

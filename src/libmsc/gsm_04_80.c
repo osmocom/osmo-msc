@@ -26,7 +26,7 @@
 #include <errno.h>
 
 #include <osmocom/msc/gsm_04_80.h>
-#include <osmocom/msc/msc_ifaces.h>
+#include <osmocom/msc/msc_a.h>
 
 #include <osmocom/gsm/protocol/gsm_04_80.h>
 #include <osmocom/gsm/gsm0480.h>
@@ -36,7 +36,7 @@
 /*! Send a MT RELEASE COMPLETE message with Reject component
  *  (see section 3.6.1) and given error code (see section 3.6.7).
  *
- * \param[in]  conn            Active RAN connection
+ * \param[in]  msc_a           Active subscriber
  * \param[in]  transaction_id  Transaction ID with TI flag set
  * \param[in]  invoke_id       InvokeID of the request
  * \param[in]  problem_tag     Problem code tag (table 3.13)
@@ -47,9 +47,8 @@
  * failed, any incorrect value can be passed (0x00 > x > 0xff), so
  * the universal NULL-tag (see table 3.6) will be used instead.
  */
-int msc_send_ussd_reject(struct ran_conn *conn,
-			     uint8_t transaction_id, int invoke_id,
-			     uint8_t problem_tag, uint8_t problem_code)
+int msc_send_ussd_reject(struct msc_a *msc_a, uint8_t transaction_id, int invoke_id,
+			 uint8_t problem_tag, uint8_t problem_code)
 {
 	struct gsm48_hdr *gh;
 	struct msgb *msg;
@@ -67,27 +66,26 @@ int msc_send_ussd_reject(struct ran_conn *conn,
 	gh->proto_discr |= transaction_id << 4;
 	gh->msg_type = GSM0480_MTYPE_RELEASE_COMPLETE;
 
-	return msc_tx_dtap(conn, msg);
+	return msc_a_tx_dtap_to_i(msc_a, msg);
 }
 
-int msc_send_ussd_notify(struct ran_conn *conn, int level, const char *text)
+int msc_send_ussd_notify(struct msc_a *msc_a, int level, const char *text)
 {
 	struct msgb *msg = gsm0480_create_ussd_notify(level, text);
 	if (!msg)
 		return -1;
-	return msc_tx_dtap(conn, msg);
+	return msc_a_tx_dtap_to_i(msc_a, msg);
 }
 
-int msc_send_ussd_release_complete(struct ran_conn *conn,
-				   uint8_t transaction_id)
+int msc_send_ussd_release_complete(struct msc_a *msc_a, uint8_t transaction_id)
 {
 	struct msgb *msg = gsm0480_create_release_complete(transaction_id);
 	if (!msg)
 		return -1;
-	return msc_tx_dtap(conn, msg);
+	return msc_a_tx_dtap_to_i(msc_a, msg);
 }
 
-int msc_send_ussd_release_complete_cause(struct ran_conn *conn,
+int msc_send_ussd_release_complete_cause(struct msc_a *msc_a,
 					 uint8_t transaction_id,
 					 uint8_t cause_loc, uint8_t cause_val)
 {
@@ -112,5 +110,5 @@ int msc_send_ussd_release_complete_cause(struct ran_conn *conn,
 	cause_ie[2] = (1 << 7) | (0x03 << 5) | (cause_loc & 0x0f);
 	cause_ie[3] = (1 << 7) | cause_val;
 
-	return msc_tx_dtap(conn, msg);
+	return msc_a_tx_dtap_to_i(msc_a, msg);
 }

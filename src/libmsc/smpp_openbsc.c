@@ -45,6 +45,7 @@
 #include <osmocom/msc/transaction.h>
 #include <osmocom/msc/gsm_subscriber.h>
 #include <osmocom/msc/vlr.h>
+#include <osmocom/msc/msc_a.h>
 
 #include "smpp_smsc.h"
 
@@ -556,22 +557,21 @@ void smpp_cmd_flush_pending(struct osmo_esme *esme)
 
 void smpp_cmd_ack(struct osmo_smpp_cmd *cmd)
 {
-	struct ran_conn *conn;
+	struct msc_a *msc_a;
 	struct gsm_trans *trans;
 
 	if (cmd->is_report)
 		goto out;
 
-	conn = connection_for_subscr(cmd->vsub);
-	if (!conn) {
-		LOGP(DSMPP, LOGL_ERROR, "No connection to subscriber anymore\n");
+	msc_a = msc_a_for_vsub(cmd->vsub, true);
+	if (!msc_a) {
+		LOGP(DSMPP, LOGL_ERROR, "No connection to subscriber %s\n", vlr_subscr_name(cmd->vsub));
 		goto out;
 	}
 
-	trans = trans_find_by_id(conn, GSM48_PDISC_SMS, cmd->gsm411_trans_id);
+	trans = trans_find_by_id(msc_a, TRANS_SMS, cmd->gsm411_trans_id);
 	if (!trans) {
-		LOGP(DSMPP, LOGL_ERROR, "GSM transaction %u is gone\n",
-		     cmd->gsm411_trans_id);
+		LOG_MSC_A_CAT(msc_a, DSMPP, LOGL_ERROR, "GSM transaction %u is gone\n", cmd->gsm411_trans_id);
 		goto out;
 	}
 
@@ -582,23 +582,23 @@ out:
 
 void smpp_cmd_err(struct osmo_smpp_cmd *cmd, uint32_t status)
 {
-	struct ran_conn *conn;
+	struct msc_a *msc_a;
 	struct gsm_trans *trans;
 	int gsm411_cause;
 
 	if (cmd->is_report)
 		goto out;
 
-	conn = connection_for_subscr(cmd->vsub);
-	if (!conn) {
-		LOGP(DSMPP, LOGL_ERROR, "No connection to subscriber anymore\n");
+	msc_a = msc_a_for_vsub(cmd->vsub, true);
+	if (!msc_a) {
+		LOGP(DSMPP, LOGL_ERROR, "No connection to subscriber %s\n", vlr_subscr_name(cmd->vsub));
 		goto out;
 	}
 
-	trans = trans_find_by_id(conn, GSM48_PDISC_SMS, cmd->gsm411_trans_id);
+	trans = trans_find_by_id(msc_a, TRANS_SMS, cmd->gsm411_trans_id);
 	if (!trans) {
-		LOGP(DSMPP, LOGL_ERROR, "GSM transaction %u is gone\n",
-		     cmd->gsm411_trans_id);
+		LOG_MSC_A_CAT(msc_a, DSMPP, LOGL_ERROR, "GSM transaction %u is gone\n",
+			      cmd->gsm411_trans_id);
 		goto out;
 	}
 
@@ -657,11 +657,12 @@ struct osmo_smpp_cmd *smpp_cmd_find_by_seqnum(struct osmo_esme *esme,
 }
 
 static int deliver_to_esme(struct osmo_esme *esme, struct gsm_sms *sms,
-			   struct ran_conn *conn)
+			   struct msc_a *msc_a)
 {
 	struct deliver_sm_t deliver;
 	int mode, ret;
 	uint8_t dcs;
+	struct vlr_subscr *vsub = msc_a_vsub(msc_a);
 
 	memset(&deliver, 0, sizeof(deliver));
 	deliver.command_length	= 0;
@@ -674,13 +675,13 @@ static int deliver_to_esme(struct osmo_esme *esme, struct gsm_sms *sms,
 		deliver.source_addr_npi = NPI_Land_Mobile_E212;
 		snprintf((char *)deliver.source_addr,
 			sizeof(deliver.source_addr), "%s",
-			conn->vsub->imsi);
+			vsub->imsi);
 	} else {
 		deliver.source_addr_ton = TON_Network_Specific;
 		deliver.source_addr_npi = NPI_ISDN_E163_E164;
 		snprintf((char *)deliver.source_addr,
 			 sizeof(deliver.source_addr), "%s",
-			 conn->vsub->msisdn);
+			 vsub->msisdn);
 	}
 
 	deliver.dest_addr_ton	= sms->dst.ton;
@@ -746,19 +747,18 @@ static int deliver_to_esme(struct osmo_esme *esme, struct gsm_sms *sms,
 	if (ret < 0)
 		return ret;
 
-	return smpp_cmd_enqueue(esme, conn->vsub, sms,
+	return smpp_cmd_enqueue(esme, vsub, sms,
 				deliver.sequence_number);
 }
 
 static struct smsc *g_smsc;
 
-int smpp_route_smpp_first(struct gsm_sms *sms, struct ran_conn *conn)
+bool smpp_route_smpp_first()
 {
-	return g_smsc->smpp_first;
+	return (bool)(g_smsc->smpp_first);
 }
 
-int smpp_try_deliver(struct gsm_sms *sms,
-		     struct ran_conn *conn)
+int smpp_try_deliver(struct gsm_sms *sms, struct msc_a *msc_a)
 {
 	struct osmo_esme *esme;
 	struct osmo_smpp_addr dst;
@@ -771,7 +771,7 @@ int smpp_try_deliver(struct gsm_sms *sms,
 
 	rc = smpp_route(g_smsc, &dst, &esme);
 	if (!rc)
-		rc = deliver_to_esme(esme, sms, conn);
+		rc = deliver_to_esme(esme, sms, msc_a);
 
 	return rc;
 }

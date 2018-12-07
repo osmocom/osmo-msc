@@ -24,7 +24,10 @@
 #include <osmocom/gsm/protocol/gsm_29_118.h>
 #include <osmocom/msc/vlr.h>
 #include <osmocom/msc/vlr_sgs.h>
+#include <osmocom/msc/paging.h>
 #include <osmocom/core/socket.h>
+
+struct msc_a;
 
 static const unsigned int sgs_state_timer_defaults[_NUM_SGS_STATE_TIMERS] = {
 	[SGS_STATE_TS5] = SGS_TS5_DEFAULT,
@@ -82,6 +85,8 @@ extern struct sgs_state *g_sgs;
 
 struct sgs_state *sgs_iface_init(void *ctx, struct gsm_network *network);
 int sgs_iface_rx(struct sgs_connection *sgc, struct msgb *msg);
+enum sgsap_service_ind sgs_serv_ind_from_paging_cause(enum paging_cause);
 int sgs_iface_tx_paging(struct vlr_subscr *vsub, enum sgsap_service_ind serv_ind);
-int sgs_iface_tx_dtap_ud(struct msgb *msg);
-void sgs_iface_tx_release(struct ran_conn *conn);
+int sgs_iface_tx_dtap_ud(struct msc_a *msc_a, struct msgb *msg);
+void sgs_iface_tx_release(struct vlr_subscr *vsub);
+

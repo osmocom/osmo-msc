@@ -50,6 +50,7 @@ struct gsm_sms_pending {
 	struct llist_head entry;
 
 	struct vlr_subscr *vsub;
+	struct msc_a *msc_a;
 	unsigned long long sms_id;
 	int failed_attempts;
 	int resend;
@@ -507,23 +508,12 @@ static int sms_sms_cb(unsigned int subsys, unsigned int signal,
 		 * subscriber. If we have some kind of other transmit error we
 		 * should flag the SMS as bad.
 		 */
-		switch (sig_sms->paging_result) {
-		case 0:
+		if (sig_sms->paging_result) {
 			/* BAD SMS? */
 			db_sms_inc_deliver_attempts(sig_sms->sms);
 			sms_pending_failed(pending, 0);
-			break;
-		case GSM_PAGING_EXPIRED:
+		} else {
 			sms_pending_failed(pending, 1);
-			break;
-		case GSM_PAGING_BUSY:
-			network->sms_queue->pending -= 1;
-			sms_pending_free(pending);
-			sms_queue_trigger(network->sms_queue);
-			break;
-		default:
-			LOGP(DLSMS, LOGL_ERROR, "Unhandled result: %d\n",
-			     sig_sms->paging_result);
 		}
 		break;
 	default:

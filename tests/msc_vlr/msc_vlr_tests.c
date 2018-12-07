@@ -30,19 +30,17 @@
 #include <osmocom/core/application.h>
 #include <osmocom/gsm/protocol/gsm_04_11.h>
 #include <osmocom/gsm/gsup.h>
-#include <osmocom/gsupclient/gsup_client.h>
+#include <osmocom/msc/gsup_client_mux.h>
 #include <osmocom/msc/gsm_04_11.h>
 #include <osmocom/msc/debug.h>
 #include <osmocom/msc/gsm_04_08.h>
 #include <osmocom/msc/transaction.h>
-#include <osmocom/msc/a_iface_bssap.h>
-
-#if BUILD_IU
-#include <osmocom/msc/iucs_ranap.h>
-#include <osmocom/ranap/iu_client.h>
-#else
-#include <osmocom/msc/iu_dummy.h>
-#endif
+#include <osmocom/msc/ran_msg.h>
+#include <osmocom/msc/msc_a.h>
+#include <osmocom/msc/msc_i.h>
+#include <osmocom/msc/msc_t.h>
+#include <osmocom/msc/call_leg.h>
+#include <osmocom/msc/rtp_stream.h>
 
 #include "msc_vlr_tests.h"
 
@@ -80,7 +78,7 @@ const char *cc_to_mncc_tx_expected_imsi = NULL;
 bool cc_to_mncc_tx_confirmed = false;
 uint32_t cc_to_mncc_tx_got_callref = 0;
 
-extern int gsm0407_pdisc_ctr_bin(uint8_t pdisc);
+extern int ran_dec_dtap_undup_pdisc_ctr_bin(uint8_t pdisc);
 
 /* static state variables for the L3 send sequence numbers */
 static uint8_t n_sd[4];
@@ -91,7 +89,7 @@ static void patch_l3_seq_nr(struct msgb *msg)
 	struct gsm48_hdr *gh = msgb_l3(msg);
 	uint8_t pdisc = gsm48_hdr_pdisc(gh);
 	uint8_t *msg_type_oct = &msg->l3h[1];
-	int bin = gsm0407_pdisc_ctr_bin(pdisc);
+	int bin = ran_dec_dtap_undup_pdisc_ctr_bin(pdisc);
 
 	if (bin >= 0 && bin < ARRAY_SIZE(n_sd)) {
 		/* patch in n_sd into the msg_type octet */
@@ -126,21 +124,6 @@ static const char *gh_type_name(struct gsm48_hdr *gh)
 					gsm48_hdr_msg_type(gh));
 }
 
-void dtap_expect_tx(const char *hex)
-{
-	/* Has the previously expected dtap been received? */
-	OSMO_ASSERT(!dtap_tx_expected);
-	if (!hex)
-		return;
-	dtap_tx_expected = msgb_from_hex("dtap_tx_expected", 1024, hex);
-	/* Mask the sequence number out */
-	if (msgb_length(dtap_tx_expected) >= 2)
-		dtap_tx_expected->data[1] &= 0x3f;
-	dtap_tx_confirmed = false;
-}
-
-int vlr_gsupc_read_cb(struct osmo_gsup_client *gsupc, struct msgb *msg);
-
 void gsup_rx(const char *rx_hex, const char *expect_tx_hex)
 {
 	int rc;
@@ -154,97 +137,303 @@ void gsup_rx(const char *rx_hex, const char *expect_tx_hex)
 	fprintf(stderr, "<-- GSUP rx %s: %s\n", label,
 		osmo_hexdump_nospc(msgb_l2(msg), msgb_l2len(msg)));
 	/* GSUP read cb takes ownership of msgb */
-	rc = vlr_gsupc_read_cb(net->vlr->gsup_client, msg);
+	rc = gsup_client_mux_rx(net->gcm->gsup_client, msg);
 	fprintf(stderr, "<-- GSUP rx %s: vlr_gsupc_read_cb() returns %d\n",
 		label, rc);
 	if (expect_tx_hex)
 		OSMO_ASSERT(gsup_tx_confirmed);
 }
 
-bool conn_exists(const struct ran_conn *conn)
+bool conn_exists(const struct msub *msub)
 {
-	struct ran_conn *c;
+	struct msub *i;
 
-	if (!conn)
+	if (!msub)
 		return false;
 
-	llist_for_each_entry(c, &net->ran_conns, entry) {
-		if (c == conn)
+	llist_for_each_entry(i, &msub_list, entry) {
+		if (i == msub)
 			return true;
 	}
 
+	btw("msub gone");
 	return false;
 }
 
 /* Simplified version of the cm_service_request_concludes() */
-void conn_conclude_cm_service_req(struct ran_conn *conn,
-				  enum osmo_rat_type via_ran)
+void conn_conclude_cm_service_req(struct msub *msub, const char *cm_service_use)
 {
+	int32_t count;
+	struct msc_a *msc_a = msub_msc_a(msub);
 	btw("Concluding CM Service Request");
 
-	OSMO_ASSERT(conn);
-	OSMO_ASSERT(conn->received_cm_service_request);
+	OSMO_ASSERT(conn_exists(msub));
+	count = osmo_use_count_by(&msc_a->use_count, cm_service_use);
+	OSMO_ASSERT(count > 0);
 
-	conn->received_cm_service_request = false;
-	ran_conn_put(conn, RAN_CONN_USE_CM_SERVICE);
+	OSMO_ASSERT(osmo_use_count_get_put(&msc_a->use_count, cm_service_use, -count) == 0)
 
-	ASSERT_RELEASE_CLEAR(via_ran);
+	ASSERT_RELEASE_CLEAR(msc_a->c.ran->type);
+}
+
+void dummy_msc_i_action(struct osmo_fsm_inst *fi, uint32_t event, void *data)
+{
+}
+
+static const struct osmo_fsm_state dummy_msc_i_states[] = {
+	{
+		.name = "0",
+		.in_event_mask = 0xffffffff,
+		.action = dummy_msc_i_action,
+	},
+};
+
+struct osmo_fsm dummy_msc_i_fsm = {
+	.name = "dummy_msc_i",
+	.states = dummy_msc_i_states,
+	.num_states = ARRAY_SIZE(dummy_msc_i_states),
+	.log_subsys = DMSC,
+	.event_names = msc_i_fsm_event_names,
+};
+
+struct msc_i *dummy_msc_i_alloc(struct msub *msub, struct ran_infra *ran)
+{
+	return msub_role_alloc(g_msub, MSC_ROLE_I, &dummy_msc_i_fsm, struct msc_i, ran);
 }
 
 enum osmo_rat_type rx_from_ran = OSMO_RAT_GERAN_A;
 
-/* SCCP user stub to make a_iface_tx_bssap() happy during test case execution */
-struct osmo_sccp_user {
-	uint8_t foo;
-};
-static struct osmo_sccp_user g_scu;
+struct msub *g_msub = NULL;
 
-struct ran_conn *conn_new(void)
+void dtap_expect_tx(const char *hex)
 {
-	struct ran_conn *conn;
-	conn = ran_conn_alloc(net, rx_from_ran, 23);
-	if (conn->via_ran == OSMO_RAT_UTRAN_IU) {
-		struct ranap_ue_conn_ctx *ue_ctx = talloc_zero(conn, struct ranap_ue_conn_ctx);
-		*ue_ctx = (struct ranap_ue_conn_ctx){
-			.conn_id = 42,
-		};
-		conn->iu.ue_ctx = ue_ctx;
-	} else {
-		conn->a.scu = &g_scu;
-	}
-	return conn;
+	/* Has the previously expected dtap been received? */
+	OSMO_ASSERT(!dtap_tx_expected);
+	if (!hex)
+		return;
+	dtap_tx_expected = msgb_from_hex("dtap_tx_expected", 1024, hex);
+	/* Mask the sequence number out */
+	if (msgb_length(dtap_tx_expected) >= 2)
+		dtap_tx_expected->data[1] &= 0x3f;
+	dtap_tx_confirmed = false;
 }
 
-struct ran_conn *g_conn = NULL;
+static int _validate_dtap(struct msgb *msg, enum osmo_rat_type to_ran)
+{
+	struct gsm48_hdr *gh = (void*)msg->data;
+	uint8_t pdisc = gsm48_hdr_pdisc(gh);
+	uint8_t msgt = gsm48_hdr_msg_type(gh);
+
+	btw("DTAP --%s--> MS: %s: %s",
+	    osmo_rat_type_name(to_ran), gh_type_name((void*)msg->data),
+	    osmo_hexdump_nospc(msg->data, msg->len));
+
+	if (pdisc == GSM48_PDISC_MM
+	    && msgt == GSM48_MT_MM_CM_SERV_ACC) {
+		cm_service_result_sent |= RES_ACCEPT;
+		talloc_free(msg);
+		return 0;
+	}
+
+	if (pdisc == GSM48_PDISC_MM
+	    && msgt == GSM48_MT_MM_CM_SERV_REJ) {
+		cm_service_result_sent |= RES_REJECT;
+		talloc_free(msg);
+		return 0;
+	}
+
+	OSMO_ASSERT(dtap_tx_expected);
+
+	/* Mask the sequence number out before comparing */
+	msg->data[1] &= 0x3f;
+	if (!msgb_eq_data_print(msg, dtap_tx_expected->data, dtap_tx_expected->len))
+		abort();
+
+	btw("DTAP matches expected message");
+
+	talloc_free(msg);
+	dtap_tx_confirmed = true;
+	talloc_free(dtap_tx_expected);
+	dtap_tx_expected = NULL;
+
+	return 0;
+}
+
+static void bssap_validate_clear_cmd()
+{
+	OSMO_ASSERT(bssap_clear_expected);
+	bssap_clear_expected = false;
+	bssap_clear_sent = true;
+}
+
+static void iucs_validate_clear_cmd()
+{
+	OSMO_ASSERT(iu_release_expected);
+	iu_release_expected = false;
+	iu_release_sent = true;
+}
+
+static int bssap_validate_cipher_mode_cmd(const struct ran_cipher_mode_command *cmd)
+{
+	int i;
+	const char *got_key;
+	cipher_mode_cmd_sent = true;
+	cipher_mode_cmd_sent_with_imeisv = cmd->geran.retrieve_imeisv;
+	btw("sending Ciphering Mode Command: retrieve_imeisv=%d", cipher_mode_cmd_sent_with_imeisv);
+	for (i = 0; i < 7; i++) {
+		if (!(cmd->geran.a5_encryption_mask & (1 << i)))
+			continue;
+		btw("...perm algo: A5/%d", i);
+	}
+	got_key = osmo_hexdump_nospc(cmd->vec->kc, sizeof(cmd->vec->kc));
+	btw("...key: %s", got_key);
+
+	if (!cipher_mode_expect_kc
+	    || strcmp(cipher_mode_expect_kc, got_key)) {
+		log("FAILURE: expected kc=%s", cipher_mode_expect_kc ? : "NULL");
+		OSMO_ASSERT(false);
+	}
+	return 0;
+}
+
+static int iucs_validate_security_mode_ctrl(const struct ran_cipher_mode_command *cmd)
+{
+	const char *got_ik;
+	got_ik = osmo_hexdump_nospc(cmd->vec->ik, sizeof(cmd->vec->ik));
+	btw("sending SecurityModeControl: ik=%s", got_ik);
+	security_mode_ctrl_sent = true;
+	if (!security_mode_expect_ik
+	    || strcmp(security_mode_expect_ik, got_ik)) {
+		log("FAILURE: expected ik=%s", security_mode_expect_ik ? : "NULL");
+		OSMO_ASSERT(false);
+	}
+	return 0;
+}
+
+struct msgb *dont_ran_encode(struct osmo_fsm_inst *caller_fi, const struct ran_msg *ran_enc_msg)
+{
+	struct msc_role_common *c = caller_fi->priv;
+	enum osmo_rat_type ran_type = c->ran->type;
+	const char *ran_name = osmo_rat_type_name(ran_type);
+	LOG_RAN_ENC(caller_fi, DMSC, LOGL_INFO, "%s on %s\n", ran_msg_type_name(ran_enc_msg->msg_type),
+		     ran_name);
+
+	switch (ran_enc_msg->msg_type) {
+	case RAN_MSG_DTAP:
+		_validate_dtap(ran_enc_msg->dtap, ran_type);
+		break;
+	case RAN_MSG_CLEAR_COMMAND:
+		switch (ran_type) {
+		case OSMO_RAT_GERAN_A:
+			bssap_validate_clear_cmd();
+			break;
+		case OSMO_RAT_UTRAN_IU:
+			iucs_validate_clear_cmd();
+			break;
+		default:
+			OSMO_ASSERT(false);
+		}
+		break;
+	case RAN_MSG_CIPHER_MODE_COMMAND:
+		switch (ran_type) {
+		case OSMO_RAT_GERAN_A:
+			bssap_validate_cipher_mode_cmd(&ran_enc_msg->cipher_mode_command);
+			break;
+		case OSMO_RAT_UTRAN_IU:
+			iucs_validate_security_mode_ctrl(&ran_enc_msg->cipher_mode_command);
+			break;
+		default:
+			OSMO_ASSERT(false);
+		}
+		break;
+	default:
+		break;
+	}
+
+	/* We're testing MSC and VLR interaction, not message encoding.
+	 * Return whatever. The test msc_i instance is a dummy and drops these.
+	 * But it must be msg_free()-able.
+	 */
+	return msgb_alloc(1, "unused dummy msg");
+}
+
+struct ran_infra test_ran_infra[] = {
+	[OSMO_RAT_GERAN_A] = {
+		.type = OSMO_RAT_GERAN_A,
+		.an_proto = OSMO_GSUP_ACCESS_NETWORK_PROTOCOL_TS3G_48006,
+		.log_subsys = DBSSAP,
+		.tdefs = msc_tdefs_geran,
+		.ran_encode = dont_ran_encode,
+	},
+	[OSMO_RAT_UTRAN_IU] = {
+		.type = OSMO_RAT_UTRAN_IU,
+		.an_proto = OSMO_GSUP_ACCESS_NETWORK_PROTOCOL_TS3G_25413,
+		.log_subsys = DIUCS,
+		.tdefs = msc_tdefs_utran,
+		.ran_encode = dont_ran_encode,
+	},
+};
+
+static int fake_msc_a_ran_dec(const struct ran_msg *ran_dec_msg)
+{
+	struct msc_a_ran_dec_data d = {
+		.from_role = MSC_ROLE_I,
+	};
+	return msc_a_ran_decode_cb(g_msub->role[MSC_ROLE_A], &d, ran_dec_msg);
+}
 
 void rx_from_ms(struct msgb *msg)
 {
 	struct gsm48_hdr *gh = msgb_l3(msg);
+	struct ran_msg ran_dec_msg;
+	struct gsm0808_cell_id cell_id = {
+		.id_discr = CELL_IDENT_LAI_AND_LAC,
+		.id.lai_and_lac = {
+			.plmn = {
+				.mcc = 1,
+				.mnc = 2,
+			},
+			.lac = 23,
+		},
+	};
+	struct msc_a *msc_a;
 
-	log("MSC <--%s-- MS: %s",
-	    osmo_rat_type_name(rx_from_ran),
-	    gh_type_name(gh));
+	log("MSC <--%s-- MS: %s", osmo_rat_type_name(rx_from_ran), gh_type_name(gh));
 
-	if (!conn_exists(g_conn))
-		g_conn = NULL;
+	if (!conn_exists(g_msub))
+		g_msub = NULL;
 
-	if (!g_conn) {
+	if (!g_msub) {
 		log("new conn");
-		g_conn = conn_new();
+		g_msub = msub_alloc(net);
+		msc_a_alloc(g_msub, &test_ran_infra[rx_from_ran]);
+		dummy_msc_i_alloc(g_msub, &test_ran_infra[rx_from_ran]);
+
 		reset_l3_seq_nr();
-		patch_l3_seq_nr(msg);
-		ran_conn_compl_l3(g_conn, msg, 23);
+		ran_dec_msg = (struct ran_msg){
+			.msg_type = RAN_MSG_COMPL_L3,
+			.compl_l3 = {
+				.cell_id = &cell_id,
+				.msg = msg,
+			},
+		};
 	} else {
-		patch_l3_seq_nr(msg);
-		if ((gsm48_hdr_pdisc(gh) == GSM48_PDISC_RR)
-		    && (gsm48_hdr_msg_type(gh) == GSM48_MT_RR_CIPH_M_COMPL))
-			ran_conn_cipher_mode_compl(g_conn, msg, 0);
-		else
-			ran_conn_dtap(g_conn, msg);
+		ran_dec_msg = (struct ran_msg){
+			.msg_type = RAN_MSG_DTAP,
+			.dtap = msg,
+		};
 	}
 
-	if (!conn_exists(g_conn))
-		g_conn = NULL;
+	msc_a = msub_msc_a(g_msub);
+	msc_a_get(msc_a, __func__);
+
+	patch_l3_seq_nr(msg);
+	fake_msc_a_ran_dec(&ran_dec_msg);
+
+	msc_a_put(msc_a, __func__);
+
+	if (!conn_exists(g_msub))
+		g_msub = NULL;
 }
 
 void ms_sends_msg(const char *hex)
@@ -257,34 +446,21 @@ void ms_sends_msg(const char *hex)
 	msgb_free(msg);
 }
 
-void bss_sends_bssap_mgmt(const char *hex)
+void ms_sends_classmark_update(const struct osmo_gsm48_classmark *classmark)
 {
-	struct msgb *msg;
-	struct bssmap_header *bh;
-	struct a_conn_info a_conn_info;
-
-	msg = msgb_from_hex("bss_sends_bssap_mgmt", 1024, hex);
-	msg->l3h = msg->data;
-
-	msg->l2h = msgb_push(msg, sizeof(*bh));
-	bh = (void*)msg->l2h;
-	bh->type = BSSAP_MSG_BSS_MANAGEMENT;
-	bh->length = msgb_l3len(msg);
-
-	if (!conn_exists(g_conn))
-		g_conn = NULL;
-
-	OSMO_ASSERT(g_conn);
-	a_conn_info.network = net;
-	a_conn_info.conn_id = g_conn->a.conn_id;
-
-	a_sccp_rx_dt((struct osmo_sccp_user*)0x1, &a_conn_info, msg);
-	msgb_free(msg);
+	struct ran_msg ran_dec = {
+		.msg_type = RAN_MSG_CLASSMARK_UPDATE,
+		.classmark_update = {
+			.classmark = classmark,
+		},
+	};
+	fake_msc_a_ran_dec(&ran_dec);
 }
 
 static int ms_sends_msg_fake(uint8_t pdisc, uint8_t msg_type)
 {
 	int rc;
+	struct ran_msg ran_dec;
 	struct msgb *msg;
 	struct gsm48_hdr *gh;
 
@@ -298,7 +474,12 @@ static int ms_sends_msg_fake(uint8_t pdisc, uint8_t msg_type)
 	msgb_put(msg, 123);
 
 	patch_l3_seq_nr(msg);
-	rc = gsm0408_dispatch(g_conn, msg);
+
+	ran_dec = (struct ran_msg){
+		.msg_type = RAN_MSG_DTAP,
+		.dtap = msg,
+	};
+	rc = fake_msc_a_ran_dec(&ran_dec);
 
 	talloc_free(msg);
 	return rc;
@@ -352,7 +533,6 @@ void __wrap_gsm340_gen_scts(uint8_t *scts, time_t time)
 const char *paging_expecting_imsi = NULL;
 uint32_t paging_expecting_tmsi;
 bool paging_sent;
-bool paging_stopped;
 
 void paging_expect_imsi(const char *imsi)
 {
@@ -366,67 +546,23 @@ void paging_expect_tmsi(uint32_t tmsi)
 	paging_expecting_imsi = NULL;
 }
 
-static int _paging_sent(enum osmo_rat_type via_ran, const char *imsi, uint32_t tmsi, uint32_t lac)
+/* override, requires '-Wl,--wrap=ran_peers_down_paging' */
+int __real_ran_peers_down_paging(struct sccp_ran_inst *sri, enum CELL_IDENT page_where, struct vlr_subscr *vsub,
+				 enum paging_cause cause);
+int __wrap_ran_peers_down_paging(struct sccp_ran_inst *sri, enum CELL_IDENT page_where, struct vlr_subscr *vsub,
+				 enum paging_cause cause)
 {
-	log("%s sends out paging request to IMSI %s, TMSI 0x%08x, LAC %u",
-	    osmo_rat_type_name(via_ran), imsi, tmsi, lac);
+	log("paging request (%s) to %s on %s", paging_cause_name(cause), vlr_subscr_name(vsub),
+	    osmo_rat_type_name(sri->ran->type));
+
 	OSMO_ASSERT(paging_expecting_imsi || (paging_expecting_tmsi != GSM_RESERVED_TMSI));
 	if (paging_expecting_imsi)
-		VERBOSE_ASSERT(strcmp(paging_expecting_imsi, imsi), == 0, "%d");
+		VERBOSE_ASSERT(strcmp(paging_expecting_imsi, vsub->imsi), == 0, "%d");
 	if (paging_expecting_tmsi != GSM_RESERVED_TMSI) {
-		VERBOSE_ASSERT(paging_expecting_tmsi, == tmsi, "0x%08x");
+		VERBOSE_ASSERT(paging_expecting_tmsi, == vsub->tmsi, "0x%08x");
 	}
 	paging_sent = true;
-	paging_stopped = false;
 	return 1;
-}
-
-/* override, requires '-Wl,--wrap=ranap_iu_page_cs' */
-int __real_ranap_iu_page_cs(const char *imsi, const uint32_t *tmsi, uint16_t lac);
-int __wrap_ranap_iu_page_cs(const char *imsi, const uint32_t *tmsi, uint16_t lac)
-{
-	return _paging_sent(OSMO_RAT_UTRAN_IU, imsi, tmsi ? *tmsi : GSM_RESERVED_TMSI, lac);
-}
-
-/* override, requires '-Wl,--wrap=a_iface_tx_paging' */
-int __real_a_iface_tx_paging(const char *imsi, uint32_t tmsi, uint16_t lac);
-int __wrap_a_iface_tx_paging(const char *imsi, uint32_t tmsi, uint16_t lac)
-{
-	return _paging_sent(OSMO_RAT_GERAN_A, imsi, tmsi, lac);
-}
-
-/* override, requires '-Wl,--wrap=msc_stop_paging' */
-void __real_msc_stop_paging(struct vlr_subscr *vsub);
-void __wrap_msc_stop_paging(struct vlr_subscr *vsub)
-{
-	paging_stopped = true;
-}
-
-
-/* override, requires '-Wl,--wrap=osmo_sccp_tx_data_msg' */
-int __real_osmo_sccp_tx_data_msg(struct osmo_sccp_user *scu, uint32_t conn_id,
-				 struct msgb *msg);
-int __wrap_osmo_sccp_tx_data_msg(struct osmo_sccp_user *scu, uint32_t conn_id,
-				 struct msgb *msg)
-{
-	const char *proto_str;
-	const char *msg_str = gsm0808_bssmap_name(msg->l3h[2]);
-	switch (*msg->l3h) {
-	case BSSAP_MSG_BSS_MANAGEMENT:
-		proto_str = "BSSAP-BSS-MANAGEMENT";
-		break;
-	case BSSAP_MSG_DTAP:
-		proto_str = "BSSAP-DTAP";
-		break;
-	default:
-		proto_str = "";
-		msg_str = "";
-		break;
-	}
-
-	log("BSC <--%s-- MSC: %s %s", proto_str, msg_str, msgb_hexdump(msg));
-	msgb_free(msg);
-	return 0;
 }
 
 void clear_vlr()
@@ -531,11 +667,25 @@ static struct log_info info = {
 	.num_cat = ARRAY_SIZE(test_categories),
 };
 
+struct gsm_mncc *on_call_release_mncc_sends_to_cc_data = NULL;
+
 int mncc_recv(struct gsm_network *net, struct msgb *msg)
 {
 	struct gsm_mncc *mncc = (void*)msg->data;
 	log("MSC --> MNCC: callref 0x%x: %s", mncc->callref,
 	    get_mncc_name(mncc->msg_type));
+
+	if (mncc->msg_type == MNCC_REL_IND && on_call_release_mncc_sends_to_cc_data) {
+
+		log("MNCC: callref 0x%x: Call Release triggering %s", mncc->callref,
+		    get_mncc_name(on_call_release_mncc_sends_to_cc_data->msg_type));
+
+		mncc_tx_to_cc(net, on_call_release_mncc_sends_to_cc_data->msg_type,
+			      on_call_release_mncc_sends_to_cc_data);
+
+		on_call_release_mncc_sends_to_cc_data = NULL;
+		return 0;
+	}
 
 	OSMO_ASSERT(cc_to_mncc_tx_expected_msg_type);
 	if (cc_to_mncc_tx_expected_msg_type != mncc->msg_type) {
@@ -600,129 +750,40 @@ int __wrap_osmo_gsup_client_send(struct osmo_gsup_client *gsupc, struct msgb *ms
 	return 0;
 }
 
-static int _validate_dtap(struct msgb *msg, enum osmo_rat_type to_ran)
+/* override, requires '-Wl,--wrap=call_leg_ensure_ci' */
+int __real_call_leg_ensure_ci(struct call_leg *cl, enum rtp_direction dir, uint32_t call_id, struct gsm_trans *for_trans);
+int __wrap_call_leg_ensure_ci(struct call_leg *cl, enum rtp_direction dir, uint32_t call_id, struct gsm_trans *for_trans)
 {
-	btw("DTAP --%s--> MS: %s: %s",
-	    osmo_rat_type_name(to_ran), gh_type_name((void*)msg->data),
-	    osmo_hexdump_nospc(msg->data, msg->len));
-
-	OSMO_ASSERT(dtap_tx_expected);
-
-	/* Mask the sequence number out before comparing */
-	msg->data[1] &= 0x3f;
-	if (!msgb_eq_data_print(msg, dtap_tx_expected->data, dtap_tx_expected->len))
-		abort();
-
-	btw("DTAP matches expected message");
-
-	talloc_free(msg);
-	dtap_tx_confirmed = true;
-	talloc_free(dtap_tx_expected);
-	dtap_tx_expected = NULL;
+	log("MS <--Call Assignment-- MSC: callref=0x%x", call_id);
 	return 0;
-}
-
-/* override, requires '-Wl,--wrap=ranap_iu_tx' */
-int __real_ranap_iu_tx(struct msgb *msg, uint8_t sapi);
-int __wrap_ranap_iu_tx(struct msgb *msg, uint8_t sapi)
-{
-	return _validate_dtap(msg, OSMO_RAT_UTRAN_IU);
-}
-
-/* override, requires '-Wl,--wrap=ranap_iu_tx_release' */
-int __real_ranap_iu_tx_release(struct ranap_ue_conn_ctx *ctx, const struct RANAP_Cause *cause);
-int __wrap_ranap_iu_tx_release(struct ranap_ue_conn_ctx *ctx, const struct RANAP_Cause *cause)
-{
-	btw("Iu Release --%s--> MS", osmo_rat_type_name(OSMO_RAT_UTRAN_IU));
-	OSMO_ASSERT(iu_release_expected);
-	iu_release_expected = false;
-	iu_release_sent = true;
-	return 0;
-}
-
-/* override, requires '-Wl,--wrap=iu_tx_common_id' */
-int __real_ranap_iu_tx_common_id(struct ranap_ue_conn_ctx *ue_ctx, const char *imsi);
-int __wrap_ranap_iu_tx_common_id(struct ranap_ue_conn_ctx *ue_ctx, const char *imsi)
-{
-	btw("Iu Common ID --%s--> MS (IMSI=%s)", osmo_rat_type_name(OSMO_RAT_UTRAN_IU), imsi);
-	return 0;
-}
-
-/* override, requires '-Wl,--wrap=a_iface_tx_dtap' */
-int __real_a_iface_tx_dtap(struct msgb *msg);
-int __wrap_a_iface_tx_dtap(struct msgb *msg)
-{
-	return _validate_dtap(msg, OSMO_RAT_GERAN_A);
-}
-
-/* override, requires '-Wl,--wrap=a_iface_tx_clear_cmd' */
-int __real_a_iface_tx_clear_cmd(struct ran_conn *conn);
-int __wrap_a_iface_tx_clear_cmd(struct ran_conn *conn)
-{
-	btw("BSSAP Clear --%s--> MS", osmo_rat_type_name(OSMO_RAT_GERAN_A));
-	OSMO_ASSERT(bssap_clear_expected);
-	bssap_clear_expected = false;
-	bssap_clear_sent = true;
-	return 0;
-}
-
-/* override, requires '-Wl,--wrap=msc_mgcp_try_call_assignment' */
-int __real_msc_mgcp_try_call_assignment(struct gsm_trans *trans);
-int __wrap_msc_mgcp_try_call_assignment(struct gsm_trans *trans)
-{
-	log("MS <--Call Assignment-- MSC: subscr=%s callref=0x%x",
-	    vlr_subscr_name(trans->vsub), trans->callref);
-	return 0;
-}
-
-struct gsm_mncc *on_call_release_mncc_sends_to_cc_data = NULL;
-
-/* override, requires '-Wl,--wrap=msc_mgcp_call_release' */
-void __real_msc_mgcp_call_release(struct gsm_trans *trans);
-void __wrap_msc_mgcp_call_release(struct gsm_trans *trans)
-{
-	log("MS <--Call Release-- MSC: subscr=%s callref=0x%x",
-	    vlr_subscr_name(trans->vsub), trans->callref);
-	if (on_call_release_mncc_sends_to_cc_data) {
-		mncc_tx_to_cc(trans->net, on_call_release_mncc_sends_to_cc_data->msg_type,
-			      on_call_release_mncc_sends_to_cc_data);
-		on_call_release_mncc_sends_to_cc_data = NULL;
-	}
 }
 
 static int fake_vlr_tx_lu_acc(void *msc_conn_ref, uint32_t send_tmsi)
 {
-	struct ran_conn *conn = msc_conn_ref;
+	struct msc_a *msc_a = msc_conn_ref;
 	if (send_tmsi == GSM_RESERVED_TMSI)
-		btw("sending LU Accept for %s", vlr_subscr_name(conn->vsub));
+		btw("sending LU Accept for %s", msc_a->c.fi->id);
 	else
 		btw("sending LU Accept for %s, with TMSI 0x%08x",
-		    vlr_subscr_name(conn->vsub), send_tmsi);
+		    msc_a->c.fi->id, send_tmsi);
 	lu_result_sent |= RES_ACCEPT;
 	return 0;
 }
 
 static int fake_vlr_tx_lu_rej(void *msc_conn_ref, enum gsm48_reject_value cause)
 {
-	struct ran_conn *conn = msc_conn_ref;
-	btw("sending LU Reject for %s, cause %u", vlr_subscr_name(conn->vsub), cause);
+	struct msc_a *msc_a = msc_conn_ref;
+	btw("sending LU Reject for %s, cause %u", msc_a->c.fi->id, cause);
 	lu_result_sent |= RES_REJECT;
 	return 0;
 }
 
-static int fake_vlr_tx_cm_serv_acc(void *msc_conn_ref)
+static int fake_vlr_tx_cm_serv_rej(void *msc_conn_ref, enum osmo_cm_service_type cm_service_type,
+				   enum gsm48_reject_value cause)
 {
-	struct ran_conn *conn = msc_conn_ref;
-	btw("sending CM Service Accept for %s", vlr_subscr_name(conn->vsub));
-	cm_service_result_sent |= RES_ACCEPT;
-	return 0;
-}
-
-static int fake_vlr_tx_cm_serv_rej(void *msc_conn_ref, enum gsm48_reject_value cause)
-{
-	struct ran_conn *conn = msc_conn_ref;
-	btw("sending CM Service Reject for %s, cause: %s",
-	    vlr_subscr_name(conn->vsub), gsm48_reject_value_name(cause));
+	struct msc_a *msc_a = msc_conn_ref;
+	btw("sending CM Service Reject (%s) for %s, cause: %s",
+	    osmo_cm_service_type_name(cm_service_type), msc_a->c.fi->id, gsm48_reject_value_name(cause));
 	cm_service_result_sent |= RES_REJECT;
 	return 0;
 }
@@ -730,11 +791,11 @@ static int fake_vlr_tx_cm_serv_rej(void *msc_conn_ref, enum gsm48_reject_value c
 static int fake_vlr_tx_auth_req(void *msc_conn_ref, struct vlr_auth_tuple *at,
 				bool send_autn)
 {
-	struct ran_conn *conn = msc_conn_ref;
+	struct msc_a *msc_a = msc_conn_ref;
 	char *hex;
 	bool ok = true;
 	btw("sending %s Auth Request for %s: tuple use_count=%d key_seq=%d auth_types=0x%x and...",
-	    send_autn? "UMTS" : "GSM", vlr_subscr_name(conn->vsub),
+	    send_autn? "UMTS" : "GSM", msc_a->c.fi->id,
 	    at->use_count, at->key_seq, at->vec.auth_types);
 
 	hex = osmo_hexdump_nospc((void*)&at->vec.rand, sizeof(at->vec.rand));
@@ -774,104 +835,64 @@ static int fake_vlr_tx_auth_req(void *msc_conn_ref, struct vlr_auth_tuple *at,
 
 static int fake_vlr_tx_auth_rej(void *msc_conn_ref)
 {
-	struct ran_conn *conn = msc_conn_ref;
-	btw("sending Auth Reject for %s", vlr_subscr_name(conn->vsub));
+	struct msc_a *msc_a = msc_conn_ref;
+	btw("sending Auth Reject for %s", msc_a->c.fi->id);
 	return 0;
 }
 
-/* override, requires '-Wl,--wrap=a_iface_tx_cipher_mode' */
-int __real_a_iface_tx_cipher_mode(const struct ran_conn *conn,
-				  struct gsm0808_encrypt_info *ei, int include_imeisv);
-int __wrap_a_iface_tx_cipher_mode(const struct ran_conn *conn,
-				  struct gsm0808_encrypt_info *ei, int include_imeisv)
+void ms_sends_ciphering_mode_complete(const char *inner_ran_msg)
 {
-	int i;
-	btw("sending Ciphering Mode Command for %s: include_imeisv=%d",
-	    vlr_subscr_name(conn->vsub), include_imeisv);
-	for (i = 0; i < ei->perm_algo_len; i++)
-		btw("...perm algo: A5/%u", ei->perm_algo[i] - 1);
-	OSMO_ASSERT(ei->key_len <= sizeof(ei->key));
-	btw("...key: %s", osmo_hexdump_nospc(ei->key, ei->key_len));
-	cipher_mode_cmd_sent = true;
-	cipher_mode_cmd_sent_with_imeisv = include_imeisv;
+	struct ran_msg ran_dec;
 
-	if (!cipher_mode_expect_kc
-	    || strcmp(cipher_mode_expect_kc, osmo_hexdump_nospc(ei->key, ei->key_len))) {
-		log("FAILURE: expected kc=%s", cipher_mode_expect_kc ? : "NULL");
-		OSMO_ASSERT(false);
+	msc_a_get(msub_msc_a(g_msub), __func__);
+
+	ran_dec = (struct ran_msg){
+		.msg_type = RAN_MSG_CIPHER_MODE_COMPLETE,
+	};
+	fake_msc_a_ran_dec(&ran_dec);
+
+	if (inner_ran_msg) {
+		struct msgb *msg = msgb_from_hex("cipher_mode_complete_ran", 1024, inner_ran_msg);
+		msg->l1h = msg->l2h = msg->l3h = msg->data;
+		ran_dec = (struct ran_msg){
+			.msg_type = RAN_MSG_DTAP,
+			.dtap = msg,
+		};
+		patch_l3_seq_nr(msg);
+		fake_msc_a_ran_dec(&ran_dec);
+		msgb_free(msg);
 	}
-	return 0;
-}
 
-/* override, requires '-Wl,--wrap=ranap_iu_tx_sec_mode_cmd' */
-int __real_ranap_iu_tx_sec_mode_cmd(struct ranap_ue_conn_ctx *uectx, struct osmo_auth_vector *vec,
-				    int send_ck, int new_key);
-int __wrap_ranap_iu_tx_sec_mode_cmd(struct ranap_ue_conn_ctx *uectx, struct osmo_auth_vector *vec,
-				    int send_ck, int new_key)
-{
-	btw("sending SecurityModeControl for UE ctx %u send_ck=%d new_key=%d",
-	    uectx->conn_id, send_ck, new_key);
-	btw("...ik=%s", osmo_hexdump_nospc(vec->ik, sizeof(vec->ik)));
-	if (send_ck)
-		btw("...ck=%s", osmo_hexdump_nospc(vec->ck, sizeof(vec->ck)));
-	security_mode_ctrl_sent = true;
-	if (!security_mode_expect_ik
-	    || strcmp(security_mode_expect_ik, osmo_hexdump_nospc(vec->ik, sizeof(vec->ik)))) {
-		log("FAILURE: expected ik=%s", security_mode_expect_ik ? : "NULL");
-		OSMO_ASSERT(false);
-	}
-	if (((!!send_ck) != (!!security_mode_expect_ck))
-	    || (security_mode_expect_ck
-		&& strcmp(security_mode_expect_ck, osmo_hexdump_nospc(vec->ck, sizeof(vec->ck))))) {
-		log("FAILURE: expected ck=%s", security_mode_expect_ck ? : "NULL");
-		OSMO_ASSERT(false);
-	}
-	return 0;
-}
+	msc_a_put(msub_msc_a(g_msub), __func__);
 
-extern int msc_vlr_set_ciph_mode(void *msc_conn_ref, bool umts_aka, bool retrieve_imeisv);
-
-static int fake_vlr_tx_ciph_mode_cmd(void *msc_conn_ref, bool umts_aka, bool retrieve_imeisv)
-{
-	int rc;
-#ifndef BUILD_IU
-	/* If we built without support for IU, fake the IU part here. The root cause is that we don't
-	 * have differing sets of expected outputs for --enable-iu and --disable-iu. */
-	struct ran_conn *conn = msc_conn_ref;
-	if (conn->via_ran == OSMO_RAT_UTRAN_IU) {
-		DEBUGP(DMM, "-> SECURITY MODE CONTROL %s\n", vlr_subscr_name(conn->vsub));
-		rc = __wrap_ranap_iu_tx_sec_mode_cmd(conn->iu.ue_ctx, &conn->vsub->last_tuple->vec,
-						     0, 1);
-	} else
-#endif
-	rc = msc_vlr_set_ciph_mode(msc_conn_ref, umts_aka, retrieve_imeisv);
-	if (rc)
-		btw("ERROR sending ciphering mode command: rc=%d", rc);
-	return rc;
+	if (!conn_exists(g_msub))
+		g_msub = NULL;
 }
 
 void ms_sends_security_mode_complete()
 {
-	OSMO_ASSERT(g_conn);
-	OSMO_ASSERT(g_conn->via_ran == OSMO_RAT_UTRAN_IU);
-	OSMO_ASSERT(g_conn->iu.ue_ctx);
-	ran_conn_rx_sec_mode_compl(g_conn);
+	struct ran_msg ran_dec;
+
+	ran_dec = (struct ran_msg){
+		.msg_type = RAN_MSG_CIPHER_MODE_COMPLETE,
+	};
+	fake_msc_a_ran_dec(&ran_dec);
+
+	if (!conn_exists(g_msub))
+		g_msub = NULL;
 }
 
-void bss_sends_clear_complete()
+void ran_sends_clear_complete()
 {
-	btw("BSS sends BSSMAP Clear Complete");
-	OSMO_ASSERT(g_conn);
-	OSMO_ASSERT(g_conn->via_ran == OSMO_RAT_GERAN_A);
-	ran_conn_rx_bssmap_clear_complete(g_conn);
-}
+	struct ran_msg ran_dec;
 
-void rnc_sends_release_complete()
-{
-	btw("RNC sends Iu Release Complete");
-	OSMO_ASSERT(g_conn);
-	OSMO_ASSERT(g_conn->via_ran == OSMO_RAT_UTRAN_IU);
-	ran_conn_rx_iu_release_complete(g_conn);
+	ran_dec = (struct ran_msg){
+		.msg_type = RAN_MSG_CLEAR_COMPLETE,
+	};
+	fake_msc_a_ran_dec(&ran_dec);
+
+	if (!conn_exists(g_msub))
+		g_msub = NULL;
 }
 
 const struct timeval fake_time_start_time = { 123, 456 };
@@ -895,25 +916,29 @@ static void check_talloc(void *msgb_ctx, void *msc_vlr_tests_ctx)
 	/* Verifying that the msgb context is empty */
 	talloc_report_full(msgb_ctx, stderr);
 	/* Expecting these to stick around in msc_vlr_tests_ctx:
-	 * talloc_total_blocks(tall_bsc_ctx) == 13
-	 * full talloc report on 'msc_vlr_tests_ctx' (total   4638 bytes in  13 blocks)
-	 *     struct osmo_gsup_client        contains    256 bytes in   1 blocks (ref 0) 0x61300000dd20
-	 *     struct gsm_network             contains   2983 bytes in   5 blocks (ref 0) 0x61400000fea0
-	 *         struct vlr_instance            contains    320 bytes in   2 blocks (ref 0) 0x61300000dee0
-	 *             struct ipaccess_unit           contains     64 bytes in   1 blocks (ref 0) 0x60e0000244c0
-	 *         no_gsup_server                 contains     15 bytes in   1 blocks (ref 0) 0x60b00000af40
-	 *         rate_ctr.c:234                 contains   2352 bytes in   1 blocks (ref 0) 0x61e00000f0e0
-	 *     logging                        contains   1399 bytes in   5 blocks (ref 0) 0x60b00000aff0
-	 *         struct log_target              contains    238 bytes in   2 blocks (ref 0) 0x61200000bf20
-	 *             struct log_category            contains     70 bytes in   1 blocks (ref 0) 0x60f00000efb0
-	 *         struct log_info                contains   1160 bytes in   2 blocks (ref 0) 0x60d00000cfd0
-	 *             struct log_info_cat            contains   1120 bytes in   1 blocks (ref 0) 0x61a00001f2e0
-	 *     msgb                           contains      0 bytes in   1 blocks (ref 0) 0x60800000bf80
-	 * (That's 13 counting the root ctx)
+	 * full talloc report on 'msgb' (total      0 bytes in   1 blocks)
+	 * talloc_total_blocks(tall_bsc_ctx) == 17
+	 * full talloc report on 'msc_vlr_tests_ctx' (total   6336 bytes in  17 blocks)
+	 *     struct osmo_gsup_client        contains    256 bytes in   1 blocks (ref 0) 0x613000000260
+	 *     struct gsm_network             contains   4647 bytes in   9 blocks (ref 0) 0x6190000000e0
+	 * 	struct mgcp_client             contains    688 bytes in   1 blocks (ref 0) 0x6180000000e0
+	 * 	struct sccp_ran_inst           contains    152 bytes in   1 blocks (ref 0) 0x611000000460
+	 * 	struct sccp_ran_inst           contains    152 bytes in   1 blocks (ref 0) 0x611000000320
+	 * 	struct gsup_client_mux         contains    200 bytes in   2 blocks (ref 0) 0x6110000001e0
+	 * 	    struct ipaccess_unit           contains     64 bytes in   1 blocks (ref 0) 0x60e000023180
+	 * 	struct vlr_instance            contains    248 bytes in   1 blocks (ref 0) 0x6130000000a0
+	 * 	no_gsup_server                 contains     15 bytes in   1 blocks (ref 0) 0x60b000000150
+	 * 	../../../src/libosmocore/src/rate_ctr.c:234 contains   2352 bytes in   1 blocks (ref 0) 0x61e0000000e0
+	 *     logging                        contains   1433 bytes in   5 blocks (ref 0) 0x60b0000000a0
+	 * 	struct log_target              contains    240 bytes in   2 blocks (ref 0) 0x6120000000a0
+	 * 	    struct log_category            contains     72 bytes in   1 blocks (ref 0) 0x60f0000000a0
+	 * 	struct log_info                contains   1192 bytes in   2 blocks (ref 0) 0x60d0000000a0
+	 * 	    struct log_info_cat            contains   1152 bytes in   1 blocks (ref 0) 0x61a0000000e0
+	 *     msgb                           contains      0 bytes in   1 blocks (ref 0) 0x608000000100
 	 */
 	fprintf(stderr, "talloc_total_blocks(tall_bsc_ctx) == %zu\n",
 		talloc_total_blocks(msc_vlr_tests_ctx));
-	if (talloc_total_blocks(msc_vlr_tests_ctx) != 13)
+	if (talloc_total_blocks(msc_vlr_tests_ctx) != 17)
 		talloc_report_full(msc_vlr_tests_ctx, stderr);
 	fprintf(stderr, "\n");
 }
@@ -1002,17 +1027,38 @@ struct gsm_network *test_net(void *ctx)
 	net->gsup_server_port = 0;
 
 	OSMO_ASSERT(msc_vlr_alloc(net) == 0);
-	OSMO_ASSERT(msc_vlr_start(net) == 0);
 	OSMO_ASSERT(net->vlr);
-	OSMO_ASSERT(net->vlr->gsup_client);
+	OSMO_ASSERT(msc_gsup_client_start(net) == 0);
+	OSMO_ASSERT(net->gcm);
+	OSMO_ASSERT(msc_vlr_start(net) == 0);
 
 	net->vlr->ops.tx_lu_acc = fake_vlr_tx_lu_acc;
 	net->vlr->ops.tx_lu_rej = fake_vlr_tx_lu_rej;
-	net->vlr->ops.tx_cm_serv_acc = fake_vlr_tx_cm_serv_acc;
+	net->vlr->ops.tx_cm_serv_acc = msc_vlr_tx_cm_serv_acc;
 	net->vlr->ops.tx_cm_serv_rej = fake_vlr_tx_cm_serv_rej;
 	net->vlr->ops.tx_auth_req = fake_vlr_tx_auth_req;
 	net->vlr->ops.tx_auth_rej = fake_vlr_tx_auth_rej;
-	net->vlr->ops.set_ciph_mode = fake_vlr_tx_ciph_mode_cmd;
+	net->vlr->ops.set_ciph_mode = msc_a_vlr_set_cipher_mode;
+
+	/* Allocate fake SCCP Ran Instances */
+	net->a.sri = talloc_zero(net, struct sccp_ran_inst);
+	*net->a.sri = (struct sccp_ran_inst){
+		.ran = &test_ran_infra[OSMO_RAT_GERAN_A],
+	};
+	INIT_LLIST_HEAD(&net->a.sri->ran_peers);
+	INIT_LLIST_HEAD(&net->a.sri->ran_conns);
+
+	net->iu.sri = talloc_zero(net, struct sccp_ran_inst);
+	*net->iu.sri = (struct sccp_ran_inst){
+		.ran = &test_ran_infra[OSMO_RAT_UTRAN_IU],
+	};
+	INIT_LLIST_HEAD(&net->iu.sri->ran_peers);
+	INIT_LLIST_HEAD(&net->iu.sri->ran_conns);
+
+	net->mgw.tdefs = g_mgw_tdefs;
+	mgcp_client_conf_init(&net->mgw.conf);
+	net->mgw.tdefs = g_mgw_tdefs;
+	net->mgw.client = mgcp_client_init(net, &net->mgw.conf);
 
 	return net;
 }
@@ -1046,8 +1092,11 @@ int main(int argc, char **argv)
 	net = test_net(msc_vlr_tests_ctx);
 
 	osmo_fsm_log_addr(false);
+	osmo_fsm_log_timeouts(cmdline_opts.verbose);
 
-	ran_conn_init();
+	call_leg_init(net);
+
+	OSMO_ASSERT(osmo_fsm_register(&dummy_msc_i_fsm) == 0);
 
 	clear_vlr();
 

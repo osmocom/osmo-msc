@@ -27,7 +27,7 @@
 #include <osmocom/msc/signal.h>
 #include <osmocom/msc/debug.h>
 #include <osmocom/msc/gsm_subscriber.h>
-#include <osmocom/msc/ran_conn.h>
+#include <osmocom/msc/msc_a.h>
 
 /* RRLP msPositionReq, nsBased,
  *	Accuracy=60, Method=gps, ResponseTime=2, oneSet */
@@ -59,9 +59,9 @@ const char *msc_rrlp_mode_name(enum rrlp_mode mode)
 	return get_value_string(rrlp_mode_names, mode);
 }
 
-static int send_rrlp_req(struct ran_conn *conn)
+static int send_rrlp_req(struct msc_a *msc_a)
 {
-	struct gsm_network *net = conn->network;
+	struct gsm_network *net = msc_a_net(msc_a);
 	const uint8_t *req;
 
 	switch (net->rrlp.mode) {
@@ -79,27 +79,25 @@ static int send_rrlp_req(struct ran_conn *conn)
 		return 0;
 	}
 
-	LOGP(DRR, LOGL_INFO, "Sending '%s' RRLP position request\n",
-		msc_rrlp_mode_name(net->rrlp.mode));
+	LOG_MSC_A_CAT(msc_a, DRR, LOGL_INFO, "Sending '%s' RRLP position request\n", msc_rrlp_mode_name(net->rrlp.mode));
 
-	return gsm48_send_rr_app_info(conn, 0x00,
-				      sizeof(ms_based_pos_req), req);
+	return gsm48_send_rr_app_info(msc_a, 0x00, sizeof(ms_based_pos_req), req);
 }
 
 static int subscr_sig_cb(unsigned int subsys, unsigned int signal,
 			 void *handler_data, void *signal_data)
 {
 	struct vlr_subscr *vsub;
-	struct ran_conn *conn;
+	struct msc_a *msc_a;
 
 	switch (signal) {
 	case S_SUBSCR_ATTACHED:
 		/* A subscriber has attached. */
 		vsub = signal_data;
-		conn = connection_for_subscr(vsub);
-		if (!conn)
+		msc_a = msc_a_for_vsub(vsub, true);
+		if (!msc_a)
 			break;
-		send_rrlp_req(conn);
+		send_rrlp_req(msc_a);
 		break;
 	}
 	return 0;
@@ -113,7 +111,7 @@ static int paging_sig_cb(unsigned int subsys, unsigned int signal,
 	switch (signal) {
 	case S_PAGING_SUCCEEDED:
 		/* A subscriber has attached. */
-		send_rrlp_req(psig_data->conn);
+		send_rrlp_req(psig_data->msc_a);
 		break;
 	case S_PAGING_EXPIRED:
 		break;

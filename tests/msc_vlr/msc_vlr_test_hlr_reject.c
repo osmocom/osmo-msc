@@ -32,7 +32,7 @@ static void test_hlr_rej_auth_info_unknown_imsi()
 
 	btw("Location Update request causes a GSUP Send Auth Info request to HLR");
 	lu_result_sent = RES_NONE;
-	gsup_expect_tx("08010809710000004026f0");
+	gsup_expect_tx("08010809710000004026f0" VLR_TO_HLR);
 	ms_sends_msg("050802008168000130089910070000006402");
 	OSMO_ASSERT(gsup_tx_confirmed);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
@@ -40,12 +40,12 @@ static void test_hlr_rej_auth_info_unknown_imsi()
 	btw("HLR sends _SEND_AUTH_INFO_ERROR = unknown IMSI");
 	auth_request_sent = false;
 	expect_bssap_clear();
-	gsup_rx("09" "010809710000004026f0" "020102", NULL);
+	gsup_rx("09" "010809710000004026f0" "020102" HLR_TO_VLR, NULL);
 	VERBOSE_ASSERT(auth_request_sent, == false, "%d");
 	VERBOSE_ASSERT(lu_result_sent, == RES_REJECT, "%d");
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
-	bss_sends_clear_complete();
+	ran_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 	clear_vlr();
 	comment_end();
@@ -59,7 +59,7 @@ static void test_hlr_rej_auth_info_net_fail()
 
 	btw("Location Update request causes a GSUP Send Auth Info request to HLR");
 	lu_result_sent = RES_NONE;
-	gsup_expect_tx("08010809710000004026f0");
+	gsup_expect_tx("08010809710000004026f0" VLR_TO_HLR);
 	ms_sends_msg("050802008168000130089910070000006402");
 	OSMO_ASSERT(gsup_tx_confirmed);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
@@ -67,12 +67,12 @@ static void test_hlr_rej_auth_info_net_fail()
 	btw("HLR sends _SEND_AUTH_INFO_ERROR = net fail");
 	auth_request_sent = false;
 	expect_bssap_clear();
-	gsup_rx("09" "010809710000004026f0" "020111", NULL);
+	gsup_rx("09" "010809710000004026f0" "020111" HLR_TO_VLR, NULL);
 	VERBOSE_ASSERT(auth_request_sent, == false, "%d");
 	VERBOSE_ASSERT(lu_result_sent, == RES_REJECT, "%d");
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
-	bss_sends_clear_complete();
+	ran_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 	clear_vlr();
 	comment_end();
@@ -92,7 +92,7 @@ static void test_hlr_rej_auth_info_net_fail_no_reuse_tuples()
 	BTW("Submit a used auth tuple in the VLR");
 	btw("Location Update request causes a GSUP Send Auth Info request to HLR");
 	lu_result_sent = RES_NONE;
-	gsup_expect_tx("08010809710000004026f0");
+	gsup_expect_tx("08010809710000004026f0" VLR_TO_HLR);
 	ms_sends_msg("050802008168000130089910070000006402");
 	OSMO_ASSERT(gsup_tx_confirmed);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
@@ -109,29 +109,29 @@ static void test_hlr_rej_auth_info_net_fail_no_reuse_tuples()
 		/* TL    TL     rand */
 		"0322"  "2010" "585df1ae287f6e273dce07090d61320b"
 		/*       TL     sres       TL     kc */
-			"2104" "2d8b2c3e" "2208" "61855fb81fc2a800"
-		,NULL);
+			"2104" "2d8b2c3e" "2208" "61855fb81fc2a800" HLR_TO_VLR,
+		NULL);
 	VERBOSE_ASSERT(auth_request_sent, == true, "%d");
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("MS sends Authen Response, VLR accepts and sends GSUP LU Req to HLR");
-	gsup_expect_tx("04010809710000004026f0280102");
+	gsup_expect_tx("04010809710000004026f0280102" VLR_TO_HLR);
 	ms_sends_msg("05542d8b2c3e");
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("HLR sends _INSERT_DATA_REQUEST, VLR responds with _INSERT_DATA_RESULT");
-	gsup_rx("10010809710000004026f00804036470f1",
-		"12010809710000004026f0");
+	gsup_rx("10010809710000004026f00804036470f1" HLR_TO_VLR,
+		"12010809710000004026f0" VLR_TO_HLR);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("HLR also sends GSUP _UPDATE_LOCATION_RESULT");
 	expect_bssap_clear();
-	gsup_rx("06010809710000004026f0", NULL);
+	gsup_rx("06010809710000004026f0" HLR_TO_VLR, NULL);
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
 	btw("LU was successful, and the conn has already been closed");
 	VERBOSE_ASSERT(lu_result_sent, == RES_ACCEPT, "%d");
-	bss_sends_clear_complete();
+	ran_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 
 
@@ -148,7 +148,7 @@ static void test_hlr_rej_auth_info_net_fail_no_reuse_tuples()
 
 	btw("Location Update request causes a GSUP Send Auth Info request to HLR");
 	lu_result_sent = RES_NONE;
-	gsup_expect_tx("08010809710000004026f0");
+	gsup_expect_tx("08010809710000004026f0" VLR_TO_HLR);
 	ms_sends_msg("050802008168000130089910070000006402");
 	OSMO_ASSERT(gsup_tx_confirmed);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
@@ -156,12 +156,12 @@ static void test_hlr_rej_auth_info_net_fail_no_reuse_tuples()
 	btw("HLR sends _SEND_AUTH_INFO_ERROR = net fail");
 	auth_request_sent = false;
 	expect_bssap_clear();
-	gsup_rx("09" "010809710000004026f0" "020111", NULL);
+	gsup_rx("09" "010809710000004026f0" "020111" HLR_TO_VLR, NULL);
 	VERBOSE_ASSERT(auth_request_sent, == false, "%d");
 	VERBOSE_ASSERT(lu_result_sent, == RES_REJECT, "%d");
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
-	bss_sends_clear_complete();
+	ran_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 	clear_vlr();
 	comment_end();
@@ -181,7 +181,7 @@ static void test_hlr_rej_auth_info_unkown_imsi_no_reuse_tuples()
 	BTW("Submit a used auth tuple in the VLR");
 	btw("Location Update request causes a GSUP Send Auth Info request to HLR");
 	lu_result_sent = RES_NONE;
-	gsup_expect_tx("08010809710000004026f0");
+	gsup_expect_tx("08010809710000004026f0" VLR_TO_HLR);
 	ms_sends_msg("050802008168000130089910070000006402");
 	OSMO_ASSERT(gsup_tx_confirmed);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
@@ -198,29 +198,29 @@ static void test_hlr_rej_auth_info_unkown_imsi_no_reuse_tuples()
 		/* TL    TL     rand */
 		"0322"  "2010" "585df1ae287f6e273dce07090d61320b"
 		/*       TL     sres       TL     kc */
-			"2104" "2d8b2c3e" "2208" "61855fb81fc2a800"
-		,NULL);
+			"2104" "2d8b2c3e" "2208" "61855fb81fc2a800" HLR_TO_VLR,
+		NULL);
 	VERBOSE_ASSERT(auth_request_sent, == true, "%d");
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("MS sends Authen Response, VLR accepts and sends GSUP LU Req to HLR");
-	gsup_expect_tx("04010809710000004026f0280102");
+	gsup_expect_tx("04010809710000004026f0280102" VLR_TO_HLR);
 	ms_sends_msg("05542d8b2c3e");
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("HLR sends _INSERT_DATA_REQUEST, VLR responds with _INSERT_DATA_RESULT");
-	gsup_rx("10010809710000004026f00804036470f1",
-		"12010809710000004026f0");
+	gsup_rx("10010809710000004026f00804036470f1" HLR_TO_VLR,
+		"12010809710000004026f0" VLR_TO_HLR);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("HLR also sends GSUP _UPDATE_LOCATION_RESULT");
 	expect_bssap_clear();
-	gsup_rx("06010809710000004026f0", NULL);
+	gsup_rx("06010809710000004026f0" HLR_TO_VLR, NULL);
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
 	btw("LU was successful, and the conn has already been closed");
 	VERBOSE_ASSERT(lu_result_sent, == RES_ACCEPT, "%d");
-	bss_sends_clear_complete();
+	ran_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 
 
@@ -238,7 +238,7 @@ static void test_hlr_rej_auth_info_unkown_imsi_no_reuse_tuples()
 
 	btw("Location Update request causes a GSUP Send Auth Info request to HLR");
 	lu_result_sent = RES_NONE;
-	gsup_expect_tx("08010809710000004026f0");
+	gsup_expect_tx("08010809710000004026f0" VLR_TO_HLR);
 	ms_sends_msg("050802008168000130089910070000006402");
 	OSMO_ASSERT(gsup_tx_confirmed);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
@@ -246,12 +246,12 @@ static void test_hlr_rej_auth_info_unkown_imsi_no_reuse_tuples()
 	btw("HLR sends _SEND_AUTH_INFO_ERROR = unknown IMSI");
 	auth_request_sent = false;
 	expect_bssap_clear();
-	gsup_rx("09" "010809710000004026f0" "020102", NULL);
+	gsup_rx("09" "010809710000004026f0" "020102" HLR_TO_VLR, NULL);
 	VERBOSE_ASSERT(auth_request_sent, == false, "%d");
 	VERBOSE_ASSERT(lu_result_sent, == RES_REJECT, "%d");
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
-	bss_sends_clear_complete();
+	ran_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 	clear_vlr();
 	comment_end();
@@ -267,7 +267,7 @@ static void test_hlr_acc_but_no_auth_tuples()
 
 	btw("Location Update request causes a GSUP Send Auth Info request to HLR");
 	lu_result_sent = RES_NONE;
-	gsup_expect_tx("08010809710000004026f0");
+	gsup_expect_tx("08010809710000004026f0" VLR_TO_HLR);
 	ms_sends_msg("050802008168000130089910070000006402");
 	OSMO_ASSERT(gsup_tx_confirmed);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
@@ -279,12 +279,13 @@ static void test_hlr_acc_but_no_auth_tuples()
 		/* imsi */
 		"0108" "09710000004026f0"
 		/* NO auth vectors */
-		,NULL);
+		HLR_TO_VLR,
+		NULL);
 	VERBOSE_ASSERT(auth_request_sent, == false, "%d");
 	VERBOSE_ASSERT(lu_result_sent, == RES_REJECT, "%d");
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
-	bss_sends_clear_complete();
+	ran_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 	clear_vlr();
 	comment_end();
@@ -304,7 +305,7 @@ static void test_hlr_rej_auth_info_net_fail_reuse_tuples()
 	BTW("Submit a used auth tuple in the VLR");
 	btw("Location Update request causes a GSUP Send Auth Info request to HLR");
 	lu_result_sent = RES_NONE;
-	gsup_expect_tx("08010809710000004026f0");
+	gsup_expect_tx("08010809710000004026f0" VLR_TO_HLR);
 	ms_sends_msg("050802008168000130089910070000006402");
 	OSMO_ASSERT(gsup_tx_confirmed);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
@@ -322,28 +323,29 @@ static void test_hlr_rej_auth_info_net_fail_reuse_tuples()
 		"0322"  "2010" "585df1ae287f6e273dce07090d61320b"
 		/*       TL     sres       TL     kc */
 			"2104" "2d8b2c3e" "2208" "61855fb81fc2a800"
-		,NULL);
+		HLR_TO_VLR,
+		NULL);
 	VERBOSE_ASSERT(auth_request_sent, == true, "%d");
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("MS sends Authen Response, VLR accepts and sends GSUP LU Req to HLR");
-	gsup_expect_tx("04010809710000004026f0280102");
+	gsup_expect_tx("04010809710000004026f0280102" VLR_TO_HLR);
 	ms_sends_msg("05542d8b2c3e");
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("HLR sends _INSERT_DATA_REQUEST, VLR responds with _INSERT_DATA_RESULT");
-	gsup_rx("10010809710000004026f00804036470f1",
-		"12010809710000004026f0");
+	gsup_rx("10010809710000004026f00804036470f1" HLR_TO_VLR,
+		"12010809710000004026f0" VLR_TO_HLR);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("HLR also sends GSUP _UPDATE_LOCATION_RESULT");
 	expect_bssap_clear();
-	gsup_rx("06010809710000004026f0", NULL);
+	gsup_rx("06010809710000004026f0" HLR_TO_VLR, NULL);
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
 	btw("LU was successful, and the conn has already been closed");
 	VERBOSE_ASSERT(lu_result_sent, == RES_ACCEPT, "%d");
-	bss_sends_clear_complete();
+	ran_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 
 
@@ -360,35 +362,35 @@ static void test_hlr_rej_auth_info_net_fail_reuse_tuples()
 
 	btw("Location Update request causes a GSUP Send Auth Info request to HLR");
 	lu_result_sent = RES_NONE;
-	gsup_expect_tx("08010809710000004026f0");
+	gsup_expect_tx("08010809710000004026f0" VLR_TO_HLR);
 	ms_sends_msg("050802008168000130089910070000006402");
 	OSMO_ASSERT(gsup_tx_confirmed);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("HLR sends _SEND_AUTH_INFO_ERROR = net fail");
 	auth_request_sent = false;
-	gsup_rx("09" "010809710000004026f0" "020111", NULL);
+	gsup_rx("09" "010809710000004026f0" "020111" HLR_TO_VLR, NULL);
 	VERBOSE_ASSERT(auth_request_sent, == true, "%d");
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("MS sends Authen Response, VLR accepts and sends GSUP LU Req to HLR");
-	gsup_expect_tx("04010809710000004026f0280102");
+	gsup_expect_tx("04010809710000004026f0280102" VLR_TO_HLR);
 	ms_sends_msg("05542d8b2c3e");
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("HLR sends _INSERT_DATA_REQUEST, VLR responds with _INSERT_DATA_RESULT");
-	gsup_rx("10010809710000004026f00804036470f1",
-		"12010809710000004026f0");
+	gsup_rx("10010809710000004026f00804036470f1" HLR_TO_VLR,
+		"12010809710000004026f0" VLR_TO_HLR);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("HLR also sends GSUP _UPDATE_LOCATION_RESULT");
 	expect_bssap_clear();
-	gsup_rx("06010809710000004026f0", NULL);
+	gsup_rx("06010809710000004026f0" HLR_TO_VLR, NULL);
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
 	btw("LU was successful, and the conn has already been closed");
 	VERBOSE_ASSERT(lu_result_sent, == RES_ACCEPT, "%d");
-	bss_sends_clear_complete();
+	ran_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 
 	clear_vlr();
@@ -401,18 +403,18 @@ static void test_hlr_rej_lu()
 
 	btw("Location Update request causes a GSUP LU request to HLR");
 	lu_result_sent = RES_NONE;
-	gsup_expect_tx("04010809710000004026f0280102");
+	gsup_expect_tx("04010809710000004026f0280102" VLR_TO_HLR);
 	ms_sends_msg("050802008168000130089910070000006402");
 	OSMO_ASSERT(gsup_tx_confirmed);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("HLR sends UPDATE_LOCATION_ERROR");
 	expect_bssap_clear();
-	gsup_rx("05" "010809710000004026f0" "020102",
+	gsup_rx("05" "010809710000004026f0" "020102" HLR_TO_VLR,
 		NULL);
 	VERBOSE_ASSERT(lu_result_sent, == RES_REJECT, "%d");
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
-	bss_sends_clear_complete();
+	ran_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 
 	clear_vlr();
@@ -425,14 +427,14 @@ static void test_hlr_no_insert_data()
 
 	btw("Location Update request causes a GSUP LU request to HLR");
 	lu_result_sent = RES_NONE;
-	gsup_expect_tx("04010809710000004026f0280102");
+	gsup_expect_tx("04010809710000004026f0280102" VLR_TO_HLR);
 	ms_sends_msg("050802008168000130089910070000006402");
 	OSMO_ASSERT(gsup_tx_confirmed);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("HLR sends only _UPDATE_LOCATION_RESULT, no INSERT DATA");
 	expect_bssap_clear();
-	gsup_rx("06010809710000004026f0", NULL);
+	gsup_rx("06010809710000004026f0" HLR_TO_VLR, NULL);
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
 	/* TODO should we wait for OSMO_GSUP_MSGT_INSERT_DATA_REQUEST? */
@@ -440,7 +442,7 @@ static void test_hlr_no_insert_data()
 	btw("LU was successful, and the conn has already been closed");
 	VERBOSE_ASSERT(lu_result_sent, == RES_ACCEPT, "%d");
 
-	bss_sends_clear_complete();
+	ran_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 	clear_vlr();
 	comment_end();

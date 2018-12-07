@@ -51,8 +51,10 @@
 #include <osmocom/msc/signal.h>
 #include <osmocom/msc/db.h>
 #include <osmocom/msc/transaction.h>
-#include <osmocom/msc/msc_ifaces.h>
 #include <osmocom/msc/vlr.h>
+#include <osmocom/msc/msub.h>
+#include <osmocom/msc/msc_a.h>
+#include <osmocom/msc/paging.h>
 
 #ifdef BUILD_SMPP
 #include "smpp_smsc.h"
@@ -60,7 +62,6 @@
 
 void *tall_gsms_ctx;
 static uint32_t new_callref = 0x40000001;
-
 
 struct gsm_sms *sms_alloc(void)
 {
@@ -124,57 +125,39 @@ static int gsm411_sendmsg(struct gsm_trans *trans, struct msgb *msg)
 {
 	LOG_TRANS(trans, LOGL_DEBUG, "GSM4.11 TX %s\n", msgb_hexdump(msg));
 	msg->l3h = msg->data;
-	return msc_tx_dtap(trans->conn, msg);
+	return msc_a_tx_dtap_to_i(trans->msc_a, msg);
 }
 
 /* Paging callback for MT SMS (Paging is triggered by SMC) */
-static int paging_cb_mmsms_est_req(unsigned int hooknum, unsigned int event,
-				   struct msgb *msg, void *_conn, void *_trans)
+static void mmsms_paging_cb(struct msc_a *msc_a, struct gsm_trans *trans)
 {
-	struct ran_conn *conn = _conn;
-	struct gsm_trans *trans = _trans;
 	struct gsm_sms *sms = trans->sms.sms;
-	int rc = 0;
 
-	LOG_TRANS(trans, LOGL_DEBUG, "%s(%s)\n", __func__, event == GSM_PAGING_SUCCEEDED ? "success" : "expired");
+	LOG_TRANS(trans, LOGL_DEBUG, "%s(%s)\n", __func__, msc_a ? "success" : "expired");
 
-	if (hooknum != GSM_HOOK_RR_PAGING)
-		return -EINVAL;
-
-	/* Paging procedure has finished */
-	trans->paging_request = NULL;
-
-	switch (event) {
-	case GSM_PAGING_SUCCEEDED:
+	if (msc_a) {
+		/* Paging succeeded */
 		/* Associate transaction with established connection */
-		trans->conn = ran_conn_get(conn, RAN_CONN_USE_TRANS_SMS);
+		msc_a_get(msc_a, MSC_A_USE_SMS);
+		trans->msc_a = msc_a;
 		/* Confirm successful connection establishment */
-		gsm411_smc_recv(&trans->sms.smc_inst,
-			GSM411_MMSMS_EST_CNF, NULL, 0);
-		break;
-	case GSM_PAGING_EXPIRED:
-	case GSM_PAGING_BUSY:
+		gsm411_smc_recv(&trans->sms.smc_inst, GSM411_MMSMS_EST_CNF, NULL, 0);
+	} else {
+		/* Paging expired or failed */
 		/* Inform SMC about channel establishment failure */
-		gsm411_smc_recv(&trans->sms.smc_inst,
-			GSM411_MMSMS_REL_IND, NULL, 0);
+		gsm411_smc_recv(&trans->sms.smc_inst, GSM411_MMSMS_REL_IND, NULL, 0);
 
 		/* gsm411_send_rp_data() doesn't set trans->sms.sms */
 		if (sms != NULL) {
 			/* Notify the SMSqueue and free stored SMS */
-			send_signal(S_SMS_UNKNOWN_ERROR, NULL, sms, event);
+			send_signal(S_SMS_UNKNOWN_ERROR, NULL, sms, 0);
 			trans->sms.sms = NULL;
 			sms_free(sms);
 		}
 
 		/* Destroy this transaction */
 		trans_free(trans);
-		rc = -ETIMEDOUT;
-		break;
-	default:
-		LOGP(DLSMS, LOGL_ERROR, "Unhandled paging event: %d\n", event);
 	}
-
-	return rc;
 }
 
 static int gsm411_mmsms_est_req(struct gsm_trans *trans)
@@ -183,7 +166,7 @@ static int gsm411_mmsms_est_req(struct gsm_trans *trans)
 	OSMO_ASSERT(trans->vsub != NULL);
 
 	/* Check if connection is already established */
-	if (trans->conn != NULL) {
+	if (trans->msc_a != NULL) {
 		LOG_TRANS(trans, LOGL_DEBUG, "Using an existing connection\n");
 		return gsm411_smc_recv(&trans->sms.smc_inst,
 			GSM411_MMSMS_EST_CNF, NULL, 0);
@@ -191,15 +174,12 @@ static int gsm411_mmsms_est_req(struct gsm_trans *trans)
 
 	/* Initiate Paging procedure */
 	LOG_TRANS(trans, LOGL_DEBUG, "Initiating Paging due to MMSMS_EST_REQ\n");
-	trans->paging_request = subscr_request_conn(trans->vsub,
-						    paging_cb_mmsms_est_req,
-						    trans, "MT SMS",
-						    SGSAP_SERV_IND_SMS);
+	trans->paging_request = paging_request_start(trans->vsub, PAGING_CAUSE_SIGNALLING_LOW_PRIO,
+						     mmsms_paging_cb, trans, "MT-SMS");
 	if (!trans->paging_request) {
 		LOG_TRANS(trans, LOGL_ERROR, "Failed to initiate Paging\n");
 		/* Inform SMC about channel establishment failure */
-		gsm411_smc_recv(&trans->sms.smc_inst,
-			GSM411_MMSMS_REL_IND, NULL, 0);
+		gsm411_smc_recv(&trans->sms.smc_inst, GSM411_MMSMS_REL_IND, NULL, 0);
 		trans_free(trans);
 		return -EIO;
 	}
@@ -215,7 +195,7 @@ static int gsm411_cp_sendmsg(struct msgb *msg, struct gsm_trans *trans,
 
 	gh = (struct gsm48_hdr *) msgb_push(msg, sizeof(*gh));
 	/* Outgoing needs the highest bit set */
-	gh->proto_discr = trans->protocol | (trans->transaction_id<<4);
+	gh->proto_discr = GSM48_PDISC_SMS | (trans->transaction_id<<4);
 	gh->msg_type = msg_type;
 	OMSC_LINKID_CB(msg) = trans->dlci;
 
@@ -408,19 +388,18 @@ static int gsm340_gen_sms_status_report_tpdu(struct gsm_trans *trans, struct msg
 static int sms_route_mt_sms(struct gsm_trans *trans, struct gsm_sms *gsms)
 {
 	int rc;
-	struct ran_conn *conn = trans->conn;
+	struct msc_a *msc_a = trans->msc_a;
+	struct gsm_network *net = msc_a_net(msc_a);
 
 #ifdef BUILD_SMPP
-	int smpp_first = smpp_route_smpp_first(gsms, conn);
-
 	/*
 	 * Route through SMPP first before going to the local database. In case
 	 * of a unroutable message and no local subscriber, SMPP will be tried
 	 * twice. In case of an unknown subscriber continue with the normal
 	 * delivery of the SMS.
 	 */
-	if (smpp_first) {
-		rc = smpp_try_deliver(gsms, conn);
+	if (smpp_route_smpp_first()) {
+		rc = smpp_try_deliver(gsms, msc_a);
 		if (rc == GSM411_RP_CAUSE_MO_NUM_UNASSIGNED)
 			/* unknown subscriber, try local */
 			goto try_local;
@@ -428,8 +407,7 @@ static int sms_route_mt_sms(struct gsm_trans *trans, struct gsm_sms *gsms)
 			LOG_TRANS(trans, LOGL_ERROR, "SMS delivery error: %d\n", rc);
 	 		rc = GSM411_RP_CAUSE_MO_TEMP_FAIL;
 			/* rc will be logged by gsm411_send_rp_error() */
-			rate_ctr_inc(&conn->network->msc_ctrs->ctr[
-					MSC_CTR_SMS_DELIVER_UNKNOWN_ERROR]);
+			rate_ctr_inc(&net->msc_ctrs->ctr[MSC_CTR_SMS_DELIVER_UNKNOWN_ERROR]);
 		}
 		return rc;
 	}
@@ -438,28 +416,27 @@ try_local:
 #endif
 
 	/* determine gsms->receiver based on dialled number */
-	gsms->receiver = vlr_subscr_find_by_msisdn(conn->network->vlr, gsms->dst.addr, VSUB_USE_SMS_RECEIVER);
+	gsms->receiver = vlr_subscr_find_by_msisdn(net->vlr, gsms->dst.addr, VSUB_USE_SMS_RECEIVER);
 	if (!gsms->receiver) {
 #ifdef BUILD_SMPP
 		/* Avoid a second look-up */
-		if (smpp_first) {
-			rate_ctr_inc(&conn->network->msc_ctrs->ctr[MSC_CTR_SMS_NO_RECEIVER]);
+		if (smpp_route_smpp_first()) {
+			rate_ctr_inc(&net->msc_ctrs->ctr[MSC_CTR_SMS_NO_RECEIVER]);
 			return GSM411_RP_CAUSE_MO_NUM_UNASSIGNED;
 		}
 
-		rc = smpp_try_deliver(gsms, conn);
+		rc = smpp_try_deliver(gsms, msc_a);
 		if (rc == GSM411_RP_CAUSE_MO_NUM_UNASSIGNED) {
-			rate_ctr_inc(&conn->network->msc_ctrs->ctr[MSC_CTR_SMS_NO_RECEIVER]);
+			rate_ctr_inc(&net->msc_ctrs->ctr[MSC_CTR_SMS_NO_RECEIVER]);
 		} else if (rc < 0) {
 			LOG_TRANS(trans, LOGL_ERROR, "SMS delivery error: %d\n", rc);
 	 		rc = GSM411_RP_CAUSE_MO_TEMP_FAIL;
 			/* rc will be logged by gsm411_send_rp_error() */
-			rate_ctr_inc(&conn->network->msc_ctrs->ctr[
-					MSC_CTR_SMS_DELIVER_UNKNOWN_ERROR]);
+			rate_ctr_inc(&net->msc_ctrs->ctr[MSC_CTR_SMS_DELIVER_UNKNOWN_ERROR]);
 		}
 #else
 		rc = GSM411_RP_CAUSE_MO_NUM_UNASSIGNED;
-		rate_ctr_inc(&conn->network->msc_ctrs->ctr[MSC_CTR_SMS_NO_RECEIVER]);
+		rate_ctr_inc(&net->msc_ctrs->ctr[MSC_CTR_SMS_NO_RECEIVER]);
 #endif
 	} else
 		rc = 0;
@@ -473,7 +450,6 @@ try_local:
 static int gsm340_rx_tpdu(struct gsm_trans *trans, struct msgb *msg,
 			  uint32_t gsm411_msg_ref)
 {
-	struct ran_conn *conn = trans->conn;
 	uint8_t *smsp = msgb_sms(msg);
 	struct gsm_sms *gsms;
 	unsigned int sms_alphabet;
@@ -482,8 +458,14 @@ static int gsm340_rx_tpdu(struct gsm_trans *trans, struct msgb *msg,
 	uint8_t da_len_bytes;
 	uint8_t address_lv[12]; /* according to 03.40 / 9.1.2.5 */
 	int rc = 0;
+	struct msc_a *msc_a = trans->msc_a;
+	struct gsm_network *net = msc_a_net(msc_a);
+	struct vlr_subscr *vsub = msc_a_vsub(msc_a);
 
-	rate_ctr_inc(&conn->network->msc_ctrs->ctr[MSC_CTR_SMS_SUBMITTED]);
+	rate_ctr_inc(&net->msc_ctrs->ctr[MSC_CTR_SMS_SUBMITTED]);
+
+	if (!msc_a || !vsub)
+		return GSM411_RP_CAUSE_MO_NET_OUT_OF_ORDER;
 
 	gsms = sms_alloc();
 	if (!gsms)
@@ -579,7 +561,7 @@ static int gsm340_rx_tpdu(struct gsm_trans *trans, struct msgb *msg,
 		}
 	}
 
-	OSMO_STRLCPY_ARRAY(gsms->src.addr, conn->vsub->msisdn);
+	OSMO_STRLCPY_ARRAY(gsms->src.addr, vsub->msisdn);
 
 	LOG_TRANS(trans, LOGL_INFO,
 		  "MO SMS -- MTI: 0x%02x, VPF: 0x%02x, "
@@ -592,9 +574,6 @@ static int gsm340_rx_tpdu(struct gsm_trans *trans, struct msgb *msg,
 		  osmo_hexdump(gsms->user_data, gsms->user_data_len));
 
 	gsms->validity_minutes = gsm340_validity_period(sms_vpf, sms_vp);
-
-	/* FIXME: This looks very wrong */
-	send_signal(0, NULL, gsms, 0);
 
 	rc = sms_route_mt_sms(trans, gsms);
 
@@ -824,7 +803,8 @@ static int gsm411_rx_rp_ack(struct gsm_trans *trans,
 static int gsm411_rx_rp_error(struct gsm_trans *trans,
 			      struct gsm411_rp_hdr *rph)
 {
-	struct gsm_network *net = trans->conn->network;
+	struct msc_a *msc_a = trans->msc_a;
+	struct gsm_network *net = msc_a_net(msc_a);
 	struct gsm_sms *sms = trans->sms.sms;
 	uint8_t cause_len = rph->data[0];
 	uint8_t cause = rph->data[1];
@@ -1005,11 +985,11 @@ static int gsm411_mn_recv(struct gsm411_smc_inst *inst, int msg_type,
 	return rc;
 }
 
-static struct gsm_trans *gsm411_trans_init(struct gsm_network *net, struct vlr_subscr *vsub, struct ran_conn *conn,
-					   uint8_t tid)
+static struct gsm_trans *gsm411_trans_init(struct gsm_network *net, struct vlr_subscr *vsub, struct msc_a *msc_a,
+					   uint8_t tid, bool mo)
 {
 	/* Allocate a new transaction */
-	struct gsm_trans *trans = trans_alloc(net, vsub, GSM48_PDISC_SMS, tid, new_callref++);
+	struct gsm_trans *trans = trans_alloc(net, vsub, TRANS_SMS, tid, new_callref++);
 	if (!trans) {
 		LOG_TRANS(trans, LOGL_ERROR, "No memory for transaction\n");
 		return NULL;
@@ -1019,9 +999,24 @@ static struct gsm_trans *gsm411_trans_init(struct gsm_network *net, struct vlr_s
 	gsm411_smc_init(&trans->sms.smc_inst, 0, 1, gsm411_mn_recv, gsm411_mm_send);
 	gsm411_smr_init(&trans->sms.smr_inst, 0, 1, gsm411_rl_recv, gsm411_mn_send);
 
-	/* Associate transaction with connection */
-	if (conn)
-		trans->conn = ran_conn_get(conn, RAN_CONN_USE_TRANS_SMS);
+	if (msc_a) {
+		msc_a_get(msc_a, MSC_A_USE_SMS);
+		trans->msc_a = msc_a;
+
+		osmo_fsm_inst_dispatch(msc_a->c.fi, MSC_A_EV_TRANSACTION_ACCEPTED, trans);
+		if (mo) {
+			if (!osmo_use_count_by(&msc_a->use_count, MSC_A_USE_CM_SERVICE_SMS))
+				LOG_TRANS(trans, LOGL_ERROR, "MO SMS without prior CM Service Request\n");
+			else
+				msc_a_put(msc_a, MSC_A_USE_CM_SERVICE_SMS);
+		}
+	}
+
+	/* Init both SMC and SMR state machines */
+	gsm411_smc_init(&trans->sms.smc_inst, 0, 1,
+		gsm411_mn_recv, gsm411_mm_send);
+	gsm411_smr_init(&trans->sms.smr_inst, 0, 1,
+		gsm411_rl_recv, gsm411_mn_send);
 
 	return trans;
 }
@@ -1053,22 +1048,22 @@ static int gsm411_assign_sm_rp_mr(struct gsm_trans *trans)
 static struct gsm_trans *gsm411_alloc_mt_trans(struct gsm_network *net,
 					       struct vlr_subscr *vsub)
 {
-	struct ran_conn *conn;
+	struct msc_a *msc_a;
 	struct gsm_trans *trans = NULL;
 	int tid;
 
 	/* Generate a new transaction ID */
-	tid = trans_assign_trans_id(net, vsub, GSM48_PDISC_SMS);
+	tid = trans_assign_trans_id(net, vsub, TRANS_SMS);
 	if (tid == -1) {
 		LOG_TRANS(trans, LOGL_ERROR, "No available transaction IDs\n");
 		return NULL;
 	}
 
 	/* Attempt to find an existing connection */
-	conn = connection_for_subscr(vsub);
+	msc_a = msc_a_for_vsub(vsub, true);
 
 	/* Allocate a new transaction */
-	trans = gsm411_trans_init(net, vsub, conn, tid);
+	trans = gsm411_trans_init(net, vsub, msc_a, tid, false);
 	if (!trans)
 		return NULL;
 
@@ -1197,8 +1192,7 @@ int gsm411_send_rp_data(struct gsm_network *net, struct vlr_subscr *vsub,
 }
 
 /* Entry point for incoming GSM48_PDISC_SMS from abis_rsl.c */
-int gsm0411_rcv_sms(struct ran_conn *conn,
-		    struct msgb *msg)
+int gsm0411_rcv_sms(struct msc_a *msc_a, struct msgb *msg)
 {
 	struct gsm48_hdr *gh = msgb_l3(msg);
 	uint8_t msg_type = gh->msg_type;
@@ -1207,12 +1201,10 @@ int gsm0411_rcv_sms(struct ran_conn *conn,
 	struct gsm_trans *trans;
 	int new_trans = 0;
 	int rc = 0;
+	struct vlr_subscr *vsub = msc_a_vsub(msc_a);
+	struct gsm_network *net = msc_a_net(msc_a);
 
-	if (!conn->vsub)
-		return -EIO;
-		/* FIXME: send some error message */
-
-	trans = trans_find_by_id(conn, GSM48_PDISC_SMS, transaction_id);
+	trans = trans_find_by_id(msc_a, TRANS_SMS, transaction_id);
 
 	/*
 	 * A transaction we created but don't know about?
@@ -1226,7 +1218,8 @@ int gsm0411_rcv_sms(struct ran_conn *conn,
 	}
 
 	if (!trans) {
-		trans = gsm411_trans_init(conn->network, conn->vsub, conn, transaction_id);
+		new_trans = 1;
+		trans = gsm411_trans_init(net, vsub, msc_a, transaction_id, true);
 		if (!trans) {
 			/* FIXME: send some error message */
 			return -ENOMEM;
@@ -1234,9 +1227,6 @@ int gsm0411_rcv_sms(struct ran_conn *conn,
 
 		trans->sms.sm_rp_mr = rph->msg_ref; /* SM-RP Message Reference */
 		trans->dlci = OMSC_LINKID_CB(msg); /* DLCI as received from BSC */
-
-		new_trans = 1;
-		cm_service_request_concludes(conn, msg);
 	}
 
 	LOG_TRANS(trans, LOGL_DEBUG, "receiving SMS message %s\n",
@@ -1257,7 +1247,7 @@ int gsm0411_rcv_sms(struct ran_conn *conn,
 			if (i == transaction_id)
 				continue;
 
-			ptrans = trans_find_by_id(conn, GSM48_PDISC_SMS, i);
+			ptrans = trans_find_by_id(msc_a, TRANS_SMS, i);
 			if (!ptrans)
 				continue;
 
@@ -1267,8 +1257,6 @@ int gsm0411_rcv_sms(struct ran_conn *conn,
 			trans_free(ptrans);
 		}
 	}
-
-	ran_conn_communicating(conn);
 
 	gsm411_smc_recv(&trans->sms.smc_inst,
 		(new_trans) ? GSM411_MMSMS_EST_IND : GSM411_MMSMS_DATA_IND,
@@ -1297,19 +1285,19 @@ void _gsm411_sms_trans_free(struct gsm_trans *trans)
 }
 
 /* Process incoming SAPI N-REJECT from BSC */
-void gsm411_sapi_n_reject(struct ran_conn *conn)
+void gsm411_sapi_n_reject(struct msc_a *msc_a)
 {
 	struct gsm_network *net;
 	struct gsm_trans *trans, *tmp;
 
-	net = conn->network;
+	net = msc_a_net(msc_a);
 
 	llist_for_each_entry_safe(trans, tmp, &net->trans_list, entry) {
 		struct gsm_sms *sms;
 
-		if (trans->conn != conn)
+		if (trans->msc_a != msc_a)
 			continue;
-		if (trans->protocol != GSM48_PDISC_SMS)
+		if (trans->type != TRANS_SMS)
 			continue;
 
 		sms = trans->sms.sms;

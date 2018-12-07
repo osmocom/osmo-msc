@@ -32,11 +32,13 @@ static void mncc_sends_to_cc(uint32_t msg_type, struct gsm_mncc *mncc)
 	mncc_tx_to_cc(net, msg_type, mncc);
 }
 
+/*
 static void on_call_release_mncc_sends_to_cc(uint32_t msg_type, struct gsm_mncc *mncc)
 {
 	mncc->msg_type = msg_type;
 	on_call_release_mncc_sends_to_cc_data = mncc;
 }
+*/
 
 #define IMSI "901700000010650"
 
@@ -50,7 +52,7 @@ static void standard_lu()
 
 	btw("Location Update request causes a GSUP Send Auth Info request to HLR");
 	lu_result_sent = RES_NONE;
-	gsup_expect_tx("080108" "09710000000156f0");
+	gsup_expect_tx("080108" "09710000000156f0" VLR_TO_HLR);
 	ms_sends_msg("0508" /* MM LU */
 		     "7" /* ciph key seq: no key available */
 		     "0" /* LU type: normal */
@@ -111,7 +113,8 @@ static void standard_lu()
 			"2310" "65af0527fda95b0dc5ae4aa515cdf32f"
 			"2410" "537c3b35a3b13b08d08eeb28098f45cc"
 			"2510" "4bf4e564f75300009bc796706bc65744"
-			"2708" "0edb0eadbea94ac2",
+			"2708" "0edb0eadbea94ac2"
+		HLR_TO_VLR,
 		NULL);
 	VERBOSE_ASSERT(auth_request_sent, == true, "%d");
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
@@ -123,18 +126,18 @@ static void standard_lu()
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("MS sends SecurityModeControl acceptance, VLR accepts and sends GSUP LU Req to HLR");
-	gsup_expect_tx("04010809710000000156f0280102");
+	gsup_expect_tx("04010809710000000156f0280102" VLR_TO_HLR);
 	ms_sends_security_mode_complete();
 	VERBOSE_ASSERT(gsup_tx_confirmed, == true, "%d");
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("HLR sends _INSERT_DATA_REQUEST, VLR responds with _INSERT_DATA_RESULT");
-	gsup_rx("10010809710000000156f00804032443f2",
-		"12010809710000000156f0");
+	gsup_rx("10010809710000000156f00804032443f2" HLR_TO_VLR,
+		"12010809710000000156f0" VLR_TO_HLR);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("HLR also sends GSUP _UPDATE_LOCATION_RESULT");
-	gsup_rx("06010809710000000156f0", NULL);
+	gsup_rx("06010809710000000156f0" HLR_TO_VLR, NULL);
 
 	VERBOSE_ASSERT(lu_result_sent, == RES_ACCEPT, "%d");
 
@@ -149,7 +152,7 @@ static void standard_lu()
 	VERBOSE_ASSERT(iu_release_sent, == true, "%d"); \
 
 	btw("LU was successful, and the conn has already been closed");
-	rnc_sends_release_complete();
+	ran_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 
 	vsub = vlr_subscr_find_by_imsi(net->vlr, IMSI, __func__);
@@ -176,12 +179,9 @@ static void test_call_mo()
 	auth_request_expect_rand = "c187a53a5e6b9d573cac7c74451fd46d";
 	auth_request_expect_autn = "1843a645b98d00005b2d666af46c45d9";
 	cm_service_result_sent = RES_NONE;
-	ms_sends_msg("052478"
+	ms_sends_msg("052471"
 		     "03575886" /* classmark 2 */
 		     "089910070000106005" /* IMSI */);
-	OSMO_ASSERT(g_conn);
-	OSMO_ASSERT(g_conn->fi);
-	OSMO_ASSERT(g_conn->vsub);
 	VERBOSE_ASSERT(cm_service_result_sent, == RES_NONE, "%d");
 	VERBOSE_ASSERT(auth_request_sent, == true, "%d");
 
@@ -254,7 +254,7 @@ static void test_call_mo()
 	OSMO_ASSERT(cc_to_mncc_tx_confirmed);
 	OSMO_ASSERT(iu_release_sent);
 
-	rnc_sends_release_complete();
+	ran_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 	clear_vlr();
 	comment_end();
@@ -274,13 +274,12 @@ static void test_call_mt()
 	standard_lu();
 
 	BTW("after a while, MNCC asks us to setup a call, causing Paging");
-	
+
 	paging_expect_imsi(IMSI);
 	paging_sent = false;
 	mncc_sends_to_cc(MNCC_SETUP_REQ, &mncc);
 
 	VERBOSE_ASSERT(paging_sent, == true, "%d");
-	VERBOSE_ASSERT(paging_stopped, == false, "%d");
 
 	btw("MS replies with Paging Response, and VLR sends Auth Request");
 	auth_request_sent = false;
@@ -299,7 +298,6 @@ static void test_call_mt()
 	btw("MS sends SecurityModeControl acceptance, VLR accepts, sends CC Setup");
 	dtap_expect_tx("0305" /* CC: Setup */);
 	ms_sends_security_mode_complete();
-	VERBOSE_ASSERT(paging_stopped, == true, "%d");
 
 	cc_to_mncc_expect_tx(IMSI, MNCC_CALL_CONF_IND);
 	ms_sends_msg("8348" /* CC: Call Confirmed */
@@ -338,7 +336,7 @@ static void test_call_mt()
 	OSMO_ASSERT(cc_to_mncc_tx_confirmed);
 	OSMO_ASSERT(iu_release_sent);
 
-	rnc_sends_release_complete();
+	ran_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 	clear_vlr();
 	comment_end();
@@ -358,13 +356,12 @@ static void test_call_mt2()
 	standard_lu();
 
 	BTW("after a while, MNCC asks us to setup a call, causing Paging");
-	
+
 	paging_expect_imsi(IMSI);
 	paging_sent = false;
 	mncc_sends_to_cc(MNCC_SETUP_REQ, &mncc);
 
 	VERBOSE_ASSERT(paging_sent, == true, "%d");
-	VERBOSE_ASSERT(paging_stopped, == false, "%d");
 
 	btw("MS replies with Paging Response, and VLR sends Auth Request");
 	auth_request_sent = false;
@@ -383,7 +380,6 @@ static void test_call_mt2()
 	btw("MS sends SecurityModeControl acceptance, VLR accepts, sends CC Setup");
 	dtap_expect_tx("0305" /* CC: Setup */);
 	ms_sends_security_mode_complete();
-	VERBOSE_ASSERT(paging_stopped, == true, "%d");
 
 	cc_to_mncc_expect_tx(IMSI, MNCC_CALL_CONF_IND);
 	ms_sends_msg("8348" /* CC: Call Confirmed */
@@ -401,15 +397,19 @@ static void test_call_mt2()
 	fake_time_passes(15, 23);
 
 	btw("The call failed, the BSC sends a BSSMAP Clear Request");
-	on_call_release_mncc_sends_to_cc(MNCC_REL_REQ, &mncc);
+	/* FIXME: in this scenario, we send an MNCC_REL_CNF even though MNCC never asked us to MNCC_REL_REQ.  Legacy
+	 * behavior did get to both MNCC_REL_IND, then an MNCC_REL_REQ from MNCC as well as a final MNCC_REL_CNF, but
+	 * this only worked synchronously, i.e. only with internal MNCC. Instead of mimicking that, we need a proper
+	 * async solution that also works with a PBX. */
 	cc_to_mncc_expect_tx("", MNCC_REL_CNF);
-	dtap_expect_tx("032d"); /* CC: Release */
+	dtap_expect_tx("032d080281af"); /* CC: Release */
 	expect_iu_release();
-	ran_conn_clear_request(g_conn, 0);
+	msc_a_release_cn(msub_msc_a(g_msub));
+	OSMO_ASSERT(dtap_tx_confirmed);
 	OSMO_ASSERT(cc_to_mncc_tx_confirmed);
 	OSMO_ASSERT(iu_release_sent);
 
-	rnc_sends_release_complete();
+	ran_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 
 	/* Make sure a pending release timer doesn't fire later to access freed data */
@@ -436,12 +436,9 @@ static void test_call_mo_to_unknown()
 	auth_request_expect_rand = "c187a53a5e6b9d573cac7c74451fd46d";
 	auth_request_expect_autn = "1843a645b98d00005b2d666af46c45d9";
 	cm_service_result_sent = RES_NONE;
-	ms_sends_msg("052478"
+	ms_sends_msg("052471"
 		     "03575886" /* classmark 2 */
 		     "089910070000106005" /* IMSI */);
-	OSMO_ASSERT(g_conn);
-	OSMO_ASSERT(g_conn->fi);
-	OSMO_ASSERT(g_conn->vsub);
 	VERBOSE_ASSERT(cm_service_result_sent, == RES_NONE, "%d");
 	VERBOSE_ASSERT(auth_request_sent, == true, "%d");
 
@@ -493,7 +490,7 @@ static void test_call_mo_to_unknown()
 	OSMO_ASSERT(iu_release_sent);
 	OSMO_ASSERT(cc_to_mncc_tx_confirmed);
 
-	rnc_sends_release_complete();
+	ran_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 	clear_vlr();
 	comment_end();
@@ -516,12 +513,9 @@ static void test_call_mo_to_unknown_timeout()
 	auth_request_expect_rand = "c187a53a5e6b9d573cac7c74451fd46d";
 	auth_request_expect_autn = "1843a645b98d00005b2d666af46c45d9";
 	cm_service_result_sent = RES_NONE;
-	ms_sends_msg("052478"
+	ms_sends_msg("052471"
 		     "03575886" /* classmark 2 */
 		     "089910070000106005" /* IMSI */);
-	OSMO_ASSERT(g_conn);
-	OSMO_ASSERT(g_conn->fi);
-	OSMO_ASSERT(g_conn->vsub);
 	VERBOSE_ASSERT(cm_service_result_sent, == RES_NONE, "%d");
 	VERBOSE_ASSERT(auth_request_sent, == true, "%d");
 
@@ -574,7 +568,7 @@ static void test_call_mo_to_unknown_timeout()
 	OSMO_ASSERT(cc_to_mncc_tx_confirmed);
 	OSMO_ASSERT(iu_release_sent);
 
-	rnc_sends_release_complete();
+	ran_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 	clear_vlr();
 	comment_end();

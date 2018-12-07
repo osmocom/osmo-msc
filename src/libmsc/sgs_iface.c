@@ -36,13 +36,14 @@
 #include <osmocom/msc/vlr.h>
 #include <osmocom/msc/vlr_sgs.h>
 #include <osmocom/msc/gsm_data.h>
-#include <osmocom/msc/a_iface.h>
 #include <osmocom/msc/gsm_04_08.h>
+#include <osmocom/msc/msub.h>
+#include <osmocom/msc/msc_a.h>
+#include <osmocom/msc/msc_i.h>
 
 #include <osmocom/msc/debug.h>
 #include <osmocom/msc/sgs_iface.h>
 #include <osmocom/msc/sgs_server.h>
-#include <osmocom/msc/msc_ifaces.h>
 #include <osmocom/gsm/protocol/gsm_29_118.h>
 
 #include <osmocom/gsm/apn.h>
@@ -88,44 +89,43 @@ enum sgs_vlr_reset_fsm_event {
  ***********************************************************************/
 
 /* Allocate a new subscriber connection */
-static struct ran_conn *subscr_conn_allocate_sgs(struct sgs_connection *sgc, struct vlr_subscr *vsub, bool mt)
+static struct msc_a *subscr_conn_allocate_sgs(struct sgs_connection *sgc, struct vlr_subscr *vsub, bool mt)
 {
-	struct ran_conn *conn;
+	struct msub *msub;
+	struct msc_a *msc_a;
 
-	conn = ran_conn_alloc(gsm_network, OSMO_RAT_EUTRAN_SGS, vsub->sgs.lai.lac);
-	if (!conn) {
-		LOGSGC_VSUB(sgc, vlr_subscr_name(vsub), LOGL_ERROR, "Connection allocation failed\n");
-		return NULL;
-	}
+	msub = msub_alloc(gsm_network);
+	msc_a = msc_a_alloc(msub,
+			    &msc_ran_infra[OSMO_RAT_EUTRAN_SGS]);
+	msc_a->complete_layer3_type = mt ? COMPLETE_LAYER3_PAGING_RESP : COMPLETE_LAYER3_CM_SERVICE_REQ;
+	msub_set_vsub(msub, vsub);
 
-	vlr_subscr_get(vsub, VSUB_USE_CONN);
-	conn->vsub = vsub;
-	conn->vsub->cs.attached_via_ran = conn->via_ran;
+	if (mt)
+		msc_a_get(msc_a, MSC_A_USE_PAGING_RESPONSE);
 
 	/* Accept the connection immediately, since the UE is already
 	 * authenticated by the MME no authentication is required. */
-	conn->complete_layer3_type = mt ? COMPLETE_LAYER3_PAGING_RESP : COMPLETE_LAYER3_CM_SERVICE_REQ;
-	ran_conn_update_id(conn);
-	osmo_fsm_inst_dispatch(conn->fi, RAN_CONN_E_COMPLETE_LAYER_3, NULL);
-	osmo_fsm_inst_dispatch(conn->fi, RAN_CONN_E_ACCEPTED, NULL);
+	osmo_fsm_inst_dispatch(msc_a->c.fi, MSC_A_EV_COMPLETE_LAYER_3_OK, NULL);
+	osmo_fsm_inst_dispatch(msc_a->c.fi, MSC_A_EV_AUTHENTICATED, NULL);
 
-	LOG_RAN_CONN(conn, LOGL_DEBUG, "RAN connection successfully allocated!\n");
-	return conn;
+	return msc_a;
 }
 
 /* Check if there are connections associated with a given subscriber. If yes,
  * make sure that those connections are tossed. */
 static void subscr_conn_toss(struct vlr_subscr *vsub)
 {
-	struct ran_conn *conn;
+	struct msub *msub;
 
-	conn = connection_for_subscr(vsub);
-	if (!conn)
+	msub = msub_for_vsub(vsub);
+	if (!msub)
 		return;
 
-	LOG_RAN_CONN(conn, LOGL_DEBUG, "RAN connection tossed because of unexpected RAN change!\n");
+	LOG_MSUB(msub, LOGL_ERROR, "Force releasing previous subscriber connection: an SGs connection for this"
+		 " subscriber is being initiated\n");
 
-	ran_conn_mo_close(conn, GSM48_REJECT_CONGESTION);
+	msc_a_release_mo(msub_msc_a(msub), GSM48_REJECT_CONGESTION);
+	/* TODO: is this strong enough? After this, it should be completely disassociated with this subscriber. */
 }
 
 struct sgs_mme_ctx *sgs_mme_by_fqdn(struct sgs_state *sgs, const char *mme_fqdn)
@@ -426,6 +426,25 @@ static void sgs_tx_mm_info_cb(struct vlr_subscr *vsub)
 	msgb_free(msg_mm_info);
 }
 
+enum sgsap_service_ind sgs_serv_ind_from_paging_cause(enum paging_cause cause)
+{
+	switch (cause) {
+	case PAGING_CAUSE_CALL_CONVERSATIONAL:
+	case PAGING_CAUSE_CALL_STREAMING:
+	case PAGING_CAUSE_CALL_INTERACTIVE:
+	case PAGING_CAUSE_CALL_BACKGROUND:
+		return SGSAP_SERV_IND_CS_CALL;
+
+	case PAGING_CAUSE_UNSPECIFIED:
+	case PAGING_CAUSE_SIGNALLING_LOW_PRIO:
+	case PAGING_CAUSE_SIGNALLING_HIGH_PRIO:
+		return SGSAP_SERV_IND_SMS;
+
+	default:
+		OSMO_ASSERT(false);
+	}
+}
+
 /*! Page UE through SGs interface
  *  \param[in] vsub subscriber context
  *  \param[in] serv_ind service indicator (sms or voide)
@@ -436,13 +455,20 @@ int sgs_iface_tx_paging(struct vlr_subscr *vsub, enum sgsap_service_ind serv_ind
 	struct gsm29118_paging_req paging_params;
 	struct sgs_mme_ctx *mme;
 
+	LOGP(DMSC, LOGL_NOTICE, "XXXXXXXXXX state == %d  conf_by_radio_contact_ind == %d\n",
+	     vsub->sgs_fsm->state, vsub->conf_by_radio_contact_ind);
+
 	/* See also: 3GPP TS 29.118, chapter 5.1.2.2 Paging Initiation */
-	if (vsub->sgs_fsm->state == SGS_UE_ST_NULL && vsub->conf_by_radio_contact_ind == true)
+	if (vsub->sgs_fsm->state == SGS_UE_ST_NULL && vsub->conf_by_radio_contact_ind == true) {
+		LOGPFSMSL(vsub->sgs_fsm, DPAG, LOGL_ERROR, "Will not Page (conf_by_radio_contact_ind == true)\n");
 		return -EINVAL;
+	}
 
 	mme = sgs_mme_ctx_by_vsub(vsub, SGSAP_MSGT_PAGING_REQ);
-	if (!mme)
+	if (!mme) {
+		LOGPFSMSL(vsub->sgs_fsm, DPAG, LOGL_ERROR, "Will not Page (no MME)\n");
 		return -EINVAL;
+	}
 
 	/* Check if there is still a paging in progress for this subscriber,
 	 * if yes, don't initiate another paging request. */
@@ -690,7 +716,7 @@ static int sgs_rx_pag_rej(struct sgs_connection *sgc, struct msgb *msg, const st
 	vlr_sgs_pag_rej(gsm_network->vlr, imsi, cause);
 
 	/* Stop all paging activity */
-	subscr_paging_cancel(vsub, GSM_PAGING_EXPIRED);
+	paging_expired(vsub);
 
 	/* Depending on the cause code some action is required */
 	if (cause == SGSAP_SGS_CAUSE_MT_CSFB_REJ_USER) {
@@ -735,7 +761,7 @@ static int sgs_rx_service_req(struct sgs_connection *sgc, struct msgb *msg, cons
 {
 	enum sgsap_service_ind serv_ind;
 	const uint8_t *serv_ind_ie;
-	struct ran_conn *conn;
+	struct msc_a *msc_a;
 	struct vlr_subscr *vsub;
 
 	/* Note: While in other RAN concepts a service request is used to
@@ -788,13 +814,13 @@ static int sgs_rx_service_req(struct sgs_connection *sgc, struct msgb *msg, cons
 	}
 
 	/* Allocate subscriber connection */
-	conn = subscr_conn_allocate_sgs(sgc, vsub, true);
-	if (!conn) {
+	msc_a = subscr_conn_allocate_sgs(sgc, vsub, true);
+	if (!msc_a) {
 		vlr_subscr_put(vsub, __func__);
 		return sgs_tx_status(sgc, imsi, SGSAP_SGS_CAUSE_MSG_INCOMP_STATE, msg, -1);
 	}
 
-	/* The conn has added a get() for the vsub, balance above vlr_subscr_find_by_imsi() */
+	/* The msub has added a get() for the vsub, balance above vlr_subscr_find_by_imsi() */
 	vlr_subscr_put(vsub, __func__);
 	return 0;
 }
@@ -802,8 +828,7 @@ static int sgs_rx_service_req(struct sgs_connection *sgc, struct msgb *msg, cons
 /* SGsAP-UPLINK-UNITDATA 3GPP TS 29.118, chapter 8.22 */
 static int sgs_rx_ul_ud(struct sgs_connection *sgc, struct msgb *msg, const struct tlv_parsed *tp, char *imsi)
 {
-	struct dtap_header *dtap;
-	struct ran_conn *conn;
+	struct msc_a *msc_a;
 	const uint8_t *nas_msg_container_ie;
 	struct vlr_subscr *vsub;
 
@@ -816,39 +841,31 @@ static int sgs_rx_ul_ud(struct sgs_connection *sgc, struct msgb *msg, const stru
 	OSMO_ASSERT(vsub);
 
 	/* Try to find existing connection (MT) or allocate a new one (MO) */
-	conn = connection_for_subscr(vsub);
-	if (!conn) {
-		conn = subscr_conn_allocate_sgs(sgc, vsub, false);
-	} else {
-		if (conn->via_ran != OSMO_RAT_EUTRAN_SGS) {
-			LOGSGC(sgc, LOGL_ERROR,
-			       "Receiving uplink unit-data for non-sgs connection -- discarding message!\n");
-			msgb_free(msg);
-			return 0;
-		}
-	}
+	msc_a = msc_a_for_vsub(vsub, true);
+	if (!msc_a)
+		msc_a = subscr_conn_allocate_sgs(sgc, vsub, false);
 
 	/* Balance above vlr_subscr_find_by_imsi() */
 	vlr_subscr_put(vsub, __func__);
 
 	/* If we do not find an existing connection and allocating a new one
 	 * faild, give up and return status. */
-	if (!conn) {
+	if (!msc_a)
 		return sgs_tx_status(sgc, imsi, SGSAP_SGS_CAUSE_MSG_INCOMP_STATE, msg, 0);
+
+	if (msc_a->c.ran->type != OSMO_RAT_EUTRAN_SGS) {
+		LOGSGC(sgc, LOGL_ERROR,
+		       "Receiving uplink unit-data for non-sgs connection -- discarding message!\n");
+		return -EINVAL;
 	}
 
 	nas_msg_container_ie = TLVP_VAL_MINLEN(tp, SGSAP_IE_NAS_MSG_CONTAINER, 1);
-	if (!nas_msg_container_ie) {
+	if (!nas_msg_container_ie)
 		return sgs_tx_status(sgc, imsi, SGSAP_SGS_CAUSE_MISSING_MAND_IE, msg, SGSAP_IE_NAS_MSG_CONTAINER);
-	}
 
 	/* ran_conn_dtap expects the dtap payload in l3h */
-	dtap = (struct dtap_header *)nas_msg_container_ie;
-	msg->l3h = (uint8_t *) nas_msg_container_ie;
-	OMSC_LINKID_CB(msg) = dtap->link_id;
-
-	/* Forward dtap payload into the msc */
-	ran_conn_dtap(conn, msg);
+	msg->l3h = (uint8_t *)nas_msg_container_ie;
+	msc_a_up_l3(msc_a, msg);
 
 	return 0;
 }
@@ -1180,22 +1197,14 @@ static struct osmo_fsm sgs_vlr_reset_fsm = {
 /*! Send unit-data through SGs interface (see msc_ifaces.c)
  *  \param[in] msg layer 3 message to send.
  *  \returns 0 in case of success, -EINVAL in case of error. */
-int sgs_iface_tx_dtap_ud(struct msgb *msg)
+int sgs_iface_tx_dtap_ud(struct msc_a *msc_a, struct msgb *msg)
 {
-	struct ran_conn *conn;
-	struct vlr_subscr *vsub;
 	struct msgb *msg_sgs;
 	struct sgs_mme_ctx *mme;
 	int rc = -EINVAL;
+	struct vlr_subscr *vsub = msc_a_vsub(msc_a);
 
-	/* This function expects a pointer to the related gsm subscriber
-	 * connection (conn) in msg->dst. Also conn->vsub must point to
-	 * the related subscriber */
-
-	OSMO_ASSERT(msg->dst);
-	conn = msg->dst;
-	OSMO_ASSERT(conn->vsub);
-	vsub = conn->vsub;
+	OSMO_ASSERT(vsub);
 
 	mme = sgs_mme_ctx_by_vsub(vsub, SGSAP_MSGT_DL_UD);
 	if (!mme)
@@ -1204,8 +1213,8 @@ int sgs_iface_tx_dtap_ud(struct msgb *msg)
 	/* Make sure the subscriber has a valid SGs association, otherwise
 	 * don't let unit-data through. */
 	if (vsub->sgs_fsm->state != SGS_UE_ST_ASSOCIATED) {
-		LOG_RAN_CONN(conn, LOGL_NOTICE, "Tx %s subscriber not SGs-associated, dropping\n",
-			     sgsap_msg_type_name(SGSAP_MSGT_DL_UD));
+		LOG_MSC_A(msc_a, LOGL_NOTICE, "Cannot Tx %s: subscriber not SGs-associated\n",
+			  sgsap_msg_type_name(SGSAP_MSGT_DL_UD));
 		goto error;
 	}
 
@@ -1218,21 +1227,12 @@ error:
 	return rc;
 }
 
-/*! Send a relase message through SGs interface (see msc_ifaces.c)
- *  \param[in] msg layer 3 message to send.
- *  \returns 0 in case of success, -EINVAL in case of error. */
-void sgs_iface_tx_release(struct ran_conn *conn)
+void sgs_iface_tx_release(struct vlr_subscr *vsub)
 {
 	struct msgb *msg_sgs;
-	struct vlr_subscr *vsub;
 	struct sgs_mme_ctx *mme;
 
-	/*! Use this function to release an SGs connection normally
-	 *  (cause code is 0). This function also automatically causes
-	 *  the VLR subscriber usage to be balanced. */
-
-	OSMO_ASSERT(conn->vsub);
-	vsub = conn->vsub;
+	OSMO_ASSERT(vsub);
 
 	mme = sgs_mme_ctx_by_vsub(vsub, SGSAP_MSGT_DL_UD);
 	if (!mme)

@@ -79,7 +79,7 @@ static int mncc_setup_ind(struct gsm_call *call, int msg_type,
 	/* already have remote call */
 	if (call->remote_ref)
 		return 0;
-	
+
 	/* transfer mode 1 would be packet mode, which was never specified */
 	if (setup->bearer_cap.mode != 0) {
 		LOGP(DMNCC, LOGL_NOTICE, "(call %x) We don't support "
@@ -254,7 +254,7 @@ int int_mncc_recv(struct gsm_network *net, struct msgb *msg)
 	/* Special messages */
 	switch(msg_type) {
 	}
-	
+
 	/* find callref */
 	callref = data->callref;
 	llist_for_each_entry(callt, &call_list, entry) {
@@ -271,7 +271,7 @@ int int_mncc_recv(struct gsm_network *net, struct msgb *msg)
 		/* create call */
 		if (!(call = talloc_zero(tall_call_ctx, struct gsm_call))) {
 			struct gsm_mncc rel;
-			
+
 			memset(&rel, 0, sizeof(struct gsm_mncc));
 			rel.callref = callref;
 			mncc_set_cause(&rel, GSM48_CAUSE_LOC_PRN_S_LU,
