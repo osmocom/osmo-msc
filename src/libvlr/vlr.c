@@ -970,6 +970,8 @@ static int vlr_subscr_handle_cancel_req(struct vlr_subscr *vsub,
 	gmm_cause_to_fsm_and_mm_cause(gsup_msg->cause, &fsm_cause, &gsm48_rej);
 	vlr_subscr_cancel_attach_fsm(vsub, fsm_cause, gsm48_rej);
 
+	vlr_subscr_rx_imsi_detach(vsub);
+
 	return rc;
 }
 
