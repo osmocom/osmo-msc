@@ -271,7 +271,9 @@ static inline struct vlr_subscr *sub_pres_vlr_fi_priv(struct osmo_fsm_inst *fi)
 	return (struct vlr_subscr*)fi->priv;
 }
 
-/* Note that the start event is dispatched right away, so in case the FSM immediately concludes from that
+/* THIS IS CURRENTLY DEAD CODE, SINCE WE NEVER SET vsub->ms_not_reachable_flag = true.
+ *
+ * Note that the start event is dispatched right away, so in case the FSM immediately concludes from that
  * event, the created FSM struct may no longer be valid as it already deallocated again, and it may
  * furthermore already have invoked the parent FSM instance's deallocation as well. Hence, instead of
  * returning, store the created FSM instance address in *fi_p before dispatching the event. It is thus
