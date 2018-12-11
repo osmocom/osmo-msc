@@ -413,7 +413,12 @@ static void lu_compl_vlr_init(struct osmo_fsm_inst *fi, uint32_t event,
 	osmo_fsm_inst_state_chg(fi, LU_COMPL_VLR_S_WAIT_SUB_PRES,
 				LU_TIMEOUT_LONG, 0);
 
-	sub_pres_vlr_fsm_start(&lcvp->sub_pres_vlr_fsm, fi, vsub, LU_COMPL_VLR_E_SUB_PRES_COMPL);
+	/* If ms_not_reachable_flag == false, the sub_pres_vlr_fsm will anyway terminate straight away and dispatch
+	 * LU_COMPL_VLR_E_SUB_PRES_COMPL to this fi, so we might as well skip that dance here and save some logging. */
+	if (vsub->ms_not_reachable_flag)
+		sub_pres_vlr_fsm_start(&lcvp->sub_pres_vlr_fsm, fi, vsub, LU_COMPL_VLR_E_SUB_PRES_COMPL);
+	else
+		osmo_fsm_inst_dispatch(fi, LU_COMPL_VLR_E_SUB_PRES_COMPL, NULL);
 }
 
 static void lu_compl_vlr_new_tmsi(struct osmo_fsm_inst *fi)

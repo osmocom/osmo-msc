@@ -129,14 +129,6 @@ DVLR lu_compl_vlr_fsm(LU:901700000004620){LU_COMPL_VLR_S_INIT}: Allocated
 DVLR lu_compl_vlr_fsm(LU:901700000004620){LU_COMPL_VLR_S_INIT}: is child of vlr_lu_fsm(LU:901700000004620)
 DVLR lu_compl_vlr_fsm(LU:901700000004620){LU_COMPL_VLR_S_INIT}: Received Event LU_COMPL_VLR_E_START
 DVLR lu_compl_vlr_fsm(LU:901700000004620){LU_COMPL_VLR_S_INIT}: state_chg to LU_COMPL_VLR_S_WAIT_SUB_PRES
-DVLR sub_pres_vlr_fsm(LU:901700000004620){SUB_PRES_VLR_S_INIT}: Allocated
-DVLR sub_pres_vlr_fsm(LU:901700000004620){SUB_PRES_VLR_S_INIT}: is child of lu_compl_vlr_fsm(LU:901700000004620)
-DVLR sub_pres_vlr_fsm(LU:901700000004620){SUB_PRES_VLR_S_INIT}: Received Event SUB_PRES_VLR_E_START
-DVLR sub_pres_vlr_fsm(LU:901700000004620){SUB_PRES_VLR_S_INIT}: state_chg to SUB_PRES_VLR_S_DONE
-DVLR sub_pres_vlr_fsm(LU:901700000004620){SUB_PRES_VLR_S_DONE}: Terminating (cause = OSMO_FSM_TERM_REGULAR)
-DVLR sub_pres_vlr_fsm(LU:901700000004620){SUB_PRES_VLR_S_DONE}: Removing from parent lu_compl_vlr_fsm(LU:901700000004620)
-DVLR sub_pres_vlr_fsm(LU:901700000004620){SUB_PRES_VLR_S_DONE}: Freeing instance
-DVLR sub_pres_vlr_fsm(LU:901700000004620){SUB_PRES_VLR_S_DONE}: Deallocated
 DVLR lu_compl_vlr_fsm(LU:901700000004620){LU_COMPL_VLR_S_WAIT_SUB_PRES}: Received Event LU_COMPL_VLR_E_SUB_PRES_COMPL
 - sending LU Accept for MSISDN:46071
 DREF VLR subscr MSISDN:46071 usage increases to: 3
@@ -633,14 +625,6 @@ DVLR lu_compl_vlr_fsm(LU:901700000004620){LU_COMPL_VLR_S_INIT}: Allocated
 DVLR lu_compl_vlr_fsm(LU:901700000004620){LU_COMPL_VLR_S_INIT}: is child of vlr_lu_fsm(LU:901700000004620)
 DVLR lu_compl_vlr_fsm(LU:901700000004620){LU_COMPL_VLR_S_INIT}: Received Event LU_COMPL_VLR_E_START
 DVLR lu_compl_vlr_fsm(LU:901700000004620){LU_COMPL_VLR_S_INIT}: state_chg to LU_COMPL_VLR_S_WAIT_SUB_PRES
-DVLR sub_pres_vlr_fsm(LU:901700000004620){SUB_PRES_VLR_S_INIT}: Allocated
-DVLR sub_pres_vlr_fsm(LU:901700000004620){SUB_PRES_VLR_S_INIT}: is child of lu_compl_vlr_fsm(LU:901700000004620)
-DVLR sub_pres_vlr_fsm(LU:901700000004620){SUB_PRES_VLR_S_INIT}: Received Event SUB_PRES_VLR_E_START
-DVLR sub_pres_vlr_fsm(LU:901700000004620){SUB_PRES_VLR_S_INIT}: state_chg to SUB_PRES_VLR_S_DONE
-DVLR sub_pres_vlr_fsm(LU:901700000004620){SUB_PRES_VLR_S_DONE}: Terminating (cause = OSMO_FSM_TERM_REGULAR)
-DVLR sub_pres_vlr_fsm(LU:901700000004620){SUB_PRES_VLR_S_DONE}: Removing from parent lu_compl_vlr_fsm(LU:901700000004620)
-DVLR sub_pres_vlr_fsm(LU:901700000004620){SUB_PRES_VLR_S_DONE}: Freeing instance
-DVLR sub_pres_vlr_fsm(LU:901700000004620){SUB_PRES_VLR_S_DONE}: Deallocated
 DVLR lu_compl_vlr_fsm(LU:901700000004620){LU_COMPL_VLR_S_WAIT_SUB_PRES}: Received Event LU_COMPL_VLR_E_SUB_PRES_COMPL
 DVLR lu_compl_vlr_fsm(LU:901700000004620){LU_COMPL_VLR_S_WAIT_SUB_PRES}: lu_compl_vlr_new_tmsi()
 DVLR lu_compl_vlr_fsm(LU:901700000004620){LU_COMPL_VLR_S_WAIT_SUB_PRES}: state_chg to LU_COMPL_VLR_S_WAIT_TMSI_CNF
@@ -1172,14 +1156,6 @@ DVLR lu_compl_vlr_fsm(LU:901700000004620){LU_COMPL_VLR_S_INIT}: Allocated
 DVLR lu_compl_vlr_fsm(LU:901700000004620){LU_COMPL_VLR_S_INIT}: is child of vlr_lu_fsm(LU:901700000004620)
 DVLR lu_compl_vlr_fsm(LU:901700000004620){LU_COMPL_VLR_S_INIT}: Received Event LU_COMPL_VLR_E_START
 DVLR lu_compl_vlr_fsm(LU:901700000004620){LU_COMPL_VLR_S_INIT}: state_chg to LU_COMPL_VLR_S_WAIT_SUB_PRES
-DVLR sub_pres_vlr_fsm(LU:901700000004620){SUB_PRES_VLR_S_INIT}: Allocated
-DVLR sub_pres_vlr_fsm(LU:901700000004620){SUB_PRES_VLR_S_INIT}: is child of lu_compl_vlr_fsm(LU:901700000004620)
-DVLR sub_pres_vlr_fsm(LU:901700000004620){SUB_PRES_VLR_S_INIT}: Received Event SUB_PRES_VLR_E_START
-DVLR sub_pres_vlr_fsm(LU:901700000004620){SUB_PRES_VLR_S_INIT}: state_chg to SUB_PRES_VLR_S_DONE
-DVLR sub_pres_vlr_fsm(LU:901700000004620){SUB_PRES_VLR_S_DONE}: Terminating (cause = OSMO_FSM_TERM_REGULAR)
-DVLR sub_pres_vlr_fsm(LU:901700000004620){SUB_PRES_VLR_S_DONE}: Removing from parent lu_compl_vlr_fsm(LU:901700000004620)
-DVLR sub_pres_vlr_fsm(LU:901700000004620){SUB_PRES_VLR_S_DONE}: Freeing instance
-DVLR sub_pres_vlr_fsm(LU:901700000004620){SUB_PRES_VLR_S_DONE}: Deallocated
 DVLR lu_compl_vlr_fsm(LU:901700000004620){LU_COMPL_VLR_S_WAIT_SUB_PRES}: Received Event LU_COMPL_VLR_E_SUB_PRES_COMPL
 DVLR lu_compl_vlr_fsm(LU:901700000004620){LU_COMPL_VLR_S_WAIT_SUB_PRES}: state_chg to LU_COMPL_VLR_S_WAIT_IMEI
 DMSC msc_tx 3 bytes to MSISDN:46071 via RAN_GERAN_A
@@ -1434,14 +1410,6 @@ DVLR lu_compl_vlr_fsm(LU:901700000004620){LU_COMPL_VLR_S_INIT}: Allocated
 DVLR lu_compl_vlr_fsm(LU:901700000004620){LU_COMPL_VLR_S_INIT}: is child of vlr_lu_fsm(LU:901700000004620)
 DVLR lu_compl_vlr_fsm(LU:901700000004620){LU_COMPL_VLR_S_INIT}: Received Event LU_COMPL_VLR_E_START
 DVLR lu_compl_vlr_fsm(LU:901700000004620){LU_COMPL_VLR_S_INIT}: state_chg to LU_COMPL_VLR_S_WAIT_SUB_PRES
-DVLR sub_pres_vlr_fsm(LU:901700000004620){SUB_PRES_VLR_S_INIT}: Allocated
-DVLR sub_pres_vlr_fsm(LU:901700000004620){SUB_PRES_VLR_S_INIT}: is child of lu_compl_vlr_fsm(LU:901700000004620)
-DVLR sub_pres_vlr_fsm(LU:901700000004620){SUB_PRES_VLR_S_INIT}: Received Event SUB_PRES_VLR_E_START
-DVLR sub_pres_vlr_fsm(LU:901700000004620){SUB_PRES_VLR_S_INIT}: state_chg to SUB_PRES_VLR_S_DONE
-DVLR sub_pres_vlr_fsm(LU:901700000004620){SUB_PRES_VLR_S_DONE}: Terminating (cause = OSMO_FSM_TERM_REGULAR)
-DVLR sub_pres_vlr_fsm(LU:901700000004620){SUB_PRES_VLR_S_DONE}: Removing from parent lu_compl_vlr_fsm(LU:901700000004620)
-DVLR sub_pres_vlr_fsm(LU:901700000004620){SUB_PRES_VLR_S_DONE}: Freeing instance
-DVLR sub_pres_vlr_fsm(LU:901700000004620){SUB_PRES_VLR_S_DONE}: Deallocated
 DVLR lu_compl_vlr_fsm(LU:901700000004620){LU_COMPL_VLR_S_WAIT_SUB_PRES}: Received Event LU_COMPL_VLR_E_SUB_PRES_COMPL
 - sending LU Accept for MSISDN:46071
 DREF VLR subscr MSISDN:46071 usage increases to: 3
@@ -1643,14 +1611,6 @@ DVLR lu_compl_vlr_fsm(LU:901700000004620){LU_COMPL_VLR_S_INIT}: Allocated
 DVLR lu_compl_vlr_fsm(LU:901700000004620){LU_COMPL_VLR_S_INIT}: is child of vlr_lu_fsm(LU:901700000004620)
 DVLR lu_compl_vlr_fsm(LU:901700000004620){LU_COMPL_VLR_S_INIT}: Received Event LU_COMPL_VLR_E_START
 DVLR lu_compl_vlr_fsm(LU:901700000004620){LU_COMPL_VLR_S_INIT}: state_chg to LU_COMPL_VLR_S_WAIT_SUB_PRES
-DVLR sub_pres_vlr_fsm(LU:901700000004620){SUB_PRES_VLR_S_INIT}: Allocated
-DVLR sub_pres_vlr_fsm(LU:901700000004620){SUB_PRES_VLR_S_INIT}: is child of lu_compl_vlr_fsm(LU:901700000004620)
-DVLR sub_pres_vlr_fsm(LU:901700000004620){SUB_PRES_VLR_S_INIT}: Received Event SUB_PRES_VLR_E_START
-DVLR sub_pres_vlr_fsm(LU:901700000004620){SUB_PRES_VLR_S_INIT}: state_chg to SUB_PRES_VLR_S_DONE
-DVLR sub_pres_vlr_fsm(LU:901700000004620){SUB_PRES_VLR_S_DONE}: Terminating (cause = OSMO_FSM_TERM_REGULAR)
-DVLR sub_pres_vlr_fsm(LU:901700000004620){SUB_PRES_VLR_S_DONE}: Removing from parent lu_compl_vlr_fsm(LU:901700000004620)
-DVLR sub_pres_vlr_fsm(LU:901700000004620){SUB_PRES_VLR_S_DONE}: Freeing instance
-DVLR sub_pres_vlr_fsm(LU:901700000004620){SUB_PRES_VLR_S_DONE}: Deallocated
 DVLR lu_compl_vlr_fsm(LU:901700000004620){LU_COMPL_VLR_S_WAIT_SUB_PRES}: Received Event LU_COMPL_VLR_E_SUB_PRES_COMPL
 DVLR lu_compl_vlr_fsm(LU:901700000004620){LU_COMPL_VLR_S_WAIT_SUB_PRES}: state_chg to LU_COMPL_VLR_S_WAIT_IMEI_TMSI
 DMSC msc_tx 3 bytes to MSISDN:46071 via RAN_GERAN_A
@@ -1905,14 +1865,6 @@ DVLR lu_compl_vlr_fsm(LU:901700000010650){LU_COMPL_VLR_S_INIT}: Allocated
 DVLR lu_compl_vlr_fsm(LU:901700000010650){LU_COMPL_VLR_S_INIT}: is child of vlr_lu_fsm(LU:901700000010650)
 DVLR lu_compl_vlr_fsm(LU:901700000010650){LU_COMPL_VLR_S_INIT}: Received Event LU_COMPL_VLR_E_START
 DVLR lu_compl_vlr_fsm(LU:901700000010650){LU_COMPL_VLR_S_INIT}: state_chg to LU_COMPL_VLR_S_WAIT_SUB_PRES
-DVLR sub_pres_vlr_fsm(LU:901700000010650){SUB_PRES_VLR_S_INIT}: Allocated
-DVLR sub_pres_vlr_fsm(LU:901700000010650){SUB_PRES_VLR_S_INIT}: is child of lu_compl_vlr_fsm(LU:901700000010650)
-DVLR sub_pres_vlr_fsm(LU:901700000010650){SUB_PRES_VLR_S_INIT}: Received Event SUB_PRES_VLR_E_START
-DVLR sub_pres_vlr_fsm(LU:901700000010650){SUB_PRES_VLR_S_INIT}: state_chg to SUB_PRES_VLR_S_DONE
-DVLR sub_pres_vlr_fsm(LU:901700000010650){SUB_PRES_VLR_S_DONE}: Terminating (cause = OSMO_FSM_TERM_REGULAR)
-DVLR sub_pres_vlr_fsm(LU:901700000010650){SUB_PRES_VLR_S_DONE}: Removing from parent lu_compl_vlr_fsm(LU:901700000010650)
-DVLR sub_pres_vlr_fsm(LU:901700000010650){SUB_PRES_VLR_S_DONE}: Freeing instance
-DVLR sub_pres_vlr_fsm(LU:901700000010650){SUB_PRES_VLR_S_DONE}: Deallocated
 DVLR lu_compl_vlr_fsm(LU:901700000010650){LU_COMPL_VLR_S_WAIT_SUB_PRES}: Received Event LU_COMPL_VLR_E_SUB_PRES_COMPL
 - sending LU Accept for MSISDN:42342
 DREF VLR subscr MSISDN:42342 usage increases to: 3
@@ -2385,14 +2337,6 @@ DVLR lu_compl_vlr_fsm(LU:901700000004620){LU_COMPL_VLR_S_INIT}: Allocated
 DVLR lu_compl_vlr_fsm(LU:901700000004620){LU_COMPL_VLR_S_INIT}: is child of vlr_lu_fsm(LU:901700000004620)
 DVLR lu_compl_vlr_fsm(LU:901700000004620){LU_COMPL_VLR_S_INIT}: Received Event LU_COMPL_VLR_E_START
 DVLR lu_compl_vlr_fsm(LU:901700000004620){LU_COMPL_VLR_S_INIT}: state_chg to LU_COMPL_VLR_S_WAIT_SUB_PRES
-DVLR sub_pres_vlr_fsm(LU:901700000004620){SUB_PRES_VLR_S_INIT}: Allocated
-DVLR sub_pres_vlr_fsm(LU:901700000004620){SUB_PRES_VLR_S_INIT}: is child of lu_compl_vlr_fsm(LU:901700000004620)
-DVLR sub_pres_vlr_fsm(LU:901700000004620){SUB_PRES_VLR_S_INIT}: Received Event SUB_PRES_VLR_E_START
-DVLR sub_pres_vlr_fsm(LU:901700000004620){SUB_PRES_VLR_S_INIT}: state_chg to SUB_PRES_VLR_S_DONE
-DVLR sub_pres_vlr_fsm(LU:901700000004620){SUB_PRES_VLR_S_DONE}: Terminating (cause = OSMO_FSM_TERM_REGULAR)
-DVLR sub_pres_vlr_fsm(LU:901700000004620){SUB_PRES_VLR_S_DONE}: Removing from parent lu_compl_vlr_fsm(LU:901700000004620)
-DVLR sub_pres_vlr_fsm(LU:901700000004620){SUB_PRES_VLR_S_DONE}: Freeing instance
-DVLR sub_pres_vlr_fsm(LU:901700000004620){SUB_PRES_VLR_S_DONE}: Deallocated
 DVLR lu_compl_vlr_fsm(LU:901700000004620){LU_COMPL_VLR_S_WAIT_SUB_PRES}: Received Event LU_COMPL_VLR_E_SUB_PRES_COMPL
 - sending LU Accept for MSISDN:42342
 DREF VLR subscr MSISDN:42342 usage increases to: 3
@@ -2885,14 +2829,6 @@ DVLR lu_compl_vlr_fsm(LU:901700000004620){LU_COMPL_VLR_S_INIT}: Allocated
 DVLR lu_compl_vlr_fsm(LU:901700000004620){LU_COMPL_VLR_S_INIT}: is child of vlr_lu_fsm(LU:901700000004620)
 DVLR lu_compl_vlr_fsm(LU:901700000004620){LU_COMPL_VLR_S_INIT}: Received Event LU_COMPL_VLR_E_START
 DVLR lu_compl_vlr_fsm(LU:901700000004620){LU_COMPL_VLR_S_INIT}: state_chg to LU_COMPL_VLR_S_WAIT_SUB_PRES
-DVLR sub_pres_vlr_fsm(LU:901700000004620){SUB_PRES_VLR_S_INIT}: Allocated
-DVLR sub_pres_vlr_fsm(LU:901700000004620){SUB_PRES_VLR_S_INIT}: is child of lu_compl_vlr_fsm(LU:901700000004620)
-DVLR sub_pres_vlr_fsm(LU:901700000004620){SUB_PRES_VLR_S_INIT}: Received Event SUB_PRES_VLR_E_START
-DVLR sub_pres_vlr_fsm(LU:901700000004620){SUB_PRES_VLR_S_INIT}: state_chg to SUB_PRES_VLR_S_DONE
-DVLR sub_pres_vlr_fsm(LU:901700000004620){SUB_PRES_VLR_S_DONE}: Terminating (cause = OSMO_FSM_TERM_REGULAR)
-DVLR sub_pres_vlr_fsm(LU:901700000004620){SUB_PRES_VLR_S_DONE}: Removing from parent lu_compl_vlr_fsm(LU:901700000004620)
-DVLR sub_pres_vlr_fsm(LU:901700000004620){SUB_PRES_VLR_S_DONE}: Freeing instance
-DVLR sub_pres_vlr_fsm(LU:901700000004620){SUB_PRES_VLR_S_DONE}: Deallocated
 DVLR lu_compl_vlr_fsm(LU:901700000004620){LU_COMPL_VLR_S_WAIT_SUB_PRES}: Received Event LU_COMPL_VLR_E_SUB_PRES_COMPL
 - sending LU Accept for MSISDN:42342
 DREF VLR subscr MSISDN:42342 usage increases to: 3
