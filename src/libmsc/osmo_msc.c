@@ -28,7 +28,6 @@
 #include <osmocom/msc/a_iface.h>
 #include <osmocom/msc/gsm_04_08.h>
 #include <osmocom/msc/gsm_04_11.h>
-#include <osmocom/msc/msc_mgcp.h>
 
 #include "../../bscconfig.h"
 #ifdef BUILD_IU
@@ -114,18 +113,17 @@ void ran_conn_dtap(struct ran_conn *conn, struct msgb *msg)
 }
 
 /* Receive an ASSIGNMENT COMPLETE from BSC */
-void ran_conn_assign_compl(struct ran_conn *conn, const struct gsm0808_speech_codec *speech_codec_chosen,
-			   const struct sockaddr_storage *aoip_transport_addr)
+void msc_assign_compl(struct ran_conn *conn,
+		      uint8_t rr_cause, uint8_t chosen_channel,
+		      uint8_t encr_alg_id, uint8_t speec)
 {
-	msc_mgcp_ass_complete(conn, speech_codec_chosen, aoip_transport_addr);
-	/* FIXME: tear down conn upon failure */
+	LOGP(DRR, LOGL_DEBUG, "MSC assign complete (do nothing).\n");
 }
 
 /* Receive an ASSIGNMENT FAILURE from BSC */
 void ran_conn_assign_fail(struct ran_conn *conn, uint8_t cause, uint8_t *rr_cause)
 {
 	LOGP(DRR, LOGL_DEBUG, "MSC assign failure (do nothing).\n");
-	/* FIXME: tear down conn upon failure */
 }
 
 /* Receive a CLASSMARK CHANGE from BSC */

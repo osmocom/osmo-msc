@@ -26,8 +26,6 @@
 #include <osmocom/core/timer.h>
 #include <osmocom/core/fsm.h>
 #include <osmocom/core/byteswap.h>
-#include <osmocom/gsm/protocol/gsm_08_08.h>
-
 #include <osmocom/msc/msc_mgcp.h>
 #include <osmocom/msc/debug.h>
 #include <osmocom/msc/transaction.h>
@@ -1027,89 +1025,51 @@ int msc_mgcp_call_assignment(struct gsm_trans *trans)
 	return 0;
 }
 
-static enum mgcp_codecs mgcp_codec_from_sc(const struct gsm0808_speech_codec *sc)
+/* Inform the FSM that the assignment (RAN connection) is now complete.
+ * Parameter:
+ * conn: RAN connection context.
+ * port: port number of the remote leg.
+ * addr: IP-address of the remote leg.
+ * Returns -EINVAL on error, 0 on success. */
+int msc_mgcp_ass_complete(struct ran_conn *conn, uint16_t port, char *addr)
 {
-	switch (sc->type) {
-	case GSM0808_SCT_FR1:
-		return CODEC_GSM_8000_1;
-		break;
-	case GSM0808_SCT_FR2:
-		return CODEC_GSMEFR_8000_1;
-		break;
-	case GSM0808_SCT_FR3:
-		return CODEC_AMR_8000_1;
-		break;
-	case GSM0808_SCT_FR4:
-		return CODEC_AMRWB_16000_1;
-		break;
-	case GSM0808_SCT_FR5:
-		return CODEC_AMRWB_16000_1;
-		break;
-	case GSM0808_SCT_HR1:
-		return CODEC_GSMHR_8000_1;
-		break;
-	case GSM0808_SCT_HR3:
-		return CODEC_AMR_8000_1;
-		break;
-	case GSM0808_SCT_HR4:
-		return CODEC_AMRWB_16000_1;
-		break;
-	case GSM0808_SCT_HR6:
-		return CODEC_AMRWB_16000_1;
-		break;
-	default:
-		return CODEC_PCMU_8000_1;
-		break;
-	}
-}
+	struct mgcp_ctx *mgcp_ctx;
 
-int msc_mgcp_ass_complete(struct ran_conn *conn, const struct gsm0808_speech_codec *speech_codec_chosen,
-			  const struct sockaddr_storage *aoip_transport_addr)
-{
-	struct sockaddr_in *rtp_addr_in;
-	const char *addr;
-	uint16_t port;
-	struct mgcp_ctx *mgcp_ctx = conn->rtp.mgcp_ctx;
-	struct osmo_fsm_inst *fi;
-
-	if (!mgcp_ctx || !mgcp_ctx->fsm) {
-		LOGPCONN(conn, LOGL_ERROR, "Invalid MGCP context, Assignment Complete failed.\n");
-		return -EINVAL;
-	}
-
-	fi = mgcp_ctx->fsm;
-
-	if (fi->state != ST_MDCX_RAN) {
-		LOGPFSML(fi, LOGL_ERROR, "Assignment Complete not allowed in this state\n");
-		return -ENOTSUP;
-	}
-
-	/* use address / port supplied with the AoIP transport address element */
-	if (aoip_transport_addr->ss_family != AF_INET) {
-		LOGPCONN(conn, LOGL_ERROR, "Assignment Complete: Unsupported addressing scheme (only IPV4 supported)\n");
-		return -EINVAL;
-	}
-
-	rtp_addr_in = (struct sockaddr_in *)&aoip_transport_addr;
-	addr = inet_ntoa(rtp_addr_in->sin_addr);
-	port = osmo_ntohs(rtp_addr_in->sin_port);
+	OSMO_ASSERT(conn);
 
 	if (port == 0) {
-		LOGPCONN(conn, LOGL_ERROR, "Assignment Complete: invalid remote call leg port (0)\n");
+		LOGP(DMGCP, LOGL_ERROR, "(subscriber:%s) invalid remote call leg port, assignment completion failed\n",
+		     vlr_subscr_name(conn->vsub));
 		return -EINVAL;
 	}
 	if (!addr || strlen(addr) <= 0) {
-		LOGPCONN(conn, LOGL_ERROR, "Assignment Complete: invalid remote call leg address (empty)\n");
+		LOGP(DMGCP, LOGL_ERROR, "(subscriber:%s) missing remote call leg address, assignment completion failed\n",
+		     vlr_subscr_name(conn->vsub));
 		return -EINVAL;
 	}
 
-	conn->rtp.codec_ran = mgcp_codec_from_sc(speech_codec_chosen);
-	osmo_strlcpy(conn->rtp.remote_addr_ran, addr, sizeof(conn->rtp.remote_addr_ran));
+	mgcp_ctx = conn->rtp.mgcp_ctx;
+	if (!mgcp_ctx) {
+		LOGP(DMGCP, LOGL_ERROR, "(subscriber:%s) invalid mgcp context, assignment completion failed.\n",
+		     vlr_subscr_name(conn->vsub));
+		return -EINVAL;
+	}
+
+	/* Memorize port and IP-Address of the remote RAN call leg. We need this
+	 * information at latest when we enter the MDCX phase for the RAN side. */
 	conn->rtp.remote_port_ran = port;
+	osmo_strlcpy(conn->rtp.remote_addr_ran, addr, sizeof(conn->rtp.remote_addr_ran));
 
-	LOGPCONN(conn, LOGL_DEBUG, "Assignment Complete: rtp %s:%u\n", addr, port);
+	LOGP(DMGCP, LOGL_DEBUG, "(subscriber:%s) assignment completed, rtp %s:%d.\n",
+	     vlr_subscr_name(conn->vsub), conn->rtp.remote_addr_ran, port);
 
-	return osmo_fsm_inst_dispatch(fi, EV_ASSIGN, mgcp_ctx);
+	/* Note: We only dispatch the event if we are really waiting for the
+	 * assignment, if we are not yet waiting, there is no need to loudly
+	 * broadcast an event that the all other states do not understand anyway */
+	if (mgcp_ctx->fsm->state == ST_MDCX_RAN)
+		osmo_fsm_inst_dispatch(mgcp_ctx->fsm, EV_ASSIGN, mgcp_ctx);
+
+	return 0;
 }
 
 /* Make the connection of a previously assigned call complete
