@@ -1142,6 +1142,7 @@ int vlr_subscr_rx_tmsi_reall_compl(struct vlr_subscr *vsub)
 bool vlr_subscr_expire(struct vlr_subscr *vsub)
 {
 	if (vsub->lu_complete) {
+		/* balancing the get from vlr_lu_compl_fsm_success() */
 		vsub->lu_complete = false;
 		vlr_subscr_put(vsub);
 
@@ -1160,7 +1161,6 @@ int vlr_subscr_rx_imsi_detach(struct vlr_subscr *vsub)
 	vsub->imsi_detached_flag = true;
 	vsub->expire_lu = VLR_SUBSCRIBER_NO_EXPIRATION;
 
-	/* balancing the get from vlr_lu_compl_fsm_success() */
 	vlr_subscr_expire(vsub);
 
 	return 0;
