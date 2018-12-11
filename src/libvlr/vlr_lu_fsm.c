@@ -555,8 +555,7 @@ static const struct osmo_fsm_state lu_compl_vlr_states[] = {
 	[LU_COMPL_VLR_S_INIT] = {
 		.in_event_mask = S(LU_COMPL_VLR_E_START),
 		.out_state_mask = S(LU_COMPL_VLR_S_DONE) |
-				  S(LU_COMPL_VLR_S_WAIT_SUB_PRES) |
-				  S(LU_COMPL_VLR_S_WAIT_IMEI),
+				  S(LU_COMPL_VLR_S_WAIT_SUB_PRES),
 		.name = OSMO_STRINGIFY(LU_COMPL_VLR_S_INIT),
 		.action = lu_compl_vlr_init,
 	},
