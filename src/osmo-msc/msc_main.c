@@ -469,22 +469,22 @@ static const struct log_info_cat msc_default_categories[] = {
 	[DSMPP] = {
 		.name = "DSMPP",
 		.description = "SMPP interface for external SMS apps",
-		.enabled = 1, .loglevel = LOGL_DEBUG,
+		.enabled = 1, .loglevel = LOGL_NOTICE,
 	},
 	[DRANAP] = {
 		.name = "DRANAP",
 		.description = "Radio Access Network Application Part Protocol",
-		.enabled = 1, .loglevel = LOGL_DEBUG,
+		.enabled = 1, .loglevel = LOGL_NOTICE,
 	},
 	[DVLR] = {
 		.name = "DVLR",
 		.description = "Visitor Location Register",
-		.enabled = 1, .loglevel = LOGL_DEBUG,
+		.enabled = 1, .loglevel = LOGL_NOTICE,
 	},
 	[DIUCS] = {
 		.name = "DIUCS",
 		.description = "Iu-CS Protocol",
-		.enabled = 1, .loglevel = LOGL_DEBUG,
+		.enabled = 1, .loglevel = LOGL_NOTICE,
 	},
 	[DBSSAP] = {
 		.name = "DBSSAP",
