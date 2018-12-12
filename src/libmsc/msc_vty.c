@@ -832,9 +832,12 @@ DEFUN(show_subscr,
 		return CMD_WARNING;
 	}
 
-	subscr_dump_full_vty(vty, vsub);
-
+	/* In the vty output to the user, exclude this local use count added by vlr_subscr_get() in get_vsub_by_argv().
+	 * This works, because: for get_vsub_by_argv() to succeed, there *must* have been at least one use count before
+	 * this, and since this is not multi-threaded, this vlr_subscr_put() cannot possibly reach a count of 0. */
 	vlr_subscr_put(vsub);
+
+	subscr_dump_full_vty(vty, vsub);
 
 	return CMD_SUCCESS;
 }
