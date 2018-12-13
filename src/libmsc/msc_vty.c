@@ -466,6 +466,12 @@ DEFUN(cfg_msc_ipa_name,
       "This name is used for GSUP routing and must be set if more than one MSC is connected to the HLR. "
       "The default is 'MSC-00-00-00-00-00-00'.\n")
 {
+	if (!msc_parsing_config_file) {
+		vty_out(vty, "The IPA name cannot be changed at run-time; "
+			"It can only be set in the configuraton file.%s", VTY_NEWLINE);
+		return CMD_WARNING;
+	}
+
 	gsmnet->msc_ipa_name = talloc_strdup(gsmnet, argv[0]);
 	return CMD_SUCCESS;
 }

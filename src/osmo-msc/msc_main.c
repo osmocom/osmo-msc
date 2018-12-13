@@ -24,6 +24,7 @@
  *
  */
 
+#include <stdbool.h>
 #include <unistd.h>
 #include <time.h>
 #include <errno.h>
@@ -514,6 +515,8 @@ extern void *tall_gsms_ctx;
 extern void *tall_call_ctx;
 extern void *tall_trans_ctx;
 
+bool msc_parsing_config_file = false;
+
 int main(int argc, char **argv)
 {
 	int rc;
@@ -566,7 +569,9 @@ int main(int argc, char **argv)
 		return -1;
 #endif
 
+	msc_parsing_config_file = true;
 	rc = vty_read_config_file(msc_cmdline_config.config_file, NULL);
+	msc_parsing_config_file = false;
 	if (rc < 0) {
 		LOGP(DMSC, LOGL_FATAL, "Failed to parse the config file: '%s'\n",
 		     msc_cmdline_config.config_file);
