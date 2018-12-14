@@ -640,6 +640,25 @@ static void subscr_dump_full_vty(struct vty *vty, struct vlr_subscr *vsub)
 		vty_out(vty, "    new TMSI: %08X%s", vsub->tmsi_new,
 			VTY_NEWLINE);
 
+	vty_out(vty, "    Flags: %s", VTY_NEWLINE);
+	vty_out(vty, "     IMSI detached:             %s%s",
+		vsub->imsi_detached_flag ? "true" : "false", VTY_NEWLINE);
+	vty_out(vty, "     Conf. by radio contact:    %s%s",
+		vsub->conf_by_radio_contact_ind ? "true" : "false",
+		VTY_NEWLINE);
+	vty_out(vty, "     Subscr. data conf. by HLR: %s%s",
+		vsub->sub_dataconf_by_hlr_ind ? "true" : "false", VTY_NEWLINE);
+	vty_out(vty, "     Location conf. in HLR:     %s%s",
+		vsub->loc_conf_in_hlr_ind ? "true" : "false", VTY_NEWLINE);
+	vty_out(vty, "     Subscriber dormant:        %s%s",
+		vsub->dormant_ind ? "true" : "false", VTY_NEWLINE);
+	vty_out(vty, "     Received cancel locataion: %s%s",
+		vsub->cancel_loc_rx ? "true" : "false", VTY_NEWLINE);
+	vty_out(vty, "     MS not reachable:          %s%s",
+		vsub->ms_not_reachable_flag ? "true" : "false", VTY_NEWLINE);
+	vty_out(vty, "     LA allowed:                %s%s",
+		vsub->la_allowed ? "true" : "false", VTY_NEWLINE);
+
 #if 0
 	/* TODO: add this to vlr_subscr? */
 	if (vsub->auth_info.auth_algo != AUTH_ALGO_NONE) {
