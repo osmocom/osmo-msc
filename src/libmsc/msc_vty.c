@@ -641,6 +641,10 @@ static void subscr_dump_full_vty(struct vty *vty, struct vlr_subscr *vsub)
 	if (vsub->tmsi_new != GSM_RESERVED_TMSI)
 		vty_out(vty, "    new TMSI: %08X%s", vsub->tmsi_new,
 			VTY_NEWLINE);
+	if (vsub->imei[0] != '\0')
+		vty_out(vty, "    IMEI: %s%s", vsub->imei, VTY_NEWLINE);
+	if (vsub->imeisv[0] != '\0')
+		vty_out(vty, "    IMEISV: %s%s", vsub->imeisv, VTY_NEWLINE);
 
 	vty_out(vty, "    Flags: %s", VTY_NEWLINE);
 	vty_out(vty, "     IMSI detached:             %s%s",
