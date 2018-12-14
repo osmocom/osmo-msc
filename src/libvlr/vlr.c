@@ -657,6 +657,28 @@ int vlr_subscr_req_sai(struct vlr_subscr *vsub,
 	return vlr_subscr_tx_gsup_message(vsub, &gsup_msg);
 }
 
+/* Initiate Check_IMEI_VLR Procedure (23.018 Chapter 7.1.2.9) */
+int vlr_subscr_tx_req_check_imei(const struct vlr_subscr *vsub)
+{
+	struct osmo_gsup_message gsup_msg = {0};
+	uint8_t imei_enc[GSM23003_IMEI_NUM_DIGITS+2]; /* +2: IE header */
+	int len;
+
+	/* Encode IMEI */
+	len = gsm48_encode_bcd_number(imei_enc, sizeof(imei_enc), 0, vsub->imei);
+	if (len < 1) {
+		LOGVSUBP(LOGL_ERROR, vsub, "Error: cannot encode IMEI '%s'\n", vsub->imei);
+		return -ENOSPC;
+	}
+	gsup_msg.imei_enc = imei_enc;
+	gsup_msg.imei_enc_len = len;
+
+	/* Send CHECK_IMEI_REQUEST */
+	gsup_msg.message_type = OSMO_GSUP_MSGT_CHECK_IMEI_REQUEST;
+	OSMO_STRLCPY_ARRAY(gsup_msg.imsi, vsub->imsi);
+	return vlr_tx_gsup_message(vsub->vlr, &gsup_msg);
+}
+
 /* Tell HLR that authentication failure occurred */
 int vlr_subscr_tx_auth_fail_rep(const struct vlr_subscr *vsub)
 {
@@ -991,6 +1013,29 @@ static int vlr_subscr_handle_cancel_req(struct vlr_subscr *vsub,
 	return rc;
 }
 
+/* Handle Check_IMEI_VLR result and error from HLR */
+static int vlr_subscr_handle_check_imei(struct vlr_subscr *vsub, const struct osmo_gsup_message *gsup)
+{
+	if (!vsub->lu_fsm) {
+		LOGVSUBP(LOGL_ERROR, vsub, "Rx %s without LU in progress\n",
+			 osmo_gsup_message_type_name(gsup->message_type));
+		return -ENODEV;
+	}
+
+	if (gsup->message_type == OSMO_GSUP_MSGT_CHECK_IMEI_RESULT) {
+		if (gsup->imei_result == OSMO_GSUP_IMEI_RESULT_ACK)
+			osmo_fsm_inst_dispatch(vsub->lu_fsm, VLR_ULA_E_HLR_IMEI_ACK, NULL);
+		else
+			osmo_fsm_inst_dispatch(vsub->lu_fsm, VLR_ULA_E_HLR_IMEI_NACK, NULL);
+	} else {
+		LOGVSUBP(LOGL_ERROR, vsub, "Check_IMEI_VLR failed; gmm_cause: %s\n",
+			 get_value_string(gsm48_gmm_cause_names, gsup->cause));
+		osmo_fsm_inst_dispatch(vsub->lu_fsm, VLR_ULA_E_HLR_IMEI_NACK, NULL);
+	}
+
+	return 0;
+}
+
 /* Incoming handler for GSUP from HLR.
  * Keep this function non-static for direct invocation by unit tests. */
 int vlr_gsupc_read_cb(struct osmo_gsup_client *gsupc, struct msgb *msg)
@@ -1059,6 +1104,10 @@ int vlr_gsupc_read_cb(struct osmo_gsup_client *gsupc, struct msgb *msg)
 			"Rx GSUP msg_type=%d not yet implemented\n",
 			gsup.message_type);
 		rc = -GMM_CAUSE_MSGT_NOTEXIST_NOTIMPL;
+		break;
+	case OSMO_GSUP_MSGT_CHECK_IMEI_ERROR:
+	case OSMO_GSUP_MSGT_CHECK_IMEI_RESULT:
+		rc = vlr_subscr_handle_check_imei(vsub, &gsup);
 		break;
 	default:
 		/* Forward message towards MSC */

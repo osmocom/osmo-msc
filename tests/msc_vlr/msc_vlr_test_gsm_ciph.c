@@ -553,9 +553,15 @@ static void test_ciph_imei()
 	EXPECT_ACCEPTED(false);
 	thwart_rx_non_initial_requests();
 
-	btw("MS replies with an Identity Response");
-	expect_bssap_clear();
+	btw("MS replies with an Identity Response, VLR sends the IMEI to HLR");
+	gsup_expect_tx("30010809710000004026f050090824433224433224f0");
 	ms_sends_msg("0559084a32244332244302");
+	EXPECT_ACCEPTED(false);
+	thwart_rx_non_initial_requests();
+
+	btw("HLR accepts the IMEI");
+	expect_bssap_clear();
+	gsup_rx("32010809710000004026f0510100", NULL);
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
 	btw("LU was successful, and the conn has already been closed");
@@ -758,8 +764,14 @@ static void test_ciph_tmsi_imei()
 	EXPECT_ACCEPTED(false);
 	thwart_rx_non_initial_requests();
 
-	btw("MS replies with an Identity Response");
+	btw("MS replies with an Identity Response, VLR sends the IMEI to HLR");
+	gsup_expect_tx("30010809710000004026f050090824433224433224f0");
 	ms_sends_msg("0559084a32244332244302");
+	EXPECT_ACCEPTED(false);
+	thwart_rx_non_initial_requests();
+
+	btw("HLR accepts the IMEI");
+	gsup_rx("32010809710000004026f0510100", NULL);
 
 	btw("a LU Accept with a new TMSI was sent, waiting for TMSI Realloc Compl");
 	EXPECT_CONN_COUNT(1);

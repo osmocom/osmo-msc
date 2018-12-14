@@ -65,6 +65,8 @@ enum vlr_lu_event {
 	VLR_ULA_E_ID_IMSI,	/* IMSI recieved from MS */
 	VLR_ULA_E_ID_IMEI,	/* IMEI received from MS */
 	VLR_ULA_E_ID_IMEISV,	/* IMEISV received from MS */
+	VLR_ULA_E_HLR_IMEI_ACK,	/* Check_IMEI_VLR result from HLR */
+	VLR_ULA_E_HLR_IMEI_NACK,/* Check_IMEI_VLR result from HLR */
 	VLR_ULA_E_HLR_LU_RES,	/* HLR UpdateLocation result */
 	VLR_ULA_E_UPD_HLR_COMPL,/* UpdatE_HLR_VLR result */
 	VLR_ULA_E_LU_COMPL_SUCCESS,/* Location_Update_Completion_VLR result */

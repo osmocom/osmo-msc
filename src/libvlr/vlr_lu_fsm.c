@@ -653,6 +653,8 @@ static const struct value_string fsm_lu_event_names[] = {
 	OSMO_VALUE_STRING(VLR_ULA_E_ID_IMSI),
 	OSMO_VALUE_STRING(VLR_ULA_E_ID_IMEI),
 	OSMO_VALUE_STRING(VLR_ULA_E_ID_IMEISV),
+	OSMO_VALUE_STRING(VLR_ULA_E_HLR_IMEI_ACK),
+	OSMO_VALUE_STRING(VLR_ULA_E_HLR_IMEI_NACK),
 	OSMO_VALUE_STRING(VLR_ULA_E_HLR_LU_RES),
 	OSMO_VALUE_STRING(VLR_ULA_E_UPD_HLR_COMPL),
 	OSMO_VALUE_STRING(VLR_ULA_E_LU_COMPL_SUCCESS),
@@ -1229,8 +1231,16 @@ static void lu_fsm_wait_lu_compl(struct osmo_fsm_inst *fi, uint32_t event,
 				       LU_COMPL_VLR_E_NEW_TMSI_ACK, NULL);
 		break;
 	case VLR_ULA_E_ID_IMEI:
+		/* Got the IMEI from ME, now send it to HLR */
+		vlr_subscr_tx_req_check_imei(lfp->vsub);
+		break;
+	case VLR_ULA_E_HLR_IMEI_ACK:
 		osmo_fsm_inst_dispatch(lfp->lu_compl_vlr_fsm,
 				       LU_COMPL_VLR_E_IMEI_CHECK_ACK, NULL);
+		break;
+	case VLR_ULA_E_HLR_IMEI_NACK:
+		osmo_fsm_inst_dispatch(lfp->lu_compl_vlr_fsm,
+				       LU_COMPL_VLR_E_IMEI_CHECK_NACK, NULL);
 		break;
 	case VLR_ULA_E_LU_COMPL_SUCCESS:
 		lu_fsm_discard_lu_compl_fsm(fi);
@@ -1362,7 +1372,9 @@ static const struct osmo_fsm_state vlr_lu_fsm_states[] = {
 				 S(VLR_ULA_E_LU_COMPL_FAILURE) |
 				 S(VLR_ULA_E_NEW_TMSI_ACK) |
 				 S(VLR_ULA_E_ID_IMEI) |
-				 S(VLR_ULA_E_ID_IMEISV),
+				 S(VLR_ULA_E_ID_IMEISV) |
+				 S(VLR_ULA_E_HLR_IMEI_ACK) |
+				 S(VLR_ULA_E_HLR_IMEI_NACK),
 		.out_state_mask = S(VLR_ULA_S_DONE),
 		.name = OSMO_STRINGIFY(VLR_ULA_S_WAIT_LU_COMPL),
 		.action = lu_fsm_wait_lu_compl,
