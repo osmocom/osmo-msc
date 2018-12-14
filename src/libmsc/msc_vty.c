@@ -432,6 +432,17 @@ DEFUN(cfg_msc_auth_tuple_reuse_on_error, cfg_msc_auth_tuple_reuse_on_error_cmd,
 	return CMD_SUCCESS;
 }
 
+DEFUN(cfg_msc_check_imei_rqd, cfg_msc_check_imei_rqd_cmd,
+      "check-imei-rqd (0|1)",
+      "Send each IMEI to the EIR to ask if it is permitted or not. The EIR is implemented as part of OsmoHLR, "
+      "and can optionally save the IMEI in the HLR.\n"
+      "Do not send IMEIs to the EIR\n"
+      "Send each IMEI to the EIR\n")
+{
+	gsmnet->vlr->cfg.check_imei_rqd = atoi(argv[0]) ? true : false;
+	return CMD_SUCCESS;
+}
+
 DEFUN(cfg_msc_paging_response_timer, cfg_msc_paging_response_timer_cmd,
       "paging response-timer (default|<1-65535>)",
       "Configure Paging\n"
@@ -499,6 +510,10 @@ static int config_write_msc(struct vty *vty)
 			VTY_NEWLINE);
 	if (gsmnet->vlr->cfg.auth_reuse_old_sets_on_error)
 		vty_out(vty, " auth-tuple-reuse-on-error 1%s",
+			VTY_NEWLINE);
+
+	if (gsmnet->vlr->cfg.check_imei_rqd)
+		vty_out(vty, " check-imei-rqd 1 %s",
 			VTY_NEWLINE);
 
 	if (gsmnet->paging_response_timer != MSC_PAGING_RESPONSE_TIMER_DEFAULT)
@@ -1548,6 +1563,7 @@ void msc_vty_init(struct gsm_network *msc_network)
 	install_element(MSC_NODE, &cfg_msc_no_assign_tmsi_cmd);
 	install_element(MSC_NODE, &cfg_msc_auth_tuple_max_reuse_count_cmd);
 	install_element(MSC_NODE, &cfg_msc_auth_tuple_reuse_on_error_cmd);
+	install_element(MSC_NODE, &cfg_msc_check_imei_rqd_cmd);
 	install_element(MSC_NODE, &cfg_msc_cs7_instance_a_cmd);
 	install_element(MSC_NODE, &cfg_msc_cs7_instance_iu_cmd);
 	install_element(MSC_NODE, &cfg_msc_paging_response_timer_cmd);
