@@ -632,6 +632,8 @@ static void subscr_dump_full_vty(struct vty *vty, struct vlr_subscr *vsub)
 			VTY_NEWLINE);
 	vty_out(vty, "    LAC: %d/0x%x%s",
 		vsub->lac, vsub->lac, VTY_NEWLINE);
+	vty_out(vty, "    RAN: %s%s",
+		ran_type_name(vsub->cs.attached_via_ran), VTY_NEWLINE);
 	vty_out(vty, "    IMSI: %s%s", vsub->imsi, VTY_NEWLINE);
 	if (vsub->tmsi != GSM_RESERVED_TMSI)
 		vty_out(vty, "    TMSI: %08X%s", vsub->tmsi,
