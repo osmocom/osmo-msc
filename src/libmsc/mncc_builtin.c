@@ -35,6 +35,8 @@
 #include <osmocom/msc/gsm_data.h>
 #include <osmocom/msc/transaction.h>
 
+#define DEBUGCC(l, r, fmt, args...)   DEBUGP(DMNCC, "(call %x, remote %x) " fmt, l->callref, r->callref, ##args)
+
 void *tall_call_ctx;
 
 static LLIST_HEAD(call_list);
@@ -105,8 +107,7 @@ static int mncc_setup_ind(struct gsm_call *call, int msg_type,
 	llist_add_tail(&remote->entry, &call_list);
 	remote->net = call->net;
 	remote->callref = new_callref++;
-	DEBUGP(DMNCC, "(call %x) Creating new remote instance %x.\n",
-		call->callref, remote->callref);
+	DEBUGCC(call, remote, "Creating new remote instance.\n");
 
 	/* link remote call */
 	call->remote_ref = remote->callref;
@@ -115,20 +116,20 @@ static int mncc_setup_ind(struct gsm_call *call, int msg_type,
 	/* send call proceeding */
 	memset(&mncc, 0, sizeof(struct gsm_mncc));
 	mncc.callref = call->callref;
-	DEBUGP(DMNCC, "(call %x) Accepting call.\n", call->callref);
+	DEBUGCC(call, remote, "Accepting call.\n");
 	mncc_tx_to_cc(call->net, MNCC_CALL_PROC_REQ, &mncc);
 
 	/* modify mode */
 	memset(&mncc, 0, sizeof(struct gsm_mncc));
 	mncc.callref = call->callref;
-	DEBUGP(DMNCC, "(call %x) Modify channel mode\n", call->callref);
+	DEBUGCC(call, remote, "Modify channel mode.\n");
 	mncc_tx_to_cc(call->net, MNCC_LCHAN_MODIFY, &mncc);
 
 	/* send setup to remote */
 //	setup->fields |= MNCC_F_SIGNAL;
 //	setup->signal = GSM48_SIGNAL_DIALTONE;
 	setup->callref = remote->callref;
-	DEBUGP(DMNCC, "(call %x) Forwarding SETUP to remote.\n", call->callref);
+	DEBUGCC(call, remote, "Forwarding SETUP to remote.\n");
 	return mncc_tx_to_cc(remote->net, MNCC_SETUP_REQ, setup);
 
 out_reject:
@@ -146,7 +147,7 @@ static int mncc_alert_ind(struct gsm_call *call, int msg_type,
 	if (!(remote = get_call_ref(call->remote_ref)))
 		return 0;
 	alert->callref = remote->callref;
-	DEBUGP(DMNCC, "(call %x) Forwarding ALERT to remote.\n", call->callref);
+	DEBUGCC(call, remote, "Forwarding ALERT to remote.\n");
 	return mncc_tx_to_cc(remote->net, MNCC_ALERT_REQ, alert);
 }
 
@@ -159,7 +160,7 @@ static int mncc_notify_ind(struct gsm_call *call, int msg_type,
 	if (!(remote = get_call_ref(call->remote_ref)))
 		return 0;
 	notify->callref = remote->callref;
-	DEBUGP(DMNCC, "(call %x) Forwarding NOTIF to remote.\n", call->callref);
+	DEBUGCC(call, remote, "Forwarding NOTIF to remote.\n");
 	return mncc_tx_to_cc(remote->net, MNCC_NOTIFY_REQ, notify);
 }
 
@@ -180,13 +181,13 @@ static int mncc_setup_cnf(struct gsm_call *call, int msg_type,
 	if (!(remote = get_call_ref(call->remote_ref)))
 		return 0;
 	connect->callref = remote->callref;
-	DEBUGP(DMNCC, "(call %x) Sending CONNECT to remote.\n", call->callref);
+	DEBUGCC(call, remote, "Sending CONNECT to remote.\n");
 	mncc_tx_to_cc(remote->net, MNCC_SETUP_RSP, connect);
 
 	/* bridge tch */
 	bridge.callref[0] = call->callref;
 	bridge.callref[1] = call->remote_ref;
-	DEBUGP(DMNCC, "(call %x) Bridging with remote.\n", call->callref);
+	DEBUGCC(call, remote, "Bridging with remote.\n");
 
 	return mncc_tx_to_cc(call->net, MNCC_BRIDGE, &bridge);
 }
@@ -206,8 +207,7 @@ static int mncc_disc_ind(struct gsm_call *call, int msg_type,
 		return 0;
 	}
 	disc->callref = remote->callref;
-	DEBUGP(DMNCC, "(call %x) Disconnecting remote with cause %d\n",
-		remote->callref, disc->cause.value);
+	DEBUGCC(call, remote, "Disconnecting remote with cause %d\n", disc->cause.value);
 	return mncc_tx_to_cc(remote->net, MNCC_DISC_REQ, disc);
 }
 
@@ -222,8 +222,7 @@ static int mncc_rel_ind(struct gsm_call *call, int msg_type, struct gsm_mncc *re
 	}
 
 	rel->callref = remote->callref;
-	DEBUGP(DMNCC, "(call %x) Releasing remote with cause %d\n",
-		call->callref, rel->cause.value);
+	DEBUGCC(call, remote, "Releasing remote with cause %d\n", rel->cause.value);
 
 	/*
 	 * Release this side of the call right now. Otherwise we end up
