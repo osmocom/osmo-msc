@@ -182,11 +182,13 @@ void thwart_rx_non_initial_requests();
 		OSMO_ASSERT(accepted == expect_accepted); \
 	} while (false)
 
-#define VERBOSE_ASSERT(val, expect_op, fmt) \
+#define VAL_ASSERT(desc, val, expect_op, fmt)	\
 	do { \
-		log(#val " == " fmt, (val)); \
+		log(desc " == " fmt, (val)); \
 		OSMO_ASSERT((val) expect_op); \
-	} while (0);
+	} while (0)
+
+#define VERBOSE_ASSERT(val, expect_op, fmt) VAL_ASSERT(#val, val, expect_op, fmt)
 
 #define EXPECT_CONN_COUNT(N) VERBOSE_ASSERT(llist_count(&net->ran_conns), == N, "%d")
 
