@@ -91,7 +91,7 @@ DREF VLR subscr MSISDN:46071 usage decreases to: 2
 DREF VLR subscr MSISDN:46071 usage increases to: 3
   vsub != NULL == 1
   strcmp(vsub->imsi, IMSI) == 0
-  vsub->lac == 23
+  LAC == 23
 DREF VLR subscr MSISDN:46071 usage decreases to: 2
 - BSS sends BSSMAP Clear Complete
 DREF MSISDN:46071: MSC conn use - release == 0 (0x0: )
@@ -287,7 +287,7 @@ DREF VLR subscr MSISDN:46071 usage decreases to: 2
 DREF VLR subscr MSISDN:46071 usage increases to: 3
   vsub != NULL == 1
   strcmp(vsub->imsi, IMSI) == 0
-  vsub->lac == 23
+  LAC == 23
 DREF VLR subscr MSISDN:46071 usage decreases to: 2
 - BSS sends BSSMAP Clear Complete
 DREF MSISDN:46071: MSC conn use - release == 0 (0x0: )

@@ -175,7 +175,7 @@ DMM RAN_conn(LU:901700000010650){RAN_CONN_S_RELEASED}: Deallocated
 DREF VLR subscr MSISDN:42342 usage increases to: 2
   vsub != NULL == 1
   strcmp(vsub->imsi, IMSI) == 0
-  vsub->lac == 23
+  LAC == 23
 DREF VLR subscr MSISDN:42342 usage decreases to: 1
 ---
 - after a while, a new conn sends a CM Service Request. VLR responds with Auth Req, 2nd auth vector
@@ -555,7 +555,7 @@ DMM RAN_conn(LU:901700000010650){RAN_CONN_S_RELEASED}: Deallocated
 DREF VLR subscr MSISDN:42342 usage increases to: 2
   vsub != NULL == 1
   strcmp(vsub->imsi, IMSI) == 0
-  vsub->lac == 23
+  LAC == 23
 DREF VLR subscr MSISDN:42342 usage decreases to: 1
 ---
 - after a while, MNCC asks us to setup a call, causing Paging
@@ -934,7 +934,7 @@ DMM RAN_conn(LU:901700000010650){RAN_CONN_S_RELEASED}: Deallocated
 DREF VLR subscr MSISDN:42342 usage increases to: 2
   vsub != NULL == 1
   strcmp(vsub->imsi, IMSI) == 0
-  vsub->lac == 23
+  LAC == 23
 DREF VLR subscr MSISDN:42342 usage decreases to: 1
 ---
 - after a while, MNCC asks us to setup a call, causing Paging
@@ -1279,7 +1279,7 @@ DMM RAN_conn(LU:901700000010650){RAN_CONN_S_RELEASED}: Deallocated
 DREF VLR subscr MSISDN:42342 usage increases to: 2
   vsub != NULL == 1
   strcmp(vsub->imsi, IMSI) == 0
-  vsub->lac == 23
+  LAC == 23
 DREF VLR subscr MSISDN:42342 usage decreases to: 1
 ---
 - after a while, a new conn sends a CM Service Request. VLR responds with Auth Req, 2nd auth vector
@@ -1621,7 +1621,7 @@ DMM RAN_conn(LU:901700000010650){RAN_CONN_S_RELEASED}: Deallocated
 DREF VLR subscr MSISDN:42342 usage increases to: 2
   vsub != NULL == 1
   strcmp(vsub->imsi, IMSI) == 0
-  vsub->lac == 23
+  LAC == 23
 DREF VLR subscr MSISDN:42342 usage decreases to: 1
 ---
 - after a while, a new conn sends a CM Service Request. VLR responds with Auth Req, 2nd auth vector

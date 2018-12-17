@@ -68,7 +68,7 @@ static void perform_lu(void)
 	vsub = vlr_subscr_find_by_imsi(net->vlr, IMSI);
 	VERBOSE_ASSERT(vsub != NULL, == true, "%d");
 	VERBOSE_ASSERT(strcmp(vsub->imsi, IMSI), == 0, "%d");
-	VERBOSE_ASSERT(vsub->lac, == 23, "%u");
+	VAL_ASSERT("LAC", vsub->lac, == 23, "%u");
 	vlr_subscr_put(vsub);
 
 	bss_sends_clear_complete();
