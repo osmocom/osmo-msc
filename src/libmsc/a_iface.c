@@ -360,7 +360,6 @@ int a_iface_tx_assignment(const struct gsm_trans *trans)
 	struct ran_conn *conn;
 	struct gsm0808_channel_type ct;
 	struct gsm0808_speech_codec_list scl;
-	uint32_t *ci_ptr = NULL;
 	struct msgb *msg;
 	struct sockaddr_storage rtp_addr;
 	struct sockaddr_in rtp_addr_in;
@@ -404,7 +403,7 @@ int a_iface_tx_assignment(const struct gsm_trans *trans)
 	memset(&rtp_addr, 0, sizeof(rtp_addr));
 	memcpy(&rtp_addr, &rtp_addr_in, sizeof(rtp_addr_in));
 
-	msg = gsm0808_create_ass(&ct, NULL, &rtp_addr, &scl, ci_ptr);
+	msg = gsm0808_create_ass(&ct, NULL, &rtp_addr, &scl, NULL);
 
 	LOGPCONN(conn, LOGL_DEBUG, "N-DATA.req(%s)\n", msgb_hexdump_l2(msg));
 	return osmo_sccp_tx_data_msg(conn->a.scu, conn->a.conn_id, msg);
