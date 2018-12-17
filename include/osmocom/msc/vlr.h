@@ -171,9 +171,6 @@ struct vlr_subscr {
 	/* PS (SGSN) specific parts */
 	struct {
 		struct llist_head pdp_list;
-		uint8_t rac;
-		uint8_t sac;
-		struct gprs_mm_ctx *mmctx;
 	} ps;
 	/* CS (NITB/CSCN) specific parts */
 	struct {
