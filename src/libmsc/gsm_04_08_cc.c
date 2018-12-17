@@ -2047,7 +2047,7 @@ int mncc_tx_to_cc(struct gsm_network *net, int msg_type, void *arg)
 		 && ((1 << trans->cc.state) & downstatelist[i].states))
 			break;
 	if (i == DOWNSLLEN) {
-		DEBUGP(DCC, "Message unhandled at this state.\n");
+		DEBUGP(DCC, "Message '%s' unhandled at state '%s'\n", get_mncc_name(msg_type), gsm48_cc_state_name(trans->cc.state));
 		return 0;
 	}
 
