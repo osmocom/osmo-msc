@@ -1761,10 +1761,9 @@ int gsm48_tch_rtp_create(struct gsm_trans *trans)
 	return 0;
 }
 
-static int tch_rtp_connect(struct gsm_network *net, void *arg)
+static int tch_rtp_connect(struct gsm_network *net, struct gsm_mncc_rtp *rtp)
 {
 	struct gsm_trans *trans;
-	struct gsm_mncc_rtp *rtp = arg;
 	struct in_addr addr;
 
 	/* FIXME: in *rtp we should get the codec information of the remote
