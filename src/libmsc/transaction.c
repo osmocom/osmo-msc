@@ -24,7 +24,6 @@
 #include <osmocom/msc/debug.h>
 #include <osmocom/core/talloc.h>
 #include <osmocom/msc/gsm_04_08.h>
-#include <osmocom/msc/mncc.h>
 #include <osmocom/msc/vlr.h>
 
 void *tall_trans_ctx;
