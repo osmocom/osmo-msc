@@ -943,7 +943,7 @@ static struct osmo_fsm_state fsm_msc_mgcp_states[] = {
 
 /* State machine definition */
 static struct osmo_fsm fsm_msc_mgcp = {
-	.name = "MGW",
+	.name = "msc-mgcp",
 	.states = fsm_msc_mgcp_states,
 	.num_states = ARRAY_SIZE(fsm_msc_mgcp_states),
 	.log_subsys = DMGCP,
@@ -979,7 +979,6 @@ int msc_mgcp_try_call_assignment(struct gsm_trans *trans)
 int msc_mgcp_call_assignment(struct gsm_trans *trans)
 {
 	struct mgcp_ctx *mgcp_ctx;
-	char name[32];
 	static bool fsm_registered = false;
 	struct ran_conn *conn;
 	struct mgcp_client *mgcp;
@@ -1009,9 +1008,6 @@ int msc_mgcp_call_assignment(struct gsm_trans *trans)
 		conn->iu.rab_id = next_iu_rab_id++;
 #endif
 
-	if (snprintf(name, sizeof(name), "MGW_%i", trans->transaction_id) >= sizeof(name))
-		return -EINVAL;
-
 	/* Register the fsm description (if not already done) */
 	if (fsm_registered == false) {
 		osmo_fsm_register(&fsm_msc_mgcp);
@@ -1028,8 +1024,10 @@ int msc_mgcp_call_assignment(struct gsm_trans *trans)
 		     vlr_subscr_name(trans->vsub), ENDPOINT_ID);
 		return -EINVAL;
 	}
-	mgcp_ctx->fsm = osmo_fsm_inst_alloc(&fsm_msc_mgcp, NULL, NULL, LOGL_DEBUG, name);
+	mgcp_ctx->fsm = osmo_fsm_inst_alloc(&fsm_msc_mgcp, NULL, NULL, LOGL_DEBUG, NULL);
 	OSMO_ASSERT(mgcp_ctx->fsm);
+	osmo_fsm_inst_update_id_f(mgcp_ctx->fsm, "%s_%s_trans%d",
+				  vlr_subscr_name(trans->vsub), ran_conn_get_conn_id(conn), trans->transaction_id);
 	mgcp_ctx->fsm->priv = mgcp_ctx;
 	mgcp_ctx->mgcp = mgcp;
 	mgcp_ctx->trans = trans;
