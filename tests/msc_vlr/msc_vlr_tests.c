@@ -1016,11 +1016,16 @@ int main(int argc, char **argv)
 	OSMO_ASSERT(osmo_stderr_target);
 	log_set_use_color(osmo_stderr_target, 0);
 	log_set_print_timestamp(osmo_stderr_target, 0);
-	log_set_print_filename(osmo_stderr_target, _log_lines? 1 : 0);
+	log_set_print_filename(osmo_stderr_target, 0);
 	log_set_print_category(osmo_stderr_target, 1);
 
-	if (cmdline_opts.verbose)
+	if (cmdline_opts.verbose) {
 		log_set_category_filter(osmo_stderr_target, DLSMS, 1, LOGL_DEBUG);
+		log_set_print_filename2(osmo_stderr_target, LOG_FILENAME_BASENAME);
+		log_set_print_filename_pos(osmo_stderr_target, LOG_FILENAME_POS_LINE_END);
+		log_set_use_color(osmo_stderr_target, 1);
+		log_set_print_level(osmo_stderr_target, 1);
+	}
 
 	net = test_net(msc_vlr_tests_ctx);
 
