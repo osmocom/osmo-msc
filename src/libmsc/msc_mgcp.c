@@ -375,7 +375,7 @@ static void mgw_crcx_ran_resp_cb(struct mgcp_response *r, void *priv)
 		return;
 	}
 
-	LOGPFSML(mgcp_ctx->fsm, LOGL_DEBUG, "CRCX/BTS: MGW responded with address %s:%u\n", r->audio_ip, r->audio_port);
+	LOGPFSML(mgcp_ctx->fsm, LOGL_DEBUG, "CRCX/RAN: MGW responded with address %s:%u\n", r->audio_ip, r->audio_port);
 
 	conn->rtp.local_port_ran = r->audio_port;
 	osmo_strlcpy(conn->rtp.local_addr_ran, r->audio_ip, sizeof(conn->rtp.local_addr_ran));
