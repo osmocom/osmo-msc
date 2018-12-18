@@ -118,6 +118,41 @@ static bool classmark_is_r99(struct gsm_classmark *cm)
 	return classmark2_is_r99(cm->classmark2, cm->classmark2_len);
 }
 
+static const char *classmark_a5_name(const struct gsm_classmark *cm)
+{
+	static char buf[128];
+	char cm1[42];
+	char cm2[42];
+	char cm3[42];
+
+	if (cm->classmark1_set)
+		snprintf(cm1, sizeof(cm1), " cm1{a5/1=%s}",
+		     cm->classmark1.a5_1 ? "not-supported":"supported" /* inverted logic */);
+	else
+		snprintf(cm1, sizeof(cm1), " no-cm1");
+
+	if (cm->classmark2_len >= 3)
+		snprintf(cm2, sizeof(cm2), " cm2{0x%x=%s%s}",
+			 cm->classmark2[2],
+			 cm->classmark2[2] & 0x1 ? " A5/2" : "",
+			 cm->classmark2[2] & 0x2 ? " A5/3" : "");
+	else
+		snprintf(cm2, sizeof(cm2), " no-cm2");
+
+	if (cm->classmark3_len >= 1)
+		snprintf(cm3, sizeof(cm3), " cm3{0x%x=%s%s%s%s}",
+			 cm->classmark3[0],
+			 cm->classmark3[0] & (1 << 0) ? " A5/4" : "",
+			 cm->classmark3[0] & (1 << 1) ? " A5/5" : "",
+			 cm->classmark3[0] & (1 << 2) ? " A5/6" : "",
+			 cm->classmark3[0] & (1 << 3) ? " A5/7" : "");
+	else
+		snprintf(cm3, sizeof(cm3), " no-cm3");
+
+	snprintf(buf, sizeof(buf), "%s%s%s", cm1, cm2, cm3);
+	return buf;
+}
+
 /* Determine if the given CLASSMARK (1/2/3) value permits a given A5/n cipher.
  * Return 1 when the given A5/n is permitted, 0 when not, and negative if the respective MS CLASSMARK is
  * not known, where the negative number indicates the classmark type: -2 means Classmark 2 is not
@@ -1648,8 +1683,9 @@ int ran_conn_geran_set_cipher_mode(struct ran_conn *conn, bool umts_aka, bool re
 
 	if (ei.perm_algo_len == 0) {
 		LOGP(DMM, LOGL_ERROR, "%s: cannot start ciphering, no intersection "
-		     "between MSC-configured and MS-supported A5 algorithms\n",
-		     vlr_subscr_name(conn->vsub));
+		     "between MSC-configured and MS-supported A5 algorithms. MSC: %x  MS:%s\n",
+		     vlr_subscr_name(conn->vsub), net->a5_encryption_mask,
+		     classmark_a5_name(&conn->vsub->classmark));
 		return -ENOTSUP;
 	}
 
