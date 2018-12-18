@@ -31,6 +31,4 @@ void msc_vty_init(struct gsm_network *msc_network);
 
 struct gsm_network *gsmnet_from_vty(struct vty *vty);
 
-extern bool msc_parsing_config_file;
-
 #endif
