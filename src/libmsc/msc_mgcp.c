@@ -51,8 +51,6 @@
 #define MGCP_ASS_TIMEOUT 10	/* in seconds */
 #define MGCP_ASS_TIMEOUT_TIMER_NR 4
 
-#define ENDPOINT_ID "rtpbridge/*@mgw"
-
 /* Some internal cause codes to indicate fault condition inside the FSM */
 enum msc_mgcp_cause_code {
 	MGCP_ERR_MGW_FAIL,
@@ -306,7 +304,7 @@ static void fsm_crcx_ran_cb(struct osmo_fsm_inst *fi, uint32_t event, void *data
 		.call_id = mgcp_ctx->call_id,
 		.conn_mode = MGCP_CONN_RECV_ONLY
 	};
-	if (osmo_strlcpy(mgcp_msg.endpoint, mgcp_ctx->rtp_endpoint, sizeof(mgcp_msg.endpoint)) >=
+	if (osmo_strlcpy(mgcp_msg.endpoint, mgcp_client_rtpbridge_wildcard(mgcp), sizeof(mgcp_msg.endpoint)) >=
 	    MGCP_ENDPOINT_MAXLEN) {
 		handle_error(mgcp_ctx, MGCP_ERR_TOOLONG, false);
 		return;
@@ -982,6 +980,7 @@ int msc_mgcp_call_assignment(struct gsm_trans *trans)
 	static bool fsm_registered = false;
 	struct ran_conn *conn;
 	struct mgcp_client *mgcp;
+	int rc;
 
 	OSMO_ASSERT(trans);
 
@@ -1017,11 +1016,12 @@ int msc_mgcp_call_assignment(struct gsm_trans *trans)
 	/* Allocate and configure a new fsm instance */
 	mgcp_ctx = talloc_zero(NULL, struct mgcp_ctx);
 	OSMO_ASSERT(mgcp_ctx);
-	if (osmo_strlcpy(mgcp_ctx->rtp_endpoint, ENDPOINT_ID, sizeof(mgcp_ctx->rtp_endpoint)) >=
-	    MGCP_ENDPOINT_MAXLEN) {
+	
+	rc = osmo_strlcpy(mgcp_ctx->rtp_endpoint, mgcp_client_rtpbridge_wildcard(mgcp), sizeof(mgcp_ctx->rtp_endpoint));
+	if (rc >= sizeof(mgcp_ctx->rtp_endpoint)) {
 		talloc_free(mgcp_ctx);
-		LOGP(DMGCP, LOGL_ERROR, "(subscriber:%s) endpoint identifier (%s) exceeds maximum length...\n",
-		     vlr_subscr_name(trans->vsub), ENDPOINT_ID);
+		LOGP(DMGCP, LOGL_ERROR, "(subscriber:%s) endpoint identifier exceeds maximum length: %s\n",
+		     vlr_subscr_name(trans->vsub), osmo_quote_str(mgcp_client_rtpbridge_wildcard(mgcp), -1));
 		return -EINVAL;
 	}
 	mgcp_ctx->fsm = osmo_fsm_inst_alloc(&fsm_msc_mgcp, NULL, NULL, LOGL_DEBUG, NULL);
