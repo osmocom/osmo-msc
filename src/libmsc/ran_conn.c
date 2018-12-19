@@ -497,10 +497,10 @@ char *ran_conn_get_conn_id(struct ran_conn *conn)
 
 	switch (conn->via_ran) {
 	case RAN_GERAN_A:
-		id = talloc_asprintf(conn, "GERAN_A-%08x", conn->a.conn_id);
+		id = talloc_asprintf(conn, "GERAN-A-%u", conn->a.conn_id);
 		break;
 	case RAN_UTRAN_IU:
-		id = talloc_asprintf(conn, "UTRAN_IU-%08x", iu_get_conn_id(conn->iu.ue_ctx));
+		id = talloc_asprintf(conn, "UTRAN-Iu-%u", iu_get_conn_id(conn->iu.ue_ctx));
 		break;
 	default:
 		LOGP(DMM, LOGL_ERROR, "RAN of conn %p unknown!\n", conn);
@@ -672,12 +672,40 @@ const struct value_string complete_layer3_type_names[] = {
 	{ 0, NULL }
 };
 
-void ran_conn_update_id(struct ran_conn *conn,
-			       enum complete_layer3_type from, const char *id)
+void ran_conn_update_id(struct ran_conn *conn)
 {
-       conn->complete_layer3_type = from;
-       osmo_fsm_inst_update_id_f(conn->fi, "%s:%s", complete_layer3_type_name(from), id);
-       LOGPFSML(conn->fi, LOGL_DEBUG, "Updated ID\n");
+	struct vlr_subscr *vsub = conn->vsub;
+
+	osmo_fsm_inst_update_id_f(conn->fi, "%s_%s_%s",
+				  ran_conn_get_conn_id(conn), vlr_subscr_name(conn->vsub),
+				  complete_layer3_type_name(conn->complete_layer3_type));
+
+	if (vsub) {
+		if (vsub->lu_fsm)
+			osmo_fsm_inst_update_id(vsub->lu_fsm, conn->fi->id);
+		if (vsub->auth_fsm)
+			osmo_fsm_inst_update_id(vsub->auth_fsm, conn->fi->id);
+		if (vsub->proc_arq_fsm)
+			osmo_fsm_inst_update_id(vsub->proc_arq_fsm, conn->fi->id);
+	}
+
+	LOGPFSML(conn->fi, LOGL_DEBUG, "Updated ID\n");
+}
+
+void ran_conn_update_id_for_vsub(struct vlr_subscr *for_vsub)
+{
+	struct gsm_network *network;
+	struct ran_conn *conn;
+	if (!for_vsub)
+		return;
+
+	network = for_vsub->vlr->user_ctx;
+	OSMO_ASSERT(network);
+
+	llist_for_each_entry(conn, &network->ran_conns, entry) {
+		if (conn->vsub == for_vsub)
+			ran_conn_update_id(conn);
+	}
 }
 
 static void rx_close_complete(struct ran_conn *conn, const char *label, bool *flag)
