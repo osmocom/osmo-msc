@@ -28,6 +28,7 @@
 #include <osmocom/msc/a_iface.h>
 #include <osmocom/msc/gsm_04_08.h>
 #include <osmocom/msc/gsm_04_11.h>
+#include <osmocom/msc/msc_mgcp.h>
 
 #include "../../bscconfig.h"
 #ifdef BUILD_IU
@@ -123,7 +124,9 @@ void msc_assign_compl(struct ran_conn *conn,
 /* Receive an ASSIGNMENT FAILURE from BSC */
 void ran_conn_assign_fail(struct ran_conn *conn, uint8_t cause, uint8_t *rr_cause)
 {
-	LOGP(DRR, LOGL_DEBUG, "MSC assign failure (do nothing).\n");
+	LOGPFSMSL(conn->fi, DRR, LOGL_ERROR, "Assignment Failure: cause=%u rr_cause=%u.\n",
+		  cause, rr_cause ? *rr_cause : 0);
+	msc_mgcp_ass_fail(conn);
 }
 
 /* Receive a CLASSMARK CHANGE from BSC */

@@ -1094,6 +1094,25 @@ int msc_mgcp_ass_complete(struct ran_conn *conn, uint16_t port, char *addr)
 	return 0;
 }
 
+/* Notify the MGCP context that Assignment failed.
+ * This will end the "ringing" on the other call leg, and will usually result in L3 and conn release (i.e. when no other
+ * transactions are still pending, which is usually the case). */
+int msc_mgcp_ass_fail(struct ran_conn *conn)
+{
+	struct mgcp_ctx *mgcp_ctx;
+
+	OSMO_ASSERT(conn);
+
+	mgcp_ctx = conn->rtp.mgcp_ctx;
+	if (!mgcp_ctx)
+		return -EINVAL;
+
+	LOGPFSMSL(conn->fi, DMGCP, LOGL_ERROR, "Assignment failed\n");
+
+	osmo_fsm_inst_dispatch(mgcp_ctx->fsm, EV_TEARDOWN_ERROR, mgcp_ctx);
+	return 0;
+}
+
 /* Make the connection of a previously assigned call complete
  * Parameter:
  * trans: transaction context.
