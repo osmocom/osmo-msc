@@ -142,9 +142,7 @@ struct vlr_subscr {
 	/* Newly allocated TMSI that was not yet acked by MS */
 	uint32_t tmsi_new;
 
-	/* some redundancy in information below? */
 	struct osmo_cell_global_id cgi;			/* 2.4.16 */
-	uint16_t lac;					/* 2.4.2 */
 
 	char imeisv[GSM23003_IMEISV_NUM_DIGITS+1];	/* 2.2.3 */
 	char imei[GSM23003_IMEISV_NUM_DIGITS+1];	/* 2.1.9 */

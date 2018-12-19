@@ -1939,7 +1939,7 @@ int mncc_tx_to_cc(struct gsm_network *net, int msg_type, void *arg)
 						GSM48_CC_CAUSE_UNASSIGNED_NR);
 		}
 		/* If subscriber is not "attached" */
-		if (!vsub->lac) {
+		if (!vsub->cgi.lai.lac) {
 			DEBUGP(DCC, "(bts - trx - ts - ti -- sub %s) "
 				"Received '%s' from MNCC with "
 				"detached subscriber %s\n", data->called.number,
@@ -1978,7 +1978,7 @@ int mncc_tx_to_cc(struct gsm_network *net, int msg_type, void *arg)
 					"unallocated channel, paging already "
 					"started for lac %d.\n",
 					data->called.number,
-					get_mncc_name(msg_type), vsub->lac);
+					get_mncc_name(msg_type), vsub->cgi.lai.lac);
 				vlr_subscr_put(vsub);
 				trans_free(trans);
 				return 0;

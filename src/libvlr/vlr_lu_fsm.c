@@ -950,7 +950,7 @@ static int assoc_lfp_with_sub(struct osmo_fsm_inst *fi, struct vlr_subscr *vsub)
 	vsub->lu_fsm = fi;
 	vsub->msc_conn_ref = lfp->msc_conn_ref;
 	/* FIXME: send new LAC to HLR? */
-	vsub->lac = lfp->new_lai.lac;
+	vsub->cgi.lai.lac = lfp->new_lai.lac;
 	lfp->vsub = vsub;
 	/* Tell MSC to associate this subscriber with the given
 	 * connection */

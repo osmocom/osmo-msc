@@ -287,7 +287,7 @@ static struct gsm_trans *establish_nc_ss_trans(struct gsm_network *net,
 	}
 
 	/* If subscriber is not "attached" */
-	if (!vsub->lac) {
+	if (!vsub->cgi.lai.lac) {
 		LOGP(DMM, LOGL_ERROR, "Network-originated session "
 			"rejected - subscriber is not attached\n");
 		return NULL;

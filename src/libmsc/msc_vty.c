@@ -631,7 +631,7 @@ static void subscr_dump_full_vty(struct vty *vty, struct vlr_subscr *vsub)
 		vty_out(vty, "    Extension: %s%s", vsub->msisdn,
 			VTY_NEWLINE);
 	vty_out(vty, "    LAC: %d/0x%x%s",
-		vsub->lac, vsub->lac, VTY_NEWLINE);
+		vsub->cgi.lai.lac, vsub->cgi.lai.lac, VTY_NEWLINE);
 	vty_out(vty, "    RAN: %s%s",
 		ran_type_name(vsub->cs.attached_via_ran), VTY_NEWLINE);
 	vty_out(vty, "    IMSI: %s%s", vsub->imsi, VTY_NEWLINE);
