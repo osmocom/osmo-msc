@@ -179,8 +179,9 @@ struct ran_conn {
 
 struct ran_conn *ran_conn_alloc(struct gsm_network *network, enum ran_type via_ran, uint16_t lac);
 
-void ran_conn_update_id(struct ran_conn *conn, enum complete_layer3_type from, const char *id);
+void ran_conn_update_id(struct ran_conn *conn);
 char *ran_conn_get_conn_id(struct ran_conn *conn);
+void ran_conn_update_id_for_vsub(struct vlr_subscr *for_vsub);
 
 void ran_conn_complete_layer_3(struct ran_conn *conn);
 

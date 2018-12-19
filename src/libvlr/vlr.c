@@ -81,20 +81,34 @@ uint32_t vlr_timer(struct vlr_instance *vlr, uint32_t timer)
 /* return static buffer with printable name of VLR subscriber */
 const char *vlr_subscr_name(struct vlr_subscr *vsub)
 {
-	static char buf[32];
+	static char buf[128];
+	char imsi[23] = "";
+	char msisdn[25] = "";
+	char tmsi[23] = "";
+	char tmsi_new[23] = "";
+	bool present = false;
 	if (!vsub)
 		return "unknown";
-	if (vsub->msisdn[0])
-		snprintf(buf, sizeof(buf), "MSISDN:%s", vsub->msisdn);
-	else if (vsub->imsi[0])
-		snprintf(buf, sizeof(buf), "IMSI:%s", vsub->imsi);
-	else if (vsub->tmsi != GSM_RESERVED_TMSI)
-		snprintf(buf, sizeof(buf), "TMSI:0x%08x", vsub->tmsi);
-	else if (vsub->tmsi_new != GSM_RESERVED_TMSI)
-		snprintf(buf, sizeof(buf), "TMSI(new):0x%08x", vsub->tmsi_new);
-	else
+	if (vsub->imsi[0]) {
+		snprintf(imsi, sizeof(imsi), "IMSI-%s", vsub->imsi);
+		present = true;
+	}
+	if (vsub->msisdn[0]) {
+		snprintf(msisdn, sizeof(msisdn), "%sMSISDN-%s", present? "_" : "", vsub->msisdn);
+		present = true;
+	}
+	if (vsub->tmsi != GSM_RESERVED_TMSI) {
+		snprintf(tmsi, sizeof(buf), "%sTMSI-0x%08x", present? "_" : "", vsub->tmsi);
+		present = true;
+	}
+	if (vsub->tmsi_new != GSM_RESERVED_TMSI) {
+		snprintf(buf, sizeof(buf), "%sTMSInew-0x%08x", present? "_" : "", vsub->tmsi_new);
+		present = true;
+	}
+	if (!present)
 		return "unknown";
-	buf[sizeof(buf)-1] = '\0';
+
+	snprintf(buf, sizeof(buf), "%s%s%s%s", imsi, msisdn, tmsi, tmsi_new);
 	return buf;
 }
 

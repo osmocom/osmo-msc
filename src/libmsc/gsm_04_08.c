@@ -354,7 +354,8 @@ int mm_rx_loc_upd_req(struct ran_conn *conn, struct msgb *msg)
 		return -EINVAL;
 	}
 
-	ran_conn_update_id(conn, COMPLETE_LAYER3_LU, mi_string);
+	conn->complete_layer3_type = COMPLETE_LAYER3_LU;
+	ran_conn_update_id(conn);
 
 	DEBUGP(DMM, "LOCATION UPDATING REQUEST: MI(%s)=%s type=%s\n",
 	       gsm48_mi_type_name(mi_type), mi_string,
@@ -688,7 +689,7 @@ accept_reuse:
 		conn->received_cm_service_request = true;
 		ran_conn_get(conn, RAN_CONN_USE_CM_SERVICE);
 	}
-	ran_conn_update_id(conn, conn->complete_layer3_type, mi_string);
+	ran_conn_update_id(conn);
 	return conn->network->vlr->ops.tx_cm_serv_acc(conn);
 }
 
@@ -781,7 +782,8 @@ int gsm48_rx_mm_serv_req(struct ran_conn *conn, struct msgb *msg)
 		/* or should we accept and note down the service request anyway? */
 	}
 
-	ran_conn_update_id(conn, COMPLETE_LAYER3_CM_SERVICE_REQ, mi_string);
+	conn->complete_layer3_type = COMPLETE_LAYER3_CM_SERVICE_REQ;
+	ran_conn_update_id(conn);
 
 	osmo_signal_dispatch(SS_SUBSCR, S_SUBSCR_IDENTITY, mi_p);
 
@@ -1183,7 +1185,8 @@ static int gsm48_rx_rr_pag_resp(struct ran_conn *conn, struct msgb *msg)
 
 	DEBUGP(DRR, "PAGING RESPONSE: MI(%s)=%s\n", gsm48_mi_type_name(mi_type), mi_string);
 
-	ran_conn_update_id(conn, COMPLETE_LAYER3_PAGING_RESP, mi_string);
+	conn->complete_layer3_type = COMPLETE_LAYER3_PAGING_RESP;
+	ran_conn_update_id(conn);
 
 	is_utran = (conn->via_ran == RAN_UTRAN_IU);
 	vlr_proc_acc_req(conn->fi,
@@ -1745,6 +1748,7 @@ static void msc_vlr_subscr_update(struct vlr_subscr *subscr)
 {
 	LOGVSUBP(LOGL_NOTICE, subscr, "VLR: update for IMSI=%s (MSISDN=%s, used=%d)\n",
 		 subscr->imsi, subscr->msisdn, subscr->use_count);
+	ran_conn_update_id_for_vsub(subscr);
 }
 
 static void update_classmark(const struct gsm_classmark *src, struct gsm_classmark *dst)
@@ -1778,6 +1782,8 @@ static void msc_vlr_subscr_assoc(void *msc_conn_ref,
 	 * associated with the conn: merge the new Classmark into vsub->classmark. Don't overwrite valid
 	 * vsub->classmark with unset classmark, though. */
 	update_classmark(&conn->temporary_classmark, &conn->vsub->classmark);
+
+	ran_conn_update_id(conn);
 }
 
 static int msc_vlr_route_gsup_msg(struct vlr_subscr *vsub,
