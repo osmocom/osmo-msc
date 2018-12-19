@@ -458,24 +458,6 @@ DEFUN(cfg_msc_emergency_msisdn, cfg_msc_emergency_msisdn_cmd,
 	return CMD_SUCCESS;
 }
 
-DEFUN(cfg_msc_ipa_name,
-      cfg_msc_ipa_name_cmd,
-      "ipa-name NAME",
-      "Set the IPA name of this MSC\n"
-      "A unique name for this MSC. For example: PLMN + redundancy server number: MSC-901-70-0. "
-      "This name is used for GSUP routing and must be set if more than one MSC is connected to the HLR. "
-      "The default is 'MSC-00-00-00-00-00-00'.\n")
-{
-	if (vty->type != VTY_FILE) {
-		vty_out(vty, "The IPA name cannot be changed at run-time; "
-			"It can only be set in the configuraton file.%s", VTY_NEWLINE);
-		return CMD_WARNING;
-	}
-
-	gsmnet->msc_ipa_name = talloc_strdup(gsmnet, argv[0]);
-	return CMD_SUCCESS;
-}
-
 /* TODO: to be deprecated as soon as we rip SMS handling out (see OS#3587) */
 DEFUN(cfg_msc_sms_over_gsup, cfg_msc_sms_over_gsup_cmd,
       "sms-over-gsup",
@@ -526,9 +508,6 @@ static int config_write_msc(struct vty *vty)
 		vty_out(vty, " emergency-call route-to-msisdn %s%s",
 			gsmnet->emergency.route_to_msisdn, VTY_NEWLINE);
 	}
-
-	if (gsmnet->msc_ipa_name)
-		vty_out(vty, " ipa-name %s%s", gsmnet->msc_ipa_name, VTY_NEWLINE);
 
 	if (gsmnet->sms_over_gsup)
 		vty_out(vty, " sms-over-gsup%s", VTY_NEWLINE);
@@ -1506,6 +1485,24 @@ DEFUN(cfg_hlr_remote_port, cfg_hlr_remote_port_cmd, "remote-port <1-65535>",
 	return CMD_SUCCESS;
 }
 
+DEFUN(cfg_hlr_ipa_name,
+      cfg_hlr_ipa_name_cmd,
+      "ipa-name NAME",
+      "Set the IPA name of this MSC\n"
+      "A unique name for this MSC. For example: PLMN + redundancy server number: MSC-901-70-0. "
+      "This name is used for GSUP routing and must be set if more than one MSC is connected to the HLR. "
+      "The default is 'MSC-00-00-00-00-00-00'.\n")
+{
+	if (vty->type != VTY_FILE) {
+		vty_out(vty, "The IPA name cannot be changed at run-time; "
+			"It can only be set in the configuraton file.%s", VTY_NEWLINE);
+		return CMD_WARNING;
+	}
+
+	gsmnet->msc_ipa_name = talloc_strdup(gsmnet, argv[0]);
+	return CMD_SUCCESS;
+}
+
 static int config_write_hlr(struct vty *vty)
 {
 	vty_out(vty, "hlr%s", VTY_NEWLINE);
@@ -1513,6 +1510,8 @@ static int config_write_hlr(struct vty *vty)
 		gsmnet->gsup_server_addr_str, VTY_NEWLINE);
 	vty_out(vty, " remote-port %u%s",
 		gsmnet->gsup_server_port, VTY_NEWLINE);
+	if (gsmnet->msc_ipa_name)
+		vty_out(vty, " ipa-name %s%s", gsmnet->msc_ipa_name, VTY_NEWLINE);
 	return CMD_SUCCESS;
 }
 
@@ -1553,7 +1552,6 @@ void msc_vty_init(struct gsm_network *msc_network)
 	install_element(MSC_NODE, &cfg_msc_cs7_instance_iu_cmd);
 	install_element(MSC_NODE, &cfg_msc_paging_response_timer_cmd);
 	install_element(MSC_NODE, &cfg_msc_emergency_msisdn_cmd);
-	install_element(MSC_NODE, &cfg_msc_ipa_name_cmd);
 	install_element(MSC_NODE, &cfg_msc_sms_over_gsup_cmd);
 	install_element(MSC_NODE, &cfg_msc_no_sms_over_gsup_cmd);
 
@@ -1605,4 +1603,5 @@ void msc_vty_init(struct gsm_network *msc_network)
 	install_node(&hlr_node, config_write_hlr);
 	install_element(HLR_NODE, &cfg_hlr_remote_ip_cmd);
 	install_element(HLR_NODE, &cfg_hlr_remote_port_cmd);
+	install_element(HLR_NODE, &cfg_hlr_ipa_name_cmd);
 }
