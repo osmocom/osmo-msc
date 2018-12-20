@@ -951,7 +951,7 @@ static struct osmo_fsm fsm_msc_mgcp = {
 	.event_names = msc_mgcp_fsm_evt_names,
 };
 
-/* Try to invoke call assignment and set trans->assignment_done flag if invoked.
+/* Try to invoke call assignment and set trans->cc.assignment_started flag if invoked.
  * This is relevant for already ongoing calls -- scenario:
  *  - subscriber is in an active voice call,
  *  - another call is coming in.
@@ -960,10 +960,10 @@ static struct osmo_fsm fsm_msc_mgcp = {
 int msc_mgcp_try_call_assignment(struct gsm_trans *trans)
 {
 	struct ran_conn *conn = trans->conn;
-	if (trans->assignment_done)
+	if (trans->cc.assignment_started)
 		return 0;
 	LOGPFSMSL(conn->fi, DMGCP, LOGL_INFO, "Starting call assignment\n");
-	trans->assignment_done = true;
+	trans->cc.assignment_started = true;
 	return msc_mgcp_call_assignment(trans);
 }
 
