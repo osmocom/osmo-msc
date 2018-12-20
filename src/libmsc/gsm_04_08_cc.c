@@ -736,12 +736,7 @@ static int gsm48_cc_rx_call_conf(struct gsm_trans *trans, struct msgb *msg)
 	new_cc_state(trans, GSM_CSTATE_MO_TERM_CALL_CONF);
 
 	/* Assign call (if not done yet) */
-	if (trans->assignment_done == false) {
-		rc = msc_mgcp_call_assignment(trans);
-		trans->assignment_done = true;
-	}
-	else
-		rc = 0;
+	rc = msc_mgcp_try_call_assignment(trans);
 
 	/* don't continue, if there were problems with
 	 * the call assignment. */
@@ -780,14 +775,7 @@ static int gsm48_cc_tx_call_proc_and_assign(struct gsm_trans *trans, void *arg)
 		return rc;
 
 	/* Assign call (if not done yet) */
-	if (trans->assignment_done == false) {
-		rc = msc_mgcp_call_assignment(trans);
-		trans->assignment_done = true;
-	}
-	else
-		rc = 0;
-
-	return rc;
+	return msc_mgcp_try_call_assignment(trans);
 }
 
 static int gsm48_cc_rx_alerting(struct gsm_trans *trans, struct msgb *msg)
@@ -1706,7 +1694,6 @@ static void mncc_recv_rtp_err(struct gsm_network *net, uint32_t callref, int cmd
 static int tch_rtp_create(struct gsm_network *net, uint32_t callref)
 {
 	struct gsm_trans *trans;
-	int rc;
 
 	/* Find callref */
 	trans = trans_find_by_callref(net, callref);
@@ -1737,14 +1724,7 @@ static int tch_rtp_create(struct gsm_network *net, uint32_t callref)
 	trans->tch_rtp_create = true;
 
 	/* Assign call (if not done yet) */
-	if (trans->assignment_done == false) {
-		rc = msc_mgcp_call_assignment(trans);
-		trans->assignment_done = true;
-	}
-	else
-		rc = 0;
-
-	return rc;
+	return msc_mgcp_try_call_assignment(trans);
 }
 
 /* Trigger TCH_RTP_CREATE acknowledgement */
