@@ -52,9 +52,6 @@ struct gsm_trans {
 	/* bearer capabilities (rate and codec) */
 	struct gsm_mncc_bearer_cap bearer_cap;
 
-	/* status of the assignment, true when done */
-	bool assignment_done;
-
 	/* if true, TCH_RTP_CREATE is sent after the
 	 * assignment is done */
 	bool tch_rtp_create;
@@ -71,6 +68,7 @@ struct gsm_trans {
 			struct osmo_timer_list timer;
 			struct osmo_timer_list timer_guard;
 			struct gsm_mncc msg;	/* stores setup/disconnect/release message */
+			bool assignment_started;
 		} cc;
 		struct {
 			struct gsm411_smc_inst smc_inst;
