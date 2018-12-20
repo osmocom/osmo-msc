@@ -951,6 +951,22 @@ static struct osmo_fsm fsm_msc_mgcp = {
 	.event_names = msc_mgcp_fsm_evt_names,
 };
 
+/* Try to invoke call assignment and set trans->assignment_done flag if invoked.
+ * This is relevant for already ongoing calls -- scenario:
+ *  - subscriber is in an active voice call,
+ *  - another call is coming in.
+ * For the second call coming in, we must wait to establish RTP and assignment until the first call is CC-Disconnected.
+ */
+int msc_mgcp_try_call_assignment(struct gsm_trans *trans)
+{
+	struct ran_conn *conn = trans->conn;
+	if (trans->assignment_done)
+		return 0;
+	LOGPFSMSL(conn->fi, DMGCP, LOGL_INFO, "Starting call assignment\n");
+	trans->assignment_done = true;
+	return msc_mgcp_call_assignment(trans);
+}
+
 /* Notify that a new call begins. This will create a connection for the
  * RAN and the CN on the MGW.
  * Parameter:

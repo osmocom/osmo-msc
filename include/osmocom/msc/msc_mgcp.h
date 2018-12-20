@@ -57,6 +57,7 @@ struct mgcp_ctx {
 	mgcp_trans_id_t mgw_pending_trans;
 };
 
+int msc_mgcp_try_call_assignment(struct gsm_trans *trans);
 int msc_mgcp_call_assignment(struct gsm_trans *trans);
 int msc_mgcp_ass_complete(struct ran_conn *conn, uint16_t port, char *addr);
 int msc_mgcp_call_complete(struct gsm_trans *trans, uint16_t port, char *addr);
