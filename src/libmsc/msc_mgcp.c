@@ -962,6 +962,10 @@ int msc_mgcp_try_call_assignment(struct gsm_trans *trans)
 	struct ran_conn *conn = trans->conn;
 	if (trans->cc.assignment_started)
 		return 0;
+	if (conn->rtp.mgcp_ctx) {
+		LOGPFSMSL(conn->fi, DMGCP, LOGL_INFO, "Another call is already ongoing, not assigning yet\n");
+		return 0;
+	}
 	LOGPFSMSL(conn->fi, DMGCP, LOGL_INFO, "Starting call assignment\n");
 	trans->cc.assignment_started = true;
 	return msc_mgcp_call_assignment(trans);
@@ -1152,6 +1156,23 @@ int msc_mgcp_call_complete(struct gsm_trans *trans, uint16_t port, char *addr)
 	return 0;
 }
 
+static struct gsm_trans *find_waiting_call(struct ran_conn *conn)
+{
+	struct gsm_trans *trans;
+	struct gsm_network *net = conn->network;
+
+	llist_for_each_entry(trans, &net->trans_list, entry) {
+		if (trans->conn != conn)
+			continue;
+		if (trans->protocol != GSM48_PDISC_CC)
+			continue;
+		if (trans->cc.assignment_started)
+			continue;
+		return trans;
+	}
+	return NULL;
+}
+
 /* Release ongoing call.
  * Parameter:
  * trans: connection context.
@@ -1160,6 +1181,7 @@ int msc_mgcp_call_release(struct gsm_trans *trans)
 {
 	struct mgcp_ctx *mgcp_ctx;
 	struct ran_conn *conn = trans->conn;
+	struct gsm_trans *waiting_trans;
 
 	OSMO_ASSERT(trans);
 
@@ -1202,6 +1224,15 @@ int msc_mgcp_call_release(struct gsm_trans *trans)
 	 * take care for a graceful shutdown and when done it will free
 	 * all related context information */
 	conn->rtp.mgcp_ctx = NULL;
+
+	/* If there is another call still waiting to be activated, this is the time when the mgcp_ctx is available again
+	 * and the other call can start assigning. */
+	waiting_trans = find_waiting_call(conn);
+	if (waiting_trans) {
+		LOGP(DMGCP, LOGL_DEBUG, "(ti %02x %s) Call waiting: starting Assignment\n",
+		     waiting_trans->transaction_id, vlr_subscr_name(trans->vsub));
+		msc_mgcp_try_call_assignment(waiting_trans);
+	}
 
 	return 0;
 }
