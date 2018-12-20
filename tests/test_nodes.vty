@@ -45,8 +45,6 @@ OsmoMSC(config-msc)# list
   mgw local-port <0-65535>
   mgw remote-ip A.B.C.D
   mgw remote-port <0-65535>
-  mgw endpoint-range <1-65534> <1-65534>
-  mgw bts-base <0-65534>
 ...
 
 OsmoMSC(config-msc)# mncc?
