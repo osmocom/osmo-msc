@@ -1164,6 +1164,12 @@ int msc_mgcp_call_release(struct gsm_trans *trans)
 		return -EINVAL;
 	}
 
+	if (mgcp_ctx->trans != trans) {
+		LOGP(DMGCP, LOGL_DEBUG, "(ti %02x %s) call release for background CC transaction\n",
+		     trans->transaction_id, vlr_subscr_name(trans->vsub));
+		return 0;
+	}
+
 	LOGP(DMGCP, LOGL_DEBUG, "(ti %02x %s) Call release: tearing down MGW endpoint\n",
 	     trans->transaction_id, vlr_subscr_name(trans->vsub));
 
