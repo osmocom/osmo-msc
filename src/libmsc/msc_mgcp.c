@@ -1143,26 +1143,29 @@ int msc_mgcp_call_complete(struct gsm_trans *trans, uint16_t port, char *addr)
 int msc_mgcp_call_release(struct gsm_trans *trans)
 {
 	struct mgcp_ctx *mgcp_ctx;
+	struct ran_conn *conn = trans->conn;
 
 	OSMO_ASSERT(trans);
 
-	if (!trans->conn) {
+	if (!conn) {
 		LOGP(DMGCP, LOGL_ERROR, "(subscriber:%s) invalid conn, call release failed\n",
 		     vlr_subscr_name(trans->vsub));
 		return -EINVAL;
 	}
-	if (!trans->conn->rtp.mgcp_ctx) {
+	mgcp_ctx = conn->rtp.mgcp_ctx;
+	if (!mgcp_ctx) {
 		LOGP(DMGCP, LOGL_ERROR, "(subscriber:%s) invalid mgcp context, call release failed.\n",
 		     vlr_subscr_name(trans->vsub));
 		return -EINVAL;
 	}
-	if (!trans->conn->rtp.mgcp_ctx->fsm) {
+	if (!mgcp_ctx->fsm) {
 		LOGP(DMGCP, LOGL_ERROR, "(subscriber:%s) no FSM, call release failed\n",
 		     vlr_subscr_name(trans->vsub));
 		return -EINVAL;
 	}
 
-	mgcp_ctx = trans->conn->rtp.mgcp_ctx;
+	LOGP(DMGCP, LOGL_DEBUG, "(ti %02x %s) Call release: tearing down MGW endpoint\n",
+	     trans->transaction_id, vlr_subscr_name(trans->vsub));
 
 	/* Inform the FSM that as soon as it reaches ST_HALT it may free
 	 * all context information immediately */
@@ -1176,10 +1179,7 @@ int msc_mgcp_call_release(struct gsm_trans *trans)
 	 * overwriting the context pointer with NULL. The FSM will now
 	 * take care for a graceful shutdown and when done it will free
 	 * all related context information */
-	trans->conn->rtp.mgcp_ctx = NULL;
-
-	LOGP(DMGCP, LOGL_DEBUG, "(subscriber:%s) call release initiated\n",
-	     vlr_subscr_name(trans->vsub));
+	conn->rtp.mgcp_ctx = NULL;
 
 	return 0;
 }
