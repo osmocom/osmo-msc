@@ -590,6 +590,8 @@ static int gsm48_cc_rx_setup(struct gsm_trans *trans, struct msgb *msg)
 			     TLVP_VAL(&tp, GSM48_IE_CC_CAP)-1);
 	}
 
+	setup.ran = trans->conn->via_ran & 0xff;
+
 	new_cc_state(trans, GSM_CSTATE_INITIATED);
 
 	LOGP(DCC, setup.emergency ? LOGL_NOTICE : LOGL_INFO, "Subscriber %s (%s) sends %sSETUP to %s\n",
