@@ -3,7 +3,7 @@ talloc_total_blocks(tall_bsc_ctx) == 13
 
 ===== test_ss_ussd_mo_geran
 - Location Update request causes a GSUP LU request to HLR
-  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
+  MSC <--GERAN-A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
   new conn
 DMM RAN_conn{RAN_CONN_S_NEW}: Allocated
 DREF unknown: MSC conn use + compl_l3 == 1 (0x1: compl_l3)
@@ -82,7 +82,7 @@ DMM RAN_conn(LU:901700000004620){RAN_CONN_S_ACCEPTED}: state_chg to RAN_CONN_S_R
 DREF MSISDN:46071: MSC conn use + release == 1 (0x100: release)
 DREF VLR subscr MSISDN:46071 usage increases to: 4
 DREF VLR subscr MSISDN:46071 usage decreases to: 3
-- BSSAP Clear --RAN_GERAN_A--> MS
+- BSSAP Clear --GERAN-A--> MS
 DREF VLR subscr MSISDN:46071 usage decreases to: 2
 <-- GSUP rx OSMO_GSUP_MSGT_UPDATE_LOCATION_RESULT: vlr_gsupc_read_cb() returns 0
 - LU was successful, and the conn has already been closed
@@ -110,7 +110,7 @@ DMM RAN_conn(LU:901700000004620){RAN_CONN_S_RELEASED}: Deallocated
   llist_count(&net->ran_conns) == 0
 ---
 - after a while, a new conn sends a CM Service Request
-  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_CM_SERV_REQ
+  MSC <--GERAN-A-- MS: GSM48_MT_MM_CM_SERV_REQ
   new conn
 DMM RAN_conn{RAN_CONN_S_NEW}: Allocated
 DREF unknown: MSC conn use + compl_l3 == 1 (0x1: compl_l3)
@@ -143,7 +143,7 @@ DMM RAN_conn(CM_SERVICE_REQ:901700000004620){RAN_CONN_S_ACCEPTED}: Received Even
 DREF MSISDN:46071: MSC conn use - compl_l3 == 1 (0x8: cm_service)
   cm_service_result_sent == 1
 ran_conn_is_accepted() == true
-  MSC <--RAN_GERAN_A-- MS: GSM0480_MTYPE_REGISTER
+  MSC <--GERAN-A-- MS: GSM0480_MTYPE_REGISTER
 DREF MSISDN:46071: MSC conn use + dtap == 2 (0xa: dtap,cm_service)
 DRLL Dispatching 04.08 message GSM0480_MTYPE_REGISTER (0xb:0x3b)
 DMM Received SS/USSD data (trans_id=8, msg_type=GSM0480_MTYPE_REGISTER)
@@ -161,8 +161,8 @@ DREF MSISDN:46071: MSC conn use - dtap == 1 (0x40: trans_nc_ss)
 DVLR GSUP rx 61: 20010809710000004026f03004200000013101033527a225020101302002013b301b04010f0416d9775d0e2ae3e965f73cfd7683d27310cd06bbc51a0d
 DREF VLR subscr MSISDN:46071 usage increases to: 4
 DMSC Routed to GSM 09.11 SS/USSD handler
-DMSC msc_tx 43 bytes to MSISDN:46071 via RAN_GERAN_A
-- DTAP --RAN_GERAN_A--> MS: GSM0480_MTYPE_RELEASE_COMPLETE: 8b2a1c27a225020101302002013b301b04010f0416d9775d0e2ae3e965f73cfd7683d27310cd06bbc51a0d
+DMSC msc_tx 43 bytes to MSISDN:46071 via GERAN-A
+- DTAP --GERAN-A--> MS: GSM0480_MTYPE_RELEASE_COMPLETE: 8b2a1c27a225020101302002013b301b04010f0416d9775d0e2ae3e965f73cfd7683d27310cd06bbc51a0d
 - DTAP matches expected message
 DREF VLR subscr MSISDN:46071 usage decreases to: 3
 DREF MSISDN:46071: MSC conn use - trans_nc_ss == 0 (0x0: )
@@ -171,7 +171,7 @@ DMM RAN_conn(CM_SERVICE_REQ:901700000004620){RAN_CONN_S_COMMUNICATING}: state_ch
 DREF MSISDN:46071: MSC conn use + release == 1 (0x100: release)
 DREF VLR subscr MSISDN:46071 usage increases to: 4
 DREF VLR subscr MSISDN:46071 usage decreases to: 3
-- BSSAP Clear --RAN_GERAN_A--> MS
+- BSSAP Clear --GERAN-A--> MS
 DREF VLR subscr MSISDN:46071 usage decreases to: 2
 <-- GSUP rx OSMO_GSUP_MSGT_PROC_SS_REQUEST: vlr_gsupc_read_cb() returns 0
   dtap_tx_confirmed == 1
@@ -199,7 +199,7 @@ talloc_total_blocks(tall_bsc_ctx) == 13
 
 ===== test_ss_ussd_no_geran
 - Location Update request causes a GSUP LU request to HLR
-  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
+  MSC <--GERAN-A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
   new conn
 DMM RAN_conn{RAN_CONN_S_NEW}: Allocated
 DREF unknown: MSC conn use + compl_l3 == 1 (0x1: compl_l3)
@@ -278,7 +278,7 @@ DMM RAN_conn(LU:901700000004620){RAN_CONN_S_ACCEPTED}: state_chg to RAN_CONN_S_R
 DREF MSISDN:46071: MSC conn use + release == 1 (0x100: release)
 DREF VLR subscr MSISDN:46071 usage increases to: 4
 DREF VLR subscr MSISDN:46071 usage decreases to: 3
-- BSSAP Clear --RAN_GERAN_A--> MS
+- BSSAP Clear --GERAN-A--> MS
 DREF VLR subscr MSISDN:46071 usage decreases to: 2
 <-- GSUP rx OSMO_GSUP_MSGT_UPDATE_LOCATION_RESULT: vlr_gsupc_read_cb() returns 0
 - LU was successful, and the conn has already been closed
@@ -317,7 +317,7 @@ DCC (ti ff sub MSISDN:46071 callref 20000101) New transaction
 DREF VLR subscr MSISDN:46071 usage increases to: 4
 DMM Triggering Paging Request
 DMM Subscriber MSISDN:46071 not paged yet, start paging.
-  RAN_GERAN_A sends out paging request to IMSI 901700000004620, TMSI 0xffffffff, LAC 23
+  GERAN-A sends out paging request to IMSI 901700000004620, TMSI 0xffffffff, LAC 23
   strcmp(paging_expecting_imsi, imsi) == 0
 DREF VLR subscr MSISDN:46071 usage increases to: 5
 DREF VLR subscr MSISDN:46071 usage decreases to: 4
@@ -331,7 +331,7 @@ DREF VLR subscr MSISDN:46071 usage increases to: 4
   llist_count(&vsub->cs.requests) == 1
 DREF VLR subscr MSISDN:46071 usage decreases to: 3
 - MS replies with Paging Response, we deliver the NC/USSD
-  MSC <--RAN_GERAN_A-- MS: GSM48_MT_RR_PAG_RESP
+  MSC <--GERAN-A-- MS: GSM48_MT_RR_PAG_RESP
   new conn
 DMM RAN_conn{RAN_CONN_S_NEW}: Allocated
 DREF unknown: MSC conn use + compl_l3 == 1 (0x1: compl_l3)
@@ -359,8 +359,8 @@ DPAG Paging success for MSISDN:46071 (event=0)
 DPAG Calling paging cbfn.
 DMM Paging subscr 46071 succeeded!
 DREF MSISDN:46071: MSC conn use + trans_nc_ss == 2 (0x41: compl_l3,trans_nc_ss)
-DMSC msc_tx 25 bytes to MSISDN:46071 via RAN_GERAN_A
-- DTAP --RAN_GERAN_A--> MS: GSM0480_MTYPE_REGISTER: 0b3b1c15a11302010102013b300b04010f0406aa510c061b01
+DMSC msc_tx 25 bytes to MSISDN:46071 via GERAN-A
+- DTAP --GERAN-A--> MS: GSM0480_MTYPE_REGISTER: 0b3b1c15a11302010102013b300b04010f0406aa510c061b01
 - DTAP matches expected message
 DREF VLR subscr MSISDN:46071 usage decreases to: 4
 DMM RAN_conn(PAGING_RESP:901700000004620){RAN_CONN_S_NEW}: state_chg to RAN_CONN_S_ACCEPTED
@@ -371,7 +371,7 @@ DREF MSISDN:46071: MSC conn use - compl_l3 == 1 (0x40: trans_nc_ss)
   dtap_tx_confirmed == 1
   paging_stopped == 1
 - MS responds to SS/USSD request
-  MSC <--RAN_GERAN_A-- MS: GSM0480_MTYPE_FACILITY
+  MSC <--GERAN-A-- MS: GSM0480_MTYPE_FACILITY
 DREF MSISDN:46071: MSC conn use + dtap == 2 (0x42: dtap,trans_nc_ss)
 DRLL Dispatching 04.08 message GSM0480_MTYPE_FACILITY (0xb:0x3a)
 DMM Received SS/USSD data (trans_id=0, msg_type=GSM0480_MTYPE_FACILITY)
@@ -386,8 +386,8 @@ DREF MSISDN:46071: MSC conn use - dtap == 1 (0x40: trans_nc_ss)
 DVLR GSUP rx 20: 20010809710000004026f0300420000101310103
 DREF VLR subscr MSISDN:46071 usage increases to: 4
 DMSC Routed to GSM 09.11 SS/USSD handler
-DMSC msc_tx 2 bytes to MSISDN:46071 via RAN_GERAN_A
-- DTAP --RAN_GERAN_A--> MS: GSM0480_MTYPE_RELEASE_COMPLETE: 0b2a
+DMSC msc_tx 2 bytes to MSISDN:46071 via GERAN-A
+- DTAP --GERAN-A--> MS: GSM0480_MTYPE_RELEASE_COMPLETE: 0b2a
 - DTAP matches expected message
 DREF VLR subscr MSISDN:46071 usage decreases to: 3
 DREF MSISDN:46071: MSC conn use - trans_nc_ss == 0 (0x0: )
@@ -396,7 +396,7 @@ DMM RAN_conn(PAGING_RESP:901700000004620){RAN_CONN_S_COMMUNICATING}: state_chg t
 DREF MSISDN:46071: MSC conn use + release == 1 (0x100: release)
 DREF VLR subscr MSISDN:46071 usage increases to: 4
 DREF VLR subscr MSISDN:46071 usage decreases to: 3
-- BSSAP Clear --RAN_GERAN_A--> MS
+- BSSAP Clear --GERAN-A--> MS
 DREF VLR subscr MSISDN:46071 usage decreases to: 2
 <-- GSUP rx OSMO_GSUP_MSGT_PROC_SS_REQUEST: vlr_gsupc_read_cb() returns 0
   dtap_tx_confirmed == 1

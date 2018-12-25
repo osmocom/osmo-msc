@@ -75,7 +75,7 @@ static void perform_lu(void)
 	EXPECT_CONN_COUNT(0);
 }
 
-static void _test_ss_ussd_mo(enum ran_type via_ran)
+static void _test_ss_ussd_mo(enum osmo_rat_type via_ran)
 {
 	/* TODO: UTRAN requires auth and ciph */
 	rx_from_ran = via_ran;
@@ -117,7 +117,7 @@ static void _test_ss_ussd_mo(enum ran_type via_ran)
 	EXPECT_CONN_COUNT(0);
 }
 
-static void _test_ss_ussd_no(enum ran_type via_ran)
+static void _test_ss_ussd_no(enum osmo_rat_type via_ran)
 {
 	struct vlr_subscr *vsub;
 
@@ -194,7 +194,7 @@ static void _test_ss_ussd_no(enum ran_type via_ran)
 static void test_ss_ussd_mo_geran()
 {
 	comment_start();
-	_test_ss_ussd_mo(RAN_GERAN_A);
+	_test_ss_ussd_mo(OSMO_RAT_GERAN_A);
 	clear_vlr();
 	comment_end();
 }
@@ -202,7 +202,7 @@ static void test_ss_ussd_mo_geran()
 static void test_ss_ussd_no_geran()
 {
 	comment_start();
-	_test_ss_ussd_no(RAN_GERAN_A);
+	_test_ss_ussd_no(OSMO_RAT_GERAN_A);
 	clear_vlr();
 	comment_end();
 }

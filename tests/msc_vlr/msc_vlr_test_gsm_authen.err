@@ -3,7 +3,7 @@ talloc_total_blocks(tall_bsc_ctx) == 13
 
 ===== test_gsm_authen
 - Location Update request causes a GSUP Send Auth Info request to HLR
-  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
+  MSC <--GERAN-A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
   new conn
 DMM RAN_conn{RAN_CONN_S_NEW}: Allocated
 DREF unknown: MSC conn use + compl_l3 == 1 (0x1: compl_l3)
@@ -69,7 +69,7 @@ DRLL Dispatching 04.08 message SMS:0x01 (0x9:0x1)
 DRLL subscr IMSI:901700000004620: Message not permitted for initial conn: SMS:0x01
   lu_result_sent == 0
 - MS sends Authen Response, VLR accepts and sends GSUP LU Req to HLR
-  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_AUTH_RESP
+  MSC <--GERAN-A-- MS: GSM48_MT_MM_AUTH_RESP
 DREF IMSI:901700000004620: MSC conn use + dtap == 1 (0x2: dtap)
 DRLL Dispatching 04.08 message GSM48_MT_MM_AUTH_RESP (0x5:0x14)
 DMM IMSI:901700000004620: MM GSM AUTHENTICATION RESPONSE (sres = 2d8b2c3e)
@@ -142,7 +142,7 @@ DMM RAN_conn(LU:901700000004620){RAN_CONN_S_ACCEPTED}: state_chg to RAN_CONN_S_R
 DREF MSISDN:46071: MSC conn use + release == 1 (0x100: release)
 DREF VLR subscr MSISDN:46071 usage increases to: 4
 DREF VLR subscr MSISDN:46071 usage decreases to: 3
-- BSSAP Clear --RAN_GERAN_A--> MS
+- BSSAP Clear --GERAN-A--> MS
 DREF VLR subscr MSISDN:46071 usage decreases to: 2
 <-- GSUP rx OSMO_GSUP_MSGT_UPDATE_LOCATION_RESULT: vlr_gsupc_read_cb() returns 0
   bssap_clear_sent == 1
@@ -165,7 +165,7 @@ DMM RAN_conn(LU:901700000004620){RAN_CONN_S_RELEASED}: Deallocated
   llist_count(&net->ran_conns) == 0
 ---
 - after a while, a new conn sends a CM Service Request. VLR responds with Auth Req, 2nd auth vector
-  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_CM_SERV_REQ
+  MSC <--GERAN-A-- MS: GSM48_MT_MM_CM_SERV_REQ
   new conn
 DMM RAN_conn{RAN_CONN_S_NEW}: Allocated
 DREF unknown: MSC conn use + compl_l3 == 1 (0x1: compl_l3)
@@ -208,7 +208,7 @@ DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_MT_RR_SY
 DRLL Dispatching 04.08 message SMS:0x01 (0x9:0x1)
 DRLL subscr MSISDN:46071: Message not permitted for initial conn: SMS:0x01
 - MS sends Authen Response, VLR accepts with a CM Service Accept
-  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_AUTH_RESP
+  MSC <--GERAN-A-- MS: GSM48_MT_MM_AUTH_RESP
 DREF MSISDN:46071: MSC conn use + dtap == 1 (0x2: dtap)
 DRLL Dispatching 04.08 message GSM48_MT_MM_AUTH_RESP (0x5:0x14)
 DMM MSISDN:46071: MM GSM AUTHENTICATION RESPONSE (sres = 20bde240)
@@ -245,7 +245,7 @@ DMM RAN_conn(CM_SERVICE_REQ:901700000004620){RAN_CONN_S_ACCEPTED}: state_chg to 
 DREF MSISDN:46071: MSC conn use + release == 1 (0x100: release)
 DREF VLR subscr MSISDN:46071 usage increases to: 3
 DREF VLR subscr MSISDN:46071 usage decreases to: 2
-- BSSAP Clear --RAN_GERAN_A--> MS
+- BSSAP Clear --GERAN-A--> MS
   bssap_clear_sent == 1
 - all requests serviced, conn has been released
 - BSS sends BSSMAP Clear Complete
@@ -270,7 +270,7 @@ DREF VLR subscr MSISDN:46071 usage increases to: 3
 DCC (ti 00 sub MSISDN:46071 callref 40000001) New transaction
 DREF VLR subscr MSISDN:46071 usage increases to: 4
 DMM Subscriber MSISDN:46071 not paged yet, start paging.
-  RAN_GERAN_A sends out paging request to IMSI 901700000004620, TMSI 0xffffffff, LAC 23
+  GERAN-A sends out paging request to IMSI 901700000004620, TMSI 0xffffffff, LAC 23
   strcmp(paging_expecting_imsi, imsi) == 0
 DREF VLR subscr MSISDN:46071 usage increases to: 5
   llist_count(&vsub->cs.requests) == 1
@@ -282,7 +282,7 @@ DREF VLR subscr MSISDN:46071 usage increases to: 5
   llist_count(&vsub->cs.requests) == 1
 DREF VLR subscr MSISDN:46071 usage decreases to: 4
 - MS replies with Paging Response, and VLR sends Auth Request with third key
-  MSC <--RAN_GERAN_A-- MS: GSM48_MT_RR_PAG_RESP
+  MSC <--GERAN-A-- MS: GSM48_MT_RR_PAG_RESP
   new conn
 DMM RAN_conn{RAN_CONN_S_NEW}: Allocated
 DREF unknown: MSC conn use + compl_l3 == 1 (0x1: compl_l3)
@@ -324,7 +324,7 @@ DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_MT_RR_SY
 DRLL Dispatching 04.08 message SMS:0x01 (0x9:0x1)
 DRLL subscr MSISDN:46071: Message not permitted for initial conn: SMS:0x01
 - MS sends Authen Response, VLR accepts and sends pending SMS
-  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_AUTH_RESP
+  MSC <--GERAN-A-- MS: GSM48_MT_MM_AUTH_RESP
 DREF MSISDN:46071: MSC conn use + dtap == 1 (0x2: dtap)
 DRLL Dispatching 04.08 message GSM48_MT_MM_AUTH_RESP (0x5:0x14)
 DMM MSISDN:46071: MM GSM AUTHENTICATION RESPONSE (sres = a29514ae)
@@ -351,8 +351,8 @@ DMM RAN_conn(PAGING_RESP:901700000004620){RAN_CONN_S_AUTH_CIPH}: Received Event 
 DPAG Paging success for MSISDN:46071 (event=0)
 DPAG Calling paging cbfn.
 DREF MSISDN:46071: MSC conn use + trans_sms == 2 (0x22: dtap,trans_sms)
-DMSC msc_tx 91 bytes to MSISDN:46071 via RAN_GERAN_A
-- DTAP --RAN_GERAN_A--> MS: SMS:0x01: 09015801000791447758100650004c0005806470f1000007101000000000445079da1e1ee7416937485e9ea7c965373d1d6683c270383b3d0ed3d36ff71c949e83c22072799e9687c5ec32a81d96afcbf4b4fb0c7ac3e9e9b7db05
+DMSC msc_tx 91 bytes to MSISDN:46071 via GERAN-A
+- DTAP --GERAN-A--> MS: SMS:0x01: 09015801000791447758100650004c0005806470f1000007101000000000445079da1e1ee7416937485e9ea7c965373d1d6683c270383b3d0ed3d36ff71c949e83c22072799e9687c5ec32a81d96afcbf4b4fb0c7ac3e9e9b7db05
 - DTAP matches expected message
 DREF VLR subscr MSISDN:46071 usage decreases to: 4
 DMM RAN_conn(PAGING_RESP:901700000004620){RAN_CONN_S_AUTH_CIPH}: state_chg to RAN_CONN_S_ACCEPTED
@@ -367,7 +367,7 @@ DREF VLR subscr MSISDN:46071 usage decreases to: 4
 - conn is still open to wait for SMS ack dance
   llist_count(&net->ran_conns) == 1
 - MS replies with CP-ACK for received SMS
-  MSC <--RAN_GERAN_A-- MS: SMS:0x04
+  MSC <--GERAN-A-- MS: SMS:0x04
 DREF MSISDN:46071: MSC conn use + dtap == 2 (0x22: dtap,trans_sms)
 DRLL Dispatching 04.08 message SMS:0x04 (0x9:0x4)
 DMM RAN_conn(PAGING_RESP:901700000004620){RAN_CONN_S_ACCEPTED}: Received Event RAN_CONN_E_COMMUNICATING
@@ -375,12 +375,12 @@ DMM RAN_conn(PAGING_RESP:901700000004620){RAN_CONN_S_ACCEPTED}: state_chg to RAN
 DREF MSISDN:46071: MSC conn use - dtap == 1 (0x20: trans_sms)
   llist_count(&net->ran_conns) == 1
 - MS also sends RP-ACK, MSC in turn sends CP-ACK for that
-  MSC <--RAN_GERAN_A-- MS: SMS:0x01
+  MSC <--GERAN-A-- MS: SMS:0x01
 DREF MSISDN:46071: MSC conn use + dtap == 2 (0x22: dtap,trans_sms)
 DRLL Dispatching 04.08 message SMS:0x01 (0x9:0x1)
 DMM RAN_conn(PAGING_RESP:901700000004620){RAN_CONN_S_COMMUNICATING}: Received Event RAN_CONN_E_COMMUNICATING
-DMSC msc_tx 2 bytes to MSISDN:46071 via RAN_GERAN_A
-- DTAP --RAN_GERAN_A--> MS: SMS:0x04: 0904
+DMSC msc_tx 2 bytes to MSISDN:46071 via GERAN-A
+- DTAP --GERAN-A--> MS: SMS:0x04: 0904
 - DTAP matches expected message
 DREF VLR subscr MSISDN:46071 usage decreases to: 3
 DREF VLR subscr MSISDN:46071 usage decreases to: 2
@@ -391,7 +391,7 @@ DMM RAN_conn(PAGING_RESP:901700000004620){RAN_CONN_S_COMMUNICATING}: state_chg t
 DREF MSISDN:46071: MSC conn use + release == 1 (0x100: release)
 DREF VLR subscr MSISDN:46071 usage increases to: 3
 DREF VLR subscr MSISDN:46071 usage decreases to: 2
-- BSSAP Clear --RAN_GERAN_A--> MS
+- BSSAP Clear --GERAN-A--> MS
   dtap_tx_confirmed == 1
   bssap_clear_sent == 1
 - SMS is done, conn is gone
@@ -411,7 +411,7 @@ DMM RAN_conn(PAGING_RESP:901700000004620){RAN_CONN_S_RELEASED}: Deallocated
   llist_count(&net->ran_conns) == 0
 ---
 - subscriber detaches
-  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_IMSI_DETACH_IND
+  MSC <--GERAN-A-- MS: GSM48_MT_MM_IMSI_DETACH_IND
   new conn
 DMM RAN_conn{RAN_CONN_S_NEW}: Allocated
 DREF unknown: MSC conn use + compl_l3 == 1 (0x1: compl_l3)
@@ -427,7 +427,7 @@ DREF freeing VLR subscr MSISDN:46071
 DMM RAN_conn{RAN_CONN_S_NEW}: Received Event RAN_CONN_E_CN_CLOSE
 DMM RAN_conn{RAN_CONN_S_NEW}: state_chg to RAN_CONN_S_RELEASING
 DREF unknown: MSC conn use + release == 2 (0x101: compl_l3,release)
-- BSSAP Clear --RAN_GERAN_A--> MS
+- BSSAP Clear --GERAN-A--> MS
 DREF unknown: MSC conn use - compl_l3 == 1 (0x100: release)
   bssap_clear_sent == 1
 - BSS sends BSSMAP Clear Complete
@@ -446,7 +446,7 @@ talloc_total_blocks(tall_bsc_ctx) == 13
 
 ===== test_gsm_authen_tmsi
 - Location Update request causes a GSUP Send Auth Info request to HLR
-  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
+  MSC <--GERAN-A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
   new conn
 DMM RAN_conn{RAN_CONN_S_NEW}: Allocated
 DREF unknown: MSC conn use + compl_l3 == 1 (0x1: compl_l3)
@@ -512,7 +512,7 @@ DRLL Dispatching 04.08 message SMS:0x01 (0x9:0x1)
 DRLL subscr IMSI:901700000004620: Message not permitted for initial conn: SMS:0x01
   lu_result_sent == 0
 - MS sends Authen Response, VLR accepts and sends GSUP LU Req to HLR
-  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_AUTH_RESP
+  MSC <--GERAN-A-- MS: GSM48_MT_MM_AUTH_RESP
 DREF IMSI:901700000004620: MSC conn use + dtap == 1 (0x2: dtap)
 DRLL Dispatching 04.08 message GSM48_MT_MM_AUTH_RESP (0x5:0x14)
 DMM IMSI:901700000004620: MM GSM AUTHENTICATION RESPONSE (sres = 2d8b2c3e)
@@ -595,7 +595,7 @@ DREF VLR subscr MSISDN:46071 usage increases to: 2
   vsub->tmsi == 0xffffffff
 DREF VLR subscr MSISDN:46071 usage decreases to: 1
 - MS sends TMSI Realloc Complete
-  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_TMSI_REALL_COMPL
+  MSC <--GERAN-A-- MS: GSM48_MT_MM_TMSI_REALL_COMPL
 DREF MSISDN:46071: MSC conn use + dtap == 1 (0x2: dtap)
 DRLL Dispatching 04.08 message GSM48_MT_MM_TMSI_REALL_COMPL (0x5:0x1b)
 DMM TMSI Reallocation Completed. Subscriber: MSISDN:46071
@@ -616,7 +616,7 @@ DMM RAN_conn(LU:901700000004620){RAN_CONN_S_ACCEPTED}: state_chg to RAN_CONN_S_R
 DREF MSISDN:46071: MSC conn use + release == 2 (0x102: dtap,release)
 DREF VLR subscr MSISDN:46071 usage increases to: 3
 DREF VLR subscr MSISDN:46071 usage decreases to: 2
-- BSSAP Clear --RAN_GERAN_A--> MS
+- BSSAP Clear --GERAN-A--> MS
 DREF MSISDN:46071: MSC conn use - dtap == 1 (0x100: release)
   bssap_clear_sent == 1
 - LU was successful, and the conn has already been closed
@@ -644,7 +644,7 @@ DREF VLR subscr MSISDN:46071 usage increases to: 2
 DREF VLR subscr MSISDN:46071 usage decreases to: 1
 ---
 - after a while, a new conn sends a CM Service Request using above TMSI. VLR responds with Auth Req, 2nd auth vector
-  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_CM_SERV_REQ
+  MSC <--GERAN-A-- MS: GSM48_MT_MM_CM_SERV_REQ
   new conn
 DMM RAN_conn{RAN_CONN_S_NEW}: Allocated
 DREF unknown: MSC conn use + compl_l3 == 1 (0x1: compl_l3)
@@ -687,7 +687,7 @@ DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_MT_RR_SY
 DRLL Dispatching 04.08 message SMS:0x01 (0x9:0x1)
 DRLL subscr MSISDN:46071: Message not permitted for initial conn: SMS:0x01
 - MS sends Authen Response, VLR accepts with a CM Service Accept
-  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_AUTH_RESP
+  MSC <--GERAN-A-- MS: GSM48_MT_MM_AUTH_RESP
 DREF MSISDN:46071: MSC conn use + dtap == 1 (0x2: dtap)
 DRLL Dispatching 04.08 message GSM48_MT_MM_AUTH_RESP (0x5:0x14)
 DMM MSISDN:46071: MM GSM AUTHENTICATION RESPONSE (sres = 20bde240)
@@ -724,7 +724,7 @@ DMM RAN_conn(CM_SERVICE_REQ:50462976){RAN_CONN_S_ACCEPTED}: state_chg to RAN_CON
 DREF MSISDN:46071: MSC conn use + release == 1 (0x100: release)
 DREF VLR subscr MSISDN:46071 usage increases to: 3
 DREF VLR subscr MSISDN:46071 usage decreases to: 2
-- BSSAP Clear --RAN_GERAN_A--> MS
+- BSSAP Clear --GERAN-A--> MS
   bssap_clear_sent == 1
 - all requests serviced, conn has been released
 - BSS sends BSSMAP Clear Complete
@@ -749,7 +749,7 @@ DREF VLR subscr MSISDN:46071 usage increases to: 3
 DCC (ti 00 sub MSISDN:46071 callref 40000002) New transaction
 DREF VLR subscr MSISDN:46071 usage increases to: 4
 DMM Subscriber MSISDN:46071 not paged yet, start paging.
-  RAN_GERAN_A sends out paging request to IMSI 901700000004620, TMSI 0x03020100, LAC 23
+  GERAN-A sends out paging request to IMSI 901700000004620, TMSI 0x03020100, LAC 23
   paging_expecting_tmsi == 0x03020100
 DREF VLR subscr MSISDN:46071 usage increases to: 5
   llist_count(&vsub->cs.requests) == 1
@@ -761,7 +761,7 @@ DREF VLR subscr MSISDN:46071 usage increases to: 5
   llist_count(&vsub->cs.requests) == 1
 DREF VLR subscr MSISDN:46071 usage decreases to: 4
 - MS replies with Paging Response using TMSI, and VLR sends Auth Request with third key
-  MSC <--RAN_GERAN_A-- MS: GSM48_MT_RR_PAG_RESP
+  MSC <--GERAN-A-- MS: GSM48_MT_RR_PAG_RESP
   new conn
 DMM RAN_conn{RAN_CONN_S_NEW}: Allocated
 DREF unknown: MSC conn use + compl_l3 == 1 (0x1: compl_l3)
@@ -803,7 +803,7 @@ DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_MT_RR_SY
 DRLL Dispatching 04.08 message SMS:0x01 (0x9:0x1)
 DRLL subscr MSISDN:46071: Message not permitted for initial conn: SMS:0x01
 - MS sends Authen Response, VLR accepts and sends pending SMS
-  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_AUTH_RESP
+  MSC <--GERAN-A-- MS: GSM48_MT_MM_AUTH_RESP
 DREF MSISDN:46071: MSC conn use + dtap == 1 (0x2: dtap)
 DRLL Dispatching 04.08 message GSM48_MT_MM_AUTH_RESP (0x5:0x14)
 DMM MSISDN:46071: MM GSM AUTHENTICATION RESPONSE (sres = a29514ae)
@@ -830,8 +830,8 @@ DMM RAN_conn(PAGING_RESP:50462976){RAN_CONN_S_AUTH_CIPH}: Received Event RAN_CON
 DPAG Paging success for MSISDN:46071 (event=0)
 DPAG Calling paging cbfn.
 DREF MSISDN:46071: MSC conn use + trans_sms == 2 (0x22: dtap,trans_sms)
-DMSC msc_tx 91 bytes to MSISDN:46071 via RAN_GERAN_A
-- DTAP --RAN_GERAN_A--> MS: SMS:0x01: 09015801000791447758100650004c0005806470f1000007101000000000445079da1e1ee7416937485e9ea7c965373d1d6683c270383b3d0ed3d36ff71c949e83c22072799e9687c5ec32a81d96afcbf4b4fb0c7ac3e9e9b7db05
+DMSC msc_tx 91 bytes to MSISDN:46071 via GERAN-A
+- DTAP --GERAN-A--> MS: SMS:0x01: 09015801000791447758100650004c0005806470f1000007101000000000445079da1e1ee7416937485e9ea7c965373d1d6683c270383b3d0ed3d36ff71c949e83c22072799e9687c5ec32a81d96afcbf4b4fb0c7ac3e9e9b7db05
 - DTAP matches expected message
 DREF VLR subscr MSISDN:46071 usage decreases to: 4
 DMM RAN_conn(PAGING_RESP:50462976){RAN_CONN_S_AUTH_CIPH}: state_chg to RAN_CONN_S_ACCEPTED
@@ -846,7 +846,7 @@ DREF VLR subscr MSISDN:46071 usage decreases to: 4
 - conn is still open to wait for SMS ack dance
   llist_count(&net->ran_conns) == 1
 - MS replies with CP-ACK for received SMS
-  MSC <--RAN_GERAN_A-- MS: SMS:0x04
+  MSC <--GERAN-A-- MS: SMS:0x04
 DREF MSISDN:46071: MSC conn use + dtap == 2 (0x22: dtap,trans_sms)
 DRLL Dispatching 04.08 message SMS:0x04 (0x9:0x4)
 DMM RAN_conn(PAGING_RESP:50462976){RAN_CONN_S_ACCEPTED}: Received Event RAN_CONN_E_COMMUNICATING
@@ -854,12 +854,12 @@ DMM RAN_conn(PAGING_RESP:50462976){RAN_CONN_S_ACCEPTED}: state_chg to RAN_CONN_S
 DREF MSISDN:46071: MSC conn use - dtap == 1 (0x20: trans_sms)
   llist_count(&net->ran_conns) == 1
 - MS also sends RP-ACK, MSC in turn sends CP-ACK for that
-  MSC <--RAN_GERAN_A-- MS: SMS:0x01
+  MSC <--GERAN-A-- MS: SMS:0x01
 DREF MSISDN:46071: MSC conn use + dtap == 2 (0x22: dtap,trans_sms)
 DRLL Dispatching 04.08 message SMS:0x01 (0x9:0x1)
 DMM RAN_conn(PAGING_RESP:50462976){RAN_CONN_S_COMMUNICATING}: Received Event RAN_CONN_E_COMMUNICATING
-DMSC msc_tx 2 bytes to MSISDN:46071 via RAN_GERAN_A
-- DTAP --RAN_GERAN_A--> MS: SMS:0x04: 0904
+DMSC msc_tx 2 bytes to MSISDN:46071 via GERAN-A
+- DTAP --GERAN-A--> MS: SMS:0x04: 0904
 - DTAP matches expected message
 DREF VLR subscr MSISDN:46071 usage decreases to: 3
 DREF VLR subscr MSISDN:46071 usage decreases to: 2
@@ -870,7 +870,7 @@ DMM RAN_conn(PAGING_RESP:50462976){RAN_CONN_S_COMMUNICATING}: state_chg to RAN_C
 DREF MSISDN:46071: MSC conn use + release == 1 (0x100: release)
 DREF VLR subscr MSISDN:46071 usage increases to: 3
 DREF VLR subscr MSISDN:46071 usage decreases to: 2
-- BSSAP Clear --RAN_GERAN_A--> MS
+- BSSAP Clear --GERAN-A--> MS
   dtap_tx_confirmed == 1
   bssap_clear_sent == 1
 - SMS is done, conn is gone
@@ -891,7 +891,7 @@ DMM RAN_conn(PAGING_RESP:50462976){RAN_CONN_S_RELEASED}: Deallocated
 ---
 - subscriber sends LU Request, this time with the TMSI
 - Location Update request causes an Auth Req to MS
-  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
+  MSC <--GERAN-A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
   new conn
 DMM RAN_conn{RAN_CONN_S_NEW}: Allocated
 DREF unknown: MSC conn use + compl_l3 == 1 (0x1: compl_l3)
@@ -924,7 +924,7 @@ DMM RAN_conn(LU:50462976){RAN_CONN_S_AUTH_CIPH}: Awaiting results for Auth+Ciph,
   auth_request_sent == 1
   lu_result_sent == 0
 - MS sends Authen Response, VLR accepts and sends GSUP LU Req to HLR
-  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_AUTH_RESP
+  MSC <--GERAN-A-- MS: GSM48_MT_MM_AUTH_RESP
 DREF MSISDN:46071: MSC conn use + dtap == 1 (0x2: dtap)
 DRLL Dispatching 04.08 message GSM48_MT_MM_AUTH_RESP (0x5:0x14)
 DMM MSISDN:46071: MM GSM AUTHENTICATION RESPONSE (sres = 5afc8d72)
@@ -1007,7 +1007,7 @@ DREF VLR subscr MSISDN:46071 usage increases to: 3
   vsub->tmsi == 0x03020100
 DREF VLR subscr MSISDN:46071 usage decreases to: 2
 - MS sends TMSI Realloc Complete
-  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_TMSI_REALL_COMPL
+  MSC <--GERAN-A-- MS: GSM48_MT_MM_TMSI_REALL_COMPL
 DREF MSISDN:46071: MSC conn use + dtap == 1 (0x2: dtap)
 DRLL Dispatching 04.08 message GSM48_MT_MM_TMSI_REALL_COMPL (0x5:0x1b)
 DMM TMSI Reallocation Completed. Subscriber: MSISDN:46071
@@ -1027,7 +1027,7 @@ DMM RAN_conn(LU:50462976){RAN_CONN_S_ACCEPTED}: state_chg to RAN_CONN_S_RELEASIN
 DREF MSISDN:46071: MSC conn use + release == 2 (0x102: dtap,release)
 DREF VLR subscr MSISDN:46071 usage increases to: 3
 DREF VLR subscr MSISDN:46071 usage decreases to: 2
-- BSSAP Clear --RAN_GERAN_A--> MS
+- BSSAP Clear --GERAN-A--> MS
 DREF MSISDN:46071: MSC conn use - dtap == 1 (0x100: release)
   bssap_clear_sent == 1
 - LU was successful, and the conn has already been closed
@@ -1055,7 +1055,7 @@ DREF VLR subscr MSISDN:46071 usage increases to: 2
 DREF VLR subscr MSISDN:46071 usage decreases to: 1
 ---
 - subscriber detaches, using new TMSI
-  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_IMSI_DETACH_IND
+  MSC <--GERAN-A-- MS: GSM48_MT_MM_IMSI_DETACH_IND
   new conn
 DMM RAN_conn{RAN_CONN_S_NEW}: Allocated
 DREF unknown: MSC conn use + compl_l3 == 1 (0x1: compl_l3)
@@ -1071,7 +1071,7 @@ DREF freeing VLR subscr MSISDN:46071
 DMM RAN_conn{RAN_CONN_S_NEW}: Received Event RAN_CONN_E_CN_CLOSE
 DMM RAN_conn{RAN_CONN_S_NEW}: state_chg to RAN_CONN_S_RELEASING
 DREF unknown: MSC conn use + release == 2 (0x101: compl_l3,release)
-- BSSAP Clear --RAN_GERAN_A--> MS
+- BSSAP Clear --GERAN-A--> MS
 DREF unknown: MSC conn use - compl_l3 == 1 (0x100: release)
   bssap_clear_sent == 1
 - BSS sends BSSMAP Clear Complete
@@ -1090,7 +1090,7 @@ talloc_total_blocks(tall_bsc_ctx) == 13
 
 ===== test_gsm_authen_imei
 - Location Update request causes a GSUP Send Auth Info request to HLR
-  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
+  MSC <--GERAN-A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
   new conn
 DMM RAN_conn{RAN_CONN_S_NEW}: Allocated
 DREF unknown: MSC conn use + compl_l3 == 1 (0x1: compl_l3)
@@ -1156,7 +1156,7 @@ DRLL Dispatching 04.08 message SMS:0x01 (0x9:0x1)
 DRLL subscr IMSI:901700000004620: Message not permitted for initial conn: SMS:0x01
   lu_result_sent == 0
 - MS sends Authen Response, VLR accepts and sends GSUP LU Req to HLR
-  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_AUTH_RESP
+  MSC <--GERAN-A-- MS: GSM48_MT_MM_AUTH_RESP
 DREF IMSI:901700000004620: MSC conn use + dtap == 1 (0x2: dtap)
 DRLL Dispatching 04.08 message GSM48_MT_MM_AUTH_RESP (0x5:0x14)
 DMM IMSI:901700000004620: MM GSM AUTHENTICATION RESPONSE (sres = 2d8b2c3e)
@@ -1214,8 +1214,8 @@ DVLR lu_compl_vlr_fsm(LU:901700000004620){LU_COMPL_VLR_S_INIT}: Received Event L
 DVLR lu_compl_vlr_fsm(LU:901700000004620){LU_COMPL_VLR_S_INIT}: state_chg to LU_COMPL_VLR_S_WAIT_SUB_PRES
 DVLR lu_compl_vlr_fsm(LU:901700000004620){LU_COMPL_VLR_S_WAIT_SUB_PRES}: Received Event LU_COMPL_VLR_E_SUB_PRES_COMPL
 DVLR lu_compl_vlr_fsm(LU:901700000004620){LU_COMPL_VLR_S_WAIT_SUB_PRES}: state_chg to LU_COMPL_VLR_S_WAIT_IMEI
-DMSC msc_tx 3 bytes to MSISDN:46071 via RAN_GERAN_A
-- DTAP --RAN_GERAN_A--> MS: GSM48_MT_MM_ID_REQ: 051802
+DMSC msc_tx 3 bytes to MSISDN:46071 via GERAN-A
+- DTAP --GERAN-A--> MS: GSM48_MT_MM_ID_REQ: 051802
 - DTAP matches expected message
 DREF VLR subscr MSISDN:46071 usage decreases to: 1
 <-- GSUP rx OSMO_GSUP_MSGT_UPDATE_LOCATION_RESULT: vlr_gsupc_read_cb() returns 0
@@ -1235,7 +1235,7 @@ DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_MT_RR_SY
 DRLL Dispatching 04.08 message SMS:0x01 (0x9:0x1)
 DRLL subscr MSISDN:46071: Message not permitted for initial conn: SMS:0x01
 - MS replies with an Identity Response
-  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_ID_RESP
+  MSC <--GERAN-A-- MS: GSM48_MT_MM_ID_RESP
 DREF MSISDN:46071: MSC conn use + dtap == 1 (0x2: dtap)
 DRLL Dispatching 04.08 message GSM48_MT_MM_ID_RESP (0x5:0x19)
 DMM IDENTITY RESPONSE: MI(IMEI)=423423423423420
@@ -1258,7 +1258,7 @@ DMM RAN_conn(LU:901700000004620){RAN_CONN_S_ACCEPTED}: state_chg to RAN_CONN_S_R
 DREF MSISDN:46071: MSC conn use + release == 2 (0x102: dtap,release)
 DREF VLR subscr MSISDN:46071 usage increases to: 3
 DREF VLR subscr MSISDN:46071 usage decreases to: 2
-- BSSAP Clear --RAN_GERAN_A--> MS
+- BSSAP Clear --GERAN-A--> MS
 DREF MSISDN:46071: MSC conn use - dtap == 1 (0x100: release)
   bssap_clear_sent == 1
 - LU was successful, and the conn has already been closed
@@ -1284,7 +1284,7 @@ DREF VLR subscr MSISDN:46071 usage increases to: 2
 DREF VLR subscr MSISDN:46071 usage decreases to: 1
 ---
 - subscriber detaches
-  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_IMSI_DETACH_IND
+  MSC <--GERAN-A-- MS: GSM48_MT_MM_IMSI_DETACH_IND
   new conn
 DMM RAN_conn{RAN_CONN_S_NEW}: Allocated
 DREF unknown: MSC conn use + compl_l3 == 1 (0x1: compl_l3)
@@ -1300,7 +1300,7 @@ DREF freeing VLR subscr MSISDN:46071
 DMM RAN_conn{RAN_CONN_S_NEW}: Received Event RAN_CONN_E_CN_CLOSE
 DMM RAN_conn{RAN_CONN_S_NEW}: state_chg to RAN_CONN_S_RELEASING
 DREF unknown: MSC conn use + release == 2 (0x101: compl_l3,release)
-- BSSAP Clear --RAN_GERAN_A--> MS
+- BSSAP Clear --GERAN-A--> MS
 DREF unknown: MSC conn use - compl_l3 == 1 (0x100: release)
   bssap_clear_sent == 1
 - BSS sends BSSMAP Clear Complete
@@ -1319,7 +1319,7 @@ talloc_total_blocks(tall_bsc_ctx) == 13
 
 ===== test_gsm_authen_tmsi_imei
 - Location Update request causes a GSUP Send Auth Info request to HLR
-  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
+  MSC <--GERAN-A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
   new conn
 DMM RAN_conn{RAN_CONN_S_NEW}: Allocated
 DREF unknown: MSC conn use + compl_l3 == 1 (0x1: compl_l3)
@@ -1385,7 +1385,7 @@ DRLL Dispatching 04.08 message SMS:0x01 (0x9:0x1)
 DRLL subscr IMSI:901700000004620: Message not permitted for initial conn: SMS:0x01
   lu_result_sent == 0
 - MS sends Authen Response, VLR accepts and sends GSUP LU Req to HLR
-  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_AUTH_RESP
+  MSC <--GERAN-A-- MS: GSM48_MT_MM_AUTH_RESP
 DREF IMSI:901700000004620: MSC conn use + dtap == 1 (0x2: dtap)
 DRLL Dispatching 04.08 message GSM48_MT_MM_AUTH_RESP (0x5:0x14)
 DMM IMSI:901700000004620: MM GSM AUTHENTICATION RESPONSE (sres = 2d8b2c3e)
@@ -1443,8 +1443,8 @@ DVLR lu_compl_vlr_fsm(LU:901700000004620){LU_COMPL_VLR_S_INIT}: Received Event L
 DVLR lu_compl_vlr_fsm(LU:901700000004620){LU_COMPL_VLR_S_INIT}: state_chg to LU_COMPL_VLR_S_WAIT_SUB_PRES
 DVLR lu_compl_vlr_fsm(LU:901700000004620){LU_COMPL_VLR_S_WAIT_SUB_PRES}: Received Event LU_COMPL_VLR_E_SUB_PRES_COMPL
 DVLR lu_compl_vlr_fsm(LU:901700000004620){LU_COMPL_VLR_S_WAIT_SUB_PRES}: state_chg to LU_COMPL_VLR_S_WAIT_IMEI_TMSI
-DMSC msc_tx 3 bytes to MSISDN:46071 via RAN_GERAN_A
-- DTAP --RAN_GERAN_A--> MS: GSM48_MT_MM_ID_REQ: 051802
+DMSC msc_tx 3 bytes to MSISDN:46071 via GERAN-A
+- DTAP --GERAN-A--> MS: GSM48_MT_MM_ID_REQ: 051802
 - DTAP matches expected message
 DREF VLR subscr MSISDN:46071 usage decreases to: 1
 <-- GSUP rx OSMO_GSUP_MSGT_UPDATE_LOCATION_RESULT: vlr_gsupc_read_cb() returns 0
@@ -1464,7 +1464,7 @@ DRLL subscr MSISDN:46071: Message not permitted for initial conn: GSM48_MT_RR_SY
 DRLL Dispatching 04.08 message SMS:0x01 (0x9:0x1)
 DRLL subscr MSISDN:46071: Message not permitted for initial conn: SMS:0x01
 - MS replies with an Identity Response
-  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_ID_RESP
+  MSC <--GERAN-A-- MS: GSM48_MT_MM_ID_RESP
 DREF MSISDN:46071: MSC conn use + dtap == 1 (0x2: dtap)
 DRLL Dispatching 04.08 message GSM48_MT_MM_ID_RESP (0x5:0x19)
 DMM IDENTITY RESPONSE: MI(IMEI)=423423423423420
@@ -1498,7 +1498,7 @@ DREF VLR subscr MSISDN:46071 usage increases to: 2
   vsub->tmsi == 0xffffffff
 DREF VLR subscr MSISDN:46071 usage decreases to: 1
 - MS sends TMSI Realloc Complete
-  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_TMSI_REALL_COMPL
+  MSC <--GERAN-A-- MS: GSM48_MT_MM_TMSI_REALL_COMPL
 DREF MSISDN:46071: MSC conn use + dtap == 1 (0x2: dtap)
 DRLL Dispatching 04.08 message GSM48_MT_MM_TMSI_REALL_COMPL (0x5:0x1b)
 DMM TMSI Reallocation Completed. Subscriber: MSISDN:46071
@@ -1519,7 +1519,7 @@ DMM RAN_conn(LU:901700000004620){RAN_CONN_S_ACCEPTED}: state_chg to RAN_CONN_S_R
 DREF MSISDN:46071: MSC conn use + release == 2 (0x102: dtap,release)
 DREF VLR subscr MSISDN:46071 usage increases to: 3
 DREF VLR subscr MSISDN:46071 usage decreases to: 2
-- BSSAP Clear --RAN_GERAN_A--> MS
+- BSSAP Clear --GERAN-A--> MS
 DREF MSISDN:46071: MSC conn use - dtap == 1 (0x100: release)
   bssap_clear_sent == 1
 - LU was successful, and the conn has already been closed
@@ -1545,7 +1545,7 @@ DREF VLR subscr MSISDN:46071 usage increases to: 2
 DREF VLR subscr MSISDN:46071 usage decreases to: 1
 ---
 - subscriber detaches, using TMSI
-  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_IMSI_DETACH_IND
+  MSC <--GERAN-A-- MS: GSM48_MT_MM_IMSI_DETACH_IND
   new conn
 DMM RAN_conn{RAN_CONN_S_NEW}: Allocated
 DREF unknown: MSC conn use + compl_l3 == 1 (0x1: compl_l3)
@@ -1561,7 +1561,7 @@ DREF freeing VLR subscr MSISDN:46071
 DMM RAN_conn{RAN_CONN_S_NEW}: Received Event RAN_CONN_E_CN_CLOSE
 DMM RAN_conn{RAN_CONN_S_NEW}: state_chg to RAN_CONN_S_RELEASING
 DREF unknown: MSC conn use + release == 2 (0x101: compl_l3,release)
-- BSSAP Clear --RAN_GERAN_A--> MS
+- BSSAP Clear --GERAN-A--> MS
 DREF unknown: MSC conn use - compl_l3 == 1 (0x100: release)
   bssap_clear_sent == 1
 - BSS sends BSSMAP Clear Complete
@@ -1580,7 +1580,7 @@ talloc_total_blocks(tall_bsc_ctx) == 13
 
 ===== test_gsm_milenage_authen
 - Location Update request causes a GSUP Send Auth Info request to HLR
-  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
+  MSC <--GERAN-A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
   new conn
 DMM RAN_conn{RAN_CONN_S_NEW}: Allocated
 DREF unknown: MSC conn use + compl_l3 == 1 (0x1: compl_l3)
@@ -1627,7 +1627,7 @@ DREF VLR subscr IMSI:901700000010650 usage decreases to: 1
   auth_request_sent == 1
   lu_result_sent == 0
 - MS sends Authen Response, VLR accepts and sends GSUP LU Req to HLR
-  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_AUTH_RESP
+  MSC <--GERAN-A-- MS: GSM48_MT_MM_AUTH_RESP
 DREF IMSI:901700000010650: MSC conn use + dtap == 1 (0x2: dtap)
 DRLL Dispatching 04.08 message GSM48_MT_MM_AUTH_RESP (0x5:0x14)
 DMM IMSI:901700000010650: MM GSM AUTHENTICATION RESPONSE (sres = 9b36efdf)
@@ -1700,7 +1700,7 @@ DMM RAN_conn(LU:901700000010650){RAN_CONN_S_ACCEPTED}: state_chg to RAN_CONN_S_R
 DREF MSISDN:42342: MSC conn use + release == 1 (0x100: release)
 DREF VLR subscr MSISDN:42342 usage increases to: 4
 DREF VLR subscr MSISDN:42342 usage decreases to: 3
-- BSSAP Clear --RAN_GERAN_A--> MS
+- BSSAP Clear --GERAN-A--> MS
 DREF VLR subscr MSISDN:42342 usage decreases to: 2
 <-- GSUP rx OSMO_GSUP_MSGT_UPDATE_LOCATION_RESULT: vlr_gsupc_read_cb() returns 0
   bssap_clear_sent == 1
@@ -1723,7 +1723,7 @@ DMM RAN_conn(LU:901700000010650){RAN_CONN_S_RELEASED}: Deallocated
   llist_count(&net->ran_conns) == 0
 ---
 - after a while, a new conn sends a CM Service Request. VLR responds with Auth Req, 2nd auth vector
-  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_CM_SERV_REQ
+  MSC <--GERAN-A-- MS: GSM48_MT_MM_CM_SERV_REQ
   new conn
 DMM RAN_conn{RAN_CONN_S_NEW}: Allocated
 DREF unknown: MSC conn use + compl_l3 == 1 (0x1: compl_l3)
@@ -1766,7 +1766,7 @@ DRLL subscr MSISDN:42342: Message not permitted for initial conn: GSM48_MT_RR_SY
 DRLL Dispatching 04.08 message SMS:0x01 (0x9:0x1)
 DRLL subscr MSISDN:42342: Message not permitted for initial conn: SMS:0x01
 - MS sends Authen Response, VLR accepts with a CM Service Accept
-  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_AUTH_RESP
+  MSC <--GERAN-A-- MS: GSM48_MT_MM_AUTH_RESP
 DREF MSISDN:42342: MSC conn use + dtap == 1 (0x2: dtap)
 DRLL Dispatching 04.08 message GSM48_MT_MM_AUTH_RESP (0x5:0x14)
 DMM MSISDN:42342: MM GSM AUTHENTICATION RESPONSE (sres = 85aa3130)
@@ -1803,7 +1803,7 @@ DMM RAN_conn(CM_SERVICE_REQ:901700000010650){RAN_CONN_S_ACCEPTED}: state_chg to 
 DREF MSISDN:42342: MSC conn use + release == 1 (0x100: release)
 DREF VLR subscr MSISDN:42342 usage increases to: 3
 DREF VLR subscr MSISDN:42342 usage decreases to: 2
-- BSSAP Clear --RAN_GERAN_A--> MS
+- BSSAP Clear --GERAN-A--> MS
   bssap_clear_sent == 1
 - all requests serviced, conn has been released
 - BSS sends BSSMAP Clear Complete
@@ -1828,7 +1828,7 @@ DREF VLR subscr MSISDN:42342 usage increases to: 3
 DCC (ti 00 sub MSISDN:42342 callref 40000003) New transaction
 DREF VLR subscr MSISDN:42342 usage increases to: 4
 DMM Subscriber MSISDN:42342 not paged yet, start paging.
-  RAN_GERAN_A sends out paging request to IMSI 901700000010650, TMSI 0xffffffff, LAC 23
+  GERAN-A sends out paging request to IMSI 901700000010650, TMSI 0xffffffff, LAC 23
   strcmp(paging_expecting_imsi, imsi) == 0
 DREF VLR subscr MSISDN:42342 usage increases to: 5
   llist_count(&vsub->cs.requests) == 1
@@ -1840,7 +1840,7 @@ DREF VLR subscr MSISDN:42342 usage increases to: 5
   llist_count(&vsub->cs.requests) == 1
 DREF VLR subscr MSISDN:42342 usage decreases to: 4
 - MS replies with Paging Response, and VLR sends Auth Request with third key
-  MSC <--RAN_GERAN_A-- MS: GSM48_MT_RR_PAG_RESP
+  MSC <--GERAN-A-- MS: GSM48_MT_RR_PAG_RESP
   new conn
 DMM RAN_conn{RAN_CONN_S_NEW}: Allocated
 DREF unknown: MSC conn use + compl_l3 == 1 (0x1: compl_l3)
@@ -1882,7 +1882,7 @@ DRLL subscr MSISDN:42342: Message not permitted for initial conn: GSM48_MT_RR_SY
 DRLL Dispatching 04.08 message SMS:0x01 (0x9:0x1)
 DRLL subscr MSISDN:42342: Message not permitted for initial conn: SMS:0x01
 - MS sends Authen Response, VLR accepts and sends pending SMS
-  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_AUTH_RESP
+  MSC <--GERAN-A-- MS: GSM48_MT_MM_AUTH_RESP
 DREF MSISDN:42342: MSC conn use + dtap == 1 (0x2: dtap)
 DRLL Dispatching 04.08 message GSM48_MT_MM_AUTH_RESP (0x5:0x14)
 DMM MSISDN:42342: MM GSM AUTHENTICATION RESPONSE (sres = 69d5f9fb)
@@ -1909,8 +1909,8 @@ DMM RAN_conn(PAGING_RESP:901700000010650){RAN_CONN_S_AUTH_CIPH}: Received Event 
 DPAG Paging success for MSISDN:42342 (event=0)
 DPAG Calling paging cbfn.
 DREF MSISDN:42342: MSC conn use + trans_sms == 2 (0x22: dtap,trans_sms)
-DMSC msc_tx 91 bytes to MSISDN:42342 via RAN_GERAN_A
-- DTAP --RAN_GERAN_A--> MS: SMS:0x01: 09015801000791447758100650004c0005802443f2000007101000000000445079da1e1ee7416937485e9ea7c965373d1d6683c270383b3d0ed3d36ff71c949e83c22072799e9687c5ec32a81d96afcbf4b4fb0c7ac3e9e9b7db05
+DMSC msc_tx 91 bytes to MSISDN:42342 via GERAN-A
+- DTAP --GERAN-A--> MS: SMS:0x01: 09015801000791447758100650004c0005802443f2000007101000000000445079da1e1ee7416937485e9ea7c965373d1d6683c270383b3d0ed3d36ff71c949e83c22072799e9687c5ec32a81d96afcbf4b4fb0c7ac3e9e9b7db05
 - DTAP matches expected message
 DREF VLR subscr MSISDN:42342 usage decreases to: 4
 DMM RAN_conn(PAGING_RESP:901700000010650){RAN_CONN_S_AUTH_CIPH}: state_chg to RAN_CONN_S_ACCEPTED
@@ -1925,7 +1925,7 @@ DREF VLR subscr MSISDN:42342 usage decreases to: 4
 - conn is still open to wait for SMS ack dance
   llist_count(&net->ran_conns) == 1
 - MS replies with CP-ACK for received SMS
-  MSC <--RAN_GERAN_A-- MS: SMS:0x04
+  MSC <--GERAN-A-- MS: SMS:0x04
 DREF MSISDN:42342: MSC conn use + dtap == 2 (0x22: dtap,trans_sms)
 DRLL Dispatching 04.08 message SMS:0x04 (0x9:0x4)
 DMM RAN_conn(PAGING_RESP:901700000010650){RAN_CONN_S_ACCEPTED}: Received Event RAN_CONN_E_COMMUNICATING
@@ -1933,12 +1933,12 @@ DMM RAN_conn(PAGING_RESP:901700000010650){RAN_CONN_S_ACCEPTED}: state_chg to RAN
 DREF MSISDN:42342: MSC conn use - dtap == 1 (0x20: trans_sms)
   llist_count(&net->ran_conns) == 1
 - MS also sends RP-ACK, MSC in turn sends CP-ACK for that
-  MSC <--RAN_GERAN_A-- MS: SMS:0x01
+  MSC <--GERAN-A-- MS: SMS:0x01
 DREF MSISDN:42342: MSC conn use + dtap == 2 (0x22: dtap,trans_sms)
 DRLL Dispatching 04.08 message SMS:0x01 (0x9:0x1)
 DMM RAN_conn(PAGING_RESP:901700000010650){RAN_CONN_S_COMMUNICATING}: Received Event RAN_CONN_E_COMMUNICATING
-DMSC msc_tx 2 bytes to MSISDN:42342 via RAN_GERAN_A
-- DTAP --RAN_GERAN_A--> MS: SMS:0x04: 0904
+DMSC msc_tx 2 bytes to MSISDN:42342 via GERAN-A
+- DTAP --GERAN-A--> MS: SMS:0x04: 0904
 - DTAP matches expected message
 DREF VLR subscr MSISDN:42342 usage decreases to: 3
 DREF VLR subscr MSISDN:42342 usage decreases to: 2
@@ -1949,7 +1949,7 @@ DMM RAN_conn(PAGING_RESP:901700000010650){RAN_CONN_S_COMMUNICATING}: state_chg t
 DREF MSISDN:42342: MSC conn use + release == 1 (0x100: release)
 DREF VLR subscr MSISDN:42342 usage increases to: 3
 DREF VLR subscr MSISDN:42342 usage decreases to: 2
-- BSSAP Clear --RAN_GERAN_A--> MS
+- BSSAP Clear --GERAN-A--> MS
   dtap_tx_confirmed == 1
   bssap_clear_sent == 1
 - SMS is done, conn is gone
@@ -1969,7 +1969,7 @@ DMM RAN_conn(PAGING_RESP:901700000010650){RAN_CONN_S_RELEASED}: Deallocated
   llist_count(&net->ran_conns) == 0
 ---
 - subscriber detaches
-  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_IMSI_DETACH_IND
+  MSC <--GERAN-A-- MS: GSM48_MT_MM_IMSI_DETACH_IND
   new conn
 DMM RAN_conn{RAN_CONN_S_NEW}: Allocated
 DREF unknown: MSC conn use + compl_l3 == 1 (0x1: compl_l3)
@@ -1985,7 +1985,7 @@ DREF freeing VLR subscr MSISDN:42342
 DMM RAN_conn{RAN_CONN_S_NEW}: Received Event RAN_CONN_E_CN_CLOSE
 DMM RAN_conn{RAN_CONN_S_NEW}: state_chg to RAN_CONN_S_RELEASING
 DREF unknown: MSC conn use + release == 2 (0x101: compl_l3,release)
-- BSSAP Clear --RAN_GERAN_A--> MS
+- BSSAP Clear --GERAN-A--> MS
 DREF unknown: MSC conn use - compl_l3 == 1 (0x100: release)
   bssap_clear_sent == 1
 - BSS sends BSSMAP Clear Complete
@@ -2005,7 +2005,7 @@ talloc_total_blocks(tall_bsc_ctx) == 13
 ===== test_wrong_sres_length
 - Total time passed: 0.000000 s
 - Location Update request causes a GSUP Send Auth Info request to HLR
-  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
+  MSC <--GERAN-A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
   new conn
 DMM RAN_conn{RAN_CONN_S_NEW}: Allocated
 DREF unknown: MSC conn use + compl_l3 == 1 (0x1: compl_l3)
@@ -2071,7 +2071,7 @@ DRLL Dispatching 04.08 message SMS:0x01 (0x9:0x1)
 DRLL subscr IMSI:901700000004620: Message not permitted for initial conn: SMS:0x01
   lu_result_sent == 0
 - MS sends Authen Response with too short SRES data, auth is thwarted.
-  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_AUTH_RESP
+  MSC <--GERAN-A-- MS: GSM48_MT_MM_AUTH_RESP
 DREF IMSI:901700000004620: MSC conn use + dtap == 1 (0x2: dtap)
 DRLL Dispatching 04.08 message GSM48_MT_MM_AUTH_RESP (0x5:0x14)
 DMM IMSI:901700000004620: MM AUTHENTICATION RESPONSE: l3 length invalid: 5
@@ -2096,7 +2096,7 @@ DMM RAN_conn(LU:901700000004620){RAN_CONN_S_AUTH_CIPH}: state_chg to RAN_CONN_S_
 DREF IMSI:901700000004620: MSC conn use + release == 2 (0x102: dtap,release)
 DREF VLR subscr IMSI:901700000004620 usage increases to: 2
 DREF VLR subscr IMSI:901700000004620 usage decreases to: 1
-- BSSAP Clear --RAN_GERAN_A--> MS
+- BSSAP Clear --GERAN-A--> MS
 DREF IMSI:901700000004620: MSC conn use - dtap == 1 (0x100: release)
   lu_result_sent == 2
 - BSS sends BSSMAP Clear Complete

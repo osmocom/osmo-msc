@@ -403,7 +403,7 @@ int mm_rx_loc_upd_req(struct ran_conn *conn, struct msgb *msg)
 	new_lai.lac = conn->lac;
 	DEBUGP(DMM, "LU/new-LAC: %u/%u\n", old_lai.lac, new_lai.lac);
 
-	is_utran = (conn->via_ran == RAN_UTRAN_IU);
+	is_utran = (conn->via_ran == OSMO_RAT_UTRAN_IU);
 	lu_fsm = vlr_loc_update(conn->fi,
 				RAN_CONN_E_ACCEPTED, RAN_CONN_E_CN_CLOSE, NULL,
 				net->vlr, conn, vlr_lu_type, tmsi, imsi,
@@ -785,7 +785,7 @@ int gsm48_rx_mm_serv_req(struct ran_conn *conn, struct msgb *msg)
 
 	osmo_signal_dispatch(SS_SUBSCR, S_SUBSCR_IDENTITY, mi_p);
 
-	is_utran = (conn->via_ran == RAN_UTRAN_IU);
+	is_utran = (conn->via_ran == OSMO_RAT_UTRAN_IU);
 	vlr_proc_acc_req(conn->fi,
 			 RAN_CONN_E_ACCEPTED, RAN_CONN_E_CN_CLOSE, NULL,
 			 net->vlr, conn,
@@ -1005,7 +1005,7 @@ static int gsm48_rx_mm_auth_resp(struct ran_conn *conn, struct msgb *msg)
 	       osmo_hexdump_nospc(res, res_len));
 
 	return vlr_subscr_rx_auth_resp(conn->vsub, classmark_is_r99(&conn->vsub->classmark),
-				       conn->via_ran == RAN_UTRAN_IU,
+				       conn->via_ran == OSMO_RAT_UTRAN_IU,
 				       res, res_len);
 }
 
@@ -1185,7 +1185,7 @@ static int gsm48_rx_rr_pag_resp(struct ran_conn *conn, struct msgb *msg)
 
 	ran_conn_update_id(conn, COMPLETE_LAYER3_PAGING_RESP, mi_string);
 
-	is_utran = (conn->via_ran == RAN_UTRAN_IU);
+	is_utran = (conn->via_ran == OSMO_RAT_UTRAN_IU);
 	vlr_proc_acc_req(conn->fi,
 			 RAN_CONN_E_ACCEPTED, RAN_CONN_E_CN_CLOSE, NULL,
 			 net->vlr, conn,
@@ -1465,8 +1465,8 @@ int gsm0408_dispatch(struct ran_conn *conn, struct msgb *msg)
 		     "%s: Illegal situation: RAN type mismatch:"
 		     " attached via %s, received message via %s\n",
 		     vlr_subscr_name(conn->vsub),
-		     ran_type_name(conn->vsub->cs.attached_via_ran),
-		     ran_type_name(conn->via_ran));
+		     osmo_rat_type_name(conn->vsub->cs.attached_via_ran),
+		     osmo_rat_type_name(conn->via_ran));
 		return -EACCES;
 	}
 
@@ -1700,16 +1700,16 @@ int msc_vlr_set_ciph_mode(void *msc_conn_ref,
 	}
 
 	switch (conn->via_ran) {
-	case RAN_GERAN_A:
+	case OSMO_RAT_GERAN_A:
 		return ran_conn_geran_set_cipher_mode(conn, umts_aka, retrieve_imeisv);
 
-	case RAN_UTRAN_IU:
+	case OSMO_RAT_UTRAN_IU:
 #ifdef BUILD_IU
 		DEBUGP(DMM, "-> SECURITY MODE CONTROL %s\n",
 		       vlr_subscr_name(conn->vsub));
 		return ranap_iu_tx_sec_mode_cmd(conn->iu.ue_ctx, &tuple->vec, 0, 1);
 #else
-		LOGP(DMM, LOGL_ERROR, "Cannot send Security Mode Control over RAN_UTRAN_IU,"
+		LOGP(DMM, LOGL_ERROR, "Cannot send Security Mode Control over OSMO_RAT_UTRAN_IU,"
 		     " built without Iu support\n");
 		return -ENOTSUP;
 #endif

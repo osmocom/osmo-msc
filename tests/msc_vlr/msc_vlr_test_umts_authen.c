@@ -23,7 +23,7 @@
 
 #include "msc_vlr_tests.h"
 
-static void _test_umts_authen(enum ran_type via_ran)
+static void _test_umts_authen(enum osmo_rat_type via_ran)
 {
 	struct vlr_subscr *vsub;
 	const char *imsi = "901700000010650";
@@ -122,7 +122,7 @@ static void _test_umts_authen(enum ran_type via_ran)
 	VERBOSE_ASSERT(auth_request_sent, == true, "%d");
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
-	if (via_ran == RAN_GERAN_A) {
+	if (via_ran == OSMO_RAT_GERAN_A) {
 		btw("MS sends Authen Response, VLR accepts and sends GSUP LU Req to HLR");
 		gsup_expect_tx("04010809710000000156f0280102");
 		ms_sends_msg("0554" "e229c19e" "2104" "791f2e41");
@@ -193,7 +193,7 @@ static void _test_umts_authen(enum ran_type via_ran)
 	EXPECT_ACCEPTED(false);
 	thwart_rx_non_initial_requests();
 
-	if (via_ran == RAN_GERAN_A) {
+	if (via_ran == OSMO_RAT_GERAN_A) {
 		btw("MS sends Authen Response, VLR accepts with a CM Service Accept");
 		gsup_expect_tx(NULL);
 		ms_sends_msg("0554" "7db47cf7" "2104" "f81e4dc7"); /* 2nd vector's res, s.a. */
@@ -255,7 +255,7 @@ static void _test_umts_authen(enum ran_type via_ran)
 	EXPECT_ACCEPTED(false);
 	thwart_rx_non_initial_requests();
 
-	if (via_ran == RAN_GERAN_A) {
+	if (via_ran == OSMO_RAT_GERAN_A) {
 		btw("MS sends Authen Response, VLR accepts and sends pending SMS");
 		dtap_expect_tx(sms);
 		ms_sends_msg("0554" "706f9967" "2104" "19ba609c"); /* 3nd vector's res, s.a. */
@@ -313,14 +313,14 @@ static void _test_umts_authen(enum ran_type via_ran)
 static void test_umts_authen_geran()
 {
 	comment_start();
-	_test_umts_authen(RAN_GERAN_A);
+	_test_umts_authen(OSMO_RAT_GERAN_A);
 	comment_end();
 }
 
 static void test_umts_authen_utran()
 {
 	comment_start();
-	_test_umts_authen(RAN_UTRAN_IU);
+	_test_umts_authen(OSMO_RAT_UTRAN_IU);
 	comment_end();
 }
 
@@ -334,7 +334,7 @@ extern int milenage_f1(const u8 *opc, const u8 *k, const u8 *_rand,
 		       const u8 *sqn, const u8 *amf, u8 *mac_a, u8 *mac_s);
 #endif
 
-static void _test_umts_authen_resync(enum ran_type via_ran)
+static void _test_umts_authen_resync(enum osmo_rat_type via_ran)
 {
 	struct vlr_subscr *vsub;
 	const char *imsi = "901700000010650";
@@ -491,7 +491,7 @@ static void _test_umts_authen_resync(enum ran_type via_ran)
 	VERBOSE_ASSERT(auth_request_sent, == true, "%d");
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
-	if (via_ran == RAN_GERAN_A) {
+	if (via_ran == OSMO_RAT_GERAN_A) {
 		btw("MS sends Authen Response, VLR accepts and sends GSUP LU Req to HLR");
 		gsup_expect_tx("04010809710000000156f0280102");
 		ms_sends_msg("0554" "1df5f0b4" "2104" "f22b696e");
@@ -550,18 +550,18 @@ static void _test_umts_authen_resync(enum ran_type via_ran)
 static void test_umts_authen_resync_geran()
 {
 	comment_start();
-	_test_umts_authen_resync(RAN_GERAN_A);
+	_test_umts_authen_resync(OSMO_RAT_GERAN_A);
 	comment_end();
 }
 
 static void test_umts_authen_resync_utran()
 {
 	comment_start();
-	_test_umts_authen_resync(RAN_UTRAN_IU);
+	_test_umts_authen_resync(OSMO_RAT_UTRAN_IU);
 	comment_end();
 }
 
-static void _test_umts_authen_too_short_res(enum ran_type via_ran)
+static void _test_umts_authen_too_short_res(enum osmo_rat_type via_ran)
 {
 	net->authentication_required = true;
 	net->vlr->cfg.assign_tmsi = true;
@@ -650,18 +650,18 @@ static void _test_umts_authen_too_short_res(enum ran_type via_ran)
 static void test_umts_authen_too_short_res_geran()
 {
 	comment_start();
-	_test_umts_authen_too_short_res(RAN_GERAN_A);
+	_test_umts_authen_too_short_res(OSMO_RAT_GERAN_A);
 	comment_end();
 }
 
 static void test_umts_authen_too_short_res_utran()
 {
 	comment_start();
-	_test_umts_authen_too_short_res(RAN_UTRAN_IU);
+	_test_umts_authen_too_short_res(OSMO_RAT_UTRAN_IU);
 	comment_end();
 }
 
-static void _test_umts_authen_too_long_res(enum ran_type via_ran)
+static void _test_umts_authen_too_long_res(enum osmo_rat_type via_ran)
 {
 	net->authentication_required = true;
 	net->vlr->cfg.assign_tmsi = true;
@@ -750,18 +750,18 @@ static void _test_umts_authen_too_long_res(enum ran_type via_ran)
 static void test_umts_authen_too_long_res_geran()
 {
 	comment_start();
-	_test_umts_authen_too_long_res(RAN_GERAN_A);
+	_test_umts_authen_too_long_res(OSMO_RAT_GERAN_A);
 	comment_end();
 }
 
 static void test_umts_authen_too_long_res_utran()
 {
 	comment_start();
-	_test_umts_authen_too_long_res(RAN_UTRAN_IU);
+	_test_umts_authen_too_long_res(OSMO_RAT_UTRAN_IU);
 	comment_end();
 }
 
-static void _test_umts_authen_only_sres(enum ran_type via_ran)
+static void _test_umts_authen_only_sres(enum osmo_rat_type via_ran)
 {
 	net->authentication_required = true;
 	net->vlr->cfg.assign_tmsi = true;
@@ -835,7 +835,7 @@ static void _test_umts_authen_only_sres(enum ran_type via_ran)
 	VERBOSE_ASSERT(auth_request_sent, == true, "%d");
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
-	if (via_ran == RAN_GERAN_A)
+	if (via_ran == OSMO_RAT_GERAN_A)
 		btw("MS sends Authen Response of wrong RES size, VLR thwarts:"
 		    " GERAN reports an SRES mismatch");
 	else
@@ -855,14 +855,14 @@ static void _test_umts_authen_only_sres(enum ran_type via_ran)
 static void test_umts_authen_only_sres_geran()
 {
 	comment_start();
-	_test_umts_authen_only_sres(RAN_GERAN_A);
+	_test_umts_authen_only_sres(OSMO_RAT_GERAN_A);
 	comment_end();
 }
 
 static void test_umts_authen_only_sres_utran()
 {
 	comment_start();
-	_test_umts_authen_only_sres(RAN_UTRAN_IU);
+	_test_umts_authen_only_sres(OSMO_RAT_UTRAN_IU);
 	comment_end();
 }
 

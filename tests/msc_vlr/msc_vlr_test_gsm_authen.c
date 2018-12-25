@@ -115,8 +115,8 @@ static void test_gsm_authen()
 	VERBOSE_ASSERT(cm_service_result_sent, == RES_ACCEPT, "%d");
 
 	/* Release connection */
-	expect_bssap_clear(RAN_GERAN_A);
-	conn_conclude_cm_service_req(g_conn, RAN_GERAN_A);
+	expect_bssap_clear(OSMO_RAT_GERAN_A);
+	conn_conclude_cm_service_req(g_conn, OSMO_RAT_GERAN_A);
 
 	btw("all requests serviced, conn has been released");
 	bss_sends_clear_complete();
@@ -333,8 +333,8 @@ static void test_gsm_authen_tmsi()
 	VERBOSE_ASSERT(cm_service_result_sent, == RES_ACCEPT, "%d");
 
 	/* Release connection */
-	expect_bssap_clear(RAN_GERAN_A);
-	conn_conclude_cm_service_req(g_conn, RAN_GERAN_A);
+	expect_bssap_clear(OSMO_RAT_GERAN_A);
+	conn_conclude_cm_service_req(g_conn, OSMO_RAT_GERAN_A);
 
 	btw("all requests serviced, conn has been released");
 	bss_sends_clear_complete();
@@ -728,7 +728,7 @@ static void test_gsm_milenage_authen()
 	comment_start();
 
 	net->authentication_required = true;
-	rx_from_ran = RAN_GERAN_A;
+	rx_from_ran = OSMO_RAT_GERAN_A;
 
 	btw("Location Update request causes a GSUP Send Auth Info request to HLR");
 	lu_result_sent = RES_NONE;
@@ -828,8 +828,8 @@ static void test_gsm_milenage_authen()
 	VERBOSE_ASSERT(cm_service_result_sent, == RES_ACCEPT, "%d");
 
 	/* Release connection */
-	expect_bssap_clear(RAN_GERAN_A);
-	conn_conclude_cm_service_req(g_conn, RAN_GERAN_A);
+	expect_bssap_clear(OSMO_RAT_GERAN_A);
+	conn_conclude_cm_service_req(g_conn, OSMO_RAT_GERAN_A);
 
 	btw("all requests serviced, conn has been released");
 	bss_sends_clear_complete();

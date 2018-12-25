@@ -115,9 +115,9 @@ static int msc_paging_request(struct vlr_subscr *vsub)
 	 * BSCs/RNCs are responsible and send them a paging request via open
 	 * SCCP connections (if any). */
 	switch (vsub->cs.attached_via_ran) {
-	case RAN_GERAN_A:
+	case OSMO_RAT_GERAN_A:
 		return a_iface_tx_paging(vsub->imsi, vsub->tmsi, vsub->cgi.lai.lac);
-	case RAN_UTRAN_IU:
+	case OSMO_RAT_UTRAN_IU:
 		return ranap_iu_page_cs(vsub->imsi,
 					vsub->tmsi == GSM_RESERVED_TMSI?
 					NULL : &vsub->tmsi,

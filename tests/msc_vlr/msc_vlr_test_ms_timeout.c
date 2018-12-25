@@ -190,7 +190,7 @@ static void test_ms_timeout_paging()
 	struct vlr_subscr *vsub;
 	const char *imsi = "901700000004620";
 
-	rx_from_ran = RAN_GERAN_A;
+	rx_from_ran = OSMO_RAT_GERAN_A;
 
 	comment_start();
 

@@ -3,7 +3,7 @@ talloc_total_blocks(tall_bsc_ctx) == 13
 
 ===== test_hlr_rej_auth_info_unknown_imsi
 - Location Update request causes a GSUP Send Auth Info request to HLR
-  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
+  MSC <--GERAN-A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
   new conn
 DMM RAN_conn{RAN_CONN_S_NEW}: Allocated
 DREF unknown: MSC conn use + compl_l3 == 1 (0x1: compl_l3)
@@ -54,7 +54,7 @@ DMM RAN_conn(LU:901700000004620){RAN_CONN_S_AUTH_CIPH}: state_chg to RAN_CONN_S_
 DREF IMSI:901700000004620: MSC conn use + release == 1 (0x100: release)
 DREF VLR subscr IMSI:901700000004620 usage increases to: 3
 DREF VLR subscr IMSI:901700000004620 usage decreases to: 2
-- BSSAP Clear --RAN_GERAN_A--> MS
+- BSSAP Clear --GERAN-A--> MS
 DREF VLR subscr IMSI:901700000004620 usage decreases to: 1
 <-- GSUP rx OSMO_GSUP_MSGT_SEND_AUTH_INFO_ERROR: vlr_gsupc_read_cb() returns 0
   auth_request_sent == 0
@@ -83,7 +83,7 @@ talloc_total_blocks(tall_bsc_ctx) == 13
 
 ===== test_hlr_rej_auth_info_net_fail
 - Location Update request causes a GSUP Send Auth Info request to HLR
-  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
+  MSC <--GERAN-A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
   new conn
 DMM RAN_conn{RAN_CONN_S_NEW}: Allocated
 DREF unknown: MSC conn use + compl_l3 == 1 (0x1: compl_l3)
@@ -134,7 +134,7 @@ DMM RAN_conn(LU:901700000004620){RAN_CONN_S_AUTH_CIPH}: state_chg to RAN_CONN_S_
 DREF IMSI:901700000004620: MSC conn use + release == 1 (0x100: release)
 DREF VLR subscr IMSI:901700000004620 usage increases to: 3
 DREF VLR subscr IMSI:901700000004620 usage decreases to: 2
-- BSSAP Clear --RAN_GERAN_A--> MS
+- BSSAP Clear --GERAN-A--> MS
 DREF VLR subscr IMSI:901700000004620 usage decreases to: 1
 <-- GSUP rx OSMO_GSUP_MSGT_SEND_AUTH_INFO_ERROR: vlr_gsupc_read_cb() returns 0
   auth_request_sent == 0
@@ -165,7 +165,7 @@ talloc_total_blocks(tall_bsc_ctx) == 13
 ---
 - Submit a used auth tuple in the VLR
 - Location Update request causes a GSUP Send Auth Info request to HLR
-  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
+  MSC <--GERAN-A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
   new conn
 DMM RAN_conn{RAN_CONN_S_NEW}: Allocated
 DREF unknown: MSC conn use + compl_l3 == 1 (0x1: compl_l3)
@@ -212,7 +212,7 @@ DREF VLR subscr IMSI:901700000004620 usage decreases to: 1
   auth_request_sent == 1
   lu_result_sent == 0
 - MS sends Authen Response, VLR accepts and sends GSUP LU Req to HLR
-  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_AUTH_RESP
+  MSC <--GERAN-A-- MS: GSM48_MT_MM_AUTH_RESP
 DREF IMSI:901700000004620: MSC conn use + dtap == 1 (0x2: dtap)
 DRLL Dispatching 04.08 message GSM48_MT_MM_AUTH_RESP (0x5:0x14)
 DMM IMSI:901700000004620: MM GSM AUTHENTICATION RESPONSE (sres = 2d8b2c3e)
@@ -285,7 +285,7 @@ DMM RAN_conn(LU:901700000004620){RAN_CONN_S_ACCEPTED}: state_chg to RAN_CONN_S_R
 DREF MSISDN:46071: MSC conn use + release == 1 (0x100: release)
 DREF VLR subscr MSISDN:46071 usage increases to: 4
 DREF VLR subscr MSISDN:46071 usage decreases to: 3
-- BSSAP Clear --RAN_GERAN_A--> MS
+- BSSAP Clear --GERAN-A--> MS
 DREF VLR subscr MSISDN:46071 usage decreases to: 2
 <-- GSUP rx OSMO_GSUP_MSGT_UPDATE_LOCATION_RESULT: vlr_gsupc_read_cb() returns 0
   bssap_clear_sent == 1
@@ -314,7 +314,7 @@ DREF VLR subscr MSISDN:46071 usage decreases to: 1
 ---
 - Another LU wants to get new tuples; even though HLR sends Network Failure, we are reusing the old tuples.
 - Location Update request causes a GSUP Send Auth Info request to HLR
-  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
+  MSC <--GERAN-A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
   new conn
 DMM RAN_conn{RAN_CONN_S_NEW}: Allocated
 DREF unknown: MSC conn use + compl_l3 == 1 (0x1: compl_l3)
@@ -359,7 +359,7 @@ DREF VLR subscr MSISDN:46071 usage decreases to: 2
   auth_request_sent == 1
   lu_result_sent == 0
 - MS sends Authen Response, VLR accepts and sends GSUP LU Req to HLR
-  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_AUTH_RESP
+  MSC <--GERAN-A-- MS: GSM48_MT_MM_AUTH_RESP
 DREF MSISDN:46071: MSC conn use + dtap == 1 (0x2: dtap)
 DRLL Dispatching 04.08 message GSM48_MT_MM_AUTH_RESP (0x5:0x14)
 DMM MSISDN:46071: MM GSM AUTHENTICATION RESPONSE (sres = 2d8b2c3e)
@@ -431,7 +431,7 @@ DMM RAN_conn(LU:901700000004620){RAN_CONN_S_ACCEPTED}: state_chg to RAN_CONN_S_R
 DREF MSISDN:46071: MSC conn use + release == 1 (0x100: release)
 DREF VLR subscr MSISDN:46071 usage increases to: 4
 DREF VLR subscr MSISDN:46071 usage decreases to: 3
-- BSSAP Clear --RAN_GERAN_A--> MS
+- BSSAP Clear --GERAN-A--> MS
 DREF VLR subscr MSISDN:46071 usage decreases to: 2
 <-- GSUP rx OSMO_GSUP_MSGT_UPDATE_LOCATION_RESULT: vlr_gsupc_read_cb() returns 0
   bssap_clear_sent == 1
@@ -462,7 +462,7 @@ talloc_total_blocks(tall_bsc_ctx) == 13
 ---
 - Submit a used auth tuple in the VLR
 - Location Update request causes a GSUP Send Auth Info request to HLR
-  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
+  MSC <--GERAN-A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
   new conn
 DMM RAN_conn{RAN_CONN_S_NEW}: Allocated
 DREF unknown: MSC conn use + compl_l3 == 1 (0x1: compl_l3)
@@ -509,7 +509,7 @@ DREF VLR subscr IMSI:901700000004620 usage decreases to: 1
   auth_request_sent == 1
   lu_result_sent == 0
 - MS sends Authen Response, VLR accepts and sends GSUP LU Req to HLR
-  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_AUTH_RESP
+  MSC <--GERAN-A-- MS: GSM48_MT_MM_AUTH_RESP
 DREF IMSI:901700000004620: MSC conn use + dtap == 1 (0x2: dtap)
 DRLL Dispatching 04.08 message GSM48_MT_MM_AUTH_RESP (0x5:0x14)
 DMM IMSI:901700000004620: MM GSM AUTHENTICATION RESPONSE (sres = 2d8b2c3e)
@@ -582,7 +582,7 @@ DMM RAN_conn(LU:901700000004620){RAN_CONN_S_ACCEPTED}: state_chg to RAN_CONN_S_R
 DREF MSISDN:46071: MSC conn use + release == 1 (0x100: release)
 DREF VLR subscr MSISDN:46071 usage increases to: 4
 DREF VLR subscr MSISDN:46071 usage decreases to: 3
-- BSSAP Clear --RAN_GERAN_A--> MS
+- BSSAP Clear --GERAN-A--> MS
 DREF VLR subscr MSISDN:46071 usage decreases to: 2
 <-- GSUP rx OSMO_GSUP_MSGT_UPDATE_LOCATION_RESULT: vlr_gsupc_read_cb() returns 0
   bssap_clear_sent == 1
@@ -611,7 +611,7 @@ DREF VLR subscr MSISDN:46071 usage decreases to: 1
 ---
 - Another LU wants to get new tuples; HLR sends Network Failure, we reject.
 - Location Update request causes a GSUP Send Auth Info request to HLR
-  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
+  MSC <--GERAN-A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
   new conn
 DMM RAN_conn{RAN_CONN_S_NEW}: Allocated
 DREF unknown: MSC conn use + compl_l3 == 1 (0x1: compl_l3)
@@ -660,7 +660,7 @@ DMM RAN_conn(LU:901700000004620){RAN_CONN_S_AUTH_CIPH}: state_chg to RAN_CONN_S_
 DREF MSISDN:46071: MSC conn use + release == 1 (0x100: release)
 DREF VLR subscr MSISDN:46071 usage increases to: 4
 DREF VLR subscr MSISDN:46071 usage decreases to: 3
-- BSSAP Clear --RAN_GERAN_A--> MS
+- BSSAP Clear --GERAN-A--> MS
 DREF VLR subscr MSISDN:46071 usage decreases to: 2
 <-- GSUP rx OSMO_GSUP_MSGT_SEND_AUTH_INFO_ERROR: vlr_gsupc_read_cb() returns 0
   auth_request_sent == 0
@@ -691,7 +691,7 @@ talloc_total_blocks(tall_bsc_ctx) == 13
 ---
 - Submit a used auth tuple in the VLR
 - Location Update request causes a GSUP Send Auth Info request to HLR
-  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
+  MSC <--GERAN-A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
   new conn
 DMM RAN_conn{RAN_CONN_S_NEW}: Allocated
 DREF unknown: MSC conn use + compl_l3 == 1 (0x1: compl_l3)
@@ -738,7 +738,7 @@ DREF VLR subscr IMSI:901700000004620 usage decreases to: 1
   auth_request_sent == 1
   lu_result_sent == 0
 - MS sends Authen Response, VLR accepts and sends GSUP LU Req to HLR
-  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_AUTH_RESP
+  MSC <--GERAN-A-- MS: GSM48_MT_MM_AUTH_RESP
 DREF IMSI:901700000004620: MSC conn use + dtap == 1 (0x2: dtap)
 DRLL Dispatching 04.08 message GSM48_MT_MM_AUTH_RESP (0x5:0x14)
 DMM IMSI:901700000004620: MM GSM AUTHENTICATION RESPONSE (sres = 2d8b2c3e)
@@ -811,7 +811,7 @@ DMM RAN_conn(LU:901700000004620){RAN_CONN_S_ACCEPTED}: state_chg to RAN_CONN_S_R
 DREF MSISDN:46071: MSC conn use + release == 1 (0x100: release)
 DREF VLR subscr MSISDN:46071 usage increases to: 4
 DREF VLR subscr MSISDN:46071 usage decreases to: 3
-- BSSAP Clear --RAN_GERAN_A--> MS
+- BSSAP Clear --GERAN-A--> MS
 DREF VLR subscr MSISDN:46071 usage decreases to: 2
 <-- GSUP rx OSMO_GSUP_MSGT_UPDATE_LOCATION_RESULT: vlr_gsupc_read_cb() returns 0
   bssap_clear_sent == 1
@@ -841,7 +841,7 @@ DREF VLR subscr MSISDN:46071 usage decreases to: 1
 - Another LU wants to get new tuples; HLR sends IMSI Unknown. Even though we would re-use an old tuple, reject the unknown IMSI.
   net->vlr->cfg.auth_reuse_old_sets_on_error == 1
 - Location Update request causes a GSUP Send Auth Info request to HLR
-  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
+  MSC <--GERAN-A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
   new conn
 DMM RAN_conn{RAN_CONN_S_NEW}: Allocated
 DREF unknown: MSC conn use + compl_l3 == 1 (0x1: compl_l3)
@@ -890,7 +890,7 @@ DMM RAN_conn(LU:901700000004620){RAN_CONN_S_AUTH_CIPH}: state_chg to RAN_CONN_S_
 DREF MSISDN:46071: MSC conn use + release == 1 (0x100: release)
 DREF VLR subscr MSISDN:46071 usage increases to: 4
 DREF VLR subscr MSISDN:46071 usage decreases to: 3
-- BSSAP Clear --RAN_GERAN_A--> MS
+- BSSAP Clear --GERAN-A--> MS
 DREF VLR subscr MSISDN:46071 usage decreases to: 2
 <-- GSUP rx OSMO_GSUP_MSGT_SEND_AUTH_INFO_ERROR: vlr_gsupc_read_cb() returns 0
   auth_request_sent == 0
@@ -919,7 +919,7 @@ talloc_total_blocks(tall_bsc_ctx) == 13
 
 ===== test_hlr_acc_but_no_auth_tuples
 - Location Update request causes a GSUP Send Auth Info request to HLR
-  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
+  MSC <--GERAN-A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
   new conn
 DMM RAN_conn{RAN_CONN_S_NEW}: Allocated
 DREF unknown: MSC conn use + compl_l3 == 1 (0x1: compl_l3)
@@ -969,7 +969,7 @@ DMM RAN_conn(LU:901700000004620){RAN_CONN_S_AUTH_CIPH}: state_chg to RAN_CONN_S_
 DREF IMSI:901700000004620: MSC conn use + release == 1 (0x100: release)
 DREF VLR subscr IMSI:901700000004620 usage increases to: 3
 DREF VLR subscr IMSI:901700000004620 usage decreases to: 2
-- BSSAP Clear --RAN_GERAN_A--> MS
+- BSSAP Clear --GERAN-A--> MS
 DREF VLR subscr IMSI:901700000004620 usage decreases to: 1
 <-- GSUP rx OSMO_GSUP_MSGT_SEND_AUTH_INFO_RESULT: vlr_gsupc_read_cb() returns 0
   auth_request_sent == 0
@@ -998,7 +998,7 @@ talloc_total_blocks(tall_bsc_ctx) == 13
 
 ===== test_hlr_rej_lu
 - Location Update request causes a GSUP LU request to HLR
-  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
+  MSC <--GERAN-A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
   new conn
 DMM RAN_conn{RAN_CONN_S_NEW}: Allocated
 DREF unknown: MSC conn use + compl_l3 == 1 (0x1: compl_l3)
@@ -1052,7 +1052,7 @@ DMM RAN_conn(LU:901700000004620){RAN_CONN_S_AUTH_CIPH}: state_chg to RAN_CONN_S_
 DREF IMSI:901700000004620: MSC conn use + release == 1 (0x100: release)
 DREF VLR subscr IMSI:901700000004620 usage increases to: 3
 DREF VLR subscr IMSI:901700000004620 usage decreases to: 2
-- BSSAP Clear --RAN_GERAN_A--> MS
+- BSSAP Clear --GERAN-A--> MS
 DREF VLR subscr IMSI:901700000004620 usage decreases to: 1
 <-- GSUP rx OSMO_GSUP_MSGT_UPDATE_LOCATION_ERROR: vlr_gsupc_read_cb() returns 0
   lu_result_sent == 2
@@ -1080,7 +1080,7 @@ talloc_total_blocks(tall_bsc_ctx) == 13
 
 ===== test_hlr_no_insert_data
 - Location Update request causes a GSUP LU request to HLR
-  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
+  MSC <--GERAN-A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
   new conn
 DMM RAN_conn{RAN_CONN_S_NEW}: Allocated
 DREF unknown: MSC conn use + compl_l3 == 1 (0x1: compl_l3)
@@ -1148,7 +1148,7 @@ DMM RAN_conn(LU:901700000004620){RAN_CONN_S_ACCEPTED}: state_chg to RAN_CONN_S_R
 DREF IMSI:901700000004620: MSC conn use + release == 1 (0x100: release)
 DREF VLR subscr IMSI:901700000004620 usage increases to: 4
 DREF VLR subscr IMSI:901700000004620 usage decreases to: 3
-- BSSAP Clear --RAN_GERAN_A--> MS
+- BSSAP Clear --GERAN-A--> MS
 DREF VLR subscr IMSI:901700000004620 usage decreases to: 2
 <-- GSUP rx OSMO_GSUP_MSGT_UPDATE_LOCATION_RESULT: vlr_gsupc_read_cb() returns 0
   bssap_clear_sent == 1

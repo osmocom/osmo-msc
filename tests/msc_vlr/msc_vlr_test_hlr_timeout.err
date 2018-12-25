@@ -4,7 +4,7 @@ talloc_total_blocks(tall_bsc_ctx) == 13
 ===== test_hlr_timeout_lu_auth_info
 - Total time passed: 0.000000 s
 - Location Update request causes a GSUP Send Auth Info request to HLR
-  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
+  MSC <--GERAN-A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
   new conn
 DMM RAN_conn{RAN_CONN_S_NEW}: Allocated
 DREF unknown: MSC conn use + compl_l3 == 1 (0x1: compl_l3)
@@ -60,7 +60,7 @@ DVLR vlr_lu_fsm(LU:901700000004620){VLR_ULA_S_WAIT_AUTH}: state_chg to VLR_ULA_S
 DMM RAN_conn(LU:901700000004620){RAN_CONN_S_RELEASING}: Received Event RAN_CONN_E_CN_CLOSE
 DMM RAN_conn(LU:901700000004620){RAN_CONN_S_RELEASING}: Event RAN_CONN_E_CN_CLOSE not permitted
 DREF VLR subscr IMSI:901700000004620 usage decreases to: 1
-- BSSAP Clear --RAN_GERAN_A--> MS
+- BSSAP Clear --GERAN-A--> MS
 - RAN_CONN_TIMEOUT has passed, conn is gone.
   bssap_clear_sent == 1
 - BSS sends BSSMAP Clear Complete
@@ -92,7 +92,7 @@ talloc_total_blocks(tall_bsc_ctx) == 13
 ===== test_hlr_timeout_lu_upd_loc_result
 - Total time passed: 0.000000 s
 - Location Update request causes a GSUP LU request to HLR
-  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
+  MSC <--GERAN-A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
   new conn
 DMM RAN_conn{RAN_CONN_S_NEW}: Allocated
 DREF unknown: MSC conn use + compl_l3 == 1 (0x1: compl_l3)
@@ -167,7 +167,7 @@ DVLR vlr_lu_fsm(LU:901700000004620){VLR_ULA_S_WAIT_HLR_UPD}: state_chg to VLR_UL
 DMM RAN_conn(LU:901700000004620){RAN_CONN_S_RELEASING}: Received Event RAN_CONN_E_CN_CLOSE
 DMM RAN_conn(LU:901700000004620){RAN_CONN_S_RELEASING}: Event RAN_CONN_E_CN_CLOSE not permitted
 DREF VLR subscr MSISDN:46071 usage decreases to: 1
-- BSSAP Clear --RAN_GERAN_A--> MS
+- BSSAP Clear --GERAN-A--> MS
 - RAN_CONN_TIMEOUT has passed, conn is gone.
   bssap_clear_sent == 1
 - BSS sends BSSMAP Clear Complete

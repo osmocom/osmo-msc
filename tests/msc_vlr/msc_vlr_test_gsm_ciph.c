@@ -126,8 +126,8 @@ static void test_ciph()
 	VERBOSE_ASSERT(cm_service_result_sent, == RES_NONE, "%d");
 
 	/* Release connection */
-	expect_bssap_clear(RAN_GERAN_A);
-	conn_conclude_cm_service_req(g_conn, RAN_GERAN_A);
+	expect_bssap_clear(OSMO_RAT_GERAN_A);
+	conn_conclude_cm_service_req(g_conn, OSMO_RAT_GERAN_A);
 
 	btw("all requests serviced, conn has been released");
 	bss_sends_clear_complete();
@@ -366,8 +366,8 @@ static void test_ciph_tmsi()
 	VERBOSE_ASSERT(cm_service_result_sent, == RES_NONE, "%d");
 
 	/* Release connection */
-	expect_bssap_clear(RAN_GERAN_A);
-	conn_conclude_cm_service_req(g_conn, RAN_GERAN_A);
+	expect_bssap_clear(OSMO_RAT_GERAN_A);
+	conn_conclude_cm_service_req(g_conn, OSMO_RAT_GERAN_A);
 
 	btw("all requests serviced, conn has been released");
 	bss_sends_clear_complete();
@@ -833,7 +833,7 @@ static void test_gsm_ciph_in_umts_env()
 
 	/* implicit: net->authentication_required = true; */
 	net->a5_encryption_mask = (1 << 1);
-	rx_from_ran = RAN_GERAN_A;
+	rx_from_ran = OSMO_RAT_GERAN_A;
 
 	btw("Location Update request causes a GSUP Send Auth Info request to HLR");
 	lu_result_sent = RES_NONE;
@@ -963,8 +963,8 @@ static void test_gsm_ciph_in_umts_env()
 	VERBOSE_ASSERT(cm_service_result_sent, == RES_NONE, "%d");
 
 	/* Release connection */
-	expect_bssap_clear(RAN_GERAN_A);
-	conn_conclude_cm_service_req(g_conn, RAN_GERAN_A);
+	expect_bssap_clear(OSMO_RAT_GERAN_A);
+	conn_conclude_cm_service_req(g_conn, OSMO_RAT_GERAN_A);
 
 	btw("all requests serviced, conn has been released");
 	bss_sends_clear_complete();
@@ -1159,8 +1159,8 @@ static void test_a5_3_supported()
 	VERBOSE_ASSERT(cm_service_result_sent, == RES_NONE, "%d");
 
 	/* Release connection */
-	expect_bssap_clear(RAN_GERAN_A);
-	conn_conclude_cm_service_req(g_conn, RAN_GERAN_A);
+	expect_bssap_clear(OSMO_RAT_GERAN_A);
+	conn_conclude_cm_service_req(g_conn, OSMO_RAT_GERAN_A);
 
 	btw("all requests serviced, conn has been released");
 	bss_sends_clear_complete();
@@ -1381,8 +1381,8 @@ static void test_cm_service_needs_classmark_update()
 	VERBOSE_ASSERT(cm_service_result_sent, == RES_NONE, "%d");
 
 	/* Release connection */
-	expect_bssap_clear(RAN_GERAN_A);
-	conn_conclude_cm_service_req(g_conn, RAN_GERAN_A);
+	expect_bssap_clear(OSMO_RAT_GERAN_A);
+	conn_conclude_cm_service_req(g_conn, OSMO_RAT_GERAN_A);
 
 	btw("all requests serviced, conn has been released");
 	bss_sends_clear_complete();

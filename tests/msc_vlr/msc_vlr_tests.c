@@ -178,7 +178,7 @@ bool conn_exists(const struct ran_conn *conn)
 
 /* Simplified version of the cm_service_request_concludes() */
 void conn_conclude_cm_service_req(struct ran_conn *conn,
-				  enum ran_type via_ran)
+				  enum osmo_rat_type via_ran)
 {
 	btw("Concluding CM Service Request");
 
@@ -191,13 +191,13 @@ void conn_conclude_cm_service_req(struct ran_conn *conn,
 	ASSERT_RELEASE_CLEAR(via_ran);
 }
 
-enum ran_type rx_from_ran = RAN_GERAN_A;
+enum osmo_rat_type rx_from_ran = OSMO_RAT_GERAN_A;
 
 struct ran_conn *conn_new(void)
 {
 	struct ran_conn *conn;
 	conn = ran_conn_alloc(net, rx_from_ran, 23);
-	if (conn->via_ran == RAN_UTRAN_IU) {
+	if (conn->via_ran == OSMO_RAT_UTRAN_IU) {
 		struct ranap_ue_conn_ctx *ue_ctx = talloc_zero(conn, struct ranap_ue_conn_ctx);
 		*ue_ctx = (struct ranap_ue_conn_ctx){
 			.conn_id = 42,
@@ -214,7 +214,7 @@ void rx_from_ms(struct msgb *msg)
 	struct gsm48_hdr *gh = msgb_l3(msg);
 
 	log("MSC <--%s-- MS: %s",
-	    ran_type_name(rx_from_ran),
+	    osmo_rat_type_name(rx_from_ran),
 	    gh_type_name(gh));
 
 	if (!conn_exists(g_conn))
@@ -358,10 +358,10 @@ void paging_expect_tmsi(uint32_t tmsi)
 	paging_expecting_imsi = NULL;
 }
 
-static int _paging_sent(enum ran_type via_ran, const char *imsi, uint32_t tmsi, uint32_t lac)
+static int _paging_sent(enum osmo_rat_type via_ran, const char *imsi, uint32_t tmsi, uint32_t lac)
 {
 	log("%s sends out paging request to IMSI %s, TMSI 0x%08x, LAC %u",
-	    ran_type_name(via_ran), imsi, tmsi, lac);
+	    osmo_rat_type_name(via_ran), imsi, tmsi, lac);
 	OSMO_ASSERT(paging_expecting_imsi || (paging_expecting_tmsi != GSM_RESERVED_TMSI));
 	if (paging_expecting_imsi)
 		VERBOSE_ASSERT(strcmp(paging_expecting_imsi, imsi), == 0, "%d");
@@ -377,14 +377,14 @@ static int _paging_sent(enum ran_type via_ran, const char *imsi, uint32_t tmsi, 
 int __real_ranap_iu_page_cs(const char *imsi, const uint32_t *tmsi, uint16_t lac);
 int __wrap_ranap_iu_page_cs(const char *imsi, const uint32_t *tmsi, uint16_t lac)
 {
-	return _paging_sent(RAN_UTRAN_IU, imsi, tmsi ? *tmsi : GSM_RESERVED_TMSI, lac);
+	return _paging_sent(OSMO_RAT_UTRAN_IU, imsi, tmsi ? *tmsi : GSM_RESERVED_TMSI, lac);
 }
 
 /* override, requires '-Wl,--wrap=a_iface_tx_paging' */
 int __real_a_iface_tx_paging(const char *imsi, uint32_t tmsi, uint16_t lac);
 int __wrap_a_iface_tx_paging(const char *imsi, uint32_t tmsi, uint16_t lac)
 {
-	return _paging_sent(RAN_GERAN_A, imsi, tmsi, lac);
+	return _paging_sent(OSMO_RAT_GERAN_A, imsi, tmsi, lac);
 }
 
 /* override, requires '-Wl,--wrap=msc_stop_paging' */
@@ -437,7 +437,7 @@ void clear_vlr()
 	net->vlr->cfg.auth_tuple_max_reuse_count = 0;
 	net->vlr->cfg.auth_reuse_old_sets_on_error = false;
 
-	rx_from_ran = RAN_GERAN_A;
+	rx_from_ran = OSMO_RAT_GERAN_A;
 	auth_request_sent = false;
 	auth_request_expect_rand = NULL;
 	auth_request_expect_autn = NULL;
@@ -581,10 +581,10 @@ int __wrap_osmo_gsup_client_send(struct osmo_gsup_client *gsupc, struct msgb *ms
 	return 0;
 }
 
-static int _validate_dtap(struct msgb *msg, enum ran_type to_ran)
+static int _validate_dtap(struct msgb *msg, enum osmo_rat_type to_ran)
 {
 	btw("DTAP --%s--> MS: %s: %s",
-	    ran_type_name(to_ran), gh_type_name((void*)msg->data),
+	    osmo_rat_type_name(to_ran), gh_type_name((void*)msg->data),
 	    osmo_hexdump_nospc(msg->data, msg->len));
 
 	OSMO_ASSERT(dtap_tx_expected);
@@ -612,14 +612,14 @@ static int _validate_dtap(struct msgb *msg, enum ran_type to_ran)
 int __real_ranap_iu_tx(struct msgb *msg, uint8_t sapi);
 int __wrap_ranap_iu_tx(struct msgb *msg, uint8_t sapi)
 {
-	return _validate_dtap(msg, RAN_UTRAN_IU);
+	return _validate_dtap(msg, OSMO_RAT_UTRAN_IU);
 }
 
 /* override, requires '-Wl,--wrap=ranap_iu_tx_release' */
 int __real_ranap_iu_tx_release(struct ranap_ue_conn_ctx *ctx, const struct RANAP_Cause *cause);
 int __wrap_ranap_iu_tx_release(struct ranap_ue_conn_ctx *ctx, const struct RANAP_Cause *cause)
 {
-	btw("Iu Release --%s--> MS", ran_type_name(RAN_UTRAN_IU));
+	btw("Iu Release --%s--> MS", osmo_rat_type_name(OSMO_RAT_UTRAN_IU));
 	OSMO_ASSERT(iu_release_expected);
 	iu_release_expected = false;
 	iu_release_sent = true;
@@ -630,7 +630,7 @@ int __wrap_ranap_iu_tx_release(struct ranap_ue_conn_ctx *ctx, const struct RANAP
 int __real_ranap_iu_tx_common_id(struct ranap_ue_conn_ctx *ue_ctx, const char *imsi);
 int __wrap_ranap_iu_tx_common_id(struct ranap_ue_conn_ctx *ue_ctx, const char *imsi)
 {
-	btw("Iu Common ID --%s--> MS (IMSI=%s)", ran_type_name(RAN_UTRAN_IU), imsi);
+	btw("Iu Common ID --%s--> MS (IMSI=%s)", osmo_rat_type_name(OSMO_RAT_UTRAN_IU), imsi);
 	return 0;
 }
 
@@ -638,14 +638,14 @@ int __wrap_ranap_iu_tx_common_id(struct ranap_ue_conn_ctx *ue_ctx, const char *i
 int __real_a_iface_tx_dtap(struct msgb *msg);
 int __wrap_a_iface_tx_dtap(struct msgb *msg)
 {
-	return _validate_dtap(msg, RAN_GERAN_A);
+	return _validate_dtap(msg, OSMO_RAT_GERAN_A);
 }
 
 /* override, requires '-Wl,--wrap=a_iface_tx_clear_cmd' */
 int __real_a_iface_tx_clear_cmd(struct ran_conn *conn);
 int __wrap_a_iface_tx_clear_cmd(struct ran_conn *conn)
 {
-	btw("BSSAP Clear --%s--> MS", ran_type_name(RAN_GERAN_A));
+	btw("BSSAP Clear --%s--> MS", osmo_rat_type_name(OSMO_RAT_GERAN_A));
 	OSMO_ASSERT(bssap_clear_expected);
 	bssap_clear_expected = false;
 	bssap_clear_sent = true;
@@ -824,7 +824,7 @@ static int fake_vlr_tx_ciph_mode_cmd(void *msc_conn_ref, bool umts_aka, bool ret
 	/* If we built without support for IU, fake the IU part here. The root cause is that we don't
 	 * have differing sets of expected outputs for --enable-iu and --disable-iu. */
 	struct ran_conn *conn = msc_conn_ref;
-	if (conn->via_ran == RAN_UTRAN_IU) {
+	if (conn->via_ran == OSMO_RAT_UTRAN_IU) {
 		DEBUGP(DMM, "-> SECURITY MODE CONTROL %s\n", vlr_subscr_name(conn->vsub));
 		rc = __wrap_ranap_iu_tx_sec_mode_cmd(conn->iu.ue_ctx, &conn->vsub->last_tuple->vec,
 						     0, 1);
@@ -839,7 +839,7 @@ static int fake_vlr_tx_ciph_mode_cmd(void *msc_conn_ref, bool umts_aka, bool ret
 void ms_sends_security_mode_complete()
 {
 	OSMO_ASSERT(g_conn);
-	OSMO_ASSERT(g_conn->via_ran == RAN_UTRAN_IU);
+	OSMO_ASSERT(g_conn->via_ran == OSMO_RAT_UTRAN_IU);
 	OSMO_ASSERT(g_conn->iu.ue_ctx);
 	ran_conn_rx_sec_mode_compl(g_conn);
 }
@@ -848,7 +848,7 @@ void bss_sends_clear_complete()
 {
 	btw("BSS sends BSSMAP Clear Complete");
 	OSMO_ASSERT(g_conn);
-	OSMO_ASSERT(g_conn->via_ran == RAN_GERAN_A);
+	OSMO_ASSERT(g_conn->via_ran == OSMO_RAT_GERAN_A);
 	ran_conn_rx_bssmap_clear_complete(g_conn);
 }
 
@@ -856,7 +856,7 @@ void rnc_sends_release_complete()
 {
 	btw("RNC sends Iu Release Complete");
 	OSMO_ASSERT(g_conn);
-	OSMO_ASSERT(g_conn->via_ran == RAN_UTRAN_IU);
+	OSMO_ASSERT(g_conn->via_ran == OSMO_RAT_UTRAN_IU);
 	ran_conn_rx_iu_release_complete(g_conn);
 }
 

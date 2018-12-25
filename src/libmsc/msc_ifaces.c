@@ -39,13 +39,6 @@
 #include <osmocom/msc/iu_dummy.h>
 #endif /* BUILD_IU */
 
-const struct value_string ran_type_names[] = {
-	OSMO_VALUE_STRING(RAN_UNKNOWN),
-	OSMO_VALUE_STRING(RAN_GERAN_A),
-	OSMO_VALUE_STRING(RAN_UTRAN_IU),
-	{ 0, NULL }
-};
-
 static int msc_tx(struct ran_conn *conn, struct msgb *msg)
 {
 	if (!msg)
@@ -57,13 +50,13 @@ static int msc_tx(struct ran_conn *conn, struct msgb *msg)
 
 	DEBUGP(DMSC, "msc_tx %u bytes to %s via %s\n",
 	       msg->len, vlr_subscr_name(conn->vsub),
-	       ran_type_name(conn->via_ran));
+	       osmo_rat_type_name(conn->via_ran));
 	switch (conn->via_ran) {
-	case RAN_GERAN_A:
+	case OSMO_RAT_GERAN_A:
 		msg->dst = conn;
 		return a_iface_tx_dtap(msg);
 
-	case RAN_UTRAN_IU:
+	case OSMO_RAT_UTRAN_IU:
 		msg->dst = conn->iu.ue_ctx;
 		return ranap_iu_tx(msg, 0);
 
@@ -131,7 +124,7 @@ int msc_tx_common_id(struct ran_conn *conn)
 		return -EINVAL;
 
 	/* Common ID is only sent over IuCS */
-	if (conn->via_ran != RAN_UTRAN_IU) {
+	if (conn->via_ran != OSMO_RAT_UTRAN_IU) {
 		LOGP(DMM, LOGL_INFO,
 		     "%s: Asked to transmit Common ID, but skipping"
 		     " because this is not on UTRAN\n",

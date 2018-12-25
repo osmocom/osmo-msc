@@ -363,7 +363,7 @@ static void ran_conn_fsm_releasing_onenter(struct osmo_fsm_inst *fi, uint32_t pr
 	trans_conn_closed(conn);
 
 	switch (conn->via_ran) {
-	case RAN_GERAN_A:
+	case OSMO_RAT_GERAN_A:
 		a_iface_tx_clear_cmd(conn);
 		if (conn->a.waiting_for_clear_complete) {
 			LOGPFSML(fi, LOGL_ERROR,
@@ -372,7 +372,7 @@ static void ran_conn_fsm_releasing_onenter(struct osmo_fsm_inst *fi, uint32_t pr
 		}
 		conn->a.waiting_for_clear_complete = true;
 		break;
-	case RAN_UTRAN_IU:
+	case OSMO_RAT_UTRAN_IU:
 		ranap_iu_tx_release(conn->iu.ue_ctx, NULL);
 		if (conn->iu.waiting_for_release_complete) {
 			LOGPFSML(fi, LOGL_ERROR,
@@ -496,10 +496,10 @@ char *ran_conn_get_conn_id(struct ran_conn *conn)
 	char *id;
 
 	switch (conn->via_ran) {
-	case RAN_GERAN_A:
+	case OSMO_RAT_GERAN_A:
 		id = talloc_asprintf(conn, "GERAN_A-%08x", conn->a.conn_id);
 		break;
-	case RAN_UTRAN_IU:
+	case OSMO_RAT_UTRAN_IU:
 		id = talloc_asprintf(conn, "UTRAN_IU-%08x", iu_get_conn_id(conn->iu.ue_ctx));
 		break;
 	default:
@@ -627,7 +627,7 @@ void ran_conn_init(void)
  * conn. As long as the FSM is waiting for responses from the subscriber, it will itself hold a use count
  * on the conn. */
 struct ran_conn *ran_conn_alloc(struct gsm_network *network,
-							enum ran_type via_ran, uint16_t lac)
+							enum osmo_rat_type via_ran, uint16_t lac)
 {
 	struct ran_conn *conn;
 	struct osmo_fsm_inst *fi;

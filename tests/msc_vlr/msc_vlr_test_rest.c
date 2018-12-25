@@ -31,7 +31,7 @@ static void test_early_stage()
 	EXPECT_ACCEPTED(false);
 
 	btw("freshly allocated conn");
-	g_conn = ran_conn_alloc(net, RAN_GERAN_A, 123);
+	g_conn = ran_conn_alloc(net, OSMO_RAT_GERAN_A, 123);
 	EXPECT_ACCEPTED(false);
 
 	btw("conn_fsm present, in state NEW");
@@ -43,7 +43,7 @@ static void test_early_stage()
 
 	btw("fake: acceptance");
 	g_conn->vsub = vlr_subscr_alloc(net->vlr);
-	g_conn->via_ran = RAN_GERAN_A;
+	g_conn->via_ran = OSMO_RAT_GERAN_A;
 	OSMO_ASSERT(g_conn->vsub);
 	/* mark as silent call so it sticks around */
 	g_conn->silent_call = 1;

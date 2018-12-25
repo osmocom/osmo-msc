@@ -4,7 +4,7 @@ talloc_total_blocks(tall_bsc_ctx) == 13
 ===== test_ms_timeout_lu_auth_resp
 - Total time passed: 0.000000 s
 - Location Update request causes a GSUP Send Auth Info request to HLR
-  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
+  MSC <--GERAN-A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
   new conn
 DMM RAN_conn{RAN_CONN_S_NEW}: Allocated
 DREF unknown: MSC conn use + compl_l3 == 1 (0x1: compl_l3)
@@ -80,7 +80,7 @@ DVLR vlr_lu_fsm(LU:901700000004620){VLR_ULA_S_WAIT_AUTH}: state_chg to VLR_ULA_S
 DMM RAN_conn(LU:901700000004620){RAN_CONN_S_RELEASING}: Received Event RAN_CONN_E_CN_CLOSE
 DMM RAN_conn(LU:901700000004620){RAN_CONN_S_RELEASING}: Event RAN_CONN_E_CN_CLOSE not permitted
 DREF VLR subscr IMSI:901700000004620 usage decreases to: 1
-- BSSAP Clear --RAN_GERAN_A--> MS
+- BSSAP Clear --GERAN-A--> MS
 - RAN_CONN_TIMEOUT has passed, conn is gone.
   bssap_clear_sent == 1
 - BSS sends BSSMAP Clear Complete
@@ -112,7 +112,7 @@ talloc_total_blocks(tall_bsc_ctx) == 13
 ===== test_ms_timeout_cm_auth_resp
 - Total time passed: 0.000000 s
 - Location Update request causes a GSUP Send Auth Info request to HLR
-  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
+  MSC <--GERAN-A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
   new conn
 DMM RAN_conn{RAN_CONN_S_NEW}: Allocated
 DREF unknown: MSC conn use + compl_l3 == 1 (0x1: compl_l3)
@@ -159,7 +159,7 @@ DREF VLR subscr IMSI:901700000004620 usage decreases to: 1
   auth_request_sent == 1
   lu_result_sent == 0
 - MS sends Authen Response, VLR accepts and sends GSUP LU Req to HLR
-  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_AUTH_RESP
+  MSC <--GERAN-A-- MS: GSM48_MT_MM_AUTH_RESP
 DREF IMSI:901700000004620: MSC conn use + dtap == 1 (0x2: dtap)
 DRLL Dispatching 04.08 message GSM48_MT_MM_AUTH_RESP (0x5:0x14)
 DMM IMSI:901700000004620: MM GSM AUTHENTICATION RESPONSE (sres = 2d8b2c3e)
@@ -232,7 +232,7 @@ DMM RAN_conn(LU:901700000004620){RAN_CONN_S_ACCEPTED}: state_chg to RAN_CONN_S_R
 DREF MSISDN:46071: MSC conn use + release == 1 (0x100: release)
 DREF VLR subscr MSISDN:46071 usage increases to: 4
 DREF VLR subscr MSISDN:46071 usage decreases to: 3
-- BSSAP Clear --RAN_GERAN_A--> MS
+- BSSAP Clear --GERAN-A--> MS
 DREF VLR subscr MSISDN:46071 usage decreases to: 2
 <-- GSUP rx OSMO_GSUP_MSGT_UPDATE_LOCATION_RESULT: vlr_gsupc_read_cb() returns 0
   bssap_clear_sent == 1
@@ -255,7 +255,7 @@ DMM RAN_conn(LU:901700000004620){RAN_CONN_S_RELEASED}: Deallocated
   llist_count(&net->ran_conns) == 0
 ---
 - after a while, a new conn sends a CM Service Request. VLR responds with Auth Req, 2nd auth vector
-  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_CM_SERV_REQ
+  MSC <--GERAN-A-- MS: GSM48_MT_MM_CM_SERV_REQ
   new conn
 DMM RAN_conn{RAN_CONN_S_NEW}: Allocated
 DREF unknown: MSC conn use + compl_l3 == 1 (0x1: compl_l3)
@@ -319,7 +319,7 @@ DVLR Process_Access_Request_VLR(CM_SERVICE_REQ:901700000004620){PR_ARQ_S_DONE}: 
 DMM RAN_conn(CM_SERVICE_REQ:901700000004620){RAN_CONN_S_RELEASING}: Received Event RAN_CONN_E_CN_CLOSE
 DMM RAN_conn(CM_SERVICE_REQ:901700000004620){RAN_CONN_S_RELEASING}: Event RAN_CONN_E_CN_CLOSE not permitted
 DREF VLR subscr MSISDN:46071 usage decreases to: 2
-- BSSAP Clear --RAN_GERAN_A--> MS
+- BSSAP Clear --GERAN-A--> MS
 - RAN_CONN_TIMEOUT has passed, conn is gone.
   bssap_clear_sent == 1
 - BSS sends BSSMAP Clear Complete
@@ -350,7 +350,7 @@ talloc_total_blocks(tall_bsc_ctx) == 13
 ===== test_ms_timeout_paging
 - Total time passed: 0.000000 s
 - Location Update request causes a GSUP LU request to HLR
-  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
+  MSC <--GERAN-A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
   new conn
 DMM RAN_conn{RAN_CONN_S_NEW}: Allocated
 DREF unknown: MSC conn use + compl_l3 == 1 (0x1: compl_l3)
@@ -429,7 +429,7 @@ DMM RAN_conn(LU:901700000004620){RAN_CONN_S_ACCEPTED}: state_chg to RAN_CONN_S_R
 DREF MSISDN:46071: MSC conn use + release == 1 (0x100: release)
 DREF VLR subscr MSISDN:46071 usage increases to: 4
 DREF VLR subscr MSISDN:46071 usage decreases to: 3
-- BSSAP Clear --RAN_GERAN_A--> MS
+- BSSAP Clear --GERAN-A--> MS
 DREF VLR subscr MSISDN:46071 usage decreases to: 2
 <-- GSUP rx OSMO_GSUP_MSGT_UPDATE_LOCATION_RESULT: vlr_gsupc_read_cb() returns 0
 - LU was successful, and the conn has already been closed
@@ -458,7 +458,7 @@ DREF VLR subscr MSISDN:46071 usage increases to: 3
 DCC (ti 00 sub MSISDN:46071 callref 40000001) New transaction
 DREF VLR subscr MSISDN:46071 usage increases to: 4
 DMM Subscriber MSISDN:46071 not paged yet, start paging.
-  RAN_GERAN_A sends out paging request to IMSI 901700000004620, TMSI 0xffffffff, LAC 23
+  GERAN-A sends out paging request to IMSI 901700000004620, TMSI 0xffffffff, LAC 23
   strcmp(paging_expecting_imsi, imsi) == 0
 DREF VLR subscr MSISDN:46071 usage increases to: 5
   llist_count(&vsub->cs.requests) == 1
@@ -499,7 +499,7 @@ DREF VLR subscr MSISDN:46071 usage increases to: 3
 DCC (ti 00 sub MSISDN:46071 callref 40000003) New transaction
 DREF VLR subscr MSISDN:46071 usage increases to: 4
 DMM Subscriber MSISDN:46071 not paged yet, start paging.
-  RAN_GERAN_A sends out paging request to IMSI 901700000004620, TMSI 0xffffffff, LAC 23
+  GERAN-A sends out paging request to IMSI 901700000004620, TMSI 0xffffffff, LAC 23
   strcmp(paging_expecting_imsi, imsi) == 0
 DREF VLR subscr MSISDN:46071 usage increases to: 5
   llist_count(&vsub->cs.requests) == 1
@@ -508,7 +508,7 @@ DREF VLR subscr MSISDN:46071 usage decreases to: 4
   paging_stopped == 0
 ---
 - subscriber detaches, pagings are canceled
-  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_IMSI_DETACH_IND
+  MSC <--GERAN-A-- MS: GSM48_MT_MM_IMSI_DETACH_IND
   new conn
 DMM RAN_conn{RAN_CONN_S_NEW}: Allocated
 DREF unknown: MSC conn use + compl_l3 == 1 (0x1: compl_l3)
@@ -529,7 +529,7 @@ DREF freeing VLR subscr MSISDN:46071
 DMM RAN_conn{RAN_CONN_S_NEW}: Received Event RAN_CONN_E_CN_CLOSE
 DMM RAN_conn{RAN_CONN_S_NEW}: state_chg to RAN_CONN_S_RELEASING
 DREF unknown: MSC conn use + release == 2 (0x101: compl_l3,release)
-- BSSAP Clear --RAN_GERAN_A--> MS
+- BSSAP Clear --GERAN-A--> MS
 DREF unknown: MSC conn use - compl_l3 == 1 (0x100: release)
   bssap_clear_sent == 1
   paging_stopped == 1
@@ -550,7 +550,7 @@ talloc_total_blocks(tall_bsc_ctx) == 13
 ===== test_classmark_update_timeout
 - Total time passed: 0.000000 s
 - Location Update request causes a GSUP Send Auth Info request to HLR
-  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
+  MSC <--GERAN-A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
   new conn
 DMM RAN_conn{RAN_CONN_S_NEW}: Allocated
 DREF unknown: MSC conn use + compl_l3 == 1 (0x1: compl_l3)
@@ -598,7 +598,7 @@ DREF VLR subscr IMSI:901700000004620 usage decreases to: 1
   auth_request_sent == 1
 ---
 - MS sends Authen Response, VLR accepts and wants to send Ciphering Mode Command to MS -- but needs Classmark 2 to determine whether A5/3 is supported
-  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_AUTH_RESP
+  MSC <--GERAN-A-- MS: GSM48_MT_MM_AUTH_RESP
 DREF IMSI:901700000004620: MSC conn use + dtap == 1 (0x2: dtap)
 DRLL Dispatching 04.08 message GSM48_MT_MM_AUTH_RESP (0x5:0x14)
 DMM IMSI:901700000004620: MM GSM AUTHENTICATION RESPONSE (sres = 2d8b2c3e)
@@ -652,7 +652,7 @@ DVLR vlr_lu_fsm(LU:901700000004620){VLR_ULA_S_WAIT_CIPH}: state_chg to VLR_ULA_S
 DMM RAN_conn(LU:901700000004620){RAN_CONN_S_RELEASING}: Received Event RAN_CONN_E_CN_CLOSE
 DMM RAN_conn(LU:901700000004620){RAN_CONN_S_RELEASING}: Event RAN_CONN_E_CN_CLOSE not permitted
 DREF VLR subscr IMSI:901700000004620 usage decreases to: 1
-- BSSAP Clear --RAN_GERAN_A--> MS
+- BSSAP Clear --GERAN-A--> MS
 - RAN_CONN_TIMEOUT has passed, conn is gone.
   bssap_clear_sent == 1
 - BSS sends BSSMAP Clear Complete

@@ -4,7 +4,7 @@ talloc_total_blocks(tall_bsc_ctx) == 13
 ===== test_call_mo
 - Total time passed: 0.000000 s
 - Location Update request causes a GSUP Send Auth Info request to HLR
-  MSC <--RAN_UTRAN_IU-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
+  MSC <--UTRAN-Iu-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
   new conn
 DMM RAN_conn{RAN_CONN_S_NEW}: Allocated
 DREF unknown: MSC conn use + compl_l3 == 1 (0x1: compl_l3)
@@ -52,7 +52,7 @@ DREF VLR subscr IMSI:901700000010650 usage decreases to: 1
   auth_request_sent == 1
   lu_result_sent == 0
 - MS sends Authen Response, VLR accepts and sends SecurityModeControl
-  MSC <--RAN_UTRAN_IU-- MS: GSM48_MT_MM_AUTH_RESP
+  MSC <--UTRAN-Iu-- MS: GSM48_MT_MM_AUTH_RESP
 DREF IMSI:901700000010650: MSC conn use + dtap == 1 (0x2: dtap)
 DRLL Dispatching 04.08 message GSM48_MT_MM_AUTH_RESP (0x5:0x14)
 DMM IMSI:901700000010650: MM UMTS AUTHENTICATION RESPONSE (res = e229c19e791f2e41)
@@ -82,7 +82,7 @@ DMM <- SECURITY MODE COMPLETE IMSI:901700000010650
 DVLR vlr_lu_fsm(LU:901700000010650){VLR_ULA_S_WAIT_CIPH}: Received Event VLR_ULA_E_CIPH_RES
 DVLR vlr_lu_fsm(LU:901700000010650){VLR_ULA_S_WAIT_CIPH}: vlr_loc_upd_post_ciph()
 DIUCS IMSI:901700000010650: tx CommonID 901700000010650
-- Iu Common ID --RAN_UTRAN_IU--> MS (IMSI=901700000010650)
+- Iu Common ID --UTRAN-Iu--> MS (IMSI=901700000010650)
 DVLR vlr_lu_fsm(LU:901700000010650){VLR_ULA_S_WAIT_CIPH}: vlr_loc_upd_node_4()
 DVLR vlr_lu_fsm(LU:901700000010650){VLR_ULA_S_WAIT_CIPH}: state_chg to VLR_ULA_S_WAIT_HLR_UPD
 DVLR upd_hlr_vlr_fsm(LU:901700000010650){UPD_HLR_VLR_S_INIT}: Allocated
@@ -132,7 +132,7 @@ DREF VLR subscr MSISDN:42342 usage decreases to: 1
   llist_count(&net->ran_conns) == 1
 ran_conn_is_accepted() == false
 - MS sends TMSI Realloc Complete
-  MSC <--RAN_UTRAN_IU-- MS: GSM48_MT_MM_TMSI_REALL_COMPL
+  MSC <--UTRAN-Iu-- MS: GSM48_MT_MM_TMSI_REALL_COMPL
 DREF MSISDN:42342: MSC conn use + dtap == 1 (0x2: dtap)
 DRLL Dispatching 04.08 message GSM48_MT_MM_TMSI_REALL_COMPL (0x5:0x1b)
 DMM TMSI Reallocation Completed. Subscriber: MSISDN:42342
@@ -153,7 +153,7 @@ DMM RAN_conn(LU:901700000010650){RAN_CONN_S_ACCEPTED}: state_chg to RAN_CONN_S_R
 DREF MSISDN:42342: MSC conn use + release == 2 (0x102: dtap,release)
 DREF VLR subscr MSISDN:42342 usage increases to: 3
 DREF VLR subscr MSISDN:42342 usage decreases to: 2
-- Iu Release --RAN_UTRAN_IU--> MS
+- Iu Release --UTRAN-Iu--> MS
 DREF MSISDN:42342: MSC conn use - dtap == 1 (0x100: release)
   iu_release_sent == 1
 - LU was successful, and the conn has already been closed
@@ -179,7 +179,7 @@ DREF VLR subscr MSISDN:42342 usage increases to: 2
 DREF VLR subscr MSISDN:42342 usage decreases to: 1
 ---
 - after a while, a new conn sends a CM Service Request. VLR responds with Auth Req, 2nd auth vector
-  MSC <--RAN_UTRAN_IU-- MS: GSM48_MT_MM_CM_SERV_REQ
+  MSC <--UTRAN-Iu-- MS: GSM48_MT_MM_CM_SERV_REQ
   new conn
 DMM RAN_conn{RAN_CONN_S_NEW}: Allocated
 DREF unknown: MSC conn use + compl_l3 == 1 (0x1: compl_l3)
@@ -214,7 +214,7 @@ DMM RAN_conn(CM_SERVICE_REQ:901700000010650){RAN_CONN_S_AUTH_CIPH}: Awaiting res
 - needs auth, not yet accepted
 ran_conn_is_accepted() == false
 - MS sends Authen Response, VLR accepts and sends SecurityModeControl
-  MSC <--RAN_UTRAN_IU-- MS: GSM48_MT_MM_AUTH_RESP
+  MSC <--UTRAN-Iu-- MS: GSM48_MT_MM_AUTH_RESP
 DREF MSISDN:42342: MSC conn use + dtap == 1 (0x2: dtap)
 DRLL Dispatching 04.08 message GSM48_MT_MM_AUTH_RESP (0x5:0x14)
 DMM MSISDN:42342: MM UMTS AUTHENTICATION RESPONSE (res = 7db47cf7f81e4dc7)
@@ -244,7 +244,7 @@ DMM <- SECURITY MODE COMPLETE MSISDN:42342
 DVLR Process_Access_Request_VLR(CM_SERVICE_REQ:901700000010650){PR_ARQ_S_WAIT_CIPH}: Received Event PR_ARQ_E_CIPH_RES
 DVLR Process_Access_Request_VLR(CM_SERVICE_REQ:901700000010650){PR_ARQ_S_WAIT_CIPH}: _proc_arq_vlr_node2_post_ciph()
 DIUCS MSISDN:42342: tx CommonID 901700000010650
-- Iu Common ID --RAN_UTRAN_IU--> MS (IMSI=901700000010650)
+- Iu Common ID --UTRAN-Iu--> MS (IMSI=901700000010650)
 DVLR Process_Access_Request_VLR(CM_SERVICE_REQ:901700000010650){PR_ARQ_S_WAIT_CIPH}: _proc_arq_vlr_node2_post_vlr()
 DVLR Process_Access_Request_VLR(CM_SERVICE_REQ:901700000010650){PR_ARQ_S_WAIT_CIPH}: _proc_arq_vlr_post_pres()
 DVLR Process_Access_Request_VLR(CM_SERVICE_REQ:901700000010650){PR_ARQ_S_WAIT_CIPH}: _proc_arq_vlr_post_trace()
@@ -260,7 +260,7 @@ DMM RAN_conn(CM_SERVICE_REQ:901700000010650){RAN_CONN_S_ACCEPTED}: ran_conn_fsm_
 ---
 - a call is initiated
 - SETUP gets forwarded to MNCC
-  MSC <--RAN_UTRAN_IU-- MS: GSM48_MT_CC_SETUP
+  MSC <--UTRAN-Iu-- MS: GSM48_MT_CC_SETUP
 DREF MSISDN:42342: MSC conn use + dtap == 2 (0xa: dtap,cm_service)
 DRLL Dispatching 04.08 message GSM48_MT_CC_SETUP (0x3:0x5)
 DCC Unknown transaction ID 8, creating new trans.
@@ -284,8 +284,8 @@ DCC (sub 42342) stopping pending guard timer
 DCC (sub 42342) starting guard timer with 180 seconds
 DCC (ti 08 sub 42342) Received 'MNCC_CALL_PROC_REQ' from MNCC in state 1 (INITIATED)
 DCC (ti 08 sub MSISDN:42342) new state INITIATED -> MO_CALL_PROC
-DMSC msc_tx 2 bytes to MSISDN:42342 via RAN_UTRAN_IU
-- DTAP --RAN_UTRAN_IU--> MS: GSM48_MT_CC_CALL_PROC: 8302
+DMSC msc_tx 2 bytes to MSISDN:42342 via UTRAN-Iu
+- DTAP --UTRAN-Iu--> MS: GSM48_MT_CC_CALL_PROC: 8302
 - DTAP matches expected message
   MS <--Call Assignment-- MSC: subscr=MSISDN:42342 callref=0x80000001
 - Total time passed: 1.000023 s
@@ -295,8 +295,8 @@ DCC (sub 42342) stopping pending guard timer
 DCC (sub 42342) starting guard timer with 180 seconds
 DCC (ti 08 sub 42342) Received 'MNCC_ALERT_REQ' from MNCC in state 3 (MO_CALL_PROC)
 DCC (ti 08 sub MSISDN:42342) new state MO_CALL_PROC -> CALL_DELIVERED
-DMSC msc_tx 2 bytes to MSISDN:42342 via RAN_UTRAN_IU
-- DTAP --RAN_UTRAN_IU--> MS: GSM48_MT_CC_ALERTING: 8301
+DMSC msc_tx 2 bytes to MSISDN:42342 via UTRAN-Iu
+- DTAP --UTRAN-Iu--> MS: GSM48_MT_CC_ALERTING: 8301
 - DTAP matches expected message
 DMNCC receive message MNCC_SETUP_RSP
 DCC (sub 42342) stopping pending guard timer
@@ -304,11 +304,11 @@ DCC (sub 42342) starting guard timer with 180 seconds
 DCC (ti 08 sub 42342) Received 'MNCC_SETUP_RSP' from MNCC in state 4 (CALL_DELIVERED)
 DCC starting timer T313 with 30 seconds
 DCC (ti 08 sub MSISDN:42342) new state CALL_DELIVERED -> CONNECT_IND
-DMSC msc_tx 2 bytes to MSISDN:42342 via RAN_UTRAN_IU
-- DTAP --RAN_UTRAN_IU--> MS: GSM48_MT_CC_CONNECT: 8307
+DMSC msc_tx 2 bytes to MSISDN:42342 via UTRAN-Iu
+- DTAP --UTRAN-Iu--> MS: GSM48_MT_CC_CONNECT: 8307
 - DTAP matches expected message
 - Total time passed: 2.000046 s
-  MSC <--RAN_UTRAN_IU-- MS: GSM48_MT_CC_CONNECT_ACK
+  MSC <--UTRAN-Iu-- MS: GSM48_MT_CC_CONNECT_ACK
 DREF MSISDN:42342: MSC conn use + dtap == 2 (0x12: dtap,trans_cc)
 DRLL Dispatching 04.08 message GSM48_MT_CC_CONNECT_ACK (0x3:0xf)
 DCC stopping pending timer T313
@@ -324,7 +324,7 @@ DREF MSISDN:42342: MSC conn use - dtap == 1 (0x10: trans_cc)
 - Total time passed: 125.000091 s
 ---
 - Call ends
-  MSC <--RAN_UTRAN_IU-- MS: GSM48_MT_CC_DISCONNECT
+  MSC <--UTRAN-Iu-- MS: GSM48_MT_CC_DISCONNECT
 DREF MSISDN:42342: MSC conn use + dtap == 2 (0x12: dtap,trans_cc)
 DRLL Dispatching 04.08 message GSM48_MT_CC_DISCONNECT (0x3:0x25)
 DCC (ti 08 sub MSISDN:42342) new state ACTIVE -> DISCONNECT_IND
@@ -338,10 +338,10 @@ DCC (sub 42342) starting guard timer with 180 seconds
 DCC (ti 08 sub 42342) Received 'MNCC_REL_REQ' from MNCC in state 12 (DISCONNECT_IND)
 DCC starting timer T308 with 10 seconds
 DCC (ti 08 sub MSISDN:42342) new state DISCONNECT_IND -> RELEASE_REQ
-DMSC msc_tx 2 bytes to MSISDN:42342 via RAN_UTRAN_IU
-- DTAP --RAN_UTRAN_IU--> MS: GSM48_MT_CC_RELEASE: 832d
+DMSC msc_tx 2 bytes to MSISDN:42342 via UTRAN-Iu
+- DTAP --UTRAN-Iu--> MS: GSM48_MT_CC_RELEASE: 832d
 - DTAP matches expected message
-  MSC <--RAN_UTRAN_IU-- MS: GSM48_MT_CC_RELEASE_COMPL
+  MSC <--UTRAN-Iu-- MS: GSM48_MT_CC_RELEASE_COMPL
 DREF MSISDN:42342: MSC conn use + dtap == 2 (0x12: dtap,trans_cc)
 DRLL Dispatching 04.08 message GSM48_MT_CC_RELEASE_COMPL (0x3:0x2a)
 DCC stopping pending timer T308
@@ -360,7 +360,7 @@ DMM RAN_conn(CM_SERVICE_REQ:901700000010650){RAN_CONN_S_COMMUNICATING}: state_ch
 DREF MSISDN:42342: MSC conn use + release == 1 (0x100: release)
 DREF VLR subscr MSISDN:42342 usage increases to: 3
 DREF VLR subscr MSISDN:42342 usage decreases to: 2
-- Iu Release --RAN_UTRAN_IU--> MS
+- Iu Release --UTRAN-Iu--> MS
 - RNC sends Iu Release Complete
 DREF MSISDN:42342: MSC conn use - release == 0 (0x0: )
 DMM RAN_conn(CM_SERVICE_REQ:901700000010650){RAN_CONN_S_RELEASING}: Received Event RAN_CONN_E_UNUSED
@@ -384,7 +384,7 @@ talloc_total_blocks(tall_bsc_ctx) == 13
 ===== test_call_mt
 - Total time passed: 0.000000 s
 - Location Update request causes a GSUP Send Auth Info request to HLR
-  MSC <--RAN_UTRAN_IU-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
+  MSC <--UTRAN-Iu-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
   new conn
 DMM RAN_conn{RAN_CONN_S_NEW}: Allocated
 DREF unknown: MSC conn use + compl_l3 == 1 (0x1: compl_l3)
@@ -432,7 +432,7 @@ DREF VLR subscr IMSI:901700000010650 usage decreases to: 1
   auth_request_sent == 1
   lu_result_sent == 0
 - MS sends Authen Response, VLR accepts and sends SecurityModeControl
-  MSC <--RAN_UTRAN_IU-- MS: GSM48_MT_MM_AUTH_RESP
+  MSC <--UTRAN-Iu-- MS: GSM48_MT_MM_AUTH_RESP
 DREF IMSI:901700000010650: MSC conn use + dtap == 1 (0x2: dtap)
 DRLL Dispatching 04.08 message GSM48_MT_MM_AUTH_RESP (0x5:0x14)
 DMM IMSI:901700000010650: MM UMTS AUTHENTICATION RESPONSE (res = e229c19e791f2e41)
@@ -462,7 +462,7 @@ DMM <- SECURITY MODE COMPLETE IMSI:901700000010650
 DVLR vlr_lu_fsm(LU:901700000010650){VLR_ULA_S_WAIT_CIPH}: Received Event VLR_ULA_E_CIPH_RES
 DVLR vlr_lu_fsm(LU:901700000010650){VLR_ULA_S_WAIT_CIPH}: vlr_loc_upd_post_ciph()
 DIUCS IMSI:901700000010650: tx CommonID 901700000010650
-- Iu Common ID --RAN_UTRAN_IU--> MS (IMSI=901700000010650)
+- Iu Common ID --UTRAN-Iu--> MS (IMSI=901700000010650)
 DVLR vlr_lu_fsm(LU:901700000010650){VLR_ULA_S_WAIT_CIPH}: vlr_loc_upd_node_4()
 DVLR vlr_lu_fsm(LU:901700000010650){VLR_ULA_S_WAIT_CIPH}: state_chg to VLR_ULA_S_WAIT_HLR_UPD
 DVLR upd_hlr_vlr_fsm(LU:901700000010650){UPD_HLR_VLR_S_INIT}: Allocated
@@ -512,7 +512,7 @@ DREF VLR subscr MSISDN:42342 usage decreases to: 1
   llist_count(&net->ran_conns) == 1
 ran_conn_is_accepted() == false
 - MS sends TMSI Realloc Complete
-  MSC <--RAN_UTRAN_IU-- MS: GSM48_MT_MM_TMSI_REALL_COMPL
+  MSC <--UTRAN-Iu-- MS: GSM48_MT_MM_TMSI_REALL_COMPL
 DREF MSISDN:42342: MSC conn use + dtap == 1 (0x2: dtap)
 DRLL Dispatching 04.08 message GSM48_MT_MM_TMSI_REALL_COMPL (0x5:0x1b)
 DMM TMSI Reallocation Completed. Subscriber: MSISDN:42342
@@ -533,7 +533,7 @@ DMM RAN_conn(LU:901700000010650){RAN_CONN_S_ACCEPTED}: state_chg to RAN_CONN_S_R
 DREF MSISDN:42342: MSC conn use + release == 2 (0x102: dtap,release)
 DREF VLR subscr MSISDN:42342 usage increases to: 3
 DREF VLR subscr MSISDN:42342 usage decreases to: 2
-- Iu Release --RAN_UTRAN_IU--> MS
+- Iu Release --UTRAN-Iu--> MS
 DREF MSISDN:42342: MSC conn use - dtap == 1 (0x100: release)
   iu_release_sent == 1
 - LU was successful, and the conn has already been closed
@@ -564,14 +564,14 @@ DREF VLR subscr MSISDN:42342 usage increases to: 2
 DCC (ti ff sub MSISDN:42342 callref 423) New transaction
 DREF VLR subscr MSISDN:42342 usage increases to: 3
 DMM Subscriber MSISDN:42342 not paged yet, start paging.
-  RAN_UTRAN_IU sends out paging request to IMSI 901700000010650, TMSI 0x03020100, LAC 23
+  UTRAN-Iu sends out paging request to IMSI 901700000010650, TMSI 0x03020100, LAC 23
   strcmp(paging_expecting_imsi, imsi) == 0
 DREF VLR subscr MSISDN:42342 usage increases to: 4
 DREF VLR subscr MSISDN:42342 usage decreases to: 3
   paging_sent == 1
   paging_stopped == 0
 - MS replies with Paging Response, and VLR sends Auth Request
-  MSC <--RAN_UTRAN_IU-- MS: GSM48_MT_RR_PAG_RESP
+  MSC <--UTRAN-Iu-- MS: GSM48_MT_RR_PAG_RESP
   new conn
 DMM RAN_conn{RAN_CONN_S_NEW}: Allocated
 DREF unknown: MSC conn use + compl_l3 == 1 (0x1: compl_l3)
@@ -603,7 +603,7 @@ DMM RAN_conn(PAGING_RESP:901700000010650){RAN_CONN_S_AUTH_CIPH}: Received Event 
 DMM RAN_conn(PAGING_RESP:901700000010650){RAN_CONN_S_AUTH_CIPH}: Awaiting results for Auth+Ciph, overruling event RAN_CONN_E_UNUSED
   auth_request_sent == 1
 - MS sends Authen Response, VLR accepts and sends SecurityModeControl
-  MSC <--RAN_UTRAN_IU-- MS: GSM48_MT_MM_AUTH_RESP
+  MSC <--UTRAN-Iu-- MS: GSM48_MT_MM_AUTH_RESP
 DREF MSISDN:42342: MSC conn use + dtap == 1 (0x2: dtap)
 DRLL Dispatching 04.08 message GSM48_MT_MM_AUTH_RESP (0x5:0x14)
 DMM MSISDN:42342: MM UMTS AUTHENTICATION RESPONSE (res = 7db47cf7f81e4dc7)
@@ -632,7 +632,7 @@ DMM <- SECURITY MODE COMPLETE MSISDN:42342
 DVLR Process_Access_Request_VLR(PAGING_RESP:901700000010650){PR_ARQ_S_WAIT_CIPH}: Received Event PR_ARQ_E_CIPH_RES
 DVLR Process_Access_Request_VLR(PAGING_RESP:901700000010650){PR_ARQ_S_WAIT_CIPH}: _proc_arq_vlr_node2_post_ciph()
 DIUCS MSISDN:42342: tx CommonID 901700000010650
-- Iu Common ID --RAN_UTRAN_IU--> MS (IMSI=901700000010650)
+- Iu Common ID --UTRAN-Iu--> MS (IMSI=901700000010650)
 DVLR Process_Access_Request_VLR(PAGING_RESP:901700000010650){PR_ARQ_S_WAIT_CIPH}: _proc_arq_vlr_node2_post_vlr()
 DVLR Process_Access_Request_VLR(PAGING_RESP:901700000010650){PR_ARQ_S_WAIT_CIPH}: _proc_arq_vlr_post_pres()
 DVLR Process_Access_Request_VLR(PAGING_RESP:901700000010650){PR_ARQ_S_WAIT_CIPH}: _proc_arq_vlr_post_trace()
@@ -647,14 +647,14 @@ DCC Paging subscr 42342 succeeded!
 DREF MSISDN:42342: MSC conn use + trans_cc == 1 (0x10: trans_cc)
 DCC starting timer T303 with 30 seconds
 DCC (ti 00 sub MSISDN:42342) new state NULL -> CALL_PRESENT
-DMSC msc_tx 2 bytes to MSISDN:42342 via RAN_UTRAN_IU
-- DTAP --RAN_UTRAN_IU--> MS: GSM48_MT_CC_SETUP: 0305
+DMSC msc_tx 2 bytes to MSISDN:42342 via UTRAN-Iu
+- DTAP --UTRAN-Iu--> MS: GSM48_MT_CC_SETUP: 0305
 - DTAP matches expected message
 DREF VLR subscr MSISDN:42342 usage decreases to: 3
 DMM RAN_conn(PAGING_RESP:901700000010650){RAN_CONN_S_AUTH_CIPH}: state_chg to RAN_CONN_S_ACCEPTED
 DMM RAN_conn(PAGING_RESP:901700000010650){RAN_CONN_S_ACCEPTED}: ran_conn_fsm_has_active_transactions: connection still has active transaction: CC
   paging_stopped == 1
-  MSC <--RAN_UTRAN_IU-- MS: GSM48_MT_CC_CALL_CONF
+  MSC <--UTRAN-Iu-- MS: GSM48_MT_CC_CALL_CONF
 DREF MSISDN:42342: MSC conn use + dtap == 2 (0x12: dtap,trans_cc)
 DRLL Dispatching 04.08 message GSM48_MT_CC_CALL_CONF (0x3:0x8)
 DCC stopping pending timer T303
@@ -668,7 +668,7 @@ DMM RAN_conn(PAGING_RESP:901700000010650){RAN_CONN_S_ACCEPTED}: Received Event R
 DMM RAN_conn(PAGING_RESP:901700000010650){RAN_CONN_S_ACCEPTED}: state_chg to RAN_CONN_S_COMMUNICATING
 DREF MSISDN:42342: MSC conn use - dtap == 1 (0x10: trans_cc)
 - Total time passed: 1.000023 s
-  MSC <--RAN_UTRAN_IU-- MS: GSM48_MT_CC_ALERTING
+  MSC <--UTRAN-Iu-- MS: GSM48_MT_CC_ALERTING
 DREF MSISDN:42342: MSC conn use + dtap == 2 (0x12: dtap,trans_cc)
 DRLL Dispatching 04.08 message GSM48_MT_CC_ALERTING (0x3:0x1)
 DCC stopping pending timer T310
@@ -680,7 +680,7 @@ DCC Sending 'MNCC_ALERT_IND' to MNCC.
 DMM RAN_conn(PAGING_RESP:901700000010650){RAN_CONN_S_COMMUNICATING}: Received Event RAN_CONN_E_COMMUNICATING
 DREF MSISDN:42342: MSC conn use - dtap == 1 (0x10: trans_cc)
 - Total time passed: 2.000046 s
-  MSC <--RAN_UTRAN_IU-- MS: GSM48_MT_CC_CONNECT
+  MSC <--UTRAN-Iu-- MS: GSM48_MT_CC_CONNECT
 DREF MSISDN:42342: MSC conn use + dtap == 2 (0x12: dtap,trans_cc)
 DRLL Dispatching 04.08 message GSM48_MT_CC_CONNECT (0x3:0x7)
 DCC stopping pending timer T301
@@ -695,15 +695,15 @@ DCC (sub 42342) starting guard timer with 180 seconds
 DCC (ti 00 sub 42342) Received 'MNCC_SETUP_COMPL_REQ' from MNCC in state 8 (CONNECT_REQUEST)
 DCC (ti 00 sub MSISDN:42342) new state CONNECT_REQUEST -> ACTIVE
 DCC (sub 42342) stopping pending guard timer
-DMSC msc_tx 2 bytes to MSISDN:42342 via RAN_UTRAN_IU
-- DTAP --RAN_UTRAN_IU--> MS: GSM48_MT_CC_CONNECT_ACK: 030f
+DMSC msc_tx 2 bytes to MSISDN:42342 via UTRAN-Iu
+- DTAP --UTRAN-Iu--> MS: GSM48_MT_CC_CONNECT_ACK: 030f
 - DTAP matches expected message
 ---
 - RTP stream goes ahead, not shown here.
 - Total time passed: 125.000091 s
 ---
 - Call ends
-  MSC <--RAN_UTRAN_IU-- MS: GSM48_MT_CC_DISCONNECT
+  MSC <--UTRAN-Iu-- MS: GSM48_MT_CC_DISCONNECT
 DREF MSISDN:42342: MSC conn use + dtap == 2 (0x12: dtap,trans_cc)
 DRLL Dispatching 04.08 message GSM48_MT_CC_DISCONNECT (0x3:0x25)
 DCC (ti 00 sub MSISDN:42342) new state ACTIVE -> DISCONNECT_IND
@@ -717,10 +717,10 @@ DCC (sub 42342) starting guard timer with 180 seconds
 DCC (ti 00 sub 42342) Received 'MNCC_REL_REQ' from MNCC in state 12 (DISCONNECT_IND)
 DCC starting timer T308 with 10 seconds
 DCC (ti 00 sub MSISDN:42342) new state DISCONNECT_IND -> RELEASE_REQ
-DMSC msc_tx 2 bytes to MSISDN:42342 via RAN_UTRAN_IU
-- DTAP --RAN_UTRAN_IU--> MS: GSM48_MT_CC_RELEASE: 032d
+DMSC msc_tx 2 bytes to MSISDN:42342 via UTRAN-Iu
+- DTAP --UTRAN-Iu--> MS: GSM48_MT_CC_RELEASE: 032d
 - DTAP matches expected message
-  MSC <--RAN_UTRAN_IU-- MS: GSM48_MT_CC_RELEASE_COMPL
+  MSC <--UTRAN-Iu-- MS: GSM48_MT_CC_RELEASE_COMPL
 DREF MSISDN:42342: MSC conn use + dtap == 2 (0x12: dtap,trans_cc)
 DRLL Dispatching 04.08 message GSM48_MT_CC_RELEASE_COMPL (0x3:0x2a)
 DCC stopping pending timer T308
@@ -739,7 +739,7 @@ DMM RAN_conn(PAGING_RESP:901700000010650){RAN_CONN_S_COMMUNICATING}: state_chg t
 DREF MSISDN:42342: MSC conn use + release == 1 (0x100: release)
 DREF VLR subscr MSISDN:42342 usage increases to: 3
 DREF VLR subscr MSISDN:42342 usage decreases to: 2
-- Iu Release --RAN_UTRAN_IU--> MS
+- Iu Release --UTRAN-Iu--> MS
 - RNC sends Iu Release Complete
 DREF MSISDN:42342: MSC conn use - release == 0 (0x0: )
 DMM RAN_conn(PAGING_RESP:901700000010650){RAN_CONN_S_RELEASING}: Received Event RAN_CONN_E_UNUSED
@@ -763,7 +763,7 @@ talloc_total_blocks(tall_bsc_ctx) == 13
 ===== test_call_mt2
 - Total time passed: 0.000000 s
 - Location Update request causes a GSUP Send Auth Info request to HLR
-  MSC <--RAN_UTRAN_IU-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
+  MSC <--UTRAN-Iu-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
   new conn
 DMM RAN_conn{RAN_CONN_S_NEW}: Allocated
 DREF unknown: MSC conn use + compl_l3 == 1 (0x1: compl_l3)
@@ -811,7 +811,7 @@ DREF VLR subscr IMSI:901700000010650 usage decreases to: 1
   auth_request_sent == 1
   lu_result_sent == 0
 - MS sends Authen Response, VLR accepts and sends SecurityModeControl
-  MSC <--RAN_UTRAN_IU-- MS: GSM48_MT_MM_AUTH_RESP
+  MSC <--UTRAN-Iu-- MS: GSM48_MT_MM_AUTH_RESP
 DREF IMSI:901700000010650: MSC conn use + dtap == 1 (0x2: dtap)
 DRLL Dispatching 04.08 message GSM48_MT_MM_AUTH_RESP (0x5:0x14)
 DMM IMSI:901700000010650: MM UMTS AUTHENTICATION RESPONSE (res = e229c19e791f2e41)
@@ -841,7 +841,7 @@ DMM <- SECURITY MODE COMPLETE IMSI:901700000010650
 DVLR vlr_lu_fsm(LU:901700000010650){VLR_ULA_S_WAIT_CIPH}: Received Event VLR_ULA_E_CIPH_RES
 DVLR vlr_lu_fsm(LU:901700000010650){VLR_ULA_S_WAIT_CIPH}: vlr_loc_upd_post_ciph()
 DIUCS IMSI:901700000010650: tx CommonID 901700000010650
-- Iu Common ID --RAN_UTRAN_IU--> MS (IMSI=901700000010650)
+- Iu Common ID --UTRAN-Iu--> MS (IMSI=901700000010650)
 DVLR vlr_lu_fsm(LU:901700000010650){VLR_ULA_S_WAIT_CIPH}: vlr_loc_upd_node_4()
 DVLR vlr_lu_fsm(LU:901700000010650){VLR_ULA_S_WAIT_CIPH}: state_chg to VLR_ULA_S_WAIT_HLR_UPD
 DVLR upd_hlr_vlr_fsm(LU:901700000010650){UPD_HLR_VLR_S_INIT}: Allocated
@@ -891,7 +891,7 @@ DREF VLR subscr MSISDN:42342 usage decreases to: 1
   llist_count(&net->ran_conns) == 1
 ran_conn_is_accepted() == false
 - MS sends TMSI Realloc Complete
-  MSC <--RAN_UTRAN_IU-- MS: GSM48_MT_MM_TMSI_REALL_COMPL
+  MSC <--UTRAN-Iu-- MS: GSM48_MT_MM_TMSI_REALL_COMPL
 DREF MSISDN:42342: MSC conn use + dtap == 1 (0x2: dtap)
 DRLL Dispatching 04.08 message GSM48_MT_MM_TMSI_REALL_COMPL (0x5:0x1b)
 DMM TMSI Reallocation Completed. Subscriber: MSISDN:42342
@@ -912,7 +912,7 @@ DMM RAN_conn(LU:901700000010650){RAN_CONN_S_ACCEPTED}: state_chg to RAN_CONN_S_R
 DREF MSISDN:42342: MSC conn use + release == 2 (0x102: dtap,release)
 DREF VLR subscr MSISDN:42342 usage increases to: 3
 DREF VLR subscr MSISDN:42342 usage decreases to: 2
-- Iu Release --RAN_UTRAN_IU--> MS
+- Iu Release --UTRAN-Iu--> MS
 DREF MSISDN:42342: MSC conn use - dtap == 1 (0x100: release)
   iu_release_sent == 1
 - LU was successful, and the conn has already been closed
@@ -943,14 +943,14 @@ DREF VLR subscr MSISDN:42342 usage increases to: 2
 DCC (ti ff sub MSISDN:42342 callref 423) New transaction
 DREF VLR subscr MSISDN:42342 usage increases to: 3
 DMM Subscriber MSISDN:42342 not paged yet, start paging.
-  RAN_UTRAN_IU sends out paging request to IMSI 901700000010650, TMSI 0x03020100, LAC 23
+  UTRAN-Iu sends out paging request to IMSI 901700000010650, TMSI 0x03020100, LAC 23
   strcmp(paging_expecting_imsi, imsi) == 0
 DREF VLR subscr MSISDN:42342 usage increases to: 4
 DREF VLR subscr MSISDN:42342 usage decreases to: 3
   paging_sent == 1
   paging_stopped == 0
 - MS replies with Paging Response, and VLR sends Auth Request
-  MSC <--RAN_UTRAN_IU-- MS: GSM48_MT_RR_PAG_RESP
+  MSC <--UTRAN-Iu-- MS: GSM48_MT_RR_PAG_RESP
   new conn
 DMM RAN_conn{RAN_CONN_S_NEW}: Allocated
 DREF unknown: MSC conn use + compl_l3 == 1 (0x1: compl_l3)
@@ -982,7 +982,7 @@ DMM RAN_conn(PAGING_RESP:901700000010650){RAN_CONN_S_AUTH_CIPH}: Received Event 
 DMM RAN_conn(PAGING_RESP:901700000010650){RAN_CONN_S_AUTH_CIPH}: Awaiting results for Auth+Ciph, overruling event RAN_CONN_E_UNUSED
   auth_request_sent == 1
 - MS sends Authen Response, VLR accepts and sends SecurityModeControl
-  MSC <--RAN_UTRAN_IU-- MS: GSM48_MT_MM_AUTH_RESP
+  MSC <--UTRAN-Iu-- MS: GSM48_MT_MM_AUTH_RESP
 DREF MSISDN:42342: MSC conn use + dtap == 1 (0x2: dtap)
 DRLL Dispatching 04.08 message GSM48_MT_MM_AUTH_RESP (0x5:0x14)
 DMM MSISDN:42342: MM UMTS AUTHENTICATION RESPONSE (res = 7db47cf7f81e4dc7)
@@ -1011,7 +1011,7 @@ DMM <- SECURITY MODE COMPLETE MSISDN:42342
 DVLR Process_Access_Request_VLR(PAGING_RESP:901700000010650){PR_ARQ_S_WAIT_CIPH}: Received Event PR_ARQ_E_CIPH_RES
 DVLR Process_Access_Request_VLR(PAGING_RESP:901700000010650){PR_ARQ_S_WAIT_CIPH}: _proc_arq_vlr_node2_post_ciph()
 DIUCS MSISDN:42342: tx CommonID 901700000010650
-- Iu Common ID --RAN_UTRAN_IU--> MS (IMSI=901700000010650)
+- Iu Common ID --UTRAN-Iu--> MS (IMSI=901700000010650)
 DVLR Process_Access_Request_VLR(PAGING_RESP:901700000010650){PR_ARQ_S_WAIT_CIPH}: _proc_arq_vlr_node2_post_vlr()
 DVLR Process_Access_Request_VLR(PAGING_RESP:901700000010650){PR_ARQ_S_WAIT_CIPH}: _proc_arq_vlr_post_pres()
 DVLR Process_Access_Request_VLR(PAGING_RESP:901700000010650){PR_ARQ_S_WAIT_CIPH}: _proc_arq_vlr_post_trace()
@@ -1026,14 +1026,14 @@ DCC Paging subscr 42342 succeeded!
 DREF MSISDN:42342: MSC conn use + trans_cc == 1 (0x10: trans_cc)
 DCC starting timer T303 with 30 seconds
 DCC (ti 00 sub MSISDN:42342) new state NULL -> CALL_PRESENT
-DMSC msc_tx 2 bytes to MSISDN:42342 via RAN_UTRAN_IU
-- DTAP --RAN_UTRAN_IU--> MS: GSM48_MT_CC_SETUP: 0305
+DMSC msc_tx 2 bytes to MSISDN:42342 via UTRAN-Iu
+- DTAP --UTRAN-Iu--> MS: GSM48_MT_CC_SETUP: 0305
 - DTAP matches expected message
 DREF VLR subscr MSISDN:42342 usage decreases to: 3
 DMM RAN_conn(PAGING_RESP:901700000010650){RAN_CONN_S_AUTH_CIPH}: state_chg to RAN_CONN_S_ACCEPTED
 DMM RAN_conn(PAGING_RESP:901700000010650){RAN_CONN_S_ACCEPTED}: ran_conn_fsm_has_active_transactions: connection still has active transaction: CC
   paging_stopped == 1
-  MSC <--RAN_UTRAN_IU-- MS: GSM48_MT_CC_CALL_CONF
+  MSC <--UTRAN-Iu-- MS: GSM48_MT_CC_CALL_CONF
 DREF MSISDN:42342: MSC conn use + dtap == 2 (0x12: dtap,trans_cc)
 DRLL Dispatching 04.08 message GSM48_MT_CC_CALL_CONF (0x3:0x8)
 DCC stopping pending timer T303
@@ -1047,7 +1047,7 @@ DMM RAN_conn(PAGING_RESP:901700000010650){RAN_CONN_S_ACCEPTED}: Received Event R
 DMM RAN_conn(PAGING_RESP:901700000010650){RAN_CONN_S_ACCEPTED}: state_chg to RAN_CONN_S_COMMUNICATING
 DREF MSISDN:42342: MSC conn use - dtap == 1 (0x10: trans_cc)
 - Total time passed: 1.000023 s
-  MSC <--RAN_UTRAN_IU-- MS: GSM48_MT_CC_ALERTING
+  MSC <--UTRAN-Iu-- MS: GSM48_MT_CC_ALERTING
 DREF MSISDN:42342: MSC conn use + dtap == 2 (0x12: dtap,trans_cc)
 DRLL Dispatching 04.08 message GSM48_MT_CC_ALERTING (0x3:0x1)
 DCC stopping pending timer T310
@@ -1072,8 +1072,8 @@ DCC (sub 42342) starting guard timer with 180 seconds
 DCC (ti 00 sub 42342) Received 'MNCC_REL_REQ' from MNCC in state 7 (CALL_RECEIVED)
 DCC starting timer T308 with 10 seconds
 DCC (ti 00 sub MSISDN:42342) new state CALL_RECEIVED -> RELEASE_REQ
-DMSC msc_tx 2 bytes to MSISDN:42342 via RAN_UTRAN_IU
-- DTAP --RAN_UTRAN_IU--> MS: GSM48_MT_CC_RELEASE: 032d
+DMSC msc_tx 2 bytes to MSISDN:42342 via UTRAN-Iu
+- DTAP --UTRAN-Iu--> MS: GSM48_MT_CC_RELEASE: 032d
 - DTAP matches expected message
 DMNCC transmit message MNCC_REL_CNF
 DCC Sending 'MNCC_REL_CNF' to MNCC.
@@ -1083,7 +1083,7 @@ DCC (ti 00 sub MSISDN:42342) new state RELEASE_REQ -> NULL
 DCC (sub 42342) stopping pending guard timer
 DREF VLR subscr MSISDN:42342 usage decreases to: 2
 DREF MSISDN:42342: MSC conn use - trans_cc == 1 (0x100: release)
-- Iu Release --RAN_UTRAN_IU--> MS
+- Iu Release --UTRAN-Iu--> MS
 - RNC sends Iu Release Complete
 DREF MSISDN:42342: MSC conn use - release == 0 (0x0: )
 DMM RAN_conn(PAGING_RESP:901700000010650){RAN_CONN_S_RELEASING}: Received Event RAN_CONN_E_UNUSED
@@ -1108,7 +1108,7 @@ talloc_total_blocks(tall_bsc_ctx) == 13
 ===== test_call_mo_to_unknown
 - Total time passed: 0.000000 s
 - Location Update request causes a GSUP Send Auth Info request to HLR
-  MSC <--RAN_UTRAN_IU-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
+  MSC <--UTRAN-Iu-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
   new conn
 DMM RAN_conn{RAN_CONN_S_NEW}: Allocated
 DREF unknown: MSC conn use + compl_l3 == 1 (0x1: compl_l3)
@@ -1156,7 +1156,7 @@ DREF VLR subscr IMSI:901700000010650 usage decreases to: 1
   auth_request_sent == 1
   lu_result_sent == 0
 - MS sends Authen Response, VLR accepts and sends SecurityModeControl
-  MSC <--RAN_UTRAN_IU-- MS: GSM48_MT_MM_AUTH_RESP
+  MSC <--UTRAN-Iu-- MS: GSM48_MT_MM_AUTH_RESP
 DREF IMSI:901700000010650: MSC conn use + dtap == 1 (0x2: dtap)
 DRLL Dispatching 04.08 message GSM48_MT_MM_AUTH_RESP (0x5:0x14)
 DMM IMSI:901700000010650: MM UMTS AUTHENTICATION RESPONSE (res = e229c19e791f2e41)
@@ -1186,7 +1186,7 @@ DMM <- SECURITY MODE COMPLETE IMSI:901700000010650
 DVLR vlr_lu_fsm(LU:901700000010650){VLR_ULA_S_WAIT_CIPH}: Received Event VLR_ULA_E_CIPH_RES
 DVLR vlr_lu_fsm(LU:901700000010650){VLR_ULA_S_WAIT_CIPH}: vlr_loc_upd_post_ciph()
 DIUCS IMSI:901700000010650: tx CommonID 901700000010650
-- Iu Common ID --RAN_UTRAN_IU--> MS (IMSI=901700000010650)
+- Iu Common ID --UTRAN-Iu--> MS (IMSI=901700000010650)
 DVLR vlr_lu_fsm(LU:901700000010650){VLR_ULA_S_WAIT_CIPH}: vlr_loc_upd_node_4()
 DVLR vlr_lu_fsm(LU:901700000010650){VLR_ULA_S_WAIT_CIPH}: state_chg to VLR_ULA_S_WAIT_HLR_UPD
 DVLR upd_hlr_vlr_fsm(LU:901700000010650){UPD_HLR_VLR_S_INIT}: Allocated
@@ -1236,7 +1236,7 @@ DREF VLR subscr MSISDN:42342 usage decreases to: 1
   llist_count(&net->ran_conns) == 1
 ran_conn_is_accepted() == false
 - MS sends TMSI Realloc Complete
-  MSC <--RAN_UTRAN_IU-- MS: GSM48_MT_MM_TMSI_REALL_COMPL
+  MSC <--UTRAN-Iu-- MS: GSM48_MT_MM_TMSI_REALL_COMPL
 DREF MSISDN:42342: MSC conn use + dtap == 1 (0x2: dtap)
 DRLL Dispatching 04.08 message GSM48_MT_MM_TMSI_REALL_COMPL (0x5:0x1b)
 DMM TMSI Reallocation Completed. Subscriber: MSISDN:42342
@@ -1257,7 +1257,7 @@ DMM RAN_conn(LU:901700000010650){RAN_CONN_S_ACCEPTED}: state_chg to RAN_CONN_S_R
 DREF MSISDN:42342: MSC conn use + release == 2 (0x102: dtap,release)
 DREF VLR subscr MSISDN:42342 usage increases to: 3
 DREF VLR subscr MSISDN:42342 usage decreases to: 2
-- Iu Release --RAN_UTRAN_IU--> MS
+- Iu Release --UTRAN-Iu--> MS
 DREF MSISDN:42342: MSC conn use - dtap == 1 (0x100: release)
   iu_release_sent == 1
 - LU was successful, and the conn has already been closed
@@ -1283,7 +1283,7 @@ DREF VLR subscr MSISDN:42342 usage increases to: 2
 DREF VLR subscr MSISDN:42342 usage decreases to: 1
 ---
 - after a while, a new conn sends a CM Service Request. VLR responds with Auth Req, 2nd auth vector
-  MSC <--RAN_UTRAN_IU-- MS: GSM48_MT_MM_CM_SERV_REQ
+  MSC <--UTRAN-Iu-- MS: GSM48_MT_MM_CM_SERV_REQ
   new conn
 DMM RAN_conn{RAN_CONN_S_NEW}: Allocated
 DREF unknown: MSC conn use + compl_l3 == 1 (0x1: compl_l3)
@@ -1318,7 +1318,7 @@ DMM RAN_conn(CM_SERVICE_REQ:901700000010650){RAN_CONN_S_AUTH_CIPH}: Awaiting res
 - needs auth, not yet accepted
 ran_conn_is_accepted() == false
 - MS sends Authen Response, VLR accepts and sends SecurityModeControl
-  MSC <--RAN_UTRAN_IU-- MS: GSM48_MT_MM_AUTH_RESP
+  MSC <--UTRAN-Iu-- MS: GSM48_MT_MM_AUTH_RESP
 DREF MSISDN:42342: MSC conn use + dtap == 1 (0x2: dtap)
 DRLL Dispatching 04.08 message GSM48_MT_MM_AUTH_RESP (0x5:0x14)
 DMM MSISDN:42342: MM UMTS AUTHENTICATION RESPONSE (res = 7db47cf7f81e4dc7)
@@ -1348,7 +1348,7 @@ DMM <- SECURITY MODE COMPLETE MSISDN:42342
 DVLR Process_Access_Request_VLR(CM_SERVICE_REQ:901700000010650){PR_ARQ_S_WAIT_CIPH}: Received Event PR_ARQ_E_CIPH_RES
 DVLR Process_Access_Request_VLR(CM_SERVICE_REQ:901700000010650){PR_ARQ_S_WAIT_CIPH}: _proc_arq_vlr_node2_post_ciph()
 DIUCS MSISDN:42342: tx CommonID 901700000010650
-- Iu Common ID --RAN_UTRAN_IU--> MS (IMSI=901700000010650)
+- Iu Common ID --UTRAN-Iu--> MS (IMSI=901700000010650)
 DVLR Process_Access_Request_VLR(CM_SERVICE_REQ:901700000010650){PR_ARQ_S_WAIT_CIPH}: _proc_arq_vlr_node2_post_vlr()
 DVLR Process_Access_Request_VLR(CM_SERVICE_REQ:901700000010650){PR_ARQ_S_WAIT_CIPH}: _proc_arq_vlr_post_pres()
 DVLR Process_Access_Request_VLR(CM_SERVICE_REQ:901700000010650){PR_ARQ_S_WAIT_CIPH}: _proc_arq_vlr_post_trace()
@@ -1364,7 +1364,7 @@ DMM RAN_conn(CM_SERVICE_REQ:901700000010650){RAN_CONN_S_ACCEPTED}: ran_conn_fsm_
 ---
 - a call is initiated
 - SETUP gets forwarded to MNCC
-  MSC <--RAN_UTRAN_IU-- MS: GSM48_MT_CC_SETUP
+  MSC <--UTRAN-Iu-- MS: GSM48_MT_CC_SETUP
 DREF MSISDN:42342: MSC conn use + dtap == 2 (0xa: dtap,cm_service)
 DRLL Dispatching 04.08 message GSM48_MT_CC_SETUP (0x3:0x5)
 DCC Unknown transaction ID 8, creating new trans.
@@ -1388,8 +1388,8 @@ DCC (sub 42342) stopping pending guard timer
 DCC (sub 42342) starting guard timer with 180 seconds
 DCC (ti 08 sub 42342) Received 'MNCC_CALL_PROC_REQ' from MNCC in state 1 (INITIATED)
 DCC (ti 08 sub MSISDN:42342) new state INITIATED -> MO_CALL_PROC
-DMSC msc_tx 2 bytes to MSISDN:42342 via RAN_UTRAN_IU
-- DTAP --RAN_UTRAN_IU--> MS: GSM48_MT_CC_CALL_PROC: 8302
+DMSC msc_tx 2 bytes to MSISDN:42342 via UTRAN-Iu
+- DTAP --UTRAN-Iu--> MS: GSM48_MT_CC_CALL_PROC: 8302
 - DTAP matches expected message
   MS <--Call Assignment-- MSC: subscr=MSISDN:42342 callref=0x80000002
 - But the other side's MSISDN could not be resolved, MNCC tells us to cancel
@@ -1399,15 +1399,15 @@ DCC (sub 42342) starting guard timer with 180 seconds
 DCC (ti 08 sub 42342) Received 'MNCC_REL_REQ' from MNCC in state 3 (MO_CALL_PROC)
 DCC starting timer T308 with 10 seconds
 DCC (ti 08 sub MSISDN:42342) new state MO_CALL_PROC -> RELEASE_REQ
-DMSC msc_tx 2 bytes to MSISDN:42342 via RAN_UTRAN_IU
-- DTAP --RAN_UTRAN_IU--> MS: GSM48_MT_CC_RELEASE: 832d
+DMSC msc_tx 2 bytes to MSISDN:42342 via UTRAN-Iu
+- DTAP --UTRAN-Iu--> MS: GSM48_MT_CC_RELEASE: 832d
 - DTAP matches expected message
 - Total time passed: 10.000023 s
 DCC starting timer T308 with 10 seconds
-DMSC msc_tx 2 bytes to MSISDN:42342 via RAN_UTRAN_IU
-- DTAP --RAN_UTRAN_IU--> MS: GSM48_MT_CC_RELEASE: 832d
+DMSC msc_tx 2 bytes to MSISDN:42342 via UTRAN-Iu
+- DTAP --UTRAN-Iu--> MS: GSM48_MT_CC_RELEASE: 832d
 - DTAP matches expected message
-  MSC <--RAN_UTRAN_IU-- MS: GSM48_MT_CC_RELEASE_COMPL
+  MSC <--UTRAN-Iu-- MS: GSM48_MT_CC_RELEASE_COMPL
 DREF MSISDN:42342: MSC conn use + dtap == 2 (0x12: dtap,trans_cc)
 DRLL Dispatching 04.08 message GSM48_MT_CC_RELEASE_COMPL (0x3:0x2a)
 DCC stopping pending timer T308
@@ -1426,7 +1426,7 @@ DMM RAN_conn(CM_SERVICE_REQ:901700000010650){RAN_CONN_S_COMMUNICATING}: state_ch
 DREF MSISDN:42342: MSC conn use + release == 1 (0x100: release)
 DREF VLR subscr MSISDN:42342 usage increases to: 3
 DREF VLR subscr MSISDN:42342 usage decreases to: 2
-- Iu Release --RAN_UTRAN_IU--> MS
+- Iu Release --UTRAN-Iu--> MS
 - RNC sends Iu Release Complete
 DREF MSISDN:42342: MSC conn use - release == 0 (0x0: )
 DMM RAN_conn(CM_SERVICE_REQ:901700000010650){RAN_CONN_S_RELEASING}: Received Event RAN_CONN_E_UNUSED
@@ -1450,7 +1450,7 @@ talloc_total_blocks(tall_bsc_ctx) == 13
 ===== test_call_mo_to_unknown_timeout
 - Total time passed: 0.000000 s
 - Location Update request causes a GSUP Send Auth Info request to HLR
-  MSC <--RAN_UTRAN_IU-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
+  MSC <--UTRAN-Iu-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
   new conn
 DMM RAN_conn{RAN_CONN_S_NEW}: Allocated
 DREF unknown: MSC conn use + compl_l3 == 1 (0x1: compl_l3)
@@ -1498,7 +1498,7 @@ DREF VLR subscr IMSI:901700000010650 usage decreases to: 1
   auth_request_sent == 1
   lu_result_sent == 0
 - MS sends Authen Response, VLR accepts and sends SecurityModeControl
-  MSC <--RAN_UTRAN_IU-- MS: GSM48_MT_MM_AUTH_RESP
+  MSC <--UTRAN-Iu-- MS: GSM48_MT_MM_AUTH_RESP
 DREF IMSI:901700000010650: MSC conn use + dtap == 1 (0x2: dtap)
 DRLL Dispatching 04.08 message GSM48_MT_MM_AUTH_RESP (0x5:0x14)
 DMM IMSI:901700000010650: MM UMTS AUTHENTICATION RESPONSE (res = e229c19e791f2e41)
@@ -1528,7 +1528,7 @@ DMM <- SECURITY MODE COMPLETE IMSI:901700000010650
 DVLR vlr_lu_fsm(LU:901700000010650){VLR_ULA_S_WAIT_CIPH}: Received Event VLR_ULA_E_CIPH_RES
 DVLR vlr_lu_fsm(LU:901700000010650){VLR_ULA_S_WAIT_CIPH}: vlr_loc_upd_post_ciph()
 DIUCS IMSI:901700000010650: tx CommonID 901700000010650
-- Iu Common ID --RAN_UTRAN_IU--> MS (IMSI=901700000010650)
+- Iu Common ID --UTRAN-Iu--> MS (IMSI=901700000010650)
 DVLR vlr_lu_fsm(LU:901700000010650){VLR_ULA_S_WAIT_CIPH}: vlr_loc_upd_node_4()
 DVLR vlr_lu_fsm(LU:901700000010650){VLR_ULA_S_WAIT_CIPH}: state_chg to VLR_ULA_S_WAIT_HLR_UPD
 DVLR upd_hlr_vlr_fsm(LU:901700000010650){UPD_HLR_VLR_S_INIT}: Allocated
@@ -1578,7 +1578,7 @@ DREF VLR subscr MSISDN:42342 usage decreases to: 1
   llist_count(&net->ran_conns) == 1
 ran_conn_is_accepted() == false
 - MS sends TMSI Realloc Complete
-  MSC <--RAN_UTRAN_IU-- MS: GSM48_MT_MM_TMSI_REALL_COMPL
+  MSC <--UTRAN-Iu-- MS: GSM48_MT_MM_TMSI_REALL_COMPL
 DREF MSISDN:42342: MSC conn use + dtap == 1 (0x2: dtap)
 DRLL Dispatching 04.08 message GSM48_MT_MM_TMSI_REALL_COMPL (0x5:0x1b)
 DMM TMSI Reallocation Completed. Subscriber: MSISDN:42342
@@ -1599,7 +1599,7 @@ DMM RAN_conn(LU:901700000010650){RAN_CONN_S_ACCEPTED}: state_chg to RAN_CONN_S_R
 DREF MSISDN:42342: MSC conn use + release == 2 (0x102: dtap,release)
 DREF VLR subscr MSISDN:42342 usage increases to: 3
 DREF VLR subscr MSISDN:42342 usage decreases to: 2
-- Iu Release --RAN_UTRAN_IU--> MS
+- Iu Release --UTRAN-Iu--> MS
 DREF MSISDN:42342: MSC conn use - dtap == 1 (0x100: release)
   iu_release_sent == 1
 - LU was successful, and the conn has already been closed
@@ -1625,7 +1625,7 @@ DREF VLR subscr MSISDN:42342 usage increases to: 2
 DREF VLR subscr MSISDN:42342 usage decreases to: 1
 ---
 - after a while, a new conn sends a CM Service Request. VLR responds with Auth Req, 2nd auth vector
-  MSC <--RAN_UTRAN_IU-- MS: GSM48_MT_MM_CM_SERV_REQ
+  MSC <--UTRAN-Iu-- MS: GSM48_MT_MM_CM_SERV_REQ
   new conn
 DMM RAN_conn{RAN_CONN_S_NEW}: Allocated
 DREF unknown: MSC conn use + compl_l3 == 1 (0x1: compl_l3)
@@ -1660,7 +1660,7 @@ DMM RAN_conn(CM_SERVICE_REQ:901700000010650){RAN_CONN_S_AUTH_CIPH}: Awaiting res
 - needs auth, not yet accepted
 ran_conn_is_accepted() == false
 - MS sends Authen Response, VLR accepts and sends SecurityModeControl
-  MSC <--RAN_UTRAN_IU-- MS: GSM48_MT_MM_AUTH_RESP
+  MSC <--UTRAN-Iu-- MS: GSM48_MT_MM_AUTH_RESP
 DREF MSISDN:42342: MSC conn use + dtap == 1 (0x2: dtap)
 DRLL Dispatching 04.08 message GSM48_MT_MM_AUTH_RESP (0x5:0x14)
 DMM MSISDN:42342: MM UMTS AUTHENTICATION RESPONSE (res = 7db47cf7f81e4dc7)
@@ -1690,7 +1690,7 @@ DMM <- SECURITY MODE COMPLETE MSISDN:42342
 DVLR Process_Access_Request_VLR(CM_SERVICE_REQ:901700000010650){PR_ARQ_S_WAIT_CIPH}: Received Event PR_ARQ_E_CIPH_RES
 DVLR Process_Access_Request_VLR(CM_SERVICE_REQ:901700000010650){PR_ARQ_S_WAIT_CIPH}: _proc_arq_vlr_node2_post_ciph()
 DIUCS MSISDN:42342: tx CommonID 901700000010650
-- Iu Common ID --RAN_UTRAN_IU--> MS (IMSI=901700000010650)
+- Iu Common ID --UTRAN-Iu--> MS (IMSI=901700000010650)
 DVLR Process_Access_Request_VLR(CM_SERVICE_REQ:901700000010650){PR_ARQ_S_WAIT_CIPH}: _proc_arq_vlr_node2_post_vlr()
 DVLR Process_Access_Request_VLR(CM_SERVICE_REQ:901700000010650){PR_ARQ_S_WAIT_CIPH}: _proc_arq_vlr_post_pres()
 DVLR Process_Access_Request_VLR(CM_SERVICE_REQ:901700000010650){PR_ARQ_S_WAIT_CIPH}: _proc_arq_vlr_post_trace()
@@ -1706,7 +1706,7 @@ DMM RAN_conn(CM_SERVICE_REQ:901700000010650){RAN_CONN_S_ACCEPTED}: ran_conn_fsm_
 ---
 - a call is initiated
 - SETUP gets forwarded to MNCC
-  MSC <--RAN_UTRAN_IU-- MS: GSM48_MT_CC_SETUP
+  MSC <--UTRAN-Iu-- MS: GSM48_MT_CC_SETUP
 DREF MSISDN:42342: MSC conn use + dtap == 2 (0xa: dtap,cm_service)
 DRLL Dispatching 04.08 message GSM48_MT_CC_SETUP (0x3:0x5)
 DCC Unknown transaction ID 8, creating new trans.
@@ -1730,8 +1730,8 @@ DCC (sub 42342) stopping pending guard timer
 DCC (sub 42342) starting guard timer with 180 seconds
 DCC (ti 08 sub 42342) Received 'MNCC_CALL_PROC_REQ' from MNCC in state 1 (INITIATED)
 DCC (ti 08 sub MSISDN:42342) new state INITIATED -> MO_CALL_PROC
-DMSC msc_tx 2 bytes to MSISDN:42342 via RAN_UTRAN_IU
-- DTAP --RAN_UTRAN_IU--> MS: GSM48_MT_CC_CALL_PROC: 8302
+DMSC msc_tx 2 bytes to MSISDN:42342 via UTRAN-Iu
+- DTAP --UTRAN-Iu--> MS: GSM48_MT_CC_CALL_PROC: 8302
 - DTAP matches expected message
   MS <--Call Assignment-- MSC: subscr=MSISDN:42342 callref=0x80000003
 - But the other side's MSISDN could not be resolved, MNCC tells us to cancel
@@ -1741,14 +1741,14 @@ DCC (sub 42342) starting guard timer with 180 seconds
 DCC (ti 08 sub 42342) Received 'MNCC_REL_REQ' from MNCC in state 3 (MO_CALL_PROC)
 DCC starting timer T308 with 10 seconds
 DCC (ti 08 sub MSISDN:42342) new state MO_CALL_PROC -> RELEASE_REQ
-DMSC msc_tx 2 bytes to MSISDN:42342 via RAN_UTRAN_IU
-- DTAP --RAN_UTRAN_IU--> MS: GSM48_MT_CC_RELEASE: 832d
+DMSC msc_tx 2 bytes to MSISDN:42342 via UTRAN-Iu
+- DTAP --UTRAN-Iu--> MS: GSM48_MT_CC_RELEASE: 832d
 - DTAP matches expected message
 - Despite our repeated CC Release Requests, the MS does not respond anymore
 - Total time passed: 10.000023 s
 DCC starting timer T308 with 10 seconds
-DMSC msc_tx 2 bytes to MSISDN:42342 via RAN_UTRAN_IU
-- DTAP --RAN_UTRAN_IU--> MS: GSM48_MT_CC_RELEASE: 832d
+DMSC msc_tx 2 bytes to MSISDN:42342 via UTRAN-Iu
+- DTAP --UTRAN-Iu--> MS: GSM48_MT_CC_RELEASE: 832d
 - DTAP matches expected message
 - The CC Release times out and we still properly clear the conn
 - Total time passed: 20.000046 s
@@ -1765,7 +1765,7 @@ DMM RAN_conn(CM_SERVICE_REQ:901700000010650){RAN_CONN_S_COMMUNICATING}: state_ch
 DREF MSISDN:42342: MSC conn use + release == 1 (0x100: release)
 DREF VLR subscr MSISDN:42342 usage increases to: 3
 DREF VLR subscr MSISDN:42342 usage decreases to: 2
-- Iu Release --RAN_UTRAN_IU--> MS
+- Iu Release --UTRAN-Iu--> MS
 - RNC sends Iu Release Complete
 DREF MSISDN:42342: MSC conn use - release == 0 (0x0: )
 DMM RAN_conn(CM_SERVICE_REQ:901700000010650){RAN_CONN_S_RELEASING}: Received Event RAN_CONN_E_UNUSED
