@@ -1659,8 +1659,6 @@ static void mncc_recv_rtp_sock(struct gsm_network *net, struct gsm_trans *trans,
 	uint32_t addr = inet_addr(trans->conn->rtp.local_addr_cn);
 	uint16_t port = trans->conn->rtp.local_port_cn;
 
-	LOGP(DMNCC, LOGL_ERROR, "RTP create for non-existing trans\n");
-
 	if (addr == INADDR_NONE) {
 		LOGP(DMNCC, LOGL_ERROR,
 		     "(subscriber:%s) external MNCC is signalling invalid IP-Address\n",
