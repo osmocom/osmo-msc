@@ -30,7 +30,7 @@ DMM RAN_conn{RAN_CONN_S_ACCEPTED}: state_chg to RAN_CONN_S_RELEASING
 DREF unknown: MSC conn use + release == 1 (0x100: release)
 DREF VLR subscr unknown usage increases to: 2
 DREF VLR subscr unknown usage decreases to: 1
-- BSSAP Clear --RAN_GERAN_A--> MS
+- BSSAP Clear --GERAN-A--> MS
   bssap_clear_sent == 1
 - BSS sends BSSMAP Clear Complete
 DREF unknown: MSC conn use - release == 0 (0x0: )
@@ -52,7 +52,7 @@ talloc_total_blocks(tall_bsc_ctx) == 13
 
 ===== test_cm_service_without_lu
 - CM Service Request without a prior Location Updating
-  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_CM_SERV_REQ
+  MSC <--GERAN-A-- MS: GSM48_MT_MM_CM_SERV_REQ
   new conn
 DMM RAN_conn{RAN_CONN_S_NEW}: Allocated
 DREF unknown: MSC conn use + compl_l3 == 1 (0x1: compl_l3)
@@ -70,7 +70,7 @@ DVLR Process_Access_Request_VLR(GERAN-A-0_unknown_CM_SERVICE_REQ){PR_ARQ_S_DONE}
 DMM RAN_conn(GERAN-A-0_unknown_CM_SERVICE_REQ){RAN_CONN_S_NEW}: Received Event RAN_CONN_E_CN_CLOSE
 DMM RAN_conn(GERAN-A-0_unknown_CM_SERVICE_REQ){RAN_CONN_S_NEW}: state_chg to RAN_CONN_S_RELEASING
 DREF unknown: MSC conn use + release == 2 (0x101: compl_l3,release)
-- BSSAP Clear --RAN_GERAN_A--> MS
+- BSSAP Clear --GERAN-A--> MS
 DRR 901700000004620: subscriber not allowed to do a CM Service Request
 DREF unknown: MSC conn use - compl_l3 == 1 (0x100: release)
   bssap_clear_sent == 1
@@ -95,7 +95,7 @@ talloc_total_blocks(tall_bsc_ctx) == 13
 
 ===== test_two_lu
 - Location Update request causes a GSUP LU request to HLR
-  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
+  MSC <--GERAN-A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
   new conn
 DMM RAN_conn{RAN_CONN_S_NEW}: Allocated
 DREF unknown: MSC conn use + compl_l3 == 1 (0x1: compl_l3)
@@ -188,7 +188,7 @@ DMM RAN_conn(GERAN-A-0_IMSI-901700000004620_MSISDN-46071_LU){RAN_CONN_S_ACCEPTED
 DREF IMSI-901700000004620_MSISDN-46071: MSC conn use + release == 1 (0x100: release)
 DREF VLR subscr IMSI-901700000004620_MSISDN-46071 usage increases to: 4
 DREF VLR subscr IMSI-901700000004620_MSISDN-46071 usage decreases to: 3
-- BSSAP Clear --RAN_GERAN_A--> MS
+- BSSAP Clear --GERAN-A--> MS
 DREF VLR subscr IMSI-901700000004620_MSISDN-46071 usage decreases to: 2
 <-- GSUP rx OSMO_GSUP_MSGT_UPDATE_LOCATION_RESULT: vlr_gsupc_read_cb() returns 0
   bssap_clear_sent == 1
@@ -212,7 +212,7 @@ DMM RAN_conn(GERAN-A-0_IMSI-901700000004620_MSISDN-46071_LU){RAN_CONN_S_RELEASED
 ---
 - verify that the MS can send another LU request
 - Location Update request causes a GSUP LU request to HLR
-  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
+  MSC <--GERAN-A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
   new conn
 DMM RAN_conn{RAN_CONN_S_NEW}: Allocated
 DREF unknown: MSC conn use + compl_l3 == 1 (0x1: compl_l3)
@@ -302,7 +302,7 @@ DMM RAN_conn(GERAN-A-0_IMSI-901700000004620_MSISDN-46071_LU){RAN_CONN_S_ACCEPTED
 DREF IMSI-901700000004620_MSISDN-46071: MSC conn use + release == 1 (0x100: release)
 DREF VLR subscr IMSI-901700000004620_MSISDN-46071 usage increases to: 4
 DREF VLR subscr IMSI-901700000004620_MSISDN-46071 usage decreases to: 3
-- BSSAP Clear --RAN_GERAN_A--> MS
+- BSSAP Clear --GERAN-A--> MS
 DREF VLR subscr IMSI-901700000004620_MSISDN-46071 usage decreases to: 2
 <-- GSUP rx OSMO_GSUP_MSGT_UPDATE_LOCATION_RESULT: vlr_gsupc_read_cb() returns 0
   bssap_clear_sent == 1
@@ -325,7 +325,7 @@ DMM RAN_conn(GERAN-A-0_IMSI-901700000004620_MSISDN-46071_LU){RAN_CONN_S_RELEASED
   llist_count(&net->ran_conns) == 0
 ---
 - subscriber detaches
-  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_IMSI_DETACH_IND
+  MSC <--GERAN-A-- MS: GSM48_MT_MM_IMSI_DETACH_IND
   new conn
 DMM RAN_conn{RAN_CONN_S_NEW}: Allocated
 DREF unknown: MSC conn use + compl_l3 == 1 (0x1: compl_l3)
@@ -341,7 +341,7 @@ DREF freeing VLR subscr IMSI-901700000004620_MSISDN-46071
 DMM RAN_conn{RAN_CONN_S_NEW}: Received Event RAN_CONN_E_CN_CLOSE
 DMM RAN_conn{RAN_CONN_S_NEW}: state_chg to RAN_CONN_S_RELEASING
 DREF unknown: MSC conn use + release == 2 (0x101: compl_l3,release)
-- BSSAP Clear --RAN_GERAN_A--> MS
+- BSSAP Clear --GERAN-A--> MS
 DREF unknown: MSC conn use - compl_l3 == 1 (0x100: release)
   bssap_clear_sent == 1
 - BSS sends BSSMAP Clear Complete
@@ -360,7 +360,7 @@ talloc_total_blocks(tall_bsc_ctx) == 13
 
 ===== test_lu_unknown_tmsi
 - Location Update request with unknown TMSI sends ID Request for IMSI
-  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
+  MSC <--GERAN-A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
   new conn
 DMM RAN_conn{RAN_CONN_S_NEW}: Allocated
 DREF unknown: MSC conn use + compl_l3 == 1 (0x1: compl_l3)
@@ -379,8 +379,8 @@ DMM RAN_conn(GERAN-A-0_TMSI-0x23422342_LU){RAN_CONN_S_NEW}: Updated ID
 DREF VLR subscr TMSI-0x23422342 usage decreases to: 1
 DVLR vlr_lu_fsm(GERAN-A-0_TMSI-0x23422342_LU){VLR_ULA_S_IDLE}: vlr_loc_upd_want_imsi()
 DVLR vlr_lu_fsm(GERAN-A-0_TMSI-0x23422342_LU){VLR_ULA_S_IDLE}: state_chg to VLR_ULA_S_WAIT_IMSI
-DMSC msc_tx 3 bytes to TMSI-0x23422342 via RAN_GERAN_A
-- DTAP --RAN_GERAN_A--> MS: GSM48_MT_MM_ID_REQ: 051801
+DMSC msc_tx 3 bytes to TMSI-0x23422342 via GERAN-A
+- DTAP --GERAN-A--> MS: GSM48_MT_MM_ID_REQ: 051801
 - DTAP matches expected message
 DMM RAN_conn(GERAN-A-0_TMSI-0x23422342_LU){RAN_CONN_S_NEW}: Received Event RAN_CONN_E_COMPLETE_LAYER_3
 DMM RAN_conn(GERAN-A-0_TMSI-0x23422342_LU){RAN_CONN_S_NEW}: state_chg to RAN_CONN_S_AUTH_CIPH
@@ -399,7 +399,7 @@ DRLL subscr TMSI-0x23422342: Message not permitted for initial conn: GSM48_MT_RR
 DRLL Dispatching 04.08 message SMS:0x01 (0x9:0x1)
 DRLL subscr TMSI-0x23422342: Message not permitted for initial conn: SMS:0x01
 - MS tells us the IMSI, causes a GSUP LU request to HLR
-  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_ID_RESP
+  MSC <--GERAN-A-- MS: GSM48_MT_MM_ID_RESP
 DREF TMSI-0x23422342: MSC conn use + dtap == 1 (0x2: dtap)
 DRLL Dispatching 04.08 message GSM48_MT_MM_ID_RESP (0x5:0x19)
 DMM IDENTITY RESPONSE: MI(IMSI)=901700000004620
@@ -479,7 +479,7 @@ DMM RAN_conn(GERAN-A-0_IMSI-901700000004620_MSISDN-46071_TMSI-0x23422342_LU){RAN
 DREF IMSI-901700000004620_MSISDN-46071_TMSI-0x23422342: MSC conn use + release == 1 (0x100: release)
 DREF VLR subscr IMSI-901700000004620_MSISDN-46071_TMSI-0x23422342 usage increases to: 4
 DREF VLR subscr IMSI-901700000004620_MSISDN-46071_TMSI-0x23422342 usage decreases to: 3
-- BSSAP Clear --RAN_GERAN_A--> MS
+- BSSAP Clear --GERAN-A--> MS
 DREF VLR subscr IMSI-901700000004620_MSISDN-46071_TMSI-0x23422342 usage decreases to: 2
 <-- GSUP rx OSMO_GSUP_MSGT_UPDATE_LOCATION_RESULT: vlr_gsupc_read_cb() returns 0
   bssap_clear_sent == 1

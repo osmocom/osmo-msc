@@ -29,7 +29,7 @@ static void test_no_authen()
 	const char *imsi = "901700000004620";
 	
 	/* No auth only works on GERAN */
-	rx_from_ran = RAN_GERAN_A;
+	rx_from_ran = OSMO_RAT_GERAN_A;
 
 	comment_start();
 
@@ -73,8 +73,8 @@ static void test_no_authen()
 	EXPECT_ACCEPTED(true);
 
 	/* Release connection */
-	expect_bssap_clear(RAN_GERAN_A);
-	conn_conclude_cm_service_req(g_conn, RAN_GERAN_A);
+	expect_bssap_clear(OSMO_RAT_GERAN_A);
+	conn_conclude_cm_service_req(g_conn, OSMO_RAT_GERAN_A);
 
 	btw("all requests serviced, conn has been released");
 	bss_sends_clear_complete();
@@ -169,7 +169,7 @@ static void test_no_authen_tmsi()
 	struct vlr_subscr *vsub;
 	const char *imsi = "901700000004620";
 
-	rx_from_ran = RAN_GERAN_A;
+	rx_from_ran = OSMO_RAT_GERAN_A;
 
 	comment_start();
 
@@ -236,8 +236,8 @@ static void test_no_authen_tmsi()
 	EXPECT_ACCEPTED(true);
 
 	/* Release connection */
-	expect_bssap_clear(RAN_GERAN_A);
-	conn_conclude_cm_service_req(g_conn, RAN_GERAN_A);
+	expect_bssap_clear(OSMO_RAT_GERAN_A);
+	conn_conclude_cm_service_req(g_conn, OSMO_RAT_GERAN_A);
 
 	btw("all requests serviced, conn has been released");
 	bss_sends_clear_complete();
@@ -392,7 +392,7 @@ static void test_no_authen_imei()
 	struct vlr_subscr *vsub;
 	const char *imsi = "901700000004620";
 
-	rx_from_ran = RAN_GERAN_A;
+	rx_from_ran = OSMO_RAT_GERAN_A;
 
 	comment_start();
 
@@ -462,7 +462,7 @@ static void test_no_authen_tmsi_imei()
 	struct vlr_subscr *vsub;
 	const char *imsi = "901700000004620";
 
-	rx_from_ran = RAN_GERAN_A;
+	rx_from_ran = OSMO_RAT_GERAN_A;
 
 	comment_start();
 
@@ -542,7 +542,7 @@ static void test_no_authen_imeisv()
 	const char *imsi = "901700000004620";
 	
 	/* No auth only works on GERAN */
-	rx_from_ran = RAN_GERAN_A;
+	rx_from_ran = OSMO_RAT_GERAN_A;
 
 	comment_start();
 
@@ -604,7 +604,7 @@ static void test_no_authen_imeisv_imei()
 	struct vlr_subscr *vsub;
 	const char *imsi = "901700000004620";
 
-	rx_from_ran = RAN_GERAN_A;
+	rx_from_ran = OSMO_RAT_GERAN_A;
 
 	comment_start();
 
@@ -684,7 +684,7 @@ static void test_no_authen_imeisv_tmsi()
 	struct vlr_subscr *vsub;
 	const char *imsi = "901700000004620";
 
-	rx_from_ran = RAN_GERAN_A;
+	rx_from_ran = OSMO_RAT_GERAN_A;
 
 	comment_start();
 
@@ -825,7 +825,7 @@ static void test_no_authen_imeisv_tmsi_imei()
 	struct vlr_subscr *vsub;
 	const char *imsi = "901700000004620";
 
-	rx_from_ran = RAN_GERAN_A;
+	rx_from_ran = OSMO_RAT_GERAN_A;
 
 	comment_start();
 
@@ -918,7 +918,7 @@ static void test_no_authen_subscr_expire()
 	const char *imsi = "901700000004620";
 
 	/* No auth only works on GERAN */
-	rx_from_ran = RAN_GERAN_A;
+	rx_from_ran = OSMO_RAT_GERAN_A;
 
 	comment_start();
 

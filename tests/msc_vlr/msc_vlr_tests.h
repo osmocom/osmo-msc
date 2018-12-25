@@ -53,7 +53,7 @@ extern struct gsm_network *net;
 extern struct gsm_bts *the_bts;
 extern void *msgb_ctx;
 
-extern enum ran_type rx_from_ran;
+extern enum osmo_rat_type rx_from_ran;
 
 extern const char *gsup_tx_expected;
 extern bool gsup_tx_confirmed;
@@ -125,13 +125,13 @@ static inline void expect_bssap_clear()
 	bssap_clear_sent = false;
 }
 
-static inline void expect_release_clear(enum ran_type via_ran)
+static inline void expect_release_clear(enum osmo_rat_type via_ran)
 {
 	switch (via_ran) {
-	case RAN_GERAN_A:
+	case OSMO_RAT_GERAN_A:
 		expect_bssap_clear();
 		return;
-	case RAN_UTRAN_IU:
+	case OSMO_RAT_UTRAN_IU:
 		expect_iu_release();
 		return;
 	default:
@@ -153,7 +153,7 @@ struct msgb *msgb_from_hex(const char *label, uint16_t size, const char *hex);
 void clear_vlr();
 bool conn_exists(const struct ran_conn *conn);
 void conn_conclude_cm_service_req(struct ran_conn *conn,
-				  enum ran_type via_ran);
+				  enum osmo_rat_type via_ran);
 
 void dtap_expect_tx(const char *hex);
 void dtap_expect_tx_ussd(char *ussd_text);
@@ -234,10 +234,10 @@ extern const struct timeval fake_time_start_time;
 
 #define ASSERT_RELEASE_CLEAR(via_ran) \
 	switch (via_ran) { \
-	case RAN_GERAN_A: \
+	case OSMO_RAT_GERAN_A: \
 		VERBOSE_ASSERT(bssap_clear_sent, == true, "%d"); \
 		break; \
-	case RAN_UTRAN_IU: \
+	case OSMO_RAT_UTRAN_IU: \
 		VERBOSE_ASSERT(iu_release_sent, == true, "%d"); \
 		break; \
 	default: \
@@ -245,13 +245,13 @@ extern const struct timeval fake_time_start_time;
 		break; \
 	}
 
-static inline void bss_rnc_sends_release_clear_complete(enum ran_type via_ran)
+static inline void bss_rnc_sends_release_clear_complete(enum osmo_rat_type via_ran)
 {
 	switch (via_ran) {
-	case RAN_GERAN_A:
+	case OSMO_RAT_GERAN_A:
 		bss_sends_clear_complete();
 		return;
-	case RAN_UTRAN_IU:
+	case OSMO_RAT_UTRAN_IU:
 		rnc_sends_release_complete();
 		return;
 	default:

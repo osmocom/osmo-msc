@@ -91,7 +91,7 @@ static int iucs_rx_rab_assign(struct ran_conn *conn, RANAP_RAB_SetupOrModifiedIt
 int iucs_rx_sec_mode_compl(struct ran_conn *conn,
 			   RANAP_SecurityModeCompleteIEs_t *ies)
 {
-	OSMO_ASSERT(conn->via_ran == RAN_UTRAN_IU);
+	OSMO_ASSERT(conn->via_ran == OSMO_RAT_UTRAN_IU);
 
 	/* TODO evalute ies */
 

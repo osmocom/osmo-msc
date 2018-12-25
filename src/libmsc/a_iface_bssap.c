@@ -53,7 +53,7 @@ static struct ran_conn *ran_conn_allocate_a(const struct a_conn_info *a_conn_inf
 
 	LOGP(DMSC, LOGL_DEBUG, "Allocating A-Interface RAN conn: lac %i, conn_id %i\n", lac, conn_id);
 
-	conn = ran_conn_alloc(network, RAN_GERAN_A, lac);
+	conn = ran_conn_alloc(network, OSMO_RAT_GERAN_A, lac);
 	if (!conn)
 		return NULL;
 
@@ -83,7 +83,7 @@ static struct ran_conn *ran_conn_lookup_a(const struct gsm_network *network, int
 	/* log_subscribers(network); */
 
 	llist_for_each_entry(conn, &network->ran_conns, entry) {
-		if (conn->via_ran == RAN_GERAN_A && conn->a.conn_id == conn_id) {
+		if (conn->via_ran == OSMO_RAT_GERAN_A && conn->a.conn_id == conn_id) {
 			LOGPCONN(conn, LOGL_DEBUG, "Found A subscriber for conn_id %i\n", conn_id);
 			return conn;
 		}

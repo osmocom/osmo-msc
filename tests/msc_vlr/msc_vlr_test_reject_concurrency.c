@@ -315,8 +315,8 @@ static void test_reject_paging_resp_during_cm()
 	BTW("The original CM Service Request can conclude");
 
 	/* Release connection */
-	expect_bssap_clear(RAN_GERAN_A);
-	conn_conclude_cm_service_req(g_conn, RAN_GERAN_A);
+	expect_bssap_clear(OSMO_RAT_GERAN_A);
+	conn_conclude_cm_service_req(g_conn, OSMO_RAT_GERAN_A);
 
 	btw("all requests serviced, conn has been released");
 	bss_sends_clear_complete();

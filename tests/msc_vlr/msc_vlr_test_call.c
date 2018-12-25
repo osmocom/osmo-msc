@@ -45,7 +45,7 @@ static void standard_lu()
 
 	net->authentication_required = true;
 	net->vlr->cfg.assign_tmsi = true;
-	rx_from_ran = RAN_UTRAN_IU;
+	rx_from_ran = OSMO_RAT_UTRAN_IU;
 
 	btw("Location Update request causes a GSUP Send Auth Info request to HLR");
 	lu_result_sent = RES_NONE;

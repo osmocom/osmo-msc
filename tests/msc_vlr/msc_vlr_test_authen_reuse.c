@@ -25,7 +25,7 @@
 
 #include "msc_vlr_tests.h"
 
-static void _test_auth_reuse(enum ran_type via_ran,
+static void _test_auth_reuse(enum osmo_rat_type via_ran,
 			     int set_max_reuse_count,
 			     int loop_requests_without_hlr,
 			     bool final_request_with_hlr)
@@ -83,7 +83,7 @@ static void _test_auth_reuse(enum ran_type via_ran,
 	VERBOSE_ASSERT(auth_request_sent, == true, "%d");
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
-	if (via_ran == RAN_GERAN_A) {
+	if (via_ran == OSMO_RAT_GERAN_A) {
 		btw("MS sends Authen Response, VLR accepts and sends GSUP LU Req to HLR");
 		gsup_expect_tx("04010809710000000156f0280102");
 		ms_sends_msg("0554" "e229c19e" "2104" "791f2e41");
@@ -159,7 +159,7 @@ static void _test_auth_reuse(enum ran_type via_ran,
 		VERBOSE_ASSERT(cm_service_result_sent, == RES_NONE, "%d");
 		VERBOSE_ASSERT(auth_request_sent, == true, "%d");
 
-		if (via_ran == RAN_GERAN_A) {
+		if (via_ran == OSMO_RAT_GERAN_A) {
 			btw("MS sends Authen Response, VLR accepts with a CM Service Accept");
 			gsup_expect_tx(NULL);
 			ms_sends_msg("0554" "e229c19e" "2104" "791f2e41");
@@ -231,7 +231,7 @@ static void _test_auth_reuse(enum ran_type via_ran,
 		VERBOSE_ASSERT(auth_request_sent, == true, "%d");
 		VERBOSE_ASSERT(cm_service_result_sent, == RES_NONE, "%d");
 
-		if (via_ran == RAN_GERAN_A) {
+		if (via_ran == OSMO_RAT_GERAN_A) {
 			btw("MS sends Authen Response, VLR accepts with a CM Service Accept");
 			gsup_expect_tx(NULL);
 			ms_sends_msg("0554" "7db47cf7" "2104" "f81e4dc7"); /* 2nd vector's res, s.a. */
@@ -272,42 +272,42 @@ static void _test_auth_reuse(enum ran_type via_ran,
 static void test_auth_use_twice_geran()
 {
 	comment_start();
-	_test_auth_reuse(RAN_GERAN_A, 1, 1, true);
+	_test_auth_reuse(OSMO_RAT_GERAN_A, 1, 1, true);
 	comment_end();
 }
 
 static void test_auth_use_twice_utran()
 {
 	comment_start();
-	_test_auth_reuse(RAN_UTRAN_IU, 1, 1, true);
+	_test_auth_reuse(OSMO_RAT_UTRAN_IU, 1, 1, true);
 	comment_end();
 }
 
 static void test_auth_use_infinitely_geran()
 {
 	comment_start();
-	_test_auth_reuse(RAN_GERAN_A, -1, 3, false);
+	_test_auth_reuse(OSMO_RAT_GERAN_A, -1, 3, false);
 	comment_end();
 }
 
 static void test_auth_use_infinitely_utran()
 {
 	comment_start();
-	_test_auth_reuse(RAN_UTRAN_IU, -1, 3, false);
+	_test_auth_reuse(OSMO_RAT_UTRAN_IU, -1, 3, false);
 	comment_end();
 }
 
 static void test_no_auth_reuse_geran()
 {
 	comment_start();
-	_test_auth_reuse(RAN_GERAN_A, 0, 0, true);
+	_test_auth_reuse(OSMO_RAT_GERAN_A, 0, 0, true);
 	comment_end();
 }
 
 static void test_no_auth_reuse_utran()
 {
 	comment_start();
-	_test_auth_reuse(RAN_UTRAN_IU, 0, 0, true);
+	_test_auth_reuse(OSMO_RAT_UTRAN_IU, 0, 0, true);
 	comment_end();
 }
 

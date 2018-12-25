@@ -314,7 +314,7 @@ static void fsm_crcx_ran_cb(struct osmo_fsm_inst *fi, uint32_t event, void *data
 	 * trick the hNodeB into doing the IuUP negotiation with itself.
 	 * This is a hack we need because osmo-mgw does not support IuUP yet, see OS#2459. */
 #ifdef BUILD_IU
-	if (conn->via_ran == RAN_UTRAN_IU)
+	if (conn->via_ran == OSMO_RAT_UTRAN_IU)
 		mgcp_msg.conn_mode = MGCP_CONN_LOOPBACK;
 #endif
 
@@ -504,7 +504,7 @@ static void fsm_crcx_compl(struct osmo_fsm_inst *fi, uint32_t event, void *data)
 	}
 
 	/* Forward assignment request to A/RANAP */
-	if (conn->via_ran == RAN_UTRAN_IU) {
+	if (conn->via_ran == OSMO_RAT_UTRAN_IU) {
 #ifdef BUILD_IU
 		/* Assign a voice channel via RANAP on 3G */
 		if (iu_rab_act_cs(trans))
@@ -513,7 +513,7 @@ static void fsm_crcx_compl(struct osmo_fsm_inst *fi, uint32_t event, void *data)
 		LOGPFSML(fi, LOGL_ERROR, "Cannot send Iu RAB Assignment: built without Iu support\n");
 		goto error;
 #endif
-	} else if (conn->via_ran == RAN_GERAN_A) {
+	} else if (conn->via_ran == OSMO_RAT_GERAN_A) {
 		/* Assign a voice channel via A on 2G */
 		if (a_iface_tx_assignment(trans))
 			goto error;
@@ -1003,7 +1003,7 @@ int msc_mgcp_call_assignment(struct gsm_trans *trans)
 #ifdef BUILD_IU
 	/* FIXME: HACK. where to scope the RAB Id? At the conn / subscriber / ranap_ue_conn_ctx? */
 	static uint8_t next_iu_rab_id = 1;
-	if (conn->via_ran == RAN_UTRAN_IU)
+	if (conn->via_ran == OSMO_RAT_UTRAN_IU)
 		conn->iu.rab_id = next_iu_rab_id++;
 #endif
 

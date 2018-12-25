@@ -544,7 +544,7 @@ static void vty_dump_one_conn(struct vty *vty, const struct ran_conn *conn)
 	vty_out(vty, "%08x %22s %3s %5u %3u %08x %c /%1u %27s %s",
 		conn->a.conn_id,
 		conn->vsub ? vlr_subscr_name(conn->vsub) : "-",
-		conn->via_ran == RAN_UTRAN_IU ? "Iu" : "A",
+		conn->via_ran == OSMO_RAT_UTRAN_IU ? "Iu" : "A",
 		conn->lac,
 		conn->use_count,
 		conn->use_tokens,
@@ -633,7 +633,7 @@ static void subscr_dump_full_vty(struct vty *vty, struct vlr_subscr *vsub)
 	vty_out(vty, "    LAC: %d/0x%x%s",
 		vsub->cgi.lai.lac, vsub->cgi.lai.lac, VTY_NEWLINE);
 	vty_out(vty, "    RAN: %s%s",
-		ran_type_name(vsub->cs.attached_via_ran), VTY_NEWLINE);
+		osmo_rat_type_name(vsub->cs.attached_via_ran), VTY_NEWLINE);
 	vty_out(vty, "    IMSI: %s%s", vsub->imsi, VTY_NEWLINE);
 	if (vsub->tmsi != GSM_RESERVED_TMSI)
 		vty_out(vty, "    TMSI: %08X%s", vsub->tmsi,

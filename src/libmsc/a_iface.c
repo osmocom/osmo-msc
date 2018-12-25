@@ -623,7 +623,7 @@ void a_clear_all(struct osmo_sccp_user *scu, const struct osmo_sccp_addr *bsc_ad
 	llist_for_each_entry_safe(conn, conn_temp, &network->ran_conns, entry) {
 		/* Clear only A connections and connections that actually
 		 * belong to the specified BSC */
-		if (conn->via_ran == RAN_GERAN_A && memcmp(bsc_addr, &conn->a.bsc_addr, sizeof(conn->a.bsc_addr)) == 0) {
+		if (conn->via_ran == OSMO_RAT_GERAN_A && memcmp(bsc_addr, &conn->a.bsc_addr, sizeof(conn->a.bsc_addr)) == 0) {
 			uint32_t conn_id = conn->a.conn_id;
 			LOGPCONN(conn, LOGL_NOTICE, "Dropping orphaned RAN connection\n");
 			/* This call will/may talloc_free(conn), so we must save conn_id above */

@@ -3,7 +3,7 @@ talloc_total_blocks(tall_bsc_ctx) == 13
 
 ===== test_reject_2nd_conn
 - Location Update Request on one connection
-  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
+  MSC <--GERAN-A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
   new conn
 DMM RAN_conn{RAN_CONN_S_NEW}: Allocated
 DREF unknown: MSC conn use + compl_l3 == 1 (0x1: compl_l3)
@@ -40,7 +40,7 @@ DMM RAN_conn(GERAN-A-0_IMSI-901700000004620_LU){RAN_CONN_S_AUTH_CIPH}: Awaiting 
   lu_result_sent == 0
   llist_count(&net->ran_conns) == 1
 - Another Location Update Request from the same subscriber on another connection is rejected
-  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
+  MSC <--GERAN-A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
   new conn
 DMM RAN_conn{RAN_CONN_S_NEW}: Allocated
 DREF unknown: MSC conn use + compl_l3 == 1 (0x1: compl_l3)
@@ -59,7 +59,7 @@ DVLR vlr_lu_fsm(GERAN-A-0_unknown_LU){VLR_ULA_S_IDLE}: state_chg to VLR_ULA_S_DO
 DMM RAN_conn(GERAN-A-0_unknown_LU){RAN_CONN_S_NEW}: Received Event RAN_CONN_E_CN_CLOSE
 DMM RAN_conn(GERAN-A-0_unknown_LU){RAN_CONN_S_NEW}: state_chg to RAN_CONN_S_RELEASING
 DREF unknown: MSC conn use + release == 2 (0x101: compl_l3,release)
-- BSSAP Clear --RAN_GERAN_A--> MS
+- BSSAP Clear --GERAN-A--> MS
 DREF VLR subscr IMSI-901700000004620 usage decreases to: 1
 DRR 901700000004620: internal error during Location Updating attempt
 DREF unknown: MSC conn use - compl_l3 == 1 (0x100: release)
@@ -127,7 +127,7 @@ DMM RAN_conn(GERAN-A-0_IMSI-901700000004620_MSISDN-46071_LU){RAN_CONN_S_ACCEPTED
 DREF IMSI-901700000004620_MSISDN-46071: MSC conn use + release == 1 (0x100: release)
 DREF VLR subscr IMSI-901700000004620_MSISDN-46071 usage increases to: 4
 DREF VLR subscr IMSI-901700000004620_MSISDN-46071 usage decreases to: 3
-- BSSAP Clear --RAN_GERAN_A--> MS
+- BSSAP Clear --GERAN-A--> MS
 DREF VLR subscr IMSI-901700000004620_MSISDN-46071 usage decreases to: 2
 <-- GSUP rx OSMO_GSUP_MSGT_UPDATE_LOCATION_RESULT: vlr_gsupc_read_cb() returns 0
   bssap_clear_sent == 1
@@ -156,7 +156,7 @@ talloc_total_blocks(tall_bsc_ctx) == 13
 
 ===== test_reject_lu_during_lu
 - Location Update Request
-  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
+  MSC <--GERAN-A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
   new conn
 DMM RAN_conn{RAN_CONN_S_NEW}: Allocated
 DREF unknown: MSC conn use + compl_l3 == 1 (0x1: compl_l3)
@@ -194,7 +194,7 @@ DMM RAN_conn(GERAN-A-0_IMSI-901700000004620_LU){RAN_CONN_S_AUTH_CIPH}: Awaiting 
   llist_count(&net->ran_conns) == 1
 ---
 - Another Location Update Request from the same subscriber on the same conn is dropped silently
-  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
+  MSC <--GERAN-A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
 DREF IMSI-901700000004620: MSC conn use + dtap == 1 (0x2: dtap)
 DRLL Dispatching 04.08 message GSM48_MT_MM_LOC_UPD_REQUEST (0x5:0x8)
 DMM Cannot accept another LU, conn already busy establishing authenticity; extraneous LOCATION UPDATING REQUEST: MI(IMSI)=901700000004620 type=IMSI ATTACH
@@ -251,7 +251,7 @@ DMM RAN_conn(GERAN-A-0_IMSI-901700000004620_MSISDN-46071_LU){RAN_CONN_S_ACCEPTED
 DREF IMSI-901700000004620_MSISDN-46071: MSC conn use + release == 1 (0x100: release)
 DREF VLR subscr IMSI-901700000004620_MSISDN-46071 usage increases to: 4
 DREF VLR subscr IMSI-901700000004620_MSISDN-46071 usage decreases to: 3
-- BSSAP Clear --RAN_GERAN_A--> MS
+- BSSAP Clear --GERAN-A--> MS
 DREF VLR subscr IMSI-901700000004620_MSISDN-46071 usage decreases to: 2
 <-- GSUP rx OSMO_GSUP_MSGT_UPDATE_LOCATION_RESULT: vlr_gsupc_read_cb() returns 0
   bssap_clear_sent == 1
@@ -280,7 +280,7 @@ talloc_total_blocks(tall_bsc_ctx) == 13
 
 ===== test_reject_cm_during_lu
 - Location Update Request
-  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
+  MSC <--GERAN-A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
   new conn
 DMM RAN_conn{RAN_CONN_S_NEW}: Allocated
 DREF unknown: MSC conn use + compl_l3 == 1 (0x1: compl_l3)
@@ -318,14 +318,14 @@ DMM RAN_conn(GERAN-A-0_IMSI-901700000004620_LU){RAN_CONN_S_AUTH_CIPH}: Awaiting 
   llist_count(&net->ran_conns) == 1
 ---
 - A CM Service Request in the middle of a LU is rejected
-  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_CM_SERV_REQ
+  MSC <--GERAN-A-- MS: GSM48_MT_MM_CM_SERV_REQ
 DREF IMSI-901700000004620: MSC conn use + dtap == 1 (0x2: dtap)
 DRLL Dispatching 04.08 message GSM48_MT_MM_CM_SERV_REQ (0x5:0x24)
 DMM <- CM SERVICE REQUEST serv_type=0x08 MI(IMSI)=901700000004620
 DMM Cannot accept CM Service Request, conn already busy establishing authenticity
 DMM -> CM SERVICE Reject cause: 22
-DMSC msc_tx 3 bytes to IMSI-901700000004620 via RAN_GERAN_A
-- DTAP --RAN_GERAN_A--> MS: GSM48_MT_MM_CM_SERV_REJ: 052216
+DMSC msc_tx 3 bytes to IMSI-901700000004620 via GERAN-A
+- DTAP --GERAN-A--> MS: GSM48_MT_MM_CM_SERV_REJ: 052216
 - DTAP matches expected message
 DREF IMSI-901700000004620: MSC conn use - dtap == 0 (0x0: )
 DMM RAN_conn(GERAN-A-0_IMSI-901700000004620_LU){RAN_CONN_S_AUTH_CIPH}: Received Event RAN_CONN_E_UNUSED
@@ -382,7 +382,7 @@ DMM RAN_conn(GERAN-A-0_IMSI-901700000004620_MSISDN-46071_LU){RAN_CONN_S_ACCEPTED
 DREF IMSI-901700000004620_MSISDN-46071: MSC conn use + release == 1 (0x100: release)
 DREF VLR subscr IMSI-901700000004620_MSISDN-46071 usage increases to: 4
 DREF VLR subscr IMSI-901700000004620_MSISDN-46071 usage decreases to: 3
-- BSSAP Clear --RAN_GERAN_A--> MS
+- BSSAP Clear --GERAN-A--> MS
 DREF VLR subscr IMSI-901700000004620_MSISDN-46071 usage decreases to: 2
 <-- GSUP rx OSMO_GSUP_MSGT_UPDATE_LOCATION_RESULT: vlr_gsupc_read_cb() returns 0
   bssap_clear_sent == 1
@@ -411,7 +411,7 @@ talloc_total_blocks(tall_bsc_ctx) == 13
 
 ===== test_reject_paging_resp_during_lu
 - Location Update Request
-  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
+  MSC <--GERAN-A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
   new conn
 DMM RAN_conn{RAN_CONN_S_NEW}: Allocated
 DREF unknown: MSC conn use + compl_l3 == 1 (0x1: compl_l3)
@@ -449,7 +449,7 @@ DMM RAN_conn(GERAN-A-0_IMSI-901700000004620_LU){RAN_CONN_S_AUTH_CIPH}: Awaiting 
   llist_count(&net->ran_conns) == 1
 ---
 - An erratic Paging Response is dropped silently
-  MSC <--RAN_GERAN_A-- MS: GSM48_MT_RR_PAG_RESP
+  MSC <--GERAN-A-- MS: GSM48_MT_RR_PAG_RESP
 DREF IMSI-901700000004620: MSC conn use + dtap == 1 (0x2: dtap)
 DRLL Dispatching 04.08 message GSM48_MT_RR_PAG_RESP (0x6:0x27)
 DMM Ignoring Paging Response, conn already busy establishing authenticity
@@ -506,7 +506,7 @@ DMM RAN_conn(GERAN-A-0_IMSI-901700000004620_MSISDN-46071_LU){RAN_CONN_S_ACCEPTED
 DREF IMSI-901700000004620_MSISDN-46071: MSC conn use + release == 1 (0x100: release)
 DREF VLR subscr IMSI-901700000004620_MSISDN-46071 usage increases to: 4
 DREF VLR subscr IMSI-901700000004620_MSISDN-46071 usage decreases to: 3
-- BSSAP Clear --RAN_GERAN_A--> MS
+- BSSAP Clear --GERAN-A--> MS
 DREF VLR subscr IMSI-901700000004620_MSISDN-46071 usage decreases to: 2
 <-- GSUP rx OSMO_GSUP_MSGT_UPDATE_LOCATION_RESULT: vlr_gsupc_read_cb() returns 0
   bssap_clear_sent == 1
@@ -537,7 +537,7 @@ talloc_total_blocks(tall_bsc_ctx) == 13
 ---
 - Subscriber does a normal LU
 - Location Update Request
-  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
+  MSC <--GERAN-A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
   new conn
 DMM RAN_conn{RAN_CONN_S_NEW}: Allocated
 DREF unknown: MSC conn use + compl_l3 == 1 (0x1: compl_l3)
@@ -619,7 +619,7 @@ DMM RAN_conn(GERAN-A-0_IMSI-901700000004620_MSISDN-46071_LU){RAN_CONN_S_ACCEPTED
 DREF IMSI-901700000004620_MSISDN-46071: MSC conn use + release == 1 (0x100: release)
 DREF VLR subscr IMSI-901700000004620_MSISDN-46071 usage increases to: 4
 DREF VLR subscr IMSI-901700000004620_MSISDN-46071 usage decreases to: 3
-- BSSAP Clear --RAN_GERAN_A--> MS
+- BSSAP Clear --GERAN-A--> MS
 DREF VLR subscr IMSI-901700000004620_MSISDN-46071 usage decreases to: 2
 <-- GSUP rx OSMO_GSUP_MSGT_UPDATE_LOCATION_RESULT: vlr_gsupc_read_cb() returns 0
   bssap_clear_sent == 1
@@ -642,7 +642,7 @@ DMM RAN_conn(GERAN-A-0_IMSI-901700000004620_MSISDN-46071_LU){RAN_CONN_S_RELEASED
   llist_count(&net->ran_conns) == 0
 ---
 - Subscriber does a normal CM Service Request
-  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_CM_SERV_REQ
+  MSC <--GERAN-A-- MS: GSM48_MT_MM_CM_SERV_REQ
   new conn
 DMM RAN_conn{RAN_CONN_S_NEW}: Allocated
 DREF unknown: MSC conn use + compl_l3 == 1 (0x1: compl_l3)
@@ -677,7 +677,7 @@ DREF IMSI-901700000004620_MSISDN-46071: MSC conn use - compl_l3 == 1 (0x8: cm_se
   cm_service_result_sent == 1
 ran_conn_is_accepted() == true
 - A LU request on an open conn is dropped silently
-  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
+  MSC <--GERAN-A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
 DREF IMSI-901700000004620_MSISDN-46071: MSC conn use + dtap == 2 (0xa: dtap,cm_service)
 DRLL Dispatching 04.08 message GSM48_MT_MM_LOC_UPD_REQUEST (0x5:0x8)
 DMM Cannot accept another LU, conn already established; extraneous LOCATION UPDATING REQUEST: MI(IMSI)=901700000004620 type=IMSI ATTACH
@@ -686,7 +686,7 @@ DREF IMSI-901700000004620_MSISDN-46071: MSC conn use - dtap == 1 (0x8: cm_servic
   llist_count(&net->ran_conns) == 1
 ---
 - subscriber detaches
-  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_IMSI_DETACH_IND
+  MSC <--GERAN-A-- MS: GSM48_MT_MM_IMSI_DETACH_IND
 DREF IMSI-901700000004620_MSISDN-46071: MSC conn use + dtap == 2 (0xa: dtap,cm_service)
 DRLL Dispatching 04.08 message GSM48_MT_MM_IMSI_DETACH_IND (0x5:0x1)
 DMM IMSI DETACH INDICATION: MI(IMSI)=901700000004620
@@ -702,7 +702,7 @@ DREF IMSI-901700000004620_MSISDN-46071: MSC conn use + release == 3 (0x10a: dtap
 DREF IMSI-901700000004620_MSISDN-46071: MSC conn use - cm_service == 2 (0x102: dtap,release)
 DREF VLR subscr IMSI-901700000004620_MSISDN-46071 usage increases to: 2
 DREF VLR subscr IMSI-901700000004620_MSISDN-46071 usage decreases to: 1
-- BSSAP Clear --RAN_GERAN_A--> MS
+- BSSAP Clear --GERAN-A--> MS
 DREF IMSI-901700000004620_MSISDN-46071: MSC conn use - dtap == 1 (0x100: release)
   bssap_clear_sent == 1
 - BSS sends BSSMAP Clear Complete
@@ -729,7 +729,7 @@ talloc_total_blocks(tall_bsc_ctx) == 13
 ---
 - Subscriber does a normal LU
 - Location Update Request
-  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
+  MSC <--GERAN-A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
   new conn
 DMM RAN_conn{RAN_CONN_S_NEW}: Allocated
 DREF unknown: MSC conn use + compl_l3 == 1 (0x1: compl_l3)
@@ -811,7 +811,7 @@ DMM RAN_conn(GERAN-A-0_IMSI-901700000004620_MSISDN-46071_LU){RAN_CONN_S_ACCEPTED
 DREF IMSI-901700000004620_MSISDN-46071: MSC conn use + release == 1 (0x100: release)
 DREF VLR subscr IMSI-901700000004620_MSISDN-46071 usage increases to: 4
 DREF VLR subscr IMSI-901700000004620_MSISDN-46071 usage decreases to: 3
-- BSSAP Clear --RAN_GERAN_A--> MS
+- BSSAP Clear --GERAN-A--> MS
 DREF VLR subscr IMSI-901700000004620_MSISDN-46071 usage decreases to: 2
 <-- GSUP rx OSMO_GSUP_MSGT_UPDATE_LOCATION_RESULT: vlr_gsupc_read_cb() returns 0
   bssap_clear_sent == 1
@@ -834,7 +834,7 @@ DMM RAN_conn(GERAN-A-0_IMSI-901700000004620_MSISDN-46071_LU){RAN_CONN_S_RELEASED
   llist_count(&net->ran_conns) == 0
 ---
 - Subscriber does a normal CM Service Request
-  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_CM_SERV_REQ
+  MSC <--GERAN-A-- MS: GSM48_MT_MM_CM_SERV_REQ
   new conn
 DMM RAN_conn{RAN_CONN_S_NEW}: Allocated
 DREF unknown: MSC conn use + compl_l3 == 1 (0x1: compl_l3)
@@ -869,7 +869,7 @@ DREF IMSI-901700000004620_MSISDN-46071: MSC conn use - compl_l3 == 1 (0x8: cm_se
   cm_service_result_sent == 1
 ran_conn_is_accepted() == true
 - A second CM Service Request on the same conn is accepted without another auth dance
-  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_CM_SERV_REQ
+  MSC <--GERAN-A-- MS: GSM48_MT_MM_CM_SERV_REQ
 DREF IMSI-901700000004620_MSISDN-46071: MSC conn use + dtap == 2 (0xa: dtap,cm_service)
 DRLL Dispatching 04.08 message GSM48_MT_MM_CM_SERV_REQ (0x5:0x24)
 DMM <- CM SERVICE REQUEST serv_type=0x08 MI(IMSI)=901700000004620
@@ -881,7 +881,7 @@ DREF IMSI-901700000004620_MSISDN-46071: MSC conn use - dtap == 1 (0x8: cm_servic
   llist_count(&net->ran_conns) == 1
 ---
 - subscriber detaches
-  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_IMSI_DETACH_IND
+  MSC <--GERAN-A-- MS: GSM48_MT_MM_IMSI_DETACH_IND
 DREF IMSI-901700000004620_MSISDN-46071: MSC conn use + dtap == 2 (0xa: dtap,cm_service)
 DRLL Dispatching 04.08 message GSM48_MT_MM_IMSI_DETACH_IND (0x5:0x1)
 DMM IMSI DETACH INDICATION: MI(IMSI)=901700000004620
@@ -897,7 +897,7 @@ DREF IMSI-901700000004620_MSISDN-46071: MSC conn use + release == 3 (0x10a: dtap
 DREF IMSI-901700000004620_MSISDN-46071: MSC conn use - cm_service == 2 (0x102: dtap,release)
 DREF VLR subscr IMSI-901700000004620_MSISDN-46071 usage increases to: 2
 DREF VLR subscr IMSI-901700000004620_MSISDN-46071 usage decreases to: 1
-- BSSAP Clear --RAN_GERAN_A--> MS
+- BSSAP Clear --GERAN-A--> MS
 DREF IMSI-901700000004620_MSISDN-46071: MSC conn use - dtap == 1 (0x100: release)
   bssap_clear_sent == 1
 - BSS sends BSSMAP Clear Complete
@@ -924,7 +924,7 @@ talloc_total_blocks(tall_bsc_ctx) == 13
 ---
 - Subscriber does a normal LU
 - Location Update Request
-  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
+  MSC <--GERAN-A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
   new conn
 DMM RAN_conn{RAN_CONN_S_NEW}: Allocated
 DREF unknown: MSC conn use + compl_l3 == 1 (0x1: compl_l3)
@@ -1006,7 +1006,7 @@ DMM RAN_conn(GERAN-A-0_IMSI-901700000004620_MSISDN-46071_LU){RAN_CONN_S_ACCEPTED
 DREF IMSI-901700000004620_MSISDN-46071: MSC conn use + release == 1 (0x100: release)
 DREF VLR subscr IMSI-901700000004620_MSISDN-46071 usage increases to: 4
 DREF VLR subscr IMSI-901700000004620_MSISDN-46071 usage decreases to: 3
-- BSSAP Clear --RAN_GERAN_A--> MS
+- BSSAP Clear --GERAN-A--> MS
 DREF VLR subscr IMSI-901700000004620_MSISDN-46071 usage decreases to: 2
 <-- GSUP rx OSMO_GSUP_MSGT_UPDATE_LOCATION_RESULT: vlr_gsupc_read_cb() returns 0
   bssap_clear_sent == 1
@@ -1029,7 +1029,7 @@ DMM RAN_conn(GERAN-A-0_IMSI-901700000004620_MSISDN-46071_LU){RAN_CONN_S_RELEASED
   llist_count(&net->ran_conns) == 0
 ---
 - Subscriber does a normal CM Service Request
-  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_CM_SERV_REQ
+  MSC <--GERAN-A-- MS: GSM48_MT_MM_CM_SERV_REQ
   new conn
 DMM RAN_conn{RAN_CONN_S_NEW}: Allocated
 DREF unknown: MSC conn use + compl_l3 == 1 (0x1: compl_l3)
@@ -1065,7 +1065,7 @@ DREF IMSI-901700000004620_MSISDN-46071: MSC conn use - compl_l3 == 1 (0x8: cm_se
 ran_conn_is_accepted() == true
 ---
 - An erratic Paging Response on the same conn is dropped silently
-  MSC <--RAN_GERAN_A-- MS: GSM48_MT_RR_PAG_RESP
+  MSC <--GERAN-A-- MS: GSM48_MT_RR_PAG_RESP
 DREF IMSI-901700000004620_MSISDN-46071: MSC conn use + dtap == 2 (0xa: dtap,cm_service)
 DRLL Dispatching 04.08 message GSM48_MT_RR_PAG_RESP (0x6:0x27)
 DMM Ignoring Paging Response, conn already established
@@ -1080,7 +1080,7 @@ DMM RAN_conn(GERAN-A-0_IMSI-901700000004620_MSISDN-46071_CM_SERVICE_REQ){RAN_CON
 DREF IMSI-901700000004620_MSISDN-46071: MSC conn use + release == 1 (0x100: release)
 DREF VLR subscr IMSI-901700000004620_MSISDN-46071 usage increases to: 3
 DREF VLR subscr IMSI-901700000004620_MSISDN-46071 usage decreases to: 2
-- BSSAP Clear --RAN_GERAN_A--> MS
+- BSSAP Clear --GERAN-A--> MS
   bssap_clear_sent == 1
 - all requests serviced, conn has been released
 - BSS sends BSSMAP Clear Complete
@@ -1107,7 +1107,7 @@ talloc_total_blocks(tall_bsc_ctx) == 13
 ---
 - Subscriber does a normal LU
 - Location Update Request
-  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
+  MSC <--GERAN-A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
   new conn
 DMM RAN_conn{RAN_CONN_S_NEW}: Allocated
 DREF unknown: MSC conn use + compl_l3 == 1 (0x1: compl_l3)
@@ -1189,7 +1189,7 @@ DMM RAN_conn(GERAN-A-0_IMSI-901700000004620_MSISDN-46071_LU){RAN_CONN_S_ACCEPTED
 DREF IMSI-901700000004620_MSISDN-46071: MSC conn use + release == 1 (0x100: release)
 DREF VLR subscr IMSI-901700000004620_MSISDN-46071 usage increases to: 4
 DREF VLR subscr IMSI-901700000004620_MSISDN-46071 usage decreases to: 3
-- BSSAP Clear --RAN_GERAN_A--> MS
+- BSSAP Clear --GERAN-A--> MS
 DREF VLR subscr IMSI-901700000004620_MSISDN-46071 usage decreases to: 2
 <-- GSUP rx OSMO_GSUP_MSGT_UPDATE_LOCATION_RESULT: vlr_gsupc_read_cb() returns 0
   bssap_clear_sent == 1
@@ -1218,7 +1218,7 @@ DREF VLR subscr IMSI-901700000004620_MSISDN-46071 usage increases to: 3
 DCC (ti 00 sub IMSI-901700000004620_MSISDN-46071 callref 40000001) New transaction
 DREF VLR subscr IMSI-901700000004620_MSISDN-46071 usage increases to: 4
 DMM Subscriber IMSI-901700000004620_MSISDN-46071 not paged yet, start paging.
-  RAN_GERAN_A sends out paging request to IMSI 901700000004620, TMSI 0xffffffff, LAC 23
+  GERAN-A sends out paging request to IMSI 901700000004620, TMSI 0xffffffff, LAC 23
   strcmp(paging_expecting_imsi, imsi) == 0
 DREF VLR subscr IMSI-901700000004620_MSISDN-46071 usage increases to: 5
   llist_count(&vsub->cs.requests) == 1
@@ -1226,7 +1226,7 @@ DREF VLR subscr IMSI-901700000004620_MSISDN-46071 usage decreases to: 4
   paging_sent == 1
   paging_stopped == 0
 - MS replies with Paging Response, we deliver the SMS
-  MSC <--RAN_GERAN_A-- MS: GSM48_MT_RR_PAG_RESP
+  MSC <--GERAN-A-- MS: GSM48_MT_RR_PAG_RESP
   new conn
 DMM RAN_conn{RAN_CONN_S_NEW}: Allocated
 DREF unknown: MSC conn use + compl_l3 == 1 (0x1: compl_l3)
@@ -1254,8 +1254,8 @@ DMM RAN_conn(GERAN-A-0_IMSI-901700000004620_MSISDN-46071_PAGING_RESP){RAN_CONN_S
 DPAG Paging success for IMSI-901700000004620_MSISDN-46071 (event=0)
 DPAG Calling paging cbfn.
 DREF IMSI-901700000004620_MSISDN-46071: MSC conn use + trans_sms == 2 (0x21: compl_l3,trans_sms)
-DMSC msc_tx 91 bytes to IMSI-901700000004620_MSISDN-46071 via RAN_GERAN_A
-- DTAP --RAN_GERAN_A--> MS: SMS:0x01: 09015801000791447758100650004c0005806470f1000007101000000000445079da1e1ee7416937485e9ea7c965373d1d6683c270383b3d0ed3d36ff71c949e83c22072799e9687c5ec32a81d96afcbf4b4fb0c7ac3e9e9b7db05
+DMSC msc_tx 91 bytes to IMSI-901700000004620_MSISDN-46071 via GERAN-A
+- DTAP --GERAN-A--> MS: SMS:0x01: 09015801000791447758100650004c0005806470f1000007101000000000445079da1e1ee7416937485e9ea7c965373d1d6683c270383b3d0ed3d36ff71c949e83c22072799e9687c5ec32a81d96afcbf4b4fb0c7ac3e9e9b7db05
 - DTAP matches expected message
 DREF VLR subscr IMSI-901700000004620_MSISDN-46071 usage decreases to: 5
 DMM RAN_conn(GERAN-A-0_IMSI-901700000004620_MSISDN-46071_PAGING_RESP){RAN_CONN_S_NEW}: state_chg to RAN_CONN_S_ACCEPTED
@@ -1269,7 +1269,7 @@ DREF IMSI-901700000004620_MSISDN-46071: MSC conn use - compl_l3 == 1 (0x20: tran
   llist_count(&net->ran_conns) == 1
 ---
 - MS sends erratic LU Request, which is dropped silently
-  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
+  MSC <--GERAN-A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
 DREF IMSI-901700000004620_MSISDN-46071: MSC conn use + dtap == 2 (0x22: dtap,trans_sms)
 DRLL Dispatching 04.08 message GSM48_MT_MM_LOC_UPD_REQUEST (0x5:0x8)
 DMM Cannot accept another LU, conn already established; extraneous LOCATION UPDATING REQUEST: MI(IMSI)=901700000004620 type=IMSI ATTACH
@@ -1277,7 +1277,7 @@ DREF IMSI-901700000004620_MSISDN-46071: MSC conn use - dtap == 1 (0x20: trans_sm
   lu_result_sent == 0
   llist_count(&net->ran_conns) == 1
 - MS replies with CP-ACK for received SMS
-  MSC <--RAN_GERAN_A-- MS: SMS:0x04
+  MSC <--GERAN-A-- MS: SMS:0x04
 DREF IMSI-901700000004620_MSISDN-46071: MSC conn use + dtap == 2 (0x22: dtap,trans_sms)
 DRLL Dispatching 04.08 message SMS:0x04 (0x9:0x4)
 DMM RAN_conn(GERAN-A-0_IMSI-901700000004620_MSISDN-46071_PAGING_RESP){RAN_CONN_S_ACCEPTED}: Received Event RAN_CONN_E_COMMUNICATING
@@ -1285,12 +1285,12 @@ DMM RAN_conn(GERAN-A-0_IMSI-901700000004620_MSISDN-46071_PAGING_RESP){RAN_CONN_S
 DREF IMSI-901700000004620_MSISDN-46071: MSC conn use - dtap == 1 (0x20: trans_sms)
   llist_count(&net->ran_conns) == 1
 - MS also sends RP-ACK, MSC in turn sends CP-ACK for that
-  MSC <--RAN_GERAN_A-- MS: SMS:0x01
+  MSC <--GERAN-A-- MS: SMS:0x01
 DREF IMSI-901700000004620_MSISDN-46071: MSC conn use + dtap == 2 (0x22: dtap,trans_sms)
 DRLL Dispatching 04.08 message SMS:0x01 (0x9:0x1)
 DMM RAN_conn(GERAN-A-0_IMSI-901700000004620_MSISDN-46071_PAGING_RESP){RAN_CONN_S_COMMUNICATING}: Received Event RAN_CONN_E_COMMUNICATING
-DMSC msc_tx 2 bytes to IMSI-901700000004620_MSISDN-46071 via RAN_GERAN_A
-- DTAP --RAN_GERAN_A--> MS: SMS:0x04: 0904
+DMSC msc_tx 2 bytes to IMSI-901700000004620_MSISDN-46071 via GERAN-A
+- DTAP --GERAN-A--> MS: SMS:0x04: 0904
 - DTAP matches expected message
 DREF VLR subscr IMSI-901700000004620_MSISDN-46071 usage decreases to: 3
 DREF VLR subscr IMSI-901700000004620_MSISDN-46071 usage decreases to: 2
@@ -1301,7 +1301,7 @@ DMM RAN_conn(GERAN-A-0_IMSI-901700000004620_MSISDN-46071_PAGING_RESP){RAN_CONN_S
 DREF IMSI-901700000004620_MSISDN-46071: MSC conn use + release == 1 (0x100: release)
 DREF VLR subscr IMSI-901700000004620_MSISDN-46071 usage increases to: 3
 DREF VLR subscr IMSI-901700000004620_MSISDN-46071 usage decreases to: 2
-- BSSAP Clear --RAN_GERAN_A--> MS
+- BSSAP Clear --GERAN-A--> MS
   dtap_tx_confirmed == 1
   bssap_clear_sent == 1
 - BSS sends BSSMAP Clear Complete
@@ -1329,7 +1329,7 @@ talloc_total_blocks(tall_bsc_ctx) == 13
 ---
 - Subscriber does a normal LU
 - Location Update Request
-  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
+  MSC <--GERAN-A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
   new conn
 DMM RAN_conn{RAN_CONN_S_NEW}: Allocated
 DREF unknown: MSC conn use + compl_l3 == 1 (0x1: compl_l3)
@@ -1411,7 +1411,7 @@ DMM RAN_conn(GERAN-A-0_IMSI-901700000004620_MSISDN-46071_LU){RAN_CONN_S_ACCEPTED
 DREF IMSI-901700000004620_MSISDN-46071: MSC conn use + release == 1 (0x100: release)
 DREF VLR subscr IMSI-901700000004620_MSISDN-46071 usage increases to: 4
 DREF VLR subscr IMSI-901700000004620_MSISDN-46071 usage decreases to: 3
-- BSSAP Clear --RAN_GERAN_A--> MS
+- BSSAP Clear --GERAN-A--> MS
 DREF VLR subscr IMSI-901700000004620_MSISDN-46071 usage decreases to: 2
 <-- GSUP rx OSMO_GSUP_MSGT_UPDATE_LOCATION_RESULT: vlr_gsupc_read_cb() returns 0
   bssap_clear_sent == 1
@@ -1440,7 +1440,7 @@ DREF VLR subscr IMSI-901700000004620_MSISDN-46071 usage increases to: 3
 DCC (ti 00 sub IMSI-901700000004620_MSISDN-46071 callref 40000002) New transaction
 DREF VLR subscr IMSI-901700000004620_MSISDN-46071 usage increases to: 4
 DMM Subscriber IMSI-901700000004620_MSISDN-46071 not paged yet, start paging.
-  RAN_GERAN_A sends out paging request to IMSI 901700000004620, TMSI 0xffffffff, LAC 23
+  GERAN-A sends out paging request to IMSI 901700000004620, TMSI 0xffffffff, LAC 23
   strcmp(paging_expecting_imsi, imsi) == 0
 DREF VLR subscr IMSI-901700000004620_MSISDN-46071 usage increases to: 5
   llist_count(&vsub->cs.requests) == 1
@@ -1448,7 +1448,7 @@ DREF VLR subscr IMSI-901700000004620_MSISDN-46071 usage decreases to: 4
   paging_sent == 1
   paging_stopped == 0
 - MS replies with Paging Response, we deliver the SMS
-  MSC <--RAN_GERAN_A-- MS: GSM48_MT_RR_PAG_RESP
+  MSC <--GERAN-A-- MS: GSM48_MT_RR_PAG_RESP
   new conn
 DMM RAN_conn{RAN_CONN_S_NEW}: Allocated
 DREF unknown: MSC conn use + compl_l3 == 1 (0x1: compl_l3)
@@ -1476,8 +1476,8 @@ DMM RAN_conn(GERAN-A-0_IMSI-901700000004620_MSISDN-46071_PAGING_RESP){RAN_CONN_S
 DPAG Paging success for IMSI-901700000004620_MSISDN-46071 (event=0)
 DPAG Calling paging cbfn.
 DREF IMSI-901700000004620_MSISDN-46071: MSC conn use + trans_sms == 2 (0x21: compl_l3,trans_sms)
-DMSC msc_tx 91 bytes to IMSI-901700000004620_MSISDN-46071 via RAN_GERAN_A
-- DTAP --RAN_GERAN_A--> MS: SMS:0x01: 09015801000791447758100650004c0005806470f1000007101000000000445079da1e1ee7416937485e9ea7c965373d1d6683c270383b3d0ed3d36ff71c949e83c22072799e9687c5ec32a81d96afcbf4b4fb0c7ac3e9e9b7db05
+DMSC msc_tx 91 bytes to IMSI-901700000004620_MSISDN-46071 via GERAN-A
+- DTAP --GERAN-A--> MS: SMS:0x01: 09015801000791447758100650004c0005806470f1000007101000000000445079da1e1ee7416937485e9ea7c965373d1d6683c270383b3d0ed3d36ff71c949e83c22072799e9687c5ec32a81d96afcbf4b4fb0c7ac3e9e9b7db05
 - DTAP matches expected message
 DREF VLR subscr IMSI-901700000004620_MSISDN-46071 usage decreases to: 5
 DMM RAN_conn(GERAN-A-0_IMSI-901700000004620_MSISDN-46071_PAGING_RESP){RAN_CONN_S_NEW}: state_chg to RAN_CONN_S_ACCEPTED
@@ -1491,7 +1491,7 @@ DREF IMSI-901700000004620_MSISDN-46071: MSC conn use - compl_l3 == 1 (0x20: tran
   llist_count(&net->ran_conns) == 1
 ---
 - CM Service Request during open connection is accepted
-  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_CM_SERV_REQ
+  MSC <--GERAN-A-- MS: GSM48_MT_MM_CM_SERV_REQ
 DREF IMSI-901700000004620_MSISDN-46071: MSC conn use + dtap == 2 (0x22: dtap,trans_sms)
 DRLL Dispatching 04.08 message GSM48_MT_MM_CM_SERV_REQ (0x5:0x24)
 DMM <- CM SERVICE REQUEST serv_type=0x08 MI(IMSI)=901700000004620
@@ -1504,7 +1504,7 @@ DREF IMSI-901700000004620_MSISDN-46071: MSC conn use - dtap == 2 (0x28: cm_servi
   llist_count(&net->ran_conns) == 1
   g_conn->received_cm_service_request == 1
 - MS replies with CP-ACK for received SMS
-  MSC <--RAN_GERAN_A-- MS: SMS:0x04
+  MSC <--GERAN-A-- MS: SMS:0x04
 DREF IMSI-901700000004620_MSISDN-46071: MSC conn use + dtap == 3 (0x2a: dtap,cm_service,trans_sms)
 DRLL Dispatching 04.08 message SMS:0x04 (0x9:0x4)
 DMM RAN_conn(GERAN-A-0_IMSI-901700000004620_MSISDN-46071_PAGING_RESP){RAN_CONN_S_ACCEPTED}: Received Event RAN_CONN_E_COMMUNICATING
@@ -1512,12 +1512,12 @@ DMM RAN_conn(GERAN-A-0_IMSI-901700000004620_MSISDN-46071_PAGING_RESP){RAN_CONN_S
 DREF IMSI-901700000004620_MSISDN-46071: MSC conn use - dtap == 2 (0x28: cm_service,trans_sms)
   llist_count(&net->ran_conns) == 1
 - MS also sends RP-ACK, MSC in turn sends CP-ACK for that
-  MSC <--RAN_GERAN_A-- MS: SMS:0x01
+  MSC <--GERAN-A-- MS: SMS:0x01
 DREF IMSI-901700000004620_MSISDN-46071: MSC conn use + dtap == 3 (0x2a: dtap,cm_service,trans_sms)
 DRLL Dispatching 04.08 message SMS:0x01 (0x9:0x1)
 DMM RAN_conn(GERAN-A-0_IMSI-901700000004620_MSISDN-46071_PAGING_RESP){RAN_CONN_S_COMMUNICATING}: Received Event RAN_CONN_E_COMMUNICATING
-DMSC msc_tx 2 bytes to IMSI-901700000004620_MSISDN-46071 via RAN_GERAN_A
-- DTAP --RAN_GERAN_A--> MS: SMS:0x04: 0904
+DMSC msc_tx 2 bytes to IMSI-901700000004620_MSISDN-46071 via GERAN-A
+- DTAP --GERAN-A--> MS: SMS:0x04: 0904
 - DTAP matches expected message
 DREF VLR subscr IMSI-901700000004620_MSISDN-46071 usage decreases to: 3
 DREF VLR subscr IMSI-901700000004620_MSISDN-46071 usage decreases to: 2
@@ -1528,7 +1528,7 @@ DREF IMSI-901700000004620_MSISDN-46071: MSC conn use - dtap == 1 (0x8: cm_servic
   llist_count(&net->ran_conns) == 1
 ---
 - subscriber detaches
-  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_IMSI_DETACH_IND
+  MSC <--GERAN-A-- MS: GSM48_MT_MM_IMSI_DETACH_IND
 DREF IMSI-901700000004620_MSISDN-46071: MSC conn use + dtap == 2 (0xa: dtap,cm_service)
 DRLL Dispatching 04.08 message GSM48_MT_MM_IMSI_DETACH_IND (0x5:0x1)
 DMM IMSI DETACH INDICATION: MI(IMSI)=901700000004620
@@ -1544,7 +1544,7 @@ DREF IMSI-901700000004620_MSISDN-46071: MSC conn use + release == 3 (0x10a: dtap
 DREF IMSI-901700000004620_MSISDN-46071: MSC conn use - cm_service == 2 (0x102: dtap,release)
 DREF VLR subscr IMSI-901700000004620_MSISDN-46071 usage increases to: 2
 DREF VLR subscr IMSI-901700000004620_MSISDN-46071 usage decreases to: 1
-- BSSAP Clear --RAN_GERAN_A--> MS
+- BSSAP Clear --GERAN-A--> MS
 DREF IMSI-901700000004620_MSISDN-46071: MSC conn use - dtap == 1 (0x100: release)
   bssap_clear_sent == 1
 - BSS sends BSSMAP Clear Complete
@@ -1571,7 +1571,7 @@ talloc_total_blocks(tall_bsc_ctx) == 13
 ---
 - Subscriber does a normal LU
 - Location Update Request
-  MSC <--RAN_GERAN_A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
+  MSC <--GERAN-A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
   new conn
 DMM RAN_conn{RAN_CONN_S_NEW}: Allocated
 DREF unknown: MSC conn use + compl_l3 == 1 (0x1: compl_l3)
@@ -1653,7 +1653,7 @@ DMM RAN_conn(GERAN-A-0_IMSI-901700000004620_MSISDN-46071_LU){RAN_CONN_S_ACCEPTED
 DREF IMSI-901700000004620_MSISDN-46071: MSC conn use + release == 1 (0x100: release)
 DREF VLR subscr IMSI-901700000004620_MSISDN-46071 usage increases to: 4
 DREF VLR subscr IMSI-901700000004620_MSISDN-46071 usage decreases to: 3
-- BSSAP Clear --RAN_GERAN_A--> MS
+- BSSAP Clear --GERAN-A--> MS
 DREF VLR subscr IMSI-901700000004620_MSISDN-46071 usage decreases to: 2
 <-- GSUP rx OSMO_GSUP_MSGT_UPDATE_LOCATION_RESULT: vlr_gsupc_read_cb() returns 0
   bssap_clear_sent == 1
@@ -1682,7 +1682,7 @@ DREF VLR subscr IMSI-901700000004620_MSISDN-46071 usage increases to: 3
 DCC (ti 00 sub IMSI-901700000004620_MSISDN-46071 callref 40000003) New transaction
 DREF VLR subscr IMSI-901700000004620_MSISDN-46071 usage increases to: 4
 DMM Subscriber IMSI-901700000004620_MSISDN-46071 not paged yet, start paging.
-  RAN_GERAN_A sends out paging request to IMSI 901700000004620, TMSI 0xffffffff, LAC 23
+  GERAN-A sends out paging request to IMSI 901700000004620, TMSI 0xffffffff, LAC 23
   strcmp(paging_expecting_imsi, imsi) == 0
 DREF VLR subscr IMSI-901700000004620_MSISDN-46071 usage increases to: 5
   llist_count(&vsub->cs.requests) == 1
@@ -1690,7 +1690,7 @@ DREF VLR subscr IMSI-901700000004620_MSISDN-46071 usage decreases to: 4
   paging_sent == 1
   paging_stopped == 0
 - MS replies with Paging Response, we deliver the SMS
-  MSC <--RAN_GERAN_A-- MS: GSM48_MT_RR_PAG_RESP
+  MSC <--GERAN-A-- MS: GSM48_MT_RR_PAG_RESP
   new conn
 DMM RAN_conn{RAN_CONN_S_NEW}: Allocated
 DREF unknown: MSC conn use + compl_l3 == 1 (0x1: compl_l3)
@@ -1718,8 +1718,8 @@ DMM RAN_conn(GERAN-A-0_IMSI-901700000004620_MSISDN-46071_PAGING_RESP){RAN_CONN_S
 DPAG Paging success for IMSI-901700000004620_MSISDN-46071 (event=0)
 DPAG Calling paging cbfn.
 DREF IMSI-901700000004620_MSISDN-46071: MSC conn use + trans_sms == 2 (0x21: compl_l3,trans_sms)
-DMSC msc_tx 91 bytes to IMSI-901700000004620_MSISDN-46071 via RAN_GERAN_A
-- DTAP --RAN_GERAN_A--> MS: SMS:0x01: 09015801000791447758100650004c0005806470f1000007101000000000445079da1e1ee7416937485e9ea7c965373d1d6683c270383b3d0ed3d36ff71c949e83c22072799e9687c5ec32a81d96afcbf4b4fb0c7ac3e9e9b7db05
+DMSC msc_tx 91 bytes to IMSI-901700000004620_MSISDN-46071 via GERAN-A
+- DTAP --GERAN-A--> MS: SMS:0x01: 09015801000791447758100650004c0005806470f1000007101000000000445079da1e1ee7416937485e9ea7c965373d1d6683c270383b3d0ed3d36ff71c949e83c22072799e9687c5ec32a81d96afcbf4b4fb0c7ac3e9e9b7db05
 - DTAP matches expected message
 DREF VLR subscr IMSI-901700000004620_MSISDN-46071 usage decreases to: 5
 DMM RAN_conn(GERAN-A-0_IMSI-901700000004620_MSISDN-46071_PAGING_RESP){RAN_CONN_S_NEW}: state_chg to RAN_CONN_S_ACCEPTED
@@ -1733,13 +1733,13 @@ DREF IMSI-901700000004620_MSISDN-46071: MSC conn use - compl_l3 == 1 (0x20: tran
   llist_count(&net->ran_conns) == 1
 ---
 - MS sends another erratic Paging Response which is dropped silently
-  MSC <--RAN_GERAN_A-- MS: GSM48_MT_RR_PAG_RESP
+  MSC <--GERAN-A-- MS: GSM48_MT_RR_PAG_RESP
 DREF IMSI-901700000004620_MSISDN-46071: MSC conn use + dtap == 2 (0x22: dtap,trans_sms)
 DRLL Dispatching 04.08 message GSM48_MT_RR_PAG_RESP (0x6:0x27)
 DMM Ignoring Paging Response, conn already established
 DREF IMSI-901700000004620_MSISDN-46071: MSC conn use - dtap == 1 (0x20: trans_sms)
 - MS replies with CP-ACK for received SMS
-  MSC <--RAN_GERAN_A-- MS: SMS:0x04
+  MSC <--GERAN-A-- MS: SMS:0x04
 DREF IMSI-901700000004620_MSISDN-46071: MSC conn use + dtap == 2 (0x22: dtap,trans_sms)
 DRLL Dispatching 04.08 message SMS:0x04 (0x9:0x4)
 DMM RAN_conn(GERAN-A-0_IMSI-901700000004620_MSISDN-46071_PAGING_RESP){RAN_CONN_S_ACCEPTED}: Received Event RAN_CONN_E_COMMUNICATING
@@ -1747,12 +1747,12 @@ DMM RAN_conn(GERAN-A-0_IMSI-901700000004620_MSISDN-46071_PAGING_RESP){RAN_CONN_S
 DREF IMSI-901700000004620_MSISDN-46071: MSC conn use - dtap == 1 (0x20: trans_sms)
   llist_count(&net->ran_conns) == 1
 - MS also sends RP-ACK, MSC in turn sends CP-ACK for that
-  MSC <--RAN_GERAN_A-- MS: SMS:0x01
+  MSC <--GERAN-A-- MS: SMS:0x01
 DREF IMSI-901700000004620_MSISDN-46071: MSC conn use + dtap == 2 (0x22: dtap,trans_sms)
 DRLL Dispatching 04.08 message SMS:0x01 (0x9:0x1)
 DMM RAN_conn(GERAN-A-0_IMSI-901700000004620_MSISDN-46071_PAGING_RESP){RAN_CONN_S_COMMUNICATING}: Received Event RAN_CONN_E_COMMUNICATING
-DMSC msc_tx 2 bytes to IMSI-901700000004620_MSISDN-46071 via RAN_GERAN_A
-- DTAP --RAN_GERAN_A--> MS: SMS:0x04: 0904
+DMSC msc_tx 2 bytes to IMSI-901700000004620_MSISDN-46071 via GERAN-A
+- DTAP --GERAN-A--> MS: SMS:0x04: 0904
 - DTAP matches expected message
 DREF VLR subscr IMSI-901700000004620_MSISDN-46071 usage decreases to: 3
 DREF VLR subscr IMSI-901700000004620_MSISDN-46071 usage decreases to: 2
@@ -1763,7 +1763,7 @@ DMM RAN_conn(GERAN-A-0_IMSI-901700000004620_MSISDN-46071_PAGING_RESP){RAN_CONN_S
 DREF IMSI-901700000004620_MSISDN-46071: MSC conn use + release == 1 (0x100: release)
 DREF VLR subscr IMSI-901700000004620_MSISDN-46071 usage increases to: 3
 DREF VLR subscr IMSI-901700000004620_MSISDN-46071 usage decreases to: 2
-- BSSAP Clear --RAN_GERAN_A--> MS
+- BSSAP Clear --GERAN-A--> MS
   dtap_tx_confirmed == 1
   bssap_clear_sent == 1
 - BSS sends BSSMAP Clear Complete

@@ -56,7 +56,7 @@ static struct ran_conn *ran_conn_allocate_iu(struct gsm_network *network,
 	DEBUGP(DIUCS, "Allocating IuCS RAN conn: lac %d, conn_id %" PRIx32 "\n",
 	       lac, ue->conn_id);
 
-	conn = ran_conn_alloc(network, RAN_UTRAN_IU, lac);
+	conn = ran_conn_alloc(network, OSMO_RAT_UTRAN_IU, lac);
 	if (!conn)
 		return NULL;
 
@@ -82,7 +82,7 @@ static inline void log_subscribers(struct gsm_network *network)
 	llist_for_each_entry(conn, &network->ran_conns, entry) {
 		DEBUGP(DIUCS, "%3d: %s", i, vlr_subscr_name(conn->vsub));
 		switch (conn->via_ran) {
-		case RAN_UTRAN_IU:
+		case OSMO_RAT_UTRAN_IU:
 			DEBUGPC(DIUCS, " Iu");
 			if (conn->iu.ue_ctx) {
 				DEBUGPC(DIUCS, " conn_id %d",
@@ -90,11 +90,11 @@ static inline void log_subscribers(struct gsm_network *network)
 				       );
 			}
 			break;
-		case RAN_GERAN_A:
+		case OSMO_RAT_GERAN_A:
 			DEBUGPC(DIUCS, " A");
 			/* TODO log A-interface connection details */
 			break;
-		case RAN_UNKNOWN:
+		case OSMO_RAT_UNKNOWN:
 			DEBUGPC(DIUCS, " ?");
 			break;
 		default:
@@ -120,7 +120,7 @@ struct ran_conn *ran_conn_lookup_iu(
 	log_subscribers(network);
 
 	llist_for_each_entry(conn, &network->ran_conns, entry) {
-		if (conn->via_ran != RAN_UTRAN_IU)
+		if (conn->via_ran != OSMO_RAT_UTRAN_IU)
 			continue;
 		if (!same_ue_conn(conn->iu.ue_ctx, ue))
 			continue;

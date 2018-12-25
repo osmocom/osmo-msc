@@ -6,16 +6,7 @@
 #include <osmocom/gsm/protocol/gsm_04_08.h>
 #include <osmocom/sigtran/sccp_sap.h>
 #include <osmocom/mgcp_client/mgcp_client.h>
-
-enum ran_type {
-       RAN_UNKNOWN = 0,
-       RAN_GERAN_A = 1,	/* 2G / A-interface */
-       RAN_UTRAN_IU= 2,	/* 3G / Iu-interface (IuCS or IuPS) */
-};
-
-extern const struct value_string ran_type_names[];
-static inline const char *ran_type_name(enum ran_type val)
-{	return get_value_string(ran_type_names, val);	}
+#include <osmocom/gsm/gsm_utils.h>
 
 enum ran_conn_fsm_event {
 	/* Accepted the initial Complete Layer 3 (starting to evaluate Authentication and Ciphering) */
@@ -115,7 +106,7 @@ struct ran_conn {
 	struct gsm_network *network;
 
 	/* connected via 2G or 3G? */
-	enum ran_type via_ran;
+	enum osmo_rat_type via_ran;
 
 	uint16_t lac;
 	struct geran_encr geran_encr;
@@ -177,7 +168,7 @@ struct ran_conn {
 	struct gsm_classmark temporary_classmark;
 };
 
-struct ran_conn *ran_conn_alloc(struct gsm_network *network, enum ran_type via_ran, uint16_t lac);
+struct ran_conn *ran_conn_alloc(struct gsm_network *network, enum osmo_rat_type via_ran, uint16_t lac);
 
 void ran_conn_update_id(struct ran_conn *conn);
 char *ran_conn_get_conn_id(struct ran_conn *conn);
