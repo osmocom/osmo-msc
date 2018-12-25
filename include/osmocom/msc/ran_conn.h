@@ -8,9 +8,9 @@
 #include <osmocom/mgcp_client/mgcp_client.h>
 
 enum ran_type {
-       RAN_UNKNOWN,
-       RAN_GERAN_A,	/* 2G / A-interface */
-       RAN_UTRAN_IU,	/* 3G / Iu-interface (IuCS or IuPS) */
+       RAN_UNKNOWN = 0,
+       RAN_GERAN_A = 1,	/* 2G / A-interface */
+       RAN_UTRAN_IU= 2,	/* 3G / Iu-interface (IuCS or IuPS) */
 };
 
 extern const struct value_string ran_type_names[];
