@@ -20,7 +20,6 @@ noinst_HEADERS = \
 	msc_ifaces.h \
 	msc_mgcp.h \
 	a_reset.h \
-	ran_conn.h \
 	rrlp.h \
 	signal.h \
 	silent_call.h \
