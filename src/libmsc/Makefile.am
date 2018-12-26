@@ -44,6 +44,8 @@ libmsc_a_SOURCES = \
 	mncc_sock.c \
 	msc_ifaces.c \
 	msc_mgcp.c \
+	neighbor_ident.c \
+	neighbor_ident_vty.c \
 	ran_conn.c \
 	rrlp.c \
 	silent_call.c \
