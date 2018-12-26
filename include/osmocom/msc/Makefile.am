@@ -19,7 +19,7 @@ noinst_HEADERS = \
 	msc_common.h \
 	msc_ifaces.h \
 	msc_mgcp.h \
-	neighor_ident.h \
+	neighbor_ident.h \
 	a_reset.h \
 	ran_conn.h \
 	rrlp.h \

@@ -1,14 +1,10 @@
-/* Manage identity of neighboring BSS cells for inter-BSC handover.
- *
- * Measurement reports tell us about neighbor ARFCN and BSIC. If that ARFCN and BSIC is not managed by
- * this local BSS, we need to tell the MSC a cell identity, like CGI, LAC+CI, etc. -- hence we need a
- * mapping from ARFCN+BSIC to Cell Identifier List, which needs to be configured by the user.
- */
+/* Manage identity of neighboring BSS cells for inter-MSC handover. */
 /* (C) 2018 by sysmocom - s.f.m.c. GmbH <info@sysmocom.de>
  *
  * All Rights Reserved
  *
  * Author: Neels Hofmeyr <nhofmeyr@sysmocom.de>
+ * Author: Stefan Sperling <ssperling@sysmocom.de>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -30,54 +26,33 @@
 #include <osmocom/core/linuxlist.h>
 #include <osmocom/core/utils.h>
 #include <osmocom/gsm/gsm0808.h>
+#include <osmocom/sigtran/osmo_ss7.h>
 
-#include <osmocom/bsc/neighbor_ident.h>
+#include <osmocom/msc/neighbor_ident.h>
+#include <osmocom/msc/gsm_data.h>
 
-struct neighbor_ident_list {
-	struct llist_head list;
-};
+/* XXX greater than or equal to IPA_STIRNG_MAX (libosmocore) and MAX_PC_STR_LEN (libosmo-sccp). */
+#define NEIGHBOR_IDENT_ADDR_STRING_MAX 64
 
-struct neighbor_ident {
-	struct llist_head entry;
-
-	struct neighbor_ident_key key;
-	struct gsm0808_cell_id_list2 val;
-};
-
-#define APPEND_THING(func, args...) do { \
-		int remain = buflen - (pos - buf); \
-		int l = func(pos, remain, ##args); \
-		if (l < 0 || l > remain) \
-			pos = buf + buflen; \
-		else \
-			pos += l; \
-	} while(0)
-#define APPEND_STR(fmt, args...) APPEND_THING(snprintf, fmt, ##args)
-
-const char *_neighbor_ident_key_name(char *buf, size_t buflen, const struct neighbor_ident_key *ni_key)
+const char *neighbor_ident_addr_name(struct gsm_network *net, const struct neighbor_ident_addr *na)
 {
-	char *pos = buf;
+	static char buf[NEIGHBOR_IDENT_ADDR_STRING_MAX + 4];
+	struct osmo_ss7_instance *ss7;
 
-	APPEND_STR("BTS ");
-	if (ni_key->from_bts == NEIGHBOR_IDENT_KEY_ANY_BTS)
-		APPEND_STR("*");
-	else if (ni_key->from_bts >= 0 && ni_key->from_bts <= 255)
-		APPEND_STR("%d", ni_key->from_bts);
-	else
-		APPEND_STR("invalid(%d)", ni_key->from_bts);
+	switch (na->type) {
+	case MSC_NEIGHBOR_TYPE_BSC:
+		ss7 = osmo_ss7_instance_find(net->a.cs7_instance);
+		OSMO_ASSERT(ss7);
+		snprintf(buf, sizeof(buf), "BSC %s", osmo_ss7_pointcode_print(ss7, na->a.point_code));
+		break;
+	case MSC_NEIGHBOR_TYPE_MSC:
+		snprintf(buf, sizeof(buf), "MSC %s", na->a.ipa_name);
+		break;
+	default:
+		return NULL;
+	}
 
-	APPEND_STR(" to ");
-	if (ni_key->bsic == BSIC_ANY)
-		APPEND_STR("ARFCN %u (any BSIC)", ni_key->arfcn);
-	else
-		APPEND_STR("ARFCN %u BSIC %u", ni_key->arfcn, ni_key->bsic & 0x3f);
 	return buf;
-}
-
-const char *neighbor_ident_key_name(const struct neighbor_ident_key *ni_key)
-{
-	static char buf[64];
-	return _neighbor_ident_key_name(buf, sizeof(buf), ni_key);
 }
 
 struct neighbor_ident_list *neighbor_ident_init(void *talloc_ctx)
@@ -95,57 +70,28 @@ void neighbor_ident_free(struct neighbor_ident_list *nil)
 	talloc_free(nil);
 }
 
-/* Return true when the entry matches the search_for requirements.
- * If exact_match is false, a BSIC_ANY entry acts as wildcard to match any search_for on that ARFCN,
- * and a BSIC_ANY in search_for likewise returns any one entry that matches the ARFCN;
- * also a from_bts == NEIGHBOR_IDENT_KEY_ANY_BTS in either entry or search_for will match.
- * If exact_match is true, only identical bsic values and identical from_bts values return a match.
- * Note, typically wildcard BSICs are only in entry, e.g. the user configured list, and search_for
- * contains a specific BSIC, e.g. as received from a Measurement Report. */
-bool neighbor_ident_key_match(const struct neighbor_ident_key *entry,
-			      const struct neighbor_ident_key *search_for,
-			      bool exact_match)
-{
-	if (exact_match
-	    && entry->from_bts != search_for->from_bts)
-		return false;
-
-	if (search_for->from_bts != NEIGHBOR_IDENT_KEY_ANY_BTS
-	    && entry->from_bts != NEIGHBOR_IDENT_KEY_ANY_BTS
-	    && entry->from_bts != search_for->from_bts)
-		return false;
-
-	if (entry->arfcn != search_for->arfcn)
-		return false;
-
-	if (exact_match && entry->bsic != search_for->bsic)
-		return false;
-
-	if (entry->bsic == BSIC_ANY || search_for->bsic == BSIC_ANY)
-		return true;
-
-	return entry->bsic == search_for->bsic;
-}
-
 static struct neighbor_ident *_neighbor_ident_get(const struct neighbor_ident_list *nil,
-						  const struct neighbor_ident_key *key,
-						  bool exact_match)
+						  const struct neighbor_ident_addr *na)
 {
 	struct neighbor_ident *ni;
-	struct neighbor_ident *wildcard_match = NULL;
 
-	/* Do both exact-bsic and wildcard matching in the same iteration:
-	 * Any exact match returns immediately, while for a wildcard match we still go through all
-	 * remaining items in case an exact match exists. */
 	llist_for_each_entry(ni, &nil->list, entry) {
-		if (neighbor_ident_key_match(&ni->key, key, true))
-			return ni;
-		if (!exact_match) {
-			if (neighbor_ident_key_match(&ni->key, key, false))
-				wildcard_match = ni;
+		if (na->type != ni->addr.type)
+			continue;
+
+		switch (na->type) {
+		case MSC_NEIGHBOR_TYPE_BSC:
+			if (ni->addr.a.point_code == na->a.point_code)
+				return ni;
+			break;
+		case MSC_NEIGHBOR_TYPE_MSC:
+			if (strcmp(ni->addr.a.ipa_name, na->a.ipa_name) == 0)
+				return ni;
+			break;
 		}
 	}
-	return wildcard_match;
+
+	return NULL;
 }
 
 static void _neighbor_ident_free(struct neighbor_ident *ni)
@@ -154,26 +100,15 @@ static void _neighbor_ident_free(struct neighbor_ident *ni)
 	talloc_free(ni);
 }
 
-bool neighbor_ident_key_valid(const struct neighbor_ident_key *key)
-{
-	if (key->from_bts != NEIGHBOR_IDENT_KEY_ANY_BTS
-	    && (key->from_bts < 0 || key->from_bts > 255))
-		return false;
-
-	if (key->bsic != BSIC_ANY && key->bsic > 0x3f)
-		return false;
-	return true;
-}
-
-/*! Add Cell Identifiers to an ARFCN+BSIC entry.
- * Exactly one kind of identifier is allowed per ARFCN+BSIC entry, and any number of entries of that kind
+/*! Add Cell Identifiers to a neighbor BSC/MSC entry.
+ * Exactly one kind of identifier is allowed per entry, and any number of entries of that kind
  * may be added up to the capacity of gsm0808_cell_id_list2, by one or more calls to this function. To
- * replace an existing entry, first call neighbor_ident_del(nil, key).
+ * replace an existing entry, first call neighbor_ident_del(nil, cell_id).
  * \returns number of entries in the resulting identifier list, or negative on error:
  *   see gsm0808_cell_id_list_add() for the meaning of returned error codes;
  *   return -ENOMEM when the list is not initialized, -ERANGE when the BSIC value is too large. */
-int neighbor_ident_add(struct neighbor_ident_list *nil, const struct neighbor_ident_key *key,
-		       const struct gsm0808_cell_id_list2 *val)
+int neighbor_ident_add(struct neighbor_ident_list *nil, const struct neighbor_ident_addr *addr,
+		       const struct gsm0808_cell_id_list2 *cell_id)
 {
 	struct neighbor_ident *ni;
 	int rc;
@@ -181,49 +116,59 @@ int neighbor_ident_add(struct neighbor_ident_list *nil, const struct neighbor_id
 	if (!nil)
 		return -ENOMEM;
 
-	if (!neighbor_ident_key_valid(key))
-		return -ERANGE;
-
-	ni = _neighbor_ident_get(nil, key, true);
+	ni = _neighbor_ident_get(nil, addr);
 	if (!ni) {
 		ni = talloc_zero(nil, struct neighbor_ident);
 		OSMO_ASSERT(ni);
-		*ni = (struct neighbor_ident){
-			.key = *key,
-			.val = *val,
-		};
+		ni->addr = *addr;
 		llist_add_tail(&ni->entry, &nil->list);
-		return ni->val.id_list_len;
+		return ni->cell_ids.id_list_len;
 	}
 
-	rc = gsm0808_cell_id_list_add(&ni->val, val);
+	rc = gsm0808_cell_id_list_add(&ni->cell_ids, cell_id);
 
 	if (rc < 0)
 		return rc;
 
-	return ni->val.id_list_len;
+	return ni->cell_ids.id_list_len;
 }
 
-/*! Find cell identity for given BTS, ARFCN and BSIC, as previously added by neighbor_ident_add().
+/*! Find cell identity for given BSC or MSC, as previously added by neighbor_ident_add().
  */
 const struct gsm0808_cell_id_list2 *neighbor_ident_get(const struct neighbor_ident_list *nil,
-						       const struct neighbor_ident_key *key)
+						       const struct neighbor_ident_addr *addr)
 {
 	struct neighbor_ident *ni;
 	if (!nil)
 		return NULL;
-	ni = _neighbor_ident_get(nil, key, false);
+	ni = _neighbor_ident_get(nil, addr);
 	if (!ni)
 		return NULL;
-	return &ni->val;
+	return &ni->cell_ids;
 }
 
-bool neighbor_ident_del(struct neighbor_ident_list *nil, const struct neighbor_ident_key *key)
+/*! Find a BSC or MSC, as previously added by neighbor_ident_add(), for a given cell identity.
+ */
+const struct neighbor_ident_addr *neighbor_ident_lookup_cell(const struct neighbor_ident_list *nil,
+							     struct gsm0808_cell_id *cell_id)
+{
+	struct neighbor_ident *ni;
+	if (!nil)
+		return NULL;
+	llist_for_each_entry(ni, &nil->list, entry) {
+		if (gsm0808_cell_id_matches_list(cell_id, &ni->cell_ids, 0))
+			return &ni->addr;
+	}
+
+	return NULL;
+}
+
+bool neighbor_ident_del(struct neighbor_ident_list *nil, const struct neighbor_ident_addr *addr)
 {
 	struct neighbor_ident *ni;
 	if (!nil)
 		return false;
-	ni = _neighbor_ident_get(nil, key, true);
+	ni = _neighbor_ident_get(nil, addr);
 	if (!ni)
 		return false;
 	_neighbor_ident_free(ni);
@@ -240,8 +185,8 @@ void neighbor_ident_clear(struct neighbor_ident_list *nil)
 /*! Iterate all neighbor_ident_list entries and call iter_cb for each.
  * If iter_cb returns false, the iteration is stopped. */
 void neighbor_ident_iter(const struct neighbor_ident_list *nil,
-			 bool (* iter_cb )(const struct neighbor_ident_key *key,
-					   const struct gsm0808_cell_id_list2 *val,
+			 bool (* iter_cb )(const struct neighbor_ident_addr *addr,
+					   const struct gsm0808_cell_id_list2 *cell_ids,
 					   void *cb_data),
 			 void *cb_data)
 {
@@ -249,7 +194,7 @@ void neighbor_ident_iter(const struct neighbor_ident_list *nil,
 	if (!nil)
 		return;
 	llist_for_each_entry_safe(ni, ni_next, &nil->list, entry) {
-		if (!iter_cb(&ni->key, &ni->val, cb_data))
+		if (!iter_cb(&ni->addr, &ni->cell_ids, cb_data))
 			return;
 	}
 }

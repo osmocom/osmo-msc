@@ -1538,6 +1538,8 @@ void msc_vty_init(struct gsm_network *msc_network)
 #ifdef BUILD_IU
 	ranap_iu_vty_init(MSC_NODE, &msc_network->iu.rab_assign_addr_enc);
 #endif
+	neighbor_ident_vty_init(msc_network);
+
 	osmo_fsm_vty_add_cmds();
 
 	osmo_signal_register_handler(SS_SCALL, scall_cbfn, NULL);

@@ -16,6 +16,7 @@
 #include <osmocom/mgcp_client/mgcp_client.h>
 
 #include <osmocom/msc/msc_common.h>
+#include <osmocom/msc/neighbor_ident.h>
 
 #include "gsm_data_shared.h"
 
@@ -207,6 +208,10 @@ struct gsm_network {
 		struct llist_head bscs;
 		struct osmo_sccp_instance *sccp;
 	} a;
+
+	/* A list of neighbor BSCs. This list is defined statically via VTY and does not
+	* necessarily correspond to BSCs attached to the A interface at a given moment. */
+	struct neighbor_ident_list *neighbor_list;
 
 	struct {
 		/* MSISDN to which to route MO emergency calls */
