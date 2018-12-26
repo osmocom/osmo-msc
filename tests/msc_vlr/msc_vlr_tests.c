@@ -746,8 +746,16 @@ int __wrap_osmo_gsup_client_send(struct osmo_gsup_client *gsupc, struct msgb *ms
 	if (len < 1)
 		abort();
 
-	if (!msgb_eq_data_print(msg, buf, len))
+	/* Compare only the length expected. Extra data is fine, to not care about new GSUP IEs invented later. */
+	if (msg->len < len) {
+		fprintf(stderr, "ERROR: GSUP message too short, expected '%s'\n", gsup_tx_expected);
 		abort();
+	}
+
+	if (memcmp(msg->data, buf, len)) {
+		fprintf(stderr, "ERROR: GSUP message mismatch, expected it to start with '%s'\n", gsup_tx_expected);
+		abort();
+	}
 
 	talloc_free(msg);
 	gsup_tx_confirmed = true;
