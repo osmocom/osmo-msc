@@ -652,6 +652,8 @@ int vlr_subscr_req_lu(struct vlr_subscr *vsub)
 
 	gsup_msg.message_type = OSMO_GSUP_MSGT_UPDATE_LOCATION_REQUEST;
 	gsup_msg.cn_domain = vsub->vlr->cfg.is_ps ? OSMO_GSUP_CN_DOMAIN_PS : OSMO_GSUP_CN_DOMAIN_CS;
+	gsup_msg.supported_rat_types[0] = vsub->cs.attached_via_ran;
+	gsup_msg.supported_rat_types_len = 1;
 	rc = vlr_subscr_tx_gsup_message(vsub, &gsup_msg);
 
 	return rc;
