@@ -252,7 +252,8 @@ static int mncc_recvmsg(struct gsm_network *net, struct gsm_trans *trans,
 #endif
 
 	mncc->msg_type = msg_type;
-	mncc->ran = trans->conn->via_ran & 0xff;
+        if (trans && trans->conn)
+                mncc->ran = trans->conn->via_ran & 0xff;
 
 	msg = msgb_alloc(sizeof(struct gsm_mncc), "MNCC");
 	if (!msg)
