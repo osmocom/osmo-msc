@@ -252,6 +252,7 @@ static int mncc_recvmsg(struct gsm_network *net, struct gsm_trans *trans,
 #endif
 
 	mncc->msg_type = msg_type;
+	mncc->ran = trans->conn->via_ran & 0xff;
 
 	msg = msgb_alloc(sizeof(struct gsm_mncc), "MNCC");
 	if (!msg)
@@ -926,6 +927,7 @@ static int gsm48_cc_rx_connect(struct gsm_trans *trans, struct msgb *msg)
 
 	new_cc_state(trans, GSM_CSTATE_CONNECT_REQUEST);
 	rate_ctr_inc(&trans->net->msc_ctrs->ctr[MSC_CTR_CALL_MT_CONNECT]);
+
 
 	return mncc_recvmsg(trans->net, trans, MNCC_SETUP_CNF, &connect);
 }
