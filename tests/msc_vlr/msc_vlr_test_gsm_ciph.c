@@ -77,7 +77,7 @@ static void test_ciph()
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("MS sends Ciphering Mode Complete, VLR accepts and sends GSUP LU Req to HLR");
-	gsup_expect_tx("04010809710000004026f0280102");
+	gsup_expect_tx("04010809710000004026f0280102290101");
 	ms_sends_msg("0632");
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
@@ -292,7 +292,7 @@ static void test_ciph_tmsi()
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("MS sends Ciphering Mode Complete, VLR accepts and sends GSUP LU Req to HLR");
-	gsup_expect_tx("04010809710000004026f0280102");
+	gsup_expect_tx("04010809710000004026f0280102290101");
 	ms_sends_msg("0632");
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
@@ -531,7 +531,7 @@ static void test_ciph_imei()
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("MS sends Ciphering Mode Complete, VLR accepts and sends GSUP LU Req to HLR");
-	gsup_expect_tx("04010809710000004026f0280102");
+	gsup_expect_tx("04010809710000004026f0280102290101");
 	ms_sends_msg("0632");
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
@@ -641,7 +641,7 @@ static void test_ciph_imeisv()
 	vlr_subscr_put(vsub);
 
 	btw("MS sends Ciphering Mode Complete with IMEISV, VLR accepts and sends GSUP LU Req to HLR");
-	gsup_expect_tx("04010809710000004026f0280102");
+	gsup_expect_tx("04010809710000004026f0280102290101");
 	ms_sends_msg("063217094b32244332244372f5");
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
@@ -736,7 +736,7 @@ static void test_ciph_tmsi_imei()
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("MS sends Ciphering Mode Complete, VLR accepts and sends GSUP LU Req to HLR");
-	gsup_expect_tx("04010809710000004026f0280102");
+	gsup_expect_tx("04010809710000004026f0280102290101");
 	ms_sends_msg("0632");
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
@@ -915,7 +915,7 @@ static void test_gsm_ciph_in_umts_env()
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("MS sends Ciphering Mode Complete, VLR accepts and sends GSUP LU Req to HLR");
-	gsup_expect_tx("04010809710000000156f0280102");
+	gsup_expect_tx("04010809710000000156f0280102290101");
 	ms_sends_msg("0632");
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
@@ -1109,7 +1109,7 @@ static void test_a5_3_supported()
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("MS sends Ciphering Mode Complete, VLR accepts and sends GSUP LU Req to HLR");
-	gsup_expect_tx("04010809710000004026f0280102");
+	gsup_expect_tx("04010809710000004026f0280102290101");
 	ms_sends_msg("0632");
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
@@ -1330,7 +1330,7 @@ static void test_cm_service_needs_classmark_update()
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("MS sends Ciphering Mode Complete, VLR accepts and sends GSUP LU Req to HLR");
-	gsup_expect_tx("04010809710000004026f0280102");
+	gsup_expect_tx("04010809710000004026f0280102290101");
 	ms_sends_msg("0632");
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 

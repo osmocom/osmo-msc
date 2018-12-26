@@ -122,7 +122,7 @@ static void standard_lu()
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("MS sends SecurityModeControl acceptance, VLR accepts and sends GSUP LU Req to HLR");
-	gsup_expect_tx("04010809710000000156f0280102");
+	gsup_expect_tx("04010809710000000156f0280102290102");
 	ms_sends_security_mode_complete();
 	VERBOSE_ASSERT(gsup_tx_confirmed, == true, "%d");
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");

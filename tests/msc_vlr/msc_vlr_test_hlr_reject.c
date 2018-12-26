@@ -114,7 +114,7 @@ static void test_hlr_rej_auth_info_net_fail_no_reuse_tuples()
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("MS sends Authen Response, VLR accepts and sends GSUP LU Req to HLR");
-	gsup_expect_tx("04010809710000004026f0280102");
+	gsup_expect_tx("04010809710000004026f0280102290101");
 	ms_sends_msg("05542d8b2c3e");
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
@@ -203,7 +203,7 @@ static void test_hlr_rej_auth_info_unkown_imsi_no_reuse_tuples()
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("MS sends Authen Response, VLR accepts and sends GSUP LU Req to HLR");
-	gsup_expect_tx("04010809710000004026f0280102");
+	gsup_expect_tx("04010809710000004026f0280102290101");
 	ms_sends_msg("05542d8b2c3e");
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
@@ -326,7 +326,7 @@ static void test_hlr_rej_auth_info_net_fail_reuse_tuples()
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("MS sends Authen Response, VLR accepts and sends GSUP LU Req to HLR");
-	gsup_expect_tx("04010809710000004026f0280102");
+	gsup_expect_tx("04010809710000004026f0280102290101");
 	ms_sends_msg("05542d8b2c3e");
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
@@ -371,7 +371,7 @@ static void test_hlr_rej_auth_info_net_fail_reuse_tuples()
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("MS sends Authen Response, VLR accepts and sends GSUP LU Req to HLR");
-	gsup_expect_tx("04010809710000004026f0280102");
+	gsup_expect_tx("04010809710000004026f0280102290101");
 	ms_sends_msg("05542d8b2c3e");
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
@@ -400,7 +400,7 @@ static void test_hlr_rej_lu()
 
 	btw("Location Update request causes a GSUP LU request to HLR");
 	lu_result_sent = RES_NONE;
-	gsup_expect_tx("04010809710000004026f0280102");
+	gsup_expect_tx("04010809710000004026f0280102290101");
 	ms_sends_msg("050802008168000130089910070000006402");
 	OSMO_ASSERT(gsup_tx_confirmed);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
@@ -424,7 +424,7 @@ static void test_hlr_no_insert_data()
 
 	btw("Location Update request causes a GSUP LU request to HLR");
 	lu_result_sent = RES_NONE;
-	gsup_expect_tx("04010809710000004026f0280102");
+	gsup_expect_tx("04010809710000004026f0280102290101");
 	ms_sends_msg("050802008168000130089910070000006402");
 	OSMO_ASSERT(gsup_tx_confirmed);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");

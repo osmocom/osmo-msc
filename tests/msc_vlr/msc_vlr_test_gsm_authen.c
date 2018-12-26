@@ -75,7 +75,7 @@ static void test_gsm_authen()
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("MS sends Authen Response, VLR accepts and sends GSUP LU Req to HLR");
-	gsup_expect_tx("04010809710000004026f0280102");
+	gsup_expect_tx("04010809710000004026f0280102290101");
 	ms_sends_msg("05542d8b2c3e");
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
@@ -269,7 +269,7 @@ static void test_gsm_authen_tmsi()
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("MS sends Authen Response, VLR accepts and sends GSUP LU Req to HLR");
-	gsup_expect_tx("04010809710000004026f0280102");
+	gsup_expect_tx("04010809710000004026f0280102290101");
 	ms_sends_msg("05542d8b2c3e");
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
@@ -446,7 +446,7 @@ static void test_gsm_authen_tmsi()
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("MS sends Authen Response, VLR accepts and sends GSUP LU Req to HLR");
-	gsup_expect_tx("04010809710000004026f0280102");
+	gsup_expect_tx("04010809710000004026f0280102290101");
 	ms_sends_msg("05545afc8d72");
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
@@ -551,7 +551,7 @@ static void test_gsm_authen_imei()
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("MS sends Authen Response, VLR accepts and sends GSUP LU Req to HLR");
-	gsup_expect_tx("04010809710000004026f0280102");
+	gsup_expect_tx("04010809710000004026f0280102290101");
 	ms_sends_msg("05542d8b2c3e");
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
@@ -654,7 +654,7 @@ static void test_gsm_authen_tmsi_imei()
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("MS sends Authen Response, VLR accepts and sends GSUP LU Req to HLR");
-	gsup_expect_tx("04010809710000004026f0280102");
+	gsup_expect_tx("04010809710000004026f0280102290101");
 	ms_sends_msg("05542d8b2c3e");
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
@@ -785,7 +785,7 @@ static void test_gsm_milenage_authen()
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("MS sends Authen Response, VLR accepts and sends GSUP LU Req to HLR");
-	gsup_expect_tx("04010809710000000156f0280102");
+	gsup_expect_tx("04010809710000000156f0280102290101");
 	ms_sends_msg("0554" "9b36efdf");
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
