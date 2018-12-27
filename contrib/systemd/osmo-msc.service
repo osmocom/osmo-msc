@@ -10,6 +10,7 @@ Type=simple
 Restart=always
 ExecStart=/usr/bin/osmo-msc -c /etc/osmocom/osmo-msc.cfg
 RestartSec=2
+ExecStopPost=/usr/local/bin/save_log_tail osmo-msc
 
 [Install]
 WantedBy=multi-user.target
