@@ -240,9 +240,6 @@ static const char *vlr_auth_fsm_result_name(enum gsm48_reject_value result)
 /* Terminate the Auth FSM Instance and notify parent */
 static void auth_fsm_term(struct osmo_fsm_inst *fi, enum gsm48_reject_value result)
 {
-	struct auth_fsm_priv *afp = fi->priv;
-	struct vlr_subscr *vsub = afp->vsub;
-
 	LOGPFSM(fi, "Authentication terminating with result %s\n",
 		vlr_auth_fsm_result_name(result));
 
@@ -254,6 +251,12 @@ static void auth_fsm_term(struct osmo_fsm_inst *fi, enum gsm48_reject_value resu
 
 	/* return the result to the parent FSM */
 	osmo_fsm_inst_term(fi, OSMO_FSM_TERM_REGULAR, &result);
+}
+
+static void auth_fsm_cleanup(struct osmo_fsm_inst *fi, enum osmo_fsm_term_cause cause)
+{
+	struct auth_fsm_priv *afp = fi->priv;
+	struct vlr_subscr *vsub = afp->vsub;
 	vsub->auth_fsm = NULL;
 }
 
@@ -583,6 +586,7 @@ struct osmo_fsm vlr_auth_fsm = {
 	.allstate_action = NULL,
 	.log_subsys = DVLR,
 	.event_names = fsm_auth_event_names,
+	.cleanup = auth_fsm_cleanup,
 };
 
 /***********************************************************************
