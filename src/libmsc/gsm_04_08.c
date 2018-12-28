@@ -1804,12 +1804,22 @@ static void update_classmark(const struct gsm_classmark *src, struct gsm_classma
 }
 
 /* VLR informs us that the subscriber has been associated with a conn */
-static void msc_vlr_subscr_assoc(void *msc_conn_ref,
+static int msc_vlr_subscr_assoc(void *msc_conn_ref,
 				 struct vlr_subscr *vsub)
 {
 	struct ran_conn *conn = msc_conn_ref;
 	OSMO_ASSERT(vsub);
-	OSMO_ASSERT(!conn->vsub);
+	if (conn->vsub) {
+		if (conn->vsub == vsub)
+			LOGPCONN(conn, LOGL_NOTICE, "msc_vlr_subscr_assoc(): conn already associated with %s\n",
+				 vlr_subscr_name(vsub));
+		else {
+			LOGPCONN(conn, LOGL_ERROR, "msc_vlr_subscr_assoc(): conn already associated with a subscriber,"
+				 " cannot associate with %s\n", vlr_subscr_name(vsub));
+			return -EINVAL;
+		}
+	}
+	OSMO_ASSERT(!conn->vsub || conn->vsub );
 	conn->vsub = vlr_subscr_get(vsub);
 	OSMO_ASSERT(conn->vsub);
 	conn->vsub->cs.attached_via_ran = conn->via_ran;
@@ -1820,6 +1830,7 @@ static void msc_vlr_subscr_assoc(void *msc_conn_ref,
 	update_classmark(&conn->temporary_classmark, &conn->vsub->classmark);
 
 	ran_conn_update_id(conn);
+	return 0;
 }
 
 static int msc_vlr_route_gsup_msg(struct vlr_subscr *vsub,

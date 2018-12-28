@@ -235,7 +235,7 @@ struct vlr_ops {
 	void (*subscr_update)(struct vlr_subscr *vsub);
 	/* notify MSC/SGSN that the given subscriber has been associated
 	 * with this msc_conn_ref */
-	void (*subscr_assoc)(void *msc_conn_ref, struct vlr_subscr *vsub);
+	int (*subscr_assoc)(void *msc_conn_ref, struct vlr_subscr *vsub);
 
 	/* Forward a parsed GSUP message towards MSC message router */
 	int (*forward_gsup_msg)(struct vlr_subscr *vsub, struct osmo_gsup_message *gsup_msg);

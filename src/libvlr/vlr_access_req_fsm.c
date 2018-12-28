@@ -72,7 +72,7 @@ struct proc_arq_priv {
 	bool implicitly_accepted_parq_by_ciphering_cmd;
 };
 
-static void assoc_par_with_subscr(struct osmo_fsm_inst *fi, struct vlr_subscr *vsub)
+static int assoc_par_with_subscr(struct osmo_fsm_inst *fi, struct vlr_subscr *vsub)
 {
 	struct proc_arq_priv *par = fi->priv;
 	struct vlr_instance *vlr = par->vlr;
@@ -81,7 +81,7 @@ static void assoc_par_with_subscr(struct osmo_fsm_inst *fi, struct vlr_subscr *v
 	par->vsub = vsub;
 	/* Tell MSC to associate this subscriber with the given
 	 * connection */
-	vlr->ops.subscr_assoc(par->msc_conn_ref, par->vsub);
+	return vlr->ops.subscr_assoc(par->msc_conn_ref, par->vsub);
 }
 
 static const char *vlr_proc_arq_result_name(const struct osmo_fsm_inst *fi)
@@ -371,8 +371,10 @@ static void proc_arq_vlr_fn_init(struct osmo_fsm_inst *fi,
 					  GSM48_REJECT_NETWORK_FAILURE);
 		}
 		vsub->proc_arq_fsm = fi;
-		assoc_par_with_subscr(fi, vsub);
-		proc_arq_vlr_fn_post_imsi(fi);
+		if (assoc_par_with_subscr(fi, vsub) != 0)
+			proc_arq_fsm_done(fi, GSM48_REJECT_NETWORK_FAILURE);
+		else
+			proc_arq_vlr_fn_post_imsi(fi);
 		vlr_subscr_put(vsub);
 		return;
 	}
@@ -414,8 +416,10 @@ static void proc_arq_vlr_fn_w_obt_imsi(struct osmo_fsm_inst *fi,
 		proc_arq_fsm_done(fi, GSM48_REJECT_IMSI_UNKNOWN_IN_VLR);
 		return;
 	}
-	assoc_par_with_subscr(fi, vsub);
-	proc_arq_vlr_fn_post_imsi(fi);
+	if (assoc_par_with_subscr(fi, vsub))
+		proc_arq_fsm_done(fi, GSM48_REJECT_NETWORK_FAILURE);
+	else
+		proc_arq_vlr_fn_post_imsi(fi);
 	vlr_subscr_put(vsub);
 }
 

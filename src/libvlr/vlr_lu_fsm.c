@@ -954,7 +954,8 @@ static int assoc_lfp_with_sub(struct osmo_fsm_inst *fi, struct vlr_subscr *vsub)
 	lfp->vsub = vsub;
 	/* Tell MSC to associate this subscriber with the given
 	 * connection */
-	vlr->ops.subscr_assoc(lfp->msc_conn_ref, lfp->vsub);
+	if (vlr->ops.subscr_assoc(lfp->msc_conn_ref, lfp->vsub))
+		lu_fsm_failure(fi, GSM48_REJECT_NETWORK_FAILURE);
 	return 0;
 }
 
