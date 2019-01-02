@@ -38,7 +38,7 @@ void _gsm911_nc_ss_trans_free(struct gsm_trans *trans);
  * \param[in] trans_id Transaction ID of transaction
  * \returns Matching transaction, if any
  */
-struct gsm_trans *trans_find_by_id(struct ran_conn *conn,
+struct gsm_trans *trans_find_by_id(const struct ran_conn *conn,
 				   uint8_t proto, uint8_t trans_id)
 {
 	struct gsm_trans *trans;
@@ -59,7 +59,7 @@ struct gsm_trans *trans_find_by_id(struct ran_conn *conn,
  * \param[in] callref Call Reference of transaction
  * \returns Matching transaction, if any
  */
-struct gsm_trans *trans_find_by_callref(struct gsm_network *net,
+struct gsm_trans *trans_find_by_callref(const struct gsm_network *net,
 					uint32_t callref)
 {
 	struct gsm_trans *trans;
@@ -76,7 +76,7 @@ struct gsm_trans *trans_find_by_callref(struct gsm_network *net,
  * \param[in] sm_rp_mr RP Message Reference (see GSM TS 04.11, section 8.2.3)
  * \returns Matching transaction, NULL otherwise
  */
-struct gsm_trans *trans_find_by_sm_rp_mr(struct ran_conn *conn,
+struct gsm_trans *trans_find_by_sm_rp_mr(const struct ran_conn *conn,
 					 uint8_t sm_rp_mr)
 {
 	struct gsm_network *net = conn->network;
@@ -182,7 +182,7 @@ void trans_free(struct gsm_trans *trans)
  * \param[in] protocol Protocol for whihc to find ID
  * \param[in] ti_flag FIXME
  */
-int trans_assign_trans_id(struct gsm_network *net, struct vlr_subscr *vsub,
+int trans_assign_trans_id(const struct gsm_network *net, const struct vlr_subscr *vsub,
 			  uint8_t protocol, uint8_t ti_flag)
 {
 	struct gsm_trans *trans;
@@ -234,7 +234,7 @@ struct gsm_trans *trans_has_conn(const struct ran_conn *conn)
  * facilities, which will then send the necessary release indications.
  * \param[in] conn Connection that is going to be closed.
  */
-void trans_conn_closed(struct ran_conn *conn)
+void trans_conn_closed(const struct ran_conn *conn)
 {
 	struct gsm_trans *trans;
 
