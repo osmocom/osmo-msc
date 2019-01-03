@@ -547,6 +547,7 @@ static void lu_compl_vlr_wait_tmsi(struct osmo_fsm_inst *fi, uint32_t event,
 
 	vsub->tmsi = vsub->tmsi_new;
 	vsub->tmsi_new = GSM_RESERVED_TMSI;
+	vsub->vlr->ops.subscr_update(vsub);
 
 	vlr_lu_compl_fsm_success(fi);
 }

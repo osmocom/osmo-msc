@@ -326,10 +326,6 @@ int mm_rx_loc_upd_req(struct ran_conn *conn, struct msgb *msg)
 
  	lu = (struct gsm48_loc_upd_req *) gh->data;
 
-	mi_type = lu->mi[0] & GSM_MI_TYPE_MASK;
-
-	gsm48_mi_to_string(mi_string, sizeof(mi_string), lu->mi, lu->mi_len);
-
 	if (ran_conn_is_establishing_auth_ciph(conn)) {
 		LOG_RAN_CONN_CAT(conn, DMM, LOGL_ERROR,
 				 "Cannot accept another LU, conn already busy establishing authenticity;"
@@ -346,7 +342,8 @@ int mm_rx_loc_upd_req(struct ran_conn *conn, struct msgb *msg)
 		return -EINVAL;
 	}
 
-	ran_conn_update_id(conn, COMPLETE_LAYER3_LU, mi_string);
+	conn->complete_layer3_type = COMPLETE_LAYER3_LU;
+	ran_conn_update_id_from_mi(conn, lu->mi, lu->mi_len);
 
 	LOG_RAN_CONN_CAT(conn, DMM, LOGL_DEBUG, "LOCATION UPDATING REQUEST: MI=%s LU-type=%s\n",
 			 osmo_mi_name(lu->mi, lu->mi_len), osmo_lu_type_name(lu->type));
@@ -373,6 +370,8 @@ int mm_rx_loc_upd_req(struct ran_conn *conn, struct msgb *msg)
 	/* TODO: 10.5.7.8 Device properties */
 	/* TODO: 10.5.1.15 MS network feature support */
 
+	mi_type = lu->mi[0] & GSM_MI_TYPE_MASK;
+	gsm48_mi_to_string(mi_string, sizeof(mi_string), lu->mi, lu->mi_len);
 	switch (mi_type) {
 	case GSM_MI_TYPE_IMSI:
 		tmsi = GSM_RESERVED_TMSI;
@@ -677,7 +676,7 @@ accept_reuse:
 		conn->received_cm_service_request = true;
 		ran_conn_get(conn, RAN_CONN_USE_CM_SERVICE);
 	}
-	ran_conn_update_id(conn, conn->complete_layer3_type, mi_string);
+	ran_conn_update_id(conn);
 	return conn->network->vlr->ops.tx_cm_serv_acc(conn);
 }
 
@@ -696,8 +695,6 @@ int gsm48_rx_mm_serv_req(struct ran_conn *conn, struct msgb *msg)
 {
 	struct gsm_network *net = conn->network;
 	uint8_t mi_type;
-	char mi_string[GSM48_MI_SIZE];
-
 	struct gsm48_hdr *gh = msgb_l3(msg);
 	struct gsm48_service_request *req =
 			(struct gsm48_service_request *)gh->data;
@@ -734,12 +731,12 @@ int gsm48_rx_mm_serv_req(struct ran_conn *conn, struct msgb *msg)
 		/* or should we accept and note down the service request anyway? */
 	}
 
-	gsm48_mi_to_string(mi_string, sizeof(mi_string), mi, mi_len);
+	conn->complete_layer3_type = COMPLETE_LAYER3_CM_SERVICE_REQ;
+	ran_conn_update_id_from_mi(conn, mi, mi_len);
+	LOG_RAN_CONN_CAT(conn, DMM, LOGL_DEBUG, "Rx CM SERVICE REQUEST cm_service_type=0x%02x\n",
+			 req->cm_service_type);
 
-	mi_type = mi[0] & GSM_MI_TYPE_MASK;
-	LOG_RAN_CONN_CAT(conn, DMM, LOGL_DEBUG, "Rx CM SERVICE REQUEST cm_service_type=0x%02x MI(%s)=%s\n",
-			 req->cm_service_type, gsm48_mi_type_name(mi_type), mi_string);
-
+	mi_type = (mi && mi_len) ? (mi[0] & GSM_MI_TYPE_MASK) : GSM_MI_TYPE_NONE;
 	switch (mi_type) {
 	case GSM_MI_TYPE_IMSI:
 	case GSM_MI_TYPE_TMSI:
@@ -753,7 +750,7 @@ int gsm48_rx_mm_serv_req(struct ran_conn *conn, struct msgb *msg)
 		}
 		/* fall-through for non-emergency setup */
 	default:
-		LOG_RAN_CONN(conn, LOGL_ERROR, "mi_type is not expected: %d\n", mi_type);
+		LOG_RAN_CONN(conn, LOGL_ERROR, "MI type is not expected: %s\n", gsm48_mi_type_name(mi_type));
 		return msc_gsm48_tx_mm_serv_rej(conn,
 						GSM48_REJECT_INCORRECT_MESSAGE);
 	}
@@ -771,9 +768,6 @@ int gsm48_rx_mm_serv_req(struct ran_conn *conn, struct msgb *msg)
 
 	if (ran_conn_is_accepted(conn))
 		return cm_serv_reuse_conn(conn, mi_p);
-
-
-	ran_conn_update_id(conn, COMPLETE_LAYER3_CM_SERVICE_REQ, mi_string);
 
 	osmo_signal_dispatch(SS_SUBSCR, S_SUBSCR_IDENTITY, mi_p);
 
@@ -1142,24 +1136,14 @@ static int gsm48_rx_rr_pag_resp(struct ran_conn *conn, struct msgb *msg)
 {
 	struct gsm_network *net = conn->network;
 	struct gsm48_hdr *gh = msgb_l3(msg);
-	struct gsm48_pag_resp *resp;
 	uint8_t classmark2_len = gh->data[1];
 	uint8_t *classmark2 = gh->data+2;
 	uint8_t *mi_lv = classmark2 + classmark2_len;
-	uint8_t mi_type;
-	char mi_string[GSM48_MI_SIZE];
 	struct osmo_location_area_id lai;
 	bool is_utran;
 
 	lai.plmn = conn->network->plmn;
 	lai.lac = conn->lac;
-
-	resp = (struct gsm48_pag_resp *) &gh->data[0];
-
-	if (gsm48_paging_extract_mi(resp, msgb_l3len(msg) - sizeof(*gh), mi_string, &mi_type) <= 0) {
-		LOGP(DRR, LOGL_ERROR, "PAGING RESPONSE: invalid Mobile Identity\n");
-		return -EINVAL;
-	}
 
 	if (ran_conn_is_establishing_auth_ciph(conn)) {
 		LOGP(DMM, LOGL_ERROR,
@@ -1172,8 +1156,9 @@ static int gsm48_rx_rr_pag_resp(struct ran_conn *conn, struct msgb *msg)
 		return 0;
 	}
 
-	ran_conn_update_id(conn, COMPLETE_LAYER3_PAGING_RESP, mi_string);
-	LOG_RAN_CONN_CAT(conn, DRR, LOGL_DEBUG, "PAGING RESPONSE: MI(%s)=%s\n", gsm48_mi_type_name(mi_type), mi_string);
+	conn->complete_layer3_type = COMPLETE_LAYER3_PAGING_RESP;
+	ran_conn_update_id_from_mi(conn, mi_lv + 1, *mi_lv);
+	LOG_RAN_CONN_CAT(conn, DRR, LOGL_DEBUG, "PAGING RESPONSE\n");
 
 	is_utran = (conn->via_ran == OSMO_RAT_UTRAN_IU);
 	vlr_proc_acc_req(conn->fi,
@@ -1734,6 +1719,7 @@ static void msc_vlr_subscr_update(struct vlr_subscr *subscr)
 {
 	LOGVSUBP(LOGL_NOTICE, subscr, "VLR: update for IMSI=%s (MSISDN=%s, used=%d)\n",
 		 subscr->imsi, subscr->msisdn, subscr->use_count);
+	ran_conn_update_id_for_vsub(subscr);
 }
 
 static void update_classmark(const struct gsm_classmark *src, struct gsm_classmark *dst)
@@ -1777,6 +1763,7 @@ static int msc_vlr_subscr_assoc(void *msc_conn_ref,
 	 * associated with the conn: merge the new Classmark into vsub->classmark. Don't overwrite valid
 	 * vsub->classmark with unset classmark, though. */
 	update_classmark(&conn->temporary_classmark, &conn->vsub->classmark);
+	ran_conn_update_id(conn);
 	return 0;
 }
 

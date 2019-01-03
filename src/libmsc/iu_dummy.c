@@ -91,8 +91,9 @@ int ranap_iu_tx_release(struct ranap_ue_conn_ctx *ctx, const struct RANAP_Cause 
 
 uint32_t iu_get_conn_id(const struct ranap_ue_conn_ctx *ue)
 {
-	LOGP(DLGLOBAL, LOGL_INFO, "iu_get_conn_id() dummy called, returning BOGUS value\n");
-	return 23;
+	/* There is a bogus conn_id in the bogus struct ranap_ue_conn_ctx, managed for unit testing of Iu even in the
+	 * absence of libosmo-ranap (when built without Iu support). */
+	return ue->conn_id;
 }
 
 #endif

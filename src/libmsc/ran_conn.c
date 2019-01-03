@@ -491,22 +491,31 @@ static struct osmo_fsm ran_conn_fsm = {
 	.timer_cb = ran_conn_fsm_timeout,
 };
 
-char *ran_conn_get_conn_id(struct ran_conn *conn)
+/* Return statically allocated string of the ran_conn RAT type and id. */
+const char *ran_conn_get_conn_id(struct ran_conn *conn)
 {
-	char *id;
+	static char id[42];
+	int rc;
+	uint32_t conn_id;
 
 	switch (conn->via_ran) {
 	case OSMO_RAT_GERAN_A:
-		id = talloc_asprintf(conn, "GERAN_A-%08x", conn->a.conn_id);
+		conn_id = conn->a.conn_id;
 		break;
 	case OSMO_RAT_UTRAN_IU:
-		id = talloc_asprintf(conn, "UTRAN_IU-%08x", iu_get_conn_id(conn->iu.ue_ctx));
+		conn_id = iu_get_conn_id(conn->iu.ue_ctx);
 		break;
 	default:
-		LOGP(DMM, LOGL_ERROR, "RAN of conn %p unknown!\n", conn);
-		return NULL;
+		return "ran-unknown";
 	}
 
+	rc = snprintf(id, sizeof(id), "%s-%u", osmo_rat_type_name(conn->via_ran), conn_id);
+	/* < 0 is error, == 0 is empty, >= size means truncation. Not really expecting this to catch on in any practical
+	 * situation. */
+	if (rc <= 0 || rc >= sizeof(id)) {
+		LOGP(DMM, LOGL_ERROR, "Error with conn id; rc=%d\n", rc);
+		return "conn-id-error";
+	}
 	return id;
 }
 
@@ -684,12 +693,57 @@ const struct value_string complete_layer3_type_names[] = {
 	{ 0, NULL }
 };
 
-void ran_conn_update_id(struct ran_conn *conn,
-			       enum complete_layer3_type from, const char *id)
+static void _ran_conn_update_id(struct ran_conn *conn, const char *subscr_identity)
 {
-       conn->complete_layer3_type = from;
-       osmo_fsm_inst_update_id_f(conn->fi, "%s:%s", complete_layer3_type_name(from), id);
-       LOGPFSML(conn->fi, LOGL_DEBUG, "Updated ID\n");
+	struct vlr_subscr *vsub = conn->vsub;
+
+	if (osmo_fsm_inst_update_id_f(conn->fi, "%s:%s:%s",
+				      subscr_identity,
+				      ran_conn_get_conn_id(conn),
+				      complete_layer3_type_name(conn->complete_layer3_type))
+	    != 0)
+		return; /* osmo_fsm_inst_update_id_f() will log an error. */
+
+	if (vsub) {
+		if (vsub->lu_fsm)
+			osmo_fsm_inst_update_id(vsub->lu_fsm, conn->fi->id);
+		if (vsub->auth_fsm)
+			osmo_fsm_inst_update_id(vsub->auth_fsm, conn->fi->id);
+		if (vsub->proc_arq_fsm)
+			osmo_fsm_inst_update_id(vsub->proc_arq_fsm, conn->fi->id);
+	}
+
+	LOGPFSML(conn->fi, LOGL_DEBUG, "Updated ID\n");
+}
+
+/* Compose an ID almost like gsm48_mi_to_string(), but print the MI type along, and print a TMSI as hex. */
+void ran_conn_update_id_from_mi(struct ran_conn *conn, const uint8_t *mi, uint8_t mi_len)
+{
+	_ran_conn_update_id(conn, osmo_mi_name(mi, mi_len));
+}
+
+/* Update ran_conn->fi id string from current conn->vsub and conn->complete_layer3_type. */
+void ran_conn_update_id(struct ran_conn *conn)
+{
+	_ran_conn_update_id(conn, vlr_subscr_name(conn->vsub));
+}
+
+/* Iterate all ran_conn instances that are relevant for this subscriber, and update FSM ID strings for all of the FSM
+ * instances. */
+void ran_conn_update_id_for_vsub(struct vlr_subscr *for_vsub)
+{
+	struct gsm_network *network;
+	struct ran_conn *conn;
+	if (!for_vsub)
+		return;
+
+	network = for_vsub->vlr->user_ctx;
+	OSMO_ASSERT(network);
+
+	llist_for_each_entry(conn, &network->ran_conns, entry) {
+		if (conn->vsub == for_vsub)
+			ran_conn_update_id(conn);
+	}
 }
 
 static void rx_close_complete(struct ran_conn *conn, const char *label, bool *flag)
