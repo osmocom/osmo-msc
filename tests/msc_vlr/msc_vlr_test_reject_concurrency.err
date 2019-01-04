@@ -316,8 +316,7 @@ DMM RAN_conn(LU:901700000004620){RAN_CONN_S_AUTH_CIPH}: Awaiting results for Aut
   MSC <--GERAN-A-- MS: GSM48_MT_MM_CM_SERV_REQ
 DREF IMSI:901700000004620: MSC conn use + dtap == 1 (0x2: dtap)
 DRLL Dispatching 04.08 message GSM48_MT_MM_CM_SERV_REQ (0x5:0x24)
-DMM RAN_conn(LU:901700000004620){RAN_CONN_S_AUTH_CIPH}: Rx CM SERVICE REQUEST cm_service_type=0x08 MI(IMSI)=901700000004620
-DMM Cannot accept CM Service Request, conn already busy establishing authenticity
+DBSSAP RAN_conn(LU:901700000004620){RAN_CONN_S_AUTH_CIPH}: Cannot accept CM Service Request, conn already busy establishing authenticity
 DMM -> CM SERVICE Reject cause: 22
 DMSC msc_tx 3 bytes to IMSI:901700000004620 via GERAN-A
 - DTAP --GERAN-A--> MS: GSM48_MT_MM_CM_SERV_REJ: 052216

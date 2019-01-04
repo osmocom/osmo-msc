@@ -726,6 +726,14 @@ int gsm48_rx_mm_serv_req(struct ran_conn *conn, struct msgb *msg)
 						GSM48_REJECT_INCORRECT_MESSAGE);
 	}
 
+	if (ran_conn_is_establishing_auth_ciph(conn)) {
+		LOG_RAN_CONN(conn, LOGL_ERROR,
+		     "Cannot accept CM Service Request, conn already busy establishing authenticity\n");
+		msc_vlr_tx_cm_serv_rej(conn, GSM48_REJECT_CONGESTION);
+		return -EINVAL;
+		/* or should we accept and note down the service request anyway? */
+	}
+
 	gsm48_mi_to_string(mi_string, sizeof(mi_string), mi, mi_len);
 
 	mi_type = mi[0] & GSM_MI_TYPE_MASK;
@@ -764,13 +772,6 @@ int gsm48_rx_mm_serv_req(struct ran_conn *conn, struct msgb *msg)
 	if (ran_conn_is_accepted(conn))
 		return cm_serv_reuse_conn(conn, mi_p);
 
-	if (ran_conn_is_establishing_auth_ciph(conn)) {
-		LOGP(DMM, LOGL_ERROR,
-		     "Cannot accept CM Service Request, conn already busy establishing authenticity\n");
-		msc_vlr_tx_cm_serv_rej(conn, GSM48_REJECT_CONGESTION);
-		return -EINVAL;
-		/* or should we accept and note down the service request anyway? */
-	}
 
 	ran_conn_update_id(conn, COMPLETE_LAYER3_CM_SERVICE_REQ, mi_string);
 
