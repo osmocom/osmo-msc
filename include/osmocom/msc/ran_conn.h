@@ -8,6 +8,12 @@
 #include <osmocom/mgcp_client/mgcp_client.h>
 #include <osmocom/gsm/gsm_utils.h>
 
+#define LOG_RAN_CONN(conn, level, fmt, args ...) \
+	LOG_RAN_CONN_CAT(conn, (conn) ? (conn)->log_subsys : DMSC, level, fmt, ## args)
+
+#define LOG_RAN_CONN_CAT(conn, subsys, level, fmt, args ...) \
+	LOGPFSMSL((conn)? (conn)->fi : NULL, subsys, level, fmt, ## args)
+
 enum ran_conn_fsm_event {
 	/* Accepted the initial Complete Layer 3 (starting to evaluate Authentication and Ciphering) */
 	RAN_CONN_E_COMPLETE_LAYER_3,
@@ -107,6 +113,8 @@ struct ran_conn {
 
 	/* connected via 2G or 3G? */
 	enum osmo_rat_type via_ran;
+	/* whether to log on DBSSAP, DIUCS, ... */
+	int log_subsys;
 
 	uint16_t lac;
 	struct geran_encr geran_encr;

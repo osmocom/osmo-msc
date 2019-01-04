@@ -511,6 +511,11 @@ static struct log_info_cat test_categories[] = {
 		.description = "MNCC API for Call Control application",
 		.enabled = 1, .loglevel = LOGL_DEBUG,
 	},
+	[DBSSAP] = {
+		.name = "DBSSAP",
+		.description = "BSSAP Protocol (A Interface)",
+		.enabled = 1, .loglevel = LOGL_DEBUG,
+	},
 };
 
 static struct log_info info = {

@@ -40,8 +40,11 @@
 #include <osmocom/sccp/sccp_types.h>
 #include <osmocom/msc/a_reset.h>
 #include <osmocom/msc/vlr.h>
+#include <osmocom/msc/ran_conn.h>
 
 #include <errno.h>
+
+#define LOGPCONN LOG_RAN_CONN
 
 /* A pointer to the GSM network we work with. By the current paradigm,
  * there can only be one gsm_network per MSC. The pointer is set once
@@ -86,7 +89,7 @@ void a_delete_bsc_con(uint32_t conn_id)
 
 	llist_for_each_entry_safe(conn, conn_temp, &active_connections, list) {
 		if (conn->conn_id == conn_id) {
-			LOGPBSCCONN(conn, LOGL_DEBUG, "Removing A-interface conn\n");
+			LOGP(DBSSAP, LOGL_DEBUG, "(conn%u) Removing A-interface conn\n", conn->conn_id);
 			llist_del(&conn->list);
 			talloc_free(conn);
 		}

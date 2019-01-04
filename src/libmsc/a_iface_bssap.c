@@ -35,10 +35,13 @@
 #include <osmocom/msc/a_reset.h>
 #include <osmocom/msc/transaction.h>
 #include <osmocom/msc/msc_mgcp.h>
+#include <osmocom/msc/ran_conn.h>
 
 #include <errno.h>
 
 #define IP_V4_ADDR_LEN 4
+
+#define LOGPCONN LOG_RAN_CONN
 
 /*
  * Helper functions to lookup and allocate subscribers

@@ -651,6 +651,18 @@ struct ran_conn *ran_conn_alloc(struct gsm_network *network,
 		.fi = fi,
 	};
 
+	switch (via_ran) {
+	case OSMO_RAT_GERAN_A:
+		conn->log_subsys = DBSSAP;
+		break;
+	case OSMO_RAT_UTRAN_IU:
+		conn->log_subsys = DRANAP;
+		break;
+	default:
+		conn->log_subsys = DMSC;
+		break;
+	}
+
 	fi->priv = conn;
 	llist_add_tail(&conn->entry, &network->ran_conns);
 	return conn;

@@ -331,25 +331,25 @@ int mm_rx_loc_upd_req(struct ran_conn *conn, struct msgb *msg)
 	gsm48_mi_to_string(mi_string, sizeof(mi_string), lu->mi, lu->mi_len);
 
 	if (ran_conn_is_establishing_auth_ciph(conn)) {
-		LOGP(DMM, LOGL_ERROR,
-		     "Cannot accept another LU, conn already busy establishing authenticity;"
-		     " extraneous LOCATION UPDATING REQUEST: MI(%s)=%s type=%s\n",
-		     gsm48_mi_type_name(mi_type), mi_string, osmo_lu_type_name(lu->type));
+		LOG_RAN_CONN_CAT(conn, DMM, LOGL_ERROR,
+				 "Cannot accept another LU, conn already busy establishing authenticity;"
+				 " extraneous LOCATION UPDATING REQUEST: MI=%s LU-type=%s\n",
+				 osmo_mi_name(lu->mi, lu->mi_len), osmo_lu_type_name(lu->type));
 		return -EINVAL;
 	}
 
 	if (ran_conn_is_accepted(conn)) {
-		LOGP(DMM, LOGL_ERROR,
-		     "Cannot accept another LU, conn already established;"
-		     " extraneous LOCATION UPDATING REQUEST: MI(%s)=%s type=%s\n",
-		     gsm48_mi_type_name(mi_type), mi_string, osmo_lu_type_name(lu->type));
+		LOG_RAN_CONN_CAT(conn, DMM, LOGL_ERROR,
+				 "Cannot accept another LU, conn already established;"
+				 " extraneous LOCATION UPDATING REQUEST: MI=%s LU-type=%s\n",
+				 osmo_mi_name(lu->mi, lu->mi_len), osmo_lu_type_name(lu->type));
 		return -EINVAL;
 	}
 
 	ran_conn_update_id(conn, COMPLETE_LAYER3_LU, mi_string);
 
-	DEBUGP(DMM, "LOCATION UPDATING REQUEST: MI(%s)=%s type=%s\n",
-	       gsm48_mi_type_name(mi_type), mi_string, osmo_lu_type_name(lu->type));
+	LOG_RAN_CONN_CAT(conn, DMM, LOGL_DEBUG, "LOCATION UPDATING REQUEST: MI=%s LU-type=%s\n",
+			 osmo_mi_name(lu->mi, lu->mi_len), osmo_lu_type_name(lu->type));
 
 	osmo_signal_dispatch(SS_SUBSCR, S_SUBSCR_IDENTITY, &lu->mi_len);
 
@@ -383,7 +383,7 @@ int mm_rx_loc_upd_req(struct ran_conn *conn, struct msgb *msg)
 		imsi = NULL;
 		break;
 	default:
-		DEBUGPC(DMM, "unknown mobile identity type\n");
+		LOG_RAN_CONN_CAT(conn, DMM, LOGL_ERROR, "unknown mobile identity type\n");
 		tmsi = GSM_RESERVED_TMSI;
 		imsi = NULL;
 		break;
@@ -392,7 +392,7 @@ int mm_rx_loc_upd_req(struct ran_conn *conn, struct msgb *msg)
 	gsm48_decode_lai2(&lu->lai, &old_lai);
 	new_lai.plmn = conn->network->plmn;
 	new_lai.lac = conn->lac;
-	DEBUGP(DMM, "LU/new-LAC: %u/%u\n", old_lai.lac, new_lai.lac);
+	LOG_RAN_CONN_CAT(conn, DMM, LOGL_DEBUG, "LU/new-LAC: %u/%u\n", old_lai.lac, new_lai.lac);
 
 	is_utran = (conn->via_ran == OSMO_RAT_UTRAN_IU);
 	lu_fsm = vlr_loc_update(conn->fi,
@@ -405,7 +405,7 @@ int mm_rx_loc_upd_req(struct ran_conn *conn, struct msgb *msg)
 				is_utran,
 				net->vlr->cfg.assign_tmsi);
 	if (!lu_fsm) {
-		DEBUGP(DRR, "%s: Can't start LU FSM\n", mi_string);
+		LOG_RAN_CONN(conn, LOGL_ERROR, "Can't start LU FSM\n");
 		return 0;
 	}
 
@@ -414,9 +414,7 @@ int mm_rx_loc_upd_req(struct ran_conn *conn, struct msgb *msg)
 	 * already have been called and completed. Has an error occured? */
 
 	if (!conn->vsub || conn->vsub->lu_fsm != lu_fsm) {
-		LOGP(DRR, LOGL_ERROR,
-		     "%s: internal error during Location Updating attempt\n",
-		     mi_string);
+		LOG_RAN_CONN(conn, LOGL_ERROR, "internal error during Location Updating attempt\n");
 		return -EIO;
 	}
 
@@ -587,7 +585,7 @@ int gsm48_tx_mm_info(struct ran_conn *conn)
 		ptr8[2] = dst;
 	}
 
-	DEBUGP(DMM, "-> MM INFO\n");
+	LOG_RAN_CONN(conn, LOGL_DEBUG, "Tx MM INFO\n");
 
 	return gsm48_conn_sendmsg(msg, conn, NULL);
 }
@@ -607,7 +605,7 @@ int gsm48_tx_mm_auth_req(struct ran_conn *conn, uint8_t *rand,
 	struct gsm48_hdr *gh = (struct gsm48_hdr *) msgb_put(msg, sizeof(*gh));
 	struct gsm48_auth_req *ar = (struct gsm48_auth_req *) msgb_put(msg, sizeof(*ar));
 
-	DEBUGP(DMM, "-> AUTH REQ (rand = %s)\n", osmo_hexdump_nospc(rand, 16));
+	DEBUGP(DMM, "Tx AUTH REQ (rand = %s)\n", osmo_hexdump_nospc(rand, 16));
 	if (autn)
 		DEBUGP(DMM, "   AUTH REQ (autn = %s)\n", osmo_hexdump_nospc(autn, 16));
 
@@ -716,21 +714,23 @@ int gsm48_rx_mm_serv_req(struct ran_conn *conn, struct msgb *msg)
 	lai.lac = conn->lac;
 
 	if (msg->data_len < sizeof(struct gsm48_service_request*)) {
-		LOGP(DMM, LOGL_ERROR, "<- CM SERVICE REQUEST wrong sized message\n");
+		LOG_RAN_CONN(conn, LOGL_ERROR, "Rx CM SERVICE REQUEST: wrong message size (%u < %zu)\n",
+			     msg->data_len, sizeof(struct gsm48_service_request*));
 		return msc_gsm48_tx_mm_serv_rej(conn,
 						GSM48_REJECT_INCORRECT_MESSAGE);
 	}
 
 	if (msg->data_len < req->mi_len + 6) {
-		LOGP(DMM, LOGL_ERROR, "<- CM SERVICE REQUEST does not fit in packet\n");
+		LOG_RAN_CONN(conn, LOGL_ERROR, "Rx CM SERVICE REQUEST: message does not fit in packet\n");
 		return msc_gsm48_tx_mm_serv_rej(conn,
 						GSM48_REJECT_INCORRECT_MESSAGE);
 	}
 
 	gsm48_mi_to_string(mi_string, sizeof(mi_string), mi, mi_len);
+
 	mi_type = mi[0] & GSM_MI_TYPE_MASK;
-	DEBUGP(DMM, "<- CM SERVICE REQUEST serv_type=0x%02x MI(%s)=%s\n",
-	       req->cm_service_type, gsm48_mi_type_name(mi_type), mi_string);
+	LOG_RAN_CONN_CAT(conn, DMM, LOGL_DEBUG, "Rx CM SERVICE REQUEST cm_service_type=0x%02x MI(%s)=%s\n",
+			 req->cm_service_type, gsm48_mi_type_name(mi_type), mi_string);
 
 	switch (mi_type) {
 	case GSM_MI_TYPE_IMSI:
@@ -740,12 +740,12 @@ int gsm48_rx_mm_serv_req(struct ran_conn *conn, struct msgb *msg)
 	case GSM_MI_TYPE_IMEI:
 		if (req->cm_service_type == GSM48_CMSERV_EMERGENCY) {
 			/* We don't do emergency calls by IMEI */
-			LOGP(DMM, LOGL_NOTICE, "<- CM SERVICE REQUEST(IMEI=%s) rejected\n", mi_string);
+			LOG_RAN_CONN(conn, LOGL_NOTICE, "Tx CM SERVICE REQUEST REJECT\n");
 			return msc_gsm48_tx_mm_serv_rej(conn, GSM48_REJECT_IMEI_NOT_ACCEPTED);
 		}
 		/* fall-through for non-emergency setup */
 	default:
-		DEBUGPC(DMM, "mi_type is not expected: %d\n", mi_type);
+		LOG_RAN_CONN(conn, LOGL_ERROR, "mi_type is not expected: %d\n", mi_type);
 		return msc_gsm48_tx_mm_serv_rej(conn,
 						GSM48_REJECT_INCORRECT_MESSAGE);
 	}
@@ -789,8 +789,7 @@ int gsm48_rx_mm_serv_req(struct ran_conn *conn, struct msgb *msg)
 	/* From vlr_proc_acc_req() we expect an implicit dispatch of PR_ARQ_E_START we expect
 	 * msc_vlr_subscr_assoc() to already have been called and completed. Has an error occured? */
 	if (!conn->vsub) {
-		LOGP(DRR, LOGL_ERROR, "%s: subscriber not allowed to do a CM Service Request\n",
-		     mi_string);
+		LOG_RAN_CONN(conn, LOGL_ERROR, "subscriber not allowed to do a CM Service Request\n");
 		return -EIO;
 	}
 
@@ -1172,9 +1171,8 @@ static int gsm48_rx_rr_pag_resp(struct ran_conn *conn, struct msgb *msg)
 		return 0;
 	}
 
-	DEBUGP(DRR, "PAGING RESPONSE: MI(%s)=%s\n", gsm48_mi_type_name(mi_type), mi_string);
-
 	ran_conn_update_id(conn, COMPLETE_LAYER3_PAGING_RESP, mi_string);
+	LOG_RAN_CONN_CAT(conn, DRR, LOGL_DEBUG, "PAGING RESPONSE: MI(%s)=%s\n", gsm48_mi_type_name(mi_type), mi_string);
 
 	is_utran = (conn->via_ran == OSMO_RAT_UTRAN_IU);
 	vlr_proc_acc_req(conn->fi,
@@ -1189,8 +1187,7 @@ static int gsm48_rx_rr_pag_resp(struct ran_conn *conn, struct msgb *msg)
 	/* From vlr_proc_acc_req() we expect an implicit dispatch of PR_ARQ_E_START we expect
 	 * msc_vlr_subscr_assoc() to already have been called and completed. Has an error occured? */
 	if (!conn->vsub) {
-		LOGP(DRR, LOGL_ERROR, "%s: subscriber not allowed to do a Paging Response\n",
-		     mi_string);
+		LOG_RAN_CONN(conn, LOGL_ERROR, "subscriber not allowed to do a Paging Response\n");
 		return -EIO;
 	}
 
@@ -1762,11 +1759,11 @@ static int msc_vlr_subscr_assoc(void *msc_conn_ref,
 	OSMO_ASSERT(vsub);
 	if (conn->vsub) {
 		if (conn->vsub == vsub)
-			LOGPCONN(conn, LOGL_NOTICE, "msc_vlr_subscr_assoc(): conn already associated with %s\n",
-				 vlr_subscr_name(vsub));
+			LOG_RAN_CONN(conn, LOGL_NOTICE, "msc_vlr_subscr_assoc(): conn already associated with %s\n",
+				     vlr_subscr_name(vsub));
 		else {
-			LOGPCONN(conn, LOGL_ERROR, "msc_vlr_subscr_assoc(): conn already associated with a subscriber,"
-				 " cannot associate with %s\n", vlr_subscr_name(vsub));
+			LOG_RAN_CONN(conn, LOGL_ERROR, "msc_vlr_subscr_assoc(): conn already associated with a subscriber,"
+				     " cannot associate with %s\n", vlr_subscr_name(vsub));
 			return -EINVAL;
 		}
 	}
