@@ -1603,12 +1603,12 @@ osmo_static_assert(sizeof(((struct gsm0808_encrypt_info*)0)->key) >= sizeof(((st
 
 int ran_conn_geran_set_cipher_mode(struct ran_conn *conn, bool umts_aka, bool retrieve_imeisv)
 {
-	struct gsm_network *net = conn->network;
+	struct gsm_network *net;
 	struct gsm0808_encrypt_info ei;
 	int i, j = 0;
 	int request_classmark = 0;
 	int request_classmark_for_a5_n = 0;
-	struct vlr_auth_tuple *tuple = conn->vsub->last_tuple;
+	struct vlr_auth_tuple *tuple;
 
 	if (!conn || !conn->vsub || !conn->vsub->last_tuple) {
 		/* This should really never happen, because we checked this in msc_vlr_set_ciph_mode()
@@ -1616,6 +1616,9 @@ int ran_conn_geran_set_cipher_mode(struct ran_conn *conn, bool umts_aka, bool re
 		LOGP(DMM, LOGL_ERROR, "Internal error: missing state during Ciphering Mode Command\n");
 		return -EINVAL;
 	}
+
+	net = conn->network;
+        tuple = conn->vsub->last_tuple;
 
 	for (i = 0; i < 8; i++) {
 		int supported;
