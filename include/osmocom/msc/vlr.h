@@ -330,8 +330,8 @@ lu_compl_vlr_proc_start(struct osmo_fsm_inst *parent,
 			uint32_t parent_event_failure);
 
 
-const char *vlr_subscr_name(struct vlr_subscr *vsub);
-const char *vlr_subscr_msisdn_or_name(struct vlr_subscr *vsub);
+const char *vlr_subscr_name(const struct vlr_subscr *vsub);
+const char *vlr_subscr_msisdn_or_name(const struct vlr_subscr *vsub);
 
 #define vlr_subscr_find_by_imsi(vlr, imsi) \
 	_vlr_subscr_find_by_imsi(vlr, imsi, __FILE__, __LINE__)

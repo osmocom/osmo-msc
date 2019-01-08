@@ -79,7 +79,7 @@ uint32_t vlr_timer(struct vlr_instance *vlr, uint32_t timer)
 }
 
 /* return static buffer with printable name of VLR subscriber */
-const char *vlr_subscr_name(struct vlr_subscr *vsub)
+const char *vlr_subscr_name(const struct vlr_subscr *vsub)
 {
 	static char buf[32];
 	if (!vsub)
@@ -98,7 +98,7 @@ const char *vlr_subscr_name(struct vlr_subscr *vsub)
 	return buf;
 }
 
-const char *vlr_subscr_msisdn_or_name(struct vlr_subscr *vsub)
+const char *vlr_subscr_msisdn_or_name(const struct vlr_subscr *vsub)
 {
 	if (!vsub || !vsub->msisdn[0])
 		return vlr_subscr_name(vsub);
