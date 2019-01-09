@@ -425,8 +425,8 @@ DEFUN(cfg_msc_auth_tuple_max_reuse_count, cfg_msc_auth_tuple_max_reuse_count_cmd
 DEFUN(cfg_msc_auth_tuple_reuse_on_error, cfg_msc_auth_tuple_reuse_on_error_cmd,
       "auth-tuple-reuse-on-error (0|1)",
       "Configure authentication tuple re-use when HLR is not responsive\n"
-      "0 = never re-use auth tuples beyond auth-tuple-max-reuse-count (default)\n"
-      "1 = if the HLR does not deliver new tuples, do re-use already available old ones.\n")
+      "Never re-use auth tuples beyond auth-tuple-max-reuse-count (default)\n"
+      "If the HLR does not deliver new tuples, do re-use already available old ones.\n")
 {
 	gsmnet->vlr->cfg.auth_reuse_old_sets_on_error = atoi(argv[0]) ? true : false;
 	return CMD_SUCCESS;
