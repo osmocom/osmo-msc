@@ -290,8 +290,8 @@ static int mm_tx_identity_req(struct ran_conn *conn, uint8_t id_type)
 static int mm_rx_id_resp(struct ran_conn *conn, struct msgb *msg)
 {
 	struct gsm48_hdr *gh = msgb_l3(msg);
-	uint8_t mi_type = gh->data[1] & GSM_MI_TYPE_MASK;
-	char mi_string[GSM48_MI_SIZE];
+	uint8_t *mi = gh->data+1;
+	uint8_t mi_len = gh->data[0];
 
 	if (!conn->vsub) {
 		LOGP(DMM, LOGL_ERROR,
@@ -299,13 +299,11 @@ static int mm_rx_id_resp(struct ran_conn *conn, struct msgb *msg)
 		return -EINVAL;
 	}
 
-	gsm48_mi_to_string(mi_string, sizeof(mi_string), &gh->data[1], gh->data[0]);
-	DEBUGP(DMM, "IDENTITY RESPONSE: MI(%s)=%s\n",
-		gsm48_mi_type_name(mi_type), mi_string);
+	DEBUGP(DMM, "IDENTITY RESPONSE: MI=%s\n", osmo_mi_name(mi, mi_len));
 
 	osmo_signal_dispatch(SS_SUBSCR, S_SUBSCR_IDENTITY, gh->data);
 
-	return vlr_subscr_rx_id_resp(conn->vsub, gh->data+1, gh->data[0]);
+	return vlr_subscr_rx_id_resp(conn->vsub, mi, mi_len);
 }
 
 /* Chapter 9.2.15: Receive Location Updating Request.
