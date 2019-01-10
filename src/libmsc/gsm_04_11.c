@@ -1064,7 +1064,7 @@ static struct gsm_trans *gsm411_alloc_mt_trans(struct gsm_network *net,
 	LOGP(DLSMS, LOGL_INFO, "Going to send a MT SMS\n");
 
 	/* Generate a new transaction ID */
-	tid = trans_assign_trans_id(net, vsub, GSM48_PDISC_SMS, 0);
+	tid = trans_assign_trans_id(net, vsub, GSM48_PDISC_SMS);
 	if (tid == -1) {
 		LOGP(DLSMS, LOGL_ERROR, "No available transaction IDs\n");
 		return NULL;

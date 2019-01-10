@@ -179,21 +179,18 @@ void trans_free(struct gsm_trans *trans)
 }
 
 /*! allocate an unused transaction ID for the given subscriber
- * in the given protocol using the ti_flag specified
+ * in the given protocol using TI flag = 0 (allocated by us).
+ * See GSM 04.07, section 11.2.3.1.3 "Transaction identifier".
  * \param[in] net GSM network
  * \param[in] subscr Subscriber for which to find ID
  * \param[in] protocol Protocol for whihc to find ID
- * \param[in] ti_flag FIXME
  */
 int trans_assign_trans_id(const struct gsm_network *net, const struct vlr_subscr *vsub,
-			  uint8_t protocol, uint8_t ti_flag)
+			  uint8_t protocol)
 {
 	struct gsm_trans *trans;
 	unsigned int used_tid_bitmask = 0;
 	int i, j, h;
-
-	if (ti_flag)
-		ti_flag = 0x8;
 
 	/* generate bitmask of already-used TIDs for this (subscr,proto) */
 	llist_for_each_entry(trans, &net->trans_list, entry) {
@@ -206,10 +203,10 @@ int trans_assign_trans_id(const struct gsm_network *net, const struct vlr_subscr
 
 	/* find a new one, trying to go in a 'circular' pattern */
 	for (h = 6; h > 0; h--)
-		if (used_tid_bitmask & (1 << (h | ti_flag)))
+		if (used_tid_bitmask & (1 << h))
 			break;
 	for (i = 0; i < 7; i++) {
-		j = ((h + i) % 7) | ti_flag;
+		j = (h + i) % 7;
 		if ((used_tid_bitmask & (1 << j)) == 0)
 			return j;
 	}

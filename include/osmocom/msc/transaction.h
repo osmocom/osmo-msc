@@ -111,7 +111,7 @@ struct gsm_trans *trans_alloc(struct gsm_network *net,
 void trans_free(struct gsm_trans *trans);
 
 int trans_assign_trans_id(const struct gsm_network *net, const struct vlr_subscr *vsub,
-			  uint8_t protocol, uint8_t ti_flag);
+			  uint8_t protocol);
 struct gsm_trans *trans_has_conn(const struct ran_conn *conn);
 void trans_conn_closed(const struct ran_conn *conn);
 

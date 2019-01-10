@@ -630,8 +630,7 @@ static int gsm48_cc_tx_setup(struct gsm_trans *trans, void *arg)
 	}
 
 	/* Get free transaction_id */
-	trans_id = trans_assign_trans_id(trans->net, trans->vsub,
-					 GSM48_PDISC_CC, 0);
+	trans_id = trans_assign_trans_id(trans->net, trans->vsub, GSM48_PDISC_CC);
 	if (trans_id < 0) {
 		/* no free transaction ID */
 		rc = mncc_release_ind(trans->net, trans, trans->callref,

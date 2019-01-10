@@ -306,8 +306,7 @@ static struct gsm_trans *establish_nc_ss_trans(struct gsm_network *net,
 	osmo_counter_inc(net->active_nc_ss);
 
 	/* Assign transaction ID */
-	tid = trans_assign_trans_id(trans->net,
-		trans->vsub, GSM48_PDISC_NC_SS, 0);
+	tid = trans_assign_trans_id(trans->net, trans->vsub, GSM48_PDISC_NC_SS);
 	if (tid < 0) {
 		LOGP(DMM, LOGL_ERROR, "No free transaction ID\n");
 		/* TODO: inform HLR about this */
