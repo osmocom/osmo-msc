@@ -60,11 +60,10 @@ int gsm0911_rcv_nc_ss(struct ran_conn *conn, struct msgb *msg)
 	struct msgb *gsup_msgb;
 	uint16_t facility_ie_len;
 	uint8_t *facility_ie;
-	uint8_t pdisc, tid;
+	uint8_t tid;
 	uint8_t msg_type;
 	int rc;
 
-	pdisc = gsm48_hdr_pdisc(gh);
 	msg_type = gsm48_hdr_msg_type(gh);
 	tid = gsm48_hdr_trans_id_flip_ti(gh);
 
@@ -72,10 +71,10 @@ int gsm0911_rcv_nc_ss(struct ran_conn *conn, struct msgb *msg)
 	log_set_context(LOG_CTX_VLR_SUBSCR, conn->vsub);
 
 	DEBUGP(DMM, "Received SS/USSD data (trans_id=%x, msg_type=%s)\n",
-		tid, gsm48_pdisc_msgtype_name(pdisc, msg_type));
+		tid, gsm48_pdisc_msgtype_name(GSM48_PDISC_NC_SS, msg_type));
 
 	/* Reuse existing transaction, or create a new one */
-	trans = trans_find_by_id(conn, pdisc, tid);
+	trans = trans_find_by_id(conn, GSM48_PDISC_NC_SS, tid);
 	if (!trans) {
 		/* Count MS-initiated attempts to establish a NC SS/USSD session */
 		rate_ctr_inc(&conn->network->msc_ctrs->ctr[MSC_CTR_NC_SS_MO_REQUESTS]);
@@ -91,7 +90,7 @@ int gsm0911_rcv_nc_ss(struct ran_conn *conn, struct msgb *msg)
 		if (msg_type != GSM0480_MTYPE_REGISTER) {
 			LOGP(DMM, LOGL_ERROR, "Unexpected message (msg_type=%s), "
 				"transaction is not allocated yet\n",
-				gsm48_pdisc_msgtype_name(pdisc, msg_type));
+				gsm48_pdisc_msgtype_name(GSM48_PDISC_NC_SS, msg_type));
 			gsm48_tx_simple(conn,
 				GSM48_PDISC_NC_SS | (tid << 4),
 				GSM0480_MTYPE_RELEASE_COMPLETE);
@@ -100,7 +99,7 @@ int gsm0911_rcv_nc_ss(struct ran_conn *conn, struct msgb *msg)
 
 		DEBUGP(DMM, " -> (new transaction)\n");
 		trans = trans_alloc(conn->network, conn->vsub,
-			pdisc, tid, new_callref++);
+				    GSM48_PDISC_NC_SS, tid, new_callref++);
 		if (!trans) {
 			DEBUGP(DMM, " -> No memory for trans\n");
 			gsm48_tx_simple(conn,
