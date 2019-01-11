@@ -308,14 +308,6 @@ static int mm_rx_id_resp(struct ran_conn *conn, struct msgb *msg)
 	return vlr_subscr_rx_id_resp(conn->vsub, gh->data+1, gh->data[0]);
 }
 
-/* FIXME: to libosmogsm */
-static const struct value_string lupd_names[] = {
-	{ GSM48_LUPD_NORMAL, "NORMAL" },
-	{ GSM48_LUPD_PERIODIC, "PERIODIC" },
-	{ GSM48_LUPD_IMSI_ATT, "IMSI ATTACH" },
-	{ 0, NULL }
-};
-
 /* Chapter 9.2.15: Receive Location Updating Request.
  * Keep this function non-static for direct invocation by unit tests. */
 int mm_rx_loc_upd_req(struct ran_conn *conn, struct msgb *msg)
@@ -342,7 +334,7 @@ int mm_rx_loc_upd_req(struct ran_conn *conn, struct msgb *msg)
 		LOGP(DMM, LOGL_ERROR,
 		     "Cannot accept another LU, conn already busy establishing authenticity;"
 		     " extraneous LOCATION UPDATING REQUEST: MI(%s)=%s type=%s\n",
-		     gsm48_mi_type_name(mi_type), mi_string, get_value_string(lupd_names, lu->type));
+		     gsm48_mi_type_name(mi_type), mi_string, osmo_lu_type_name(lu->type));
 		return -EINVAL;
 	}
 
@@ -350,15 +342,14 @@ int mm_rx_loc_upd_req(struct ran_conn *conn, struct msgb *msg)
 		LOGP(DMM, LOGL_ERROR,
 		     "Cannot accept another LU, conn already established;"
 		     " extraneous LOCATION UPDATING REQUEST: MI(%s)=%s type=%s\n",
-		     gsm48_mi_type_name(mi_type), mi_string, get_value_string(lupd_names, lu->type));
+		     gsm48_mi_type_name(mi_type), mi_string, osmo_lu_type_name(lu->type));
 		return -EINVAL;
 	}
 
 	ran_conn_update_id(conn, COMPLETE_LAYER3_LU, mi_string);
 
 	DEBUGP(DMM, "LOCATION UPDATING REQUEST: MI(%s)=%s type=%s\n",
-	       gsm48_mi_type_name(mi_type), mi_string,
-	       get_value_string(lupd_names, lu->type));
+	       gsm48_mi_type_name(mi_type), mi_string, osmo_lu_type_name(lu->type));
 
 	osmo_signal_dispatch(SS_SUBSCR, S_SUBSCR_IDENTITY, &lu->mi_len);
 
