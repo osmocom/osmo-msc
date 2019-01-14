@@ -216,7 +216,7 @@ int trans_assign_trans_id(const struct gsm_network *net, const struct vlr_subscr
 
 /*! Check if we have any transaction for given connection
  * \param[in] conn Connection to check
- * \returns 1 in case there is a transaction, 0 otherwise
+ * \returns transaction pointer if found, NULL otherwise
  */
 struct gsm_trans *trans_has_conn(const struct ran_conn *conn)
 {
