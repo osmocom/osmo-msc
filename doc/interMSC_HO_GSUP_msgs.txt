@@ -1,0 +1,89 @@
+GSUP messages on the E-interface (MSC<->MSC)
+============================================
+
+Draft blueprint of requried IEs.
+
+Interesting specs
+-----------------
+
+- 3GPP TS 29.010
+- 3GPP TS 29.002
+
+
+Message sequences
+-----------------
+
+  MSC-A=MSC-I        MSC-B=MSC-T                         (MSC-T: transitional MSC, with a potential RAN connection)
+    ------------------>  request prepareHandover         (an_apdu == Handover Request)
+    <------------------  response prepareHandover        (an_apdu == Handover Request Ack)
+    <------------------  request processAccessSignalling (an_apdu == Handover Detect)
+    <------------------  request sendEndSignal           (an_apdu == Handover Complete)
+                     MSC-B=MSC-I                         (MSC-I: internal MSC, the one with the active RAN connection)
+
+
+  MSC-A              MSC-B=MSC-I             MSC-B'=MSC-T
+    <------------------                          request prepareSubsequentHandover  (an_apdu == Handover Required)
+    ------------------------------------------>  request prepareHandover            (an_apdu == Handover Request)
+    <------------------------------------------  response prepareHandover           (an_apdu == Handover Request Ack)
+    ------------------>                          response prepareSubsequentHandover (an_apdu == Handover Request Ack)
+    <------------------------------------------  request processAccessSignalling    (an_apdu == Handover Detect)
+    <------------------------------------------  request processAccessSignalling    (an_apdu == Handover Complete)
+    ------------------>                          request close
+                     MSC-B clears            MSC-B'=MSC-I
+
+
+  MSC-A              MSC-B=MSC-I
+    ------------------>  request forwardAccessSignalling (an_apdu == DTAP, e.g. CC, SMS, ...)
+    <------------------  request processAccessSignalling (an_apdu == DTAP, e.g. CC, SMS, ...)
+
+
+    ------------------> source_name=MSC-A;  destination_name=MSC-B
+    <------------------ source_name=MSC-B;  destination_name=MSC-A
+
+
+GSUP Message Contents
+---------------------
+
+Prefix these messages to mark them as part of the E-interface; e.g.
+OSMO_GSUP_MSGT_E_PREPARE_HANDOVER.
+
+message_type:
+ 	[prepareHandover|prepareSubsequentHandover|sendEndSignal]x{Request,Error,Result}
+	[processAccessSignalling|forwardAccessSignalling|close|abort] (x{Request})
+imsi: BCD (handle to associate with subscriber connection)
+source_name: blob (string: osmo-msc: sender's gsmnet->msc_ipa_name, to route messages)
+destination_name: blob (string: osmo-msc: IPA_NAME as in https://gerrit.osmocom.org/c/osmo-msc/+/12446, or received from previous source_name IE)
+session_state: osmo_gsup_session_state
+session_id: uint32_t
+handover_number:                    (MSC-A <-- MSC-B, Handover Request Ack)
+        extension: [Extension=0|NoExtension=1] (1 bit; should currently always be == 1)
+        nature_of_nr: [GSM340_TYPE_NATIONAL|GSM340_TYPE_INTERNATIONAL|...] (3 bit)
+        number_plan: GSM340_PLAN_ISDN (4 bit)
+        msisdn: BCD
+an_apdu:
+        access_network_proto: [ts3G-48006=1|ts3G-25413=2] (i.e. BSSAP or RANAP; 1 byte value; 3GPP 29.002 AccessNetworkProtocolId)
+        data: blob up to 2560 bytes (complete BSSAP or RANAP message; 3GPP 29.002 LongSignalInfo)
+cause_rr: enum gsm48_rr_cause (3GPP TS 44.018 10.5.2.31) (for 'abort' message type or 'Error' responses)
+cause_bssap: enum gsm0808_cause (3GPP TS 48.008 3.2.2.5) (for 'abort' message type or 'Error' responses)
+cause_sm: enum gsm48_gsm_cause (3GPP TS 24.008 10.5.6.6 / Table 10.5.157) (for 'abort' message type or 'Error' responses)
+
+
+Of which are newly added message IEs:
+- source_name
+- target_name
+- handover_number
+- an_apdu
+- cause_*
+
+
+GSUP Message Contents, maybe added at a later stage
+---------------------------------------------------
+
+So far this information is only in-band in the BSSAP/RANAP messages.
+There is currently no need to copy them to the GSUP message structures.
+
+target_cell_id: osmo_cell_global_id (MSC-A --> MSC-B, Handover Request)
+encryption_info: gsm0808_encrypt_info
+integrity_protection_info: gsm0808_encrypt_info
+aoip_supported_codecs: gsm0808_speech_codec_list
+...
