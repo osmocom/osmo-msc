@@ -38,7 +38,7 @@ struct gsm_call {
 	struct llist_head entry;
 
 	/* network handle */
-	void *net;
+	struct gsm_network *net;
 
 	/* the 'local' transaction */
 	uint32_t callref;
