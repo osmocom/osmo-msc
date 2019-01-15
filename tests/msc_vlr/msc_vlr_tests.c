@@ -570,15 +570,21 @@ __wrap_osmo_gsup_client_create2(struct ipaccess_unit *ipa_dev, const char *ip_ad
 int __real_osmo_gsup_client_send(struct osmo_gsup_client *gsupc, struct msgb *msg);
 int __wrap_osmo_gsup_client_send(struct osmo_gsup_client *gsupc, struct msgb *msg)
 {
-	const char *is = osmo_hexdump_nospc(msg->data, msg->len);
+	uint8_t buf[512];
+	int len;
+
 	fprintf(stderr, "GSUP --> HLR: %s: %s\n",
-		osmo_gsup_message_type_name(msg->data[0]), is);
+		osmo_gsup_message_type_name(msg->data[0]), osmo_hexdump_nospc(msg->data, msg->len));
 
 	OSMO_ASSERT(gsup_tx_expected);
-	if (strcmp(gsup_tx_expected, is)) {
-		fprintf(stderr, "Mismatch! Expected:\n%s\n", gsup_tx_expected);
+	OSMO_ASSERT(strlen(gsup_tx_expected) <= (sizeof(buf) * 2));
+
+	len = osmo_hexparse(gsup_tx_expected, buf, sizeof(buf));
+	if (len < 1)
 		abort();
-	}
+
+	if (!msgb_eq_data_print(msg, buf, len))
+		abort();
 
 	talloc_free(msg);
 	gsup_tx_confirmed = true;
@@ -596,13 +602,8 @@ static int _validate_dtap(struct msgb *msg, enum osmo_rat_type to_ran)
 
 	/* Mask the sequence number out before comparing */
 	msg->data[1] &= 0x3f;
-	if (msg->len != dtap_tx_expected->len
-	    || memcmp(msg->data, dtap_tx_expected->data, msg->len)) {
-		fprintf(stderr, "Mismatch! Expected:\n%s\n",
-		       osmo_hexdump_nospc(dtap_tx_expected->data,
-					  dtap_tx_expected->len));
+	if (!msgb_eq_data_print(msg, dtap_tx_expected->data, dtap_tx_expected->len))
 		abort();
-	}
 
 	btw("DTAP matches expected message");
 
