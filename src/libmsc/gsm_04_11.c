@@ -1007,6 +1007,27 @@ static int gsm411_mn_recv(struct gsm411_smc_inst *inst, int msg_type,
 	return rc;
 }
 
+static struct gsm_trans *gsm411_trans_init(struct gsm_network *net, struct vlr_subscr *vsub, struct ran_conn *conn,
+					   uint8_t tid)
+{
+	/* Allocate a new transaction */
+	struct gsm_trans *trans = trans_alloc(net, vsub, GSM48_PDISC_SMS, tid, new_callref++);
+	if (!trans) {
+		LOGP(DLSMS, LOGL_ERROR, "No memory for transaction\n");
+		return NULL;
+	}
+
+	/* Init both SMC and SMR state machines */
+	gsm411_smc_init(&trans->sms.smc_inst, 0, 1, gsm411_mn_recv, gsm411_mm_send);
+	gsm411_smr_init(&trans->sms.smr_inst, 0, 1, gsm411_rl_recv, gsm411_mn_send);
+
+	/* Associate transaction with connection */
+	if (conn)
+		trans->conn = ran_conn_get(conn, RAN_CONN_USE_TRANS_SMS);
+
+	return trans;
+}
+
 static struct gsm_trans *gsm411_alloc_mt_trans(struct gsm_network *net,
 					       struct vlr_subscr *vsub)
 {
@@ -1023,24 +1044,15 @@ static struct gsm_trans *gsm411_alloc_mt_trans(struct gsm_network *net,
 		return NULL;
 	}
 
-	/* Allocate a new transaction */
-	trans = trans_alloc(net, vsub, GSM48_PDISC_SMS, tid, new_callref++);
-	if (!trans) {
-		LOGP(DLSMS, LOGL_ERROR, "No memory for trans\n");
-		return NULL;
-	}
-
-	/* Init both SMC and SMR state machines */
-	gsm411_smc_init(&trans->sms.smc_inst, 0, 1,
-		gsm411_mn_recv, gsm411_mm_send);
-	gsm411_smr_init(&trans->sms.smr_inst, 0, 1,
-		gsm411_rl_recv, gsm411_mn_send);
-
 	/* Attempt to find an existing connection */
 	conn = connection_for_subscr(vsub);
+
+	/* Allocate a new transaction */
+	trans = gsm411_trans_init(net, vsub, conn, tid);
+	if (!trans)
+		return NULL;
+
 	if (conn) {
-		/* Associate transaction with connection */
-		trans->conn = ran_conn_get(conn, RAN_CONN_USE_TRANS_SMS);
 		/* Generate unique RP Message Reference */
 		trans->sms.sm_rp_mr = conn->next_rp_ref++;
 	}
@@ -1192,21 +1204,12 @@ int gsm0411_rcv_sms(struct ran_conn *conn,
 	}
 
 	if (!trans) {
-		DEBUGP(DLSMS, " -> (new transaction)\n");
-		trans = trans_alloc(conn->network, conn->vsub,
-				    GSM48_PDISC_SMS,
-				    transaction_id, new_callref++);
+		trans = gsm411_trans_init(conn->network, conn->vsub, conn, transaction_id);
 		if (!trans) {
-			DEBUGP(DLSMS, " -> No memory for trans\n");
 			/* FIXME: send some error message */
 			return -ENOMEM;
 		}
-		gsm411_smc_init(&trans->sms.smc_inst, 0, 1,
-			gsm411_mn_recv, gsm411_mm_send);
-		gsm411_smr_init(&trans->sms.smr_inst, 0, 1,
-			gsm411_rl_recv, gsm411_mn_send);
 
-		trans->conn = ran_conn_get(conn, RAN_CONN_USE_TRANS_SMS);
 		trans->dlci = OMSC_LINKID_CB(msg); /* DLCI as received from BSC */
 
 		new_trans = 1;
