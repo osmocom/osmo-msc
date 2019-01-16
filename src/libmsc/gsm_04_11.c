@@ -135,8 +135,7 @@ static int paging_cb_mmsms_est_req(unsigned int hooknum, unsigned int event,
 	struct gsm_sms *sms = trans->sms.sms;
 	int rc = 0;
 
-	DEBUGP(DLSMS, "paging_cb_mmsms_est_req(hooknum=%u, event=%u, "
-		"conn=%p, trans=%p)\n", hooknum, event, conn, trans);
+	DEBUGP(DLSMS, "paging_cb_mmsms_est_req(hooknum=%u, event=%u)\n", hooknum, event);
 
 	if (hooknum != GSM_HOOK_RR_PAGING)
 		return -EINVAL;
