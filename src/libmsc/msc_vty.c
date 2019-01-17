@@ -550,15 +550,21 @@ DEFUN(show_bsc, show_bsc_cmd,
 
 static void vty_conn_hdr(struct vty *vty)
 {
-	vty_out(vty, "--ConnId ------------Subscriber RAN --LAC Use --Tokens C A5 State%s",
-		VTY_NEWLINE);
+	unsigned lnum = 0;
+	struct ran_conn *conn;
+
+	llist_for_each_entry(conn, &gsmnet->ran_conns, entry)
+		lnum++;
+
+	if (lnum)
+		vty_out(vty, "--ConnId RAN --LAC Use --Tokens C A5    State                    ------------ Subscriber%s",
+			VTY_NEWLINE);
 }
 
 static void vty_dump_one_conn(struct vty *vty, const struct ran_conn *conn)
 {
-	vty_out(vty, "%08x %22s %3s %5u %3u %08x %c /%1u %27s %s",
+	vty_out(vty, "%08x %3s %5u %3u %08x %c /%1u %27s %22s%s",
 		conn->a.conn_id,
-		conn->vsub ? vlr_subscr_name(conn->vsub) : "-",
 		conn->via_ran == OSMO_RAT_UTRAN_IU ? "Iu" : "A",
 		conn->lac,
 		conn->use_count,
@@ -566,6 +572,7 @@ static void vty_dump_one_conn(struct vty *vty, const struct ran_conn *conn)
 		conn->received_cm_service_request ? 'C' : '-',
 		conn->geran_encr.alg_id,
 		conn->fi ? osmo_fsm_inst_state_name(conn->fi) : "-",
+		conn->vsub ? vlr_subscr_name(conn->vsub) : "-",
 		VTY_NEWLINE);
 }
 
@@ -583,8 +590,15 @@ DEFUN(show_msc_conn, show_msc_conn_cmd,
 
 static void vty_trans_hdr(struct vty *vty)
 {
-	vty_out(vty, "------------Subscriber --ConnId -P TI -CallRef Proto%s",
-		VTY_NEWLINE);
+	unsigned lnum = 0;
+	struct gsm_trans *trans;
+
+	llist_for_each_entry(trans, &gsmnet->trans_list, entry)
+		lnum++;
+
+	if (lnum)
+		vty_out(vty, "--ConnId -P TI -CallRef [---  Proto   ---] ------------ Subscriber%s",
+			VTY_NEWLINE);
 }
 
 static const char *get_trans_proto_str(const struct gsm_trans *trans)
@@ -613,13 +627,14 @@ static const char *get_trans_proto_str(const struct gsm_trans *trans)
 
 static void vty_dump_one_trans(struct vty *vty, const struct gsm_trans *trans)
 {
-	vty_out(vty, "%22s %08x %s %02u %08x %s%s",
-		trans->vsub ? vlr_subscr_name(trans->vsub) : "-",
+	vty_out(vty, "%08x %s %02u %08x [%s] %22s%s",
 		trans->conn ? trans->conn->a.conn_id : 0,
 		gsm48_pdisc_name(trans->protocol),
 		trans->transaction_id,
 		trans->callref,
-		get_trans_proto_str(trans), VTY_NEWLINE);
+		get_trans_proto_str(trans),
+		trans->vsub ? vlr_subscr_name(trans->vsub) : "-",
+		VTY_NEWLINE);
 }
 
 DEFUN(show_msc_transaction, show_msc_transaction_cmd,
