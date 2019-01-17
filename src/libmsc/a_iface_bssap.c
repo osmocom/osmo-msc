@@ -585,6 +585,29 @@ static int bssmap_rx_ass_compl(struct ran_conn *conn, struct msgb *msg,
 	return 0;
 }
 
+/* Handle incoming LCLS-NOTIFICATION BSSMAP message: 3GPP TS 48.008 §3.2.1.93 */
+static int bssmap_rx_lcls_notif(const struct ran_conn *conn, const struct msgb *msg, const struct tlv_parsed *tp)
+{
+
+	bool status_avail = TLVP_PRESENT(tp, GSM0808_IE_LCLS_BSS_STATUS),
+	      break_avail = TLVP_PRESENT(tp, GSM0808_IE_LCLS_BREAK_REQ);
+
+	/* Either §3.2.2.119 LCLS-BSS-Status or §3.2.2.120 LCLS-Break-Request shall be present */
+	if (!(status_avail ^ break_avail)) {
+		LOGPCONN(conn, LOGL_ERROR, "Ignoring broken LCLS Notification message\n");
+		return -EINVAL;
+	}
+
+	if (status_avail)
+		LOGPCONN(conn, LOGL_NOTICE, "Received LCLS Status: %s\n",
+			 gsm0808_lcls_status_name(tlvp_val8(tp, GSM0808_IE_LCLS_BSS_STATUS, GSM0808_LCLS_STS_NA)));
+
+	if (break_avail)
+		LOGPCONN(conn, LOGL_NOTICE, "Received LCLS Break Request\n");
+
+	return 0;
+}
+
 /* Handle incoming connection oriented BSSMAP messages */
 static int rx_bssmap(struct osmo_sccp_user *scu, const struct a_conn_info *a_conn_info, struct msgb *msg)
 {
@@ -646,6 +669,8 @@ static int rx_bssmap(struct osmo_sccp_user *scu, const struct a_conn_info *a_con
 		return bssmap_rx_sapi_n_rej(conn, msg, &tp);
 	case BSS_MAP_MSG_ASSIGMENT_COMPLETE:
 		return bssmap_rx_ass_compl(conn, msg, &tp);
+	case BSS_MAP_MSG_LCLS_NOTIFICATION:
+		return bssmap_rx_lcls_notif(conn, msg, &tp);
 	default:
 		LOGPCONN(conn, LOGL_ERROR, "Unimplemented msg type: %s\n", gsm0808_bssmap_name(msg_type));
 		return -EINVAL;
