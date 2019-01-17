@@ -109,7 +109,7 @@ struct gsm_trans *trans_alloc(struct gsm_network *net,
 
 	/* a valid subscriber is indispensable */
 	if (vsub == NULL) {
-		LOGP(DCC, LOGL_NOTICE,
+		LOGP(DVLR, LOGL_ERROR,
 		     "unable to alloc transaction, invalid subscriber (NULL)\n");
 		return NULL;
 	}

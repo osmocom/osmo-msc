@@ -1931,7 +1931,7 @@ int mncc_tx_to_cc(struct gsm_network *net, int msg_type, void *arg)
 		/* Create transaction */
 		trans = trans_alloc(net, vsub, GSM48_PDISC_CC, 0xff, data->callref);
 		if (!trans) {
-			DEBUGP(DCC, "No memory for trans.\n");
+			LOGP(DCC, LOGL_ERROR, "No memory for trans.\n");
 			vlr_subscr_put(vsub);
 			/* Ressource unavailable */
 			mncc_release_ind(net, NULL, data->callref,
@@ -2129,7 +2129,7 @@ int gsm0408_rcv_cc(struct ran_conn *conn, struct msgb *msg)
 				    GSM48_PDISC_CC,
 				    transaction_id, new_callref++);
 		if (!trans) {
-			DEBUGP(DCC, "No memory for trans.\n");
+			LOGP(DCC, LOGL_ERROR, "No memory for trans.\n");
 			rc = gsm48_tx_simple(conn,
 					     GSM48_PDISC_CC | (transaction_id << 4),
 					     GSM48_MT_CC_RELEASE_COMPL);

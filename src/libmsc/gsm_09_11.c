@@ -101,7 +101,7 @@ int gsm0911_rcv_nc_ss(struct ran_conn *conn, struct msgb *msg)
 		trans = trans_alloc(conn->network, conn->vsub,
 				    GSM48_PDISC_NC_SS, tid, new_callref++);
 		if (!trans) {
-			DEBUGP(DMM, " -> No memory for trans\n");
+			LOGP(DMM, LOGL_ERROR, " -> No memory for trans\n");
 			gsm48_tx_simple(conn,
 				GSM48_PDISC_NC_SS | (tid << 4),
 				GSM0480_MTYPE_RELEASE_COMPLETE);
@@ -298,7 +298,7 @@ static struct gsm_trans *establish_nc_ss_trans(struct gsm_network *net,
 	trans = trans_alloc(net, vsub, GSM48_PDISC_NC_SS,
 		0xff, gsup_msg->session_id);
 	if (!trans) {
-		DEBUGP(DMM, " -> No memory for trans\n");
+		LOGP(DMM, LOGL_ERROR, " -> No memory for trans\n");
 		return NULL;
 	}
 
