@@ -1028,6 +1028,30 @@ static struct gsm_trans *gsm411_trans_init(struct gsm_network *net, struct vlr_s
 	return trans;
 }
 
+/* Assigns an (unused) SM-RP-MR value to a given transaction */
+static int gsm411_assign_sm_rp_mr(struct gsm_trans *trans)
+{
+	uint8_t mr;
+
+	/* After allocation a given transaction has zero-initialized
+	 * SM-RP-MR value, so trans_find_by_sm_rp_mr() may consider
+	 * 0x00 as used. This is why we "poison" this transaction
+	 * using the highest value. */
+	trans->sms.sm_rp_mr = 0xff;
+
+	/* According to 8.2.3, MR is in the range 0 through 255 */
+	for (mr = 0x00; mr < 0xff; mr++) {
+		if (trans_find_by_sm_rp_mr(trans->net, trans->vsub, mr))
+			continue; /* this MR is busy, find another one */
+		/* An unused value has been found, assign it */
+		trans->sms.sm_rp_mr = mr;
+		return 0;
+	}
+
+	/* All possible values are busy */
+	return -EBUSY;
+}
+
 static struct gsm_trans *gsm411_alloc_mt_trans(struct gsm_network *net,
 					       struct vlr_subscr *vsub)
 {
@@ -1052,9 +1076,11 @@ static struct gsm_trans *gsm411_alloc_mt_trans(struct gsm_network *net,
 	if (!trans)
 		return NULL;
 
-	if (conn) {
-		/* Generate unique RP Message Reference */
-		trans->sms.sm_rp_mr = conn->next_rp_ref++;
+	/* Assign a unique SM-RP Message Reference */
+	if (gsm411_assign_sm_rp_mr(trans) != 0) {
+		LOGP(DLSMS, LOGL_ERROR, "Failed to assign SM-RP-MR\n");
+		trans_free(trans);
+		return NULL;
 	}
 
 	/* Use SAPI 3 (see GSM 04.11, section 2.3) */

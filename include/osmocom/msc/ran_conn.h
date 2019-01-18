@@ -102,8 +102,6 @@ struct ran_conn {
 
 	/* LU expiration handling */
 	uint8_t expire_timer_stopped;
-	/* SMS helpers for libmsc */
-	uint8_t next_rp_ref;
 
 	/* Are we part of a special "silent" call */
 	int silent_call;
