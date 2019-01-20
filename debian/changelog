@@ -1,3 +1,233 @@
+osmo-msc (1.3.0) unstable; urgency=medium
+
+  [ Philipp Maier ]
+  * vlr_access_req_fsm: use correct cause codes
+  * a_reset: cleanup + remove dead code
+  * mgcp: do not start connections in loopback mode
+  * mgcp: hack to keep IuUP working
+  * mgcp: use codec information returned with ASSIGNMENT COMPL.
+  * doc: update mgw settings in example config file
+  * mncc: fix byte ordering of IP-Address in mncc
+  * msc_mgcp: move mncc struct initalization to where its actually needed
+  * gsm_04_08_cc: Add global guard timer for MNCC
+  * cosmetic: remove forgotten debug printf
+  * vlr: drop unused is_ps parameter in vlr_subscr_req_lu()
+  * osmo_msc: remove unused parameter from msc_dtap()
+  * gsm_subscriber: make function msc_paging_request() static
+  * msc_vty: display subscriber flags
+  * msc_vty: display current RAN type
+  * msc_vty: also show IMEI and IMEISV
+  * gsm_04_08: Fix nullpointer deref
+
+  [ Stefan Sperling ]
+  * remove redundant unconditional PKG_CHECK_MODULES for libsmpp
+  * implement periodic Location Update expiry in the VLR
+  * VLR: reject overlong IMSIs in ID RESP messages
+  * fix a use-after-free in msc_mgcp.c:_handle_error()
+  * detach cancelled subscribers from VLR
+  * make gsup ipa name configurable in osmo-msc.cfg
+  * provide software version information to gsup peer
+  * require 'ipa-name' option to be set via config file
+  * use vty->type instead of local variable
+
+  [ Vadim Yanitskiy ]
+  * libmsc/ussd.c: FIX: properly indicate errors
+  * libmsc: properly name the MSC_CONN_USE token for SS
+  * libmsc/ussd.c: use connection ref-counting and transactions
+  * Use proper naming for GSM TS 09.11 implementation
+  * libmsc/gsm_04_08.c: expose gsm48_tx_simple()
+  * libmsc/gsm_09_11.c: properly indicate transaction errors
+  * libmsc/gsm_04_80.c: make the API abstract from ss_request struct
+  * .gitignore: ignore src/libgsupclient/gsup_test_client
+  * configure.ac: drop unused dependencies
+  * msc_vlr_tests: don't abuse USSD-request to conclude connections
+  * libvlr/vlr.c: forward unhandled GSUP messages towards MSC
+  * libmsc/gsm_09_11.c: forward SS/USSD messages to HLR over GSUP
+  * libmsc/gsm_09_11.c: implement network-initiated sessions
+  * libmsc/gsm_09_11.c: properly handle MS-initiated release
+  * libmsc/gsm_09_11.c: introduce rate counters for NC_SS sessions
+  * libmsc/gsm_09_11.c: introduce counter for active sessions
+  * msc/signal.h: use #pragma once include guard
+  * msc/rrlp.h: use #pragma once include guard
+  * libmsc/rrlp.c: add missing include
+  * libmsc/gsm_09_11.c: clean up the local GSM 04.80 API
+  * RRLP: properly name the init function
+  * RRLP: fix: actually init the RRLP signal handlers
+  * RRLP: migrate and share mode definitions from msc_vty.c
+  * RRLP: print log when sending a position request
+  * osmo-msc: free the VTY talloc context on exit
+  * osmo-msc: track the use of talloc NULL memory contexts
+  * libmsc/db.c: cosmetic: mark missing breaks in switch as intended
+  * msc/gsm_04_11.h: drop unused sms_next_rp_msg_ref()
+  * msc/gsm_04_11.h: use forward-declaration for _gsm411_sms_trans_free()
+  * msc_vlr_tests.c: drop duplicating DMM category definition
+  * libmsc/gsm_04_11.c: don't pass msgb to gsm411_rx_rp_{ack|error}
+  * libmsc/gsm_04_11.c: refactor RP-DATA header validation
+  * libmsc/transaction.c: cosmetic: fix typo
+  * libmsc/gsm_09_11.c: drop redundant assertion of stored msgb
+  * libmsc/gsm_04_11.c: refactor MT SMS message handling
+  * libmsc/gsm_04_11.c: fix: always use SAPI 3 for MT SMS
+  * libmsc/VTY: introduce kill-switch for routing SMS over GSUP
+  * libmsc/gsm_04_11.c: forward MO SMS messages over GSUP
+  * libmsc/gsm_04_11.c: accept MT SMS messages over GSUP
+
+  [ Pau Espin Pedrol ]
+  * msc_main: Fix typo in description of version param
+  * jenkins.sh: Use --enable-werror only when iu support is disabled
+  * osmo-msc: Improve shutdown due to signal and print talloc report on exit
+  * msc: Set talloc ctx for osmo_signal structures
+  * Install systemd services with autotools
+  * Install sample cfg file to /etc/osmocom
+  * msc: vty: Fix integer printf formatting
+
+  [ Daniel Willmann ]
+  * git-version-gen: Don't check for .git directory
+  * OsmoBSC/HLR/MSC: Fix default config file name
+
+  [ Harald Welte ]
+  * libmsc: move L3 call-control to separate C file (gsm_04_08_cc.c)
+  * migrate to oap_client in libosmogsm
+  * Remove local libgsupclient; Use libosmo-gsup-client from osmo-hlr
+  * gsm0407_is_duplicate(): Handle error ret of gsm0407_pdisc_ctr_bin()
+  * share chapters/gsup.adoc from OsmoSGSN to OsmoMSC + OsmoHLR
+  * vty-ref: Update URI of docbook 5.0 schema
+  * add SGs / CSFB related dot + msc files
+
+  [ Neels Hofmeyr ]
+  * vlr_access_req_fsm.c: use osmo_strlcpy and avoid compiler error
+  * Iu MGCP: no need to loopback on the cn side
+  * cosmetic: typos in log and comment
+  * use __FILE__, not __BASE_FILE__
+  * cosmetic: mute "COMPLETE_LAYER_3 not permitted"
+  * store classmark in vlr_subscr, not conn
+  * msc_vlr_tests: cosmetically tweak perm algo printing
+  * A5/n Ciph: request Classmark Update if missing
+  * fix Classmark Update without VLR subscriber
+  * vty: add SCCP related vty commands
+  * GSUP client: send CN domain IE on LU request
+  * lu_fsm: result cb: use proper cause type (warning/coverity)
+  * Importing history from osmo-gsm-manuals
+  * add OsmoMSC manual
+  * add OsmoHLR manual, OsmoHLR VTY reference
+  * refactor Makefile build rules, don't use the FORCE
+  * OsmoMSC: update VTY reference
+  * msc: update vty reference
+  * drop unused gsm_subscr_conn->mncc_rtp_bridge
+  * drop unused gsm_network->handover.active
+  * drop unused openbscdefines.h
+  * drop unused SUBSCR_CONN_E_INVALID
+  * drop unused gsm0408_allow_everyone() declaration
+  * drop unused tests/db/*
+  * cosmetic: subscr_conn_fsm_auth_ciph() should be static
+  * adjust copyright in subscr_conn.c
+  * populate gsm_subscriber_connection->encr during Ciph
+  * rename gsm_encr to geran_encr, it is only applicable on GERAN
+  * drop msc_compl_l3() return value
+  * rename gsm_subscriber_connection to ran_conn
+  * rename some RAN conn related stuff to ran_conn_*
+  * move subscr_conn.c to ran_conn.c
+  * move ran_conn declarations to new ran_conn.h
+  * combine several small .h in msc_common.h
+  * cosmetic: drop some unused opaque struct defs
+  * move gsm_auth_tuple to vlr.h as vlr_auth_tuple
+  * GSM_EXTENSION_LENGTH -> VLR_MSISDN_LENGTH
+  * drop cruft from gsm_subscriber.h
+  * move gsm_cbfn to gsm_subscriber.h, the only user
+  * python tests: use py shebang instead of $(PYTHON)
+  * make: prepare for adding transcript tests
+  * add test_nodes.vty transcript test
+  * cosmetic: msc_main.c: default args definition style
+  * msc_main: mncc: move mncc socket decision to after read_cfg
+  * vty: mncc cfg: separate the 'mncc' from 'mncc-guard-timeout'
+  * add VTY commands: mncc internal / external (== -M)
+  * ASS-COMPL: do not fire Sec Mode Compl event
+  * move ASS-COMPL MGCP handling out of a_iface_bssap.c
+  * drop gsm48 RR ciph mode compl from permitted initial messages
+  * LU: do not always invoke sub_pres_vlr_fsm_start()
+  * Revert "move ASS-COMPL MGCP handling out of a_iface_bssap.c"
+  * log: by default start with all categories on LOGL_NOTICE
+  * tweak comment to indicate sub_pres_vlr fsm as dead code
+  * vlr_lu_fsm: drop unused out_state INIT -> WAIT_IMEI
+  * comment: vlr: put the 'balancing' comment closer to the put()
+  * vty: show subscriber: put() before printing the use count
+  * fix msc_mgcp_fsm_evt_names: two missing events
+  * mgcp log tweak: say RAN, not BTS, like surrounding logging
+  * fix test_nodes.vty after libosmo-mgcp-client vty changes
+  * cosmetics in msc_mgcp_call_release()
+  * release RTP stream only for matching CC transaction
+  * fix vlr ops.subscr_assoc re-association
+  * remove code dup: add msc_mgcp_try_call_assignment()
+  * move trans->assignment_done to cc.assignment_started
+  * fix: incoming call during ongoing call
+  * abort assignment on Assignment Failure
+  * vlr: auth_fsm: make sure vsub->auth_fsm = NULL when it terminates
+  * vty cfg: move 'ipa-name' from 'msc' to 'hlr' section
+  * use osmo_rat_type from libosmocore
+  * use mgcp-client configured endpoint domain name
+  * use osmo_lu_type_name() from libosmocore
+  * add LOG_RAN_CONN() to use the conn->fi->id for context
+  * rx CM Service Req: reject double use sooner
+  * refactor log ctx for vlr_subscr and ran_conn
+  * mm_rx_id_resp(): use osmo_mi_name()
+  * tweak fsm_msc_mgcp FSM and FI name
+  * err log: fully log MS supported A5 algos on mismatch
+  * msc_vlr_tests: tweak logging in verbose mode
+
+  [ Keith ]
+  * libmsc/mncc_sock.c: Add lchan_type_offset in queue_hello()
+  * Make alert notifications vty configurable per ESME
+  * Cosmetic: Fix spelling in smpp vty
+
+  [ Max ]
+  * Properly parse cause in cipher mode reject
+  * Add counters for BSSMAP cipher mode messages
+  * vty: add command to show all known BSC
+  * msc_vlr_tests: tweak conn_exists()
+  * Fix build with latest libosmocore
+  * Use BSSAP-specific TLV parser from libosmocore
+  * Use libosmocore to function to parse cipher mode reject cause
+  * cosmetic: drop duplicated #include
+  * cosmetic: drop unused variable
+  * CC: log more details about unhandled message/state
+  * VLR tests: add logging macro with explicit value description
+  * VLR tests: avoid leaking LAC access details
+  * Use proper type for tch_rtp_connect() parameter
+  * VLR: drop unused struct members
+  * Remove redundancy in LAC processing
+  * MNCC: use log wrapper for call processing
+  * Constify transaction helpers parameters
+  * Use explicit protocol discriminator for NC SS/USSD session
+  * Fix trans_has_conn() doxygen description
+  * Enable SMS-related log in VLR tests
+  * MNCC: use explicit struct type in gsm_call
+  * SMS: remove code duplication in transaction init
+  * vty: make 'sh connect/transact' readable again
+
+  [ Keith Whyte ]
+  * libmsc: Don't send SMS STATUS REPORT locally if the ESME accepted it.
+
+  [ Alexander Couzens ]
+  * OsmoMSC: add rate counter documentation
+
+  [ Oliver Smith ]
+  * build manuals moved here from osmo-gsm-manuals.git
+  * Fix DISTCHECK_CONFIGURE_FLAGS override
+  * contrib/jenkins.sh: build and publish manuals
+  * contrib: fix makedistcheck with disabled systemd
+  * Cosmetic: msc_vty: remove redundant "0 =", "1 ="
+  * msc_vty.c: make check-imei-rqd configurable
+  * vlr_core.h: remove duplicate declarations
+  * VLR: vlr_subscr_{,msisdn_or_}name: const vsub arg
+  * VLR: send CHECK-IMEI to EIR/HLR
+
+  [ Ivan Kluchnikov ]
+  * libmsc/transaction: introduce trans_find_by_sm_rp_mr()
+
+  [ gsmevent admin ]
+  * gsm_04_08_cc.c: drop non-sensible error message
+
+ -- Harald Welte <laforge@gnumonks.org>  Mon, 21 Jan 2019 00:16:26 +0100
+
 osmo-msc (1.2.0) unstable; urgency=medium
 
   [ Neels Hofmeyr ]
