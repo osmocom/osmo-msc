@@ -59,7 +59,7 @@ int msc_send_ussd_reject(struct ran_conn *conn,
 		return -1;
 
 	/* Wrap the component in a Facility message */
-	msgb_wrap_with_TL(msg, GSM0480_IE_FACILITY);
+	msgb_push_tl(msg, GSM0480_IE_FACILITY);
 
 	/* And finally pre-pend the L3 header */
 	gh = (struct gsm48_hdr *) msgb_push(msg, sizeof(*gh));
