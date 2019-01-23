@@ -1179,6 +1179,7 @@ int gsm0411_rcv_sms(struct ran_conn *conn,
 	struct gsm48_hdr *gh = msgb_l3(msg);
 	uint8_t msg_type = gh->msg_type;
 	uint8_t transaction_id = gsm48_hdr_trans_id_flip_ti(gh);
+	struct gsm411_rp_hdr *rph = (struct gsm411_rp_hdr *) gh->data;
 	struct gsm_trans *trans;
 	int new_trans = 0;
 	int rc = 0;
@@ -1210,6 +1211,7 @@ int gsm0411_rcv_sms(struct ran_conn *conn,
 			return -ENOMEM;
 		}
 
+		trans->sms.sm_rp_mr = rph->msg_ref; /* SM-RP Message Reference */
 		trans->dlci = OMSC_LINKID_CB(msg); /* DLCI as received from BSC */
 
 		new_trans = 1;
