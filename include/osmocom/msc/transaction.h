@@ -100,7 +100,8 @@ struct gsm_trans *trans_find_by_id(const struct ran_conn *conn,
 				   uint8_t proto, uint8_t trans_id);
 struct gsm_trans *trans_find_by_callref(const struct gsm_network *net,
 					uint32_t callref);
-struct gsm_trans *trans_find_by_sm_rp_mr(const struct ran_conn *conn,
+struct gsm_trans *trans_find_by_sm_rp_mr(const struct gsm_network *net,
+					 const struct vlr_subscr *vsub,
 					 uint8_t sm_rp_mr);
 
 struct gsm_trans *trans_alloc(struct gsm_network *net,

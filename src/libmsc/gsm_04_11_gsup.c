@@ -176,7 +176,7 @@ int gsm411_gsup_mo_handler(struct vlr_subscr *vsub,
 	}
 
 	/* Attempt to find DTAP-transaction */
-	trans = trans_find_by_sm_rp_mr(conn, *(gsup_msg->sm_rp_mr));
+	trans = trans_find_by_sm_rp_mr(net, vsub, *(gsup_msg->sm_rp_mr));
 	if (!trans) {
 		LOGP(DLSMS, LOGL_NOTICE, "No transaction found for %s, "
 			"ignoring %s-%s message...\n", vlr_subscr_name(vsub),
