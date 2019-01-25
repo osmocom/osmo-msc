@@ -138,7 +138,7 @@ struct gsm_trans *trans_alloc(struct gsm_network *net,
  */
 void trans_free(struct gsm_trans *trans)
 {
-	enum ran_conn_use conn_usage_token = RAN_CONN_USE_UNTRACKED;
+	enum ran_conn_use conn_usage_token;
 	struct ran_conn *conn;
 
 	switch (trans->protocol) {
@@ -153,6 +153,9 @@ void trans_free(struct gsm_trans *trans)
 	case GSM48_PDISC_NC_SS:
 		_gsm911_nc_ss_trans_free(trans);
 		conn_usage_token = RAN_CONN_USE_TRANS_NC_SS;
+		break;
+	default:
+		conn_usage_token = RAN_CONN_USE_UNTRACKED;
 		break;
 	}
 
