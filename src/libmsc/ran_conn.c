@@ -442,7 +442,7 @@ static const struct osmo_fsm_state ran_conn_fsm_states[] = {
 		/* allow everything to release for any odd behavior */
 		.in_event_mask = S(RAN_CONN_E_COMPLETE_LAYER_3) |
 				 S(RAN_CONN_E_COMMUNICATING) |
-		                 S(RAN_CONN_E_RELEASE_WHEN_UNUSED) |
+				 S(RAN_CONN_E_RELEASE_WHEN_UNUSED) |
 				 S(RAN_CONN_E_ACCEPTED) |
 				 S(RAN_CONN_E_MO_CLOSE) |
 				 S(RAN_CONN_E_CN_CLOSE) |
