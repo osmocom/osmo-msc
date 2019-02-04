@@ -416,10 +416,15 @@ int a_iface_tx_assignment(const struct gsm_trans *trans)
 int a_iface_tx_clear_cmd(struct ran_conn *conn)
 {
 	struct msgb *msg;
+	struct vlr_subscr *vsub = conn->vsub;
+	bool csfb_ind = false;
 
 	LOGPCONN(conn, LOGL_INFO, "Tx BSSMAP CLEAR COMMAND to BSC\n");
 
-	msg = gsm0808_create_clear_command(GSM0808_CAUSE_CALL_CONTROL);
+	if (vsub && vsub->sgs_fsm->state == SGS_UE_ST_ASSOCIATED)
+		csfb_ind = true;
+
+	msg = gsm0808_create_clear_command2(GSM0808_CAUSE_CALL_CONTROL, csfb_ind);
 	return osmo_sccp_tx_data_msg(conn->a.scu, conn->a.conn_id, msg);
 }
 
