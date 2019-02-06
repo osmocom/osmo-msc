@@ -86,3 +86,31 @@ int msc_send_ussd_release_complete(struct ran_conn *conn,
 		return -1;
 	return msc_tx_dtap(conn, msg);
 }
+
+int msc_send_ussd_release_complete_cause(struct ran_conn *conn,
+					 uint8_t transaction_id,
+					 uint8_t cause_loc, uint8_t cause_val)
+{
+	struct msgb *msg;
+	uint8_t *cause_ie;
+
+	msg = gsm0480_create_release_complete(transaction_id);
+	if (!msg)
+		return -1;
+
+	/* Encode cause IE (see GSM 04.08, section 10.5.4.11)
+	 * with fixed length (2 bytes of TL, 2 bytes of payload).
+	 * NOTE: we don't use gsm48_encode_cause() API because
+	 * it wants gsm_mncc_cause struct from us. */
+	cause_ie = msgb_put(msg, 2 + 2);
+	cause_ie[0] = GSM48_IE_CAUSE;
+	cause_ie[1] = 2;
+
+	/* Coding standard defined for the GSM PLMNs,
+	 * location and cause: as given by caller,
+	 * no extension, no diagnostics. */
+	cause_ie[2] = (1 << 7) | (0x03 << 5) | (cause_loc & 0x0f);
+	cause_ie[3] = (1 << 7) | cause_val;
+
+	return msc_tx_dtap(conn, msg);
+}
