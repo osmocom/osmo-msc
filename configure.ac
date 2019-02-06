@@ -46,6 +46,17 @@ PKG_CHECK_MODULES(LIBOSMOSCCP, libosmo-sccp >= 1.0.0)
 PKG_CHECK_MODULES(LIBOSMOMGCPCLIENT, libosmo-mgcp-client >= 1.5.0)
 PKG_CHECK_MODULES(LIBOSMOGSUPCLIENT, libosmo-gsup-client >= 1.0.0)
 
+old_LIBS=$LIBS
+AC_SEARCH_LIBS([sctp_send], [sctp], [
+	AC_DEFINE(HAVE_LIBSCTP, 1, [Define 1 to enable SCTP support])
+	AC_SUBST(HAVE_LIBSCTP, [1])
+	if test -n "$ac_lib"; then
+		AC_SUBST(LIBSCTP_LIBS, [-l$ac_lib])
+	fi
+	], [
+	AC_MSG_ERROR([sctp_send not found in searched libs])])
+LIBS=$old_LIBS
+
 AC_ARG_ENABLE(sanitize,
 	[AS_HELP_STRING(
 		[--enable-sanitize],
