@@ -182,8 +182,8 @@ void trans_free(struct gsm_trans *trans)
  * in the given protocol using TI flag = 0 (allocated by us).
  * See GSM 04.07, section 11.2.3.1.3 "Transaction identifier".
  * \param[in] net GSM network
- * \param[in] subscr Subscriber for which to find ID
- * \param[in] protocol Protocol for whihc to find ID
+ * \param[in] subscr Subscriber for which to assign a new TID
+ * \param[in] protocol Protocol of to be assigned TID
  */
 int trans_assign_trans_id(const struct gsm_network *net, const struct vlr_subscr *vsub,
 			  uint8_t protocol)
