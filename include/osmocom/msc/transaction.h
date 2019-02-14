@@ -9,6 +9,9 @@
 #include <osmocom/gsm/gsm0411_smc.h>
 #include <osmocom/gsm/gsm0411_smr.h>
 
+/* Used for late TID assignment */
+#define TRANS_ID_UNASSIGNED 0xff
+
 enum bridge_state {
 	BRIDGE_STATE_NONE,
 	BRIDGE_STATE_LOOPBACK_PENDING,

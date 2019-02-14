@@ -296,7 +296,7 @@ static struct gsm_trans *establish_nc_ss_trans(struct gsm_network *net,
 
 	/* Allocate a new transaction */
 	trans = trans_alloc(net, vsub, GSM48_PDISC_NC_SS,
-		0xff, gsup_msg->session_id);
+		TRANS_ID_UNASSIGNED, gsup_msg->session_id);
 	if (!trans) {
 		LOGP(DMM, LOGL_ERROR, " -> No memory for trans\n");
 		return NULL;

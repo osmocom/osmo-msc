@@ -196,7 +196,7 @@ int trans_assign_trans_id(const struct gsm_network *net, const struct vlr_subscr
 	llist_for_each_entry(trans, &net->trans_list, entry) {
 		if (trans->vsub != vsub ||
 		    trans->protocol != protocol ||
-		    trans->transaction_id == 0xff)
+		    trans->transaction_id == TRANS_ID_UNASSIGNED)
 			continue;
 		used_tid_bitmask |= (1 << trans->transaction_id);
 	}

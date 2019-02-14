@@ -617,7 +617,7 @@ static int gsm48_cc_tx_setup(struct gsm_trans *trans, void *arg)
 	gh = (struct gsm48_hdr *) msgb_put(msg, sizeof(*gh));
 
 	/* transaction id must not be assigned */
-	if (trans->transaction_id != 0xff) { /* unasssigned */
+	if (trans->transaction_id != TRANS_ID_UNASSIGNED) {
 		DEBUGP(DCC, "TX Setup with assigned transaction. "
 			"This is not allowed!\n");
 		/* Temporarily out of order */
@@ -1928,7 +1928,8 @@ int mncc_tx_to_cc(struct gsm_network *net, int msg_type, void *arg)
 						GSM48_CC_CAUSE_DEST_OOO);
 		}
 		/* Create transaction */
-		trans = trans_alloc(net, vsub, GSM48_PDISC_CC, 0xff, data->callref);
+		trans = trans_alloc(net, vsub, GSM48_PDISC_CC,
+				    TRANS_ID_UNASSIGNED, data->callref);
 		if (!trans) {
 			LOGP(DCC, LOGL_ERROR, "No memory for trans.\n");
 			vlr_subscr_put(vsub);
