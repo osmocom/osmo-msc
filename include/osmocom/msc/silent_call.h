@@ -2,9 +2,12 @@
 #define _SILENT_CALL_H
 
 struct ran_conn;
+struct gsm0808_channel_type;
 
 extern int gsm_silent_call_start(struct vlr_subscr *vsub,
-                                 void *data, int type);
+		struct gsm0808_channel_type *ct,
+		const char *traffic_dst_ip, uint16_t traffic_dst_port,
+		void *data);
 extern int gsm_silent_call_stop(struct vlr_subscr *vsub);
 
 #if 0

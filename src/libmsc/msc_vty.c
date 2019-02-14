@@ -1042,21 +1042,35 @@ err:
 	return rc;
 }
 
-#define CHAN_TYPES "(any|tch/f|tch/any|sdcch)"
+#define CHAN_TYPES "(any|tch/f|tch/h|tch/any|sdcch)"
 #define CHAN_TYPE_HELP 			\
 		"Any channel\n"		\
 		"TCH/F channel\n"	\
+		"TCH/H channel\n"	\
 		"Any TCH channel\n"	\
 		"SDCCH channel\n"
 
+#define CHAN_MODES "(signalling|speech-hr|speech-fr|speech-efr|speech-amr)"
+#define CHAN_MODE_HELP				\
+		"Signalling only\n"		\
+		"Speech with HR codec\n"	\
+		"Speech with FR codec\n"	\
+		"Speech with EFR codec\n"	\
+		"Speech with AMR codec\n"
+
 DEFUN(subscriber_silent_call_start,
       subscriber_silent_call_start_cmd,
-      "subscriber " SUBSCR_TYPES " ID silent-call start (any|tch/f|tch/any|sdcch)",
+      "subscriber " SUBSCR_TYPES " ID silent-call start " CHAN_TYPES " " CHAN_MODES " [IP] [<0-65536>]",
 	SUBSCR_HELP "Silent call operation\n" "Start silent call\n"
-	CHAN_TYPE_HELP)
+	CHAN_TYPE_HELP CHAN_MODE_HELP
+	"Target IP for RTP traffic (default 127.0.0.1)\n"
+	"Target port for RTP traffic (default: 4000)\n")
 {
 	struct vlr_subscr *vsub = get_vsub_by_argv(gsmnet, argv[0], argv[1]);
-	int rc, type;
+	struct gsm0808_channel_type ct;
+	const char *ip = NULL;
+	uint16_t port = 0;
+	int rc, speech;
 
 	if (!vsub) {
 		vty_out(vty, "%% No subscriber found for %s %s%s",
@@ -1064,16 +1078,52 @@ DEFUN(subscriber_silent_call_start,
 		return CMD_WARNING;
 	}
 
-	if (!strcmp(argv[2], "tch/f"))
-		type = RSL_CHANNEED_TCH_F;
-	else if (!strcmp(argv[2], "tch/any"))
-		type = RSL_CHANNEED_TCH_ForH;
-	else if (!strcmp(argv[2], "sdcch"))
-		type = RSL_CHANNEED_SDCCH;
-	else
-		type = RSL_CHANNEED_ANY;	/* Defaults to ANY */
+	memset(&ct, 0x00, sizeof(ct));
 
-	rc = gsm_silent_call_start(vsub, vty, type);
+	if (!strcmp(argv[3], "signalling")) {
+		ct.ch_indctr = GSM0808_CHAN_SIGN;
+		ct.perm_spch[0] = 0; /* Spare but required */
+		ct.perm_spch_len = 1;
+	} else if (!strcmp(argv[3], "speech-hr")) {
+		ct.ch_indctr = GSM0808_CHAN_SPEECH;
+		ct.perm_spch[0] = GSM0808_PERM_HR1;
+		ct.perm_spch_len = 1;
+	} else if (!strcmp(argv[3], "speech-fr")) {
+		ct.ch_indctr = GSM0808_CHAN_SPEECH;
+		ct.perm_spch[0] = GSM0808_PERM_FR1;
+		ct.perm_spch_len = 1;
+	} else if (!strcmp(argv[3], "speech-efr")) {
+		ct.ch_indctr = GSM0808_CHAN_SPEECH;
+		ct.perm_spch[0] = GSM0808_PERM_FR2;
+		ct.perm_spch_len = 1;
+	} else if (!strcmp(argv[3], "speech-amr")) {
+		ct.ch_indctr = GSM0808_CHAN_SPEECH;
+		ct.perm_spch[0] = GSM0808_PERM_FR3;
+		ct.perm_spch[1] = GSM0808_PERM_HR3;
+		ct.perm_spch_len = 2;
+	}
+
+	speech = ct.ch_indctr == GSM0808_CHAN_SPEECH;
+
+	if (!strcmp(argv[2], "tch/f"))
+		ct.ch_rate_type = speech ? GSM0808_SPEECH_FULL_BM : GSM0808_SIGN_FULL_BM;
+	else if (!strcmp(argv[2], "tch/h"))
+		ct.ch_rate_type = speech ? GSM0808_SPEECH_HALF_LM : GSM0808_SIGN_HALF_LM;
+	else if (!strcmp(argv[2], "tch/any"))
+		ct.ch_rate_type = speech ? GSM0808_SPEECH_FULL_PREF : GSM0808_SIGN_FULL_PREF;
+	else if (!strcmp(argv[2], "sdcch")) {
+		if (speech) {
+			vty_out(vty, "Can't request speech on SDCCH%s", VTY_NEWLINE);
+			return CMD_WARNING;
+		}
+		ct.ch_rate_type = GSM0808_SIGN_SDCCH;
+	} else
+		ct.ch_rate_type = speech ? GSM0808_SPEECH_FULL_PREF : GSM0808_SIGN_ANY;
+
+	ip   = argc >= 5 ? argv[4] : "127.0.0.1";
+	port = argc >= 6 ? atoi(argv[5]) : 4000;
+
+	rc = gsm_silent_call_start(vsub, &ct, ip, port, vty);
 	switch (rc) {
 	case -ENODEV:
 		vty_out(vty, "%% Subscriber not attached%s", VTY_NEWLINE);

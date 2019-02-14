@@ -24,6 +24,7 @@
 #include <unistd.h>
 #include <errno.h>
 
+#include <osmocom/core/byteswap.h>
 #include <osmocom/core/msgb.h>
 #include <osmocom/msc/signal.h>
 #include <osmocom/msc/debug.h>
@@ -31,13 +32,37 @@
 #include <osmocom/msc/gsm_subscriber.h>
 #include <osmocom/msc/vlr.h>
 
+#include <osmocom/sigtran/sccp_helpers.h>
+
+struct silent_call_data {
+	struct gsm0808_channel_type ct;
+
+	char traffic_ip[INET_ADDRSTRLEN];
+	uint16_t traffic_port;
+
+	void *data;
+
+	struct osmo_timer_list timer;
+	struct ran_conn *conn;
+};
+
+static void timer_cb(void *data)
+{
+	struct silent_call_data *scd = (struct silent_call_data *)data;
+	ran_conn_communicating(scd->conn);
+	talloc_free(scd);
+}
+
 /* paging of the requested subscriber has completed */
 static int paging_cb_silent(unsigned int hooknum, unsigned int event,
 			    struct msgb *msg, void *_conn, void *_data)
 {
+	struct silent_call_data *scd = (struct silent_call_data *)_data;
 	struct ran_conn *conn = _conn;
 	struct scall_signal_data sigdata;
+	struct msgb *msg_ass;
 	int rc = 0;
+	int i;
 
 	if (hooknum != GSM_HOOK_RR_PAGING)
 		return -EINVAL;
@@ -45,7 +70,7 @@ static int paging_cb_silent(unsigned int hooknum, unsigned int event,
 	DEBUGP(DLSMS, "paging_cb_silent: ");
 
 	sigdata.conn = conn;
-	sigdata.data = _data;
+	sigdata.data = scd->data;
 
 	switch (event) {
 	case GSM_PAGING_SUCCEEDED:
@@ -56,19 +81,57 @@ static int paging_cb_silent(unsigned int hooknum, unsigned int event,
 			conn->lchan->ts->nr, conn->lchan->ts->trx->arfcn);
 #endif
 		conn->silent_call = 1;
+
+		/* Increment lchan reference count and mark as active*/
 		ran_conn_get(conn, RAN_CONN_USE_SILENT_CALL);
-		/* increment lchan reference count */
+
+		/* Schedule a timer to mark it as active */
+		scd->conn = conn;
+		osmo_timer_setup(&scd->timer, timer_cb, scd);
+		osmo_timer_schedule(&scd->timer, 0, 0);
+
+		/* Manually craft an assignement message with requested mode */
+		if (scd->ct.ch_indctr == GSM0808_CHAN_SPEECH) {
+			struct gsm0808_speech_codec_list scl;
+			union {
+				struct sockaddr_storage st;
+				struct sockaddr_in in;
+			} rtp_addr;
+
+			memset(&rtp_addr, 0, sizeof(rtp_addr));
+			rtp_addr.in.sin_family = AF_INET;
+			rtp_addr.in.sin_port = osmo_htons(scd->traffic_port);
+			rtp_addr.in.sin_addr.s_addr = inet_addr(scd->traffic_ip);
+
+			for (i=0; i<scd->ct.perm_spch_len; i++)
+				gsm0808_speech_codec_from_chan_type(&scl.codec[i], scd->ct.perm_spch[i]);
+			scl.len = scd->ct.perm_spch_len;
+
+			msg_ass = gsm0808_create_ass(&scd->ct, NULL, &rtp_addr.st, &scl, NULL);
+		} else {
+			msg_ass = gsm0808_create_ass(&scd->ct, NULL, NULL, NULL, NULL);
+		}
+
+		/* Send assignement message, hoping it will work */
+		osmo_sccp_tx_data_msg(conn->a.scu, conn->a.conn_id, msg_ass);
+
+		/* Signal completion */
 		osmo_signal_dispatch(SS_SCALL, S_SCALL_SUCCESS, &sigdata);
 		break;
+
 	case GSM_PAGING_EXPIRED:
 	case GSM_PAGING_BUSY:
 		DEBUGP(DLSMS, "expired\n");
 		osmo_signal_dispatch(SS_SCALL, S_SCALL_EXPIRED, &sigdata);
 		break;
+
 	default:
 		rc = -EINVAL;
 		break;
 	}
+
+	if (rc)
+		talloc_free(scd);
 
 	return rc;
 }
@@ -120,18 +183,33 @@ int silent_call_reroute(struct ran_conn *conn, struct msgb *msg)
 
 
 /* initiate a silent call with a given subscriber */
-int gsm_silent_call_start(struct vlr_subscr *vsub, void *data, int type)
+int gsm_silent_call_start(struct vlr_subscr *vsub,
+	struct gsm0808_channel_type *ct,
+	const char *traffic_dst_ip, uint16_t traffic_dst_port,
+	void *data)
 {
 	struct subscr_request *req;
+	struct silent_call_data *scd;
 
-	/* FIXME the VTY command allows selecting a silent call channel type.
-	 * This doesn't apply to the situation after MSCSPLIT with an
-	 * A-interface. */
-	req = subscr_request_conn(vsub, paging_cb_silent, data,
+	scd = talloc_zero(vsub, struct silent_call_data);
+
+	memcpy(&scd->ct, ct, sizeof(struct gsm0808_channel_type));
+
+	if (traffic_dst_ip) {
+		strncpy(scd->traffic_ip, traffic_dst_ip, sizeof(scd->traffic_ip));
+		scd->traffic_port = traffic_dst_port;
+	}
+
+	scd->data = data;
+
+	req = subscr_request_conn(vsub, paging_cb_silent, scd,
 				  "establish silent call",
 				  SGSAP_SERV_IND_CS_CALL);
-	if (!req)
+	if (!req) {
+		talloc_free(scd);
 		return -ENODEV;
+	}
+
 	return 0;
 }
 
