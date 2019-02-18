@@ -148,6 +148,19 @@ static int a_iface_tx_bssap(const struct ran_conn *conn, struct msgb *msg)
 	OSMO_ASSERT(conn->a.scu);
 
 	LOGPCONN(conn, LOGL_DEBUG, "N-DATA.req(%s)\n", msgb_hexdump_l3(msg));
+
+	/* some consistency checks to ensure we don't send invalid length */
+	switch (msg->l3h[0]) {
+	case BSSAP_MSG_DTAP:
+		OSMO_ASSERT(msgb_l3len(msg) == msg->l3h[2] + 3);
+		break;
+	case BSSAP_MSG_BSS_MANAGEMENT:
+		OSMO_ASSERT(msgb_l3len(msg) == msg->l3h[1] + 2);
+		break;
+	default:
+		break;
+	}
+
 	return osmo_sccp_tx_data_msg(conn->a.scu, conn->a.conn_id, msg);
 }
 
