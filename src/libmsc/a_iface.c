@@ -147,7 +147,7 @@ static int a_iface_tx_bssap(const struct ran_conn *conn, struct msgb *msg)
 	OSMO_ASSERT(conn);
 	OSMO_ASSERT(conn->a.scu);
 
-	LOGPCONN(conn, LOGL_DEBUG, "N-DATA.req(%s)\n", msgb_hexdump_l2(msg));
+	LOGPCONN(conn, LOGL_DEBUG, "N-DATA.req(%s)\n", msgb_hexdump_l3(msg));
 	return osmo_sccp_tx_data_msg(conn->a.scu, conn->a.conn_id, msg);
 }
 
