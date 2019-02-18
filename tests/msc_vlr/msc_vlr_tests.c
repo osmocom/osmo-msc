@@ -193,6 +193,12 @@ void conn_conclude_cm_service_req(struct ran_conn *conn,
 
 enum osmo_rat_type rx_from_ran = OSMO_RAT_GERAN_A;
 
+/* SCCP user stub to make a_iface_tx_bssap() happy during test case execution */
+struct osmo_sccp_user {
+	uint8_t foo;
+};
+static struct osmo_sccp_user g_scu;
+
 struct ran_conn *conn_new(void)
 {
 	struct ran_conn *conn;
@@ -203,6 +209,8 @@ struct ran_conn *conn_new(void)
 			.conn_id = 42,
 		};
 		conn->iu.ue_ctx = ue_ctx;
+	} else {
+		conn->a.scu = &g_scu;
 	}
 	return conn;
 }

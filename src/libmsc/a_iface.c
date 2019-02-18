@@ -141,6 +141,16 @@ static struct bsc_context *get_bsc_context_by_sccp_addr(const struct osmo_sccp_a
 	return NULL;
 }
 
+/* wrapper around osmo_sccp_tx_data_msg(): Transmit a fully encoded BSSAP (DTAP or BSSMAP) message */
+static int a_iface_tx_bssap(const struct ran_conn *conn, struct msgb *msg)
+{
+	OSMO_ASSERT(conn);
+	OSMO_ASSERT(conn->a.scu);
+
+	LOGPCONN(conn, LOGL_DEBUG, "N-DATA.req(%s)\n", msgb_hexdump_l2(msg));
+	return osmo_sccp_tx_data_msg(conn->a.scu, conn->a.conn_id, msg);
+}
+
 /* Send DTAP message via A-interface, take ownership of msg */
 int a_iface_tx_dtap(struct msgb *msg)
 {
@@ -151,7 +161,6 @@ int a_iface_tx_dtap(struct msgb *msg)
 	OSMO_ASSERT(msg);
 	conn = (struct ran_conn *)msg->dst;
 	OSMO_ASSERT(conn);
-	OSMO_ASSERT(conn->a.scu);
 
 	LOGPCONN(conn, LOGL_DEBUG, "Passing DTAP message (DLCI=0x%02x) from MSC to BSC\n", link_id);
 
@@ -167,9 +176,8 @@ int a_iface_tx_dtap(struct msgb *msg)
 		return -EINVAL;
 	}
 
-	LOGPCONN(conn, LOGL_DEBUG, "N-DATA.req(%s)\n", msgb_hexdump_l2(msg_resp));
 	/* osmo_sccp_tx_data_msg() takes ownership of msg_resp */
-	return osmo_sccp_tx_data_msg(conn->a.scu, conn->a.conn_id, msg_resp);
+	return a_iface_tx_bssap(conn, msg_resp);
 }
 
 /* Send Cipher mode command via A-interface */
@@ -186,9 +194,7 @@ int a_iface_tx_cipher_mode(const struct ran_conn *conn,
 	LOGPC(DBSSAP, LOGL_DEBUG, " key %s\n", osmo_hexdump_nospc(ei->key, ei->key_len));
 
 	msg_resp = gsm0808_create_cipher(ei, include_imeisv ? &crm : NULL);
-	LOGPCONN(conn, LOGL_DEBUG, "N-DATA.req(%s)\n", msgb_hexdump_l2(msg_resp));
-
-	return osmo_sccp_tx_data_msg(conn->a.scu, conn->a.conn_id, msg_resp);
+	return a_iface_tx_bssap(conn, msg_resp);
 }
 
 /* Page a subscriber via A-interface */
@@ -407,9 +413,7 @@ int a_iface_tx_assignment(const struct gsm_trans *trans)
 	memcpy(&rtp_addr, &rtp_addr_in, sizeof(rtp_addr_in));
 
 	msg = gsm0808_create_ass(&ct, NULL, &rtp_addr, &scl, NULL);
-
-	LOGPCONN(conn, LOGL_DEBUG, "N-DATA.req(%s)\n", msgb_hexdump_l2(msg));
-	return osmo_sccp_tx_data_msg(conn->a.scu, conn->a.conn_id, msg);
+	return a_iface_tx_bssap(conn, msg);
 }
 
 /* Send clear command via A-interface */
@@ -425,7 +429,7 @@ int a_iface_tx_clear_cmd(struct ran_conn *conn)
 		csfb_ind = true;
 
 	msg = gsm0808_create_clear_command2(GSM0808_CAUSE_CALL_CONTROL, csfb_ind);
-	return osmo_sccp_tx_data_msg(conn->a.scu, conn->a.conn_id, msg);
+	return a_iface_tx_bssap(conn, msg);
 }
 
 int a_iface_tx_classmark_request(const struct ran_conn *conn)
@@ -435,7 +439,7 @@ int a_iface_tx_classmark_request(const struct ran_conn *conn)
 	LOGPCONN(conn, LOGL_INFO, "Tx BSSMAP CLASSMARK REQUEST to BSC\n");
 
 	msg = gsm0808_create_classmark_request();
-	return osmo_sccp_tx_data_msg(conn->a.scu, conn->a.conn_id, msg);
+	return a_iface_tx_bssap(conn, msg);
 }
 
 /* Callback function: Close all open connections */
