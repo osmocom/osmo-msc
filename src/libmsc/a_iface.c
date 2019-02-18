@@ -154,7 +154,7 @@ static int a_iface_tx_bssap(const struct ran_conn *conn, struct msgb *msg)
 /* Send DTAP message via A-interface, take ownership of msg */
 int a_iface_tx_dtap(struct msgb *msg)
 {
-	struct ran_conn *conn;
+	const struct ran_conn *conn;
 	struct msgb *msg_resp;
 
 	uint8_t link_id = OMSC_LINKID_CB(msg);
@@ -366,7 +366,7 @@ static int enc_speech_codec_list(struct gsm0808_speech_codec_list *scl, const st
 /* Send assignment request via A-interface */
 int a_iface_tx_assignment(const struct gsm_trans *trans)
 {
-	struct ran_conn *conn;
+	const struct ran_conn *conn;
 	struct gsm0808_channel_type ct;
 	struct gsm0808_speech_codec_list scl;
 	struct msgb *msg;
@@ -417,7 +417,7 @@ int a_iface_tx_assignment(const struct gsm_trans *trans)
 }
 
 /* Send clear command via A-interface */
-int a_iface_tx_clear_cmd(struct ran_conn *conn)
+int a_iface_tx_clear_cmd(const struct ran_conn *conn)
 {
 	struct msgb *msg;
 	struct vlr_subscr *vsub = conn->vsub;
