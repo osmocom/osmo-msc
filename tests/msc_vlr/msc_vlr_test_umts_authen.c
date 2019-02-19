@@ -160,12 +160,12 @@ static void _test_umts_authen(enum osmo_rat_type via_ran)
 	thwart_rx_non_initial_requests();
 
 	btw("even though the TMSI is not acked, we can already find the subscr with it");
-	vsub = vlr_subscr_find_by_tmsi(net->vlr, 0x03020100);
+	vsub = vlr_subscr_find_by_tmsi(net->vlr, 0x03020100, __func__);
 	VERBOSE_ASSERT(vsub != NULL, == true, "%d");
 	VERBOSE_ASSERT(strcmp(vsub->imsi, imsi), == 0, "%d");
 	VERBOSE_ASSERT(vsub->tmsi_new, == 0x03020100, "0x%08x");
 	VERBOSE_ASSERT(vsub->tmsi, == GSM_RESERVED_TMSI, "0x%08x");
-	vlr_subscr_put(vsub);
+	vlr_subscr_put(vsub, __func__);
 
 	btw("MS sends TMSI Realloc Complete");
 	expect_release_clear(via_ran);
@@ -223,7 +223,7 @@ static void _test_umts_authen(enum osmo_rat_type via_ran)
 	BTW("an SMS is sent, MS is paged");
 	paging_expect_imsi(imsi);
 	paging_sent = false;
-	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi);
+	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi, __func__);
 	OSMO_ASSERT(vsub);
 	VERBOSE_ASSERT(llist_count(&vsub->cs.requests), == 0, "%d");
 
@@ -232,16 +232,16 @@ static void _test_umts_authen(enum osmo_rat_type via_ran)
 		 " marketing option.");
 
 	VERBOSE_ASSERT(llist_count(&vsub->cs.requests), == 1, "%d");
-	vlr_subscr_put(vsub);
+	vlr_subscr_put(vsub, __func__);
 	vsub = NULL;
 	VERBOSE_ASSERT(paging_sent, == true, "%d");
 	VERBOSE_ASSERT(paging_stopped, == false, "%d");
 
 	btw("the subscriber and its pending request should remain");
-	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi);
+	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi, __func__);
 	OSMO_ASSERT(vsub);
 	VERBOSE_ASSERT(llist_count(&vsub->cs.requests), == 1, "%d");
-	vlr_subscr_put(vsub);
+	vlr_subscr_put(vsub, __func__);
 
 	btw("MS replies with Paging Response, and VLR sends Auth Request with third key");
 	auth_request_sent = false;
@@ -277,10 +277,10 @@ static void _test_umts_authen(enum osmo_rat_type via_ran)
 	}
 
 	btw("SMS was delivered, no requests pending for subscr");
-	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi);
+	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi, __func__);
 	OSMO_ASSERT(vsub);
 	VERBOSE_ASSERT(llist_count(&vsub->cs.requests), == 0, "%d");
-	vlr_subscr_put(vsub);
+	vlr_subscr_put(vsub, __func__);
 
 	btw("conn is still open to wait for SMS ack dance");
 	EXPECT_CONN_COUNT(1);
@@ -529,12 +529,12 @@ static void _test_umts_authen_resync(enum osmo_rat_type via_ran)
 	thwart_rx_non_initial_requests();
 
 	btw("even though the TMSI is not acked, we can already find the subscr with it");
-	vsub = vlr_subscr_find_by_tmsi(net->vlr, 0x03020100);
+	vsub = vlr_subscr_find_by_tmsi(net->vlr, 0x03020100, __func__);
 	VERBOSE_ASSERT(vsub != NULL, == true, "%d");
 	VERBOSE_ASSERT(strcmp(vsub->imsi, imsi), == 0, "%d");
 	VERBOSE_ASSERT(vsub->tmsi_new, == 0x03020100, "0x%08x");
 	VERBOSE_ASSERT(vsub->tmsi, == GSM_RESERVED_TMSI, "0x%08x");
-	vlr_subscr_put(vsub);
+	vlr_subscr_put(vsub, __func__);
 
 	btw("MS sends TMSI Realloc Complete");
 	expect_release_clear(via_ran);

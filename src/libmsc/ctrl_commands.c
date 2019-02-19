@@ -29,6 +29,8 @@
 
 #include <stdbool.h>
 
+#define VSUB_USE_CTRL "CTRL"
+
 static struct gsm_network *msc_ctrl_net = NULL;
 
 static int get_subscriber_list(struct ctrl_cmd *cmd, void *d)
@@ -73,7 +75,7 @@ static int set_sub_expire(struct ctrl_cmd *cmd, void *data)
 		return CTRL_CMD_ERROR;
 	}
 
-	vsub = vlr_subscr_find_by_imsi(msc_ctrl_net->vlr, cmd->value);
+	vsub = vlr_subscr_find_by_imsi(msc_ctrl_net->vlr, cmd->value, VSUB_USE_CTRL);
 	if (!vsub) {
 		LOGP(DCTRL, LOGL_ERROR, "Attempt to expire unknown subscriber IMSI=%s\n", cmd->value);
 		cmd->reply = "IMSI unknown";
@@ -85,11 +87,11 @@ static int set_sub_expire(struct ctrl_cmd *cmd, void *data)
 	if (vlr_subscr_expire(vsub))
 		LOGP(DCTRL, LOGL_NOTICE, "VLR released subscriber %s\n", vlr_subscr_name(vsub));
 
-	if (vsub->use_count > 1)
+	if (osmo_use_count_total(&vsub->use_count) > 1)
 		LOGP(DCTRL, LOGL_NOTICE, "Subscriber %s is still in use, should be released soon\n",
 		     vlr_subscr_name(vsub));
 
-	vlr_subscr_put(vsub);
+	vlr_subscr_put(vsub, VSUB_USE_CTRL);
 
 	return CTRL_CMD_REPLY;
 }

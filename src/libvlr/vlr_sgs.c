@@ -80,7 +80,7 @@ int vlr_sgs_loc_update(struct vlr_instance *vlr, struct vlr_sgs_cfg *cfg,
 	OSMO_ASSERT(cfg);
 	OSMO_ASSERT(imsi);
 
-	vsub = vlr_subscr_find_or_create_by_imsi(vlr, imsi, NULL);
+	vsub = vlr_subscr_find_or_create_by_imsi(vlr, imsi, VSUB_USE_SGS, NULL);
 	if (!vsub) {
 		LOGP(DSGS, LOGL_ERROR, "VLR subscriber allocation failed\n");
 		return -EINVAL;
@@ -137,7 +137,7 @@ void vlr_sgs_imsi_detach(struct vlr_instance *vlr, const char *imsi, enum sgsap_
 	struct vlr_subscr *vsub;
 	enum sgs_ue_fsm_event evt;
 
-	vsub = vlr_subscr_find_by_imsi(vlr, imsi);
+	vsub = vlr_subscr_find_by_imsi(vlr, imsi, __func__);
 	if (!vsub)
 		return;
 
@@ -164,12 +164,12 @@ void vlr_sgs_imsi_detach(struct vlr_instance *vlr, const char *imsi, enum sgsap_
 	}
 
 	osmo_fsm_inst_dispatch(vsub->sgs_fsm, evt, NULL);
-	vlr_subscr_put(vsub);
 
 	/* Detaching from non EPS services essentially means that the
 	 * subscriber is detached from 2G. In any case the VLR will
 	 * get rid of the subscriber. */
 	vlr_subscr_expire(vsub);
+	vlr_subscr_put(vsub, __func__);
 }
 
 /*! Perform an SGs EPS detach.
@@ -180,7 +180,7 @@ void vlr_sgs_eps_detach(struct vlr_instance *vlr, const char *imsi, enum sgsap_i
 {
 	struct vlr_subscr *vsub;
 	enum sgs_ue_fsm_event evt;
-	vsub = vlr_subscr_find_by_imsi(vlr, imsi);
+	vsub = vlr_subscr_find_by_imsi(vlr, imsi, __func__);
 	if (!vsub)
 		return;
 
@@ -211,7 +211,7 @@ void vlr_sgs_eps_detach(struct vlr_instance *vlr, const char *imsi, enum sgsap_i
 	if (vsub->expire_lu == VLR_SUBSCRIBER_NO_EXPIRATION)
 		vlr_subscr_enable_expire_lu(vsub);
 
-	vlr_subscr_put(vsub);
+	vlr_subscr_put(vsub, __func__);
 }
 
 /*! Perform an SGs TMSI reallocation complete.
@@ -220,12 +220,12 @@ void vlr_sgs_eps_detach(struct vlr_instance *vlr, const char *imsi, enum sgsap_i
 void vlr_sgs_tmsi_reall_compl(struct vlr_instance *vlr, const char *imsi)
 {
 	struct vlr_subscr *vsub;
-	vsub = vlr_subscr_find_by_imsi(vlr, imsi);
+	vsub = vlr_subscr_find_by_imsi(vlr, imsi, __func__);
 	if (!vsub)
 		return;
 
 	osmo_fsm_inst_dispatch(vsub->sgs_fsm, SGS_UE_E_RX_TMSI_REALLOC, NULL);
-	vlr_subscr_put(vsub);
+	vlr_subscr_put(vsub, __func__);
 }
 
 /*! Notify that an SGs paging has been rejected by the MME.
@@ -235,7 +235,7 @@ void vlr_sgs_tmsi_reall_compl(struct vlr_instance *vlr, const char *imsi)
 void vlr_sgs_pag_rej(struct vlr_instance *vlr, const char *imsi, enum sgsap_sgs_cause cause)
 {
 	struct vlr_subscr *vsub;
-	vsub = vlr_subscr_find_by_imsi(vlr, imsi);
+	vsub = vlr_subscr_find_by_imsi(vlr, imsi, __func__);
 	if (!vsub)
 		return;
 
@@ -246,10 +246,10 @@ void vlr_sgs_pag_rej(struct vlr_instance *vlr, const char *imsi, enum sgsap_sgs_
 	     vlr_subscr_msisdn_or_name(vsub), vlr_sgs_state_timer_name(SGS_STATE_TS5), sgsap_sgs_cause_name(cause));
 
 	osmo_fsm_inst_dispatch(vsub->sgs_fsm, SGS_UE_E_RX_PAGING_FAILURE, &cause);
-	vlr_subscr_put(vsub);
-
 	/* Balance ref count increment from vlr_sgs_pag() */
-	vlr_subscr_put(vsub);
+	vlr_subscr_put(vsub, VSUB_USE_SGS_PAGING);
+
+	vlr_subscr_put(vsub, __func__);
 }
 
 /*! Notify that an SGs paging has been accepted by the MME.
@@ -258,16 +258,16 @@ void vlr_sgs_pag_rej(struct vlr_instance *vlr, const char *imsi, enum sgsap_sgs_
 void vlr_sgs_pag_ack(struct vlr_instance *vlr, const char *imsi)
 {
 	struct vlr_subscr *vsub;
-	vsub = vlr_subscr_find_by_imsi(vlr, imsi);
+	vsub = vlr_subscr_find_by_imsi(vlr, imsi, __func__);
 	if (!vsub)
 		return;
 
 	/* Stop Ts5 and and consider the paging as successful */
 	osmo_timer_del(&vsub->sgs.Ts5);
-	vlr_subscr_put(vsub);
-
 	/* Balance ref count increment from vlr_sgs_pag() */
-	vlr_subscr_put(vsub);
+	vlr_subscr_put(vsub, VSUB_USE_SGS_PAGING);
+
+	vlr_subscr_put(vsub, __func__);
 }
 
 /*! Notify that the UE has been marked as unreachable by the MME.
@@ -277,7 +277,7 @@ void vlr_sgs_pag_ack(struct vlr_instance *vlr, const char *imsi)
 void vlr_sgs_ue_unr(struct vlr_instance *vlr, const char *imsi, enum sgsap_sgs_cause cause)
 {
 	struct vlr_subscr *vsub;
-	vsub = vlr_subscr_find_by_imsi(vlr, imsi);
+	vsub = vlr_subscr_find_by_imsi(vlr, imsi, __func__);
 	if (!vsub)
 		return;
 
@@ -289,7 +289,7 @@ void vlr_sgs_ue_unr(struct vlr_instance *vlr, const char *imsi, enum sgsap_sgs_c
 	     vlr_subscr_msisdn_or_name(vsub), vlr_sgs_state_timer_name(SGS_STATE_TS5), sgsap_sgs_cause_name(cause));
 
 	osmo_fsm_inst_dispatch(vsub->sgs_fsm, SGS_UE_E_RX_SGSAP_UE_UNREACHABLE, &cause);
-	vlr_subscr_put(vsub);
+	vlr_subscr_put(vsub, __func__);
 }
 
 /* Callback function that is called when an SGs paging request times out */
@@ -306,7 +306,7 @@ static void Ts5_timeout_cb(void *arg)
 	     vlr_subscr_msisdn_or_name(vsub), vlr_sgs_state_timer_name(SGS_STATE_TS5));
 
 	/* Balance ref count increment from vlr_sgs_pag() */
-	vlr_subscr_put(vsub);
+	vlr_subscr_put(vsub, VSUB_USE_SGS_PAGING);
 
 	return;
 }
@@ -346,7 +346,7 @@ void vlr_sgs_pag(struct vlr_subscr *vsub, enum sgsap_service_ind serv_ind)
 	/* Ensure that the reference count is increased by one while the
 	 * paging is happening. We will balance this again in vlr_sgs_pag_rej()
 	 * and vlr_sgs_pag_ack(); */
-	vlr_subscr_get(vsub);
+	vlr_subscr_get(vsub, VSUB_USE_SGS_PAGING);
 }
 
 /*! Check if the SGs interface is currently paging

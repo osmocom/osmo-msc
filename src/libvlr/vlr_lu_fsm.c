@@ -360,7 +360,7 @@ static void vlr_lu_compl_fsm_success(struct osmo_fsm_inst *fi)
 	if (!vsub->lu_complete) {
 		vsub->lu_complete = true;
 		/* Balanced by vlr_subscr_expire() */
-		vlr_subscr_get(vsub);
+		vlr_subscr_get(vsub, VSUB_USE_ATTACHED);
 	}
 	_vlr_lu_compl_fsm_done(fi, VLR_FSM_RESULT_SUCCESS, 0);
 	vlr_sgs_fsm_update_id(vsub);
@@ -982,7 +982,7 @@ static int _lu_fsm_associate_vsub(struct osmo_fsm_inst *fi)
 		 * someone else's TMSI.
 		 * TODO: Otherwise we can ask for the IMSI and verify that it
 		 * matches the IMSI on record. */
-		vsub = vlr_subscr_find_or_create_by_tmsi(vlr, lfp->tmsi, NULL);
+		vsub = vlr_subscr_find_or_create_by_tmsi(vlr, lfp->tmsi, __func__, NULL);
 
 		if (!vsub) {
 			LOGPFSML(fi, LOGL_ERROR, "VLR subscriber allocation failed\n");
@@ -992,27 +992,27 @@ static int _lu_fsm_associate_vsub(struct osmo_fsm_inst *fi)
 
 		vsub->sub_dataconf_by_hlr_ind = false;
 		if (assoc_lfp_with_sub(fi, vsub)) {
-			vlr_subscr_put(vsub);
+			vlr_subscr_put(vsub, __func__);
 			return -1; /* error, fsm failure invoked in assoc_lfp_with_sub() */
 		}
-		vlr_subscr_put(vsub);
+		vlr_subscr_put(vsub, __func__);
 	} else {
 		/* IMSI was used */
-		vsub = vlr_subscr_find_or_create_by_imsi(vlr, lfp->imsi, NULL);
+		vsub = vlr_subscr_find_or_create_by_imsi(vlr, lfp->imsi, __func__, NULL);
 
 		if (!vsub) {
 			LOGPFSML(fi, LOGL_ERROR, "VLR subscriber allocation failed\n");
 			lu_fsm_failure(fi, GSM48_REJECT_SRV_OPT_TMP_OUT_OF_ORDER);
-			vlr_subscr_put(vsub);
+			vlr_subscr_put(vsub, __func__);
 			return -1;
 		}
 
 		vsub->sub_dataconf_by_hlr_ind = false;
 		if (assoc_lfp_with_sub(fi, vsub)) {
-			vlr_subscr_put(vsub);
+			vlr_subscr_put(vsub, __func__);
 			return -1; /* error, fsm failure invoked in assoc_lfp_with_sub() */
 		}
-		vlr_subscr_put(vsub);
+		vlr_subscr_put(vsub, __func__);
 	}
 	return 0;
 }

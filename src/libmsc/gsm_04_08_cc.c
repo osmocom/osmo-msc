@@ -1897,9 +1897,9 @@ int mncc_tx_to_cc(struct gsm_network *net, int msg_type, void *arg)
 		/* New transaction due to setup, find subscriber */
 		if (data->called.number[0])
 			vsub = vlr_subscr_find_by_msisdn(net->vlr,
-							 data->called.number);
+							 data->called.number, __func__);
 		else
-			vsub = vlr_subscr_find_by_imsi(net->vlr, data->imsi);
+			vsub = vlr_subscr_find_by_imsi(net->vlr, data->imsi, __func__);
 
 		/* update the subscriber we deal with */
 		log_set_context(LOG_CTX_VLR_SUBSCR, vsub);
@@ -1921,7 +1921,7 @@ int mncc_tx_to_cc(struct gsm_network *net, int msg_type, void *arg)
 				"Received '%s' from MNCC with "
 				"detached subscriber %s\n", data->called.number,
 				get_mncc_name(msg_type), vlr_subscr_name(vsub));
-			vlr_subscr_put(vsub);
+			vlr_subscr_put(vsub, __func__);
 			/* Temporarily out of order */
 			return mncc_release_ind(net, NULL, data->callref,
 						GSM48_CAUSE_LOC_PRN_S_LU,
@@ -1932,7 +1932,7 @@ int mncc_tx_to_cc(struct gsm_network *net, int msg_type, void *arg)
 				    TRANS_ID_UNASSIGNED, data->callref);
 		if (!trans) {
 			LOGP(DCC, LOGL_ERROR, "No memory for trans.\n");
-			vlr_subscr_put(vsub);
+			vlr_subscr_put(vsub, __func__);
 			/* Ressource unavailable */
 			mncc_release_ind(net, NULL, data->callref,
 					 GSM48_CAUSE_LOC_PRN_S_LU,
@@ -1957,7 +1957,7 @@ int mncc_tx_to_cc(struct gsm_network *net, int msg_type, void *arg)
 					"started for lac %d.\n",
 					data->called.number,
 					get_mncc_name(msg_type), vsub->cgi.lai.lac);
-				vlr_subscr_put(vsub);
+				vlr_subscr_put(vsub, __func__);
 				trans_free(trans);
 				return 0;
 			}
@@ -1973,18 +1973,18 @@ int mncc_tx_to_cc(struct gsm_network *net, int msg_type, void *arg)
 							SGSAP_SERV_IND_CS_CALL);
 			if (!trans->paging_request) {
 				LOGP(DCC, LOGL_ERROR, "Failed to allocate paging token.\n");
-				vlr_subscr_put(vsub);
+				vlr_subscr_put(vsub, __func__);
 				trans_free(trans);
 				return 0;
 			}
-			vlr_subscr_put(vsub);
+			vlr_subscr_put(vsub, __func__);
 			return 0;
 		}
 
 		/* Assign conn */
 		trans->conn = ran_conn_get(conn, RAN_CONN_USE_TRANS_CC);
 		trans->dlci = 0x00; /* SAPI=0, not SACCH */
-		vlr_subscr_put(vsub);
+		vlr_subscr_put(vsub, __func__);
 	} else {
 		/* update the subscriber we deal with */
 		log_set_context(LOG_CTX_VLR_SUBSCR, trans->vsub);

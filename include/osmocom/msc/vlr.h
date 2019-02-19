@@ -4,6 +4,7 @@
 #include <osmocom/core/linuxlist.h>
 #include <osmocom/core/fsm.h>
 #include <osmocom/core/logging.h>
+#include <osmocom/core/use_count.h>
 #include <osmocom/gsm/protocol/gsm_23_003.h>
 #include <osmocom/gsm/protocol/gsm_04_08_gprs.h>
 #include <osmocom/gsm/gsm23003.h>
@@ -25,6 +26,8 @@ struct log_target;
 
 #define VLR_SUBSCRIBER_NO_EXPIRATION	0
 #define VLR_SUBSCRIBER_LU_EXPIRATION_INTERVAL	60	/* in seconds */
+
+#define VSUB_USE_ATTACHED "attached"
 
 /* from 3s to 10s */
 #define GSM_29002_TIMER_S	10
@@ -158,7 +161,8 @@ struct vlr_subscr {
 	bool ms_not_reachable_flag;			/* 2.10.2 (MNRF) */
 	bool la_allowed;
 
-	int use_count;
+	struct osmo_use_count use_count;
+	struct osmo_use_count_entry use_count_buf[10];
 
 	struct osmo_fsm_inst *lu_fsm;
 	struct osmo_fsm_inst *auth_fsm;
@@ -349,49 +353,56 @@ lu_compl_vlr_proc_start(struct osmo_fsm_inst *parent,
 const char *vlr_subscr_name(const struct vlr_subscr *vsub);
 const char *vlr_subscr_msisdn_or_name(const struct vlr_subscr *vsub);
 
-#define vlr_subscr_find_by_imsi(vlr, imsi) \
-	_vlr_subscr_find_by_imsi(vlr, imsi, __FILE__, __LINE__)
-#define vlr_subscr_find_or_create_by_imsi(vlr, imsi, created) \
-	_vlr_subscr_find_or_create_by_imsi(vlr, imsi, created, \
+#define vlr_subscr_find_by_imsi(vlr, imsi, USE) \
+	_vlr_subscr_find_by_imsi(vlr, imsi, USE, __FILE__, __LINE__)
+#define vlr_subscr_find_or_create_by_imsi(vlr, imsi, USE, created) \
+	_vlr_subscr_find_or_create_by_imsi(vlr, imsi, USE, created, \
 					   __FILE__, __LINE__)
 
-#define vlr_subscr_find_by_tmsi(vlr, tmsi) \
-	_vlr_subscr_find_by_tmsi(vlr, tmsi, __FILE__, __LINE__)
-#define vlr_subscr_find_or_create_by_tmsi(vlr, tmsi, created) \
-	_vlr_subscr_find_or_create_by_tmsi(vlr, tmsi, created, \
+#define vlr_subscr_find_by_tmsi(vlr, tmsi, USE) \
+	_vlr_subscr_find_by_tmsi(vlr, tmsi, USE, __FILE__, __LINE__)
+#define vlr_subscr_find_or_create_by_tmsi(vlr, tmsi, USE, created) \
+	_vlr_subscr_find_or_create_by_tmsi(vlr, tmsi, USE, created, \
 					   __FILE__, __LINE__)
 
-#define vlr_subscr_find_by_msisdn(vlr, msisdn) \
-	_vlr_subscr_find_by_msisdn(vlr, msisdn, __FILE__, __LINE__)
+#define vlr_subscr_find_by_msisdn(vlr, msisdn, USE) \
+	_vlr_subscr_find_by_msisdn(vlr, msisdn, USE, __FILE__, __LINE__)
 
 struct vlr_subscr *_vlr_subscr_find_by_imsi(struct vlr_instance *vlr,
 					    const char *imsi,
+					    const char *use,
 					    const char *file, int line);
 struct vlr_subscr *_vlr_subscr_find_or_create_by_imsi(struct vlr_instance *vlr,
 						      const char *imsi,
+						      const char *use,
 						      bool *created,
 						      const char *file,
 						      int line);
 
 struct vlr_subscr *_vlr_subscr_find_by_tmsi(struct vlr_instance *vlr,
 					    uint32_t tmsi,
+					    const char *use,
 					    const char *file, int line);
 struct vlr_subscr *_vlr_subscr_find_or_create_by_tmsi(struct vlr_instance *vlr,
 						      uint32_t tmsi,
+						      const char *use,
 						      bool *created,
 						      const char *file,
 						      int line);
 
 struct vlr_subscr *_vlr_subscr_find_by_msisdn(struct vlr_instance *vlr,
 					      const char *msisdn,
+					      const char *use,
 					      const char *file, int line);
 
-#define vlr_subscr_get(sub) _vlr_subscr_get(sub, __FILE__, __LINE__)
-#define vlr_subscr_put(sub) _vlr_subscr_put(sub, __FILE__, __LINE__)
-struct vlr_subscr *_vlr_subscr_get(struct vlr_subscr *sub, const char *file, int line);
-struct vlr_subscr *_vlr_subscr_put(struct vlr_subscr *sub, const char *file, int line);
+#define vlr_subscr_get(VSUB, USE) vlr_subscr_get_src(VSUB, USE, __FILE__, __LINE__)
+#define vlr_subscr_put(VSUB, USE) vlr_subscr_put_src(VSUB, USE, __FILE__, __LINE__)
 
-struct vlr_subscr *vlr_subscr_alloc(struct vlr_instance *vlr);
+#define vlr_subscr_get_src(VSUB, USE, SRCFILE, SRCLINE) \
+	OSMO_ASSERT(_osmo_use_count_get_put(&(VSUB)->use_count, USE, 1, SRCFILE, SRCLINE) == 0)
+#define vlr_subscr_put_src(VSUB, USE, SRCFILE, SRCLINE) \
+	OSMO_ASSERT(_osmo_use_count_get_put(&(VSUB)->use_count, USE, -1, SRCFILE, SRCLINE) == 0)
+
 void vlr_subscr_free(struct vlr_subscr *vsub);
 int vlr_subscr_alloc_tmsi(struct vlr_subscr *vsub);
 

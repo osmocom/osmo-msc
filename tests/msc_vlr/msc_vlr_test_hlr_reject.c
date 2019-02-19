@@ -136,13 +136,13 @@ static void test_hlr_rej_auth_info_net_fail_no_reuse_tuples()
 
 
 	BTW("Now one auth tuple is available, but used.");
-	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi);
+	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi, __func__);
 	OSMO_ASSERT(vsub);
 	OSMO_ASSERT(vsub->last_tuple);
 	VERBOSE_ASSERT(vsub->last_tuple->use_count, == 1, "%d");
 	/* no need to look at all auth tuples, the ongoing test would take an
 	 * unexpected course if there were more. */
-	vlr_subscr_put(vsub);
+	vlr_subscr_put(vsub, __func__);
 
 	BTW("Another LU wants to get new tuples; HLR sends Network Failure, we reject.");
 
@@ -225,13 +225,13 @@ static void test_hlr_rej_auth_info_unkown_imsi_no_reuse_tuples()
 
 
 	BTW("Now one auth tuple is available, but used.");
-	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi);
+	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi, __func__);
 	OSMO_ASSERT(vsub);
 	OSMO_ASSERT(vsub->last_tuple);
 	VERBOSE_ASSERT(vsub->last_tuple->use_count, == 1, "%d");
 	/* no need to look at all auth tuples, the ongoing test would take an
 	 * unexpected course if there were more. */
-	vlr_subscr_put(vsub);
+	vlr_subscr_put(vsub, __func__);
 
 	BTW("Another LU wants to get new tuples; HLR sends IMSI Unknown. Even though we would re-use an old tuple, reject the unknown IMSI.");
 	VERBOSE_ASSERT(net->vlr->cfg.auth_reuse_old_sets_on_error, == true, "%d");
@@ -348,13 +348,13 @@ static void test_hlr_rej_auth_info_net_fail_reuse_tuples()
 
 
 	BTW("Now one auth tuple is available, but used.");
-	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi);
+	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi, __func__);
 	OSMO_ASSERT(vsub);
 	OSMO_ASSERT(vsub->last_tuple);
 	VERBOSE_ASSERT(vsub->last_tuple->use_count, == 1, "%d");
 	/* no need to look at all auth tuples, the ongoing test would take an
 	 * unexpected course if there were more. */
-	vlr_subscr_put(vsub);
+	vlr_subscr_put(vsub, __func__);
 
 	BTW("Another LU wants to get new tuples; even though HLR sends Network Failure, we are reusing the old tuples.");
 

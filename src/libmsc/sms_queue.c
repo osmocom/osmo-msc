@@ -118,14 +118,15 @@ static struct gsm_sms_pending *sms_pending_from(struct gsm_sms_queue *smsq,
 	if (!pending)
 		return NULL;
 
-	pending->vsub = vlr_subscr_get(sms->receiver);
+	vlr_subscr_get(sms->receiver, VSUB_USE_SMS_PENDING);
+	pending->vsub = sms->receiver;
 	pending->sms_id = sms->id;
 	return pending;
 }
 
 static void sms_pending_free(struct gsm_sms_pending *pending)
 {
-	vlr_subscr_put(pending->vsub);
+	vlr_subscr_put(pending->vsub, VSUB_USE_SMS_PENDING);
 	llist_del(&pending->entry);
 	talloc_free(pending);
 }
@@ -482,12 +483,13 @@ static int sms_sms_cb(unsigned int subsys, unsigned int signal,
 	case S_SMS_DELIVERED:
 		/* Remember the subscriber and clear the pending entry */
 		network->sms_queue->pending -= 1;
-		vsub = vlr_subscr_get(pending->vsub);
+		vsub = pending->vsub;
+		vlr_subscr_get(vsub, __func__);
 		db_sms_delete_sent_message_by_id(pending->sms_id);
 		sms_pending_free(pending);
 		/* Attempt to send another SMS to this subscriber */
 		sms_send_next(vsub);
-		vlr_subscr_put(vsub);
+		vlr_subscr_put(vsub, __func__);
 		break;
 	case S_SMS_MEM_EXCEEDED:
 		network->sms_queue->pending -= 1;

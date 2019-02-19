@@ -93,6 +93,11 @@ struct gsm_trans *trans_find_by_sm_rp_mr(const struct gsm_network *net,
 	return NULL;
 }
 
+static const char *trans_vsub_use(uint8_t proto)
+{
+	return get_value_string_or_null(gsm48_pdisc_names, proto) ? : "trans-proto-unknown";
+}
+
 /*! Allocate a new transaction and add it to network list
  *  \param[in] net Netwokr in which we allocate transaction
  *  \param[in] subscr Subscriber for which we allocate transaction
@@ -121,8 +126,8 @@ struct gsm_trans *trans_alloc(struct gsm_network *net,
 	if (!trans)
 		return NULL;
 
-	trans->vsub = vlr_subscr_get(vsub);
-
+	vlr_subscr_get(vsub, trans_vsub_use(protocol));
+	trans->vsub = vsub;
 	trans->protocol = protocol;
 	trans->transaction_id = trans_id;
 	trans->callref = callref;
@@ -165,7 +170,7 @@ void trans_free(struct gsm_trans *trans)
 	}
 
 	if (trans->vsub) {
-		vlr_subscr_put(trans->vsub);
+		vlr_subscr_put(trans->vsub, trans_vsub_use(trans->protocol));
 		trans->vsub = NULL;
 	}
 

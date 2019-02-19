@@ -23,6 +23,7 @@
 
 #include "msc_vlr_tests.h"
 #include "stubs.h"
+#include <osmocom/msc/vlr.h>
 
 static void test_early_stage()
 {
@@ -43,7 +44,7 @@ static void test_early_stage()
 	thwart_rx_non_initial_requests();
 
 	btw("fake: acceptance");
-	g_conn->vsub = vlr_subscr_alloc(net->vlr);
+	g_conn->vsub = vlr_subscr_find_or_create_by_imsi(net->vlr, "135111", VSUB_USE_CONN, NULL);
 	g_conn->via_ran = OSMO_RAT_GERAN_A;
 	OSMO_ASSERT(g_conn->vsub);
 	/* mark as silent call so it sticks around */

@@ -68,6 +68,8 @@ struct cmd_node net_node = {
 	1,
 };
 
+#define VSUB_USE_VTY "VTY"
+
 #define NETWORK_STR "Configure the GSM network\n"
 #define CODE_CMD_STR "Code commands\n"
 #define NAME_CMD_STR "Name Commands\n"
@@ -671,6 +673,7 @@ static void subscr_dump_full_vty(struct vty *vty, struct vlr_subscr *vsub)
 	struct gsm_trans *trans;
 	int reqs;
 	struct llist_head *entry;
+	char buf[128];
 
 	if (strlen(vsub->name))
 		vty_out(vty, "    Name: '%s'%s", vsub->name, VTY_NEWLINE);
@@ -755,7 +758,7 @@ static void subscr_dump_full_vty(struct vty *vty, struct vlr_subscr *vsub)
 	else
 		vty_out(vty, "    SGs-MME: (none)%s", VTY_NEWLINE);
 
-	vty_out(vty, "    Use count: %u%s", vsub->use_count, VTY_NEWLINE);
+	vty_out(vty, "    Use: %s%s", osmo_use_count_name_buf(buf, sizeof(buf), &vsub->use_count), VTY_NEWLINE);
 
 	/* Connection */
 	if (vsub->msc_conn_ref) {
@@ -882,11 +885,11 @@ static struct vlr_subscr *get_vsub_by_argv(struct gsm_network *gsmnet,
 					       const char *id)
 {
 	if (!strcmp(type, "extension") || !strcmp(type, "msisdn"))
-		return vlr_subscr_find_by_msisdn(gsmnet->vlr, id);
+		return vlr_subscr_find_by_msisdn(gsmnet->vlr, id, VSUB_USE_VTY);
 	else if (!strcmp(type, "imsi") || !strcmp(type, "id"))
-		return vlr_subscr_find_by_imsi(gsmnet->vlr, id);
+		return vlr_subscr_find_by_imsi(gsmnet->vlr, id, VSUB_USE_VTY);
 	else if (!strcmp(type, "tmsi"))
-		return vlr_subscr_find_by_tmsi(gsmnet->vlr, atoi(id));
+		return vlr_subscr_find_by_tmsi(gsmnet->vlr, atoi(id), VSUB_USE_VTY);
 
 	return NULL;
 }
@@ -916,7 +919,7 @@ DEFUN(show_subscr,
 	/* In the vty output to the user, exclude this local use count added by vlr_subscr_get() in get_vsub_by_argv().
 	 * This works, because: for get_vsub_by_argv() to succeed, there *must* have been at least one use count before
 	 * this, and since this is not multi-threaded, this vlr_subscr_put() cannot possibly reach a count of 0. */
-	vlr_subscr_put(vsub);
+	vlr_subscr_put(vsub, VSUB_USE_VTY);
 
 	subscr_dump_full_vty(vty, vsub);
 
@@ -955,7 +958,7 @@ DEFUN(subscriber_send_pending_sms,
 	if (sms)
 		gsm411_send_sms(gsmnet, sms->receiver, sms);
 
-	vlr_subscr_put(vsub);
+	vlr_subscr_put(vsub, VSUB_USE_VTY);
 
 	return CMD_SUCCESS;
 }
@@ -979,7 +982,7 @@ DEFUN(subscriber_sms_delete_all,
 
 	db_sms_delete_by_msisdn(vsub->msisdn);
 
-	vlr_subscr_put(vsub);
+	vlr_subscr_put(vsub, VSUB_USE_VTY);
 
 	return CMD_SUCCESS;
 }
@@ -1011,7 +1014,7 @@ DEFUN(subscriber_send_sms,
 			goto err;
 		}
 		sender_msisdn = sender->msisdn;
-		vlr_subscr_put(sender);
+		vlr_subscr_put(sender, VSUB_USE_VTY);
 	}
 
 	str = argv_concat(argv, argc, 4);
@@ -1020,7 +1023,7 @@ DEFUN(subscriber_send_sms,
 
 err:
 	if (vsub)
-		vlr_subscr_put(vsub);
+		vlr_subscr_put(vsub, VSUB_USE_VTY);
 
 	return rc;
 }
@@ -1053,7 +1056,7 @@ DEFUN(subscriber_silent_sms,
 			goto err;
 		}
 		sender_msisdn = sender->msisdn;
-		vlr_subscr_put(sender);
+		vlr_subscr_put(sender, VSUB_USE_VTY);
 	}
 
 	str = argv_concat(argv, argc, 4);
@@ -1062,7 +1065,7 @@ DEFUN(subscriber_silent_sms,
 
 err:
 	if (vsub)
-		vlr_subscr_put(vsub);
+		vlr_subscr_put(vsub, VSUB_USE_VTY);
 
 	return rc;
 }
@@ -1161,7 +1164,7 @@ DEFUN(subscriber_silent_call_start,
 		break;
 	}
 
-	vlr_subscr_put(vsub);
+	vlr_subscr_put(vsub, VSUB_USE_VTY);
 	return rc ? CMD_WARNING : CMD_SUCCESS;
 }
 
@@ -1197,7 +1200,7 @@ DEFUN(subscriber_silent_call_stop,
 		break;
 	}
 
-	vlr_subscr_put(vsub);
+	vlr_subscr_put(vsub, VSUB_USE_VTY);
 	return rc ? CMD_WARNING : CMD_SUCCESS;
 }
 
@@ -1224,7 +1227,7 @@ DEFUN(subscriber_ussd_notify,
 	level = atoi(argv[2]);
 	text = argv_concat(argv, argc, 3);
 	if (!text) {
-		vlr_subscr_put(vsub);
+		vlr_subscr_put(vsub, VSUB_USE_VTY);
 		return CMD_WARNING;
 	}
 
@@ -1232,7 +1235,7 @@ DEFUN(subscriber_ussd_notify,
 	if (!conn) {
 		vty_out(vty, "%% An active connection is required for %s %s%s",
 			argv[0], argv[1], VTY_NEWLINE);
-		vlr_subscr_put(vsub);
+		vlr_subscr_put(vsub, VSUB_USE_VTY);
 		talloc_free(text);
 		return CMD_WARNING;
 	}
@@ -1242,7 +1245,7 @@ DEFUN(subscriber_ussd_notify,
 	 * we use dummy GSM 04.07 transaction ID. */
 	msc_send_ussd_release_complete(conn, 0x00);
 
-	vlr_subscr_put(vsub);
+	vlr_subscr_put(vsub, VSUB_USE_VTY);
 	talloc_free(text);
 	return CMD_SUCCESS;
 }
@@ -1267,7 +1270,7 @@ DEFUN(subscriber_paging,
 	else
 		vty_out(vty, "%% paging subscriber failed%s", VTY_NEWLINE);
 
-	vlr_subscr_put(vsub);
+	vlr_subscr_put(vsub, VSUB_USE_VTY);
 	return req ? CMD_SUCCESS : CMD_WARNING;
 }
 
@@ -1323,7 +1326,7 @@ DEFUN(subscriber_mstest_close,
 	if (!conn) {
 		vty_out(vty, "%% An active connection is required for %s %s%s",
 			argv[0], argv[1], VTY_NEWLINE);
-		vlr_subscr_put(vsub);
+		vlr_subscr_put(vsub, VSUB_USE_VTY);
 		return CMD_WARNING;
 	}
 
@@ -1351,7 +1354,7 @@ DEFUN(subscriber_mstest_open,
 	if (!conn) {
 		vty_out(vty, "%% An active connection is required for %s %s%s",
 			argv[0], argv[1], VTY_NEWLINE);
-		vlr_subscr_put(vsub);
+		vlr_subscr_put(vsub, VSUB_USE_VTY);
 		return CMD_WARNING;
 	}
 
@@ -1378,12 +1381,12 @@ DEFUN(ena_subscr_expire,
 		vty_out(vty, "%% VLR released subscriber %s%s",
 			vlr_subscr_name(vsub), VTY_NEWLINE);
 
-	if (vsub->use_count > 1)
+	if (osmo_use_count_total(&vsub->use_count) > 1)
 		vty_out(vty, "%% Subscriber %s is still in use,"
 			" should be released soon%s",
 			vlr_subscr_name(vsub), VTY_NEWLINE);
 
-	vlr_subscr_put(vsub);
+	vlr_subscr_put(vsub, VSUB_USE_VTY);
 	return CMD_SUCCESS;
 }
 
@@ -1575,7 +1578,7 @@ DEFUN(logging_fltr_imsi,
 	if (!tgt)
 		return CMD_WARNING;
 
-	vlr_subscr = vlr_subscr_find_by_imsi(gsmnet->vlr, imsi);
+	vlr_subscr = vlr_subscr_find_by_imsi(gsmnet->vlr, imsi, VSUB_USE_VTY);
 
 	if (!vlr_subscr) {
 		vty_out(vty, "%%no subscriber with IMSI(%s)%s",
@@ -1584,6 +1587,7 @@ DEFUN(logging_fltr_imsi,
 	}
 
 	log_set_filter_vlr_subscr(tgt, vlr_subscr);
+	vlr_subscr_put(vlr_subscr, VSUB_USE_VTY);
 	return CMD_SUCCESS;
 }
 

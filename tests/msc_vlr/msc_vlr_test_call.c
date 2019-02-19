@@ -152,11 +152,11 @@ static void standard_lu()
 	rnc_sends_release_complete();
 	EXPECT_CONN_COUNT(0);
 
-	vsub = vlr_subscr_find_by_imsi(net->vlr, IMSI);
+	vsub = vlr_subscr_find_by_imsi(net->vlr, IMSI, __func__);
 	VERBOSE_ASSERT(vsub != NULL, == true, "%d");
 	VERBOSE_ASSERT(strcmp(vsub->imsi, IMSI), == 0, "%d");
 	VAL_ASSERT("LAC", vsub->cgi.lai.lac, == 23, "%u");
-	vlr_subscr_put(vsub);
+	vlr_subscr_put(vsub, __func__);
 }
 
 static void test_call_mo()

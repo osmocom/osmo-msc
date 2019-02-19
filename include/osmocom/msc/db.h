@@ -24,6 +24,8 @@
 
 #include "gsm_subscriber.h"
 
+#define VSUB_USE_SMS_RECEIVER "SMS-receiver"
+
 struct gsm_network;
 struct gsm_sms;
 

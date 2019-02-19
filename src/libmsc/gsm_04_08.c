@@ -878,10 +878,10 @@ static int gsm48_rx_mm_imsi_detach_ind(struct ran_conn *conn, struct msgb *msg)
 	switch (mi_type) {
 	case GSM_MI_TYPE_TMSI:
 		vsub = vlr_subscr_find_by_tmsi(network->vlr,
-					       tmsi_from_string(mi_string));
+					       tmsi_from_string(mi_string), __func__);
 		break;
 	case GSM_MI_TYPE_IMSI:
-		vsub = vlr_subscr_find_by_imsi(network->vlr, mi_string);
+		vsub = vlr_subscr_find_by_imsi(network->vlr, mi_string, __func__);
 		break;
 	case GSM_MI_TYPE_IMEI:
 	case GSM_MI_TYPE_IMEISV:
@@ -909,7 +909,7 @@ static int gsm48_rx_mm_imsi_detach_ind(struct ran_conn *conn, struct msgb *msg)
 
 		vlr_subscr_rx_imsi_detach(vsub);
 		osmo_signal_dispatch(SS_SUBSCR, S_SUBSCR_DETACHED, vsub);
-		vlr_subscr_put(vsub);
+		vlr_subscr_put(vsub, __func__);
 	}
 
 	ran_conn_close(conn, 0);
@@ -1768,8 +1768,8 @@ void ran_conn_rx_sec_mode_compl(struct ran_conn *conn)
 /* VLR informs us that the subscriber data has somehow been modified */
 static void msc_vlr_subscr_update(struct vlr_subscr *subscr)
 {
-	LOGVSUBP(LOGL_NOTICE, subscr, "VLR: update for IMSI=%s (MSISDN=%s, used=%d)\n",
-		 subscr->imsi, subscr->msisdn, subscr->use_count);
+	LOGVSUBP(LOGL_NOTICE, subscr, "VLR: update for IMSI=%s (MSISDN=%s)\n",
+		 subscr->imsi, subscr->msisdn);
 	ran_conn_update_id_for_vsub(subscr);
 }
 
@@ -1806,7 +1806,8 @@ static int msc_vlr_subscr_assoc(void *msc_conn_ref,
 		}
 	}
 
-	conn->vsub = vlr_subscr_get(vsub);
+	vlr_subscr_get(vsub, VSUB_USE_CONN);
+	conn->vsub = vsub;
 	OSMO_ASSERT(conn->vsub);
 	conn->vsub->cs.attached_via_ran = conn->via_ran;
 

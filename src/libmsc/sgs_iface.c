@@ -98,6 +98,7 @@ static struct ran_conn *subscr_conn_allocate_sgs(struct sgs_connection *sgc, str
 		return NULL;
 	}
 
+	vlr_subscr_get(vsub, VSUB_USE_CONN);
 	conn->vsub = vsub;
 	conn->vsub->cs.attached_via_ran = conn->via_ran;
 
@@ -264,7 +265,7 @@ static bool check_sgs_association(struct sgs_connection *sgc, struct msgb *msg, 
 	uint8_t msg_type = msg->data[0];
 
 	/* Subscriber must be known by the VLR */
-	vsub = vlr_subscr_find_by_imsi(gsm_network->vlr, imsi);
+	vsub = vlr_subscr_find_by_imsi(gsm_network->vlr, imsi, __func__);
 	if (!vsub) {
 		LOGSGC(sgc, LOGL_NOTICE, "SGsAP Message %s with unknown IMSI (%s), releasing\n",
 		       sgsap_msg_type_name(msg_type), imsi);
@@ -279,11 +280,11 @@ static bool check_sgs_association(struct sgs_connection *sgc, struct msgb *msg, 
 		       vlr_subscr_name(vsub), sgsap_msg_type_name(msg_type));
 		resp = gsm29118_create_release_req(vsub->imsi, SGSAP_SGS_CAUSE_IMSI_DET_EPS_NONEPS);
 		sgs_tx(sgc, resp);
-		vlr_subscr_put(vsub);
+		vlr_subscr_put(vsub, __func__);
 		return false;
 	}
 
-	vlr_subscr_put(vsub);
+	vlr_subscr_put(vsub, __func__);
 	return true;
 }
 
@@ -316,12 +317,12 @@ const char *subscr_info(const char *imsi)
 	struct vlr_subscr *vsub;
 
 	if (imsi) {
-		vsub = vlr_subscr_find_by_imsi(gsm_network->vlr, imsi);
+		vsub = vlr_subscr_find_by_imsi(gsm_network->vlr, imsi, __func__);
 		if (!vsub)
 			subscr_string = imsi;
 		else {
 			subscr_string = vlr_subscr_name(vsub);
-			vlr_subscr_put(vsub);
+			vlr_subscr_put(vsub, __func__);
 		}
 	}
 
@@ -556,10 +557,10 @@ static int sgs_rx_loc_upd_req(struct sgs_connection *sgc, struct msgb *msg, cons
 	struct vlr_subscr *vsub;
 
 	/* Check for lingering connections */
-	vsub = vlr_subscr_find_by_imsi(gsm_network->vlr, imsi);
+	vsub = vlr_subscr_find_by_imsi(gsm_network->vlr, imsi, __func__);
 	if (vsub) {
 		subscr_conn_toss(vsub);
-		vlr_subscr_put(vsub);
+		vlr_subscr_put(vsub, __func__);
 	}
 
 	/* Determine MME-Name */
@@ -675,7 +676,7 @@ static int sgs_rx_pag_rej(struct sgs_connection *sgc, struct msgb *msg, const st
 		return 0;
 
 	/* Subscriber must be known by the VLR */
-	vsub = vlr_subscr_find_by_imsi(gsm_network->vlr, imsi);
+	vsub = vlr_subscr_find_by_imsi(gsm_network->vlr, imsi, __func__);
 	if (!vsub)
 		return sgs_tx_status(sgc, imsi, SGSAP_SGS_CAUSE_IMSI_UNKNOWN, msg, SGSAP_IE_IMSI);
 
@@ -698,7 +699,7 @@ static int sgs_rx_pag_rej(struct sgs_connection *sgc, struct msgb *msg, const st
 		OSMO_ASSERT(false);
 	}
 
-	vlr_subscr_put(vsub);
+	vlr_subscr_put(vsub, __func__);
 	return 0;
 }
 
@@ -739,7 +740,7 @@ static int sgs_rx_service_req(struct sgs_connection *sgc, struct msgb *msg, cons
 	if (!check_sgs_association(sgc, msg, imsi))
 		return 0;
 
-	vsub = vlr_subscr_find_by_imsi(gsm_network->vlr, imsi);
+	vsub = vlr_subscr_find_by_imsi(gsm_network->vlr, imsi, __func__);
 	/* Note: vsub is already sufficiently verified by check_sgs_association(),
 	 * we must have a vsub at this point! */
 	OSMO_ASSERT(vsub);
@@ -747,13 +748,13 @@ static int sgs_rx_service_req(struct sgs_connection *sgc, struct msgb *msg, cons
 	/* The Service request is intended as a paging response, if one is
 	 * received while nothing is paging something is very wrong! */
 	if (!vlr_sgs_pag_pend(vsub)) {
-		vlr_subscr_put(vsub);
+		vlr_subscr_put(vsub, __func__);
 		return sgs_tx_status(sgc, imsi, SGSAP_SGS_CAUSE_MSG_INCOMP_STATE, msg, -1);
 	}
 	serv_ind_ie = TLVP_VAL_MINLEN(tp, SGSAP_IE_SERVICE_INDICATOR, 1);
 
 	if (!serv_ind_ie) {
-		vlr_subscr_put(vsub);
+		vlr_subscr_put(vsub, __func__);
 		return sgs_tx_status(sgc, imsi, SGSAP_SGS_CAUSE_MISSING_MAND_IE, msg, SGSAP_IE_SERVICE_INDICATOR);
 	}
 	if (serv_ind_ie[0] == SGSAP_SERV_IND_CS_CALL)
@@ -761,7 +762,7 @@ static int sgs_rx_service_req(struct sgs_connection *sgc, struct msgb *msg, cons
 	else if (serv_ind_ie[0] == SGSAP_SERV_IND_SMS)
 		serv_ind = serv_ind_ie[0];
 	else {
-		vlr_subscr_put(vsub);
+		vlr_subscr_put(vsub, __func__);
 		return sgs_tx_status(sgc, imsi, SGSAP_SGS_CAUSE_INVALID_MAND_IE, msg, SGSAP_IE_SERVICE_INDICATOR);
 	}
 
@@ -776,17 +777,19 @@ static int sgs_rx_service_req(struct sgs_connection *sgc, struct msgb *msg, cons
 	 * the connection will be allocated when the MS is appearing on the
 	 * A-Interface. */
 	if (serv_ind == SGSAP_SERV_IND_CS_CALL) {
-		vlr_subscr_put(vsub);
+		vlr_subscr_put(vsub, __func__);
 		return 0;
 	}
 
 	/* Allocate subscriber connection */
 	conn = subscr_conn_allocate_sgs(sgc, vsub, true);
 	if (!conn) {
-		vlr_subscr_put(vsub);
+		vlr_subscr_put(vsub, __func__);
 		return sgs_tx_status(sgc, imsi, SGSAP_SGS_CAUSE_MSG_INCOMP_STATE, msg, -1);
 	}
 
+	/* The conn has added a get() for the vsub, balance above vlr_subscr_find_by_imsi() */
+	vlr_subscr_put(vsub, __func__);
 	return 0;
 }
 
@@ -795,14 +798,13 @@ static int sgs_rx_ul_ud(struct sgs_connection *sgc, struct msgb *msg, const stru
 {
 	struct dtap_header *dtap;
 	struct ran_conn *conn;
-	bool ran_conn_created = false;
 	const uint8_t *nas_msg_container_ie;
 	struct vlr_subscr *vsub;
 
 	if (!check_sgs_association(sgc, msg, imsi))
 		return 0;
 
-	vsub = vlr_subscr_find_by_imsi(gsm_network->vlr, imsi);
+	vsub = vlr_subscr_find_by_imsi(gsm_network->vlr, imsi, __func__);
 	/* Note: vsub is already sufficiently verified by check_sgs_association(),
 	 * we must have a vsub at this point! */
 	OSMO_ASSERT(vsub);
@@ -811,7 +813,6 @@ static int sgs_rx_ul_ud(struct sgs_connection *sgc, struct msgb *msg, const stru
 	conn = connection_for_subscr(vsub);
 	if (!conn) {
 		conn = subscr_conn_allocate_sgs(sgc, vsub, false);
-		ran_conn_created = true;
 	} else {
 		if (conn->via_ran != OSMO_RAT_EUTRAN_SGS) {
 			LOGSGC(sgc, LOGL_ERROR,
@@ -821,16 +822,17 @@ static int sgs_rx_ul_ud(struct sgs_connection *sgc, struct msgb *msg, const stru
 		}
 	}
 
+	/* Balance above vlr_subscr_find_by_imsi() */
+	vlr_subscr_put(vsub, __func__);
+
 	/* If we do not find an existing connection and allocating a new one
 	 * faild, give up and return status. */
 	if (!conn) {
-		vlr_subscr_put(vsub);
 		return sgs_tx_status(sgc, imsi, SGSAP_SGS_CAUSE_MSG_INCOMP_STATE, msg, 0);
 	}
 
 	nas_msg_container_ie = TLVP_VAL_MINLEN(tp, SGSAP_IE_NAS_MSG_CONTAINER, 1);
 	if (!nas_msg_container_ie) {
-		vlr_subscr_put(vsub);
 		return sgs_tx_status(sgc, imsi, SGSAP_SGS_CAUSE_MISSING_MAND_IE, msg, SGSAP_IE_NAS_MSG_CONTAINER);
 	}
 
@@ -842,12 +844,6 @@ static int sgs_rx_ul_ud(struct sgs_connection *sgc, struct msgb *msg, const stru
 	/* Forward dtap payload into the msc */
 	ran_conn_dtap(conn, msg);
 
-	/* If we did not create the conn right here, we just handle the ref
-	 * counting normally. Otherwise we are in the same role as
-	 * sgs_rx_service_req() and we want that the refcount says incremented
-	 * througout the lifetime of the newly created conn. */
-	if (!ran_conn_created)
-		vlr_subscr_put(vsub);
 	return 0;
 }
 
@@ -860,7 +856,7 @@ static int sgs_rx_csfb_ind(struct sgs_connection *sgc, struct msgb *msg, const s
 	 * to the 4G network, so we use the SGs interface again for further
 	 * communication with the UE. */
 
-	vsub = vlr_subscr_find_by_imsi(gsm_network->vlr, imsi);
+	vsub = vlr_subscr_find_by_imsi(gsm_network->vlr, imsi, __func__);
 	if (!vsub)
 		return sgs_tx_status(sgc, imsi, SGSAP_SGS_CAUSE_IMSI_UNKNOWN, msg, SGSAP_IE_IMSI);
 
@@ -868,7 +864,7 @@ static int sgs_rx_csfb_ind(struct sgs_connection *sgc, struct msgb *msg, const s
 	subscr_conn_toss(vsub);
 
 	vsub->cs.attached_via_ran = OSMO_RAT_EUTRAN_SGS;
-	vlr_subscr_put(vsub);
+	vlr_subscr_put(vsub, __func__);
 	return 0;
 }
 

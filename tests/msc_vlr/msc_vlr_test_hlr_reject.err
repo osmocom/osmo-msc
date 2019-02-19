@@ -15,12 +15,12 @@ DVLR vlr_lu_fsm(IMSI-901700000004620:GERAN-A-0:LU){VLR_ULA_S_IDLE}: Allocated
 DVLR vlr_lu_fsm(IMSI-901700000004620:GERAN-A-0:LU){VLR_ULA_S_IDLE}: is child of RAN_conn(IMSI-901700000004620:GERAN-A-0:LU)
 DVLR vlr_lu_fsm(IMSI-901700000004620:GERAN-A-0:LU){VLR_ULA_S_IDLE}: rev=GSM net=GERAN Auth (no Ciph)
 DVLR vlr_lu_fsm(IMSI-901700000004620:GERAN-A-0:LU){VLR_ULA_S_IDLE}: Received Event VLR_ULA_E_UPDATE_LA
-DREF VLR subscr unknown usage increases to: 1
+DREF VLR subscr unknown + _lu_fsm_associate_vsub: now used by 1 (_lu_fsm_associate_vsub)
 DVLR set IMSI on subscriber; IMSI=901700000004620 id=901700000004620
 DVLR New subscr, IMSI: 901700000004620
-DREF VLR subscr IMSI-901700000004620 usage increases to: 2
+DREF VLR subscr IMSI-901700000004620 + conn: now used by 2 (_lu_fsm_associate_vsub,conn)
 DMM RAN_conn(IMSI-901700000004620:GERAN-A-0:LU){RAN_CONN_S_NEW}: Updated ID
-DREF VLR subscr IMSI-901700000004620 usage decreases to: 1
+DREF VLR subscr IMSI-901700000004620 - _lu_fsm_associate_vsub: now used by 1 (conn)
 DVLR vlr_lu_fsm(IMSI-901700000004620:GERAN-A-0:LU){VLR_ULA_S_IDLE}: vlr_loc_upd_node1()
 DVLR vlr_lu_fsm(IMSI-901700000004620:GERAN-A-0:LU){VLR_ULA_S_IDLE}: state_chg to VLR_ULA_S_WAIT_AUTH
 DVLR VLR_Authenticate(IMSI-901700000004620:GERAN-A-0:LU){VLR_SUB_AS_NEEDS_AUTH}: Allocated
@@ -38,7 +38,7 @@ DMM RAN_conn(IMSI-901700000004620:GERAN-A-0:LU){RAN_CONN_S_AUTH_CIPH}: Awaiting 
 - HLR sends _SEND_AUTH_INFO_ERROR = unknown IMSI
 <-- GSUP rx OSMO_GSUP_MSGT_SEND_AUTH_INFO_ERROR: 09010809710000004026f0020102
 DVLR GSUP rx 14: 09010809710000004026f0020102
-DREF VLR subscr IMSI-901700000004620 usage increases to: 2
+DREF VLR subscr IMSI-901700000004620 + vlr_gsupc_read_cb: now used by 2 (conn,vlr_gsupc_read_cb)
 DVLR VLR_Authenticate(IMSI-901700000004620:GERAN-A-0:LU){VLR_SUB_AS_NEEDS_AUTH_WAIT_AI}: Received Event VLR_AUTH_E_HLR_SAI_NACK
 DVLR VLR_Authenticate(IMSI-901700000004620:GERAN-A-0:LU){VLR_SUB_AS_NEEDS_AUTH_WAIT_AI}: GSUP: rx Auth Info Error cause: 2: IMSI unknown in HLR
 DVLR VLR_Authenticate(IMSI-901700000004620:GERAN-A-0:LU){VLR_SUB_AS_NEEDS_AUTH_WAIT_AI}: Authentication terminating with result IMSI unknown in HLR
@@ -51,11 +51,11 @@ DVLR vlr_lu_fsm(IMSI-901700000004620:GERAN-A-0:LU){VLR_ULA_S_WAIT_AUTH}: state_c
 DMM RAN_conn(IMSI-901700000004620:GERAN-A-0:LU){RAN_CONN_S_AUTH_CIPH}: Received Event RAN_CONN_E_CN_CLOSE
 DMM RAN_conn(IMSI-901700000004620:GERAN-A-0:LU){RAN_CONN_S_AUTH_CIPH}: state_chg to RAN_CONN_S_RELEASING
 DREF IMSI-901700000004620: MSC conn use + release == 1 (0x100: release)
-DREF VLR subscr IMSI-901700000004620 usage increases to: 3
-DREF VLR subscr IMSI-901700000004620 usage decreases to: 2
+DREF VLR subscr IMSI-901700000004620 + vlr_subscr_cancel_attach_fsm: now used by 3 (conn,vlr_gsupc_read_cb,vlr_subscr_cancel_attach_fsm)
+DREF VLR subscr IMSI-901700000004620 - vlr_subscr_cancel_attach_fsm: now used by 2 (conn,vlr_gsupc_read_cb)
 - BSSAP Clear --GERAN-A--> MS
 DVLR VLR_Authenticate(IMSI-901700000004620:GERAN-A-0:LU){VLR_SUB_AS_AUTH_FAILED}: Deallocated
-DREF VLR subscr IMSI-901700000004620 usage decreases to: 1
+DREF VLR subscr IMSI-901700000004620 - vlr_gsupc_read_cb: now used by 1 (conn)
 <-- GSUP rx OSMO_GSUP_MSGT_SEND_AUTH_INFO_ERROR: vlr_gsupc_read_cb() returns 0
   auth_request_sent == 0
   lu_result_sent == 2
@@ -70,7 +70,7 @@ DVLR vlr_lu_fsm(IMSI-901700000004620:GERAN-A-0:LU){VLR_ULA_S_DONE}: Removing fro
 DVLR vlr_lu_fsm(IMSI-901700000004620:GERAN-A-0:LU){VLR_ULA_S_DONE}: fsm_lu_cleanup called with cause OSMO_FSM_TERM_PARENT
 DVLR vlr_lu_fsm(IMSI-901700000004620:GERAN-A-0:LU){VLR_ULA_S_DONE}: Deferring: will deallocate with RAN_conn(IMSI-901700000004620:GERAN-A-0:LU)
 DRLL IMSI-901700000004620: Freeing RAN connection
-DREF VLR subscr IMSI-901700000004620 usage decreases to: 0
+DREF VLR subscr IMSI-901700000004620 - conn: now used by 0 (-)
 DREF freeing VLR subscr IMSI-901700000004620
 DMM RAN_conn(IMSI-901700000004620:GERAN-A-0:LU){RAN_CONN_S_RELEASED}: Deallocated, including all deferred deallocations
   llist_count(&net->ran_conns) == 0
@@ -93,12 +93,12 @@ DVLR vlr_lu_fsm(IMSI-901700000004620:GERAN-A-0:LU){VLR_ULA_S_IDLE}: Allocated
 DVLR vlr_lu_fsm(IMSI-901700000004620:GERAN-A-0:LU){VLR_ULA_S_IDLE}: is child of RAN_conn(IMSI-901700000004620:GERAN-A-0:LU)
 DVLR vlr_lu_fsm(IMSI-901700000004620:GERAN-A-0:LU){VLR_ULA_S_IDLE}: rev=GSM net=GERAN Auth (no Ciph)
 DVLR vlr_lu_fsm(IMSI-901700000004620:GERAN-A-0:LU){VLR_ULA_S_IDLE}: Received Event VLR_ULA_E_UPDATE_LA
-DREF VLR subscr unknown usage increases to: 1
+DREF VLR subscr unknown + _lu_fsm_associate_vsub: now used by 1 (_lu_fsm_associate_vsub)
 DVLR set IMSI on subscriber; IMSI=901700000004620 id=901700000004620
 DVLR New subscr, IMSI: 901700000004620
-DREF VLR subscr IMSI-901700000004620 usage increases to: 2
+DREF VLR subscr IMSI-901700000004620 + conn: now used by 2 (_lu_fsm_associate_vsub,conn)
 DMM RAN_conn(IMSI-901700000004620:GERAN-A-0:LU){RAN_CONN_S_NEW}: Updated ID
-DREF VLR subscr IMSI-901700000004620 usage decreases to: 1
+DREF VLR subscr IMSI-901700000004620 - _lu_fsm_associate_vsub: now used by 1 (conn)
 DVLR vlr_lu_fsm(IMSI-901700000004620:GERAN-A-0:LU){VLR_ULA_S_IDLE}: vlr_loc_upd_node1()
 DVLR vlr_lu_fsm(IMSI-901700000004620:GERAN-A-0:LU){VLR_ULA_S_IDLE}: state_chg to VLR_ULA_S_WAIT_AUTH
 DVLR VLR_Authenticate(IMSI-901700000004620:GERAN-A-0:LU){VLR_SUB_AS_NEEDS_AUTH}: Allocated
@@ -116,7 +116,7 @@ DMM RAN_conn(IMSI-901700000004620:GERAN-A-0:LU){RAN_CONN_S_AUTH_CIPH}: Awaiting 
 - HLR sends _SEND_AUTH_INFO_ERROR = net fail
 <-- GSUP rx OSMO_GSUP_MSGT_SEND_AUTH_INFO_ERROR: 09010809710000004026f0020111
 DVLR GSUP rx 14: 09010809710000004026f0020111
-DREF VLR subscr IMSI-901700000004620 usage increases to: 2
+DREF VLR subscr IMSI-901700000004620 + vlr_gsupc_read_cb: now used by 2 (conn,vlr_gsupc_read_cb)
 DVLR VLR_Authenticate(IMSI-901700000004620:GERAN-A-0:LU){VLR_SUB_AS_NEEDS_AUTH_WAIT_AI}: Received Event VLR_AUTH_E_HLR_SAI_NACK
 DVLR VLR_Authenticate(IMSI-901700000004620:GERAN-A-0:LU){VLR_SUB_AS_NEEDS_AUTH_WAIT_AI}: GSUP: rx Auth Info Error cause: 17: Network failure
 DVLR VLR_Authenticate(IMSI-901700000004620:GERAN-A-0:LU){VLR_SUB_AS_NEEDS_AUTH_WAIT_AI}: Authentication terminating with result Network failure
@@ -129,11 +129,11 @@ DVLR vlr_lu_fsm(IMSI-901700000004620:GERAN-A-0:LU){VLR_ULA_S_WAIT_AUTH}: state_c
 DMM RAN_conn(IMSI-901700000004620:GERAN-A-0:LU){RAN_CONN_S_AUTH_CIPH}: Received Event RAN_CONN_E_CN_CLOSE
 DMM RAN_conn(IMSI-901700000004620:GERAN-A-0:LU){RAN_CONN_S_AUTH_CIPH}: state_chg to RAN_CONN_S_RELEASING
 DREF IMSI-901700000004620: MSC conn use + release == 1 (0x100: release)
-DREF VLR subscr IMSI-901700000004620 usage increases to: 3
-DREF VLR subscr IMSI-901700000004620 usage decreases to: 2
+DREF VLR subscr IMSI-901700000004620 + vlr_subscr_cancel_attach_fsm: now used by 3 (conn,vlr_gsupc_read_cb,vlr_subscr_cancel_attach_fsm)
+DREF VLR subscr IMSI-901700000004620 - vlr_subscr_cancel_attach_fsm: now used by 2 (conn,vlr_gsupc_read_cb)
 - BSSAP Clear --GERAN-A--> MS
 DVLR VLR_Authenticate(IMSI-901700000004620:GERAN-A-0:LU){VLR_SUB_AS_AUTH_FAILED}: Deallocated
-DREF VLR subscr IMSI-901700000004620 usage decreases to: 1
+DREF VLR subscr IMSI-901700000004620 - vlr_gsupc_read_cb: now used by 1 (conn)
 <-- GSUP rx OSMO_GSUP_MSGT_SEND_AUTH_INFO_ERROR: vlr_gsupc_read_cb() returns 0
   auth_request_sent == 0
   lu_result_sent == 2
@@ -148,7 +148,7 @@ DVLR vlr_lu_fsm(IMSI-901700000004620:GERAN-A-0:LU){VLR_ULA_S_DONE}: Removing fro
 DVLR vlr_lu_fsm(IMSI-901700000004620:GERAN-A-0:LU){VLR_ULA_S_DONE}: fsm_lu_cleanup called with cause OSMO_FSM_TERM_PARENT
 DVLR vlr_lu_fsm(IMSI-901700000004620:GERAN-A-0:LU){VLR_ULA_S_DONE}: Deferring: will deallocate with RAN_conn(IMSI-901700000004620:GERAN-A-0:LU)
 DRLL IMSI-901700000004620: Freeing RAN connection
-DREF VLR subscr IMSI-901700000004620 usage decreases to: 0
+DREF VLR subscr IMSI-901700000004620 - conn: now used by 0 (-)
 DREF freeing VLR subscr IMSI-901700000004620
 DMM RAN_conn(IMSI-901700000004620:GERAN-A-0:LU){RAN_CONN_S_RELEASED}: Deallocated, including all deferred deallocations
   llist_count(&net->ran_conns) == 0
@@ -173,12 +173,12 @@ DVLR vlr_lu_fsm(IMSI-901700000004620:GERAN-A-0:LU){VLR_ULA_S_IDLE}: Allocated
 DVLR vlr_lu_fsm(IMSI-901700000004620:GERAN-A-0:LU){VLR_ULA_S_IDLE}: is child of RAN_conn(IMSI-901700000004620:GERAN-A-0:LU)
 DVLR vlr_lu_fsm(IMSI-901700000004620:GERAN-A-0:LU){VLR_ULA_S_IDLE}: rev=GSM net=GERAN Auth (no Ciph)
 DVLR vlr_lu_fsm(IMSI-901700000004620:GERAN-A-0:LU){VLR_ULA_S_IDLE}: Received Event VLR_ULA_E_UPDATE_LA
-DREF VLR subscr unknown usage increases to: 1
+DREF VLR subscr unknown + _lu_fsm_associate_vsub: now used by 1 (_lu_fsm_associate_vsub)
 DVLR set IMSI on subscriber; IMSI=901700000004620 id=901700000004620
 DVLR New subscr, IMSI: 901700000004620
-DREF VLR subscr IMSI-901700000004620 usage increases to: 2
+DREF VLR subscr IMSI-901700000004620 + conn: now used by 2 (_lu_fsm_associate_vsub,conn)
 DMM RAN_conn(IMSI-901700000004620:GERAN-A-0:LU){RAN_CONN_S_NEW}: Updated ID
-DREF VLR subscr IMSI-901700000004620 usage decreases to: 1
+DREF VLR subscr IMSI-901700000004620 - _lu_fsm_associate_vsub: now used by 1 (conn)
 DVLR vlr_lu_fsm(IMSI-901700000004620:GERAN-A-0:LU){VLR_ULA_S_IDLE}: vlr_loc_upd_node1()
 DVLR vlr_lu_fsm(IMSI-901700000004620:GERAN-A-0:LU){VLR_ULA_S_IDLE}: state_chg to VLR_ULA_S_WAIT_AUTH
 DVLR VLR_Authenticate(IMSI-901700000004620:GERAN-A-0:LU){VLR_SUB_AS_NEEDS_AUTH}: Allocated
@@ -196,7 +196,7 @@ DMM RAN_conn(IMSI-901700000004620:GERAN-A-0:LU){RAN_CONN_S_AUTH_CIPH}: Awaiting 
 - from HLR, rx _SEND_AUTH_INFO_RESULT; VLR sends Auth Req to MS
 <-- GSUP rx OSMO_GSUP_MSGT_SEND_AUTH_INFO_RESULT: 0a010809710000004026f003222010585df1ae287f6e273dce07090d61320b21042d8b2c3e220861855fb81fc2a800
 DVLR GSUP rx 47: 0a010809710000004026f003222010585df1ae287f6e273dce07090d61320b21042d8b2c3e220861855fb81fc2a800
-DREF VLR subscr IMSI-901700000004620 usage increases to: 2
+DREF VLR subscr IMSI-901700000004620 + vlr_gsupc_read_cb: now used by 2 (conn,vlr_gsupc_read_cb)
 DVLR VLR_Authenticate(IMSI-901700000004620:GERAN-A-0:LU){VLR_SUB_AS_NEEDS_AUTH_WAIT_AI}: Received Event VLR_AUTH_E_HLR_SAI_ACK
 DVLR SUBSCR(IMSI-901700000004620) Received 1 auth tuples
 DVLR VLR_Authenticate(IMSI-901700000004620:GERAN-A-0:LU){VLR_SUB_AS_NEEDS_AUTH_WAIT_AI}: state_chg to VLR_SUB_AS_WAIT_RESP
@@ -204,7 +204,7 @@ DVLR VLR_Authenticate(IMSI-901700000004620:GERAN-A-0:LU){VLR_SUB_AS_WAIT_RESP}: 
 - sending GSM Auth Request for IMSI-901700000004620: tuple use_count=1 key_seq=0 auth_types=0x1 and...
 - ...rand=585df1ae287f6e273dce07090d61320b
 - ...expecting sres=2d8b2c3e
-DREF VLR subscr IMSI-901700000004620 usage decreases to: 1
+DREF VLR subscr IMSI-901700000004620 - vlr_gsupc_read_cb: now used by 1 (conn)
 <-- GSUP rx OSMO_GSUP_MSGT_SEND_AUTH_INFO_RESULT: vlr_gsupc_read_cb() returns 0
   auth_request_sent == 1
   lu_result_sent == 0
@@ -239,19 +239,19 @@ DMM RAN_conn(IMSI-901700000004620:GERAN-A-0:LU){RAN_CONN_S_AUTH_CIPH}: Awaiting 
 - HLR sends _INSERT_DATA_REQUEST, VLR responds with _INSERT_DATA_RESULT
 <-- GSUP rx OSMO_GSUP_MSGT_INSERT_DATA_REQUEST: 10010809710000004026f00804036470f1
 DVLR GSUP rx 17: 10010809710000004026f00804036470f1
-DREF VLR subscr IMSI-901700000004620 usage increases to: 2
+DREF VLR subscr IMSI-901700000004620 + vlr_gsupc_read_cb: now used by 2 (conn,vlr_gsupc_read_cb)
 DVLR IMSI:901700000004620 has MSISDN:46071
-DVLR SUBSCR(IMSI-901700000004620:MSISDN-46071) VLR: update for IMSI=901700000004620 (MSISDN=46071, used=2)
+DVLR SUBSCR(IMSI-901700000004620:MSISDN-46071) VLR: update for IMSI=901700000004620 (MSISDN=46071)
 DMM RAN_conn(IMSI-901700000004620:MSISDN-46071:GERAN-A-0:LU){RAN_CONN_S_AUTH_CIPH}: Updated ID
 DVLR GSUP tx: 12010809710000004026f0
 GSUP --> HLR: OSMO_GSUP_MSGT_INSERT_DATA_RESULT: 12010809710000004026f0
-DREF VLR subscr IMSI-901700000004620:MSISDN-46071 usage decreases to: 1
+DREF VLR subscr IMSI-901700000004620:MSISDN-46071 - vlr_gsupc_read_cb: now used by 1 (conn)
 <-- GSUP rx OSMO_GSUP_MSGT_INSERT_DATA_REQUEST: vlr_gsupc_read_cb() returns 0
   lu_result_sent == 0
 - HLR also sends GSUP _UPDATE_LOCATION_RESULT
 <-- GSUP rx OSMO_GSUP_MSGT_UPDATE_LOCATION_RESULT: 06010809710000004026f0
 DVLR GSUP rx 11: 06010809710000004026f0
-DREF VLR subscr IMSI-901700000004620:MSISDN-46071 usage increases to: 2
+DREF VLR subscr IMSI-901700000004620:MSISDN-46071 + vlr_gsupc_read_cb: now used by 2 (conn,vlr_gsupc_read_cb)
 DVLR vlr_lu_fsm(IMSI-901700000004620:MSISDN-46071:GERAN-A-0:LU){VLR_ULA_S_WAIT_HLR_UPD}: Received Event VLR_ULA_E_HLR_LU_RES
 DVLR upd_hlr_vlr_fsm(IMSI-901700000004620:GERAN-A-0:LU){UPD_HLR_VLR_S_WAIT_FOR_DATA}: Received Event UPD_HLR_VLR_E_UPD_LOC_ACK
 DVLR upd_hlr_vlr_fsm(IMSI-901700000004620:GERAN-A-0:LU){UPD_HLR_VLR_S_WAIT_FOR_DATA}: state_chg to UPD_HLR_VLR_S_DONE
@@ -265,7 +265,7 @@ DVLR lu_compl_vlr_fsm(IMSI-901700000004620:MSISDN-46071:GERAN-A-0:LU){LU_COMPL_V
 DVLR lu_compl_vlr_fsm(IMSI-901700000004620:MSISDN-46071:GERAN-A-0:LU){LU_COMPL_VLR_S_INIT}: state_chg to LU_COMPL_VLR_S_WAIT_SUB_PRES
 DVLR lu_compl_vlr_fsm(IMSI-901700000004620:MSISDN-46071:GERAN-A-0:LU){LU_COMPL_VLR_S_WAIT_SUB_PRES}: Received Event LU_COMPL_VLR_E_SUB_PRES_COMPL
 - sending LU Accept for IMSI-901700000004620:MSISDN-46071
-DREF VLR subscr IMSI-901700000004620:MSISDN-46071 usage increases to: 3
+DREF VLR subscr IMSI-901700000004620:MSISDN-46071 + attached: now used by 3 (conn,vlr_gsupc_read_cb,attached)
 DVLR lu_compl_vlr_fsm(IMSI-901700000004620:MSISDN-46071:GERAN-A-0:LU){LU_COMPL_VLR_S_WAIT_SUB_PRES}: state_chg to LU_COMPL_VLR_S_DONE
 DVLR vlr_lu_fsm(IMSI-901700000004620:MSISDN-46071:GERAN-A-0:LU){VLR_ULA_S_WAIT_LU_COMPL}: Received Event VLR_ULA_E_LU_COMPL_SUCCESS
 DVLR lu_compl_vlr_fsm(IMSI-901700000004620:MSISDN-46071:GERAN-A-0:LU){LU_COMPL_VLR_S_DONE}: Terminating in cascade, depth 2 (cause = OSMO_FSM_TERM_PARENT, caused by: upd_hlr_vlr_fsm(IMSI-901700000004620:GERAN-A-0:LU))
@@ -277,11 +277,11 @@ DMM RAN_conn(IMSI-901700000004620:MSISDN-46071:GERAN-A-0:LU){RAN_CONN_S_AUTH_CIP
 DMM RAN_conn(IMSI-901700000004620:MSISDN-46071:GERAN-A-0:LU){RAN_CONN_S_ACCEPTED}: Received Event RAN_CONN_E_UNUSED
 DMM RAN_conn(IMSI-901700000004620:MSISDN-46071:GERAN-A-0:LU){RAN_CONN_S_ACCEPTED}: state_chg to RAN_CONN_S_RELEASING
 DREF IMSI-901700000004620:MSISDN-46071: MSC conn use + release == 1 (0x100: release)
-DREF VLR subscr IMSI-901700000004620:MSISDN-46071 usage increases to: 4
-DREF VLR subscr IMSI-901700000004620:MSISDN-46071 usage decreases to: 3
+DREF VLR subscr IMSI-901700000004620:MSISDN-46071 + vlr_subscr_cancel_attach_fsm: now used by 4 (conn,vlr_gsupc_read_cb,attached,vlr_subscr_cancel_attach_fsm)
+DREF VLR subscr IMSI-901700000004620:MSISDN-46071 - vlr_subscr_cancel_attach_fsm: now used by 3 (conn,vlr_gsupc_read_cb,attached)
 - BSSAP Clear --GERAN-A--> MS
 DVLR upd_hlr_vlr_fsm(IMSI-901700000004620:GERAN-A-0:LU){UPD_HLR_VLR_S_DONE}: Deallocated, including all deferred deallocations
-DREF VLR subscr IMSI-901700000004620:MSISDN-46071 usage decreases to: 2
+DREF VLR subscr IMSI-901700000004620:MSISDN-46071 - vlr_gsupc_read_cb: now used by 2 (conn,attached)
 <-- GSUP rx OSMO_GSUP_MSGT_UPDATE_LOCATION_RESULT: vlr_gsupc_read_cb() returns 0
   bssap_clear_sent == 1
 - LU was successful, and the conn has already been closed
@@ -296,14 +296,14 @@ DVLR vlr_lu_fsm(IMSI-901700000004620:MSISDN-46071:GERAN-A-0:LU){VLR_ULA_S_DONE}:
 DVLR vlr_lu_fsm(IMSI-901700000004620:MSISDN-46071:GERAN-A-0:LU){VLR_ULA_S_DONE}: fsm_lu_cleanup called with cause OSMO_FSM_TERM_PARENT
 DVLR vlr_lu_fsm(IMSI-901700000004620:MSISDN-46071:GERAN-A-0:LU){VLR_ULA_S_DONE}: Deferring: will deallocate with RAN_conn(IMSI-901700000004620:MSISDN-46071:GERAN-A-0:LU)
 DRLL IMSI-901700000004620:MSISDN-46071: Freeing RAN connection
-DREF VLR subscr IMSI-901700000004620:MSISDN-46071 usage decreases to: 1
+DREF VLR subscr IMSI-901700000004620:MSISDN-46071 - conn: now used by 1 (attached)
 DMM RAN_conn(IMSI-901700000004620:MSISDN-46071:GERAN-A-0:LU){RAN_CONN_S_RELEASED}: Deallocated, including all deferred deallocations
   llist_count(&net->ran_conns) == 0
 ---
 - Now one auth tuple is available, but used.
-DREF VLR subscr IMSI-901700000004620:MSISDN-46071 usage increases to: 2
+DREF VLR subscr IMSI-901700000004620:MSISDN-46071 + test_hlr_rej_auth_info_net_fail_reuse_tuples: now used by 2 (attached,test_hlr_rej_auth_info_net_fail_reuse_tuples)
   vsub->last_tuple->use_count == 1
-DREF VLR subscr IMSI-901700000004620:MSISDN-46071 usage decreases to: 1
+DREF VLR subscr IMSI-901700000004620:MSISDN-46071 - test_hlr_rej_auth_info_net_fail_reuse_tuples: now used by 1 (attached)
 ---
 - Another LU wants to get new tuples; even though HLR sends Network Failure, we are reusing the old tuples.
 - Location Update request causes a GSUP Send Auth Info request to HLR
@@ -319,10 +319,10 @@ DVLR vlr_lu_fsm(IMSI-901700000004620:GERAN-A-0:LU){VLR_ULA_S_IDLE}: Allocated
 DVLR vlr_lu_fsm(IMSI-901700000004620:GERAN-A-0:LU){VLR_ULA_S_IDLE}: is child of RAN_conn(IMSI-901700000004620:GERAN-A-0:LU)
 DVLR vlr_lu_fsm(IMSI-901700000004620:GERAN-A-0:LU){VLR_ULA_S_IDLE}: rev=GSM net=GERAN Auth (no Ciph)
 DVLR vlr_lu_fsm(IMSI-901700000004620:GERAN-A-0:LU){VLR_ULA_S_IDLE}: Received Event VLR_ULA_E_UPDATE_LA
-DREF VLR subscr IMSI-901700000004620:MSISDN-46071 usage increases to: 2
-DREF VLR subscr IMSI-901700000004620:MSISDN-46071 usage increases to: 3
+DREF VLR subscr IMSI-901700000004620:MSISDN-46071 + _lu_fsm_associate_vsub: now used by 2 (attached,_lu_fsm_associate_vsub)
+DREF VLR subscr IMSI-901700000004620:MSISDN-46071 + conn: now used by 3 (attached,_lu_fsm_associate_vsub,conn)
 DMM RAN_conn(IMSI-901700000004620:MSISDN-46071:GERAN-A-0:LU){RAN_CONN_S_NEW}: Updated ID
-DREF VLR subscr IMSI-901700000004620:MSISDN-46071 usage decreases to: 2
+DREF VLR subscr IMSI-901700000004620:MSISDN-46071 - _lu_fsm_associate_vsub: now used by 2 (attached,conn)
 DVLR vlr_lu_fsm(IMSI-901700000004620:MSISDN-46071:GERAN-A-0:LU){VLR_ULA_S_IDLE}: vlr_loc_upd_node1()
 DVLR vlr_lu_fsm(IMSI-901700000004620:MSISDN-46071:GERAN-A-0:LU){VLR_ULA_S_IDLE}: state_chg to VLR_ULA_S_WAIT_AUTH
 DVLR VLR_Authenticate(IMSI-901700000004620:MSISDN-46071:GERAN-A-0:LU){VLR_SUB_AS_NEEDS_AUTH}: Allocated
@@ -340,7 +340,7 @@ DMM RAN_conn(IMSI-901700000004620:MSISDN-46071:GERAN-A-0:LU){RAN_CONN_S_AUTH_CIP
 - HLR sends _SEND_AUTH_INFO_ERROR = net fail
 <-- GSUP rx OSMO_GSUP_MSGT_SEND_AUTH_INFO_ERROR: 09010809710000004026f0020111
 DVLR GSUP rx 14: 09010809710000004026f0020111
-DREF VLR subscr IMSI-901700000004620:MSISDN-46071 usage increases to: 3
+DREF VLR subscr IMSI-901700000004620:MSISDN-46071 + vlr_gsupc_read_cb: now used by 3 (attached,conn,vlr_gsupc_read_cb)
 DVLR VLR_Authenticate(IMSI-901700000004620:MSISDN-46071:GERAN-A-0:LU){VLR_SUB_AS_NEEDS_AUTH_WAIT_AI}: Received Event VLR_AUTH_E_HLR_SAI_NACK
 DVLR VLR_Authenticate(IMSI-901700000004620:MSISDN-46071:GERAN-A-0:LU){VLR_SUB_AS_NEEDS_AUTH_WAIT_AI}: GSUP: rx Auth Info Error cause: 17: Network failure
 DVLR VLR_Authenticate(IMSI-901700000004620:MSISDN-46071:GERAN-A-0:LU){VLR_SUB_AS_NEEDS_AUTH_WAIT_AI}: state_chg to VLR_SUB_AS_WAIT_RESP
@@ -348,7 +348,7 @@ DVLR VLR_Authenticate(IMSI-901700000004620:MSISDN-46071:GERAN-A-0:LU){VLR_SUB_AS
 - sending GSM Auth Request for IMSI-901700000004620:MSISDN-46071: tuple use_count=2 key_seq=0 auth_types=0x1 and...
 - ...rand=585df1ae287f6e273dce07090d61320b
 - ...expecting sres=2d8b2c3e
-DREF VLR subscr IMSI-901700000004620:MSISDN-46071 usage decreases to: 2
+DREF VLR subscr IMSI-901700000004620:MSISDN-46071 - vlr_gsupc_read_cb: now used by 2 (attached,conn)
 <-- GSUP rx OSMO_GSUP_MSGT_SEND_AUTH_INFO_ERROR: vlr_gsupc_read_cb() returns 0
   auth_request_sent == 1
   lu_result_sent == 0
@@ -383,19 +383,19 @@ DMM RAN_conn(IMSI-901700000004620:MSISDN-46071:GERAN-A-0:LU){RAN_CONN_S_AUTH_CIP
 - HLR sends _INSERT_DATA_REQUEST, VLR responds with _INSERT_DATA_RESULT
 <-- GSUP rx OSMO_GSUP_MSGT_INSERT_DATA_REQUEST: 10010809710000004026f00804036470f1
 DVLR GSUP rx 17: 10010809710000004026f00804036470f1
-DREF VLR subscr IMSI-901700000004620:MSISDN-46071 usage increases to: 3
+DREF VLR subscr IMSI-901700000004620:MSISDN-46071 + vlr_gsupc_read_cb: now used by 3 (attached,conn,vlr_gsupc_read_cb)
 DVLR IMSI:901700000004620 has MSISDN:46071
-DVLR SUBSCR(IMSI-901700000004620:MSISDN-46071) VLR: update for IMSI=901700000004620 (MSISDN=46071, used=3)
+DVLR SUBSCR(IMSI-901700000004620:MSISDN-46071) VLR: update for IMSI=901700000004620 (MSISDN=46071)
 DMM RAN_conn(IMSI-901700000004620:MSISDN-46071:GERAN-A-0:LU){RAN_CONN_S_AUTH_CIPH}: Updated ID
 DVLR GSUP tx: 12010809710000004026f0
 GSUP --> HLR: OSMO_GSUP_MSGT_INSERT_DATA_RESULT: 12010809710000004026f0
-DREF VLR subscr IMSI-901700000004620:MSISDN-46071 usage decreases to: 2
+DREF VLR subscr IMSI-901700000004620:MSISDN-46071 - vlr_gsupc_read_cb: now used by 2 (attached,conn)
 <-- GSUP rx OSMO_GSUP_MSGT_INSERT_DATA_REQUEST: vlr_gsupc_read_cb() returns 0
   lu_result_sent == 0
 - HLR also sends GSUP _UPDATE_LOCATION_RESULT
 <-- GSUP rx OSMO_GSUP_MSGT_UPDATE_LOCATION_RESULT: 06010809710000004026f0
 DVLR GSUP rx 11: 06010809710000004026f0
-DREF VLR subscr IMSI-901700000004620:MSISDN-46071 usage increases to: 3
+DREF VLR subscr IMSI-901700000004620:MSISDN-46071 + vlr_gsupc_read_cb: now used by 3 (attached,conn,vlr_gsupc_read_cb)
 DVLR vlr_lu_fsm(IMSI-901700000004620:MSISDN-46071:GERAN-A-0:LU){VLR_ULA_S_WAIT_HLR_UPD}: Received Event VLR_ULA_E_HLR_LU_RES
 DVLR upd_hlr_vlr_fsm(IMSI-901700000004620:MSISDN-46071:GERAN-A-0:LU){UPD_HLR_VLR_S_WAIT_FOR_DATA}: Received Event UPD_HLR_VLR_E_UPD_LOC_ACK
 DVLR upd_hlr_vlr_fsm(IMSI-901700000004620:MSISDN-46071:GERAN-A-0:LU){UPD_HLR_VLR_S_WAIT_FOR_DATA}: state_chg to UPD_HLR_VLR_S_DONE
@@ -420,11 +420,11 @@ DMM RAN_conn(IMSI-901700000004620:MSISDN-46071:GERAN-A-0:LU){RAN_CONN_S_AUTH_CIP
 DMM RAN_conn(IMSI-901700000004620:MSISDN-46071:GERAN-A-0:LU){RAN_CONN_S_ACCEPTED}: Received Event RAN_CONN_E_UNUSED
 DMM RAN_conn(IMSI-901700000004620:MSISDN-46071:GERAN-A-0:LU){RAN_CONN_S_ACCEPTED}: state_chg to RAN_CONN_S_RELEASING
 DREF IMSI-901700000004620:MSISDN-46071: MSC conn use + release == 1 (0x100: release)
-DREF VLR subscr IMSI-901700000004620:MSISDN-46071 usage increases to: 4
-DREF VLR subscr IMSI-901700000004620:MSISDN-46071 usage decreases to: 3
+DREF VLR subscr IMSI-901700000004620:MSISDN-46071 + vlr_subscr_cancel_attach_fsm: now used by 4 (attached,conn,vlr_gsupc_read_cb,vlr_subscr_cancel_attach_fsm)
+DREF VLR subscr IMSI-901700000004620:MSISDN-46071 - vlr_subscr_cancel_attach_fsm: now used by 3 (attached,conn,vlr_gsupc_read_cb)
 - BSSAP Clear --GERAN-A--> MS
 DVLR upd_hlr_vlr_fsm(IMSI-901700000004620:MSISDN-46071:GERAN-A-0:LU){UPD_HLR_VLR_S_DONE}: Deallocated, including all deferred deallocations
-DREF VLR subscr IMSI-901700000004620:MSISDN-46071 usage decreases to: 2
+DREF VLR subscr IMSI-901700000004620:MSISDN-46071 - vlr_gsupc_read_cb: now used by 2 (attached,conn)
 <-- GSUP rx OSMO_GSUP_MSGT_UPDATE_LOCATION_RESULT: vlr_gsupc_read_cb() returns 0
   bssap_clear_sent == 1
 - LU was successful, and the conn has already been closed
@@ -439,7 +439,7 @@ DVLR vlr_lu_fsm(IMSI-901700000004620:MSISDN-46071:GERAN-A-0:LU){VLR_ULA_S_DONE}:
 DVLR vlr_lu_fsm(IMSI-901700000004620:MSISDN-46071:GERAN-A-0:LU){VLR_ULA_S_DONE}: fsm_lu_cleanup called with cause OSMO_FSM_TERM_PARENT
 DVLR vlr_lu_fsm(IMSI-901700000004620:MSISDN-46071:GERAN-A-0:LU){VLR_ULA_S_DONE}: Deferring: will deallocate with RAN_conn(IMSI-901700000004620:MSISDN-46071:GERAN-A-0:LU)
 DRLL IMSI-901700000004620:MSISDN-46071: Freeing RAN connection
-DREF VLR subscr IMSI-901700000004620:MSISDN-46071 usage decreases to: 1
+DREF VLR subscr IMSI-901700000004620:MSISDN-46071 - conn: now used by 1 (attached)
 DMM RAN_conn(IMSI-901700000004620:MSISDN-46071:GERAN-A-0:LU){RAN_CONN_S_RELEASED}: Deallocated, including all deferred deallocations
   llist_count(&net->ran_conns) == 0
 DREF freeing VLR subscr IMSI-901700000004620:MSISDN-46071
@@ -464,12 +464,12 @@ DVLR vlr_lu_fsm(IMSI-901700000004620:GERAN-A-0:LU){VLR_ULA_S_IDLE}: Allocated
 DVLR vlr_lu_fsm(IMSI-901700000004620:GERAN-A-0:LU){VLR_ULA_S_IDLE}: is child of RAN_conn(IMSI-901700000004620:GERAN-A-0:LU)
 DVLR vlr_lu_fsm(IMSI-901700000004620:GERAN-A-0:LU){VLR_ULA_S_IDLE}: rev=GSM net=GERAN Auth (no Ciph)
 DVLR vlr_lu_fsm(IMSI-901700000004620:GERAN-A-0:LU){VLR_ULA_S_IDLE}: Received Event VLR_ULA_E_UPDATE_LA
-DREF VLR subscr unknown usage increases to: 1
+DREF VLR subscr unknown + _lu_fsm_associate_vsub: now used by 1 (_lu_fsm_associate_vsub)
 DVLR set IMSI on subscriber; IMSI=901700000004620 id=901700000004620
 DVLR New subscr, IMSI: 901700000004620
-DREF VLR subscr IMSI-901700000004620 usage increases to: 2
+DREF VLR subscr IMSI-901700000004620 + conn: now used by 2 (_lu_fsm_associate_vsub,conn)
 DMM RAN_conn(IMSI-901700000004620:GERAN-A-0:LU){RAN_CONN_S_NEW}: Updated ID
-DREF VLR subscr IMSI-901700000004620 usage decreases to: 1
+DREF VLR subscr IMSI-901700000004620 - _lu_fsm_associate_vsub: now used by 1 (conn)
 DVLR vlr_lu_fsm(IMSI-901700000004620:GERAN-A-0:LU){VLR_ULA_S_IDLE}: vlr_loc_upd_node1()
 DVLR vlr_lu_fsm(IMSI-901700000004620:GERAN-A-0:LU){VLR_ULA_S_IDLE}: state_chg to VLR_ULA_S_WAIT_AUTH
 DVLR VLR_Authenticate(IMSI-901700000004620:GERAN-A-0:LU){VLR_SUB_AS_NEEDS_AUTH}: Allocated
@@ -487,7 +487,7 @@ DMM RAN_conn(IMSI-901700000004620:GERAN-A-0:LU){RAN_CONN_S_AUTH_CIPH}: Awaiting 
 - from HLR, rx _SEND_AUTH_INFO_RESULT; VLR sends Auth Req to MS
 <-- GSUP rx OSMO_GSUP_MSGT_SEND_AUTH_INFO_RESULT: 0a010809710000004026f003222010585df1ae287f6e273dce07090d61320b21042d8b2c3e220861855fb81fc2a800
 DVLR GSUP rx 47: 0a010809710000004026f003222010585df1ae287f6e273dce07090d61320b21042d8b2c3e220861855fb81fc2a800
-DREF VLR subscr IMSI-901700000004620 usage increases to: 2
+DREF VLR subscr IMSI-901700000004620 + vlr_gsupc_read_cb: now used by 2 (conn,vlr_gsupc_read_cb)
 DVLR VLR_Authenticate(IMSI-901700000004620:GERAN-A-0:LU){VLR_SUB_AS_NEEDS_AUTH_WAIT_AI}: Received Event VLR_AUTH_E_HLR_SAI_ACK
 DVLR SUBSCR(IMSI-901700000004620) Received 1 auth tuples
 DVLR VLR_Authenticate(IMSI-901700000004620:GERAN-A-0:LU){VLR_SUB_AS_NEEDS_AUTH_WAIT_AI}: state_chg to VLR_SUB_AS_WAIT_RESP
@@ -495,7 +495,7 @@ DVLR VLR_Authenticate(IMSI-901700000004620:GERAN-A-0:LU){VLR_SUB_AS_WAIT_RESP}: 
 - sending GSM Auth Request for IMSI-901700000004620: tuple use_count=1 key_seq=0 auth_types=0x1 and...
 - ...rand=585df1ae287f6e273dce07090d61320b
 - ...expecting sres=2d8b2c3e
-DREF VLR subscr IMSI-901700000004620 usage decreases to: 1
+DREF VLR subscr IMSI-901700000004620 - vlr_gsupc_read_cb: now used by 1 (conn)
 <-- GSUP rx OSMO_GSUP_MSGT_SEND_AUTH_INFO_RESULT: vlr_gsupc_read_cb() returns 0
   auth_request_sent == 1
   lu_result_sent == 0
@@ -530,19 +530,19 @@ DMM RAN_conn(IMSI-901700000004620:GERAN-A-0:LU){RAN_CONN_S_AUTH_CIPH}: Awaiting 
 - HLR sends _INSERT_DATA_REQUEST, VLR responds with _INSERT_DATA_RESULT
 <-- GSUP rx OSMO_GSUP_MSGT_INSERT_DATA_REQUEST: 10010809710000004026f00804036470f1
 DVLR GSUP rx 17: 10010809710000004026f00804036470f1
-DREF VLR subscr IMSI-901700000004620 usage increases to: 2
+DREF VLR subscr IMSI-901700000004620 + vlr_gsupc_read_cb: now used by 2 (conn,vlr_gsupc_read_cb)
 DVLR IMSI:901700000004620 has MSISDN:46071
-DVLR SUBSCR(IMSI-901700000004620:MSISDN-46071) VLR: update for IMSI=901700000004620 (MSISDN=46071, used=2)
+DVLR SUBSCR(IMSI-901700000004620:MSISDN-46071) VLR: update for IMSI=901700000004620 (MSISDN=46071)
 DMM RAN_conn(IMSI-901700000004620:MSISDN-46071:GERAN-A-0:LU){RAN_CONN_S_AUTH_CIPH}: Updated ID
 DVLR GSUP tx: 12010809710000004026f0
 GSUP --> HLR: OSMO_GSUP_MSGT_INSERT_DATA_RESULT: 12010809710000004026f0
-DREF VLR subscr IMSI-901700000004620:MSISDN-46071 usage decreases to: 1
+DREF VLR subscr IMSI-901700000004620:MSISDN-46071 - vlr_gsupc_read_cb: now used by 1 (conn)
 <-- GSUP rx OSMO_GSUP_MSGT_INSERT_DATA_REQUEST: vlr_gsupc_read_cb() returns 0
   lu_result_sent == 0
 - HLR also sends GSUP _UPDATE_LOCATION_RESULT
 <-- GSUP rx OSMO_GSUP_MSGT_UPDATE_LOCATION_RESULT: 06010809710000004026f0
 DVLR GSUP rx 11: 06010809710000004026f0
-DREF VLR subscr IMSI-901700000004620:MSISDN-46071 usage increases to: 2
+DREF VLR subscr IMSI-901700000004620:MSISDN-46071 + vlr_gsupc_read_cb: now used by 2 (conn,vlr_gsupc_read_cb)
 DVLR vlr_lu_fsm(IMSI-901700000004620:MSISDN-46071:GERAN-A-0:LU){VLR_ULA_S_WAIT_HLR_UPD}: Received Event VLR_ULA_E_HLR_LU_RES
 DVLR upd_hlr_vlr_fsm(IMSI-901700000004620:GERAN-A-0:LU){UPD_HLR_VLR_S_WAIT_FOR_DATA}: Received Event UPD_HLR_VLR_E_UPD_LOC_ACK
 DVLR upd_hlr_vlr_fsm(IMSI-901700000004620:GERAN-A-0:LU){UPD_HLR_VLR_S_WAIT_FOR_DATA}: state_chg to UPD_HLR_VLR_S_DONE
@@ -556,7 +556,7 @@ DVLR lu_compl_vlr_fsm(IMSI-901700000004620:MSISDN-46071:GERAN-A-0:LU){LU_COMPL_V
 DVLR lu_compl_vlr_fsm(IMSI-901700000004620:MSISDN-46071:GERAN-A-0:LU){LU_COMPL_VLR_S_INIT}: state_chg to LU_COMPL_VLR_S_WAIT_SUB_PRES
 DVLR lu_compl_vlr_fsm(IMSI-901700000004620:MSISDN-46071:GERAN-A-0:LU){LU_COMPL_VLR_S_WAIT_SUB_PRES}: Received Event LU_COMPL_VLR_E_SUB_PRES_COMPL
 - sending LU Accept for IMSI-901700000004620:MSISDN-46071
-DREF VLR subscr IMSI-901700000004620:MSISDN-46071 usage increases to: 3
+DREF VLR subscr IMSI-901700000004620:MSISDN-46071 + attached: now used by 3 (conn,vlr_gsupc_read_cb,attached)
 DVLR lu_compl_vlr_fsm(IMSI-901700000004620:MSISDN-46071:GERAN-A-0:LU){LU_COMPL_VLR_S_WAIT_SUB_PRES}: state_chg to LU_COMPL_VLR_S_DONE
 DVLR vlr_lu_fsm(IMSI-901700000004620:MSISDN-46071:GERAN-A-0:LU){VLR_ULA_S_WAIT_LU_COMPL}: Received Event VLR_ULA_E_LU_COMPL_SUCCESS
 DVLR lu_compl_vlr_fsm(IMSI-901700000004620:MSISDN-46071:GERAN-A-0:LU){LU_COMPL_VLR_S_DONE}: Terminating in cascade, depth 2 (cause = OSMO_FSM_TERM_PARENT, caused by: upd_hlr_vlr_fsm(IMSI-901700000004620:GERAN-A-0:LU))
@@ -568,11 +568,11 @@ DMM RAN_conn(IMSI-901700000004620:MSISDN-46071:GERAN-A-0:LU){RAN_CONN_S_AUTH_CIP
 DMM RAN_conn(IMSI-901700000004620:MSISDN-46071:GERAN-A-0:LU){RAN_CONN_S_ACCEPTED}: Received Event RAN_CONN_E_UNUSED
 DMM RAN_conn(IMSI-901700000004620:MSISDN-46071:GERAN-A-0:LU){RAN_CONN_S_ACCEPTED}: state_chg to RAN_CONN_S_RELEASING
 DREF IMSI-901700000004620:MSISDN-46071: MSC conn use + release == 1 (0x100: release)
-DREF VLR subscr IMSI-901700000004620:MSISDN-46071 usage increases to: 4
-DREF VLR subscr IMSI-901700000004620:MSISDN-46071 usage decreases to: 3
+DREF VLR subscr IMSI-901700000004620:MSISDN-46071 + vlr_subscr_cancel_attach_fsm: now used by 4 (conn,vlr_gsupc_read_cb,attached,vlr_subscr_cancel_attach_fsm)
+DREF VLR subscr IMSI-901700000004620:MSISDN-46071 - vlr_subscr_cancel_attach_fsm: now used by 3 (conn,vlr_gsupc_read_cb,attached)
 - BSSAP Clear --GERAN-A--> MS
 DVLR upd_hlr_vlr_fsm(IMSI-901700000004620:GERAN-A-0:LU){UPD_HLR_VLR_S_DONE}: Deallocated, including all deferred deallocations
-DREF VLR subscr IMSI-901700000004620:MSISDN-46071 usage decreases to: 2
+DREF VLR subscr IMSI-901700000004620:MSISDN-46071 - vlr_gsupc_read_cb: now used by 2 (conn,attached)
 <-- GSUP rx OSMO_GSUP_MSGT_UPDATE_LOCATION_RESULT: vlr_gsupc_read_cb() returns 0
   bssap_clear_sent == 1
 - LU was successful, and the conn has already been closed
@@ -587,14 +587,14 @@ DVLR vlr_lu_fsm(IMSI-901700000004620:MSISDN-46071:GERAN-A-0:LU){VLR_ULA_S_DONE}:
 DVLR vlr_lu_fsm(IMSI-901700000004620:MSISDN-46071:GERAN-A-0:LU){VLR_ULA_S_DONE}: fsm_lu_cleanup called with cause OSMO_FSM_TERM_PARENT
 DVLR vlr_lu_fsm(IMSI-901700000004620:MSISDN-46071:GERAN-A-0:LU){VLR_ULA_S_DONE}: Deferring: will deallocate with RAN_conn(IMSI-901700000004620:MSISDN-46071:GERAN-A-0:LU)
 DRLL IMSI-901700000004620:MSISDN-46071: Freeing RAN connection
-DREF VLR subscr IMSI-901700000004620:MSISDN-46071 usage decreases to: 1
+DREF VLR subscr IMSI-901700000004620:MSISDN-46071 - conn: now used by 1 (attached)
 DMM RAN_conn(IMSI-901700000004620:MSISDN-46071:GERAN-A-0:LU){RAN_CONN_S_RELEASED}: Deallocated, including all deferred deallocations
   llist_count(&net->ran_conns) == 0
 ---
 - Now one auth tuple is available, but used.
-DREF VLR subscr IMSI-901700000004620:MSISDN-46071 usage increases to: 2
+DREF VLR subscr IMSI-901700000004620:MSISDN-46071 + test_hlr_rej_auth_info_net_fail_no_reuse_tuples: now used by 2 (attached,test_hlr_rej_auth_info_net_fail_no_reuse_tuples)
   vsub->last_tuple->use_count == 1
-DREF VLR subscr IMSI-901700000004620:MSISDN-46071 usage decreases to: 1
+DREF VLR subscr IMSI-901700000004620:MSISDN-46071 - test_hlr_rej_auth_info_net_fail_no_reuse_tuples: now used by 1 (attached)
 ---
 - Another LU wants to get new tuples; HLR sends Network Failure, we reject.
 - Location Update request causes a GSUP Send Auth Info request to HLR
@@ -610,10 +610,10 @@ DVLR vlr_lu_fsm(IMSI-901700000004620:GERAN-A-0:LU){VLR_ULA_S_IDLE}: Allocated
 DVLR vlr_lu_fsm(IMSI-901700000004620:GERAN-A-0:LU){VLR_ULA_S_IDLE}: is child of RAN_conn(IMSI-901700000004620:GERAN-A-0:LU)
 DVLR vlr_lu_fsm(IMSI-901700000004620:GERAN-A-0:LU){VLR_ULA_S_IDLE}: rev=GSM net=GERAN Auth (no Ciph)
 DVLR vlr_lu_fsm(IMSI-901700000004620:GERAN-A-0:LU){VLR_ULA_S_IDLE}: Received Event VLR_ULA_E_UPDATE_LA
-DREF VLR subscr IMSI-901700000004620:MSISDN-46071 usage increases to: 2
-DREF VLR subscr IMSI-901700000004620:MSISDN-46071 usage increases to: 3
+DREF VLR subscr IMSI-901700000004620:MSISDN-46071 + _lu_fsm_associate_vsub: now used by 2 (attached,_lu_fsm_associate_vsub)
+DREF VLR subscr IMSI-901700000004620:MSISDN-46071 + conn: now used by 3 (attached,_lu_fsm_associate_vsub,conn)
 DMM RAN_conn(IMSI-901700000004620:MSISDN-46071:GERAN-A-0:LU){RAN_CONN_S_NEW}: Updated ID
-DREF VLR subscr IMSI-901700000004620:MSISDN-46071 usage decreases to: 2
+DREF VLR subscr IMSI-901700000004620:MSISDN-46071 - _lu_fsm_associate_vsub: now used by 2 (attached,conn)
 DVLR vlr_lu_fsm(IMSI-901700000004620:MSISDN-46071:GERAN-A-0:LU){VLR_ULA_S_IDLE}: vlr_loc_upd_node1()
 DVLR vlr_lu_fsm(IMSI-901700000004620:MSISDN-46071:GERAN-A-0:LU){VLR_ULA_S_IDLE}: state_chg to VLR_ULA_S_WAIT_AUTH
 DVLR VLR_Authenticate(IMSI-901700000004620:MSISDN-46071:GERAN-A-0:LU){VLR_SUB_AS_NEEDS_AUTH}: Allocated
@@ -631,7 +631,7 @@ DMM RAN_conn(IMSI-901700000004620:MSISDN-46071:GERAN-A-0:LU){RAN_CONN_S_AUTH_CIP
 - HLR sends _SEND_AUTH_INFO_ERROR = net fail
 <-- GSUP rx OSMO_GSUP_MSGT_SEND_AUTH_INFO_ERROR: 09010809710000004026f0020111
 DVLR GSUP rx 14: 09010809710000004026f0020111
-DREF VLR subscr IMSI-901700000004620:MSISDN-46071 usage increases to: 3
+DREF VLR subscr IMSI-901700000004620:MSISDN-46071 + vlr_gsupc_read_cb: now used by 3 (attached,conn,vlr_gsupc_read_cb)
 DVLR VLR_Authenticate(IMSI-901700000004620:MSISDN-46071:GERAN-A-0:LU){VLR_SUB_AS_NEEDS_AUTH_WAIT_AI}: Received Event VLR_AUTH_E_HLR_SAI_NACK
 DVLR VLR_Authenticate(IMSI-901700000004620:MSISDN-46071:GERAN-A-0:LU){VLR_SUB_AS_NEEDS_AUTH_WAIT_AI}: GSUP: rx Auth Info Error cause: 17: Network failure
 DVLR VLR_Authenticate(IMSI-901700000004620:MSISDN-46071:GERAN-A-0:LU){VLR_SUB_AS_NEEDS_AUTH_WAIT_AI}: Authentication terminating with result Network failure
@@ -644,11 +644,11 @@ DVLR vlr_lu_fsm(IMSI-901700000004620:MSISDN-46071:GERAN-A-0:LU){VLR_ULA_S_WAIT_A
 DMM RAN_conn(IMSI-901700000004620:MSISDN-46071:GERAN-A-0:LU){RAN_CONN_S_AUTH_CIPH}: Received Event RAN_CONN_E_CN_CLOSE
 DMM RAN_conn(IMSI-901700000004620:MSISDN-46071:GERAN-A-0:LU){RAN_CONN_S_AUTH_CIPH}: state_chg to RAN_CONN_S_RELEASING
 DREF IMSI-901700000004620:MSISDN-46071: MSC conn use + release == 1 (0x100: release)
-DREF VLR subscr IMSI-901700000004620:MSISDN-46071 usage increases to: 4
-DREF VLR subscr IMSI-901700000004620:MSISDN-46071 usage decreases to: 3
+DREF VLR subscr IMSI-901700000004620:MSISDN-46071 + vlr_subscr_cancel_attach_fsm: now used by 4 (attached,conn,vlr_gsupc_read_cb,vlr_subscr_cancel_attach_fsm)
+DREF VLR subscr IMSI-901700000004620:MSISDN-46071 - vlr_subscr_cancel_attach_fsm: now used by 3 (attached,conn,vlr_gsupc_read_cb)
 - BSSAP Clear --GERAN-A--> MS
 DVLR VLR_Authenticate(IMSI-901700000004620:MSISDN-46071:GERAN-A-0:LU){VLR_SUB_AS_AUTH_FAILED}: Deallocated
-DREF VLR subscr IMSI-901700000004620:MSISDN-46071 usage decreases to: 2
+DREF VLR subscr IMSI-901700000004620:MSISDN-46071 - vlr_gsupc_read_cb: now used by 2 (attached,conn)
 <-- GSUP rx OSMO_GSUP_MSGT_SEND_AUTH_INFO_ERROR: vlr_gsupc_read_cb() returns 0
   auth_request_sent == 0
   lu_result_sent == 2
@@ -663,7 +663,7 @@ DVLR vlr_lu_fsm(IMSI-901700000004620:MSISDN-46071:GERAN-A-0:LU){VLR_ULA_S_DONE}:
 DVLR vlr_lu_fsm(IMSI-901700000004620:MSISDN-46071:GERAN-A-0:LU){VLR_ULA_S_DONE}: fsm_lu_cleanup called with cause OSMO_FSM_TERM_PARENT
 DVLR vlr_lu_fsm(IMSI-901700000004620:MSISDN-46071:GERAN-A-0:LU){VLR_ULA_S_DONE}: Deferring: will deallocate with RAN_conn(IMSI-901700000004620:MSISDN-46071:GERAN-A-0:LU)
 DRLL IMSI-901700000004620:MSISDN-46071: Freeing RAN connection
-DREF VLR subscr IMSI-901700000004620:MSISDN-46071 usage decreases to: 1
+DREF VLR subscr IMSI-901700000004620:MSISDN-46071 - conn: now used by 1 (attached)
 DMM RAN_conn(IMSI-901700000004620:MSISDN-46071:GERAN-A-0:LU){RAN_CONN_S_RELEASED}: Deallocated, including all deferred deallocations
   llist_count(&net->ran_conns) == 0
 DREF freeing VLR subscr IMSI-901700000004620:MSISDN-46071
@@ -688,12 +688,12 @@ DVLR vlr_lu_fsm(IMSI-901700000004620:GERAN-A-0:LU){VLR_ULA_S_IDLE}: Allocated
 DVLR vlr_lu_fsm(IMSI-901700000004620:GERAN-A-0:LU){VLR_ULA_S_IDLE}: is child of RAN_conn(IMSI-901700000004620:GERAN-A-0:LU)
 DVLR vlr_lu_fsm(IMSI-901700000004620:GERAN-A-0:LU){VLR_ULA_S_IDLE}: rev=GSM net=GERAN Auth (no Ciph)
 DVLR vlr_lu_fsm(IMSI-901700000004620:GERAN-A-0:LU){VLR_ULA_S_IDLE}: Received Event VLR_ULA_E_UPDATE_LA
-DREF VLR subscr unknown usage increases to: 1
+DREF VLR subscr unknown + _lu_fsm_associate_vsub: now used by 1 (_lu_fsm_associate_vsub)
 DVLR set IMSI on subscriber; IMSI=901700000004620 id=901700000004620
 DVLR New subscr, IMSI: 901700000004620
-DREF VLR subscr IMSI-901700000004620 usage increases to: 2
+DREF VLR subscr IMSI-901700000004620 + conn: now used by 2 (_lu_fsm_associate_vsub,conn)
 DMM RAN_conn(IMSI-901700000004620:GERAN-A-0:LU){RAN_CONN_S_NEW}: Updated ID
-DREF VLR subscr IMSI-901700000004620 usage decreases to: 1
+DREF VLR subscr IMSI-901700000004620 - _lu_fsm_associate_vsub: now used by 1 (conn)
 DVLR vlr_lu_fsm(IMSI-901700000004620:GERAN-A-0:LU){VLR_ULA_S_IDLE}: vlr_loc_upd_node1()
 DVLR vlr_lu_fsm(IMSI-901700000004620:GERAN-A-0:LU){VLR_ULA_S_IDLE}: state_chg to VLR_ULA_S_WAIT_AUTH
 DVLR VLR_Authenticate(IMSI-901700000004620:GERAN-A-0:LU){VLR_SUB_AS_NEEDS_AUTH}: Allocated
@@ -711,7 +711,7 @@ DMM RAN_conn(IMSI-901700000004620:GERAN-A-0:LU){RAN_CONN_S_AUTH_CIPH}: Awaiting 
 - from HLR, rx _SEND_AUTH_INFO_RESULT; VLR sends Auth Req to MS
 <-- GSUP rx OSMO_GSUP_MSGT_SEND_AUTH_INFO_RESULT: 0a010809710000004026f003222010585df1ae287f6e273dce07090d61320b21042d8b2c3e220861855fb81fc2a800
 DVLR GSUP rx 47: 0a010809710000004026f003222010585df1ae287f6e273dce07090d61320b21042d8b2c3e220861855fb81fc2a800
-DREF VLR subscr IMSI-901700000004620 usage increases to: 2
+DREF VLR subscr IMSI-901700000004620 + vlr_gsupc_read_cb: now used by 2 (conn,vlr_gsupc_read_cb)
 DVLR VLR_Authenticate(IMSI-901700000004620:GERAN-A-0:LU){VLR_SUB_AS_NEEDS_AUTH_WAIT_AI}: Received Event VLR_AUTH_E_HLR_SAI_ACK
 DVLR SUBSCR(IMSI-901700000004620) Received 1 auth tuples
 DVLR VLR_Authenticate(IMSI-901700000004620:GERAN-A-0:LU){VLR_SUB_AS_NEEDS_AUTH_WAIT_AI}: state_chg to VLR_SUB_AS_WAIT_RESP
@@ -719,7 +719,7 @@ DVLR VLR_Authenticate(IMSI-901700000004620:GERAN-A-0:LU){VLR_SUB_AS_WAIT_RESP}: 
 - sending GSM Auth Request for IMSI-901700000004620: tuple use_count=1 key_seq=0 auth_types=0x1 and...
 - ...rand=585df1ae287f6e273dce07090d61320b
 - ...expecting sres=2d8b2c3e
-DREF VLR subscr IMSI-901700000004620 usage decreases to: 1
+DREF VLR subscr IMSI-901700000004620 - vlr_gsupc_read_cb: now used by 1 (conn)
 <-- GSUP rx OSMO_GSUP_MSGT_SEND_AUTH_INFO_RESULT: vlr_gsupc_read_cb() returns 0
   auth_request_sent == 1
   lu_result_sent == 0
@@ -754,19 +754,19 @@ DMM RAN_conn(IMSI-901700000004620:GERAN-A-0:LU){RAN_CONN_S_AUTH_CIPH}: Awaiting 
 - HLR sends _INSERT_DATA_REQUEST, VLR responds with _INSERT_DATA_RESULT
 <-- GSUP rx OSMO_GSUP_MSGT_INSERT_DATA_REQUEST: 10010809710000004026f00804036470f1
 DVLR GSUP rx 17: 10010809710000004026f00804036470f1
-DREF VLR subscr IMSI-901700000004620 usage increases to: 2
+DREF VLR subscr IMSI-901700000004620 + vlr_gsupc_read_cb: now used by 2 (conn,vlr_gsupc_read_cb)
 DVLR IMSI:901700000004620 has MSISDN:46071
-DVLR SUBSCR(IMSI-901700000004620:MSISDN-46071) VLR: update for IMSI=901700000004620 (MSISDN=46071, used=2)
+DVLR SUBSCR(IMSI-901700000004620:MSISDN-46071) VLR: update for IMSI=901700000004620 (MSISDN=46071)
 DMM RAN_conn(IMSI-901700000004620:MSISDN-46071:GERAN-A-0:LU){RAN_CONN_S_AUTH_CIPH}: Updated ID
 DVLR GSUP tx: 12010809710000004026f0
 GSUP --> HLR: OSMO_GSUP_MSGT_INSERT_DATA_RESULT: 12010809710000004026f0
-DREF VLR subscr IMSI-901700000004620:MSISDN-46071 usage decreases to: 1
+DREF VLR subscr IMSI-901700000004620:MSISDN-46071 - vlr_gsupc_read_cb: now used by 1 (conn)
 <-- GSUP rx OSMO_GSUP_MSGT_INSERT_DATA_REQUEST: vlr_gsupc_read_cb() returns 0
   lu_result_sent == 0
 - HLR also sends GSUP _UPDATE_LOCATION_RESULT
 <-- GSUP rx OSMO_GSUP_MSGT_UPDATE_LOCATION_RESULT: 06010809710000004026f0
 DVLR GSUP rx 11: 06010809710000004026f0
-DREF VLR subscr IMSI-901700000004620:MSISDN-46071 usage increases to: 2
+DREF VLR subscr IMSI-901700000004620:MSISDN-46071 + vlr_gsupc_read_cb: now used by 2 (conn,vlr_gsupc_read_cb)
 DVLR vlr_lu_fsm(IMSI-901700000004620:MSISDN-46071:GERAN-A-0:LU){VLR_ULA_S_WAIT_HLR_UPD}: Received Event VLR_ULA_E_HLR_LU_RES
 DVLR upd_hlr_vlr_fsm(IMSI-901700000004620:GERAN-A-0:LU){UPD_HLR_VLR_S_WAIT_FOR_DATA}: Received Event UPD_HLR_VLR_E_UPD_LOC_ACK
 DVLR upd_hlr_vlr_fsm(IMSI-901700000004620:GERAN-A-0:LU){UPD_HLR_VLR_S_WAIT_FOR_DATA}: state_chg to UPD_HLR_VLR_S_DONE
@@ -780,7 +780,7 @@ DVLR lu_compl_vlr_fsm(IMSI-901700000004620:MSISDN-46071:GERAN-A-0:LU){LU_COMPL_V
 DVLR lu_compl_vlr_fsm(IMSI-901700000004620:MSISDN-46071:GERAN-A-0:LU){LU_COMPL_VLR_S_INIT}: state_chg to LU_COMPL_VLR_S_WAIT_SUB_PRES
 DVLR lu_compl_vlr_fsm(IMSI-901700000004620:MSISDN-46071:GERAN-A-0:LU){LU_COMPL_VLR_S_WAIT_SUB_PRES}: Received Event LU_COMPL_VLR_E_SUB_PRES_COMPL
 - sending LU Accept for IMSI-901700000004620:MSISDN-46071
-DREF VLR subscr IMSI-901700000004620:MSISDN-46071 usage increases to: 3
+DREF VLR subscr IMSI-901700000004620:MSISDN-46071 + attached: now used by 3 (conn,vlr_gsupc_read_cb,attached)
 DVLR lu_compl_vlr_fsm(IMSI-901700000004620:MSISDN-46071:GERAN-A-0:LU){LU_COMPL_VLR_S_WAIT_SUB_PRES}: state_chg to LU_COMPL_VLR_S_DONE
 DVLR vlr_lu_fsm(IMSI-901700000004620:MSISDN-46071:GERAN-A-0:LU){VLR_ULA_S_WAIT_LU_COMPL}: Received Event VLR_ULA_E_LU_COMPL_SUCCESS
 DVLR lu_compl_vlr_fsm(IMSI-901700000004620:MSISDN-46071:GERAN-A-0:LU){LU_COMPL_VLR_S_DONE}: Terminating in cascade, depth 2 (cause = OSMO_FSM_TERM_PARENT, caused by: upd_hlr_vlr_fsm(IMSI-901700000004620:GERAN-A-0:LU))
@@ -792,11 +792,11 @@ DMM RAN_conn(IMSI-901700000004620:MSISDN-46071:GERAN-A-0:LU){RAN_CONN_S_AUTH_CIP
 DMM RAN_conn(IMSI-901700000004620:MSISDN-46071:GERAN-A-0:LU){RAN_CONN_S_ACCEPTED}: Received Event RAN_CONN_E_UNUSED
 DMM RAN_conn(IMSI-901700000004620:MSISDN-46071:GERAN-A-0:LU){RAN_CONN_S_ACCEPTED}: state_chg to RAN_CONN_S_RELEASING
 DREF IMSI-901700000004620:MSISDN-46071: MSC conn use + release == 1 (0x100: release)
-DREF VLR subscr IMSI-901700000004620:MSISDN-46071 usage increases to: 4
-DREF VLR subscr IMSI-901700000004620:MSISDN-46071 usage decreases to: 3
+DREF VLR subscr IMSI-901700000004620:MSISDN-46071 + vlr_subscr_cancel_attach_fsm: now used by 4 (conn,vlr_gsupc_read_cb,attached,vlr_subscr_cancel_attach_fsm)
+DREF VLR subscr IMSI-901700000004620:MSISDN-46071 - vlr_subscr_cancel_attach_fsm: now used by 3 (conn,vlr_gsupc_read_cb,attached)
 - BSSAP Clear --GERAN-A--> MS
 DVLR upd_hlr_vlr_fsm(IMSI-901700000004620:GERAN-A-0:LU){UPD_HLR_VLR_S_DONE}: Deallocated, including all deferred deallocations
-DREF VLR subscr IMSI-901700000004620:MSISDN-46071 usage decreases to: 2
+DREF VLR subscr IMSI-901700000004620:MSISDN-46071 - vlr_gsupc_read_cb: now used by 2 (conn,attached)
 <-- GSUP rx OSMO_GSUP_MSGT_UPDATE_LOCATION_RESULT: vlr_gsupc_read_cb() returns 0
   bssap_clear_sent == 1
 - LU was successful, and the conn has already been closed
@@ -811,14 +811,14 @@ DVLR vlr_lu_fsm(IMSI-901700000004620:MSISDN-46071:GERAN-A-0:LU){VLR_ULA_S_DONE}:
 DVLR vlr_lu_fsm(IMSI-901700000004620:MSISDN-46071:GERAN-A-0:LU){VLR_ULA_S_DONE}: fsm_lu_cleanup called with cause OSMO_FSM_TERM_PARENT
 DVLR vlr_lu_fsm(IMSI-901700000004620:MSISDN-46071:GERAN-A-0:LU){VLR_ULA_S_DONE}: Deferring: will deallocate with RAN_conn(IMSI-901700000004620:MSISDN-46071:GERAN-A-0:LU)
 DRLL IMSI-901700000004620:MSISDN-46071: Freeing RAN connection
-DREF VLR subscr IMSI-901700000004620:MSISDN-46071 usage decreases to: 1
+DREF VLR subscr IMSI-901700000004620:MSISDN-46071 - conn: now used by 1 (attached)
 DMM RAN_conn(IMSI-901700000004620:MSISDN-46071:GERAN-A-0:LU){RAN_CONN_S_RELEASED}: Deallocated, including all deferred deallocations
   llist_count(&net->ran_conns) == 0
 ---
 - Now one auth tuple is available, but used.
-DREF VLR subscr IMSI-901700000004620:MSISDN-46071 usage increases to: 2
+DREF VLR subscr IMSI-901700000004620:MSISDN-46071 + test_hlr_rej_auth_info_unkown_imsi_no_reuse_tuples: now used by 2 (attached,test_hlr_rej_auth_info_unkown_imsi_no_reuse_tuples)
   vsub->last_tuple->use_count == 1
-DREF VLR subscr IMSI-901700000004620:MSISDN-46071 usage decreases to: 1
+DREF VLR subscr IMSI-901700000004620:MSISDN-46071 - test_hlr_rej_auth_info_unkown_imsi_no_reuse_tuples: now used by 1 (attached)
 ---
 - Another LU wants to get new tuples; HLR sends IMSI Unknown. Even though we would re-use an old tuple, reject the unknown IMSI.
   net->vlr->cfg.auth_reuse_old_sets_on_error == 1
@@ -835,10 +835,10 @@ DVLR vlr_lu_fsm(IMSI-901700000004620:GERAN-A-0:LU){VLR_ULA_S_IDLE}: Allocated
 DVLR vlr_lu_fsm(IMSI-901700000004620:GERAN-A-0:LU){VLR_ULA_S_IDLE}: is child of RAN_conn(IMSI-901700000004620:GERAN-A-0:LU)
 DVLR vlr_lu_fsm(IMSI-901700000004620:GERAN-A-0:LU){VLR_ULA_S_IDLE}: rev=GSM net=GERAN Auth (no Ciph)
 DVLR vlr_lu_fsm(IMSI-901700000004620:GERAN-A-0:LU){VLR_ULA_S_IDLE}: Received Event VLR_ULA_E_UPDATE_LA
-DREF VLR subscr IMSI-901700000004620:MSISDN-46071 usage increases to: 2
-DREF VLR subscr IMSI-901700000004620:MSISDN-46071 usage increases to: 3
+DREF VLR subscr IMSI-901700000004620:MSISDN-46071 + _lu_fsm_associate_vsub: now used by 2 (attached,_lu_fsm_associate_vsub)
+DREF VLR subscr IMSI-901700000004620:MSISDN-46071 + conn: now used by 3 (attached,_lu_fsm_associate_vsub,conn)
 DMM RAN_conn(IMSI-901700000004620:MSISDN-46071:GERAN-A-0:LU){RAN_CONN_S_NEW}: Updated ID
-DREF VLR subscr IMSI-901700000004620:MSISDN-46071 usage decreases to: 2
+DREF VLR subscr IMSI-901700000004620:MSISDN-46071 - _lu_fsm_associate_vsub: now used by 2 (attached,conn)
 DVLR vlr_lu_fsm(IMSI-901700000004620:MSISDN-46071:GERAN-A-0:LU){VLR_ULA_S_IDLE}: vlr_loc_upd_node1()
 DVLR vlr_lu_fsm(IMSI-901700000004620:MSISDN-46071:GERAN-A-0:LU){VLR_ULA_S_IDLE}: state_chg to VLR_ULA_S_WAIT_AUTH
 DVLR VLR_Authenticate(IMSI-901700000004620:MSISDN-46071:GERAN-A-0:LU){VLR_SUB_AS_NEEDS_AUTH}: Allocated
@@ -856,7 +856,7 @@ DMM RAN_conn(IMSI-901700000004620:MSISDN-46071:GERAN-A-0:LU){RAN_CONN_S_AUTH_CIP
 - HLR sends _SEND_AUTH_INFO_ERROR = unknown IMSI
 <-- GSUP rx OSMO_GSUP_MSGT_SEND_AUTH_INFO_ERROR: 09010809710000004026f0020102
 DVLR GSUP rx 14: 09010809710000004026f0020102
-DREF VLR subscr IMSI-901700000004620:MSISDN-46071 usage increases to: 3
+DREF VLR subscr IMSI-901700000004620:MSISDN-46071 + vlr_gsupc_read_cb: now used by 3 (attached,conn,vlr_gsupc_read_cb)
 DVLR VLR_Authenticate(IMSI-901700000004620:MSISDN-46071:GERAN-A-0:LU){VLR_SUB_AS_NEEDS_AUTH_WAIT_AI}: Received Event VLR_AUTH_E_HLR_SAI_NACK
 DVLR VLR_Authenticate(IMSI-901700000004620:MSISDN-46071:GERAN-A-0:LU){VLR_SUB_AS_NEEDS_AUTH_WAIT_AI}: GSUP: rx Auth Info Error cause: 2: IMSI unknown in HLR
 DVLR VLR_Authenticate(IMSI-901700000004620:MSISDN-46071:GERAN-A-0:LU){VLR_SUB_AS_NEEDS_AUTH_WAIT_AI}: Authentication terminating with result IMSI unknown in HLR
@@ -869,11 +869,11 @@ DVLR vlr_lu_fsm(IMSI-901700000004620:MSISDN-46071:GERAN-A-0:LU){VLR_ULA_S_WAIT_A
 DMM RAN_conn(IMSI-901700000004620:MSISDN-46071:GERAN-A-0:LU){RAN_CONN_S_AUTH_CIPH}: Received Event RAN_CONN_E_CN_CLOSE
 DMM RAN_conn(IMSI-901700000004620:MSISDN-46071:GERAN-A-0:LU){RAN_CONN_S_AUTH_CIPH}: state_chg to RAN_CONN_S_RELEASING
 DREF IMSI-901700000004620:MSISDN-46071: MSC conn use + release == 1 (0x100: release)
-DREF VLR subscr IMSI-901700000004620:MSISDN-46071 usage increases to: 4
-DREF VLR subscr IMSI-901700000004620:MSISDN-46071 usage decreases to: 3
+DREF VLR subscr IMSI-901700000004620:MSISDN-46071 + vlr_subscr_cancel_attach_fsm: now used by 4 (attached,conn,vlr_gsupc_read_cb,vlr_subscr_cancel_attach_fsm)
+DREF VLR subscr IMSI-901700000004620:MSISDN-46071 - vlr_subscr_cancel_attach_fsm: now used by 3 (attached,conn,vlr_gsupc_read_cb)
 - BSSAP Clear --GERAN-A--> MS
 DVLR VLR_Authenticate(IMSI-901700000004620:MSISDN-46071:GERAN-A-0:LU){VLR_SUB_AS_AUTH_FAILED}: Deallocated
-DREF VLR subscr IMSI-901700000004620:MSISDN-46071 usage decreases to: 2
+DREF VLR subscr IMSI-901700000004620:MSISDN-46071 - vlr_gsupc_read_cb: now used by 2 (attached,conn)
 <-- GSUP rx OSMO_GSUP_MSGT_SEND_AUTH_INFO_ERROR: vlr_gsupc_read_cb() returns 0
   auth_request_sent == 0
   lu_result_sent == 2
@@ -888,7 +888,7 @@ DVLR vlr_lu_fsm(IMSI-901700000004620:MSISDN-46071:GERAN-A-0:LU){VLR_ULA_S_DONE}:
 DVLR vlr_lu_fsm(IMSI-901700000004620:MSISDN-46071:GERAN-A-0:LU){VLR_ULA_S_DONE}: fsm_lu_cleanup called with cause OSMO_FSM_TERM_PARENT
 DVLR vlr_lu_fsm(IMSI-901700000004620:MSISDN-46071:GERAN-A-0:LU){VLR_ULA_S_DONE}: Deferring: will deallocate with RAN_conn(IMSI-901700000004620:MSISDN-46071:GERAN-A-0:LU)
 DRLL IMSI-901700000004620:MSISDN-46071: Freeing RAN connection
-DREF VLR subscr IMSI-901700000004620:MSISDN-46071 usage decreases to: 1
+DREF VLR subscr IMSI-901700000004620:MSISDN-46071 - conn: now used by 1 (attached)
 DMM RAN_conn(IMSI-901700000004620:MSISDN-46071:GERAN-A-0:LU){RAN_CONN_S_RELEASED}: Deallocated, including all deferred deallocations
   llist_count(&net->ran_conns) == 0
 DREF freeing VLR subscr IMSI-901700000004620:MSISDN-46071
@@ -911,12 +911,12 @@ DVLR vlr_lu_fsm(IMSI-901700000004620:GERAN-A-0:LU){VLR_ULA_S_IDLE}: Allocated
 DVLR vlr_lu_fsm(IMSI-901700000004620:GERAN-A-0:LU){VLR_ULA_S_IDLE}: is child of RAN_conn(IMSI-901700000004620:GERAN-A-0:LU)
 DVLR vlr_lu_fsm(IMSI-901700000004620:GERAN-A-0:LU){VLR_ULA_S_IDLE}: rev=GSM net=GERAN Auth (no Ciph)
 DVLR vlr_lu_fsm(IMSI-901700000004620:GERAN-A-0:LU){VLR_ULA_S_IDLE}: Received Event VLR_ULA_E_UPDATE_LA
-DREF VLR subscr unknown usage increases to: 1
+DREF VLR subscr unknown + _lu_fsm_associate_vsub: now used by 1 (_lu_fsm_associate_vsub)
 DVLR set IMSI on subscriber; IMSI=901700000004620 id=901700000004620
 DVLR New subscr, IMSI: 901700000004620
-DREF VLR subscr IMSI-901700000004620 usage increases to: 2
+DREF VLR subscr IMSI-901700000004620 + conn: now used by 2 (_lu_fsm_associate_vsub,conn)
 DMM RAN_conn(IMSI-901700000004620:GERAN-A-0:LU){RAN_CONN_S_NEW}: Updated ID
-DREF VLR subscr IMSI-901700000004620 usage decreases to: 1
+DREF VLR subscr IMSI-901700000004620 - _lu_fsm_associate_vsub: now used by 1 (conn)
 DVLR vlr_lu_fsm(IMSI-901700000004620:GERAN-A-0:LU){VLR_ULA_S_IDLE}: vlr_loc_upd_node1()
 DVLR vlr_lu_fsm(IMSI-901700000004620:GERAN-A-0:LU){VLR_ULA_S_IDLE}: state_chg to VLR_ULA_S_WAIT_AUTH
 DVLR VLR_Authenticate(IMSI-901700000004620:GERAN-A-0:LU){VLR_SUB_AS_NEEDS_AUTH}: Allocated
@@ -934,7 +934,7 @@ DMM RAN_conn(IMSI-901700000004620:GERAN-A-0:LU){RAN_CONN_S_AUTH_CIPH}: Awaiting 
 - from HLR, rx _SEND_AUTH_INFO_RESULT but it lacks auth tuples
 <-- GSUP rx OSMO_GSUP_MSGT_SEND_AUTH_INFO_RESULT: 0a010809710000004026f0
 DVLR GSUP rx 11: 0a010809710000004026f0
-DREF VLR subscr IMSI-901700000004620 usage increases to: 2
+DREF VLR subscr IMSI-901700000004620 + vlr_gsupc_read_cb: now used by 2 (conn,vlr_gsupc_read_cb)
 DVLR VLR_Authenticate(IMSI-901700000004620:GERAN-A-0:LU){VLR_SUB_AS_NEEDS_AUTH_WAIT_AI}: Received Event VLR_AUTH_E_HLR_SAI_ACK
 DVLR VLR_Authenticate(IMSI-901700000004620:GERAN-A-0:LU){VLR_SUB_AS_NEEDS_AUTH_WAIT_AI}: Authentication terminating with result Network failure
 DVLR VLR_Authenticate(IMSI-901700000004620:GERAN-A-0:LU){VLR_SUB_AS_NEEDS_AUTH_WAIT_AI}: state_chg to VLR_SUB_AS_AUTH_FAILED
@@ -946,11 +946,11 @@ DVLR vlr_lu_fsm(IMSI-901700000004620:GERAN-A-0:LU){VLR_ULA_S_WAIT_AUTH}: state_c
 DMM RAN_conn(IMSI-901700000004620:GERAN-A-0:LU){RAN_CONN_S_AUTH_CIPH}: Received Event RAN_CONN_E_CN_CLOSE
 DMM RAN_conn(IMSI-901700000004620:GERAN-A-0:LU){RAN_CONN_S_AUTH_CIPH}: state_chg to RAN_CONN_S_RELEASING
 DREF IMSI-901700000004620: MSC conn use + release == 1 (0x100: release)
-DREF VLR subscr IMSI-901700000004620 usage increases to: 3
-DREF VLR subscr IMSI-901700000004620 usage decreases to: 2
+DREF VLR subscr IMSI-901700000004620 + vlr_subscr_cancel_attach_fsm: now used by 3 (conn,vlr_gsupc_read_cb,vlr_subscr_cancel_attach_fsm)
+DREF VLR subscr IMSI-901700000004620 - vlr_subscr_cancel_attach_fsm: now used by 2 (conn,vlr_gsupc_read_cb)
 - BSSAP Clear --GERAN-A--> MS
 DVLR VLR_Authenticate(IMSI-901700000004620:GERAN-A-0:LU){VLR_SUB_AS_AUTH_FAILED}: Deallocated
-DREF VLR subscr IMSI-901700000004620 usage decreases to: 1
+DREF VLR subscr IMSI-901700000004620 - vlr_gsupc_read_cb: now used by 1 (conn)
 <-- GSUP rx OSMO_GSUP_MSGT_SEND_AUTH_INFO_RESULT: vlr_gsupc_read_cb() returns 0
   auth_request_sent == 0
   lu_result_sent == 2
@@ -965,7 +965,7 @@ DVLR vlr_lu_fsm(IMSI-901700000004620:GERAN-A-0:LU){VLR_ULA_S_DONE}: Removing fro
 DVLR vlr_lu_fsm(IMSI-901700000004620:GERAN-A-0:LU){VLR_ULA_S_DONE}: fsm_lu_cleanup called with cause OSMO_FSM_TERM_PARENT
 DVLR vlr_lu_fsm(IMSI-901700000004620:GERAN-A-0:LU){VLR_ULA_S_DONE}: Deferring: will deallocate with RAN_conn(IMSI-901700000004620:GERAN-A-0:LU)
 DRLL IMSI-901700000004620: Freeing RAN connection
-DREF VLR subscr IMSI-901700000004620 usage decreases to: 0
+DREF VLR subscr IMSI-901700000004620 - conn: now used by 0 (-)
 DREF freeing VLR subscr IMSI-901700000004620
 DMM RAN_conn(IMSI-901700000004620:GERAN-A-0:LU){RAN_CONN_S_RELEASED}: Deallocated, including all deferred deallocations
   llist_count(&net->ran_conns) == 0
@@ -988,12 +988,12 @@ DVLR vlr_lu_fsm(IMSI-901700000004620:GERAN-A-0:LU){VLR_ULA_S_IDLE}: Allocated
 DVLR vlr_lu_fsm(IMSI-901700000004620:GERAN-A-0:LU){VLR_ULA_S_IDLE}: is child of RAN_conn(IMSI-901700000004620:GERAN-A-0:LU)
 DVLR vlr_lu_fsm(IMSI-901700000004620:GERAN-A-0:LU){VLR_ULA_S_IDLE}: rev=GSM net=GERAN (no Auth)
 DVLR vlr_lu_fsm(IMSI-901700000004620:GERAN-A-0:LU){VLR_ULA_S_IDLE}: Received Event VLR_ULA_E_UPDATE_LA
-DREF VLR subscr unknown usage increases to: 1
+DREF VLR subscr unknown + _lu_fsm_associate_vsub: now used by 1 (_lu_fsm_associate_vsub)
 DVLR set IMSI on subscriber; IMSI=901700000004620 id=901700000004620
 DVLR New subscr, IMSI: 901700000004620
-DREF VLR subscr IMSI-901700000004620 usage increases to: 2
+DREF VLR subscr IMSI-901700000004620 + conn: now used by 2 (_lu_fsm_associate_vsub,conn)
 DMM RAN_conn(IMSI-901700000004620:GERAN-A-0:LU){RAN_CONN_S_NEW}: Updated ID
-DREF VLR subscr IMSI-901700000004620 usage decreases to: 1
+DREF VLR subscr IMSI-901700000004620 - _lu_fsm_associate_vsub: now used by 1 (conn)
 DVLR vlr_lu_fsm(IMSI-901700000004620:GERAN-A-0:LU){VLR_ULA_S_IDLE}: vlr_loc_upd_node1()
 DVLR vlr_lu_fsm(IMSI-901700000004620:GERAN-A-0:LU){VLR_ULA_S_IDLE}: vlr_loc_upd_post_auth()
 DVLR vlr_lu_fsm(IMSI-901700000004620:GERAN-A-0:LU){VLR_ULA_S_IDLE}: vlr_loc_upd_post_ciph()
@@ -1014,7 +1014,7 @@ DMM RAN_conn(IMSI-901700000004620:GERAN-A-0:LU){RAN_CONN_S_AUTH_CIPH}: Awaiting 
 - HLR sends UPDATE_LOCATION_ERROR
 <-- GSUP rx OSMO_GSUP_MSGT_UPDATE_LOCATION_ERROR: 05010809710000004026f0020102
 DVLR GSUP rx 14: 05010809710000004026f0020102
-DREF VLR subscr IMSI-901700000004620 usage increases to: 2
+DREF VLR subscr IMSI-901700000004620 + vlr_gsupc_read_cb: now used by 2 (conn,vlr_gsupc_read_cb)
 DVLR SUBSCR(IMSI-901700000004620) UpdateLocation failed; gmm_cause: IMSI unknown in HLR
 DVLR vlr_lu_fsm(IMSI-901700000004620:GERAN-A-0:LU){VLR_ULA_S_WAIT_HLR_UPD}: Received Event VLR_ULA_E_HLR_LU_RES
 DVLR upd_hlr_vlr_fsm(IMSI-901700000004620:GERAN-A-0:LU){UPD_HLR_VLR_S_WAIT_FOR_DATA}: Received Event UPD_HLR_VLR_E_UPD_LOC_NACK
@@ -1027,11 +1027,11 @@ DVLR vlr_lu_fsm(IMSI-901700000004620:GERAN-A-0:LU){VLR_ULA_S_WAIT_HLR_UPD}: stat
 DMM RAN_conn(IMSI-901700000004620:GERAN-A-0:LU){RAN_CONN_S_AUTH_CIPH}: Received Event RAN_CONN_E_CN_CLOSE
 DMM RAN_conn(IMSI-901700000004620:GERAN-A-0:LU){RAN_CONN_S_AUTH_CIPH}: state_chg to RAN_CONN_S_RELEASING
 DREF IMSI-901700000004620: MSC conn use + release == 1 (0x100: release)
-DREF VLR subscr IMSI-901700000004620 usage increases to: 3
-DREF VLR subscr IMSI-901700000004620 usage decreases to: 2
+DREF VLR subscr IMSI-901700000004620 + vlr_subscr_cancel_attach_fsm: now used by 3 (conn,vlr_gsupc_read_cb,vlr_subscr_cancel_attach_fsm)
+DREF VLR subscr IMSI-901700000004620 - vlr_subscr_cancel_attach_fsm: now used by 2 (conn,vlr_gsupc_read_cb)
 - BSSAP Clear --GERAN-A--> MS
 DVLR upd_hlr_vlr_fsm(IMSI-901700000004620:GERAN-A-0:LU){UPD_HLR_VLR_S_DONE}: Deallocated
-DREF VLR subscr IMSI-901700000004620 usage decreases to: 1
+DREF VLR subscr IMSI-901700000004620 - vlr_gsupc_read_cb: now used by 1 (conn)
 <-- GSUP rx OSMO_GSUP_MSGT_UPDATE_LOCATION_ERROR: vlr_gsupc_read_cb() returns 0
   lu_result_sent == 2
   bssap_clear_sent == 1
@@ -1045,7 +1045,7 @@ DVLR vlr_lu_fsm(IMSI-901700000004620:GERAN-A-0:LU){VLR_ULA_S_DONE}: Removing fro
 DVLR vlr_lu_fsm(IMSI-901700000004620:GERAN-A-0:LU){VLR_ULA_S_DONE}: fsm_lu_cleanup called with cause OSMO_FSM_TERM_PARENT
 DVLR vlr_lu_fsm(IMSI-901700000004620:GERAN-A-0:LU){VLR_ULA_S_DONE}: Deferring: will deallocate with RAN_conn(IMSI-901700000004620:GERAN-A-0:LU)
 DRLL IMSI-901700000004620: Freeing RAN connection
-DREF VLR subscr IMSI-901700000004620 usage decreases to: 0
+DREF VLR subscr IMSI-901700000004620 - conn: now used by 0 (-)
 DREF freeing VLR subscr IMSI-901700000004620
 DMM RAN_conn(IMSI-901700000004620:GERAN-A-0:LU){RAN_CONN_S_RELEASED}: Deallocated, including all deferred deallocations
   llist_count(&net->ran_conns) == 0
@@ -1068,12 +1068,12 @@ DVLR vlr_lu_fsm(IMSI-901700000004620:GERAN-A-0:LU){VLR_ULA_S_IDLE}: Allocated
 DVLR vlr_lu_fsm(IMSI-901700000004620:GERAN-A-0:LU){VLR_ULA_S_IDLE}: is child of RAN_conn(IMSI-901700000004620:GERAN-A-0:LU)
 DVLR vlr_lu_fsm(IMSI-901700000004620:GERAN-A-0:LU){VLR_ULA_S_IDLE}: rev=GSM net=GERAN (no Auth)
 DVLR vlr_lu_fsm(IMSI-901700000004620:GERAN-A-0:LU){VLR_ULA_S_IDLE}: Received Event VLR_ULA_E_UPDATE_LA
-DREF VLR subscr unknown usage increases to: 1
+DREF VLR subscr unknown + _lu_fsm_associate_vsub: now used by 1 (_lu_fsm_associate_vsub)
 DVLR set IMSI on subscriber; IMSI=901700000004620 id=901700000004620
 DVLR New subscr, IMSI: 901700000004620
-DREF VLR subscr IMSI-901700000004620 usage increases to: 2
+DREF VLR subscr IMSI-901700000004620 + conn: now used by 2 (_lu_fsm_associate_vsub,conn)
 DMM RAN_conn(IMSI-901700000004620:GERAN-A-0:LU){RAN_CONN_S_NEW}: Updated ID
-DREF VLR subscr IMSI-901700000004620 usage decreases to: 1
+DREF VLR subscr IMSI-901700000004620 - _lu_fsm_associate_vsub: now used by 1 (conn)
 DVLR vlr_lu_fsm(IMSI-901700000004620:GERAN-A-0:LU){VLR_ULA_S_IDLE}: vlr_loc_upd_node1()
 DVLR vlr_lu_fsm(IMSI-901700000004620:GERAN-A-0:LU){VLR_ULA_S_IDLE}: vlr_loc_upd_post_auth()
 DVLR vlr_lu_fsm(IMSI-901700000004620:GERAN-A-0:LU){VLR_ULA_S_IDLE}: vlr_loc_upd_post_ciph()
@@ -1094,7 +1094,7 @@ DMM RAN_conn(IMSI-901700000004620:GERAN-A-0:LU){RAN_CONN_S_AUTH_CIPH}: Awaiting 
 - HLR sends only _UPDATE_LOCATION_RESULT, no INSERT DATA
 <-- GSUP rx OSMO_GSUP_MSGT_UPDATE_LOCATION_RESULT: 06010809710000004026f0
 DVLR GSUP rx 11: 06010809710000004026f0
-DREF VLR subscr IMSI-901700000004620 usage increases to: 2
+DREF VLR subscr IMSI-901700000004620 + vlr_gsupc_read_cb: now used by 2 (conn,vlr_gsupc_read_cb)
 DVLR vlr_lu_fsm(IMSI-901700000004620:GERAN-A-0:LU){VLR_ULA_S_WAIT_HLR_UPD}: Received Event VLR_ULA_E_HLR_LU_RES
 DVLR upd_hlr_vlr_fsm(IMSI-901700000004620:GERAN-A-0:LU){UPD_HLR_VLR_S_WAIT_FOR_DATA}: Received Event UPD_HLR_VLR_E_UPD_LOC_ACK
 DVLR upd_hlr_vlr_fsm(IMSI-901700000004620:GERAN-A-0:LU){UPD_HLR_VLR_S_WAIT_FOR_DATA}: state_chg to UPD_HLR_VLR_S_DONE
@@ -1108,7 +1108,7 @@ DVLR lu_compl_vlr_fsm(IMSI-901700000004620:GERAN-A-0:LU){LU_COMPL_VLR_S_INIT}: R
 DVLR lu_compl_vlr_fsm(IMSI-901700000004620:GERAN-A-0:LU){LU_COMPL_VLR_S_INIT}: state_chg to LU_COMPL_VLR_S_WAIT_SUB_PRES
 DVLR lu_compl_vlr_fsm(IMSI-901700000004620:GERAN-A-0:LU){LU_COMPL_VLR_S_WAIT_SUB_PRES}: Received Event LU_COMPL_VLR_E_SUB_PRES_COMPL
 - sending LU Accept for IMSI-901700000004620
-DREF VLR subscr IMSI-901700000004620 usage increases to: 3
+DREF VLR subscr IMSI-901700000004620 + attached: now used by 3 (conn,vlr_gsupc_read_cb,attached)
 DVLR lu_compl_vlr_fsm(IMSI-901700000004620:GERAN-A-0:LU){LU_COMPL_VLR_S_WAIT_SUB_PRES}: state_chg to LU_COMPL_VLR_S_DONE
 DVLR vlr_lu_fsm(IMSI-901700000004620:GERAN-A-0:LU){VLR_ULA_S_WAIT_LU_COMPL}: Received Event VLR_ULA_E_LU_COMPL_SUCCESS
 DVLR lu_compl_vlr_fsm(IMSI-901700000004620:GERAN-A-0:LU){LU_COMPL_VLR_S_DONE}: Terminating in cascade, depth 2 (cause = OSMO_FSM_TERM_PARENT, caused by: upd_hlr_vlr_fsm(IMSI-901700000004620:GERAN-A-0:LU))
@@ -1120,11 +1120,11 @@ DMM RAN_conn(IMSI-901700000004620:GERAN-A-0:LU){RAN_CONN_S_AUTH_CIPH}: state_chg
 DMM RAN_conn(IMSI-901700000004620:GERAN-A-0:LU){RAN_CONN_S_ACCEPTED}: Received Event RAN_CONN_E_UNUSED
 DMM RAN_conn(IMSI-901700000004620:GERAN-A-0:LU){RAN_CONN_S_ACCEPTED}: state_chg to RAN_CONN_S_RELEASING
 DREF IMSI-901700000004620: MSC conn use + release == 1 (0x100: release)
-DREF VLR subscr IMSI-901700000004620 usage increases to: 4
-DREF VLR subscr IMSI-901700000004620 usage decreases to: 3
+DREF VLR subscr IMSI-901700000004620 + vlr_subscr_cancel_attach_fsm: now used by 4 (conn,vlr_gsupc_read_cb,attached,vlr_subscr_cancel_attach_fsm)
+DREF VLR subscr IMSI-901700000004620 - vlr_subscr_cancel_attach_fsm: now used by 3 (conn,vlr_gsupc_read_cb,attached)
 - BSSAP Clear --GERAN-A--> MS
 DVLR upd_hlr_vlr_fsm(IMSI-901700000004620:GERAN-A-0:LU){UPD_HLR_VLR_S_DONE}: Deallocated, including all deferred deallocations
-DREF VLR subscr IMSI-901700000004620 usage decreases to: 2
+DREF VLR subscr IMSI-901700000004620 - vlr_gsupc_read_cb: now used by 2 (conn,attached)
 <-- GSUP rx OSMO_GSUP_MSGT_UPDATE_LOCATION_RESULT: vlr_gsupc_read_cb() returns 0
   bssap_clear_sent == 1
 - LU was successful, and the conn has already been closed
@@ -1139,7 +1139,7 @@ DVLR vlr_lu_fsm(IMSI-901700000004620:GERAN-A-0:LU){VLR_ULA_S_DONE}: Removing fro
 DVLR vlr_lu_fsm(IMSI-901700000004620:GERAN-A-0:LU){VLR_ULA_S_DONE}: fsm_lu_cleanup called with cause OSMO_FSM_TERM_PARENT
 DVLR vlr_lu_fsm(IMSI-901700000004620:GERAN-A-0:LU){VLR_ULA_S_DONE}: Deferring: will deallocate with RAN_conn(IMSI-901700000004620:GERAN-A-0:LU)
 DRLL IMSI-901700000004620: Freeing RAN connection
-DREF VLR subscr IMSI-901700000004620 usage decreases to: 1
+DREF VLR subscr IMSI-901700000004620 - conn: now used by 1 (attached)
 DMM RAN_conn(IMSI-901700000004620:GERAN-A-0:LU){RAN_CONN_S_RELEASED}: Deallocated, including all deferred deallocations
   llist_count(&net->ran_conns) == 0
 DREF freeing VLR subscr IMSI-901700000004620

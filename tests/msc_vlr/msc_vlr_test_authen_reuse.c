@@ -121,12 +121,12 @@ static void _test_auth_reuse(enum osmo_rat_type via_ran,
 	thwart_rx_non_initial_requests();
 
 	btw("even though the TMSI is not acked, we can already find the subscr with it");
-	vsub = vlr_subscr_find_by_tmsi(net->vlr, 0x03020100);
+	vsub = vlr_subscr_find_by_tmsi(net->vlr, 0x03020100, __func__);
 	VERBOSE_ASSERT(vsub != NULL, == true, "%d");
 	VERBOSE_ASSERT(strcmp(vsub->imsi, imsi), == 0, "%d");
 	VERBOSE_ASSERT(vsub->tmsi_new, == 0x03020100, "0x%08x");
 	VERBOSE_ASSERT(vsub->tmsi, == GSM_RESERVED_TMSI, "0x%08x");
-	vlr_subscr_put(vsub);
+	vlr_subscr_put(vsub, __func__);
 
 	btw("MS sends TMSI Realloc Complete");
 	expect_release_clear(via_ran);
@@ -141,11 +141,11 @@ static void _test_auth_reuse(enum osmo_rat_type via_ran,
 
 	for (i = 0; i < loop_requests_without_hlr; i++, expected_use_count++) {
 		BTW("Now the auth tuple has use_count == %d", expected_use_count);
-		vsub = vlr_subscr_find_by_imsi(net->vlr, imsi);
+		vsub = vlr_subscr_find_by_imsi(net->vlr, imsi, __func__);
 		OSMO_ASSERT(vsub);
 		OSMO_ASSERT(vsub->last_tuple);
 		VERBOSE_ASSERT(vsub->last_tuple->use_count, == expected_use_count, "%d");
-		vlr_subscr_put(vsub);
+		vlr_subscr_put(vsub, __func__);
 
 		BTW("after a while, a new conn sends a CM Service Request. VLR responds with Auth Req,"
 		    " and reuses old auth vector");
@@ -189,11 +189,11 @@ static void _test_auth_reuse(enum osmo_rat_type via_ran,
 
 	if (final_request_with_hlr) {
 		BTW("Now the auth tuple has use_count == %d, as much as is allowed.", expected_use_count);
-		vsub = vlr_subscr_find_by_imsi(net->vlr, imsi);
+		vsub = vlr_subscr_find_by_imsi(net->vlr, imsi, __func__);
 		OSMO_ASSERT(vsub);
 		OSMO_ASSERT(vsub->last_tuple);
 		VERBOSE_ASSERT(vsub->last_tuple->use_count, == expected_use_count, "%d");
-		vlr_subscr_put(vsub);
+		vlr_subscr_put(vsub, __func__);
 
 		BTW("after a while, a new conn sends a CM Service Request. VLR responds with Auth Req,"
 		    " and needs to request a second auth vector from HLR");

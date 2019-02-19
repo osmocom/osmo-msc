@@ -119,6 +119,7 @@ const char *vlr_subscr_msisdn_or_name(const struct vlr_subscr *vsub)
 
 struct vlr_subscr *_vlr_subscr_find_by_imsi(struct vlr_instance *vlr,
 					    const char *imsi,
+					    const char *use,
 					    const char *file, int line)
 {
 	struct vlr_subscr *vsub;
@@ -127,14 +128,17 @@ struct vlr_subscr *_vlr_subscr_find_by_imsi(struct vlr_instance *vlr,
 		return NULL;
 
 	llist_for_each_entry(vsub, &vlr->subscribers, list) {
-		if (vlr_subscr_matches_imsi(vsub, imsi))
-			return _vlr_subscr_get(vsub, file, line);
+		if (vlr_subscr_matches_imsi(vsub, imsi)) {
+			vlr_subscr_get_src(vsub, use, file, line);
+			return vsub;
+		}
 	}
 	return NULL;
 }
 
 struct vlr_subscr *_vlr_subscr_find_by_tmsi(struct vlr_instance *vlr,
 					    uint32_t tmsi,
+					    const char *use,
 					    const char *file, int line)
 {
 	struct vlr_subscr *vsub;
@@ -143,14 +147,17 @@ struct vlr_subscr *_vlr_subscr_find_by_tmsi(struct vlr_instance *vlr,
 		return NULL;
 
 	llist_for_each_entry(vsub, &vlr->subscribers, list) {
-		if (vlr_subscr_matches_tmsi(vsub, tmsi))
-			return _vlr_subscr_get(vsub, file, line);
+		if (vlr_subscr_matches_tmsi(vsub, tmsi)) {
+			vlr_subscr_get_src(vsub, use, file, line);
+			return vsub;
+		}
 	}
 	return NULL;
 }
 
 struct vlr_subscr *_vlr_subscr_find_by_msisdn(struct vlr_instance *vlr,
 					      const char *msisdn,
+					      const char *use,
 					      const char *file, int line)
 {
 	struct vlr_subscr *vsub;
@@ -159,8 +166,10 @@ struct vlr_subscr *_vlr_subscr_find_by_msisdn(struct vlr_instance *vlr,
 		return NULL;
 
 	llist_for_each_entry(vsub, &vlr->subscribers, list) {
-		if (vlr_subscr_matches_msisdn(vsub, msisdn))
-			return _vlr_subscr_get(vsub, file, line);
+		if (vlr_subscr_matches_msisdn(vsub, msisdn)) {
+			vlr_subscr_get_src(vsub, use, file, line);
+			return vsub;
+		}
 	}
 	return NULL;
 }
@@ -217,30 +226,24 @@ static int vlr_tx_gsup_error_reply(const struct vlr_instance *vlr,
 	return vlr_tx_gsup_message(vlr, &gsup_reply);
 }
 
-struct vlr_subscr *_vlr_subscr_get(struct vlr_subscr *sub, const char *file, int line)
+static int vlr_subscr_use_cb(struct osmo_use_count_entry *e, int32_t old_use_count, const char *file, int line)
 {
-	if (!sub)
-		return NULL;
-	OSMO_ASSERT(sub->use_count < INT_MAX);
-	sub->use_count++;
-	LOGPSRC(DREF, LOGL_DEBUG, file, line,
-		"VLR subscr %s usage increases to: %d\n",
-		vlr_subscr_name(sub), sub->use_count);
-	return sub;
-}
+	struct vlr_subscr *vsub = e->use_count->talloc_object;
+	char buf[128];
 
-struct vlr_subscr *_vlr_subscr_put(struct vlr_subscr *sub, const char *file, int line)
-{
-	if (!sub)
-		return NULL;
-	sub->use_count--;
-	LOGPSRC(DREF, sub->use_count >= 0? LOGL_DEBUG : LOGL_ERROR,
-		file, line,
-		"VLR subscr %s usage decreases to: %d\n",
-		vlr_subscr_name(sub), sub->use_count);
-	if (sub->use_count <= 0)
-		vlr_subscr_free(sub);
-	return NULL;
+	if (!e->use)
+		return -EINVAL;
+
+	LOGPSRC(DREF, LOGL_DEBUG, file, line, "VLR subscr %s %s %s: now used by %s\n",
+		vlr_subscr_name(vsub), (e->count - old_use_count) > 0? "+" : "-", e->use,
+		osmo_use_count_name_buf(buf, sizeof(buf), e->use_count));
+
+	if (e->count < 0)
+		return -ERANGE;
+
+	if (osmo_use_count_total(e->use_count) <= 0)
+		vlr_subscr_free(vsub);
+	return 0;
 }
 
 /* Allocate a new subscriber and insert it into list */
@@ -250,9 +253,16 @@ static struct vlr_subscr *_vlr_subscr_alloc(struct vlr_instance *vlr)
 	int i;
 
 	vsub = talloc_zero(vlr, struct vlr_subscr);
-	vsub->vlr = vlr;
-	vsub->tmsi = GSM_RESERVED_TMSI;
-	vsub->tmsi_new = GSM_RESERVED_TMSI;
+	*vsub = (struct vlr_subscr){
+		.vlr = vlr,
+		.tmsi = GSM_RESERVED_TMSI,
+		.tmsi_new = GSM_RESERVED_TMSI,
+		.use_count = (struct osmo_use_count){
+			.talloc_object = vsub,
+			.use_cb = vlr_subscr_use_cb,
+		},
+	};
+	osmo_use_count_make_static_entries(&vsub->use_count, vsub->use_count_buf, ARRAY_SIZE(vsub->use_count_buf));
 
 	for (i = 0; i < ARRAY_SIZE(vsub->auth_tuples); i++)
 		vsub->auth_tuples[i].key_seq = VLR_KEY_SEQ_INVAL;
@@ -267,11 +277,6 @@ static struct vlr_subscr *_vlr_subscr_alloc(struct vlr_instance *vlr)
 
 	llist_add_tail(&vsub->list, &vlr->subscribers);
 	return vsub;
-}
-
-struct vlr_subscr *vlr_subscr_alloc(struct vlr_instance *vlr)
-{
-	return vlr_subscr_get(_vlr_subscr_alloc(vlr));
 }
 
 /* Send a GSUP Purge MS request.
@@ -297,12 +302,12 @@ void vlr_subscr_cancel_attach_fsm(struct vlr_subscr *vsub,
 	if (!vsub)
 		return;
 
-	vlr_subscr_get(vsub);
+	vlr_subscr_get(vsub, __func__);
 	if (vsub->lu_fsm)
 		vlr_loc_update_cancel(vsub->lu_fsm, fsm_cause, gsm48_cause);
 	if (vsub->proc_arq_fsm)
 		vlr_parq_cancel(vsub->proc_arq_fsm, fsm_cause, gsm48_cause);
-	vlr_subscr_put(vsub);
+	vlr_subscr_put(vsub, __func__);
 }
 
 /* Call vlr_subscr_cancel(), then completely drop the entry from the VLR */
@@ -327,6 +332,7 @@ int vlr_subscr_alloc_tmsi(struct vlr_subscr *vsub)
 	struct vlr_instance *vlr = vsub->vlr;
 	uint32_t tmsi;
 	int tried, rc;
+	struct vlr_subscr *other_vsub;
 
 	for (tried = 0; tried < 100; tried++) {
 		rc = osmo_get_rand_id((uint8_t *) &tmsi, sizeof(tmsi));
@@ -349,8 +355,10 @@ int vlr_subscr_alloc_tmsi(struct vlr_subscr *vsub)
 		}
 
 		/* If this TMSI is already in use, try another one. */
-		if (vlr_subscr_find_by_tmsi(vlr, tmsi))
+		if ((other_vsub = vlr_subscr_find_by_tmsi(vlr, tmsi, __func__))) {
+			vlr_subscr_put(other_vsub, __func__);
 			continue;
+		}
 
 		vsub->tmsi_new = tmsi;
 		vsub->vlr->ops.subscr_update(vsub);
@@ -368,21 +376,23 @@ int vlr_subscr_alloc_tmsi(struct vlr_subscr *vsub)
  * \param[out] created  if non-NULL, returns whether a new entry was created. */
 struct vlr_subscr *_vlr_subscr_find_or_create_by_imsi(struct vlr_instance *vlr,
 						      const char *imsi,
+						      const char *use,
 						      bool *created,
 						      const char *file,
 						      int line)
 {
 	struct vlr_subscr *vsub;
-	vsub = _vlr_subscr_find_by_imsi(vlr, imsi, file, line);
+	vsub = _vlr_subscr_find_by_imsi(vlr, imsi, use, file, line);
 	if (vsub) {
 		if (created)
 			*created = false;
 		return vsub;
 	}
 
-	vsub = _vlr_subscr_get(_vlr_subscr_alloc(vlr), file, line);
+	vsub = _vlr_subscr_alloc(vlr);
 	if (!vsub)
 		return NULL;
+	vlr_subscr_get_src(vsub, use, file, line);
 	vlr_subscr_set_imsi(vsub, imsi);
 	LOGP(DVLR, LOGL_INFO, "New subscr, IMSI: %s\n", vsub->imsi);
 	if (created)
@@ -396,21 +406,23 @@ struct vlr_subscr *_vlr_subscr_find_or_create_by_imsi(struct vlr_instance *vlr,
  * \param[out] created  if non-NULL, returns whether a new entry was created. */
 struct vlr_subscr *_vlr_subscr_find_or_create_by_tmsi(struct vlr_instance *vlr,
 						      uint32_t tmsi,
+						      const char *use,
 						      bool *created,
 						      const char *file,
 						      int line)
 {
 	struct vlr_subscr *vsub;
-	vsub = _vlr_subscr_find_by_tmsi(vlr, tmsi, file, line);
+	vsub = _vlr_subscr_find_by_tmsi(vlr, tmsi, use, file, line);
 	if (vsub) {
 		if (created)
 			*created = false;
 		return vsub;
 	}
 
-	vsub = _vlr_subscr_get(_vlr_subscr_alloc(vlr), file, line);
+	vsub = _vlr_subscr_alloc(vlr);
 	if (!vsub)
 		return NULL;
+	vlr_subscr_get_src(vsub, use, file, line);
 	vsub->tmsi = tmsi;
 	LOGP(DVLR, LOGL_INFO, "New subscr, TMSI: 0x%08x\n", vsub->tmsi);
 	if (created)
@@ -1098,7 +1110,7 @@ int vlr_gsupc_read_cb(struct osmo_gsup_client *gsupc, struct msgb *msg)
 		goto msgb_free_and_return;
 	}
 
-	vsub = vlr_subscr_find_by_imsi(vlr, gsup.imsi);
+	vsub = vlr_subscr_find_by_imsi(vlr, gsup.imsi, __func__);
 	if (!vsub) {
 		switch (gsup.message_type) {
 		case OSMO_GSUP_MSGT_PURGE_MS_RESULT:
@@ -1146,7 +1158,7 @@ int vlr_gsupc_read_cb(struct osmo_gsup_client *gsupc, struct msgb *msg)
 		break;
 	}
 
-	vlr_subscr_put(vsub);
+	vlr_subscr_put(vsub, __func__);
 
 msgb_free_and_return:
 	msgb_free(msg);
@@ -1239,7 +1251,7 @@ bool vlr_subscr_expire(struct vlr_subscr *vsub)
 	if (vsub->lu_complete) {
 		/* balancing the get from vlr_lu_compl_fsm_success() */
 		vsub->lu_complete = false;
-		vlr_subscr_put(vsub);
+		vlr_subscr_put(vsub, VSUB_USE_ATTACHED);
 
 		return true;
 	}
@@ -1425,16 +1437,18 @@ void log_set_filter_vlr_subscr(struct log_target *target,
 			       struct vlr_subscr *vlr_subscr)
 {
 	struct vlr_subscr **fsub = (void*)&target->filter_data[LOG_FLT_VLR_SUBSCR];
+	const char *use = "logfilter";
 
 	/* free the old data */
 	if (*fsub) {
-		vlr_subscr_put(*fsub);
+		vlr_subscr_put(*fsub, use);
 		*fsub = NULL;
 	}
 
 	if (vlr_subscr) {
 		target->filter_map |= (1 << LOG_FLT_VLR_SUBSCR);
-		*fsub = vlr_subscr_get(vlr_subscr);
+		vlr_subscr_get(vlr_subscr, use);
+		*fsub = vlr_subscr;
 	} else
 		target->filter_map &= ~(1 << LOG_FLT_VLR_SUBSCR);
 }

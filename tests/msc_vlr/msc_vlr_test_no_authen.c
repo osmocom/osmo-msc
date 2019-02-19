@@ -84,7 +84,7 @@ static void test_no_authen()
 	BTW("an SMS is sent, MS is paged");
 	paging_expect_imsi(imsi);
 	paging_sent = false;
-	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi);
+	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi, __func__);
 	OSMO_ASSERT(vsub);
 	VERBOSE_ASSERT(llist_count(&vsub->cs.requests), == 0, "%d");
 
@@ -93,16 +93,16 @@ static void test_no_authen()
 		 " marketing option.");
 
 	VERBOSE_ASSERT(llist_count(&vsub->cs.requests), == 1, "%d");
-	vlr_subscr_put(vsub);
+	vlr_subscr_put(vsub, __func__);
 	vsub = NULL;
 	VERBOSE_ASSERT(paging_sent, == true, "%d");
 	VERBOSE_ASSERT(paging_stopped, == false, "%d");
 
 	btw("the subscriber and its pending request should remain");
-	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi);
+	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi, __func__);
 	OSMO_ASSERT(vsub);
 	VERBOSE_ASSERT(llist_count(&vsub->cs.requests), == 1, "%d");
-	vlr_subscr_put(vsub);
+	vlr_subscr_put(vsub, __func__);
 
 	btw("MS replies with Paging Response, we deliver the SMS");
 	dtap_expect_tx("09" /* SMS messages */
@@ -131,10 +131,10 @@ static void test_no_authen()
 	VERBOSE_ASSERT(paging_stopped, == true, "%d");
 
 	btw("SMS was delivered, no requests pending for subscr");
-	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi);
+	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi, __func__);
 	OSMO_ASSERT(vsub);
 	VERBOSE_ASSERT(llist_count(&vsub->cs.requests), == 0, "%d");
-	vlr_subscr_put(vsub);
+	vlr_subscr_put(vsub, __func__);
 
 	btw("conn is still open to wait for SMS ack dance");
 	EXPECT_CONN_COUNT(1);
@@ -203,12 +203,12 @@ static void test_no_authen_tmsi()
 	thwart_rx_non_initial_requests();
 
 	btw("even though the TMSI is not acked, we can already find the subscr with it");
-	vsub = vlr_subscr_find_by_tmsi(net->vlr, 0x03020100);
+	vsub = vlr_subscr_find_by_tmsi(net->vlr, 0x03020100, __func__);
 	VERBOSE_ASSERT(vsub != NULL, == true, "%d");
 	VERBOSE_ASSERT(strcmp(vsub->imsi, imsi), == 0, "%d");
 	VERBOSE_ASSERT(vsub->tmsi_new, == 0x03020100, "0x%08x");
 	VERBOSE_ASSERT(vsub->tmsi, == GSM_RESERVED_TMSI, "0x%08x");
-	vlr_subscr_put(vsub);
+	vlr_subscr_put(vsub, __func__);
 
 	btw("MS sends TMSI Realloc Complete");
 	expect_bssap_clear();
@@ -220,12 +220,12 @@ static void test_no_authen_tmsi()
 	EXPECT_CONN_COUNT(0);
 
 	btw("Subscriber has the new TMSI");
-	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi);
+	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi, __func__);
 	VERBOSE_ASSERT(vsub != NULL, == true, "%d");
 	VERBOSE_ASSERT(strcmp(vsub->imsi, imsi), == 0, "%d");
 	VERBOSE_ASSERT(vsub->tmsi_new, == GSM_RESERVED_TMSI, "0x%08x");
 	VERBOSE_ASSERT(vsub->tmsi, == 0x03020100, "0x%08x");
-	vlr_subscr_put(vsub);
+	vlr_subscr_put(vsub, __func__);
 
 	BTW("after a while, a new conn sends a CM Service Request using above TMSI");
 	cm_service_result_sent = RES_NONE;
@@ -247,7 +247,7 @@ static void test_no_authen_tmsi()
 	BTW("an SMS is sent, MS is paged using above TMSI");
 	paging_expect_tmsi(0x03020100);
 	paging_sent = false;
-	vsub = vlr_subscr_find_by_tmsi(net->vlr, 0x03020100);
+	vsub = vlr_subscr_find_by_tmsi(net->vlr, 0x03020100, __func__);
 	OSMO_ASSERT(vsub);
 	VERBOSE_ASSERT(llist_count(&vsub->cs.requests), == 0, "%d");
 
@@ -256,16 +256,16 @@ static void test_no_authen_tmsi()
 		 " marketing option.");
 
 	VERBOSE_ASSERT(llist_count(&vsub->cs.requests), == 1, "%d");
-	vlr_subscr_put(vsub);
+	vlr_subscr_put(vsub, __func__);
 	vsub = NULL;
 	VERBOSE_ASSERT(paging_sent, == true, "%d");
 	VERBOSE_ASSERT(paging_stopped, == false, "%d");
 
 	btw("the subscriber and its pending request should remain");
-	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi);
+	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi, __func__);
 	OSMO_ASSERT(vsub);
 	VERBOSE_ASSERT(llist_count(&vsub->cs.requests), == 1, "%d");
-	vlr_subscr_put(vsub);
+	vlr_subscr_put(vsub, __func__);
 
 	btw("MS replies with Paging Response using TMSI, we deliver the SMS");
 	dtap_expect_tx("09" /* SMS messages */
@@ -294,10 +294,10 @@ static void test_no_authen_tmsi()
 	VERBOSE_ASSERT(paging_stopped, == true, "%d");
 
 	btw("SMS was delivered, no requests pending for subscr");
-	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi);
+	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi, __func__);
 	OSMO_ASSERT(vsub);
 	VERBOSE_ASSERT(llist_count(&vsub->cs.requests), == 0, "%d");
-	vlr_subscr_put(vsub);
+	vlr_subscr_put(vsub, __func__);
 
 	btw("conn is still open to wait for SMS ack dance");
 	EXPECT_CONN_COUNT(1);
@@ -353,12 +353,12 @@ static void test_no_authen_tmsi()
 	thwart_rx_non_initial_requests();
 
 	btw("even though the TMSI is not acked, we can already find the subscr with it");
-	vsub = vlr_subscr_find_by_tmsi(net->vlr, 0x07060504);
+	vsub = vlr_subscr_find_by_tmsi(net->vlr, 0x07060504, __func__);
 	VERBOSE_ASSERT(vsub != NULL, == true, "%d");
 	VERBOSE_ASSERT(strcmp(vsub->imsi, imsi), == 0, "%d");
 	VERBOSE_ASSERT(vsub->tmsi_new, == 0x07060504, "0x%08x");
 	VERBOSE_ASSERT(vsub->tmsi, == 0x03020100, "0x%08x");
-	vlr_subscr_put(vsub);
+	vlr_subscr_put(vsub, __func__);
 
 	btw("MS sends TMSI Realloc Complete");
 	expect_bssap_clear();
@@ -370,12 +370,12 @@ static void test_no_authen_tmsi()
 	EXPECT_CONN_COUNT(0);
 
 	btw("subscriber has the new TMSI");
-	vsub = vlr_subscr_find_by_tmsi(net->vlr, 0x07060504);
+	vsub = vlr_subscr_find_by_tmsi(net->vlr, 0x07060504, __func__);
 	VERBOSE_ASSERT(vsub != NULL, == true, "%d");
 	VERBOSE_ASSERT(strcmp(vsub->imsi, imsi), == 0, "%d");
 	VERBOSE_ASSERT(vsub->tmsi_new, == GSM_RESERVED_TMSI, "0x%08x");
 	VERBOSE_ASSERT(vsub->tmsi, == 0x07060504, "0x%08x");
-	vlr_subscr_put(vsub);
+	vlr_subscr_put(vsub, __func__);
 
 	BTW("subscriber detaches, using new TMSI");
 	expect_bssap_clear();
@@ -422,10 +422,10 @@ static void test_no_authen_imei()
 
 	btw("We will only do business when the IMEI is known");
 	EXPECT_CONN_COUNT(1);
-	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi);
+	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi, __func__);
 	OSMO_ASSERT(vsub);
 	VERBOSE_ASSERT(vsub->imei[0], == 0, "%d");
-	vlr_subscr_put(vsub);
+	vlr_subscr_put(vsub, __func__);
 	EXPECT_ACCEPTED(false);
 	thwart_rx_non_initial_requests();
 
@@ -446,10 +446,10 @@ static void test_no_authen_imei()
 	EXPECT_CONN_COUNT(0);
 
 	btw("Subscriber has the IMEI");
-	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi);
+	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi, __func__);
 	OSMO_ASSERT(vsub);
 	VERBOSE_ASSERT(strcmp(vsub->imei, "423423423423420"), == 0, "%d");
-	vlr_subscr_put(vsub);
+	vlr_subscr_put(vsub, __func__);
 
 	BTW("subscriber detaches");
 	expect_bssap_clear();
@@ -497,10 +497,10 @@ static void test_no_authen_tmsi_imei()
 
 	btw("We will only do business when the IMEI is known");
 	EXPECT_CONN_COUNT(1);
-	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi);
+	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi, __func__);
 	OSMO_ASSERT(vsub);
 	VERBOSE_ASSERT(vsub->imei[0], == 0, "%d");
-	vlr_subscr_put(vsub);
+	vlr_subscr_put(vsub, __func__);
 	EXPECT_ACCEPTED(false);
 	thwart_rx_non_initial_requests();
 
@@ -528,11 +528,11 @@ static void test_no_authen_tmsi_imei()
 	EXPECT_CONN_COUNT(0);
 
 	btw("Subscriber has the IMEI and TMSI");
-	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi);
+	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi, __func__);
 	OSMO_ASSERT(vsub);
 	VERBOSE_ASSERT(strcmp(vsub->imei, "423423423423420"), == 0, "%d");
 	VERBOSE_ASSERT(vsub->tmsi, == 0x03020100, "0x%08x");
-	vlr_subscr_put(vsub);
+	vlr_subscr_put(vsub, __func__);
 
 	BTW("subscriber detaches");
 	expect_bssap_clear();
@@ -570,10 +570,10 @@ static void test_no_authen_imeisv()
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("Subscriber has the IMEISV from the ID Response");
-	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi);
+	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi, __func__);
 	OSMO_ASSERT(vsub);
 	VERBOSE_ASSERT(strcmp(vsub->imeisv, "4234234234234275"), == 0, "%d");
-	vlr_subscr_put(vsub);
+	vlr_subscr_put(vsub, __func__);
 
 	btw("HLR sends _INSERT_DATA_REQUEST, VLR responds with _INSERT_DATA_RESULT");
 	gsup_rx("10010809710000004026f00804036470f1",
@@ -633,10 +633,10 @@ static void test_no_authen_imeisv_imei()
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("Subscriber has the IMEISV from the ID Response");
-	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi);
+	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi, __func__);
 	OSMO_ASSERT(vsub);
 	VERBOSE_ASSERT(strcmp(vsub->imeisv, "4234234234234275"), == 0, "%d");
-	vlr_subscr_put(vsub);
+	vlr_subscr_put(vsub, __func__);
 
 	btw("HLR sends _INSERT_DATA_REQUEST, VLR responds with _INSERT_DATA_RESULT");
 	gsup_rx("10010809710000004026f00804036470f1",
@@ -654,10 +654,10 @@ static void test_no_authen_imeisv_imei()
 
 	btw("We will only do business when the IMEI is known");
 	EXPECT_CONN_COUNT(1);
-	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi);
+	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi, __func__);
 	OSMO_ASSERT(vsub);
 	VERBOSE_ASSERT(vsub->imei[0], == 0, "%d");
-	vlr_subscr_put(vsub);
+	vlr_subscr_put(vsub, __func__);
 	EXPECT_ACCEPTED(false);
 	thwart_rx_non_initial_requests();
 
@@ -676,10 +676,10 @@ static void test_no_authen_imeisv_imei()
 	EXPECT_CONN_COUNT(0);
 
 	btw("Subscriber has the IMEI");
-	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi);
+	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi, __func__);
 	OSMO_ASSERT(vsub);
 	VERBOSE_ASSERT(strcmp(vsub->imei, "423423423423420"), == 0, "%d");
-	vlr_subscr_put(vsub);
+	vlr_subscr_put(vsub, __func__);
 
 	BTW("subscriber detaches");
 	expect_bssap_clear();
@@ -717,10 +717,10 @@ static void test_no_authen_imeisv_tmsi()
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("Subscriber has the IMEISV from the ID Response");
-	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi);
+	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi, __func__);
 	OSMO_ASSERT(vsub);
 	VERBOSE_ASSERT(strcmp(vsub->imeisv, "4234234234234275"), == 0, "%d");
-	vlr_subscr_put(vsub);
+	vlr_subscr_put(vsub, __func__);
 
 	btw("HLR sends _INSERT_DATA_REQUEST, VLR responds with _INSERT_DATA_RESULT");
 	gsup_rx("10010809710000004026f00804036470f1",
@@ -742,12 +742,12 @@ static void test_no_authen_imeisv_tmsi()
 	thwart_rx_non_initial_requests();
 
 	btw("even though the TMSI is not acked, we can already find the subscr with it");
-	vsub = vlr_subscr_find_by_tmsi(net->vlr, 0x03020100);
+	vsub = vlr_subscr_find_by_tmsi(net->vlr, 0x03020100, __func__);
 	VERBOSE_ASSERT(vsub != NULL, == true, "%d");
 	VERBOSE_ASSERT(strcmp(vsub->imsi, imsi), == 0, "%d");
 	VERBOSE_ASSERT(vsub->tmsi_new, == 0x03020100, "0x%08x");
 	VERBOSE_ASSERT(vsub->tmsi, == GSM_RESERVED_TMSI, "0x%08x");
-	vlr_subscr_put(vsub);
+	vlr_subscr_put(vsub, __func__);
 
 	btw("MS sends TMSI Realloc Complete");
 	expect_bssap_clear();
@@ -773,10 +773,10 @@ static void test_no_authen_imeisv_tmsi()
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("Subscriber has the IMEISV from the ID Response");
-	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi);
+	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi, __func__);
 	OSMO_ASSERT(vsub);
 	VERBOSE_ASSERT(strcmp(vsub->imeisv, "5234234234234276"), == 0, "%d");
-	vlr_subscr_put(vsub);
+	vlr_subscr_put(vsub, __func__);
 
 	btw("HLR sends _INSERT_DATA_REQUEST, VLR responds with _INSERT_DATA_RESULT");
 	gsup_rx("10010809710000004026f00804036470f1",
@@ -798,12 +798,12 @@ static void test_no_authen_imeisv_tmsi()
 	thwart_rx_non_initial_requests();
 
 	btw("even though the TMSI is not acked, we can already find the subscr with it");
-	vsub = vlr_subscr_find_by_tmsi(net->vlr, 0x07060504);
+	vsub = vlr_subscr_find_by_tmsi(net->vlr, 0x07060504, __func__);
 	VERBOSE_ASSERT(vsub != NULL, == true, "%d");
 	VERBOSE_ASSERT(strcmp(vsub->imsi, imsi), == 0, "%d");
 	VERBOSE_ASSERT(vsub->tmsi_new, == 0x07060504, "0x%08x");
 	VERBOSE_ASSERT(vsub->tmsi, == 0x03020100, "0x%08x");
-	vlr_subscr_put(vsub);
+	vlr_subscr_put(vsub, __func__);
 
 	btw("MS sends TMSI Realloc Complete");
 	expect_bssap_clear();
@@ -815,12 +815,12 @@ static void test_no_authen_imeisv_tmsi()
 	EXPECT_CONN_COUNT(0);
 
 	btw("subscriber has the new TMSI");
-	vsub = vlr_subscr_find_by_tmsi(net->vlr, 0x07060504);
+	vsub = vlr_subscr_find_by_tmsi(net->vlr, 0x07060504, __func__);
 	VERBOSE_ASSERT(vsub != NULL, == true, "%d");
 	VERBOSE_ASSERT(strcmp(vsub->imsi, imsi), == 0, "%d");
 	VERBOSE_ASSERT(vsub->tmsi_new, == GSM_RESERVED_TMSI, "0x%08x");
 	VERBOSE_ASSERT(vsub->tmsi, == 0x07060504, "0x%08x");
-	vlr_subscr_put(vsub);
+	vlr_subscr_put(vsub, __func__);
 
 	BTW("subscriber detaches, using new TMSI");
 	expect_bssap_clear();
@@ -859,10 +859,10 @@ static void test_no_authen_imeisv_tmsi_imei()
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("Subscriber has the IMEISV from the ID Response");
-	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi);
+	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi, __func__);
 	OSMO_ASSERT(vsub);
 	VERBOSE_ASSERT(strcmp(vsub->imeisv, "4234234234234275"), == 0, "%d");
-	vlr_subscr_put(vsub);
+	vlr_subscr_put(vsub, __func__);
 
 	btw("HLR sends _INSERT_DATA_REQUEST, VLR responds with _INSERT_DATA_RESULT");
 	gsup_rx("10010809710000004026f00804036470f1",
@@ -880,10 +880,10 @@ static void test_no_authen_imeisv_tmsi_imei()
 
 	btw("We will only do business when the IMEI is known");
 	EXPECT_CONN_COUNT(1);
-	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi);
+	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi, __func__);
 	OSMO_ASSERT(vsub);
 	VERBOSE_ASSERT(vsub->imei[0], == 0, "%d");
-	vlr_subscr_put(vsub);
+	vlr_subscr_put(vsub, __func__);
 	EXPECT_ACCEPTED(false);
 	thwart_rx_non_initial_requests();
 
@@ -911,12 +911,12 @@ static void test_no_authen_imeisv_tmsi_imei()
 	EXPECT_CONN_COUNT(0);
 
 	btw("Subscriber has the IMEISV, IMEI and TMSI");
-	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi);
+	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi, __func__);
 	OSMO_ASSERT(vsub);
 	VERBOSE_ASSERT(strcmp(vsub->imeisv, "4234234234234275"), == 0, "%d");
 	VERBOSE_ASSERT(strcmp(vsub->imei, "423423423423420"), == 0, "%d");
 	VERBOSE_ASSERT(vsub->tmsi, == 0x03020100, "0x%08x");
-	vlr_subscr_put(vsub);
+	vlr_subscr_put(vsub, __func__);
 
 	BTW("subscriber detaches");
 	expect_bssap_clear();
@@ -972,15 +972,15 @@ static void test_no_authen_subscr_expire()
 	bss_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
 
-	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi);
+	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi, __func__);
 	OSMO_ASSERT(vsub);
-	vlr_subscr_put(vsub);
+	vlr_subscr_put(vsub, __func__);
 
 	/* Let T3212 (periodic Location update timer) expire */
 	fake_time_passes((net->t3212 * 60 * 6 * 2) + 60*4, 0);
 
 	/* The subscriber should now be gone. */
-	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi);
+	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi, __func__);
 	OSMO_ASSERT(vsub == NULL);
 
 	EXPECT_CONN_COUNT(0);

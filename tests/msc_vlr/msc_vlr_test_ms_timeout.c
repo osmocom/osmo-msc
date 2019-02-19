@@ -222,7 +222,7 @@ static void test_ms_timeout_paging()
 	BTW("an SMS is sent, MS is paged");
 	paging_expect_imsi(imsi);
 	paging_sent = false;
-	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi);
+	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi, __func__);
 	OSMO_ASSERT(vsub);
 	VERBOSE_ASSERT(llist_count(&vsub->cs.requests), == 0, "%d");
 
@@ -231,7 +231,7 @@ static void test_ms_timeout_paging()
 		 " marketing option.");
 
 	VERBOSE_ASSERT(llist_count(&vsub->cs.requests), == 1, "%d");
-	vlr_subscr_put(vsub);
+	vlr_subscr_put(vsub, __func__);
 	vsub = NULL;
 	VERBOSE_ASSERT(paging_sent, == true, "%d");
 	VERBOSE_ASSERT(paging_stopped, == false, "%d");
@@ -242,7 +242,7 @@ static void test_ms_timeout_paging()
 
 	btw("the paging timeout has not yet expired");
 	VERBOSE_ASSERT(paging_stopped, == false, "%d");
-	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi);
+	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi, __func__);
 	OSMO_ASSERT(vsub);
 	VERBOSE_ASSERT(vsub->cs.is_paging, == true, "%d");
 	btw("another request is added to the list but does not cause another paging");
@@ -251,7 +251,7 @@ static void test_ms_timeout_paging()
 	send_sms(vsub, vsub,
 		 "One paging ought to be enough for anyone.");
 	VERBOSE_ASSERT(llist_count(&vsub->cs.requests), == 2, "%d");
-	vlr_subscr_put(vsub);
+	vlr_subscr_put(vsub, __func__);
 	vsub = NULL;
 	VERBOSE_ASSERT(paging_sent, == false, "%d");
 
@@ -259,7 +259,7 @@ static void test_ms_timeout_paging()
 	fake_time_passes(2, 0);
 	VERBOSE_ASSERT(paging_stopped, == true, "%d");
 
-	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi);
+	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi, __func__);
 	OSMO_ASSERT(vsub);
 	VERBOSE_ASSERT(vsub->cs.is_paging, == false, "%d");
 	VERBOSE_ASSERT(llist_count(&vsub->cs.requests), == 0, "%d");
@@ -273,7 +273,7 @@ static void test_ms_timeout_paging()
 		 " marketing option.");
 
 	VERBOSE_ASSERT(llist_count(&vsub->cs.requests), == 1, "%d");
-	vlr_subscr_put(vsub);
+	vlr_subscr_put(vsub, __func__);
 	vsub = NULL;
 	VERBOSE_ASSERT(paging_sent, == true, "%d");
 	VERBOSE_ASSERT(paging_stopped, == false, "%d");
@@ -284,7 +284,7 @@ static void test_ms_timeout_paging()
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 	VERBOSE_ASSERT(paging_stopped, == true, "%d");
 
-	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi);
+	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi, __func__);
 	OSMO_ASSERT(!vsub);
 
 	bss_sends_clear_complete();

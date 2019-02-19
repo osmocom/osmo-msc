@@ -552,7 +552,7 @@ static void ran_conn_fsm_cleanup(struct osmo_fsm_inst *fi, enum osmo_fsm_term_ca
 		DEBUGP(DRLL, "%s: Freeing RAN connection\n", vlr_subscr_name(conn->vsub));
 		conn->vsub->lu_fsm = NULL;
 		conn->vsub->msc_conn_ref = NULL;
-		vlr_subscr_put(conn->vsub);
+		vlr_subscr_put(conn->vsub, VSUB_USE_CONN);
 		conn->vsub = NULL;
 	} else
 		DEBUGP(DRLL, "Freeing RAN connection with NULL subscriber\n");

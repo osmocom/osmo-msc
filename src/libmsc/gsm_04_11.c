@@ -71,7 +71,7 @@ void sms_free(struct gsm_sms *sms)
 {
 	/* drop references to subscriber structure */
 	if (sms->receiver)
-		vlr_subscr_put(sms->receiver);
+		vlr_subscr_put(sms->receiver, VSUB_USE_SMS_RECEIVER);
 #ifdef BUILD_SMPP
 	if (sms->smpp.esme)
 		smpp_esme_put(sms->smpp.esme);
@@ -89,7 +89,8 @@ struct gsm_sms *sms_from_text(struct vlr_subscr *receiver,
 	if (!sms)
 		return NULL;
 
-	sms->receiver = vlr_subscr_get(receiver);
+	vlr_subscr_get(receiver, VSUB_USE_SMS_RECEIVER);
+	sms->receiver = receiver;
 	OSMO_STRLCPY_ARRAY(sms->text, text);
 
 	OSMO_STRLCPY_ARRAY(sms->src.addr, sender_msisdn);
@@ -441,8 +442,7 @@ try_local:
 #endif
 
 	/* determine gsms->receiver based on dialled number */
-	gsms->receiver = vlr_subscr_find_by_msisdn(conn->network->vlr,
-						   gsms->dst.addr);
+	gsms->receiver = vlr_subscr_find_by_msisdn(conn->network->vlr, gsms->dst.addr, VSUB_USE_SMS_RECEIVER);
 	if (!gsms->receiver) {
 #ifdef BUILD_SMPP
 		/* Avoid a second look-up */

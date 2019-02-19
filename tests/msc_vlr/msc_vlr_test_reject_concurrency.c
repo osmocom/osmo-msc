@@ -127,7 +127,7 @@ static void _page()
 	BTW("an SMS is sent, MS is paged");
 	paging_expect_imsi(imsi);
 	paging_sent = false;
-	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi);
+	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi, __func__);
 	OSMO_ASSERT(vsub);
 	VERBOSE_ASSERT(llist_count(&vsub->cs.requests), == 0, "%d");
 
@@ -136,7 +136,7 @@ static void _page()
 		 " marketing option.");
 
 	VERBOSE_ASSERT(llist_count(&vsub->cs.requests), == 1, "%d");
-	vlr_subscr_put(vsub);
+	vlr_subscr_put(vsub, __func__);
 	vsub = NULL;
 	VERBOSE_ASSERT(paging_sent, == true, "%d");
 	VERBOSE_ASSERT(paging_stopped, == false, "%d");

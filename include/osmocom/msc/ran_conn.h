@@ -14,6 +14,8 @@
 #define LOG_RAN_CONN_CAT(conn, subsys, level, fmt, args ...) \
 	LOGPFSMSL((conn)? (conn)->fi : NULL, subsys, level, fmt, ## args)
 
+#define VSUB_USE_CONN "conn"
+
 enum ran_conn_fsm_event {
 	/* Accepted the initial Complete Layer 3 (starting to evaluate Authentication and Ciphering) */
 	RAN_CONN_E_COMPLETE_LAYER_3,

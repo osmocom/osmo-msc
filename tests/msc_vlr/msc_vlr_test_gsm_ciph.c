@@ -137,7 +137,7 @@ static void test_ciph()
 	BTW("an SMS is sent, MS is paged");
 	paging_expect_imsi(imsi);
 	paging_sent = false;
-	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi);
+	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi, __func__);
 	OSMO_ASSERT(vsub);
 	VERBOSE_ASSERT(llist_count(&vsub->cs.requests), == 0, "%d");
 
@@ -146,16 +146,16 @@ static void test_ciph()
 		 " marketing option.");
 
 	VERBOSE_ASSERT(llist_count(&vsub->cs.requests), == 1, "%d");
-	vlr_subscr_put(vsub);
+	vlr_subscr_put(vsub, __func__);
 	vsub = NULL;
 	VERBOSE_ASSERT(paging_sent, == true, "%d");
 	VERBOSE_ASSERT(paging_stopped, == false, "%d");
 
 	btw("the subscriber and its pending request should remain");
-	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi);
+	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi, __func__);
 	OSMO_ASSERT(vsub);
 	VERBOSE_ASSERT(llist_count(&vsub->cs.requests), == 1, "%d");
-	vlr_subscr_put(vsub);
+	vlr_subscr_put(vsub, __func__);
 
 	btw("MS replies with Paging Response, and VLR sends Auth Request with third key");
 	auth_request_sent = false;
@@ -203,10 +203,10 @@ static void test_ciph()
 	VERBOSE_ASSERT(paging_stopped, == true, "%d");
 
 	btw("SMS was delivered, no requests pending for subscr");
-	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi);
+	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi, __func__);
 	OSMO_ASSERT(vsub);
 	VERBOSE_ASSERT(llist_count(&vsub->cs.requests), == 0, "%d");
-	vlr_subscr_put(vsub);
+	vlr_subscr_put(vsub, __func__);
 
 	btw("conn is still open to wait for SMS ack dance");
 	EXPECT_CONN_COUNT(1);
@@ -312,12 +312,12 @@ static void test_ciph_tmsi()
 	thwart_rx_non_initial_requests();
 
 	btw("even though the TMSI is not acked, we can already find the subscr with it");
-	vsub = vlr_subscr_find_by_tmsi(net->vlr, 0x03020100);
+	vsub = vlr_subscr_find_by_tmsi(net->vlr, 0x03020100, __func__);
 	VERBOSE_ASSERT(vsub != NULL, == true, "%d");
 	VERBOSE_ASSERT(strcmp(vsub->imsi, imsi), == 0, "%d");
 	VERBOSE_ASSERT(vsub->tmsi_new, == 0x03020100, "0x%08x");
 	VERBOSE_ASSERT(vsub->tmsi, == GSM_RESERVED_TMSI, "0x%08x");
-	vlr_subscr_put(vsub);
+	vlr_subscr_put(vsub, __func__);
 
 	btw("MS sends TMSI Realloc Complete");
 	expect_bssap_clear();
@@ -329,12 +329,12 @@ static void test_ciph_tmsi()
 	EXPECT_CONN_COUNT(0);
 
 	btw("Subscriber has the new TMSI");
-	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi);
+	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi, __func__);
 	VERBOSE_ASSERT(vsub != NULL, == true, "%d");
 	VERBOSE_ASSERT(strcmp(vsub->imsi, imsi), == 0, "%d");
 	VERBOSE_ASSERT(vsub->tmsi_new, == GSM_RESERVED_TMSI, "0x%08x");
 	VERBOSE_ASSERT(vsub->tmsi, == 0x03020100, "0x%08x");
-	vlr_subscr_put(vsub);
+	vlr_subscr_put(vsub, __func__);
 
 	BTW("after a while, a new conn sends a CM Service Request using above TMSI. VLR responds with Auth Req, 2nd auth vector");
 	cm_service_result_sent = RES_NONE;
@@ -377,7 +377,7 @@ static void test_ciph_tmsi()
 	BTW("an SMS is sent, MS is paged");
 	paging_expect_tmsi(0x03020100);
 	paging_sent = false;
-	vsub = vlr_subscr_find_by_tmsi(net->vlr, 0x03020100);
+	vsub = vlr_subscr_find_by_tmsi(net->vlr, 0x03020100, __func__);
 	OSMO_ASSERT(vsub);
 	VERBOSE_ASSERT(llist_count(&vsub->cs.requests), == 0, "%d");
 
@@ -386,16 +386,16 @@ static void test_ciph_tmsi()
 		 " marketing option.");
 
 	VERBOSE_ASSERT(llist_count(&vsub->cs.requests), == 1, "%d");
-	vlr_subscr_put(vsub);
+	vlr_subscr_put(vsub, __func__);
 	vsub = NULL;
 	VERBOSE_ASSERT(paging_sent, == true, "%d");
 	VERBOSE_ASSERT(paging_stopped, == false, "%d");
 
 	btw("the subscriber and its pending request should remain");
-	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi);
+	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi, __func__);
 	OSMO_ASSERT(vsub);
 	VERBOSE_ASSERT(llist_count(&vsub->cs.requests), == 1, "%d");
-	vlr_subscr_put(vsub);
+	vlr_subscr_put(vsub, __func__);
 
 	btw("MS replies with Paging Response using TMSI, and VLR sends Auth Request with third key");
 	auth_request_sent = false;
@@ -443,10 +443,10 @@ static void test_ciph_tmsi()
 	VERBOSE_ASSERT(paging_stopped, == true, "%d");
 
 	btw("SMS was delivered, no requests pending for subscr");
-	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi);
+	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi, __func__);
 	OSMO_ASSERT(vsub);
 	VERBOSE_ASSERT(llist_count(&vsub->cs.requests), == 0, "%d");
-	vlr_subscr_put(vsub);
+	vlr_subscr_put(vsub, __func__);
 
 	btw("conn is still open to wait for SMS ack dance");
 	EXPECT_CONN_COUNT(1);
@@ -547,10 +547,10 @@ static void test_ciph_imei()
 
 	btw("We will only do business when the IMEI is known");
 	EXPECT_CONN_COUNT(1);
-	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi);
+	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi, __func__);
 	OSMO_ASSERT(vsub);
 	VERBOSE_ASSERT(vsub->imei[0], == 0, "%d");
-	vlr_subscr_put(vsub);
+	vlr_subscr_put(vsub, __func__);
 	EXPECT_ACCEPTED(false);
 	thwart_rx_non_initial_requests();
 
@@ -571,10 +571,10 @@ static void test_ciph_imei()
 	EXPECT_CONN_COUNT(0);
 
 	btw("Subscriber has the IMEI");
-	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi);
+	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi, __func__);
 	OSMO_ASSERT(vsub);
 	VERBOSE_ASSERT(strcmp(vsub->imei, "423423423423420"), == 0, "%d");
-	vlr_subscr_put(vsub);
+	vlr_subscr_put(vsub, __func__);
 
 	BTW("subscriber detaches");
 	expect_bssap_clear();
@@ -642,10 +642,10 @@ static void test_ciph_imeisv()
 	thwart_rx_non_initial_requests();
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
-	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi);
+	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi, __func__);
 	OSMO_ASSERT(vsub);
 	VERBOSE_ASSERT(vsub->imeisv[0], == 0, "%d");
-	vlr_subscr_put(vsub);
+	vlr_subscr_put(vsub, __func__);
 
 	btw("MS sends Ciphering Mode Complete with IMEISV, VLR accepts and sends GSUP LU Req to HLR");
 	gsup_expect_tx("04010809710000004026f0280102");
@@ -653,10 +653,10 @@ static void test_ciph_imeisv()
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("Subscriber has the IMEISV");
-	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi);
+	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi, __func__);
 	OSMO_ASSERT(vsub);
 	VERBOSE_ASSERT(strcmp(vsub->imeisv, "4234234234234275"), == 0, "%d");
-	vlr_subscr_put(vsub);
+	vlr_subscr_put(vsub, __func__);
 
 	EXPECT_ACCEPTED(false);
 	thwart_rx_non_initial_requests();
@@ -758,10 +758,10 @@ static void test_ciph_tmsi_imei()
 
 	btw("We will only do business when the IMEI is known");
 	EXPECT_CONN_COUNT(1);
-	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi);
+	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi, __func__);
 	OSMO_ASSERT(vsub);
 	VERBOSE_ASSERT(vsub->imei[0], == 0, "%d");
-	vlr_subscr_put(vsub);
+	vlr_subscr_put(vsub, __func__);
 	EXPECT_ACCEPTED(false);
 	thwart_rx_non_initial_requests();
 
@@ -781,12 +781,12 @@ static void test_ciph_tmsi_imei()
 	thwart_rx_non_initial_requests();
 
 	btw("even though the TMSI is not acked, we can already find the subscr with it");
-	vsub = vlr_subscr_find_by_tmsi(net->vlr, 0x03020100);
+	vsub = vlr_subscr_find_by_tmsi(net->vlr, 0x03020100, __func__);
 	VERBOSE_ASSERT(vsub != NULL, == true, "%d");
 	VERBOSE_ASSERT(strcmp(vsub->imsi, imsi), == 0, "%d");
 	VERBOSE_ASSERT(vsub->tmsi_new, == 0x03020100, "0x%08x");
 	VERBOSE_ASSERT(vsub->tmsi, == GSM_RESERVED_TMSI, "0x%08x");
-	vlr_subscr_put(vsub);
+	vlr_subscr_put(vsub, __func__);
 
 	btw("MS sends TMSI Realloc Complete");
 	expect_bssap_clear();
@@ -798,11 +798,11 @@ static void test_ciph_tmsi_imei()
 	EXPECT_CONN_COUNT(0);
 
 	btw("Subscriber has the IMEI and TMSI");
-	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi);
+	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi, __func__);
 	OSMO_ASSERT(vsub);
 	VERBOSE_ASSERT(strcmp(vsub->imei, "423423423423420"), == 0, "%d");
 	VERBOSE_ASSERT(vsub->tmsi, == 0x03020100, "0x%08x");
-	vlr_subscr_put(vsub);
+	vlr_subscr_put(vsub, __func__);
 
 	BTW("subscriber detaches, using TMSI");
 	expect_bssap_clear();
@@ -986,7 +986,7 @@ static void test_gsm_ciph_in_umts_env()
 	BTW("an SMS is sent, MS is paged");
 	paging_expect_imsi(imsi);
 	paging_sent = false;
-	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi);
+	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi, __func__);
 	OSMO_ASSERT(vsub);
 	VERBOSE_ASSERT(llist_count(&vsub->cs.requests), == 0, "%d");
 
@@ -995,16 +995,16 @@ static void test_gsm_ciph_in_umts_env()
 		 " marketing option.");
 
 	VERBOSE_ASSERT(llist_count(&vsub->cs.requests), == 1, "%d");
-	vlr_subscr_put(vsub);
+	vlr_subscr_put(vsub, __func__);
 	vsub = NULL;
 	VERBOSE_ASSERT(paging_sent, == true, "%d");
 	VERBOSE_ASSERT(paging_stopped, == false, "%d");
 
 	btw("the subscriber and its pending request should remain");
-	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi);
+	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi, __func__);
 	OSMO_ASSERT(vsub);
 	VERBOSE_ASSERT(llist_count(&vsub->cs.requests), == 1, "%d");
-	vlr_subscr_put(vsub);
+	vlr_subscr_put(vsub, __func__);
 
 	btw("MS replies with Paging Response, and VLR sends *UMTS AKA* Auth Request with third key");
 	auth_request_sent = false;
@@ -1031,10 +1031,10 @@ static void test_gsm_ciph_in_umts_env()
 	VERBOSE_ASSERT(paging_stopped, == true, "%d");
 
 	btw("SMS was delivered, no requests pending for subscr");
-	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi);
+	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi, __func__);
 	OSMO_ASSERT(vsub);
 	VERBOSE_ASSERT(llist_count(&vsub->cs.requests), == 0, "%d");
-	vlr_subscr_put(vsub);
+	vlr_subscr_put(vsub, __func__);
 
 	btw("conn is still open to wait for SMS ack dance");
 	EXPECT_CONN_COUNT(1);
@@ -1182,7 +1182,7 @@ static void test_a5_3_supported()
 	BTW("an SMS is sent, MS is paged");
 	paging_expect_imsi(imsi);
 	paging_sent = false;
-	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi);
+	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi, __func__);
 	OSMO_ASSERT(vsub);
 	VERBOSE_ASSERT(llist_count(&vsub->cs.requests), == 0, "%d");
 
@@ -1191,16 +1191,16 @@ static void test_a5_3_supported()
 		 " marketing option.");
 
 	VERBOSE_ASSERT(llist_count(&vsub->cs.requests), == 1, "%d");
-	vlr_subscr_put(vsub);
+	vlr_subscr_put(vsub, __func__);
 	vsub = NULL;
 	VERBOSE_ASSERT(paging_sent, == true, "%d");
 	VERBOSE_ASSERT(paging_stopped, == false, "%d");
 
 	btw("the subscriber and its pending request should remain");
-	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi);
+	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi, __func__);
 	OSMO_ASSERT(vsub);
 	VERBOSE_ASSERT(llist_count(&vsub->cs.requests), == 1, "%d");
-	vlr_subscr_put(vsub);
+	vlr_subscr_put(vsub, __func__);
 
 	btw("MS replies with Paging Response, and VLR sends Auth Request with third key");
 	auth_request_sent = false;
@@ -1248,10 +1248,10 @@ static void test_a5_3_supported()
 	VERBOSE_ASSERT(paging_stopped, == true, "%d");
 
 	btw("SMS was delivered, no requests pending for subscr");
-	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi);
+	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi, __func__);
 	OSMO_ASSERT(vsub);
 	VERBOSE_ASSERT(llist_count(&vsub->cs.requests), == 0, "%d");
-	vlr_subscr_put(vsub);
+	vlr_subscr_put(vsub, __func__);
 
 	btw("conn is still open to wait for SMS ack dance");
 	EXPECT_CONN_COUNT(1);
@@ -1404,23 +1404,23 @@ static void test_cm_service_needs_classmark_update()
 	BTW("an SMS is sent, MS is paged");
 	paging_expect_imsi(imsi);
 	paging_sent = false;
-	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi);
+	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi, __func__);
 	OSMO_ASSERT(vsub);
 	VERBOSE_ASSERT(llist_count(&vsub->cs.requests), == 0, "%d");
 
 	send_sms(vsub, vsub, "Privacy in residential applications is a desirable marketing option.");
 
 	VERBOSE_ASSERT(llist_count(&vsub->cs.requests), == 1, "%d");
-	vlr_subscr_put(vsub);
+	vlr_subscr_put(vsub, __func__);
 	vsub = NULL;
 	VERBOSE_ASSERT(paging_sent, == true, "%d");
 	VERBOSE_ASSERT(paging_stopped, == false, "%d");
 
 	btw("the subscriber and its pending request should remain");
-	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi);
+	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi, __func__);
 	OSMO_ASSERT(vsub);
 	VERBOSE_ASSERT(llist_count(&vsub->cs.requests), == 1, "%d");
-	vlr_subscr_put(vsub);
+	vlr_subscr_put(vsub, __func__);
 
 	btw("MS replies with Paging Response, and VLR sends Auth Request with third key");
 	auth_request_sent = false;
@@ -1429,11 +1429,11 @@ static void test_cm_service_needs_classmark_update()
 	VERBOSE_ASSERT(auth_request_sent, == true, "%d");
 
 	BTW("Fake a situation where Classmark 2 is unknown during proc_arq_fsm");
-	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi);
+	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi, __func__);
 	OSMO_ASSERT(vsub);
 	vsub->classmark.classmark2_len = 0;
 	vsub->classmark.classmark3_len = 0;
-	vlr_subscr_put(vsub);
+	vlr_subscr_put(vsub, __func__);
 	
 
 	btw("MS sends Authen Response, VLR accepts and requests Ciphering");
@@ -1479,10 +1479,10 @@ static void test_cm_service_needs_classmark_update()
 	VERBOSE_ASSERT(paging_stopped, == true, "%d");
 
 	btw("SMS was delivered, no requests pending for subscr");
-	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi);
+	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi, __func__);
 	OSMO_ASSERT(vsub);
 	VERBOSE_ASSERT(llist_count(&vsub->cs.requests), == 0, "%d");
-	vlr_subscr_put(vsub);
+	vlr_subscr_put(vsub, __func__);
 
 	btw("conn is still open to wait for SMS ack dance");
 	EXPECT_CONN_COUNT(1);

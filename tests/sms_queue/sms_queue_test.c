@@ -27,6 +27,8 @@
 #include <osmocom/msc/vlr.h>
 #include <osmocom/msc/gsm_data.h>
 #include <osmocom/msc/gsm_04_11.h>
+#include <osmocom/msc/db.h>
+#include <osmocom/msc/sms_queue.h>
 
 static void *talloc_ctx = NULL;
 extern void *tall_gsms_ctx;
@@ -91,17 +93,25 @@ struct gsm_sms *__wrap_db_sms_get_next_unsent_rr_msisdn(struct gsm_network *net,
 							const char *last_msisdn,
 							unsigned int max_failed)
 {
-	static struct vlr_subscr arbitrary_vsub;
+	static struct vlr_subscr arbitrary_vsub = {};
+	static bool arbitrary_vsub_set_up = false;
 	struct gsm_sms *sms;
 	int i;
 	printf("     hitting database: looking for MSISDN > '%s', failed_attempts <= %d\n",
 	       last_msisdn, max_failed);
 
+	if (!arbitrary_vsub_set_up) {
+		osmo_use_count_make_static_entries(&arbitrary_vsub.use_count, arbitrary_vsub.use_count_buf,
+						   ARRAY_SIZE(arbitrary_vsub.use_count_buf));
+		arbitrary_vsub_set_up = true;
+	}
+
 	/* Every time we call sms_free(), the internal logic of libmsc
 	 * may call vlr_subscr_put() on our arbitrary_vsub, what would
 	 * lead to a segfault if its use_count <= 0. To prevent this,
 	 * let's ensure a big enough initial value. */
-	arbitrary_vsub.use_count = 1000;
+	osmo_use_count_get_put(&arbitrary_vsub.use_count, VSUB_USE_SMS_RECEIVER, 1000);
+	osmo_use_count_get_put(&arbitrary_vsub.use_count, VSUB_USE_SMS_PENDING, 1000);
 	arbitrary_vsub.lu_complete = true;
 
 	for (i = 0; i < ARRAY_SIZE(fake_sms_db); i++) {

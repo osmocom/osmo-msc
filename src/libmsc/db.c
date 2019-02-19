@@ -769,7 +769,7 @@ static struct gsm_sms *sms_from_result(struct gsm_network *net, dbi_result resul
 	daddr = dbi_result_get_string(result, "dest_addr");
 	if (daddr)
 		OSMO_STRLCPY_ARRAY(sms->dst.addr, daddr);
-	sms->receiver = vlr_subscr_find_by_msisdn(net->vlr, sms->dst.addr);
+	sms->receiver = vlr_subscr_find_by_msisdn(net->vlr, sms->dst.addr, VSUB_USE_SMS_RECEIVER);
 
 	sms->src.npi = dbi_result_get_ulonglong(result, "src_npi");
 	sms->src.ton = dbi_result_get_ulonglong(result, "src_ton");

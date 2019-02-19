@@ -66,11 +66,11 @@ static void perform_lu(void)
 	VERBOSE_ASSERT(lu_result_sent, == RES_ACCEPT, "%d");
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
-	vsub = vlr_subscr_find_by_imsi(net->vlr, IMSI);
+	vsub = vlr_subscr_find_by_imsi(net->vlr, IMSI, __func__);
 	VERBOSE_ASSERT(vsub != NULL, == true, "%d");
 	VERBOSE_ASSERT(strcmp(vsub->imsi, IMSI), == 0, "%d");
 	VAL_ASSERT("LAC", vsub->cgi.lai.lac, == 23, "%u");
-	vlr_subscr_put(vsub);
+	vlr_subscr_put(vsub, __func__);
 
 	bss_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);
@@ -132,7 +132,7 @@ static void _test_ss_ussd_no(enum osmo_rat_type via_ran)
 
 	paging_expect_imsi(IMSI);
 	paging_sent = false;
-	vsub = vlr_subscr_find_by_imsi(net->vlr, IMSI);
+	vsub = vlr_subscr_find_by_imsi(net->vlr, IMSI, __func__);
 	OSMO_ASSERT(vsub);
 	VERBOSE_ASSERT(llist_count(&vsub->cs.requests), == 0, "%d");
 
@@ -144,16 +144,16 @@ static void _test_ss_ussd_no(enum osmo_rat_type via_ran)
 		"3515" FACILITY_IE_REQ, NULL);
 
 	VERBOSE_ASSERT(llist_count(&vsub->cs.requests), == 1, "%d");
-	vlr_subscr_put(vsub);
+	vlr_subscr_put(vsub, __func__);
 	vsub = NULL;
 	VERBOSE_ASSERT(paging_sent, == true, "%d");
 	VERBOSE_ASSERT(paging_stopped, == false, "%d");
 
 	btw("the subscriber and its pending request should remain");
-	vsub = vlr_subscr_find_by_imsi(net->vlr, IMSI);
+	vsub = vlr_subscr_find_by_imsi(net->vlr, IMSI, __func__);
 	OSMO_ASSERT(vsub);
 	VERBOSE_ASSERT(llist_count(&vsub->cs.requests), == 1, "%d");
-	vlr_subscr_put(vsub);
+	vlr_subscr_put(vsub, __func__);
 
 	btw("MS replies with Paging Response, we deliver the NC/USSD");
 

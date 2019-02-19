@@ -48,6 +48,9 @@
 
 #include "smpp_smsc.h"
 
+#define VSUB_USE_SMPP "SMPP"
+#define VSUB_USE_SMPP_CMD "SMPP-cmd"
+
 /*! \brief find vlr_subscr for a given SMPP NPI/TON/Address */
 static struct vlr_subscr *subscr_by_dst(struct gsm_network *net,
 					    uint8_t npi, uint8_t ton,
@@ -57,11 +60,11 @@ static struct vlr_subscr *subscr_by_dst(struct gsm_network *net,
 
 	switch (npi) {
 	case NPI_Land_Mobile_E212:
-		vsub = vlr_subscr_find_by_imsi(net->vlr, addr);
+		vsub = vlr_subscr_find_by_imsi(net->vlr, addr, VSUB_USE_SMPP);
 		break;
 	case NPI_ISDN_E163_E164:
 	case NPI_Private:
-		vsub = vlr_subscr_find_by_msisdn(net->vlr, addr);
+		vsub = vlr_subscr_find_by_msisdn(net->vlr, addr, VSUB_USE_SMPP);
 		break;
 	default:
 		LOGP(DSMPP, LOGL_NOTICE, "Unsupported NPI: %u\n", npi);
@@ -117,7 +120,7 @@ static int submit_to_sms(struct gsm_sms **psms, struct gsm_network *net,
 			if (smpp34_submit_tlv_msg_payload(t, submit, &sms_msg,
 							  &sms_msg_len) < 0) {
 				if (dest)
-					vlr_subscr_put(dest);
+					vlr_subscr_put(dest, VSUB_USE_SMPP);
 				return ESME_ROPTPARNOTALLWD;
 			}
 			break;
@@ -136,7 +139,7 @@ static int submit_to_sms(struct gsm_sms **psms, struct gsm_network *net,
 		} else {
 			LOGP(DLSMS, LOGL_ERROR,
 			     "SMPP neither message payload nor valid sm_length.\n");
-			vlr_subscr_put(dest);
+			vlr_subscr_put(dest, VSUB_USE_SMPP);
 			return ESME_RINVPARLEN;
 		}
 	}
@@ -532,7 +535,7 @@ static void smpp_cmd_free(struct osmo_smpp_cmd *cmd)
 {
 	osmo_timer_del(&cmd->response_timer);
 	llist_del(&cmd->list);
-	vlr_subscr_put(cmd->vsub);
+	vlr_subscr_put(cmd->vsub, VSUB_USE_SMPP_CMD);
 	talloc_free(cmd);
 }
 
@@ -619,7 +622,8 @@ static int smpp_cmd_enqueue(struct osmo_esme *esme,
 	cmd->is_report		= sms->is_report;
 	cmd->gsm411_msg_ref	= sms->gsm411.msg_ref;
 	cmd->gsm411_trans_id	= sms->gsm411.transaction_id;
-	cmd->vsub		= vlr_subscr_get(vsub);
+	vlr_subscr_get(vsub, VSUB_USE_SMPP_CMD);
+	cmd->vsub = vsub;
 
 	/* FIXME: No predefined value for this response_timer as specified by
 	 * SMPP 3.4 specs, section 7.2. Make this configurable? Don't forget

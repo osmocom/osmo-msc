@@ -50,6 +50,8 @@
 #include <osmocom/msc/a_iface.h>
 #include <osmocom/msc/sgs_iface.h>
 
+#define VSUB_USE_PAGING "Paging"
+
 void subscr_paging_cancel(struct vlr_subscr *vsub, enum gsm_paging_event event)
 {
 	subscr_paging_dispatch(GSM_HOOK_RR_PAGING, event, NULL, NULL, vsub);
@@ -106,7 +108,7 @@ int subscr_paging_dispatch(unsigned int hooknum, unsigned int event,
 
 	/* balanced with the moment we start paging */
 	vsub->cs.is_paging = false;
-	vlr_subscr_put(vsub);
+	vlr_subscr_put(vsub, VSUB_USE_PAGING);
 	return 0;
 }
 
@@ -168,7 +170,7 @@ struct subscr_request *subscr_request_conn(struct vlr_subscr *vsub,
 			return NULL;
 		}
 		/* reduced on the first paging callback */
-		vlr_subscr_get(vsub);
+		vlr_subscr_get(vsub, VSUB_USE_PAGING);
 		vsub->cs.is_paging = true;
 		osmo_timer_setup(&vsub->cs.paging_response_timer, paging_response_timer_cb, vsub);
 		osmo_timer_schedule(&vsub->cs.paging_response_timer, net->paging_response_timer, 0);

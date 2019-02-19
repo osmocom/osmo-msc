@@ -356,10 +356,10 @@ static void proc_arq_vlr_fn_init(struct osmo_fsm_inst *fi,
 	/* Obtain_Identity_VLR */
 	if (!par->by_tmsi) {
 		/* IMSI was included */
-		vsub = vlr_subscr_find_by_imsi(par->vlr, par->imsi);
+		vsub = vlr_subscr_find_by_imsi(par->vlr, par->imsi, __func__);
 	} else {
 		/* TMSI was included */
-		vsub = vlr_subscr_find_by_tmsi(par->vlr, par->tmsi);
+		vsub = vlr_subscr_find_by_tmsi(par->vlr, par->tmsi, __func__);
 	}
 	if (vsub) {
 		log_set_context(LOG_CTX_VLR_SUBSCR, vsub);
@@ -377,7 +377,7 @@ static void proc_arq_vlr_fn_init(struct osmo_fsm_inst *fi,
 			proc_arq_fsm_done(fi, GSM48_REJECT_NETWORK_FAILURE);
 		else
 			proc_arq_vlr_fn_post_imsi(fi);
-		vlr_subscr_put(vsub);
+		vlr_subscr_put(vsub, __func__);
 		return;
 	}
 	/* No VSUB could be resolved. What now? */
@@ -412,7 +412,7 @@ static void proc_arq_vlr_fn_w_obt_imsi(struct osmo_fsm_inst *fi,
 
 	OSMO_ASSERT(event == PR_ARQ_E_ID_IMSI);
 
-	vsub = vlr_subscr_find_by_imsi(vlr, par->imsi);
+	vsub = vlr_subscr_find_by_imsi(vlr, par->imsi, __func__);
 	if (!vsub) {
 		/* Set User Error: Unidentified Subscriber */
 		proc_arq_fsm_done(fi, GSM48_REJECT_IMSI_UNKNOWN_IN_VLR);
@@ -422,7 +422,7 @@ static void proc_arq_vlr_fn_w_obt_imsi(struct osmo_fsm_inst *fi,
 		proc_arq_fsm_done(fi, GSM48_REJECT_NETWORK_FAILURE);
 	else
 		proc_arq_vlr_fn_post_imsi(fi);
-	vlr_subscr_put(vsub);
+	vlr_subscr_put(vsub, __func__);
 }
 
 /* Authenticate_VLR has completed */
