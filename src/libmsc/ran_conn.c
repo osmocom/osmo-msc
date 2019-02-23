@@ -683,6 +683,7 @@ struct ran_conn *ran_conn_alloc(struct gsm_network *network,
 		break;
 	case OSMO_RAT_EUTRAN_SGS:
 		conn->log_subsys = DSGS;
+		break;
 	default:
 		conn->log_subsys = DMSC;
 		break;
