@@ -1129,7 +1129,7 @@ static int sgs_vlr_reset_fsm_timer_cb(struct osmo_fsm_inst *fi)
 			mme->ns11_remaining--;
 		} else {
 			LOGMME(mme, LOGL_ERROR, "Ts11 expired more than %u (Ns11) times, giving up\n",
-			       sgs->cfg.counter[SGS_STATE_TS11]);
+			       sgs->cfg.counter[SGS_STATE_NS11]);
 			osmo_fsm_inst_state_chg(fi, SGS_VLRR_ST_NULL, 0, 0);
 		}
 		break;
