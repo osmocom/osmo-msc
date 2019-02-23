@@ -749,7 +749,7 @@ static void subscr_dump_full_vty(struct vty *vty, struct vlr_subscr *vsub)
 	/* SGs related */
 	vty_out(vty, "    SGs-state: %s%s",
 		osmo_fsm_inst_state_name(vsub->sgs_fsm), VTY_NEWLINE);
-	if (vsub->sgs.mme_name && strlen(vsub->sgs.mme_name))
+	if (strlen(vsub->sgs.mme_name))
 		vty_out(vty, "    SGs-MME: %s%s", vsub->sgs.mme_name, VTY_NEWLINE);
 	else
 		vty_out(vty, "    SGs-MME: (none)%s", VTY_NEWLINE);
