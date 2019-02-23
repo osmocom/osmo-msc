@@ -147,6 +147,7 @@ hlr
  remote-ip 127.0.0.1
  remote-port 4222
 sgs
+ local-port 29118
  local-ip 0.0.0.0
  vlr-name vlr.example.net
 end

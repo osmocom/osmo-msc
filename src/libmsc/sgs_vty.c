@@ -158,12 +158,9 @@ static int config_write_sgs(struct vty *vty)
 	char str_buf[256];
 
 	vty_out(vty, "sgs%s", VTY_NEWLINE);
-	if (sgs->cfg.local_port != SGS_PORT_DEFAULT)
-		vty_out(vty, " local-port %u%s", sgs->cfg.local_port, VTY_NEWLINE);
-	if (sgs->cfg.local_addr)
-		vty_out(vty, " local-ip %s%s", sgs->cfg.local_addr, VTY_NEWLINE);
-	if (sgs->cfg.vlr_name)
-		vty_out(vty, " vlr-name %s%s", sgs->cfg.vlr_name, VTY_NEWLINE);
+	vty_out(vty, " local-port %u%s", sgs->cfg.local_port, VTY_NEWLINE);
+	vty_out(vty, " local-ip %s%s", sgs->cfg.local_addr, VTY_NEWLINE);
+	vty_out(vty, " vlr-name %s%s", sgs->cfg.vlr_name, VTY_NEWLINE);
 
 	for (i = 0; i < ARRAY_SIZE(sgs->cfg.timer); i++) {
 		if (sgs->cfg.timer[i] == sgs_state_timer_defaults[i])
