@@ -30,7 +30,7 @@ Homepage: https://osmocom.org/projects/osmomsc
 Package: osmo-msc
 Architecture: any
 Multi-Arch: foreign
-Depends: ${misc:Depends}, ${shlibs:Depends}
+Depends: ${misc:Depends}, ${shlibs:Depends}, libdbd-sqlite3
 Description: OsmoMSC: Osmocom's Mobile Switching Center for 2G and 3G circuit-switched mobile networks
   The Mobile Switching Center (MSC) is the heart of 2G/3G
   circuit-switched services.  It terminates the A-interface links from the
