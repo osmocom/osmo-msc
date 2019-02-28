@@ -58,7 +58,7 @@ int gsm411_gsup_mo_fwd_sm_req(struct gsm_trans *trans, struct msgb *msg,
 	/* Associate logging messages with this subscriber */
 	log_set_context(LOG_CTX_VLR_SUBSCR, trans->vsub);
 
-	LOGP(DLSMS, LOGL_DEBUG, "TX GSUP MO-forwardSM-Req\n");
+	LOG_TRANS(trans, LOGL_DEBUG, "TX GSUP MO-forwardSM-Req\n");
 
 	/* Assign SM-RP-MR to transaction state */
 	trans->sms.sm_rp_mr = sm_rp_mr;
@@ -67,7 +67,7 @@ int gsm411_gsup_mo_fwd_sm_req(struct gsm_trans *trans, struct msgb *msg,
 	bcd_len = gsm48_encode_bcd_number(bcd_buf, sizeof(bcd_buf),
 		0, trans->vsub->msisdn);
 	if (bcd_len <= 0 || bcd_len > sizeof(bcd_buf)) {
-		LOGP(DLSMS, LOGL_ERROR, "Failed to encode subscriber's MSISDN\n");
+		LOG_TRANS(trans, LOGL_ERROR, "Failed to encode subscriber's MSISDN\n");
 		return -EINVAL;
 	}
 
@@ -99,7 +99,7 @@ int gsm411_gsup_mo_ready_for_sm_req(struct gsm_trans *trans, uint8_t sm_rp_mr)
 	/* Associate logging messages with this subscriber */
 	log_set_context(LOG_CTX_VLR_SUBSCR, trans->vsub);
 
-	LOGP(DLSMS, LOGL_DEBUG, "TX GSUP READY-FOR-SM Req\n");
+	LOG_TRANS(trans, LOGL_DEBUG, "TX GSUP READY-FOR-SM Req\n");
 
 	/* Assign SM-RP-MR to transaction state */
 	trans->sms.sm_rp_mr = sm_rp_mr;
@@ -147,9 +147,6 @@ int gsm411_gsup_mo_handler(struct vlr_subscr *vsub,
 		OSMO_ASSERT(0);
 	}
 
-	LOGP(DLSMS, LOGL_DEBUG, "RX %s-%s\n", msg_name,
-		msg_is_err ? "Err" : "Res");
-
 	/* Make sure that 'SMS over GSUP' is expected */
 	if (!net->sms_over_gsup) {
 		/* TODO: notify sender about that? */
@@ -172,6 +169,8 @@ int gsm411_gsup_mo_handler(struct vlr_subscr *vsub,
 			msg_name, msg_is_err ? "Err" : "Res");
 		return -EIO; /* TODO: notify sender about that? */
 	}
+
+	LOG_TRANS(trans, LOGL_DEBUG, "RX %s-%s\n", msg_name, msg_is_err ? "Err" : "Res");
 
 	/* Send either RP-ERROR, or RP-ACK */
 	if (msg_is_err) {
@@ -198,7 +197,7 @@ int gsm411_gsup_mt_fwd_sm_res(struct gsm_trans *trans, uint8_t sm_rp_mr)
 	/* Associate logging messages with this subscriber */
 	log_set_context(LOG_CTX_VLR_SUBSCR, trans->vsub);
 
-	LOGP(DLSMS, LOGL_DEBUG, "TX MT-forwardSM-Res\n");
+	LOG_TRANS(trans, LOGL_DEBUG, "TX MT-forwardSM-Res\n");
 
 	/* Initialize a new GSUP message */
 	gsup_sm_msg_init(&gsup_msg, OSMO_GSUP_MSGT_MT_FORWARD_SM_RESULT,
@@ -215,7 +214,7 @@ int gsm411_gsup_mt_fwd_sm_err(struct gsm_trans *trans,
 	/* Associate logging messages with this subscriber */
 	log_set_context(LOG_CTX_VLR_SUBSCR, trans->vsub);
 
-	LOGP(DLSMS, LOGL_DEBUG, "TX MT-forwardSM-Err\n");
+	LOG_TRANS(trans, LOGL_DEBUG, "TX MT-forwardSM-Err\n");
 
 	/* Initialize a new GSUP message */
 	gsup_sm_msg_init(&gsup_msg, OSMO_GSUP_MSGT_MT_FORWARD_SM_ERROR,

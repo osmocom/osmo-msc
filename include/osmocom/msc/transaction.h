@@ -3,13 +3,28 @@
 #include <osmocom/msc/gsm_data.h>
 #include <osmocom/msc/gsm_subscriber.h>
 #include <osmocom/core/linuxlist.h>
+#include <osmocom/core/fsm.h>
 #include <osmocom/msc/gsm_04_11.h>
 #include <osmocom/msc/mncc.h>
+#include <osmocom/msc/debug.h>
 #include <osmocom/gsm/gsm0411_smc.h>
 #include <osmocom/gsm/gsm0411_smr.h>
 
 /* Used for late TID assignment */
 #define TRANS_ID_UNASSIGNED 0xff
+
+#define LOG_TRANS_CAT(trans, subsys, level, fmt, args...) \
+	LOGP(subsys, level, \
+	     "trans(%s %s callref-0x%x tid-%u%s) " fmt, \
+	     (trans) ? gsm48_pdisc_name((trans)->protocol) : "NULL", \
+	     (trans) ? ((trans)->conn ? (trans)->conn->fi->id : vlr_subscr_name((trans)->vsub)) : "NULL", \
+	     (trans) ? (trans)->callref : 0, \
+	     (trans) ? (trans)->transaction_id : 0, \
+	     (trans) && (trans)->paging_request ? ",PAGING" : "", \
+	     ##args)
+
+#define LOG_TRANS(trans, level, fmt, args...) \
+	     LOG_TRANS_CAT(trans, trans_log_subsys(trans), level, fmt, ##args)
 
 enum bridge_state {
 	BRIDGE_STATE_NONE,
@@ -118,3 +133,18 @@ int trans_assign_trans_id(const struct gsm_network *net, const struct vlr_subscr
 			  uint8_t protocol);
 struct gsm_trans *trans_has_conn(const struct ran_conn *conn);
 void trans_conn_closed(const struct ran_conn *conn);
+
+static inline int trans_log_subsys(const struct gsm_trans *trans)
+{
+	if (!trans)
+		return DMSC;
+	switch (trans->protocol) {
+	case GSM48_PDISC_CC:
+		return DCC;
+	case GSM48_PDISC_SMS:
+		return DLSMS;
+	default:
+		break;
+	}
+	return DMSC;
+}

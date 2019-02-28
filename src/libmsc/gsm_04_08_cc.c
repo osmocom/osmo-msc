@@ -75,8 +75,7 @@ static uint32_t new_callref = 0x80000001;
 static void gsm48_cc_guard_timeout(void *arg)
 {
 	struct gsm_trans *trans = arg;
-	DEBUGP(DCC, "(sub %s) guard timeout expired\n",
-	       vlr_subscr_msisdn_or_name(trans->vsub));
+	LOG_TRANS(trans, LOGL_DEBUG, "guard timeout expired\n");
 	trans_free(trans);
 	return;
 }
@@ -84,8 +83,7 @@ static void gsm48_cc_guard_timeout(void *arg)
 static void gsm48_stop_guard_timer(struct gsm_trans *trans)
 {
 	if (osmo_timer_pending(&trans->cc.timer_guard)) {
-		DEBUGP(DCC, "(sub %s) stopping pending guard timer\n",
-		       vlr_subscr_msisdn_or_name(trans->vsub));
+		LOG_TRANS(trans, LOGL_DEBUG, "stopping pending guard timer\n");
 		osmo_timer_del(&trans->cc.timer_guard);
 	}
 }
@@ -102,9 +100,7 @@ static void gsm48_start_guard_timer(struct gsm_trans *trans)
 	 * timer will time out and hard-clear the connection. */
 	if (osmo_timer_pending(&trans->cc.timer_guard))
 		gsm48_stop_guard_timer(trans);
-	DEBUGP(DCC, "(sub %s) starting guard timer with %d seconds\n",
-	       vlr_subscr_msisdn_or_name(trans->vsub),
-	       trans->net->mncc_guard_timeout);
+	LOG_TRANS(trans, LOGL_DEBUG, "starting guard timer with %d seconds\n", trans->net->mncc_guard_timeout);
 	osmo_timer_setup(&trans->cc.timer_guard, gsm48_cc_guard_timeout, trans);
 	osmo_timer_schedule(&trans->cc.timer_guard,
 			    trans->net->mncc_guard_timeout, 0);
@@ -177,11 +173,9 @@ static void new_cc_state(struct gsm_trans *trans, int state)
 	if (state > 31 || state < 0)
 		return;
 
-	DEBUGP(DCC, "(ti %02x sub %s) new state %s -> %s\n",
-	       trans->transaction_id,
-	       vlr_subscr_name(trans->vsub),
-	       gsm48_cc_state_name(trans->cc.state),
-	       gsm48_cc_state_name(state));
+	LOG_TRANS(trans, LOGL_DEBUG, "new state %s -> %s\n",
+		  gsm48_cc_state_name(trans->cc.state),
+		  gsm48_cc_state_name(state));
 
 	count_statistics(trans, state);
 	trans->cc.state = state;
@@ -213,7 +207,7 @@ static int gsm48_cc_tx_status(struct gsm_trans *trans, void *arg)
 static void gsm48_stop_cc_timer(struct gsm_trans *trans)
 {
 	if (osmo_timer_pending(&trans->cc.timer)) {
-		DEBUGP(DCC, "stopping pending timer T%x\n", trans->cc.Tcurrent);
+		LOG_TRANS(trans, LOGL_DEBUG, "stopping pending timer T%x\n", trans->cc.Tcurrent);
 		osmo_timer_del(&trans->cc.timer);
 		trans->cc.Tcurrent = 0;
 	}
@@ -225,31 +219,7 @@ static int mncc_recvmsg(struct gsm_network *net, struct gsm_trans *trans,
 	struct msgb *msg;
 	unsigned char *data;
 
-	DEBUGP(DMNCC, "transmit message %s\n", get_mncc_name(msg_type));
-
-#if BEFORE_MSCSPLIT
-	/* Re-enable this log output once we can obtain this information via
-	 * A-interface, see OS#2391. */
-	if (trans)
-		if (trans->conn && trans->conn->lchan)
-			DEBUGP(DCC, "(bts %d trx %d ts %d ti %x sub %s) "
-				"Sending '%s' to MNCC.\n",
-				trans->conn->lchan->ts->trx->bts->nr,
-				trans->conn->lchan->ts->trx->nr,
-				trans->conn->lchan->ts->nr, trans->transaction_id,
-				vlr_subscr_msisdn_or_name(trans->vsub),
-				get_mncc_name(msg_type));
-		else
-			DEBUGP(DCC, "(bts - trx - ts - ti -- sub %s) "
-				"Sending '%s' to MNCC.\n",
-				vlr_subscr_msisdn_or_name(trans->vsub),
-				get_mncc_name(msg_type));
-	else
-		DEBUGP(DCC, "(bts - trx - ts - ti -- sub -) "
-			"Sending '%s' to MNCC.\n", get_mncc_name(msg_type));
-#else
-	DEBUGP(DCC, "Sending '%s' to MNCC.\n", get_mncc_name(msg_type));
-#endif
+	LOG_TRANS_CAT(trans, DMNCC, LOGL_DEBUG, "tx %s\n", get_mncc_name(msg_type));
 
 	mncc->msg_type = msg_type;
 
@@ -317,8 +287,7 @@ static int setup_trig_pag_evt(unsigned int hooknum, unsigned int event,
 
 	switch (paging_event) {
 	case GSM_PAGING_SUCCEEDED:
-		DEBUGP(DCC, "Paging subscr %s succeeded!\n",
-		       vlr_subscr_msisdn_or_name(transt->vsub));
+		LOG_TRANS(transt, LOGL_DEBUG, "Paging succeeded\n");
 		OSMO_ASSERT(conn);
 		/* Assign conn */
 		transt->conn = ran_conn_get(conn, RAN_CONN_USE_TRANS_CC);
@@ -328,9 +297,7 @@ static int setup_trig_pag_evt(unsigned int hooknum, unsigned int event,
 		break;
 	case GSM_PAGING_EXPIRED:
 	case GSM_PAGING_BUSY:
-		DEBUGP(DCC, "Paging subscr %s %s!\n",
-		       vlr_subscr_msisdn_or_name(transt->vsub),
-		       paging_event == GSM_PAGING_EXPIRED ? "expired" : "busy");
+		LOG_TRANS(transt, LOGL_DEBUG, "Paging expired\n");
 		/* Temporarily out of order */
 		mncc_release_ind(transt->net, transt,
 				 transt->callref,
@@ -352,11 +319,19 @@ static int tch_bridge(struct gsm_network *net, struct gsm_mncc_bridge *bridge)
 	struct gsm_trans *trans2 = trans_find_by_callref(net, bridge->callref[1]);
 	int rc;
 
-	if (!trans1 || !trans2)
+	if (!trans1 || !trans2) {
+		LOG_TRANS(trans1 ? : trans2, LOGL_ERROR, "Cannot MNCC_BRIDGE, one or both call legs are unset\n");
 		return -EIO;
+	}
 
-	if (!trans1->conn || !trans2->conn)
+	if (!trans1->conn || !trans2->conn) {
+		LOG_TRANS(trans1, LOGL_ERROR, "Cannot MNCC_BRIDGE, one or both call legs lack an active connection\n");
+		LOG_TRANS(trans2, LOGL_ERROR, "Cannot MNCC_BRIDGE, one or both call legs lack an active connection\n");
 		return -EIO;
+	}
+
+	LOG_TRANS(trans1, LOGL_DEBUG, "MNCC_BRIDGE: Local bridge to callref 0x%x\n", trans2->callref);
+	LOG_TRANS(trans2, LOGL_DEBUG, "MNCC_BRIDGE: Local bridge to callref 0x%x\n", trans1->callref);
 
 	/* Which subscriber do we want to track trans1 or trans2? */
 	log_set_context(LOG_CTX_VLR_SUBSCR, trans1->vsub);
@@ -386,7 +361,7 @@ static int tch_bridge(struct gsm_network *net, struct gsm_mncc_bridge *bridge)
 
 static int gsm48_cc_rx_status_enq(struct gsm_trans *trans, struct msgb *msg)
 {
-	DEBUGP(DCC, "-> STATUS ENQ\n");
+	LOG_TRANS(trans, LOGL_DEBUG, "-> STATUS ENQ\n");
 	return gsm48_cc_tx_status(trans, msg);
 }
 
@@ -485,7 +460,9 @@ static inline void disconnect_bridge(struct gsm_network *net,
 	if (!trans0 || !trans1)
 		return;
 
-	DEBUGP(DCC, "Failed to bridge TCH for calls %x <-> %x :: %s \n",
+	LOG_TRANS(trans0, LOGL_ERROR, "Failed to bridge TCH for calls %x <-> %x :: %s \n",
+	       trans0->callref, trans1->callref, strerror(err));
+	LOG_TRANS(trans1, LOGL_ERROR, "Failed to bridge TCH for calls %x <-> %x :: %s \n",
 	       trans0->callref, trans1->callref, strerror(err));
 
 	memset(&mx_rel, 0, sizeof(struct gsm_mncc));
@@ -502,7 +479,7 @@ static inline void disconnect_bridge(struct gsm_network *net,
 static void gsm48_start_cc_timer(struct gsm_trans *trans, int current,
 				 int sec, int micro)
 {
-	DEBUGP(DCC, "starting timer T%x with %d seconds\n", current, sec);
+	LOG_TRANS(trans, LOGL_DEBUG, "starting timer T%x with %d seconds\n", current, sec);
 	osmo_timer_setup(&trans->cc.timer, gsm48_cc_timeout, trans);
 	osmo_timer_schedule(&trans->cc.timer, sec, micro);
 	trans->cc.Tcurrent = current;
@@ -592,9 +569,8 @@ static int gsm48_cc_rx_setup(struct gsm_trans *trans, struct msgb *msg)
 
 	new_cc_state(trans, GSM_CSTATE_INITIATED);
 
-	LOGP(DCC, setup.emergency ? LOGL_NOTICE : LOGL_INFO, "Subscriber %s (%s) sends %sSETUP to %s\n",
-	     vlr_subscr_name(trans->vsub), trans->vsub->msisdn, setup.emergency ? "EMERGENCY_" : "",
-	     setup.called.number);
+	LOG_TRANS(trans, setup.emergency ? LOGL_NOTICE : LOGL_INFO, "%sSETUP to %s\n",
+		  setup.emergency ? "EMERGENCY_" : "", setup.called.number);
 
 	rate_ctr_inc(&trans->net->msc_ctrs->ctr[MSC_CTR_CALL_MO_SETUP]);
 
@@ -618,7 +594,7 @@ static int gsm48_cc_tx_setup(struct gsm_trans *trans, void *arg)
 
 	/* transaction id must not be assigned */
 	if (trans->transaction_id != TRANS_ID_UNASSIGNED) {
-		DEBUGP(DCC, "TX Setup with assigned transaction. "
+		LOG_TRANS(trans, LOGL_DEBUG, "TX Setup with assigned transaction. "
 			"This is not allowed!\n");
 		/* Temporarily out of order */
 		rc = mncc_release_ind(trans->net, trans, trans->callref,
@@ -1695,13 +1671,13 @@ static int tch_rtp_create(struct gsm_network *net, uint32_t callref)
 	/* Find callref */
 	trans = trans_find_by_callref(net, callref);
 	if (!trans) {
-		LOGP(DMNCC, LOGL_ERROR, "RTP create for non-existing trans\n");
+		LOG_TRANS_CAT(trans, DMNCC, LOGL_ERROR, "RTP create for non-existing trans\n");
 		mncc_recv_rtp_err(net, callref, MNCC_RTP_CREATE);
 		return -EIO;
 	}
 	log_set_context(LOG_CTX_VLR_SUBSCR, trans->vsub);
 	if (!trans->conn) {
-		LOGP(DMNCC, LOGL_NOTICE, "RTP create for trans without conn\n");
+		LOG_TRANS_CAT(trans, DMNCC, LOGL_NOTICE, "RTP create for trans without conn\n");
 		mncc_recv_rtp_err(net, callref, MNCC_RTP_CREATE);
 		return 0;
 	}
@@ -1756,13 +1732,13 @@ static int tch_rtp_connect(struct gsm_network *net, struct gsm_mncc_rtp *rtp)
 	/* Find callref */
 	trans = trans_find_by_callref(net, rtp->callref);
 	if (!trans) {
-		LOGP(DMNCC, LOGL_ERROR, "RTP connect for non-existing trans\n");
+		LOG_TRANS_CAT(trans, DMNCC, LOGL_ERROR, "RTP connect for non-existing trans\n");
 		mncc_recv_rtp_err(net, rtp->callref, MNCC_RTP_CONNECT);
 		return -EIO;
 	}
 	log_set_context(LOG_CTX_VLR_SUBSCR, trans->vsub);
 	if (!trans->conn) {
-		LOGP(DMNCC, LOGL_ERROR, "RTP connect for trans without conn\n");
+		LOG_TRANS_CAT(trans, DMNCC, LOGL_ERROR, "RTP connect for trans without conn\n");
 		mncc_recv_rtp_err(net, rtp->callref, MNCC_RTP_CONNECT);
 		return 0;
 	}
@@ -1837,8 +1813,6 @@ int mncc_tx_to_cc(struct gsm_network *net, int msg_type, void *arg)
 	struct ran_conn *conn = NULL;
 	struct gsm_mncc *data = arg, rel;
 
-	DEBUGP(DMNCC, "receive message %s\n", get_mncc_name(msg_type));
-
 	/* handle special messages */
 	switch(msg_type) {
 	case MNCC_BRIDGE:
@@ -1860,7 +1834,7 @@ int mncc_tx_to_cc(struct gsm_network *net, int msg_type, void *arg)
 	case GSM_TCHF_FRAME_EFR:
 	case GSM_TCHH_FRAME:
 	case GSM_TCH_FRAME_AMR:
-		LOGP(DMNCC, LOGL_ERROR, "RTP streams must be handled externally; %s not supported.\n",
+		LOG_TRANS_CAT(trans, DMNCC, LOGL_ERROR, "RTP streams must be handled externally; %s not supported.\n",
 		     get_mncc_name(msg_type));
 		return -ENOTSUP;
 	}
@@ -1876,51 +1850,43 @@ int mncc_tx_to_cc(struct gsm_network *net, int msg_type, void *arg)
 		struct vlr_subscr *vsub;
 
 		if (msg_type != MNCC_SETUP_REQ) {
-			DEBUGP(DCC, "(bts - trx - ts - ti -- sub %s) "
-				"Received '%s' from MNCC with "
-				"unknown callref %d\n", data->called.number,
-				get_mncc_name(msg_type), data->callref);
+			LOG_TRANS_CAT(trans, DCC, LOGL_ERROR, "Unknown call reference for %s\n",
+				      get_mncc_name(msg_type));
 			/* Invalid call reference */
 			return mncc_release_ind(net, NULL, data->callref,
 						GSM48_CAUSE_LOC_PRN_S_LU,
 						GSM48_CC_CAUSE_INVAL_TRANS_ID);
 		}
 		if (!data->called.number[0] && !data->imsi[0]) {
-			DEBUGP(DCC, "(bts - trx - ts - ti) "
-				"Received '%s' from MNCC with "
-				"no number or IMSI\n", get_mncc_name(msg_type));
+			LOG_TRANS_CAT(trans, DCC, LOGL_ERROR, "Neither number nor IMSI in %s\n",
+				      get_mncc_name(msg_type));
 			/* Invalid number */
 			return mncc_release_ind(net, NULL, data->callref,
 						GSM48_CAUSE_LOC_PRN_S_LU,
 						GSM48_CC_CAUSE_INV_NR_FORMAT);
 		}
 		/* New transaction due to setup, find subscriber */
-		if (data->called.number[0])
-			vsub = vlr_subscr_find_by_msisdn(net->vlr,
-							 data->called.number, __func__);
-		else
+		if (data->called.number[0]) {
+			vsub = vlr_subscr_find_by_msisdn(net->vlr, data->called.number, __func__);
+			if (!vsub)
+				LOG_TRANS_CAT(trans, DCC, LOGL_ERROR, "rx %s for unknown subscriber number '%s'\n",
+					      get_mncc_name(msg_type), data->called.number);
+		} else {
 			vsub = vlr_subscr_find_by_imsi(net->vlr, data->imsi, __func__);
-
+			if (!vsub)
+				LOG_TRANS_CAT(trans, DCC, LOGL_ERROR, "rx %s for unknown subscriber IMSI '%s'\n",
+					      get_mncc_name(msg_type), data->imsi);
+		}
+		if (!vsub)
+			return mncc_release_ind(net, NULL, data->callref, GSM48_CAUSE_LOC_PRN_S_LU,
+						GSM48_CC_CAUSE_UNASSIGNED_NR);
 		/* update the subscriber we deal with */
 		log_set_context(LOG_CTX_VLR_SUBSCR, vsub);
 
-		/* If subscriber is not found */
-		if (!vsub) {
-			DEBUGP(DCC, "(bts - trx - ts - ti -- sub %s) "
-				"Received '%s' from MNCC with "
-				"unknown subscriber %s\n", data->called.number,
-				get_mncc_name(msg_type), data->called.number);
-			/* Unknown subscriber */
-			return mncc_release_ind(net, NULL, data->callref,
-						GSM48_CAUSE_LOC_PRN_S_LU,
-						GSM48_CC_CAUSE_UNASSIGNED_NR);
-		}
 		/* If subscriber is not "attached" */
-		if (!vsub->cgi.lai.lac) {
-			DEBUGP(DCC, "(bts - trx - ts - ti -- sub %s) "
-				"Received '%s' from MNCC with "
-				"detached subscriber %s\n", data->called.number,
-				get_mncc_name(msg_type), vlr_subscr_name(vsub));
+		if (!vsub->lu_complete) {
+			LOG_TRANS_CAT(trans, DCC, LOGL_ERROR, "rx %s for subscriber that is not attached: %s\n",
+				      get_mncc_name(msg_type), vlr_subscr_name(vsub));
 			vlr_subscr_put(vsub, __func__);
 			/* Temporarily out of order */
 			return mncc_release_ind(net, NULL, data->callref,
@@ -1931,7 +1897,7 @@ int mncc_tx_to_cc(struct gsm_network *net, int msg_type, void *arg)
 		trans = trans_alloc(net, vsub, GSM48_PDISC_CC,
 				    TRANS_ID_UNASSIGNED, data->callref);
 		if (!trans) {
-			LOGP(DCC, LOGL_ERROR, "No memory for trans.\n");
+			LOG_TRANS(trans, LOGL_ERROR, "No memory for trans.\n");
 			vlr_subscr_put(vsub, __func__);
 			/* Ressource unavailable */
 			mncc_release_ind(net, NULL, data->callref,
@@ -1951,16 +1917,14 @@ int mncc_tx_to_cc(struct gsm_network *net, int msg_type, void *arg)
 				if (transt == trans ||
 				    transt->vsub != vsub)
 					continue;
-				DEBUGP(DCC, "(bts - trx - ts - ti -- sub %s) "
-					"Received '%s' from MNCC with "
-					"unallocated channel, paging already "
-					"started for lac %d.\n",
-					data->called.number,
-					get_mncc_name(msg_type), vsub->cgi.lai.lac);
+				LOG_TRANS(trans, LOGL_DEBUG,
+					  "rx %s, subscriber not yet connected, paging already started\n",
+					  get_mncc_name(msg_type));
 				vlr_subscr_put(vsub, __func__);
 				trans_free(trans);
 				return 0;
 			}
+
 			/* store setup information until paging succeeds */
 			memcpy(&trans->cc.msg, data, sizeof(struct gsm_mncc));
 
@@ -1972,7 +1936,7 @@ int mncc_tx_to_cc(struct gsm_network *net, int msg_type, void *arg)
 							"MNCC: establish call",
 							SGSAP_SERV_IND_CS_CALL);
 			if (!trans->paging_request) {
-				LOGP(DCC, LOGL_ERROR, "Failed to allocate paging token.\n");
+				LOG_TRANS(trans, LOGL_ERROR, "Failed to allocate paging token.\n");
 				vlr_subscr_put(vsub, __func__);
 				trans_free(trans);
 				return 0;
@@ -1990,6 +1954,8 @@ int mncc_tx_to_cc(struct gsm_network *net, int msg_type, void *arg)
 		log_set_context(LOG_CTX_VLR_SUBSCR, trans->vsub);
 	}
 
+	LOG_TRANS_CAT(trans, DMNCC, LOGL_DEBUG, "rx %s\n", get_mncc_name(msg_type));
+
 	gsm48_start_guard_timer(trans);
 
 	if (trans->conn)
@@ -1997,10 +1963,7 @@ int mncc_tx_to_cc(struct gsm_network *net, int msg_type, void *arg)
 
 	/* if paging did not respond yet */
 	if (!conn) {
-		DEBUGP(DCC, "(sub %s) "
-			"Received '%s' from MNCC in paging state\n",
-			vlr_subscr_msisdn_or_name(trans->vsub),
-			get_mncc_name(msg_type));
+		LOG_TRANS(trans, LOGL_DEBUG, "rx %s in paging state\n", get_mncc_name(msg_type));
 		mncc_set_cause(&rel, GSM48_CAUSE_LOC_PRN_S_LU,
 				GSM48_CC_CAUSE_NORM_CALL_CLEAR);
 		if (msg_type == MNCC_REL_REQ)
@@ -2011,12 +1974,8 @@ int mncc_tx_to_cc(struct gsm_network *net, int msg_type, void *arg)
 		trans_free(trans);
 		return rc;
 	} else {
-		DEBUGP(DCC, "(ti %02x sub %s) "
-		       "Received '%s' from MNCC in state %d (%s)\n",
-		       trans->transaction_id,
-		       vlr_subscr_msisdn_or_name(trans->conn->vsub),
-		       get_mncc_name(msg_type), trans->cc.state,
-		       gsm48_cc_state_name(trans->cc.state));
+		LOG_TRANS(trans, LOGL_DEBUG, "rx %s in state %s\n",
+			  get_mncc_name(msg_type), gsm48_cc_state_name(trans->cc.state));
 	}
 
 	/* Find function for current state and message */
@@ -2025,7 +1984,8 @@ int mncc_tx_to_cc(struct gsm_network *net, int msg_type, void *arg)
 		 && ((1 << trans->cc.state) & downstatelist[i].states))
 			break;
 	if (i == DOWNSLLEN) {
-		DEBUGP(DCC, "Message '%s' unhandled at state '%s'\n", get_mncc_name(msg_type), gsm48_cc_state_name(trans->cc.state));
+		LOG_TRANS(trans, LOGL_DEBUG, "Message '%s' unhandled at state '%s'\n",
+			  get_mncc_name(msg_type), gsm48_cc_state_name(trans->cc.state));
 		return 0;
 	}
 
@@ -2098,28 +2058,17 @@ int gsm0408_rcv_cc(struct ran_conn *conn, struct msgb *msg)
 	int i, rc = 0;
 
 	if (msg_type & 0x80) {
-		DEBUGP(DCC, "MSG 0x%2x not defined for PD error\n", msg_type);
+		LOG_TRANS(trans, LOGL_DEBUG, "MSG 0x%2x not defined for PD error\n", msg_type);
 		return -EINVAL;
 	}
 
 	if (!conn->vsub) {
-		LOGP(DCC, LOGL_ERROR, "Invalid conn: no subscriber\n");
+		LOG_TRANS(trans, LOGL_ERROR, "Invalid conn: no subscriber\n");
 		return -EINVAL;
 	}
 
 	/* Find transaction */
 	trans = trans_find_by_id(conn, GSM48_PDISC_CC, transaction_id);
-
-#if BEFORE_MSCSPLIT
-	/* Re-enable this log output once we can obtain this information via
-	 * A-interface, see OS#2391. */
-	DEBUGP(DCC, "(bts %d trx %d ts %d ti %x sub %s) "
-		"Received '%s' from MS in state %d (%s)\n",
-		conn->bts->nr, conn->lchan->ts->trx->nr, conn->lchan->ts->nr,
-		transaction_id, vlr_subscr_msisdn_or_name(conn->vsub),
-		gsm48_cc_msg_name(msg_type), trans?(trans->cc.state):0,
-		gsm48_cc_state_name(trans?(trans->cc.state):0));
-#endif
 
 	/* Create transaction */
 	if (!trans) {
@@ -2130,7 +2079,7 @@ int gsm0408_rcv_cc(struct ran_conn *conn, struct msgb *msg)
 				    GSM48_PDISC_CC,
 				    transaction_id, new_callref++);
 		if (!trans) {
-			LOGP(DCC, LOGL_ERROR, "No memory for trans.\n");
+			LOG_TRANS(trans, LOGL_ERROR, "No memory for trans.\n");
 			rc = gsm48_tx_simple(conn,
 					     GSM48_PDISC_CC | (transaction_id << 4),
 					     GSM48_MT_CC_RELEASE_COMPL);
@@ -2142,13 +2091,16 @@ int gsm0408_rcv_cc(struct ran_conn *conn, struct msgb *msg)
 		cm_service_request_concludes(conn, msg);
 	}
 
+	LOG_TRANS(trans, LOGL_DEBUG, "rx %s in state %s\n", gsm48_cc_msg_name(msg_type),
+		  gsm48_cc_state_name(trans->cc.state));
+
 	/* find function for current state and message */
 	for (i = 0; i < DATASLLEN; i++)
 		if ((msg_type == datastatelist[i].type)
 		 && ((1 << trans->cc.state) & datastatelist[i].states))
 			break;
 	if (i == DATASLLEN) {
-		DEBUGP(DCC, "Message unhandled at this state.\n");
+		LOG_TRANS(trans, LOGL_ERROR, "Message unhandled at this state.\n");
 		return 0;
 	}
 

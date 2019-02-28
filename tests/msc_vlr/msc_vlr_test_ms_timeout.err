@@ -446,17 +446,17 @@ DMM RAN_conn(IMSI-901700000004620:MSISDN-46071:GERAN-A-0:LU){RAN_CONN_S_RELEASED
 DREF VLR subscr IMSI-901700000004620:MSISDN-46071 + test_ms_timeout_paging: now used by 2 (attached,test_ms_timeout_paging)
   llist_count(&vsub->cs.requests) == 0
 DREF VLR subscr IMSI-901700000004620:MSISDN-46071 + SMS-receiver: now used by 3 (attached,test_ms_timeout_paging,SMS-receiver)
-DLSMS Going to send a MT SMS
-DCC (ti 00 sub IMSI-901700000004620:MSISDN-46071 callref 40000001) New transaction
 DREF VLR subscr IMSI-901700000004620:MSISDN-46071 + SMS: now used by 4 (attached,test_ms_timeout_paging,SMS-receiver,SMS)
+DLSMS trans(SMS IMSI-901700000004620:MSISDN-46071 callref-0x40000001 tid-0) New transaction
 DLSMS SMC(0) instance created for network
 DLSMS SMR(0) instance created for network.
+DLSMS trans(SMS IMSI-901700000004620:MSISDN-46071 callref-0x40000001 tid-0) Going to send a MT SMS
 DLSMS SMR(0) message SM-RL-DATA_REQ received in state IDLE
 DLSMS SMR(0) TX SMS RP-DATA
 DLSMS SMR(0) new RP state IDLE -> WAIT_FOR_RP_ACK
 DLSMS SMC(0) message MNSMS-EST-REQ received in state IDLE
 DLSMS SMC(0) new CP state IDLE -> MM_CONN_PENDING
-DLSMS Initiating Paging procedure for IMSI-901700000004620:MSISDN-46071 due to MMSMS_EST_REQ
+DLSMS trans(SMS IMSI-901700000004620:MSISDN-46071 callref-0x40000001 tid-0) Initiating Paging due to MMSMS_EST_REQ
 DMM Subscriber IMSI-901700000004620:MSISDN-46071 not paged yet, start paging.
   GERAN-A sends out paging request to IMSI 901700000004620, TMSI 0xffffffff, LAC 23
   strcmp(paging_expecting_imsi, imsi) == 0
@@ -473,17 +473,17 @@ DREF VLR subscr IMSI-901700000004620:MSISDN-46071 + test_ms_timeout_paging: now 
   vsub->cs.is_paging == 1
 - another request is added to the list but does not cause another paging
 DREF VLR subscr IMSI-901700000004620:MSISDN-46071 + SMS-receiver: now used by 6 (attached,2*SMS-receiver,SMS,Paging,test_ms_timeout_paging)
-DLSMS Going to send a MT SMS
-DCC (ti 01 sub IMSI-901700000004620:MSISDN-46071 callref 40000002) New transaction
 DREF VLR subscr IMSI-901700000004620:MSISDN-46071 + SMS: now used by 7 (attached,2*SMS-receiver,2*SMS,Paging,test_ms_timeout_paging)
+DLSMS trans(SMS IMSI-901700000004620:MSISDN-46071 callref-0x40000002 tid-1) New transaction
 DLSMS SMC(0) instance created for network
 DLSMS SMR(0) instance created for network.
+DLSMS trans(SMS IMSI-901700000004620:MSISDN-46071 callref-0x40000002 tid-1) Going to send a MT SMS
 DLSMS SMR(0) message SM-RL-DATA_REQ received in state IDLE
 DLSMS SMR(0) TX SMS RP-DATA
 DLSMS SMR(0) new RP state IDLE -> WAIT_FOR_RP_ACK
 DLSMS SMC(0) message MNSMS-EST-REQ received in state IDLE
 DLSMS SMC(0) new CP state IDLE -> MM_CONN_PENDING
-DLSMS Initiating Paging procedure for IMSI-901700000004620:MSISDN-46071 due to MMSMS_EST_REQ
+DLSMS trans(SMS IMSI-901700000004620:MSISDN-46071 callref-0x40000002 tid-1) Initiating Paging due to MMSMS_EST_REQ
 DMM Subscriber IMSI-901700000004620:MSISDN-46071 already paged.
   llist_count(&vsub->cs.requests) == 2
 DREF VLR subscr IMSI-901700000004620:MSISDN-46071 - test_ms_timeout_paging: now used by 6 (attached,2*SMS-receiver,2*SMS,Paging)
@@ -492,32 +492,34 @@ DREF VLR subscr IMSI-901700000004620:MSISDN-46071 - test_ms_timeout_paging: now 
 - Total time passed: 11.000000 s
 DPAG Paging failure for IMSI-901700000004620:MSISDN-46071 (event=1)
 DPAG Calling paging cbfn.
-DLSMS paging_cb_mmsms_est_req(hooknum=1, event=1)
+DLSMS trans(SMS IMSI-901700000004620:MSISDN-46071 callref-0x40000001 tid-0,PAGING) paging_cb_mmsms_est_req(expired)
 DLSMS SMC(0) message MMSMS-REL-IND received in state MM_CONN_PENDING
 DLSMS SMC(0) MM layer is released
 DLSMS SMC(0) new CP state MM_CONN_PENDING -> IDLE
-DLSMS MNSMS-ERROR-IND, no cause
+DLSMS trans(SMS IMSI-901700000004620:MSISDN-46071 callref-0x40000001 tid-0) MNSMS-ERROR-IND, no cause
 DLSMS SMR(0) message MNSMS-ERROR-IND received in state WAIT_FOR_RP_ACK
 DLSMS SMR(0) TX SMS MNSMS-ERROR-IND
 DLSMS SMR(0) new RP state WAIT_FOR_RP_ACK -> IDLE
 DLSMS SMR(0) TX: MNSMS-REL-REQ
 DLSMS SMC(0) message MNSMS-REL-REQ received in state IDLE
 DREF VLR subscr IMSI-901700000004620:MSISDN-46071 - SMS-receiver: now used by 5 (attached,SMS-receiver,2*SMS,Paging)
+DLSMS trans(SMS IMSI-901700000004620:MSISDN-46071 callref-0x40000001 tid-0) Freeing transaction
 DLSMS SMR(0) clearing SMR instance
 DLSMS SMC(0) clearing instance
 DREF VLR subscr IMSI-901700000004620:MSISDN-46071 - SMS: now used by 4 (attached,SMS-receiver,SMS,Paging)
 DPAG Calling paging cbfn.
-DLSMS paging_cb_mmsms_est_req(hooknum=1, event=1)
+DLSMS trans(SMS IMSI-901700000004620:MSISDN-46071 callref-0x40000002 tid-1,PAGING) paging_cb_mmsms_est_req(expired)
 DLSMS SMC(0) message MMSMS-REL-IND received in state MM_CONN_PENDING
 DLSMS SMC(0) MM layer is released
 DLSMS SMC(0) new CP state MM_CONN_PENDING -> IDLE
-DLSMS MNSMS-ERROR-IND, no cause
+DLSMS trans(SMS IMSI-901700000004620:MSISDN-46071 callref-0x40000002 tid-1) MNSMS-ERROR-IND, no cause
 DLSMS SMR(0) message MNSMS-ERROR-IND received in state WAIT_FOR_RP_ACK
 DLSMS SMR(0) TX SMS MNSMS-ERROR-IND
 DLSMS SMR(0) new RP state WAIT_FOR_RP_ACK -> IDLE
 DLSMS SMR(0) TX: MNSMS-REL-REQ
 DLSMS SMC(0) message MNSMS-REL-REQ received in state IDLE
 DREF VLR subscr IMSI-901700000004620:MSISDN-46071 - SMS-receiver: now used by 3 (attached,SMS,Paging)
+DLSMS trans(SMS IMSI-901700000004620:MSISDN-46071 callref-0x40000002 tid-1) Freeing transaction
 DLSMS SMR(0) clearing SMR instance
 DLSMS SMC(0) clearing instance
 DREF VLR subscr IMSI-901700000004620:MSISDN-46071 - SMS: now used by 2 (attached,Paging)
@@ -529,17 +531,17 @@ DREF VLR subscr IMSI-901700000004620:MSISDN-46071 + test_ms_timeout_paging: now 
 ---
 - Now that the timeout has expired, another Paging is sent on request
 DREF VLR subscr IMSI-901700000004620:MSISDN-46071 + SMS-receiver: now used by 3 (attached,test_ms_timeout_paging,SMS-receiver)
-DLSMS Going to send a MT SMS
-DCC (ti 00 sub IMSI-901700000004620:MSISDN-46071 callref 40000003) New transaction
 DREF VLR subscr IMSI-901700000004620:MSISDN-46071 + SMS: now used by 4 (attached,test_ms_timeout_paging,SMS-receiver,SMS)
+DLSMS trans(SMS IMSI-901700000004620:MSISDN-46071 callref-0x40000003 tid-0) New transaction
 DLSMS SMC(0) instance created for network
 DLSMS SMR(0) instance created for network.
+DLSMS trans(SMS IMSI-901700000004620:MSISDN-46071 callref-0x40000003 tid-0) Going to send a MT SMS
 DLSMS SMR(0) message SM-RL-DATA_REQ received in state IDLE
 DLSMS SMR(0) TX SMS RP-DATA
 DLSMS SMR(0) new RP state IDLE -> WAIT_FOR_RP_ACK
 DLSMS SMC(0) message MNSMS-EST-REQ received in state IDLE
 DLSMS SMC(0) new CP state IDLE -> MM_CONN_PENDING
-DLSMS Initiating Paging procedure for IMSI-901700000004620:MSISDN-46071 due to MMSMS_EST_REQ
+DLSMS trans(SMS IMSI-901700000004620:MSISDN-46071 callref-0x40000003 tid-0) Initiating Paging due to MMSMS_EST_REQ
 DMM Subscriber IMSI-901700000004620:MSISDN-46071 not paged yet, start paging.
   GERAN-A sends out paging request to IMSI 901700000004620, TMSI 0xffffffff, LAC 23
   strcmp(paging_expecting_imsi, imsi) == 0
@@ -560,17 +562,18 @@ DREF VLR subscr IMSI-901700000004620:MSISDN-46071 + gsm48_rx_mm_imsi_detach_ind:
 DMM IMSI DETACH for IMSI-901700000004620:MSISDN-46071
 DPAG Paging failure for IMSI-901700000004620:MSISDN-46071 (event=1)
 DPAG Calling paging cbfn.
-DLSMS paging_cb_mmsms_est_req(hooknum=1, event=1)
+DLSMS trans(SMS IMSI-901700000004620:MSISDN-46071 callref-0x40000003 tid-0,PAGING) paging_cb_mmsms_est_req(expired)
 DLSMS SMC(0) message MMSMS-REL-IND received in state MM_CONN_PENDING
 DLSMS SMC(0) MM layer is released
 DLSMS SMC(0) new CP state MM_CONN_PENDING -> IDLE
-DLSMS MNSMS-ERROR-IND, no cause
+DLSMS trans(SMS IMSI-901700000004620:MSISDN-46071 callref-0x40000003 tid-0) MNSMS-ERROR-IND, no cause
 DLSMS SMR(0) message MNSMS-ERROR-IND received in state WAIT_FOR_RP_ACK
 DLSMS SMR(0) TX SMS MNSMS-ERROR-IND
 DLSMS SMR(0) new RP state WAIT_FOR_RP_ACK -> IDLE
 DLSMS SMR(0) TX: MNSMS-REL-REQ
 DLSMS SMC(0) message MNSMS-REL-REQ received in state IDLE
 DREF VLR subscr IMSI-901700000004620:MSISDN-46071 - SMS-receiver: now used by 4 (attached,SMS,Paging,gsm48_rx_mm_imsi_detach_ind)
+DLSMS trans(SMS IMSI-901700000004620:MSISDN-46071 callref-0x40000003 tid-0) Freeing transaction
 DLSMS SMR(0) clearing SMR instance
 DLSMS SMC(0) clearing instance
 DREF VLR subscr IMSI-901700000004620:MSISDN-46071 - SMS: now used by 3 (attached,Paging,gsm48_rx_mm_imsi_detach_ind)

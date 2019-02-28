@@ -110,17 +110,13 @@ struct gsm_trans *trans_alloc(struct gsm_network *net,
 			      uint8_t protocol, uint8_t trans_id,
 			      uint32_t callref)
 {
-	struct gsm_trans *trans;
+	struct gsm_trans *trans = NULL; /* (NULL for LOG_TRANS() before allocation) */
 
 	/* a valid subscriber is indispensable */
 	if (vsub == NULL) {
-		LOGP(DVLR, LOGL_ERROR,
-		     "unable to alloc transaction, invalid subscriber (NULL)\n");
+		LOG_TRANS(trans, LOGL_ERROR, "unable to alloc transaction, invalid subscriber (NULL)\n");
 		return NULL;
 	}
-
-	DEBUGP(DCC, "(ti %02x sub %s callref %x) New transaction\n",
-	       trans_id, vlr_subscr_name(vsub), callref);
 
 	trans = talloc_zero(tall_trans_ctx, struct gsm_trans);
 	if (!trans)
@@ -135,6 +131,7 @@ struct gsm_trans *trans_alloc(struct gsm_network *net,
 	trans->net = net;
 	llist_add_tail(&trans->entry, &net->trans_list);
 
+	LOG_TRANS(trans, LOGL_DEBUG, "New transaction\n");
 	return trans;
 }
 
@@ -145,6 +142,8 @@ void trans_free(struct gsm_trans *trans)
 {
 	enum ran_conn_use conn_usage_token;
 	struct ran_conn *conn;
+
+	LOG_TRANS(trans, LOGL_DEBUG, "Freeing transaction\n");
 
 	switch (trans->protocol) {
 	case GSM48_PDISC_CC:

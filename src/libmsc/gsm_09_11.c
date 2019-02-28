@@ -60,8 +60,7 @@ static void ncss_session_timeout_handler(void *_trans)
 	if (trans->net->ncss_guard_timeout == 0)
 		return;
 
-	LOGP(DMM, LOGL_NOTICE, "SS/USSD session timeout, releasing "
-		"transaction (trans=%p, callref=%x)\n", trans, trans->callref);
+	LOG_TRANS(trans, LOGL_NOTICE, "SS/USSD session timeout, releasing\n");
 
 	/* Indicate connection release to subscriber (if active) */
 	if (trans->conn != NULL) {
@@ -103,9 +102,6 @@ int gsm0911_rcv_nc_ss(struct ran_conn *conn, struct msgb *msg)
 	/* Associate logging messages with this subscriber */
 	log_set_context(LOG_CTX_VLR_SUBSCR, conn->vsub);
 
-	DEBUGP(DMM, "Received SS/USSD data (trans_id=%x, msg_type=%s)\n",
-		tid, gsm48_pdisc_msgtype_name(GSM48_PDISC_NC_SS, msg_type));
-
 	/* Reuse existing transaction, or create a new one */
 	trans = trans_find_by_id(conn, GSM48_PDISC_NC_SS, tid);
 	if (!trans) {
@@ -121,20 +117,18 @@ int gsm0911_rcv_nc_ss(struct ran_conn *conn, struct msgb *msg)
 		 * a supplementary service.
 		 */
 		if (msg_type != GSM0480_MTYPE_REGISTER) {
-			LOGP(DMM, LOGL_ERROR, "Unexpected message (msg_type=%s), "
-				"transaction is not allocated yet\n",
-				gsm48_pdisc_msgtype_name(GSM48_PDISC_NC_SS, msg_type));
+			LOG_TRANS(trans, LOGL_ERROR, "Rx wrong SS/USSD message type for new transaction: %s\n",
+				  gsm48_pdisc_msgtype_name(GSM48_PDISC_NC_SS, msg_type));
 			gsm48_tx_simple(conn,
 				GSM48_PDISC_NC_SS | (tid << 4),
 				GSM0480_MTYPE_RELEASE_COMPLETE);
 			return -EINVAL;
 		}
 
-		DEBUGP(DMM, " -> (new transaction)\n");
 		trans = trans_alloc(conn->network, conn->vsub,
 				    GSM48_PDISC_NC_SS, tid, new_callref++);
 		if (!trans) {
-			LOGP(DMM, LOGL_ERROR, " -> No memory for trans\n");
+			LOG_TRANS(trans, LOGL_ERROR, " -> No memory for trans\n");
 			gsm48_tx_simple(conn,
 				GSM48_PDISC_NC_SS | (tid << 4),
 				GSM0480_MTYPE_RELEASE_COMPLETE);
@@ -153,6 +147,9 @@ int gsm0911_rcv_nc_ss(struct ran_conn *conn, struct msgb *msg)
 		cm_service_request_concludes(conn, msg);
 	}
 
+	LOG_TRANS(trans, LOGL_DEBUG, "Received SS/USSD msg %s\n",
+		  gsm48_pdisc_msgtype_name(GSM48_PDISC_NC_SS, msg_type));
+
 	/* (Re)schedule the inactivity timer */
 	if (conn->network->ncss_guard_timeout > 0) {
 		osmo_timer_schedule(&trans->ss.timer_guard,
@@ -163,16 +160,15 @@ int gsm0911_rcv_nc_ss(struct ran_conn *conn, struct msgb *msg)
 	rc = gsm0480_extract_ie_by_tag(gh, msgb_l3len(msg),
 		&facility_ie, &facility_ie_len, GSM0480_IE_FACILITY);
 	if (rc) {
-		LOGP(DMM, LOGL_ERROR, "GSM 04.80 message parsing error, "
-			"couldn't extract Facility IE\n");
+		LOG_TRANS(trans, LOGL_ERROR, "GSM 04.80 message parsing error, couldn't extract Facility IE\n");
 		goto error;
 	}
 
 	/* Facility IE is optional for RELEASE COMPLETE */
 	if (msg_type != GSM0480_MTYPE_RELEASE_COMPLETE) {
 		if (!facility_ie || facility_ie_len < 2) {
-			LOGP(DMM, LOGL_ERROR, "GSM 04.80 message parsing error, "
-				"missing mandatory Facility IE\n");
+			LOG_TRANS(trans, LOGL_ERROR, "GSM 04.80 message parsing error,"
+				  " missing mandatory Facility IE\n");
 			rc = -EINVAL;
 			goto error;
 		}
@@ -211,7 +207,7 @@ int gsm0911_rcv_nc_ss(struct ran_conn *conn, struct msgb *msg)
 	/* Allocate GSUP message buffer */
 	gsup_msgb = osmo_gsup_client_msgb_alloc();
 	if (!gsup_msgb) {
-		LOGP(DMM, LOGL_ERROR, "Couldn't allocate GSUP message\n");
+		LOG_TRANS(trans, LOGL_ERROR, "Couldn't allocate GSUP message\n");
 		rc = -ENOMEM;
 		goto error;
 	}
@@ -219,14 +215,14 @@ int gsm0911_rcv_nc_ss(struct ran_conn *conn, struct msgb *msg)
 	/* Encode GSUP message */
 	rc = osmo_gsup_encode(gsup_msgb, &gsup_msg);
 	if (rc) {
-		LOGP(DMM, LOGL_ERROR, "Couldn't encode GSUP message\n");
+		LOG_TRANS(trans, LOGL_ERROR, "Couldn't encode GSUP message\n");
 		goto error;
 	}
 
 	/* Finally send */
 	rc = osmo_gsup_client_send(conn->network->vlr->gsup_client, gsup_msgb);
 	if (rc) {
-		LOGP(DMM, LOGL_ERROR, "Couldn't send GSUP message\n");
+		LOG_TRANS(trans, LOGL_ERROR, "Couldn't send GSUP message\n");
 		goto error;
 	}
 
@@ -323,33 +319,37 @@ static struct gsm_trans *establish_nc_ss_trans(struct gsm_network *net,
 	struct gsm_trans *trans, *transt;
 	int tid;
 
+	/* Allocate transaction first, for log context */
+	trans = trans_alloc(net, vsub, GSM48_PDISC_NC_SS,
+		TRANS_ID_UNASSIGNED, gsup_msg->session_id);
+
+	if (!trans) {
+		LOG_TRANS(trans, LOGL_ERROR, " -> No memory for trans\n");
+		return NULL;
+	}
+
 	if (gsup_msg->session_state != OSMO_GSUP_SESSION_STATE_BEGIN) {
-		LOGP(DMM, LOGL_ERROR, "Received non-BEGIN message "
+		LOG_TRANS(trans, LOGL_ERROR, "Received non-BEGIN message "
 			"for non-existing transaction\n");
+		trans_free(trans);
 		return NULL;
 	}
 
 	if (!gsup_msg->ss_info || gsup_msg->ss_info_len < 2) {
-		LOGP(DMM, LOGL_ERROR, "Missing mandatory Facility IE\n");
+		LOG_TRANS(trans, LOGL_ERROR, "Missing mandatory Facility IE\n");
+		trans_free(trans);
 		return NULL;
 	}
 
 	/* If subscriber is not "attached" */
 	if (!vsub->cgi.lai.lac) {
-		LOGP(DMM, LOGL_ERROR, "Network-originated session "
+		LOG_TRANS(trans, LOGL_ERROR, "Network-originated session "
 			"rejected - subscriber is not attached\n");
+		trans_free(trans);
 		return NULL;
 	}
 
-	DEBUGP(DMM, "Establishing network-originated session\n");
-
-	/* Allocate a new transaction */
-	trans = trans_alloc(net, vsub, GSM48_PDISC_NC_SS,
-		TRANS_ID_UNASSIGNED, gsup_msg->session_id);
-	if (!trans) {
-		LOGP(DMM, LOGL_ERROR, " -> No memory for trans\n");
-		return NULL;
-	}
+	LOG_TRANS(trans, LOGL_DEBUG, "Establishing network-originated session\n");
 
 	/* Count active NC SS/USSD sessions */
 	osmo_counter_inc(net->active_nc_ss);
@@ -357,7 +357,7 @@ static struct gsm_trans *establish_nc_ss_trans(struct gsm_network *net,
 	/* Assign transaction ID */
 	tid = trans_assign_trans_id(trans->net, trans->vsub, GSM48_PDISC_NC_SS);
 	if (tid < 0) {
-		LOGP(DMM, LOGL_ERROR, "No free transaction ID\n");
+		LOG_TRANS(trans, LOGL_ERROR, "No free transaction ID\n");
 		/* TODO: inform HLR about this */
 		/* TODO: release connection with subscriber */
 		trans->callref = 0;
@@ -379,7 +379,7 @@ static struct gsm_trans *establish_nc_ss_trans(struct gsm_network *net,
 		return trans;
 	}
 
-	DEBUGP(DMM, "Triggering Paging Request\n");
+	LOG_TRANS(trans, LOGL_DEBUG, "Triggering Paging Request\n");
 
 	/* Find transaction with this subscriber already paging */
 	llist_for_each_entry(transt, &net->trans_list, entry) {
@@ -387,7 +387,7 @@ static struct gsm_trans *establish_nc_ss_trans(struct gsm_network *net,
 		if (transt == trans || transt->vsub != vsub)
 			continue;
 
-		LOGP(DMM, LOGL_ERROR, "Paging already started, "
+		LOG_TRANS(trans, LOGL_ERROR, "Paging already started, "
 			"rejecting message...\n");
 		trans_free(trans);
 		return NULL;
@@ -398,7 +398,7 @@ static struct gsm_trans *establish_nc_ss_trans(struct gsm_network *net,
 		&handle_paging_event, trans, "GSM 09.11 SS/USSD",
 	        SGSAP_SERV_IND_CS_CALL);
 	if (!trans->paging_request) {
-		LOGP(DMM, LOGL_ERROR, "Failed to allocate paging token\n");
+		LOG_TRANS(trans, LOGL_ERROR, "Failed to allocate paging token\n");
 		trans_free(trans);
 		return NULL;
 	}
@@ -510,7 +510,7 @@ int gsm0911_gsup_handler(struct vlr_subscr *vsub,
 	/* Missing or incorrect session state */
 	case OSMO_GSUP_SESSION_STATE_NONE:
 	default:
-		LOGP(DMM, LOGL_ERROR, "Unexpected session state %d\n",
+		LOG_TRANS(trans, LOGL_ERROR, "Unexpected session state %d\n",
 			gsup_msg->session_state);
 		/* FIXME: send ERROR back to the HLR */
 		msgb_free(ss_msg);
@@ -520,7 +520,7 @@ int gsm0911_gsup_handler(struct vlr_subscr *vsub,
 	/* Facility IE is optional only for RELEASE COMPLETE */
 	if (gh->msg_type != GSM0480_MTYPE_RELEASE_COMPLETE) {
 		if (!gsup_msg->ss_info || gsup_msg->ss_info_len < 2) {
-			LOGP(DMM, LOGL_ERROR, "Missing mandatory Facility IE "
+			LOG_TRANS(trans, LOGL_ERROR, "Missing mandatory Facility IE "
 				"for mapped 0x%02x message\n", gh->msg_type);
 			/* FIXME: send ERROR back to the HLR */
 			msgb_free(ss_msg);
