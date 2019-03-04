@@ -24,8 +24,6 @@
 #include <string.h>
 #include <sys/types.h>
 
-#include "bscconfig.h"
-
 #include <osmocom/msc/debug.h>
 #include <osmocom/msc/gsm_data.h>
 #include <osmocom/msc/gsm_subscriber.h>

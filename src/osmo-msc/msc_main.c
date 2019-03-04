@@ -36,7 +36,7 @@
 #include <getopt.h>
 
 /* build switches from the configure script */
-#include "../../bscconfig.h"
+#include "config.h"
 
 #include <osmocom/msc/db.h>
 #include <osmocom/core/application.h>

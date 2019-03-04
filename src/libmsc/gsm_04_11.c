@@ -33,7 +33,7 @@
 #include <time.h>
 #include <netinet/in.h>
 
-#include "bscconfig.h"
+#include "config.h"
 
 #include <osmocom/core/msgb.h>
 #include <osmocom/core/talloc.h>

@@ -32,7 +32,7 @@
 #include <regex.h>
 #include <sys/types.h>
 
-#include "bscconfig.h"
+#include "config.h"
 
 #include <osmocom/msc/db.h>
 #include <osmocom/msc/debug.h>

@@ -21,7 +21,7 @@
  *
  */
 
-#include "bscconfig.h"
+#include "config.h"
 
 #include <osmocom/core/tdef.h>
 
