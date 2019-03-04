@@ -31,7 +31,7 @@
 
 #include <osmocom/msc/ran_infra.h>
 
-#include "bscconfig.h"
+#include "config.h"
 
 const struct value_string an_proto_names[] = {
 	{ OSMO_GSUP_ACCESS_NETWORK_PROTOCOL_TS3G_48006, "Ts3G-48006" },

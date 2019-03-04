@@ -5,8 +5,8 @@ debian/*.log
 .deps
 Makefile
 Makefile.in
-bscconfig.h
-bscconfig.h.in
+config.h
+config.h.in
 *.pc
 
 *.*~

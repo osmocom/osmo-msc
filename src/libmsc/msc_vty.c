@@ -23,7 +23,7 @@
 /* NOTE: I would have liked to call this the MSC_NODE instead of the MSC_NODE,
  * but MSC_NODE already exists to configure a remote MSC for osmo-bsc. */
 
-#include "../../bscconfig.h"
+#include "config.h"
 
 #include <inttypes.h>
 #include <limits.h>

@@ -237,7 +237,7 @@ AC_MSG_RESULT([CFLAGS="$CFLAGS"])
 AC_MSG_RESULT([CPPFLAGS="$CPPFLAGS"])
 
 dnl Generate the output
-AM_CONFIG_HEADER(bscconfig.h)
+AM_CONFIG_HEADER(config.h)
 
 AC_OUTPUT(
     include/Makefile
