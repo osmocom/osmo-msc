@@ -151,11 +151,12 @@ static void sms_pending_failed(struct gsm_sms_pending *pending, int paging_error
 	struct gsm_network *net = pending->vsub->vlr->user_ctx;
 	struct gsm_sms_queue *smsq;
 
+	pending->failed_attempts++;
 	LOGP(DLSMS, LOGL_NOTICE, "Sending SMS %llu failed %d times.\n",
 	     pending->sms_id, pending->failed_attempts);
 
 	smsq = net->sms_queue;
-	if (++pending->failed_attempts < smsq->max_fail)
+	if (pending->failed_attempts < smsq->max_fail)
 		return sms_pending_resend(pending);
 
 	sms_pending_free(pending);
