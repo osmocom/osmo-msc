@@ -161,7 +161,6 @@ static void sms_pending_failed(struct gsm_sms_pending *pending, int paging_error
 
 	sms_pending_free(pending);
 	smsq->pending -= 1;
-	sms_queue_trigger(smsq);
 }
 
 /*
