@@ -959,6 +959,30 @@ DEFUN(subscriber_send_pending_sms,
 	return CMD_SUCCESS;
 }
 
+DEFUN(subscriber_sms_delete_all,
+      subscriber_sms_delete_all_cmd,
+      "subscriber " SUBSCR_TYPES " ID sms delete-all",
+      SUBSCR_HELP "SMS Operations\n"
+      "Delete all SMS to be delivered to this subscriber"
+      " -- WARNING: the SMS data for all unsent SMS for this subscriber"
+      " WILL BE LOST.\n")
+{
+	struct vlr_subscr *vsub;
+
+	vsub = get_vsub_by_argv(gsmnet, argv[0], argv[1]);
+	if (!vsub) {
+		vty_out(vty, "%% No subscriber found for %s %s%s",
+			argv[0], argv[1], VTY_NEWLINE);
+		return CMD_WARNING;
+	}
+
+	db_sms_delete_by_msisdn(vsub->msisdn);
+
+	vlr_subscr_put(vsub);
+
+	return CMD_SUCCESS;
+}
+
 DEFUN(subscriber_send_sms,
       subscriber_send_sms_cmd,
       "subscriber " SUBSCR_TYPES " ID sms sender " SUBSCR_TYPES " SENDER_ID send .LINE",
@@ -1651,6 +1675,7 @@ void msc_vty_init(struct gsm_network *msc_network)
 	install_element(ENABLE_NODE, &smsqueue_clear_cmd);
 	install_element(ENABLE_NODE, &smsqueue_fail_cmd);
 	install_element(ENABLE_NODE, &subscriber_send_pending_sms_cmd);
+	install_element(ENABLE_NODE, &subscriber_sms_delete_all_cmd);
 
 	install_element(CONFIG_NODE, &cfg_mncc_int_cmd);
 	install_node(&mncc_int_node, config_write_mncc_int);
