@@ -121,7 +121,6 @@ int gsm411_gsup_mo_handler(struct vlr_subscr *vsub,
 	struct vlr_instance *vlr;
 	struct gsm_network *net;
 	struct gsm_trans *trans;
-	struct ran_conn *conn;
 	const char *msg_name;
 	bool msg_is_err;
 
@@ -164,16 +163,6 @@ int gsm411_gsup_mo_handler(struct vlr_subscr *vsub,
 		goto msg_error;
 	if (msg_is_err && !gsup_msg->sm_rp_cause)
 		goto msg_error;
-
-	/* Attempt to find a DTAP-connection */
-	conn = connection_for_subscr(vsub);
-	if (!conn) {
-		/* FIXME: should we establish it then? */
-		LOGP(DLSMS, LOGL_NOTICE, "No connection found for %s, "
-			"ignoring %s-%s message...\n", vlr_subscr_name(vsub),
-			msg_name, msg_is_err ? "Err" : "Res");
-		return -EIO; /* TODO: notify sender about that? */
-	}
 
 	/* Attempt to find DTAP-transaction */
 	trans = trans_find_by_sm_rp_mr(net, vsub, *(gsup_msg->sm_rp_mr));
