@@ -200,8 +200,14 @@ struct ran_conn *connection_for_subscr(struct vlr_subscr *vsub)
 	struct ran_conn *conn;
 
 	llist_for_each_entry(conn, &net->ran_conns, entry) {
-		if (conn->vsub == vsub)
-			return conn;
+		if (conn->vsub != vsub)
+			continue;
+		/* Found a conn, but is it in a usable state? Must not add transactions to a conn that is in release,
+		 * and must not start transactions for an unauthenticated subscriber. There will obviously be only one
+		 * conn for this vsub, so return NULL right away. */
+		if (!ran_conn_is_accepted(conn))
+			return NULL;
+		return conn;
 	}
 
 	return NULL;

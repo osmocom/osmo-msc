@@ -538,8 +538,10 @@ static void ran_conn_fsm_cleanup(struct osmo_fsm_inst *fi, enum osmo_fsm_term_ca
 {
 	struct ran_conn *conn = fi->priv;
 
-	if (ran_conn_fsm_has_active_transactions(fi))
+	if (ran_conn_fsm_has_active_transactions(fi)) {
 		LOGPFSML(fi, LOGL_ERROR, "Deallocating despite active transactions\n");
+		trans_conn_closed(conn);
+	}
 
 	if (!conn) {
 		LOGP(DRLL, LOGL_ERROR, "Freeing NULL RAN connection\n");
