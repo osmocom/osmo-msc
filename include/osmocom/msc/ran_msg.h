@@ -88,6 +88,7 @@ struct ran_assignment_command {
 	uint8_t osmux_cid;
 	bool call_id_present;
 	uint32_t call_id;
+	struct osmo_lcls *lcls;
 };
 
 struct ran_cipher_mode_command {

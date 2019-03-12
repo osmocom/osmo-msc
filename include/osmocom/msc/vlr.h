@@ -271,6 +271,7 @@ struct vlr_instance {
 		bool is_ps;
 		uint8_t nri_bitlen;
 		struct osmo_nri_ranges *nri_ranges;
+		bool lcls_enable;
 	} cfg;
 	/* A free-form pointer for use by the caller */
 	void *user_ctx;

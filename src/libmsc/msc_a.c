@@ -517,6 +517,69 @@ static void msc_a_fsm_authenticated(struct osmo_fsm_inst *fi, uint32_t event, vo
 	}
 }
 
+struct osmo_lcls *lcls_compose(const struct msc_a *msc_a, struct gsm_trans *cc_trans, bool use_lac)
+{
+	/* FIXME: ensure that a interface is in use for this transaction
+	   This fails test #13 because we have no sccp there Do we need this logging?
+	   Can we get primary_pc elsewhere? */
+	if (!cc_trans->net->a.sri->sccp)
+		return NULL;
+	struct osmo_ss7_instance *ss7 = osmo_sccp_get_ss7(cc_trans->net->a.sri->sccp);
+	struct osmo_lcls *lcls;
+	uint8_t w = osmo_ss7_pc_width(&ss7->cfg.pc_fmt);
+
+	if (!cc_trans) {
+		LOGP(DCC, LOGL_ERROR, "LCLS: unable to fill parameters for unallocated transaction\n");
+		return NULL;
+	}
+
+	if (!cc_trans->net->vlr->cfg.lcls_enable) {
+		LOGP(DCC, LOGL_NOTICE, "LCLS disabled globally\n");
+		return NULL;
+	}
+
+	/* Why this test? Do we need it? Where to find conn now, if this is still valid?
+	if (!cc_trans->conn) {
+		LOGP(DCC, LOGL_ERROR, "LCLS: unable to fill parameters for transaction without connection\n");
+		return NULL;
+	}*/
+
+	if (msc_a->c.ran->type != OSMO_RAT_GERAN_A) {
+		LOGP(DCC, LOGL_ERROR, "LCLS: only A interface is supported at the moment\n");
+		return NULL;
+	}
+
+	lcls = talloc_zero(cc_trans, struct osmo_lcls);
+	if (!lcls) {
+		LOGP(DCC, LOGL_ERROR, "LCLS: failed to allocate osmo_lcls\n");
+		return NULL;
+	}
+
+	LOGP(DCC, LOGL_INFO, "LCLS: using %u bits (%u bytes) for node ID\n", w, w / 8);
+
+	lcls->gcr.net_len = 3;
+	lcls->gcr.node = ss7->cfg.primary_pc;
+
+	/* net id from Q.1902.3 3-5 bytes, this function gives 3 bytes exactly */
+	osmo_plmn_to_bcd(lcls->gcr.net, &cc_trans->net->plmn);
+
+	osmo_store32be(cc_trans->callref, lcls->gcr.cr);
+	osmo_store16be(use_lac ? msc_a->via_cell.lai.lac : msc_a->via_cell.cell_identity, lcls->gcr.cr + 3);
+
+	LOGP(DCC, LOGL_INFO, "LCLS: allocated %s-based CR-ID %s\n", use_lac ? "LAC" : "CI",
+	     osmo_hexdump(lcls->gcr.cr, 5));
+
+	lcls->config = GSM0808_LCLS_CFG_BOTH_WAY;
+	lcls->control = GSM0808_LCLS_CSC_CONNECT;
+	lcls->corr_needed = true;
+	lcls->gcr_available = true;
+
+	LOGP(DCC, LOGL_DEBUG, "Filled %s\n", osmo_lcls_dump(lcls));
+	LOGP(DCC, LOGL_DEBUG, "Filled %s\n", osmo_gcr_dump(lcls));
+
+	return lcls;
+}
+
 /* The MGW has given us a local IP address for the RAN side. Ready to start the Assignment of a voice channel. */
 static void msc_a_call_leg_ran_local_addr_available(struct msc_a *msc_a)
 {
@@ -549,8 +612,11 @@ static void msc_a_call_leg_ran_local_addr_available(struct msc_a *msc_a)
 			.osmux_cid = msc_a->cc.call_leg->rtp[RTP_TO_RAN]->local_osmux_cid,
 			.call_id_present = true,
 			.call_id = cc_trans->callref,
+			/* Pass what here???   DATA_WE_NEED, bool use_lac   */
+			.lcls = lcls_compose(msc_a, cc_trans, true),
 		},
 	};
+
 	if (msc_a_ran_down(msc_a, MSC_ROLE_I, &msg)) {
 		LOG_MSC_A(msc_a, LOGL_ERROR, "Cannot send Assignment\n");
 		trans_free(cc_trans);
@@ -1482,6 +1548,13 @@ int msc_a_ran_dec_from_msc_i(struct msc_a *msc_a, struct msc_a_ran_dec_data *d)
 
 	case RAN_MSG_HANDOVER_FAILURE:
 		rc = msc_a_up_ho(msc_a, d, MSC_HO_EV_RX_FAILURE);
+		break;
+
+	case RAN_MSG_LCLS_STATUS:
+		/* The BSS sends us LCLS_STATUS. We do nothing for now, but it is not an error. */
+		LOG_MSC_A(msc_a, LOGL_DEBUG, "LCLS_STATUS (%s) received from MSC-I\n",
+			  gsm0808_lcls_status_name(msg->lcls_status.status));
+		rc = 0;
 		break;
 
 	default:
