@@ -67,6 +67,7 @@ struct proc_arq_priv {
 	struct osmo_location_area_id lai;
 	bool authentication_required;
 	bool ciphering_required;
+	uint8_t key_seq;
 	bool is_r99;
 	bool is_utran;
 	bool implicitly_accepted_parq_by_ciphering_cmd;
@@ -316,7 +317,8 @@ static bool is_auth_required(struct proc_arq_priv *par)
 	/* The cases where the authentication procedure should be used
 	 * are defined in 3GPP TS 33.102 */
 	/* For now we use a default value passed in to vlr_lu_fsm(). */
-	return par->authentication_required || par->ciphering_required;
+	return par->authentication_required ||
+		(par->ciphering_required && !auth_try_reuse_tuple(par->vsub, par->key_seq));
 }
 
 /* after the IMSI is known */
@@ -528,6 +530,7 @@ static const struct osmo_fsm_state proc_arq_vlr_states[] = {
 		.out_state_mask = S(PR_ARQ_S_DONE) |
 				  S(PR_ARQ_S_WAIT_OBTAIN_IMSI) |
 				  S(PR_ARQ_S_WAIT_AUTH) |
+				  S(PR_ARQ_S_WAIT_CIPH) |
 				  S(PR_ARQ_S_WAIT_UPD_LOC_CHILD) |
 				  S(PR_ARQ_S_WAIT_SUB_PRES) |
 				  S(PR_ARQ_S_WAIT_TRACE_SUB) |
@@ -540,6 +543,7 @@ static const struct osmo_fsm_state proc_arq_vlr_states[] = {
 		.in_event_mask = S(PR_ARQ_E_ID_IMSI),
 		.out_state_mask = S(PR_ARQ_S_DONE) |
 				  S(PR_ARQ_S_WAIT_AUTH) |
+				  S(PR_ARQ_S_WAIT_CIPH) |
 				  S(PR_ARQ_S_WAIT_UPD_LOC_CHILD) |
 				  S(PR_ARQ_S_WAIT_SUB_PRES) |
 				  S(PR_ARQ_S_WAIT_TRACE_SUB) |
@@ -637,6 +641,7 @@ vlr_proc_acc_req(struct osmo_fsm_inst *parent,
 		 const struct osmo_location_area_id *lai,
 		 bool authentication_required,
 		 bool ciphering_required,
+		 uint8_t key_seq,
 		 bool is_r99, bool is_utran)
 {
 	struct osmo_fsm_inst *fi;
@@ -660,6 +665,7 @@ vlr_proc_acc_req(struct osmo_fsm_inst *parent,
 	par->parent_event_data = parent_event_data;
 	par->authentication_required = authentication_required;
 	par->ciphering_required = ciphering_required;
+	par->key_seq = key_seq;
 	par->is_r99 = is_r99;
 	par->is_utran = is_utran;
 

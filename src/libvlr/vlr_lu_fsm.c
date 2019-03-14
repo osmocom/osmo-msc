@@ -685,6 +685,7 @@ struct lu_fsm_priv {
 	struct osmo_location_area_id new_lai;
 	bool authentication_required;
 	bool ciphering_required;
+	uint8_t key_seq;
 	bool is_r99;
 	bool is_utran;
 	bool assign_tmsi;
@@ -705,7 +706,8 @@ static bool is_auth_required(struct lu_fsm_priv *lfp)
 	/* The cases where the authentication procedure should be used
 	 * are defined in 3GPP TS 33.102 */
 	/* For now we use a default value passed in to vlr_lu_fsm(). */
-	return lfp->authentication_required || lfp->ciphering_required;
+	return lfp->authentication_required ||
+		(lfp->ciphering_required && !auth_try_reuse_tuple(lfp->vsub, lfp->key_seq));
 }
 
 /* Determine if ciphering is required */
@@ -1316,6 +1318,7 @@ static const struct osmo_fsm_state vlr_lu_fsm_states[] = {
 				  S(VLR_ULA_S_WAIT_PVLR) |
 				  S(VLR_ULA_S_WAIT_IMSI) |
 				  S(VLR_ULA_S_WAIT_AUTH) |
+				  S(VLR_ULA_S_WAIT_CIPH) |
 				  S(VLR_ULA_S_WAIT_HLR_UPD) |
 				  S(VLR_ULA_S_DONE),
 		.name = OSMO_STRINGIFY(VLR_ULA_S_IDLE),
@@ -1326,6 +1329,7 @@ static const struct osmo_fsm_state vlr_lu_fsm_states[] = {
 		.out_state_mask = S(VLR_ULA_S_WAIT_PVLR) |
 				  S(VLR_ULA_S_WAIT_IMSI) |
 				  S(VLR_ULA_S_WAIT_AUTH) |
+				  S(VLR_ULA_S_WAIT_CIPH) |
 				  S(VLR_ULA_S_WAIT_HLR_UPD) |
 				  S(VLR_ULA_S_DONE),
 		.name = OSMO_STRINGIFY(VLR_ULA_S_WAIT_IMEISV),
@@ -1336,6 +1340,7 @@ static const struct osmo_fsm_state vlr_lu_fsm_states[] = {
 				 S(VLR_ULA_E_SEND_ID_NACK),
 		.out_state_mask = S(VLR_ULA_S_WAIT_IMSI) |
 				  S(VLR_ULA_S_WAIT_AUTH) |
+				  S(VLR_ULA_S_WAIT_CIPH) |
 				  S(VLR_ULA_S_DONE),
 		.name = OSMO_STRINGIFY(VLR_ULA_S_WAIT_PVLR),
 		.action = lu_fsm_wait_pvlr,
@@ -1360,6 +1365,7 @@ static const struct osmo_fsm_state vlr_lu_fsm_states[] = {
 	[VLR_ULA_S_WAIT_IMSI] = {
 		.in_event_mask = S(VLR_ULA_E_ID_IMSI),
 		.out_state_mask = S(VLR_ULA_S_WAIT_AUTH) |
+				  S(VLR_ULA_S_WAIT_CIPH) |
 				  S(VLR_ULA_S_WAIT_HLR_UPD) |
 				  S(VLR_ULA_S_DONE),
 		.name = OSMO_STRINGIFY(VLR_ULA_S_WAIT_IMSI),
@@ -1439,6 +1445,7 @@ vlr_loc_update(struct osmo_fsm_inst *parent,
 	       const struct osmo_location_area_id *new_lai,
 	       bool authentication_required,
 	       bool ciphering_required,
+	       uint8_t key_seq,
 	       bool is_r99, bool is_utran,
 	       bool assign_tmsi)
 {
@@ -1462,6 +1469,7 @@ vlr_loc_update(struct osmo_fsm_inst *parent,
 	lfp->parent_event_data = parent_event_data;
 	lfp->authentication_required = authentication_required;
 	lfp->ciphering_required = ciphering_required;
+	lfp->key_seq = key_seq;
 	lfp->is_r99 = is_r99;
 	lfp->is_utran = is_utran;
 	lfp->assign_tmsi = assign_tmsi;

@@ -35,3 +35,5 @@ struct osmo_fsm_inst *auth_fsm_start(struct vlr_subscr *vsub,
 				     uint32_t parent_term_event,
 				     bool is_r99,
 				     bool is_utran);
+
+bool auth_try_reuse_tuple(struct vlr_subscr *vsub, uint8_t key_seq);

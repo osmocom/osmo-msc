@@ -433,6 +433,7 @@ int mm_rx_loc_upd_req(struct ran_conn *conn, struct msgb *msg)
 				&old_lai, &new_lai,
 				is_utran || conn->network->authentication_required,
 				is_utran || conn->network->a5_encryption_mask > 0x01,
+				lu->key_seq,
 				classmark1_is_r99(&lu->classmark1),
 				is_utran,
 				net->vlr->cfg.assign_tmsi);
@@ -820,6 +821,7 @@ int gsm48_rx_mm_serv_req(struct ran_conn *conn, struct msgb *msg)
 			 VLR_PR_ARQ_T_CM_SERV_REQ, mi-1, &lai,
 			 is_utran || conn->network->authentication_required,
 			 is_utran || conn->network->a5_encryption_mask > 0x01,
+			 req->cipher_key_seq,
 			 classmark2_is_r99(classmark2, classmark2_len),
 			 is_utran);
 
@@ -1178,6 +1180,8 @@ static int gsm48_rx_rr_pag_resp(struct ran_conn *conn, struct msgb *msg)
 {
 	struct gsm_network *net = conn->network;
 	struct gsm48_hdr *gh = msgb_l3(msg);
+	struct gsm48_pag_resp *pr =
+			(struct gsm48_pag_resp *)gh->data;
 	uint8_t classmark2_len = gh->data[1];
 	uint8_t *classmark2 = gh->data+2;
 	uint8_t *mi_lv = classmark2 + classmark2_len;
@@ -1209,6 +1213,7 @@ static int gsm48_rx_rr_pag_resp(struct ran_conn *conn, struct msgb *msg)
 			 VLR_PR_ARQ_T_PAGING_RESP, mi_lv, &lai,
 			 is_utran || conn->network->authentication_required,
 			 is_utran || conn->network->a5_encryption_mask > 0x01,
+			 pr->key_seq,
 			 classmark2_is_r99(classmark2, classmark2_len),
 			 is_utran);
 

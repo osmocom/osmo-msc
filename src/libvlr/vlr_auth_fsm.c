@@ -629,3 +629,18 @@ struct osmo_fsm_inst *auth_fsm_start(struct vlr_subscr *vsub,
 
 	return fi;
 }
+
+bool auth_try_reuse_tuple(struct vlr_subscr *vsub, uint8_t key_seq)
+{
+	int max_reuse_count = vsub->vlr->cfg.auth_tuple_max_reuse_count;
+	struct vlr_auth_tuple *at = vsub->last_tuple;
+
+	if (!at)
+		return false;
+	if ((max_reuse_count >= 0) && (at->use_count > max_reuse_count))
+		return false;
+	if (at->key_seq != key_seq)
+		return false;
+	at->use_count++;
+	return true;
+}
