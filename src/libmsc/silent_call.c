@@ -26,6 +26,7 @@
 
 #include <osmocom/core/byteswap.h>
 #include <osmocom/core/msgb.h>
+#include <osmocom/core/utils.h>
 #include <osmocom/msc/signal.h>
 #include <osmocom/msc/debug.h>
 #include <osmocom/msc/gsm_data.h>
@@ -202,7 +203,7 @@ int gsm_silent_call_start(struct vlr_subscr *vsub,
 	memcpy(&scd->ct, ct, sizeof(scd->ct));
 
 	if (traffic_dst_ip) {
-		strncpy(scd->traffic_ip, traffic_dst_ip, sizeof(scd->traffic_ip));
+		osmo_strlcpy(scd->traffic_ip, traffic_dst_ip, sizeof(scd->traffic_ip));
 		scd->traffic_port = traffic_dst_port;
 	}
 
