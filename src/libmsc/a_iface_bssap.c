@@ -703,6 +703,33 @@ static int rx_dtap(const struct osmo_sccp_user *scu, const struct a_conn_info *a
 	return 0;
 }
 
+/* Extract and verify the length information from the BSSMAP header. */
+void bssmap_msg_verify_len(struct msgb *msg)
+{
+	unsigned int expected_len;
+	unsigned int calculated_len;
+	struct bssmap_header *bssmap_header;
+
+	bssmap_header = (struct bssmap_header *)msg->l2h;
+
+	calculated_len = msgb_l3len(msg);
+	expected_len = bssmap_header->length;
+
+	/* In case of contradictory length information, decide for the
+	 * shorter length */
+	if (calculated_len > expected_len) {
+		LOGP(DBSSAP, LOGL_NOTICE,
+		     "BSSMAP message contains extra data, expected %u bytes, got %u bytes, truncated\n",
+		     expected_len, calculated_len);
+		msgb_l3trim(msg, expected_len);
+	} else if (calculated_len < expected_len) {
+		LOGP(DMSC, LOGL_NOTICE,
+		     "Short BSSMAP message, expected %u bytes, got %u bytes\n",
+		     expected_len, calculated_len);
+		msgb_l3trim(msg, calculated_len);
+	}
+}
+
 /* Handle incoming connection oriented messages. No ownership of 'msg' is passed on! */
 int a_sccp_rx_dt(struct osmo_sccp_user *scu, const struct a_conn_info *a_conn_info, struct msgb *msg)
 {
@@ -718,6 +745,7 @@ int a_sccp_rx_dt(struct osmo_sccp_user *scu, const struct a_conn_info *a_conn_in
 	switch (msg->l2h[0]) {
 	case BSSAP_MSG_BSS_MANAGEMENT:
 		msg->l3h = &msg->l2h[sizeof(struct bssmap_header)];
+		bssmap_msg_verify_len(msg);
 		return rx_bssmap(scu, a_conn_info, msg);
 	case BSSAP_MSG_DTAP:
 		return rx_dtap(scu, a_conn_info, msg);
