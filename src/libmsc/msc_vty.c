@@ -30,6 +30,7 @@
 
 #include <osmocom/gsm/protocol/gsm_08_58.h>
 #include <osmocom/gsm/protocol/gsm_04_14.h>
+#include <osmocom/gsm/protocol/gsm_08_08.h>
 
 #include <osmocom/sigtran/sccp_helpers.h>
 
