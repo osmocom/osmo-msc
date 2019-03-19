@@ -84,33 +84,29 @@ uint32_t vlr_timer(struct vlr_instance *vlr, uint32_t timer)
 const char *vlr_subscr_name(const struct vlr_subscr *vsub)
 {
 	static char buf[128];
-	char imsi[23] = "";
-	char msisdn[25] = "";
-	char tmsi[23] = "";
-	char tmsi_new[23] = "";
+	struct osmo_strbuf sb = { .buf = buf, .len = sizeof(buf) };
 	bool present = false;
 	if (!vsub)
 		return "unknown";
 	if (vsub->imsi[0]) {
-		snprintf(imsi, sizeof(imsi), "IMSI-%s", vsub->imsi);
+		OSMO_STRBUF_PRINTF(sb, "IMSI-%s", vsub->imsi);
 		present = true;
 	}
 	if (vsub->msisdn[0]) {
-		snprintf(msisdn, sizeof(msisdn), "%sMSISDN-%s", present? ":" : "", vsub->msisdn);
+		OSMO_STRBUF_PRINTF(sb, "%sMSISDN-%s", present? ":" : "", vsub->msisdn);
 		present = true;
 	}
 	if (vsub->tmsi != GSM_RESERVED_TMSI) {
-		snprintf(tmsi, sizeof(tmsi), "%sTMSI-0x%08X", present? ":" : "", vsub->tmsi);
+		OSMO_STRBUF_PRINTF(sb, "%sTMSI-0x%08X", present? ":" : "", vsub->tmsi);
 		present = true;
 	}
 	if (vsub->tmsi_new != GSM_RESERVED_TMSI) {
-		snprintf(tmsi_new, sizeof(tmsi_new), "%sTMSInew-0x%08X", present? ":" : "", vsub->tmsi_new);
+		OSMO_STRBUF_PRINTF(sb, "%sTMSInew-0x%08X", present? ":" : "", vsub->tmsi_new);
 		present = true;
 	}
 	if (!present)
 		return "unknown";
 
-	snprintf(buf, sizeof(buf), "%s%s%s%s", imsi, msisdn, tmsi, tmsi_new);
 	return buf;
 }
 
