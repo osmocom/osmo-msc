@@ -60,5 +60,5 @@ Description: OsmoMSC: Osmocom's Mobile Switching Center for 2G and 3G circuit-sw
   towards a HLR, but the much simpler Osmocom GSUP protocol, which can
   be translated to MAP if needed.
   .
-  This package contains the debug symbols for osmo-mgw in order to
+  This package contains the debug symbols for osmo-msc in order to
   generate meaningful backtraces in bug-reports.
