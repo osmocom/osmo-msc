@@ -1258,8 +1258,12 @@ struct sgs_state *sgs_iface_init(void *ctx, struct gsm_network *network)
 		return NULL;
 	g_sgs = sgs;
 
-	osmo_fsm_register(&sgs_vlr_reset_fsm);
 	sgs_server_open(sgs);
 
 	return sgs;
+}
+
+static __attribute__((constructor)) void on_dso_load(void)
+{
+	OSMO_ASSERT(osmo_fsm_register(&sgs_vlr_reset_fsm) == 0);
 }
