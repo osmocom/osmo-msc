@@ -57,10 +57,8 @@ DEFUN(cfg_sgs_local_ip, cfg_sgs_local_ip_cmd,
 	osmo_stream_srv_link_set_addr(sgs->srv_link, sgs->cfg.local_addr);
 
 	rc = sgs_server_open(sgs);
-	if (rc < 0) {
-		vty_out(vty, "%% SGs socket cannot be opened: %s%s", strerror(errno), VTY_NEWLINE);
+	if (rc < 0)
 		return CMD_WARNING;
-	}
 
 	return CMD_SUCCESS;
 }
@@ -77,10 +75,8 @@ DEFUN(cfg_sgs_local_port, cfg_sgs_local_port_cmd,
 	osmo_stream_srv_link_set_port(sgs->srv_link, sgs->cfg.local_port);
 
 	rc = sgs_server_open(sgs);
-	if (rc < 0) {
-		vty_out(vty, "%% SGs socket cannot be opened: %s%s", strerror(errno), VTY_NEWLINE);
+	if (rc < 0)
 		return CMD_WARNING;
-	}
 
 	return CMD_SUCCESS;
 }
