@@ -51,7 +51,7 @@
 
 /* A pointer to the GSM network we work with. By the current paradigm,
  * there can only be one gsm_network per MSC. The pointer is set once
- * when calling a_init() */
+ * when calling sgs_iface_init() */
 static struct gsm_network *gsm_network = NULL;
 
 static struct osmo_fsm sgs_vlr_reset_fsm;
