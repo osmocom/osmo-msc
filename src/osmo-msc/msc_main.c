@@ -62,6 +62,7 @@
 #include <osmocom/sigtran/osmo_ss7.h>
 #include <osmocom/mgcp_client/mgcp_client.h>
 #include <osmocom/msc/sgs_iface.h>
+#include <osmocom/msc/sgs_server.h>
 
 #ifdef BUILD_IU
 #include <osmocom/ranap/iu_client.h>
@@ -690,6 +691,11 @@ TODO: we probably want some of the _net_ ctrl commands from bsc_base_ctrl_cmds_i
 	if (ss7_setup(tall_msc_ctx)) {
 		printf("Setting up SCCP client failed.\n");
 		return 8;
+	}
+
+	if (sgs_server_open(g_sgs)) {
+		printf("Starting SGs server failed\n");
+		return 9;
 	}
 
 #ifdef BUILD_IU

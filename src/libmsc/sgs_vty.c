@@ -56,9 +56,11 @@ DEFUN(cfg_sgs_local_ip, cfg_sgs_local_ip_cmd,
 	osmo_strlcpy(sgs->cfg.local_addr, argv[0], sizeof(sgs->cfg.local_addr));
 	osmo_stream_srv_link_set_addr(sgs->srv_link, sgs->cfg.local_addr);
 
-	rc = sgs_server_open(sgs);
-	if (rc < 0)
-		return CMD_WARNING;
+	if (vty->type != VTY_FILE) {
+		rc = sgs_server_open(sgs);
+		if (rc < 0)
+			return CMD_WARNING;
+	}
 
 	return CMD_SUCCESS;
 }
@@ -74,9 +76,11 @@ DEFUN(cfg_sgs_local_port, cfg_sgs_local_port_cmd,
 	sgs->cfg.local_port = atoi(argv[0]);
 	osmo_stream_srv_link_set_port(sgs->srv_link, sgs->cfg.local_port);
 
-	rc = sgs_server_open(sgs);
-	if (rc < 0)
-		return CMD_WARNING;
+	if (vty->type != VTY_FILE) {
+		rc = sgs_server_open(sgs);
+		if (rc < 0)
+			return CMD_WARNING;
+	}
 
 	return CMD_SUCCESS;
 }

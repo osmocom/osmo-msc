@@ -1258,8 +1258,6 @@ struct sgs_state *sgs_iface_init(void *ctx, struct gsm_network *network)
 		return NULL;
 	g_sgs = sgs;
 
-	sgs_server_open(sgs);
-
 	return sgs;
 }
 
