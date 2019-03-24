@@ -1021,6 +1021,8 @@ int main(int argc, char **argv)
 {
 	handle_options(argc, argv);
 
+	osmo_fsm_term_safely(true);
+
 	msc_vlr_tests_ctx = talloc_named_const(NULL, 0, "msc_vlr_tests_ctx");
 	msgb_ctx = msgb_talloc_ctx_init(msc_vlr_tests_ctx, 0);
 	osmo_init_logging2(msc_vlr_tests_ctx, &info);

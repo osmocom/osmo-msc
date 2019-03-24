@@ -530,6 +530,8 @@ int main(int argc, char **argv)
 	/* Track the use of talloc NULL memory contexts */
 	talloc_enable_null_tracking();
 
+	osmo_fsm_term_safely(true);
+
 	msc_vty_info.copyright	= osmomsc_copyright;
 
 	tall_msc_ctx = talloc_named_const(NULL, 1, "osmo_msc");
