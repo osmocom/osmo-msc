@@ -48,6 +48,7 @@ OsmoMSC(config-msc)# list
 ...
   sms-database PATH
   assign-tmsi
+  lcls enable <0-1>
   mncc internal
   mncc external MNCC_SOCKET_PATH
   mncc guard-timeout <0-255>

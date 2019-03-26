@@ -498,6 +498,16 @@ DEFUN(cfg_msc_no_assign_tmsi, cfg_msc_no_assign_tmsi_cmd,
 	return CMD_SUCCESS;
 }
 
+DEFUN(cfg_msc_lcls_enable, cfg_msc_lcls_enable_cmd,
+      "lcls enable <0-1>",
+      "Set LCLS (Local Call Local Switch) related option\n"
+      "Enable LCLS for all calls\n"
+      "Enable (1) or disable (0) LCLS for all calls\n")
+{
+	gsmnet->vlr->cfg.lcls_enable = atoi(argv[0]);
+	return CMD_SUCCESS;
+}
+
 DEFUN(cfg_msc_cs7_instance_a,
       cfg_msc_cs7_instance_a_cmd,
       "cs7-instance-a <0-15>",
@@ -785,6 +795,9 @@ static int config_write_msc(struct vty *vty)
 		else
 			vty_out(vty, " check-imei-rqd 1%s", VTY_NEWLINE);
 	}
+
+	if (gsmnet->vlr->cfg.lcls_enable > 0)
+		vty_out(vty, " lcls enable 1%s", VTY_NEWLINE);
 
 	if (gsmnet->emergency.route_to_msisdn) {
 		vty_out(vty, " emergency-call route-to-msisdn %s%s",
@@ -2082,6 +2095,7 @@ void msc_vty_init(struct gsm_network *msc_network)
 	install_node(&msc_node, config_write_msc);
 	install_element(MSC_NODE, &cfg_sms_database_cmd);
 	install_element(MSC_NODE, &cfg_msc_assign_tmsi_cmd);
+	install_element(MSC_NODE, &cfg_msc_lcls_enable_cmd);
 	install_element(MSC_NODE, &cfg_msc_mncc_internal_cmd);
 	install_element(MSC_NODE, &cfg_msc_mncc_external_cmd);
 	install_element(MSC_NODE, &cfg_msc_mncc_guard_timeout_cmd);

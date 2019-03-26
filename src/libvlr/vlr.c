@@ -1258,7 +1258,7 @@ struct vlr_instance *vlr_alloc(void *ctx, const struct vlr_ops *ops)
 	vlr->cfg.assign_tmsi = true;
 	vlr->cfg.nri_bitlen = OSMO_NRI_BITLEN_DEFAULT;
 	vlr->cfg.nri_ranges = osmo_nri_ranges_alloc(vlr);
-	vlr->cfg.lcls_enable = 1;
+	vlr->cfg.lcls_enable = 0;
 
 	/* reset shared timer definitions */
 	osmo_tdefs_reset(msc_tdefs_vlr);
