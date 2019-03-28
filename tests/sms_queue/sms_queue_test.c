@@ -26,8 +26,10 @@
 #include <osmocom/msc/debug.h>
 #include <osmocom/msc/vlr.h>
 #include <osmocom/msc/gsm_data.h>
+#include <osmocom/msc/gsm_04_11.h>
 
 static void *talloc_ctx = NULL;
+extern void *tall_gsms_ctx;
 
 struct gsm_sms *smsq_take_next_sms(struct gsm_network *net,
 				   char *last_msisdn,
@@ -44,8 +46,6 @@ static void _test_take_next_sms_print(int i,
 		printf("no SMS to send");
 	printf(" (last_msisdn='%s')\n", last_msisdn? last_msisdn : "NULL");
 }
-
-static struct gsm_sms fake_sms = { 0 };
 
 struct {
 	const char *msisdn;
@@ -91,10 +91,18 @@ struct gsm_sms *__wrap_db_sms_get_next_unsent_rr_msisdn(struct gsm_network *net,
 							const char *last_msisdn,
 							unsigned int max_failed)
 {
-	static struct vlr_subscr arbitrary_vsub = { .lu_complete = true };
+	static struct vlr_subscr arbitrary_vsub;
+	struct gsm_sms *sms;
 	int i;
 	printf("     hitting database: looking for MSISDN > '%s', failed_attempts <= %d\n",
 	       last_msisdn, max_failed);
+
+	/* Every time we call sms_free(), the internal logic of libmsc
+	 * may call vlr_subscr_put() on our arbitrary_vsub, what would
+	 * lead to a segfault if its use_count <= 0. To prevent this,
+	 * let's ensure a big enough initial value. */
+	arbitrary_vsub.use_count = 1000;
+	arbitrary_vsub.lu_complete = true;
 
 	for (i = 0; i < ARRAY_SIZE(fake_sms_db); i++) {
 		if (!fake_sms_db[i].nr_of_sms)
@@ -103,14 +111,19 @@ struct gsm_sms *__wrap_db_sms_get_next_unsent_rr_msisdn(struct gsm_network *net,
 			continue;
 		if (fake_sms_db[i].failed_attempts > max_failed)
 			continue;
-		osmo_strlcpy(fake_sms.dst.addr, fake_sms_db[i].msisdn,
-			     sizeof(fake_sms.dst.addr));
-		fake_sms.receiver = fake_sms_db[i].vsub_attached? &arbitrary_vsub : NULL;
-		osmo_strlcpy(fake_sms.text, fake_sms_db[i].msisdn, sizeof(fake_sms.text));
+
+		sms = sms_alloc();
+		OSMO_ASSERT(sms);
+
+		osmo_strlcpy(sms->dst.addr, fake_sms_db[i].msisdn,
+			     sizeof(sms->dst.addr));
+		sms->receiver = fake_sms_db[i].vsub_attached? &arbitrary_vsub : NULL;
+		osmo_strlcpy(sms->text, fake_sms_db[i].msisdn, sizeof(sms->text));
 		if (fake_sms_db[i].vsub_attached)
 			fake_sms_db[i].nr_of_sms--;
-		return &fake_sms;
+		return sms;
 	}
+
 	return NULL;
 }
 
@@ -127,6 +140,10 @@ void show_fake_sms_db()
 	printf("-->\n");
 }
 
+/* sms_free() is not safe against NULL */
+#define sms_free_safe(sms) \
+	if (sms != NULL) sms_free(sms)
+
 static void test_next_sms()
 {
 	int i;
@@ -141,6 +158,7 @@ static void test_next_sms()
 		struct gsm_sms *sms = smsq_take_next_sms(NULL, last_msisdn, sizeof(last_msisdn));
 		_test_take_next_sms_print(i, sms, last_msisdn);
 		OSMO_ASSERT(i >= 4 || sms);
+		sms_free_safe(sms);
 	}
 
 	printf("\n- SMS are pending at various nr failed attempts (cutoff at >= 10)\n");
@@ -156,6 +174,7 @@ static void test_next_sms()
 		struct gsm_sms *sms = smsq_take_next_sms(NULL, last_msisdn, sizeof(last_msisdn));
 		_test_take_next_sms_print(i, sms, last_msisdn);
 		OSMO_ASSERT(i >= 2 || sms);
+		sms_free_safe(sms);
 	}
 
 	printf("\n- iterate the SMS DB at most once\n");
@@ -205,6 +224,10 @@ int main(int argc, char **argv)
 	msgb_ctx = msgb_talloc_ctx_init(talloc_ctx, 0);
 	logging_ctx = talloc_named_const(talloc_ctx, 0, "logging");
 	osmo_init_logging2(logging_ctx, &info);
+
+	/* Share our talloc context with libmsc's GSM 04.11 code,
+	 * so sms_alloc() would use it instead of NULL. */
+	tall_gsms_ctx = talloc_ctx;
 
 	OSMO_ASSERT(osmo_stderr_target);
 	log_set_use_color(osmo_stderr_target, 0);
