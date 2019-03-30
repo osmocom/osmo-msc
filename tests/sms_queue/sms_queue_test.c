@@ -220,6 +220,9 @@ int main(int argc, char **argv)
 	void *msgb_ctx;
 	void *logging_ctx;
 
+	/* Track the use of talloc NULL memory contexts */
+	talloc_enable_null_tracking();
+
 	talloc_ctx = talloc_named_const(NULL, 0, "sms_queue_test");
 	msgb_ctx = msgb_talloc_ctx_init(talloc_ctx, 0);
 	logging_ctx = talloc_named_const(talloc_ctx, 0, "logging");
@@ -257,6 +260,9 @@ int main(int argc, char **argv)
 	OSMO_ASSERT(talloc_total_blocks(talloc_ctx) == 1);
 	OSMO_ASSERT(talloc_total_size(talloc_ctx) == 0);
 	talloc_free(talloc_ctx);
+
+	talloc_report_full(NULL, stderr);
+	talloc_disable_null_tracking();
 
 	return 0;
 }
