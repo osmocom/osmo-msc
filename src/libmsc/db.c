@@ -236,6 +236,7 @@ static struct gsm_sms *sms_from_result_v3(dbi_result result)
 	long long unsigned int sender_id;
 	const char *text, *daddr;
 	const unsigned char *user_data;
+	unsigned int user_data_len;
 	char buf[32];
 	char *quoted;
 	dbi_result result2;
@@ -273,10 +274,15 @@ static struct gsm_sms *sms_from_result_v3(dbi_result result)
 	if (daddr)
 		OSMO_STRLCPY_ARRAY(sms->dst.addr, daddr);
 
-	sms->user_data_len = dbi_result_get_field_length(result, "user_data");
+	user_data_len = dbi_result_get_field_length(result, "user_data");
 	user_data = dbi_result_get_binary(result, "user_data");
-	if (sms->user_data_len > sizeof(sms->user_data))
-		sms->user_data_len = (uint8_t) sizeof(sms->user_data);
+	if (user_data_len > sizeof(sms->user_data)) {
+		LOGP(DDB, LOGL_ERROR,
+		     "SMS TP-UD length %u is too big, truncating to %zu\n",
+		     user_data_len, sizeof(sms->user_data));
+		user_data_len = (uint8_t) sizeof(sms->user_data);
+	}
+	sms->user_data_len = user_data_len;
 	memcpy(sms->user_data, user_data, sms->user_data_len);
 
 	text = dbi_result_get_string(result, "text");
@@ -395,6 +401,7 @@ static struct gsm_sms *sms_from_result_v4(dbi_result result)
 {
 	struct gsm_sms *sms = sms_alloc();
 	const unsigned char *user_data;
+	unsigned int user_data_len;
 	const char *text, *addr;
 
 	if (!sms)
@@ -419,10 +426,15 @@ static struct gsm_sms *sms_from_result_v4(dbi_result result)
 	sms->dst.ton = dbi_result_get_ulonglong(result, "dest_ton");
 	sms->dst.npi = dbi_result_get_ulonglong(result, "dest_npi");
 
-	sms->user_data_len = dbi_result_get_field_length(result, "user_data");
+	user_data_len = dbi_result_get_field_length(result, "user_data");
 	user_data = dbi_result_get_binary(result, "user_data");
-	if (sms->user_data_len > sizeof(sms->user_data))
-		sms->user_data_len = (uint8_t) sizeof(sms->user_data);
+	if (user_data_len > sizeof(sms->user_data)) {
+		LOGP(DDB, LOGL_ERROR,
+		     "SMS TP-UD length %u is too big, truncating to %zu\n",
+		     user_data_len, sizeof(sms->user_data));
+		user_data_len = (uint8_t) sizeof(sms->user_data);
+	}
+	sms->user_data_len = user_data_len;
 	memcpy(sms->user_data, user_data, sms->user_data_len);
 
 	text = dbi_result_get_string(result, "text");
@@ -753,6 +765,7 @@ static struct gsm_sms *sms_from_result(struct gsm_network *net, dbi_result resul
 	struct gsm_sms *sms = sms_alloc();
 	const char *text, *daddr, *saddr;
 	const unsigned char *user_data;
+	unsigned int user_data_len;
 	time_t validity_timestamp;
 
 	if (!sms)
@@ -789,10 +802,15 @@ static struct gsm_sms *sms_from_result(struct gsm_network *net, dbi_result resul
 	if (saddr)
 		OSMO_STRLCPY_ARRAY(sms->src.addr, saddr);
 
-	sms->user_data_len = dbi_result_get_field_length(result, "user_data");
+	user_data_len = dbi_result_get_field_length(result, "user_data");
 	user_data = dbi_result_get_binary(result, "user_data");
-	if (sms->user_data_len > sizeof(sms->user_data))
-		sms->user_data_len = (uint8_t) sizeof(sms->user_data);
+	if (user_data_len > sizeof(sms->user_data)) {
+		LOGP(DDB, LOGL_ERROR,
+		     "SMS TP-UD length %u is too big, truncating to %zu\n",
+		     user_data_len, sizeof(sms->user_data));
+		user_data_len = (uint8_t) sizeof(sms->user_data);
+	}
+	sms->user_data_len = user_data_len;
 	if (user_data)
 		memcpy(sms->user_data, user_data, sms->user_data_len);
 
