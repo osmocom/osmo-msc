@@ -131,8 +131,15 @@ void vlr_sgs_imsi_detach(struct vlr_instance *vlr, const char *imsi, enum sgsap_
 {
 	struct vlr_subscr *vsub;
 	enum sgs_ue_fsm_event evt;
+
 	vsub = vlr_subscr_find_by_imsi(vlr, imsi);
 	if (!vsub)
+		return;
+
+	/* See also: 3GPP TS 29.118, 5.6.3 Procedures in the VLR: In case of
+	 * an implicit detach, we are supposed to check if the state of the
+	 * SGs-association, and only when it is not SGs-NULL, we may proceed. */
+	if (vsub->sgs_fsm->state == SGS_UE_ST_NULL && type == SGSAP_ID_NONEPS_T_IMPLICIT_UE_EPS_NONEPS)
 		return;
 
 	switch (type) {
@@ -153,6 +160,11 @@ void vlr_sgs_imsi_detach(struct vlr_instance *vlr, const char *imsi, enum sgsap_
 
 	osmo_fsm_inst_dispatch(vsub->sgs_fsm, evt, NULL);
 	vlr_subscr_put(vsub);
+
+	/* Detaching from non EPS services essentially means that the
+	 * subscriber is detached from 2G. In any case the VLR will
+	 * get rid of the subscriber. */
+	vlr_subscr_expire(vsub);
 }
 
 /*! Perform an SGs EPS detach.
