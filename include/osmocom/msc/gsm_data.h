@@ -239,7 +239,6 @@ enum gsm_sms_source_id {
 	SMS_SOURCE_SMPP,	/* received via SMPP */
 };
 
-#define SMS_HDR_SIZE	128
 #define SMS_TEXT_SIZE	256
 
 struct gsm_sms_addr {
