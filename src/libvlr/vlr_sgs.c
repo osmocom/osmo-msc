@@ -101,6 +101,11 @@ int vlr_sgs_loc_update(struct vlr_instance *vlr, struct vlr_sgs_cfg *cfg,
 	vsub->cgi.lai = *new_lai;
 	vsub->cs.lac = vsub->sgs.lai.lac;
 
+	/* Subscribers that are created by the SGs location update will not
+	 * expire automatically, however a 2G LU or an implicit IMSI detach
+	 * from EPS services may change this. */
+	vsub->expire_lu = VLR_SUBSCRIBER_NO_EXPIRATION;
+
 	return 0;
 }
 
@@ -197,6 +202,15 @@ void vlr_sgs_eps_detach(struct vlr_instance *vlr, const char *imsi, enum sgsap_i
 	}
 
 	osmo_fsm_inst_dispatch(vsub->sgs_fsm, evt, NULL);
+
+	/* See also 3GPP TS 29.118, 5.4.3 Procedures in the VLR. Detaching from
+	 * EPS services essentially means that the subscriber leaves the 4G RAN
+	 * but continues to live on 2G, this basically turns the subscriber into
+	 * a normal 2G subscriber and we need to make sure that the lu-
+	 * expiration timer is running. */
+	if (vsub->expire_lu == VLR_SUBSCRIBER_NO_EXPIRATION)
+		vlr_subscr_enable_expire_lu(vsub);
+
 	vlr_subscr_put(vsub);
 }
 
