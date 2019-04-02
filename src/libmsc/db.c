@@ -229,6 +229,7 @@ static void parse_tp_ud_from_result(struct gsm_sms *sms, dbi_result result)
 {
 	const unsigned char *user_data;
 	unsigned int user_data_len;
+	unsigned int text_len;
 	const char *text;
 
 	/* Retrieve TP-UDL (User-Data-Length) in octets (regardless of DCS) */
@@ -245,6 +246,15 @@ static void parse_tp_ud_from_result(struct gsm_sms *sms, dbi_result result)
 	if (user_data_len > 0) {
 		user_data = dbi_result_get_binary(result, "user_data");
 		memcpy(sms->user_data, user_data, user_data_len);
+	}
+
+	/* Retrieve the text length (excluding '\0') */
+	text_len = dbi_result_get_field_length(result, "text");
+	if (text_len >= sizeof(sms->text)) {
+		LOGP(DDB, LOGL_ERROR,
+		     "SMS text length %u is too big, truncating to %zu\n",
+		     text_len, sizeof(sms->text) - 1);
+		/* OSMO_STRLCPY_ARRAY() does truncation for us */
 	}
 
 	/* Retrieve the text parsed from TP-UD (User-Data) */
