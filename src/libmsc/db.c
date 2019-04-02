@@ -225,6 +225,34 @@ static int update_db_revision_2(void)
 	return 0;
 }
 
+static void parse_tp_ud_from_result(struct gsm_sms *sms, dbi_result result)
+{
+	const unsigned char *user_data;
+	unsigned int user_data_len;
+	const char *text;
+
+	/* Retrieve TP-UDL (User-Data-Length) in octets (regardless of DCS) */
+	user_data_len = dbi_result_get_field_length(result, "user_data");
+	if (user_data_len > sizeof(sms->user_data)) {
+		LOGP(DDB, LOGL_ERROR,
+		     "SMS TP-UD length %u is too big, truncating to %zu\n",
+		     user_data_len, sizeof(sms->user_data));
+		user_data_len = (uint8_t) sizeof(sms->user_data);
+	}
+	sms->user_data_len = user_data_len;
+
+	/* Retrieve the TP-UD (User-Data) itself */
+	if (user_data_len > 0) {
+		user_data = dbi_result_get_binary(result, "user_data");
+		memcpy(sms->user_data, user_data, user_data_len);
+	}
+
+	/* Retrieve the text parsed from TP-UD (User-Data) */
+	text = dbi_result_get_string(result, "text");
+	if (text)
+		OSMO_STRLCPY_ARRAY(sms->text, text);
+}
+
 /**
  * Copied from the normal sms_from_result_v3 to avoid having
  * to make sure that the real routine will remain backward
@@ -234,9 +262,7 @@ static struct gsm_sms *sms_from_result_v3(dbi_result result)
 {
 	struct gsm_sms *sms = sms_alloc();
 	long long unsigned int sender_id;
-	const char *text, *daddr;
-	const unsigned char *user_data;
-	unsigned int user_data_len;
+	const char *daddr;
 	char buf[32];
 	char *quoted;
 	dbi_result result2;
@@ -274,20 +300,9 @@ static struct gsm_sms *sms_from_result_v3(dbi_result result)
 	if (daddr)
 		OSMO_STRLCPY_ARRAY(sms->dst.addr, daddr);
 
-	user_data_len = dbi_result_get_field_length(result, "user_data");
-	user_data = dbi_result_get_binary(result, "user_data");
-	if (user_data_len > sizeof(sms->user_data)) {
-		LOGP(DDB, LOGL_ERROR,
-		     "SMS TP-UD length %u is too big, truncating to %zu\n",
-		     user_data_len, sizeof(sms->user_data));
-		user_data_len = (uint8_t) sizeof(sms->user_data);
-	}
-	sms->user_data_len = user_data_len;
-	memcpy(sms->user_data, user_data, sms->user_data_len);
+	/* Parse TP-UD, TP-UDL and decoded text */
+	parse_tp_ud_from_result(sms, result);
 
-	text = dbi_result_get_string(result, "text");
-	if (text)
-		OSMO_STRLCPY_ARRAY(sms->text, text);
 	return sms;
 }
 
@@ -400,9 +415,7 @@ rollback:
 static struct gsm_sms *sms_from_result_v4(dbi_result result)
 {
 	struct gsm_sms *sms = sms_alloc();
-	const unsigned char *user_data;
-	unsigned int user_data_len;
-	const char *text, *addr;
+	const char *addr;
 
 	if (!sms)
 		return NULL;
@@ -426,20 +439,9 @@ static struct gsm_sms *sms_from_result_v4(dbi_result result)
 	sms->dst.ton = dbi_result_get_ulonglong(result, "dest_ton");
 	sms->dst.npi = dbi_result_get_ulonglong(result, "dest_npi");
 
-	user_data_len = dbi_result_get_field_length(result, "user_data");
-	user_data = dbi_result_get_binary(result, "user_data");
-	if (user_data_len > sizeof(sms->user_data)) {
-		LOGP(DDB, LOGL_ERROR,
-		     "SMS TP-UD length %u is too big, truncating to %zu\n",
-		     user_data_len, sizeof(sms->user_data));
-		user_data_len = (uint8_t) sizeof(sms->user_data);
-	}
-	sms->user_data_len = user_data_len;
-	memcpy(sms->user_data, user_data, sms->user_data_len);
+	/* Parse TP-UD, TP-UDL and decoded text */
+	parse_tp_ud_from_result(sms, result);
 
-	text = dbi_result_get_string(result, "text");
-	if (text)
-		OSMO_STRLCPY_ARRAY(sms->text, text);
 	return sms;
 }
 
@@ -763,9 +765,7 @@ int db_sms_store(struct gsm_sms *sms)
 static struct gsm_sms *sms_from_result(struct gsm_network *net, dbi_result result)
 {
 	struct gsm_sms *sms = sms_alloc();
-	const char *text, *daddr, *saddr;
-	const unsigned char *user_data;
-	unsigned int user_data_len;
+	const char *daddr, *saddr;
 	time_t validity_timestamp;
 
 	if (!sms)
@@ -802,21 +802,9 @@ static struct gsm_sms *sms_from_result(struct gsm_network *net, dbi_result resul
 	if (saddr)
 		OSMO_STRLCPY_ARRAY(sms->src.addr, saddr);
 
-	user_data_len = dbi_result_get_field_length(result, "user_data");
-	user_data = dbi_result_get_binary(result, "user_data");
-	if (user_data_len > sizeof(sms->user_data)) {
-		LOGP(DDB, LOGL_ERROR,
-		     "SMS TP-UD length %u is too big, truncating to %zu\n",
-		     user_data_len, sizeof(sms->user_data));
-		user_data_len = (uint8_t) sizeof(sms->user_data);
-	}
-	sms->user_data_len = user_data_len;
-	if (user_data)
-		memcpy(sms->user_data, user_data, sms->user_data_len);
+	/* Parse TP-UD, TP-UDL and decoded text */
+	parse_tp_ud_from_result(sms, result);
 
-	text = dbi_result_get_string(result, "text");
-	if (text)
-		OSMO_STRLCPY_ARRAY(sms->text, text);
 	return sms;
 }
 
