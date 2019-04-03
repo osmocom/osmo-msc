@@ -48,24 +48,6 @@ static const struct value_string sgs_ue_fsm_event_names[] = {
 	{0, NULL}
 };
 
-/* Initiate location update and change to SGS_UE_ST_LA_UPD_PRES state */
-static void perform_lu(struct osmo_fsm_inst *fi)
-{
-	struct vlr_subscr *vsub = fi->priv;
-	int rc;
-	osmo_fsm_inst_state_chg(fi, SGS_UE_ST_LA_UPD_PRES, 0, 0);
-	vsub->ms_not_reachable_flag = false;
-
-	/* Note: At the moment we allocate a new TMSI on each LU. */
-	rc = vlr_subscr_alloc_tmsi(vsub);
-	if (rc != 0)
-		LOGPFSML(fi, LOGL_ERROR, "(sub %s) VLR LU tmsi allocation failed\n", vlr_subscr_name(vsub));
-
-	rc = vlr_subscr_req_lu(vsub);
-	if (rc != 0)
-		LOGPFSML(fi, LOGL_ERROR, "(sub %s) HLR LU request failed\n", vlr_subscr_name(vsub));
-}
-
 /* Send the SGs Association to NULL state immediately */
 static void to_null(struct osmo_fsm_inst *fi)
 {
@@ -84,6 +66,37 @@ static void to_null(struct osmo_fsm_inst *fi)
 	/* Ensure that Ts5 (pending paging via SGs) is deleted */
 	if (vlr_sgs_pag_pend(vsub))
 		osmo_timer_del(&vsub->sgs.Ts5);
+}
+
+/* Initiate location update and change to SGS_UE_ST_LA_UPD_PRES state */
+static void perform_lu(struct osmo_fsm_inst *fi)
+{
+	struct vlr_subscr *vsub = fi->priv;
+	struct sgs_lu_response sgs_lu_response = {0};
+	int rc;
+
+	/* Note: At the moment we allocate a new TMSI on each LU. */
+	rc = vlr_subscr_alloc_tmsi(vsub);
+	if (rc != 0) {
+		LOGPFSML(fi, LOGL_ERROR, "(sub %s) VLR LU tmsi allocation failed\n", vlr_subscr_name(vsub));
+		goto error;
+	}
+
+	rc = vlr_subscr_req_lu(vsub);
+	if (rc != 0) {
+		LOGPFSML(fi, LOGL_ERROR, "(sub %s) HLR LU request failed\n", vlr_subscr_name(vsub));
+		goto error;
+	}
+
+	osmo_fsm_inst_state_chg(fi, SGS_UE_ST_LA_UPD_PRES, 0, 0);
+	vsub->ms_not_reachable_flag = false;
+	return;
+
+error:
+	to_null(fi);
+	sgs_lu_response.error = true;
+	sgs_lu_response.vsub = vsub;
+	vsub->sgs.response_cb(&sgs_lu_response);
 }
 
 /* Respawn a pending paging (Timer is reset and a new paging request is sent) */

@@ -854,7 +854,7 @@ static int vlr_subscr_handle_isd_req(struct vlr_subscr *vsub,
 static int vlr_subscr_handle_lu_res(struct vlr_subscr *vsub,
 				    const struct osmo_gsup_message *gsup)
 {
-	struct sgs_lu_response sgs_lu_response;
+	struct sgs_lu_response sgs_lu_response = {0};
 	bool sgs_lu_in_progress = false;
 
 	if (vsub->sgs_fsm->state == SGS_UE_ST_LA_UPD_PRES)
@@ -885,7 +885,7 @@ static int vlr_subscr_handle_lu_res(struct vlr_subscr *vsub,
 static int vlr_subscr_handle_lu_err(struct vlr_subscr *vsub,
 				    const struct osmo_gsup_message *gsup)
 {
-	struct sgs_lu_response sgs_lu_response;
+	struct sgs_lu_response sgs_lu_response = {0};
 	bool sgs_lu_in_progress = false;
 
 	if (vsub->sgs_fsm->state == SGS_UE_ST_LA_UPD_PRES)

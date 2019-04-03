@@ -376,15 +376,26 @@ static void sgs_tx_loc_upd_resp_cb(struct sgs_lu_response *response)
 	unsigned int new_id_len = 0;
 	uint8_t resp_msg_type;
 
+	/* Determine message type that is sent next (needed for logging) */
 	if (response->accepted)
 		resp_msg_type = SGSAP_MSGT_LOC_UPD_ACK;
+	else if (response->error)
+		resp_msg_type = SGSAP_MSGT_RESET_IND;
 	else
 		resp_msg_type = SGSAP_MSGT_LOC_UPD_REJ;
 
+	/* Determine MME */
 	mme = sgs_mme_ctx_by_vsub(vsub, resp_msg_type);
 	if (!mme)
 		return;
 
+	/* Handle error (HLR failure) */
+	if (response->error) {
+		osmo_fsm_inst_dispatch(mme->fi, SGS_VLRR_E_START_RESET, NULL);
+		return;
+	}
+
+	/* Handle LU accept/reject */
 	if (response->accepted) {
 		if (vsub->tmsi_new != GSM_RESERVED_TMSI) {
 			new_id_len = gsm48_generate_mid_from_tmsi(new_id, vsub->tmsi_new);
@@ -1120,6 +1131,10 @@ static void sgs_vlr_reset_fsm_allstate(struct osmo_fsm_inst *fi, uint32_t event,
 		reset_params.vlr_name_present = true;
 		reset_ind = gsm29118_create_reset_ind(&reset_params);
 		sgs_tx(sgc, reset_ind);
+
+		/* Perform a reset of the SGS FSM of all subscribers that are present in the VLR */
+		vlr_sgs_reset(gsm_network->vlr);
+
 		osmo_fsm_inst_state_chg(fi, SGS_VLRR_ST_WAIT_ACK, sgs->cfg.timer[SGS_STATE_TS11], 11);
 		break;
 	default:
@@ -1187,6 +1202,7 @@ static const struct osmo_fsm_state sgs_vlr_reset_fsm_states[] = {
 static struct osmo_fsm sgs_vlr_reset_fsm = {
 	.name = "SGs-VLR-RESET",
 	.states = sgs_vlr_reset_fsm_states,
+	.num_states = ARRAY_SIZE(sgs_vlr_reset_fsm_states),
 	.allstate_event_mask = S(SGS_VLRR_E_START_RESET),
 	.allstate_action = sgs_vlr_reset_fsm_allstate,
 	.timer_cb = sgs_vlr_reset_fsm_timer_cb,

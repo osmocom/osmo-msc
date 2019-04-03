@@ -75,6 +75,7 @@ static inline const char *vlr_sgs_state_counter_name(enum vlr_sgs_state_ctr Ns)
 /* This callback function is called when an SGs location update is complete */
 struct sgs_lu_response {
 	bool accepted;
+	bool error;
 	struct vlr_subscr *vsub;
 };
 typedef void (*vlr_sgs_lu_response_cb_t) (struct sgs_lu_response *response);
