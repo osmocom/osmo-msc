@@ -1601,7 +1601,7 @@ static int gsm48_cc_rx_userinfo(struct gsm_trans *trans, struct msgb *msg)
 	return mncc_recvmsg(trans->net, trans, MNCC_USERINFO_IND, &user);
 }
 
-static void mncc_recv_rtp(struct gsm_network *net, uint32_t callref,
+static void mncc_recv_rtp(struct gsm_network *net, struct gsm_trans *trans, uint32_t callref,
 		int cmd, uint32_t addr, uint16_t port, uint32_t payload_type,
 		uint32_t payload_msg_type)
 {
@@ -1617,7 +1617,7 @@ static void mncc_recv_rtp(struct gsm_network *net, uint32_t callref,
 	rtp->port = port;
 	rtp->payload_type = payload_type;
 	rtp->payload_msg_type = payload_msg_type;
-	mncc_recvmsg(net, NULL, cmd, (struct gsm_mncc *)data);
+	mncc_recvmsg(net, trans, cmd, (struct gsm_mncc *)data);
 }
 
 static void mncc_recv_rtp_sock(struct gsm_network *net, struct gsm_trans *trans, int cmd)
@@ -1652,16 +1652,16 @@ static void mncc_recv_rtp_sock(struct gsm_network *net, struct gsm_trans *trans,
 	 * lchan->abis_ip.rtp_payload */
 	uint32_t payload_type = 0;
 
-	return mncc_recv_rtp(net, trans->callref, cmd,
+	return mncc_recv_rtp(net, trans, trans->callref, cmd,
 			addr,
 			port,
 		        payload_type,
 			msg_type);
 }
 
-static void mncc_recv_rtp_err(struct gsm_network *net, uint32_t callref, int cmd)
+static void mncc_recv_rtp_err(struct gsm_network *net, struct gsm_trans *trans, uint32_t callref, int cmd)
 {
-	return mncc_recv_rtp(net, callref, cmd, 0, 0, 0, 0);
+	return mncc_recv_rtp(net, trans, callref, cmd, 0, 0, 0, 0);
 }
 
 static int tch_rtp_create(struct gsm_network *net, uint32_t callref)
@@ -1672,15 +1672,16 @@ static int tch_rtp_create(struct gsm_network *net, uint32_t callref)
 	trans = trans_find_by_callref(net, callref);
 	if (!trans) {
 		LOG_TRANS_CAT(trans, DMNCC, LOGL_ERROR, "RTP create for non-existing trans\n");
-		mncc_recv_rtp_err(net, callref, MNCC_RTP_CREATE);
+		mncc_recv_rtp_err(net, trans, callref, MNCC_RTP_CREATE);
 		return -EIO;
 	}
 	log_set_context(LOG_CTX_VLR_SUBSCR, trans->vsub);
 	if (!trans->conn) {
 		LOG_TRANS_CAT(trans, DMNCC, LOGL_NOTICE, "RTP create for trans without conn\n");
-		mncc_recv_rtp_err(net, callref, MNCC_RTP_CREATE);
+		mncc_recv_rtp_err(net, trans, callref, MNCC_RTP_CREATE);
 		return 0;
 	}
+	LOG_TRANS_CAT(trans, DMNCC, LOGL_DEBUG, "rx %s\n", get_mncc_name(MNCC_RTP_CREATE));
 
 	/* When we call msc_mgcp_call_assignment() we will trigger, depending
 	 * on the RAN type the call assignment on the A or Iu interface.
@@ -1733,15 +1734,17 @@ static int tch_rtp_connect(struct gsm_network *net, struct gsm_mncc_rtp *rtp)
 	trans = trans_find_by_callref(net, rtp->callref);
 	if (!trans) {
 		LOG_TRANS_CAT(trans, DMNCC, LOGL_ERROR, "RTP connect for non-existing trans\n");
-		mncc_recv_rtp_err(net, rtp->callref, MNCC_RTP_CONNECT);
+		mncc_recv_rtp_err(net, trans, rtp->callref, MNCC_RTP_CONNECT);
 		return -EIO;
 	}
 	log_set_context(LOG_CTX_VLR_SUBSCR, trans->vsub);
 	if (!trans->conn) {
 		LOG_TRANS_CAT(trans, DMNCC, LOGL_ERROR, "RTP connect for trans without conn\n");
-		mncc_recv_rtp_err(net, rtp->callref, MNCC_RTP_CONNECT);
+		mncc_recv_rtp_err(net, trans, rtp->callref, MNCC_RTP_CONNECT);
 		return 0;
 	}
+
+	LOG_TRANS_CAT(trans, DMNCC, LOGL_DEBUG, "rx %s\n", get_mncc_name(MNCC_RTP_CONNECT));
 
 	addr.s_addr = osmo_htonl(rtp->ip);
 	return msc_mgcp_call_complete(trans, rtp->port, inet_ntoa(addr));
