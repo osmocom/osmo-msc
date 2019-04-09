@@ -520,7 +520,9 @@ static int smpp_handle_bind_tx(struct osmo_esme *esme, struct msgb *msg)
 	tlv.value.val16 = esme->smpp_version;
 	build_tlv(&bind_r.tlv, &tlv);
 
-	return PACK_AND_SEND(esme, &bind_r);
+	rc = PACK_AND_SEND(esme, &bind_r);
+	destroy_tlv(bind_r.tlv);
+	return rc;
 }
 
 /*! \brief handle an incoming SMPP BIND TRANSCEIVER */
@@ -632,6 +634,7 @@ int smpp_tx_alert(struct osmo_esme *esme, uint8_t ton, uint8_t npi,
 {
 	struct alert_notification_t alert;
 	struct tlv_t tlv;
+	int rc;
 
 	memset(&alert, 0, sizeof(alert));
 	alert.command_length	= 0;
@@ -652,7 +655,9 @@ int smpp_tx_alert(struct osmo_esme *esme, uint8_t ton, uint8_t npi,
 		alert.source_addr_npi,
 		get_value_string(smpp_avail_strs, avail_status));
 
-	return PACK_AND_SEND(esme, &alert);
+	rc = PACK_AND_SEND(esme, &alert);
+	destroy_tlv(alert.tlv);
+	return rc;
 }
 
 /* \brief send a DELIVER-SM message to given ESME */
