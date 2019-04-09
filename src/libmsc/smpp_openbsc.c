@@ -28,6 +28,7 @@
 #include <smpp34.h>
 #include <smpp34_structs.h>
 #include <smpp34_params.h>
+#include <smpp34_heap.h>
 
 #include <osmocom/core/utils.h>
 #include <osmocom/core/msgb.h>
@@ -51,6 +52,31 @@
 
 #define VSUB_USE_SMPP "SMPP"
 #define VSUB_USE_SMPP_CMD "SMPP-cmd"
+
+/* talloc integration for libsmpp34 */
+
+static struct smsc *g_smsc;
+
+static void *smpp34_talloc_malloc(size_t sz)
+{
+	return talloc_size(g_smsc, sz);
+}
+
+static void *smpp34_talloc_realloc(void *ptr, size_t sz)
+{
+	return talloc_realloc_size(g_smsc, ptr, sz);
+}
+
+static void smpp34_talloc_free(void *ptr)
+{
+	talloc_free(ptr);
+}
+
+static const struct smpp34_memory_functions smpp34_talloc = {
+	.malloc_fun = smpp34_talloc_malloc,
+	.realloc_fun = smpp34_talloc_realloc,
+	.free_fun = smpp34_talloc_free,
+};
 
 /*! \brief find vlr_subscr for a given SMPP NPI/TON/Address */
 static struct vlr_subscr *subscr_by_dst(struct gsm_network *net,
@@ -790,6 +816,7 @@ int smpp_openbsc_alloc_init(void *ctx)
 		LOGP(DSMPP, LOGL_FATAL, "Cannot allocate smsc struct\n");
 		return -1;
 	}
+	smpp34_set_memory_functions(&smpp34_talloc);
 	return smpp_vty_init();
 }
 
