@@ -228,8 +228,10 @@ struct gsm_sms *smsq_take_next_sms(struct gsm_network *net,
 		/* Is the subscriber attached? If not, go to next SMS */
 		if (!sms->receiver || !sms->receiver->lu_complete) {
 			LOGP(DLSMS, LOGL_DEBUG,
-			     "Subscriber %s is not attached, skipping SMS %llu\n",
-			     vlr_subscr_msisdn_or_name(sms->receiver), sms->id);
+			     "Subscriber %s%s is not attached, skipping SMS %llu\n",
+			     sms->receiver ? "" : "MSISDN-",
+			     sms->receiver ? vlr_subscr_msisdn_or_name(sms->receiver)
+					   : sms->dst.addr, sms->id);
 			sms_free(sms);
 			continue;
 		}
