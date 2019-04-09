@@ -1,6 +1,7 @@
 SUBDIRS = \
 	sms_queue \
 	msc_vlr \
+	db_sms \
 	$(NULL)
 
 if BUILD_SMPP

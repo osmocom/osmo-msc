@@ -16,6 +16,13 @@ cat $abs_srcdir/sms_queue/sms_queue_test.err > experr
 AT_CHECK([$abs_top_builddir/tests/sms_queue/sms_queue_test], [], [expout], [experr])
 AT_CLEANUP
 
+AT_SETUP([db_sms_test])
+AT_KEYWORDS([db_sms_test])
+cat $abs_srcdir/db_sms/db_sms_test.ok > expout
+cat $abs_srcdir/db_sms/db_sms_test.err > experr
+AT_CHECK([$abs_top_builddir/tests/db_sms/db_sms_test], [], [expout], [experr])
+AT_CLEANUP
+
 AT_SETUP([msc_vlr_test_no_authen])
 AT_KEYWORDS([msc_vlr_test_no_authen])
 cat $abs_srcdir/msc_vlr/msc_vlr_test_no_authen.ok > expout
