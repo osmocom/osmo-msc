@@ -68,6 +68,7 @@ struct e_link *e_link_alloc(struct gsup_client_mux *gcm, struct osmo_fsm_inst *m
 {
 	struct e_link *e;
 	struct msc_role_common *c = msc_role->priv;
+	size_t use_len;
 
 	/* use msub as talloc parent, so we can move an e_link from msc_t to msc_i when it is established. */
 	e = talloc_zero(c->msub, struct e_link);
@@ -76,13 +77,19 @@ struct e_link *e_link_alloc(struct gsup_client_mux *gcm, struct osmo_fsm_inst *m
 
 	e->gcm = gcm;
 
-	/* Expecting all code paths to print the remote name according to remote_name_len. To be paranoid, place a nul
-	 * character after the end. */
-	e->remote_name = talloc_size(e, remote_name_len + 1);
+	/* FIXME: this is a braindamaged duality of char* and blob, which we can't seem to get rid of easily.
+	 * See also osmo-hlr change I01a45900e14d41bcd338f50ad85d9fabf2c61405 which resolved this on the
+	 * osmo-hlr side, but was abandoned. Not sure which way is the right solution. */
+	/* To be able to include a terminating NUL character when sending the IPA name, append one if there is none yet.
+	 * Current osmo-hlr needs the terminating NUL to be included. */
+	use_len = remote_name_len;
+	if (remote_name[use_len-1] != '\0')
+		use_len++;
+	e->remote_name = talloc_size(e, use_len);
 	OSMO_ASSERT(e->remote_name);
 	memcpy(e->remote_name, remote_name, remote_name_len);
-	e->remote_name[remote_name_len] = '\0';
-	e->remote_name_len = remote_name_len;
+	e->remote_name[use_len-1] = '\0';
+	e->remote_name_len = use_len;
 
 	e_link_assign(e, msc_role);
 	return e;
@@ -123,9 +130,9 @@ int e_prep_gsup_msg(struct e_link *e, struct osmo_gsup_message *gsup_msg)
 	*gsup_msg = (struct osmo_gsup_message){
 		.message_class = OSMO_GSUP_MESSAGE_CLASS_INTER_MSC,
 		.source_name = (const uint8_t*)local_msc_name,
-		.source_name_len = strlen(local_msc_name),
+		.source_name_len = strlen(local_msc_name)+1, /* include terminating nul */
 		.destination_name = (const uint8_t*)e->remote_name,
-		.destination_name_len = e->remote_name_len,
+		.destination_name_len = e->remote_name_len, /* the nul here is also included, from e_link_alloc() */
 	};
 
 	if (vsub)
