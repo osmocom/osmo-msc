@@ -1021,20 +1021,15 @@ int db_sms_delete_sent_message_by_id(unsigned long long sms_id)
 }
 
 
-static int delete_expired_sms(unsigned long long sms_id, time_t created, time_t validity_timestamp)
+static int delete_expired_sms(unsigned long long sms_id, time_t validity_timestamp)
 {
 	dbi_result result;
-	time_t now, min_created;
+	time_t now;
 
 	now = time(NULL);
-	if (validity_timestamp > now)
-		return -1;
 
-	/* Our SMS expiry threshold is hard-coded to roughly 2 weeks at the moment. */
-	min_created = now - (time_t)(60 * 60 * 24 * 7 * 2);
-	if (min_created < 0) /* bogus system clock? */
-		return -1;
-	if (created >= min_created) /* not yet expired */
+	/* Net yet expired */
+	if (validity_timestamp > now)
 		return -1;
 
 	result = dbi_conn_queryf(conn, "DELETE FROM SMS WHERE id = %llu", sms_id);
@@ -1049,9 +1044,9 @@ static int delete_expired_sms(unsigned long long sms_id, time_t created, time_t 
 int db_sms_delete_expired_message_by_id(unsigned long long sms_id)
 {
 	dbi_result result;
-	time_t created, validity_timestamp;
+	time_t validity_timestamp;
 
-	result = dbi_conn_queryf(conn, "SELECT created,valid_until FROM SMS WHERE id = %llu", sms_id);
+	result = dbi_conn_queryf(conn, "SELECT valid_until FROM SMS WHERE id = %llu", sms_id);
 	if (!result)
 		return -1;
 	if (!next_row(result)) {
@@ -1059,29 +1054,28 @@ int db_sms_delete_expired_message_by_id(unsigned long long sms_id)
 		return -1;
 	}
 
-	created = dbi_result_get_datetime(result, "created");
 	validity_timestamp = dbi_result_get_datetime(result, "valid_until");
 
 	dbi_result_free(result);
-	return delete_expired_sms(sms_id, created, validity_timestamp);
+	return delete_expired_sms(sms_id, validity_timestamp);
 }
 
 void db_sms_delete_oldest_expired_message(void)
 {
 	dbi_result result;
 
-	result = dbi_conn_queryf(conn, "SELECT id,created,valid_until FROM SMS ORDER BY created LIMIT 1");
+	result = dbi_conn_queryf(conn, "SELECT id,valid_until FROM SMS "
+				       "ORDER BY valid_until LIMIT 1");
 	if (!result)
 		return;
 
 	if (next_row(result)) {
 		unsigned long long sms_id;
-		time_t created, validity_timestamp;
+		time_t validity_timestamp;
 
 		sms_id = dbi_result_get_ulonglong(result, "id");
-		created = dbi_result_get_datetime(result, "created");
 		validity_timestamp = dbi_result_get_datetime(result, "valid_until");
-		delete_expired_sms(sms_id, created, validity_timestamp);
+		delete_expired_sms(sms_id, validity_timestamp);
 	}
 
 	dbi_result_free(result);

@@ -68,8 +68,7 @@ DDB NOTICE test_db_sms_get('Truncated TP-UD (255 octets, 8-bit encoding)'): succ
 DDB NOTICE verify_sms('Truncated TP-UD (255 octets, 8-bit encoding)'): TP-User-Data mismatch
 DDB NOTICE test_db_sms_get('Same MSISDN #1'): failure, as expected
 DDB NOTICE test_db_sms_get('Same MSISDN #2'): failure, as expected
-DDB NOTICE test_db_sms_get('Expired SMS'): unexpected result
-DDB NOTICE verify_sms('Expired SMS'): match
+DDB NOTICE test_db_sms_get('Expired SMS'): failure, as expected
 DDB NOTICE test_db_sms_get('Empty TP-UD'): success, as expected
 DDB NOTICE verify_sms('Empty TP-UD'): match
 full talloc report on 'null_context' (total      0 bytes in   1 blocks)
