@@ -1238,11 +1238,13 @@ int gsm0411_rcv_sms(struct ran_conn *conn,
 	LOG_TRANS(trans, LOGL_DEBUG, "receiving SMS message %s\n",
 		  gsm48_pdisc_msgtype_name(gsm48_hdr_pdisc(gh), gsm48_hdr_msg_type(gh)));
 
-	/* 5.4: For MO, if a CP-DATA is received for a new
-	 * transaction, equals reception of an implicit
-	 * last CP-ACK for previous transaction */
+	/* According to section 5.3.4, due to structure of message flow on
+	 * SAPI 0 and 3 it is possible that the CP-ACK of a short message
+	 * transfer might not be received. In this case the reception of
+	 * CP-DATA may be interpreted as the reception of the awaited
+	 * CP-ACK (implicit) and CP-DATA message. */
 	if (trans->sms.smc_inst.cp_state == GSM411_CPS_IDLE
-	 && msg_type == GSM411_MT_CP_DATA) {
+	    && msg_type == GSM411_MT_CP_DATA) {
 		int i;
 		struct gsm_trans *ptrans;
 
