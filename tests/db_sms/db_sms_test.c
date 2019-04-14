@@ -247,8 +247,6 @@ static struct sms_test {
 		},
 		.ud = &sms_tp_ud_set[0],
 	},
-#if 0
-	/* FIXME: there is a bug that causes ASAN / Valgrind to complain */
 	{
 		.name = "Empty TP-UD",
 		.sms = {
@@ -267,7 +265,6 @@ static struct sms_test {
 		},
 		.ud = NULL,
 	},
-#endif
 };
 
 static void prepare_sms_test_set(void)

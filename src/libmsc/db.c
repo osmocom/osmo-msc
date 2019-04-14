@@ -695,14 +695,20 @@ int db_sms_store(struct gsm_sms *sms)
 {
 	dbi_result result;
 	char *q_text, *q_daddr, *q_saddr;
-	unsigned char *q_udata;
+	unsigned char *q_udata = NULL;
 	time_t now, validity_timestamp;
 
 	dbi_conn_quote_string_copy(conn, (char *)sms->text, &q_text);
 	dbi_conn_quote_string_copy(conn, (char *)sms->dst.addr, &q_daddr);
 	dbi_conn_quote_string_copy(conn, (char *)sms->src.addr, &q_saddr);
-	dbi_conn_quote_binary_copy(conn, sms->user_data, sms->user_data_len,
-				   &q_udata);
+
+	/* Guard against zero-length input, as this may cause
+	 * buffer overruns in libdbi / libdbdsqlite3. */
+	if (sms->user_data_len > 0) {
+		dbi_conn_quote_binary_copy(conn, sms->user_data,
+					   sms->user_data_len,
+					   &q_udata);
+	}
 
 	now = time(NULL);
 	validity_timestamp = now + sms->validity_minutes * 60;

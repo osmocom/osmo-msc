@@ -11,6 +11,7 @@ DDB NOTICE test_db_sms_store('Truncated TP-UD (255 octets, 8-bit encoding)'): su
 DDB NOTICE test_db_sms_store('Same MSISDN #1'): success, as expected
 DDB NOTICE test_db_sms_store('Same MSISDN #2'): success, as expected
 DDB NOTICE test_db_sms_store('Expired SMS'): success, as expected
+DDB NOTICE test_db_sms_store('Empty TP-UD'): success, as expected
 DDB INFO Testing db_sms_get()...
 DDB NOTICE test_db_sms_get('Regular MO SMS'): success, as expected
 DDB NOTICE verify_sms('Regular MO SMS'): match
@@ -32,6 +33,8 @@ DDB NOTICE test_db_sms_get('Same MSISDN #2'): success, as expected
 DDB NOTICE verify_sms('Same MSISDN #2'): match
 DDB NOTICE test_db_sms_get('Expired SMS'): success, as expected
 DDB NOTICE verify_sms('Expired SMS'): match
+DDB NOTICE test_db_sms_get('Empty TP-UD'): success, as expected
+DDB NOTICE verify_sms('Empty TP-UD'): match
 DDB INFO Testing db_sms_get_next_unsent() and db_sms_mark_delivered()...
 DDB NOTICE db_sms_get_next_unsent(#1): found
 DDB NOTICE verify_sms('Regular MO SMS'): match
@@ -67,4 +70,6 @@ DDB NOTICE test_db_sms_get('Same MSISDN #1'): failure, as expected
 DDB NOTICE test_db_sms_get('Same MSISDN #2'): failure, as expected
 DDB NOTICE test_db_sms_get('Expired SMS'): unexpected result
 DDB NOTICE verify_sms('Expired SMS'): match
+DDB NOTICE test_db_sms_get('Empty TP-UD'): success, as expected
+DDB NOTICE verify_sms('Empty TP-UD'): match
 full talloc report on 'null_context' (total      0 bytes in   1 blocks)
