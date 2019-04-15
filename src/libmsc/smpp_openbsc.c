@@ -151,7 +151,6 @@ static int submit_to_sms(struct gsm_sms **psms, struct gsm_network *net,
 	sms->msg_ref = msg_ref;
 
 	/* fill in the destination address */
-	sms->receiver = dest;
 	sms->dst.ton = submit->dest_addr_ton;
 	sms->dst.npi = submit->dest_addr_npi;
 	if (dest)
@@ -159,6 +158,11 @@ static int submit_to_sms(struct gsm_sms **psms, struct gsm_network *net,
 	else
 		OSMO_STRLCPY_ARRAY(sms->dst.addr,
 				   (const char *)submit->destination_addr);
+	if (dest) {
+		sms->receiver = dest;
+		vlr_subscr_get(sms->receiver, VSUB_USE_SMS_RECEIVER);
+		vlr_subscr_put(dest, VSUB_USE_SMPP);
+	}
 
 	/* fill in the source address */
 	sms->src.ton = submit->source_addr_ton;
