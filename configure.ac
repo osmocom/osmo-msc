@@ -119,18 +119,6 @@ AC_SUBST(found_sqlite3)
 
 
 dnl Checks for typedefs, structures and compiler characteristics
-
-# The following test is taken from WebKit's webkit.m4
-saved_CFLAGS="$CFLAGS"
-CFLAGS="$CFLAGS -fvisibility=hidden "
-AC_MSG_CHECKING([if ${CC} supports -fvisibility=hidden])
-AC_COMPILE_IFELSE([AC_LANG_SOURCE([char foo;])],
-      [ AC_MSG_RESULT([yes])
-        SYMBOL_VISIBILITY="-fvisibility=hidden"],
-        AC_MSG_RESULT([no]))
-CFLAGS="$saved_CFLAGS"
-AC_SUBST(SYMBOL_VISIBILITY)
-
 AX_CHECK_COMPILE_FLAG([-Werror=implicit], [CFLAGS="$CFLAGS -Werror=implicit"])
 AX_CHECK_COMPILE_FLAG([-Werror=maybe-uninitialized], [CFLAGS="$CFLAGS -Werror=maybe-uninitialized"])
 AX_CHECK_COMPILE_FLAG([-Werror=memset-transposed-args], [CFLAGS="$CFLAGS -Werror=memset-transposed-args"])
