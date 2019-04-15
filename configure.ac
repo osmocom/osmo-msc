@@ -112,11 +112,6 @@ dnl checks for header files
 AC_HEADER_STDC
 AC_CHECK_HEADERS(dbi/dbd.h,,AC_MSG_ERROR(DBI library is not installed))
 
-found_sqlite3=yes
-PKG_CHECK_MODULES(SQLITE3, sqlite3, ,found_sqlite3=no)
-AM_CONDITIONAL(HAVE_SQLITE3, test "$found_sqlite3" = yes)
-AC_SUBST(found_sqlite3)
-
 
 dnl Checks for typedefs, structures and compiler characteristics
 AX_CHECK_COMPILE_FLAG([-Werror=implicit], [CFLAGS="$CFLAGS -Werror=implicit"])
