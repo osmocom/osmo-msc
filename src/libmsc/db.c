@@ -615,6 +615,9 @@ int db_init(const char *name)
 {
 	dbi_initialize_r(NULL, &inst);
 
+	LOGP(DDB, LOGL_NOTICE, "Init database connection to '%s' using %s\n",
+	     name, dbi_version());
+
 	conn = dbi_conn_new_r("sqlite3", inst);
 	if (conn == NULL) {
 		LOGP(DDB, LOGL_FATAL, "Failed to create database connection to sqlite3 db '%s'; "
