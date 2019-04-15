@@ -139,7 +139,8 @@ static int submit_to_sms(struct gsm_sms **psms, struct gsm_network *net,
 		} else {
 			LOGP(DLSMS, LOGL_ERROR,
 			     "SMPP neither message payload nor valid sm_length.\n");
-			vlr_subscr_put(dest, VSUB_USE_SMPP);
+			if (dest)
+				vlr_subscr_put(dest, VSUB_USE_SMPP);
 			return ESME_RINVPARLEN;
 		}
 	}
@@ -152,6 +153,12 @@ static int submit_to_sms(struct gsm_sms **psms, struct gsm_network *net,
 
 	/* fill in the destination address */
 	sms->receiver = dest;
+	if (dest) {
+		/* Replace use count from above subscr_by_dst (VSUB_USE_SMPP) by the sms->receiver use count
+		 * (VSUB_USE_SMS_RECEIVER) */
+		vlr_subscr_get(sms->receiver, VSUB_USE_SMS_RECEIVER);
+		vlr_subscr_put(dest, VSUB_USE_SMPP);
+	}
 	sms->dst.ton = submit->dest_addr_ton;
 	sms->dst.npi = submit->dest_addr_npi;
 	if (dest)
