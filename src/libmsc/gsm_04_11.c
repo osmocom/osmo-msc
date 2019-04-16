@@ -42,6 +42,7 @@
 #include <osmocom/gsm/gsm_utils.h>
 #include <osmocom/gsm/gsm0411_utils.h>
 #include <osmocom/gsm/protocol/gsm_04_11.h>
+#include <osmocom/gsm/protocol/gsm_03_40.h>
 
 #include <osmocom/msc/debug.h>
 #include <osmocom/msc/gsm_data.h>
@@ -545,19 +546,35 @@ static int gsm340_rx_tpdu(struct gsm_trans *trans, struct msgb *msg,
 		rc = GSM411_RP_CAUSE_MO_NET_OUT_OF_ORDER;
 		goto out;
 	}
-	gsms->user_data_len = *smsp++;
-	if (gsms->user_data_len) {
-		memcpy(gsms->user_data, smsp, gsms->user_data_len);
 
-		switch (sms_alphabet) {
-		case DCS_7BIT_DEFAULT:
-			gsm_7bit_decode_n(gsms->text, sizeof(gsms->text), smsp,
-					  gsms->user_data_len);
-			break;
-		case DCS_8BIT_DATA:
-		case DCS_UCS2:
-		case DCS_NONE:
-			break;
+	/* As per 3GPP TS 03.40, section 9.2.3.16, TP-User-Data-Length (TP-UDL)
+	 * may indicate either the number of septets, or the number of octets,
+	 * depending on Data Coding Scheme. We store TP-UDL value as-is,
+	 * so this should be kept in mind to avoid buffer overruns. */
+	gsms->user_data_len = *smsp++;
+	if (gsms->user_data_len > 0) {
+		if (sms_alphabet == DCS_7BIT_DEFAULT) {
+			/* TP-UDL is indicated in septets (up to 160) */
+			if (gsms->user_data_len > GSM340_UDL_SPT_MAX) {
+				LOG_TRANS(trans, LOGL_NOTICE,
+					  "TP-User-Data-Length %u (septets) "
+					  "is too big, truncating to %u\n",
+					  gsms->user_data_len, GSM340_UDL_SPT_MAX);
+				gsms->user_data_len = GSM340_UDL_SPT_MAX;
+			}
+			memcpy(gsms->user_data, smsp, gsm_get_octet_len(gsms->user_data_len));
+			gsm_7bit_decode_n(gsms->text, sizeof(gsms->text),
+					  smsp, gsms->user_data_len);
+		} else {
+			/* TP-UDL is indicated in octets (up to 140) */
+			if (gsms->user_data_len > GSM340_UDL_OCT_MAX) {
+				LOG_TRANS(trans, LOGL_NOTICE,
+					  "TP-User-Data-Length %u (octets) "
+					  "is too big, truncating to %u\n",
+					  gsms->user_data_len, GSM340_UDL_OCT_MAX);
+				gsms->user_data_len = GSM340_UDL_OCT_MAX;
+			}
+			memcpy(gsms->user_data, smsp, gsms->user_data_len);
 		}
 	}
 
