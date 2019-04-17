@@ -128,7 +128,13 @@ static void sgs_ue_fsm_lau_present(struct osmo_fsm_inst *fi, uint32_t event, voi
 		vsub->loc_conf_in_hlr_ind = true;
 		vsub->la_allowed = true;
 		vsub->imsi_detached_flag = false;
-		vsub->lu_complete = true;
+
+		if (!vsub->lu_complete) {
+			vsub->lu_complete = true;
+			/* Balanced by vlr_subscr_expire() */
+			vlr_subscr_get(vsub, VSUB_USE_ATTACHED);
+		}
+
 		vlr_sgs_fsm_update_id(vsub);
 		vsub->cs.attached_via_ran = OSMO_RAT_EUTRAN_SGS;
 
