@@ -399,9 +399,9 @@ struct vlr_subscr *_vlr_subscr_find_by_msisdn(struct vlr_instance *vlr,
 #define vlr_subscr_put(VSUB, USE) vlr_subscr_put_src(VSUB, USE, __FILE__, __LINE__)
 
 #define vlr_subscr_get_src(VSUB, USE, SRCFILE, SRCLINE) \
-	OSMO_ASSERT(_osmo_use_count_get_put(&(VSUB)->use_count, USE, 1, SRCFILE, SRCLINE) == 0)
+	OSMO_ASSERT((VSUB) && _osmo_use_count_get_put(&(VSUB)->use_count, USE, 1, SRCFILE, SRCLINE) == 0)
 #define vlr_subscr_put_src(VSUB, USE, SRCFILE, SRCLINE) \
-	OSMO_ASSERT(_osmo_use_count_get_put(&(VSUB)->use_count, USE, -1, SRCFILE, SRCLINE) == 0)
+	OSMO_ASSERT((VSUB) && _osmo_use_count_get_put(&(VSUB)->use_count, USE, -1, SRCFILE, SRCLINE) == 0)
 
 void vlr_subscr_free(struct vlr_subscr *vsub);
 int vlr_subscr_alloc_tmsi(struct vlr_subscr *vsub);
