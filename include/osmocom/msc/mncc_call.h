@@ -22,6 +22,7 @@
  */
 #pragma once
 
+#include <osmocom/mgcp_client/mgcp_client.h>
 #include <osmocom/msc/mncc.h>
 #include <osmocom/msc/mncc_call.h>
 
@@ -138,3 +139,5 @@ int mncc_call_tx_msgt(struct mncc_call *mncc_call, uint32_t msg_type);
 struct mncc_call *mncc_call_find_by_callref(uint32_t callref);
 
 void mncc_call_release(struct mncc_call *mncc_call);
+
+uint32_t mgcp_codec_to_mncc_payload_msg_type(enum mgcp_codecs codec);
