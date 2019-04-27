@@ -30,6 +30,8 @@
 #include <regex.h>
 #include <sys/types.h>
 
+#include <osmocom/mgcp_client/mgcp_client_endpoint_fsm.h>
+
 #include <osmocom/msc/db.h>
 #include <osmocom/msc/debug.h>
 #include <osmocom/msc/gsm_data.h>
@@ -1667,18 +1669,34 @@ int gsm48_tch_rtp_create(struct gsm_trans *trans)
 	struct gsm_network *net = msc_a_net(msc_a);
 	struct call_leg *cl = msc_a->cc.call_leg;
 	struct osmo_sockaddr_str *rtp_cn_local;
+	struct rtp_stream *rtp_cn = cl ? cl->rtp[RTP_TO_CN] : NULL;
 	/* FIXME: This has to be set to some meaningful value,
 	 * before the MSC-Split, this value was pulled from
 	 * lchan->abis_ip.rtp_payload */
 	uint32_t payload_type = 0;
-	int msg_type;
+	int payload_msg_type;
+	const struct mgcp_conn_peer *mgcp_info;
 
-	/* FIXME This has to be set to some meaningful value.
-	 * Possible options are:
-	 * GSM_TCHF_FRAME, GSM_TCHF_FRAME_EFR,
-	 * GSM_TCHH_FRAME, GSM_TCH_FRAME_AMR
-	 * (0 if unknown) */
-	msg_type = GSM_TCHF_FRAME;
+	if (!rtp_cn) {
+		LOG_TRANS_CAT(trans, DMNCC, LOGL_ERROR, "Cannot RTP CREATE to MNCC, no RTP set up for the CN side\n");
+		return -EINVAL;
+	}
+
+	if (!rtp_cn->codec_known) {
+		LOG_TRANS_CAT(trans, DMNCC, LOGL_ERROR,
+			      "Cannot RTP CREATE to MNCC, no codec set up for the RTP CN side\n");
+		return -EINVAL;
+	}
+
+	/* Codec */
+	payload_msg_type = mgcp_codec_to_mncc_payload_msg_type(rtp_cn->codec);
+
+	/* Payload Type number */
+	/* FIXME: since several codecs could be enabled, the proper solution is to forward SDP to MNCC as a
+	 * whole. For now, let's just send the first codec, knowing that currently most of our code actually
+	 * only sets a single codec to begin with. */
+	mgcp_info = osmo_mgcpc_ep_ci_get_rtp_info(rtp_cn->ci);
+	payload_type = map_codec_to_pt(mgcp_info->ptmap, mgcp_info->ptmap_len, rtp_cn->codec);
 
 	rtp_cn_local = call_leg_local_ip(cl, RTP_TO_CN);
 	if (!rtp_cn_local) {
@@ -1686,7 +1704,7 @@ int gsm48_tch_rtp_create(struct gsm_trans *trans)
 		return -EINVAL;
 	}
 
-	return mncc_recv_rtp(net, trans, trans->callref, MNCC_RTP_CREATE, rtp_cn_local, payload_type, msg_type);
+	return mncc_recv_rtp(net, trans, trans->callref, MNCC_RTP_CREATE, rtp_cn_local, payload_type, payload_msg_type);
 }
 
 static int tch_rtp_connect(struct gsm_network *net, const struct gsm_mncc_rtp *rtp)
