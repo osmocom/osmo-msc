@@ -52,10 +52,4 @@ int db_sms_delete_sent_message_by_id(unsigned long long sms_id);
 int db_sms_delete_expired_message_by_id(unsigned long long sms_id);
 void db_sms_delete_oldest_expired_message(void);
 
-/* Statistics counter storage */
-struct osmo_counter;
-int db_store_counter(struct osmo_counter *ctr);
-struct rate_ctr_group;
-int db_store_rate_ctr_group(struct rate_ctr_group *ctrg);
-
 #endif /* _DB_H */

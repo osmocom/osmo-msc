@@ -43,8 +43,8 @@ arguments:
 *-m, --mncc-sock*::
 	Same as option -M (deprecated).
 *-C, --no-dbcounter*::
-	Disable the regular periodic synchronization of statistics
-	counters to the database.
+	Deprecated. DB statistics and counter has been removed.
+	This option is only valid for compatiblity and does nothing.
 
 
 === Multiple instances

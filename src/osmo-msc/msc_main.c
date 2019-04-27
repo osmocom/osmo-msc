@@ -102,18 +102,13 @@ static struct {
 	const char *config_file;
 	int daemonize;
 	const char *mncc_sock_path;
-	int use_db_counter;
 } msc_cmdline_config = {
 	.database_name = "sms.db",
 	.config_file = "osmo-msc.cfg",
-	.use_db_counter = 1,
 };
 
 /* timer to store statistics */
-#define DB_SYNC_INTERVAL	60, 0
 #define EXPIRE_INTERVAL		10, 0
-
-static struct osmo_timer_list db_sync_timer;
 
 static int quit = 0;
 
@@ -135,7 +130,6 @@ static void print_help()
 	printf("  -V --version               Print the version of OsmoMSC.\n");
 	printf("  -e --log-level number      Set a global loglevel.\n");
 	printf("  -M --mncc-sock-path PATH   Disable built-in MNCC handler and offer socket.\n");
-	printf("  -C --no-dbcounter          Disable regular syncing of counters to database.\n");
 }
 
 static void handle_options(int argc, char **argv)
@@ -153,7 +147,7 @@ static void handle_options(int argc, char **argv)
 			{"version", 0, 0, 'V' },
 			{"log-level", 1, 0, 'e'},
 			{"mncc-sock-path", 1, 0, 'M'},
-			{"no-dbcounter", 0, 0, 'C'},
+			{"no-dbcounter", 0, 0, 'C'}, /* deprecated */
 			{0, 0, 0, 0}
 		};
 
@@ -192,7 +186,7 @@ static void handle_options(int argc, char **argv)
 			msc_cmdline_config.mncc_sock_path = optarg;
 			break;
 		case 'C':
-			msc_cmdline_config.use_db_counter = 0;
+			fprintf(stderr, "-C is deprecated and does nothing.");
 			break;
 		case 'V':
 			print_version(1);
@@ -258,19 +252,6 @@ static void signal_handler(int signal)
 	default:
 		break;
 	}
-}
-
-/* timer handling */
-static int _db_store_counter(struct osmo_counter *counter, void *data)
-{
-	return db_store_counter(counter);
-}
-
-static void db_sync_timer_cb(void *data)
-{
-	/* store counters to database and re-schedule */
-	osmo_counters_for_each(_db_store_counter, NULL);
-	osmo_timer_schedule(&db_sync_timer, DB_SYNC_INTERVAL);
 }
 
 static int msc_vty_go_parent(struct vty *vty)
@@ -664,11 +645,6 @@ TODO: we probably want some of the _net_ ctrl commands from bsc_base_ctrl_cmds_i
 		printf("DB: Failed to prepare database.\n");
 		return 5;
 	}
-
-	/* setup the timer */
-	osmo_timer_setup(&db_sync_timer, db_sync_timer_cb, NULL);
-	if (msc_cmdline_config.use_db_counter)
-		osmo_timer_schedule(&db_sync_timer, DB_SYNC_INTERVAL);
 
 	signal(SIGINT, &signal_handler);
 	signal(SIGTERM, &signal_handler);
