@@ -35,6 +35,8 @@ struct osmo_tdef mncc_tdefs[] = {
 	{}
 };
 
+#include <osmocom/core/stat_item.h>
+
 struct gsm_network *gsm_network_init(void *ctx, mncc_recv_cb_t mncc_recv)
 {
 	struct gsm_network *net;
@@ -66,8 +68,13 @@ struct gsm_network *gsm_network_init(void *ctx, mncc_recv_cb_t mncc_recv)
 		talloc_free(net);
 		return NULL;
 	}
-	net->active_calls = osmo_counter_alloc("msc.active_calls");
-	net->active_nc_ss = osmo_counter_alloc("msc.active_nc_ss");
+
+	net->statg = osmo_stat_item_group_alloc(net, &msc_statg_desc, 0);
+	if (!net->statg) {
+		rate_ctr_group_free(net->msc_ctrs);
+		talloc_free(net);
+		return NULL;
+	}
 
 	net->mncc_tdefs = mncc_tdefs;
 	net->mncc_recv = mncc_recv;

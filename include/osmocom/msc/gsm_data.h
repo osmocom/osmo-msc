@@ -10,6 +10,7 @@
 #include <osmocom/core/rate_ctr.h>
 #include <osmocom/core/select.h>
 #include <osmocom/core/stats.h>
+#include <osmocom/core/stat_item.h>
 #include <osmocom/gsm/gsm48.h>
 #include <osmocom/crypt/auth.h>
 
@@ -96,12 +97,30 @@ static const struct rate_ctr_desc msc_ctr_description[] = {
 	[MSC_CTR_BSSMAP_CIPHER_MODE_COMPLETE] =	{"bssmap:cipher_mode_complete", "Number of CIPHER MODE COMPLETE messages processed by BSSMAP layer"},
 };
 
+enum {
+	MSC_STAT_ACTIVE_CALLS,
+	MSC_STAT_ACTIVE_NC_SS,
+};
+
 static const struct rate_ctr_group_desc msc_ctrg_desc = {
 	"msc",
 	"mobile switching center",
 	OSMO_STATS_CLASS_GLOBAL,
 	ARRAY_SIZE(msc_ctr_description),
 	msc_ctr_description,
+};
+
+static const struct osmo_stat_item_desc msc_stat_item_description[] = {
+	[MSC_STAT_ACTIVE_CALLS] = { "msc.active_calls", "Currently active calls "          , OSMO_STAT_ITEM_NO_UNIT, 4, 0},
+	[MSC_STAT_ACTIVE_NC_SS]        = { "msc.active_nc_ss", "Currently active SS/USSD sessions", OSMO_STAT_ITEM_NO_UNIT, 4, 0},
+};
+
+static const struct osmo_stat_item_group_desc msc_statg_desc = {
+	"net",
+	"network statistics",
+	OSMO_STATS_CLASS_GLOBAL,
+	ARRAY_SIZE(msc_stat_item_description),
+	msc_stat_item_description,
 };
 
 #define MSC_PAGING_RESPONSE_TIMER_DEFAULT 10
@@ -131,8 +150,7 @@ struct gsm_network {
 	int send_mm_info;
 
 	struct rate_ctr_group *msc_ctrs;
-	struct osmo_counter *active_calls;
-	struct osmo_counter *active_nc_ss;
+	struct osmo_stat_item_group *statg;
 
 	/* layer 4 */
 	char *mncc_sock_path;

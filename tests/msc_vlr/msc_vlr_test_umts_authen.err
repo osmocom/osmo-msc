@@ -1,6 +1,6 @@
 DLMGCP MGCP client: using endpoint domain '@mgw'
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 17
+talloc_total_blocks(tall_bsc_ctx) == 19
 
 ===== test_umts_authen_geran
 - Location Update request causes a GSUP Send Auth Info request to HLR
@@ -599,7 +599,7 @@ DMSC msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:GERAN-A:NONE){MSC_A
 ===== test_umts_authen_geran: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 17
+talloc_total_blocks(tall_bsc_ctx) == 19
 
 ===== test_umts_authen_utran
 - Location Update request causes a GSUP Send Auth Info request to HLR
@@ -1229,7 +1229,7 @@ DMSC msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:NONE){MSC_
 ===== test_umts_authen_utran: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 17
+talloc_total_blocks(tall_bsc_ctx) == 19
 
 ===== test_umts_authen_resync_geran
 - Location Update request causes a GSUP Send Auth Info request to HLR
@@ -1461,7 +1461,7 @@ DVLR freeing VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 (max t
 ===== test_umts_authen_resync_geran: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 17
+talloc_total_blocks(tall_bsc_ctx) == 19
 
 ===== test_umts_authen_resync_utran
 - Location Update request causes a GSUP Send Auth Info request to HLR
@@ -1705,7 +1705,7 @@ DVLR freeing VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 (max t
 ===== test_umts_authen_resync_utran: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 17
+talloc_total_blocks(tall_bsc_ctx) == 19
 
 ===== test_umts_authen_too_short_res_geran
 - Location Update request causes a GSUP Send Auth Info request to HLR
@@ -1823,7 +1823,7 @@ DMSC msc_a(IMSI-901700000010650:GERAN-A:LU){MSC_A_ST_RELEASED}: Deallocated, inc
 ===== test_umts_authen_too_short_res_geran: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 17
+talloc_total_blocks(tall_bsc_ctx) == 19
 
 ===== test_umts_authen_too_short_res_utran
 - Location Update request causes a GSUP Send Auth Info request to HLR
@@ -1941,7 +1941,7 @@ DMSC msc_a(IMSI-901700000010650:UTRAN-Iu:LU){MSC_A_ST_RELEASED}: Deallocated, in
 ===== test_umts_authen_too_short_res_utran: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 17
+talloc_total_blocks(tall_bsc_ctx) == 19
 
 ===== test_umts_authen_too_long_res_geran
 - Location Update request causes a GSUP Send Auth Info request to HLR
@@ -2059,7 +2059,7 @@ DMSC msc_a(IMSI-901700000010650:GERAN-A:LU){MSC_A_ST_RELEASED}: Deallocated, inc
 ===== test_umts_authen_too_long_res_geran: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 17
+talloc_total_blocks(tall_bsc_ctx) == 19
 
 ===== test_umts_authen_too_long_res_utran
 - Location Update request causes a GSUP Send Auth Info request to HLR
@@ -2177,7 +2177,7 @@ DMSC msc_a(IMSI-901700000010650:UTRAN-Iu:LU){MSC_A_ST_RELEASED}: Deallocated, in
 ===== test_umts_authen_too_long_res_utran: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 17
+talloc_total_blocks(tall_bsc_ctx) == 19
 
 ===== test_umts_authen_only_sres_geran
 - Location Update request causes a GSUP Send Auth Info request to HLR
@@ -2295,7 +2295,7 @@ DMSC msc_a(IMSI-901700000010650:GERAN-A:LU){MSC_A_ST_RELEASED}: Deallocated, inc
 ===== test_umts_authen_only_sres_geran: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 17
+talloc_total_blocks(tall_bsc_ctx) == 19
 
 ===== test_umts_authen_only_sres_utran
 - Location Update request causes a GSUP Send Auth Info request to HLR
@@ -2413,8 +2413,8 @@ DMSC msc_a(IMSI-901700000010650:UTRAN-Iu:LU){MSC_A_ST_RELEASED}: Deallocated, in
 ===== test_umts_authen_only_sres_utran: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 17
+talloc_total_blocks(tall_bsc_ctx) == 19
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 17
+talloc_total_blocks(tall_bsc_ctx) == 19
 

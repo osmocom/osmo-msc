@@ -161,7 +161,7 @@ static void count_statistics(struct gsm_trans *trans, int new_state)
 	/* state incoming */
 	switch (new_state) {
 	case GSM_CSTATE_ACTIVE:
-		osmo_counter_inc(trans->net->active_calls);
+		osmo_stat_item_inc(trans->net->statg->items[MSC_STAT_ACTIVE_CALLS], 1);
 		rate_ctr_inc(&msc->ctr[MSC_CTR_CALL_ACTIVE]);
 		break;
 	}
@@ -169,7 +169,7 @@ static void count_statistics(struct gsm_trans *trans, int new_state)
 	/* state outgoing */
 	switch (old_state) {
 	case GSM_CSTATE_ACTIVE:
-		osmo_counter_dec(trans->net->active_calls);
+		osmo_stat_item_dec(trans->net->statg->items[MSC_STAT_ACTIVE_CALLS], 1);
 		if (new_state == GSM_CSTATE_DISCONNECT_REQ ||
 				new_state == GSM_CSTATE_DISCONNECT_IND)
 			rate_ctr_inc(&msc->ctr[MSC_CTR_CALL_COMPLETE]);

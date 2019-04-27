@@ -1,6 +1,6 @@
 DLMGCP MGCP client: using endpoint domain '@mgw'
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 17
+talloc_total_blocks(tall_bsc_ctx) == 19
 
 ===== test_reject_2nd_conn
 - Location Update Request on one connection
@@ -190,7 +190,7 @@ DVLR freeing VLR subscr IMSI-901700000004620:MSISDN-46071 (max total use count w
 ===== test_reject_2nd_conn: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 17
+talloc_total_blocks(tall_bsc_ctx) == 19
 
 ===== test_reject_lu_during_lu
 - Location Update Request
@@ -331,7 +331,7 @@ DVLR freeing VLR subscr IMSI-901700000004620:MSISDN-46071 (max total use count w
 ===== test_reject_lu_during_lu: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 17
+talloc_total_blocks(tall_bsc_ctx) == 19
 
 ===== test_reject_cm_during_lu
 - Location Update Request
@@ -476,7 +476,7 @@ DVLR freeing VLR subscr IMSI-901700000004620:MSISDN-46071 (max total use count w
 ===== test_reject_cm_during_lu: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 17
+talloc_total_blocks(tall_bsc_ctx) == 19
 
 ===== test_reject_paging_resp_during_lu
 - Location Update Request
@@ -616,7 +616,7 @@ DVLR freeing VLR subscr IMSI-901700000004620:MSISDN-46071 (max total use count w
 ===== test_reject_paging_resp_during_lu: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 17
+talloc_total_blocks(tall_bsc_ctx) == 19
 
 ===== test_reject_lu_during_cm
 
@@ -851,7 +851,7 @@ DMSC msc_a(IMSI-901700000004620:MSISDN-46071:GERAN-A:CM_SERVICE_REQ){MSC_A_ST_RE
 ===== test_reject_lu_during_cm: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 17
+talloc_total_blocks(tall_bsc_ctx) == 19
 
 ===== test_reject_cm_during_cm
 
@@ -1090,7 +1090,7 @@ DMSC msc_a(IMSI-901700000004620:MSISDN-46071:GERAN-A:CM_SERVICE_REQ){MSC_A_ST_RE
 ===== test_reject_cm_during_cm: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 17
+talloc_total_blocks(tall_bsc_ctx) == 19
 
 ===== test_reject_paging_resp_during_cm
 
@@ -1314,7 +1314,7 @@ DVLR freeing VLR subscr IMSI-901700000004620:MSISDN-46071 (max total use count w
 ===== test_reject_paging_resp_during_cm: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 17
+talloc_total_blocks(tall_bsc_ctx) == 19
 
 ===== test_reject_lu_during_paging_resp
 
@@ -1612,7 +1612,7 @@ DVLR freeing VLR subscr IMSI-901700000004620:MSISDN-46071 (max total use count w
 ===== test_reject_lu_during_paging_resp: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 17
+talloc_total_blocks(tall_bsc_ctx) == 19
 
 ===== test_accept_cm_during_paging_resp
 
@@ -1933,7 +1933,7 @@ DMSC msc_a(IMSI-901700000004620:MSISDN-46071:GERAN-A:CM_SERVICE_REQ){MSC_A_ST_RE
 ===== test_accept_cm_during_paging_resp: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 17
+talloc_total_blocks(tall_bsc_ctx) == 19
 
 ===== test_reject_paging_resp_during_paging_resp
 
@@ -2228,8 +2228,8 @@ DVLR freeing VLR subscr IMSI-901700000004620:MSISDN-46071 (max total use count w
 ===== test_reject_paging_resp_during_paging_resp: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 17
+talloc_total_blocks(tall_bsc_ctx) == 19
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 17
+talloc_total_blocks(tall_bsc_ctx) == 19
 

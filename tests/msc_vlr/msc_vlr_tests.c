@@ -922,28 +922,30 @@ static void check_talloc(void *msgb_ctx, void *msc_vlr_tests_ctx)
 	talloc_report_full(msgb_ctx, stderr);
 	/* Expecting these to stick around in msc_vlr_tests_ctx:
 	 * full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-	 * talloc_total_blocks(tall_bsc_ctx) == 17
-	 * full talloc report on 'msc_vlr_tests_ctx' (total   6336 bytes in  17 blocks)
-	 *     struct osmo_gsup_client        contains    256 bytes in   1 blocks (ref 0) 0x613000000260
-	 *     struct gsm_network             contains   4647 bytes in   9 blocks (ref 0) 0x6190000000e0
-	 * 	struct mgcp_client             contains    688 bytes in   1 blocks (ref 0) 0x6180000000e0
-	 * 	struct sccp_ran_inst           contains    152 bytes in   1 blocks (ref 0) 0x611000000460
-	 * 	struct sccp_ran_inst           contains    152 bytes in   1 blocks (ref 0) 0x611000000320
-	 * 	struct gsup_client_mux         contains    200 bytes in   2 blocks (ref 0) 0x6110000001e0
-	 * 	    struct ipaccess_unit           contains     64 bytes in   1 blocks (ref 0) 0x60e000023180
-	 * 	struct vlr_instance            contains    248 bytes in   1 blocks (ref 0) 0x6130000000a0
-	 * 	no_gsup_server                 contains     15 bytes in   1 blocks (ref 0) 0x60b000000150
-	 * 	../../../src/libosmocore/src/rate_ctr.c:234 contains   2352 bytes in   1 blocks (ref 0) 0x61e0000000e0
-	 *     logging                        contains   1433 bytes in   5 blocks (ref 0) 0x60b0000000a0
-	 * 	struct log_target              contains    240 bytes in   2 blocks (ref 0) 0x6120000000a0
-	 * 	    struct log_category            contains     72 bytes in   1 blocks (ref 0) 0x60f0000000a0
-	 * 	struct log_info                contains   1192 bytes in   2 blocks (ref 0) 0x60d0000000a0
-	 * 	    struct log_info_cat            contains   1152 bytes in   1 blocks (ref 0) 0x61a0000000e0
-	 *     msgb                           contains      0 bytes in   1 blocks (ref 0) 0x608000000100
+	 * talloc_total_blocks(tall_bsc_ctx) == 19
+	 * full talloc report on 'msc_vlr_tests_ctx' (total   6532 bytes in  19 blocks)
+	 * struct osmo_gsup_client        contains    256 bytes in   1 blocks (ref 0) 0x56143306aa10
+	 * struct gsm_network             contains   4775 bytes in  11 blocks (ref 0) 0x5614330697e0
+	 * 	struct mgcp_client             contains    688 bytes in   1 blocks (ref 0) 0x56143306ad80
+	 * 	struct sccp_ran_inst           contains    152 bytes in   1 blocks (ref 0) 0x56143306ac80
+	 * 	struct sccp_ran_inst           contains    152 bytes in   1 blocks (ref 0) 0x56143306ab80
+	 * 	struct gsup_client_mux         contains    152 bytes in   2 blocks (ref 0) 0x56143306a8a0
+	 * 	struct ipaccess_unit           contains     64 bytes in   1 blocks (ref 0) 0x56143306a960
+	 * 	struct vlr_instance            contains    248 bytes in   1 blocks (ref 0) 0x56143306a740
+	 * 	no_gsup_server                 contains     15 bytes in   1 blocks (ref 0) 0x56143306a6c0
+	 * 	stat_item.c:96                 contains    144 bytes in   2 blocks (ref 0) 0x56143306a550
+	 * 	stat_item.c:118                contains     96 bytes in   1 blocks (ref 0) 0x56143306a5f0
+	 * 	rate_ctr.c:234                 contains   2352 bytes in   1 blocks (ref 0) 0x561433069bb0
+	 * logging                        contains   1501 bytes in   5 blocks (ref 0) 0x561433068fe0
+	 * 	struct log_target              contains    244 bytes in   2 blocks (ref 0) 0x561433069610
+	 * 	struct log_category            contains     76 bytes in   1 blocks (ref 0) 0x561433069720
+	 * 	struct log_info                contains   1256 bytes in   2 blocks (ref 0) 0x561433069050
+	 * 	struct log_info_cat            contains   1216 bytes in   1 blocks (ref 0) 0x5614330690e0
+	 * msgb                           contains      0 bytes in   1 blocks (ref 0) 0x561433068f70
 	 */
 	fprintf(stderr, "talloc_total_blocks(tall_bsc_ctx) == %zu\n",
 		talloc_total_blocks(msc_vlr_tests_ctx));
-	if (talloc_total_blocks(msc_vlr_tests_ctx) != 17)
+	if (talloc_total_blocks(msc_vlr_tests_ctx) != 19)
 		talloc_report_full(msc_vlr_tests_ctx, stderr);
 	fprintf(stderr, "\n");
 }
