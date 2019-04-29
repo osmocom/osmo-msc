@@ -508,8 +508,12 @@ static int gsm340_rx_tpdu(struct gsm_trans *trans, struct msgb *msg,
 	gsms->dst.ton = (address_lv[1] >> 4) & 7;
 	gsms->dst.npi = address_lv[1] & 0xF;
 	/* convert to real number */
-	gsm48_decode_bcd_number(gsms->dst.addr,
-				sizeof(gsms->dst.addr), address_lv, 1);
+	if (gsm48_decode_bcd_number2(gsms->dst.addr,
+				     sizeof(gsms->dst.addr), address_lv, da_len_bytes, 1)) {
+		LOG_TRANS(trans, LOGL_ERROR, "Failed to decode destination Address\n");
+		rc = GSM411_RP_CAUSE_SEMANT_INC_MSG;
+		goto out;
+	}
 	smsp += da_len_bytes;
 
 	gsms->protocol_id = *smsp++;
