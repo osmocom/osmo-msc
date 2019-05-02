@@ -146,7 +146,7 @@ struct vlr_subscr {
 	struct osmo_cell_global_id cgi;			/* 2.4.16 */
 
 	char imeisv[GSM23003_IMEISV_NUM_DIGITS+1];	/* 2.2.3 */
-	char imei[GSM23003_IMEISV_NUM_DIGITS+1];	/* 2.1.9 */
+	char imei[GSM23003_IMEI_NUM_DIGITS_NO_CHK+1];	/* 2.1.9 */
 	bool imsi_detached_flag;			/* 2.7.1 */
 	bool conf_by_radio_contact_ind;			/* 2.7.4.1 */
 	bool sub_dataconf_by_hlr_ind;			/* 2.7.4.2 */

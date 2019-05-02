@@ -568,7 +568,7 @@ static void test_gsm_authen_imei()
 	thwart_rx_non_initial_requests();
 
 	btw("MS replies with an Identity Response, VLR sends the IMEI to HLR");
-	gsup_expect_tx("30010809710000004026f050090824433224433224f0" VLR_TO_HLR);
+	gsup_expect_tx("30010809710000004026f050080724433224433224" VLR_TO_HLR);
 	ms_sends_msg("0559084a32244332244302");
 	EXPECT_ACCEPTED(false);
 	thwart_rx_non_initial_requests();
@@ -586,7 +586,7 @@ static void test_gsm_authen_imei()
 	btw("Subscriber has the IMEI");
 	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi, __func__);
 	OSMO_ASSERT(vsub);
-	VERBOSE_ASSERT(strcmp(vsub->imei, "423423423423420"), == 0, "%d");
+	VERBOSE_ASSERT(strcmp(vsub->imei, "42342342342342"), == 0, "%d");
 	vlr_subscr_put(vsub, __func__);
 
 	BTW("subscriber detaches");
@@ -677,7 +677,7 @@ static void test_gsm_authen_imei_nack()
 	thwart_rx_non_initial_requests();
 
 	btw("MS replies with an Identity Response, VLR sends the IMEI to HLR");
-	gsup_expect_tx("30010809710000004026f050090824433224433224f0" VLR_TO_HLR);
+	gsup_expect_tx("30010809710000004026f050080724433224433224" VLR_TO_HLR);
 	ms_sends_msg("0559084a32244332244302");
 	EXPECT_ACCEPTED(false);
 	thwart_rx_non_initial_requests();
@@ -770,7 +770,7 @@ static void test_gsm_authen_imei_err()
 	thwart_rx_non_initial_requests();
 
 	btw("MS replies with an Identity Response, VLR sends the IMEI to HLR");
-	gsup_expect_tx("30010809710000004026f050090824433224433224f0" VLR_TO_HLR);
+	gsup_expect_tx("30010809710000004026f050080724433224433224" VLR_TO_HLR);
 	ms_sends_msg("0559084a32244332244302");
 	EXPECT_ACCEPTED(false);
 	thwart_rx_non_initial_requests();
@@ -864,7 +864,7 @@ static void test_gsm_authen_tmsi_imei()
 	thwart_rx_non_initial_requests();
 
 	btw("MS replies with an Identity Response, VLR sends the IMEI to HLR");
-	gsup_expect_tx("30010809710000004026f050090824433224433224f0" VLR_TO_HLR);
+	gsup_expect_tx("30010809710000004026f050080724433224433224" VLR_TO_HLR);
 	ms_sends_msg("0559084a32244332244302");
 	EXPECT_ACCEPTED(false);
 	thwart_rx_non_initial_requests();
@@ -898,7 +898,7 @@ static void test_gsm_authen_tmsi_imei()
 	btw("Subscriber has the IMEI and TMSI");
 	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi, __func__);
 	OSMO_ASSERT(vsub);
-	VERBOSE_ASSERT(strcmp(vsub->imei, "423423423423420"), == 0, "%d");
+	VERBOSE_ASSERT(strcmp(vsub->imei, "42342342342342"), == 0, "%d");
 	VERBOSE_ASSERT(vsub->tmsi, == 0x03020100, "0x%08x");
 	vlr_subscr_put(vsub, __func__);
 
