@@ -38,7 +38,7 @@ OsmoMSC(config-msc)# list
   no assign-tmsi
   auth-tuple-max-reuse-count <-1-2147483647>
   auth-tuple-reuse-on-error (0|1)
-  check-imei-rqd (0|1)
+  check-imei-rqd (0|1|early)
   cs7-instance-a <0-15>
   cs7-instance-iu <0-15>
   paging response-timer (default|<1-65535>)

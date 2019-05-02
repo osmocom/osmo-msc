@@ -455,13 +455,24 @@ DEFUN(cfg_msc_auth_tuple_reuse_on_error, cfg_msc_auth_tuple_reuse_on_error_cmd,
 }
 
 DEFUN(cfg_msc_check_imei_rqd, cfg_msc_check_imei_rqd_cmd,
-      "check-imei-rqd (0|1)",
+      "check-imei-rqd (0|1|early)",
       "Send each IMEI to the EIR to ask if it is permitted or not. The EIR is implemented as part of OsmoHLR, "
       "and can optionally save the IMEI in the HLR.\n"
       "Do not send IMEIs to the EIR\n"
-      "Send each IMEI to the EIR\n")
+      "Send each IMEI to the EIR\n"
+      "Send each IMEI to the EIR, and do it at the start of the location update. This allows the EIR to receive the"
+      " IMEI, even if the MS would get rejected when the MSC sends the location update request to the HLR.\n")
 {
-	gsmnet->vlr->cfg.check_imei_rqd = atoi(argv[0]) ? true : false;
+	if (strcmp(argv[0], "0") == 0) {
+		gsmnet->vlr->cfg.check_imei_rqd = false;
+		gsmnet->vlr->cfg.retrieve_imeisv_early = false;
+	} else if (strcmp(argv[0], "1") == 0) {
+		gsmnet->vlr->cfg.check_imei_rqd = true;
+		gsmnet->vlr->cfg.retrieve_imeisv_early = false;
+	} else if (strcmp(argv[0], "early") == 0) {
+		gsmnet->vlr->cfg.check_imei_rqd = true;
+		gsmnet->vlr->cfg.retrieve_imeisv_early = true;
+	}
 	return CMD_SUCCESS;
 }
 
@@ -581,9 +592,12 @@ static int config_write_msc(struct vty *vty)
 		vty_out(vty, " auth-tuple-reuse-on-error 1%s",
 			VTY_NEWLINE);
 
-	if (gsmnet->vlr->cfg.check_imei_rqd)
-		vty_out(vty, " check-imei-rqd 1 %s",
-			VTY_NEWLINE);
+	if (gsmnet->vlr->cfg.check_imei_rqd) {
+		if (gsmnet->vlr->cfg.retrieve_imeisv_early)
+			vty_out(vty, " check-imei-rqd early%s", VTY_NEWLINE);
+		else
+			vty_out(vty, " check-imei-rqd 1%s", VTY_NEWLINE);
+	}
 
 	if (gsmnet->paging_response_timer != MSC_PAGING_RESPONSE_TIMER_DEFAULT)
 		vty_out(vty, " paging response-timer %u%s", gsmnet->paging_response_timer, VTY_NEWLINE);
