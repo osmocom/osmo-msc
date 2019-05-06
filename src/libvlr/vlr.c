@@ -1241,7 +1241,7 @@ int vlr_subscr_rx_tmsi_reall_compl(struct vlr_subscr *vsub)
 					      PR_ARQ_E_TMSI_ACK, NULL);
 	} else {
 		LOGVSUBP(LOGL_NOTICE, vsub,
-			 "gratuitous TMSI REALLOC COMPL");
+			 "gratuitous TMSI REALLOC COMPL\n");
 		return -EINVAL;
 	}
 }

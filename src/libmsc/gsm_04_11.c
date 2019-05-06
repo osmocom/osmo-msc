@@ -425,7 +425,7 @@ static int sms_route_mt_sms(struct gsm_trans *trans, struct gsm_sms *gsms)
 			/* unknown subscriber, try local */
 			goto try_local;
 		if (rc < 0) {
-			LOG_TRANS(trans, LOGL_ERROR, "SMS delivery error: %d.", rc);
+			LOG_TRANS(trans, LOGL_ERROR, "SMS delivery error: %d\n", rc);
 	 		rc = GSM411_RP_CAUSE_MO_TEMP_FAIL;
 			/* rc will be logged by gsm411_send_rp_error() */
 			rate_ctr_inc(&conn->network->msc_ctrs->ctr[
@@ -451,7 +451,7 @@ try_local:
 		if (rc == GSM411_RP_CAUSE_MO_NUM_UNASSIGNED) {
 			rate_ctr_inc(&conn->network->msc_ctrs->ctr[MSC_CTR_SMS_NO_RECEIVER]);
 		} else if (rc < 0) {
-			LOG_TRANS(trans, LOGL_ERROR, "SMS delivery error: %d.", rc);
+			LOG_TRANS(trans, LOGL_ERROR, "SMS delivery error: %d\n", rc);
 	 		rc = GSM411_RP_CAUSE_MO_TEMP_FAIL;
 			/* rc will be logged by gsm411_send_rp_error() */
 			rate_ctr_inc(&conn->network->msc_ctrs->ctr[

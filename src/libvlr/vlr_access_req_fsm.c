@@ -141,7 +141,7 @@ static void proc_arq_vlr_dispatch_result(struct osmo_fsm_inst *fi,
 	 * will start handling pending paging transactions. */
 
 	if (!fi->proc.parent) {
-		LOGPFSML(fi, LOGL_ERROR, "No parent FSM");
+		LOGPFSML(fi, LOGL_ERROR, "No parent FSM\n");
 		return;
 	}
 	osmo_fsm_inst_dispatch(fi->proc.parent,
