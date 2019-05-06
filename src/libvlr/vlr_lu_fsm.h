@@ -9,6 +9,7 @@ enum vlr_lu_state {
 	VLR_ULA_S_WAIT_AUTH,	/* Waiting for Authentication */
 	VLR_ULA_S_WAIT_CIPH,	/* Waiting for Ciphering Complete */
 	VLR_ULA_S_WAIT_IMSI,	/* Waiting for IMSI from MS */
+	VLR_ULA_S_WAIT_HLR_CHECK_IMEI_EARLY, /* Waiting for Check IMEI result from HLR */
 	VLR_ULA_S_WAIT_HLR_UPD,	/* Waiting for end of HLR update */
 	VLR_ULA_S_WAIT_LU_COMPL,/* Waiting for LU complete */
 	VLR_ULA_S_WAIT_LU_COMPL_STANDALONE, /* Standalone VLR */

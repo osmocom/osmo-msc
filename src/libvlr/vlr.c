@@ -1043,6 +1043,8 @@ static int vlr_subscr_handle_check_imei(struct vlr_subscr *vsub, const struct os
 		return -ENODEV;
 	}
 
+	/* Dispatch result to vsub->lu_fsm, which will either handle the result by itself (Check IMEI early) or dispatch
+         * it further to lu_compl_vlr_fsm (Check IMEI after LU). */
 	if (gsup->message_type == OSMO_GSUP_MSGT_CHECK_IMEI_RESULT) {
 		if (gsup->imei_result == OSMO_GSUP_IMEI_RESULT_ACK)
 			osmo_fsm_inst_dispatch(vsub->lu_fsm, VLR_ULA_E_HLR_IMEI_ACK, NULL);

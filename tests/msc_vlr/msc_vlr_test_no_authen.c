@@ -615,17 +615,23 @@ static void test_no_authen_imeisv_imei()
 	ms_sends_msg("050802008168000130089910070000006402");
 	OSMO_ASSERT(dtap_tx_confirmed);
 
-	btw("MS replies with an Identity Response, causes LU to commence with a GSUP LU request to HLR");
-	gsup_expect_tx("04010809710000004026f0280102" VLR_TO_HLR);
+	btw("MS replies with an Identity Response, causes an early GSUP Check IMEI request to HLR");
+	gsup_expect_tx("30010809710000004026f050080724433224433224" VLR_TO_HLR);
 	ms_sends_msg("0559094332244332244372f5");
 	OSMO_ASSERT(gsup_tx_confirmed);
-	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("Subscriber has the IMEISV from the ID Response");
 	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi, __func__);
 	OSMO_ASSERT(vsub);
 	VERBOSE_ASSERT(strcmp(vsub->imeisv, "4234234234234275"), == 0, "%d");
 	vlr_subscr_put(vsub, __func__);
+
+	btw("HLR accepts the IMEI, VLR responds with LU Request");
+	expect_bssap_clear();
+	gsup_rx("32010809710000004026f0510100" HLR_TO_VLR,
+		"04010809710000004026f0280102" VLR_TO_HLR);
+	OSMO_ASSERT(gsup_tx_confirmed);
+	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("HLR sends _INSERT_DATA_REQUEST, VLR responds with _INSERT_DATA_RESULT");
 	gsup_rx("10010809710000004026f00804036470f1" HLR_TO_VLR,
@@ -637,26 +643,8 @@ static void test_no_authen_imeisv_imei()
 	thwart_rx_non_initial_requests();
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
-	btw("HLR also sends GSUP _UPDATE_LOCATION_RESULT, and we send an ID Request for the IMEI to the MS");
-	dtap_expect_tx("051802");
+	btw("HLR also sends GSUP _UPDATE_LOCATION_RESULT");
 	gsup_rx("06010809710000004026f0" HLR_TO_VLR, NULL);
-
-	btw("We will only do business when the IMEI is known");
-	EXPECT_CONN_COUNT(1);
-	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi, __func__);
-	OSMO_ASSERT(vsub);
-	vlr_subscr_put(vsub, __func__);
-	EXPECT_ACCEPTED(false);
-	thwart_rx_non_initial_requests();
-
-	btw("MS replies with an Identity Response, VLR sends the IMEI to HLR");
-	gsup_expect_tx("30010809710000004026f050080724433224433224" VLR_TO_HLR);
-	ms_sends_msg("0559084a32244332244302");
-
-	btw("HLR accepts the IMEI");
-	expect_bssap_clear();
-	gsup_rx("32010809710000004026f0510100" HLR_TO_VLR, NULL);
-	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
 	btw("LU was successful, and the conn has already been closed");
 	VERBOSE_ASSERT(lu_result_sent, == RES_ACCEPT, "%d");
@@ -840,17 +828,23 @@ static void test_no_authen_imeisv_tmsi_imei()
 	ms_sends_msg("050802008168000130089910070000006402");
 	OSMO_ASSERT(dtap_tx_confirmed);
 
-	btw("MS replies with an Identity Response, causes LU to commence with a GSUP LU request to HLR");
-	gsup_expect_tx("04010809710000004026f0280102" VLR_TO_HLR);
+	btw("MS replies with an Identity Response, causes an early GSUP Check IMEI request to HLR");
+	gsup_expect_tx("30010809710000004026f050080724433224433224" VLR_TO_HLR);
 	ms_sends_msg("0559094332244332244372f5");
 	OSMO_ASSERT(gsup_tx_confirmed);
-	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("Subscriber has the IMEISV from the ID Response");
 	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi, __func__);
 	OSMO_ASSERT(vsub);
 	VERBOSE_ASSERT(strcmp(vsub->imeisv, "4234234234234275"), == 0, "%d");
 	vlr_subscr_put(vsub, __func__);
+
+	btw("HLR accepts the IMEI, VLR responds with LU Request");
+	expect_bssap_clear();
+	gsup_rx("32010809710000004026f0510100" HLR_TO_VLR,
+		"04010809710000004026f0280102" VLR_TO_HLR);
+	OSMO_ASSERT(gsup_tx_confirmed);
+	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("HLR sends _INSERT_DATA_REQUEST, VLR responds with _INSERT_DATA_RESULT");
 	gsup_rx("10010809710000004026f00804036470f1" HLR_TO_VLR,
@@ -862,24 +856,8 @@ static void test_no_authen_imeisv_tmsi_imei()
 	thwart_rx_non_initial_requests();
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
-	btw("HLR also sends GSUP _UPDATE_LOCATION_RESULT, and we send an ID Request for the IMEI to the MS");
-	dtap_expect_tx("051802");
+	btw("HLR also sends GSUP _UPDATE_LOCATION_RESULT");
 	gsup_rx("06010809710000004026f0" HLR_TO_VLR, NULL);
-
-	btw("We will only do business when the IMEI is known");
-	EXPECT_CONN_COUNT(1);
-	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi, __func__);
-	OSMO_ASSERT(vsub);
-	vlr_subscr_put(vsub, __func__);
-	EXPECT_ACCEPTED(false);
-	thwart_rx_non_initial_requests();
-
-	btw("MS replies with an Identity Response, VLR sends the IMEI to HLR");
-	gsup_expect_tx("30010809710000004026f050080724433224433224" VLR_TO_HLR);
-	ms_sends_msg("0559084a32244332244302");
-
-	btw("HLR accepts the IMEI");
-	gsup_rx("32010809710000004026f0510100" HLR_TO_VLR, NULL);
 
 	btw("a LU Accept with a new TMSI was sent, waiting for TMSI Realloc Compl");
 	EXPECT_CONN_COUNT(1);

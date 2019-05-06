@@ -460,7 +460,8 @@ static void lu_compl_vlr_wait_subscr_pres(struct osmo_fsm_inst *fi,
 
 	/* TODO: Trace_Subscriber_Activity_VLR */
 
-	if (vlr->cfg.check_imei_rqd) {
+	/* If imeisv_early is enabled: IMEI already retrieved and checked (vlr_loc_upd_node1_pre), don't do it again. */
+	if (vlr->cfg.check_imei_rqd && !vlr->cfg.retrieve_imeisv_early) {
 		/* Check IMEI VLR */
 		osmo_fsm_inst_state_chg(fi,
 					lcvp->assign_tmsi ?
@@ -924,6 +925,39 @@ static void vlr_loc_upd_node1(struct osmo_fsm_inst *fi)
 	}
 }
 
+static void vlr_loc_upd_node1_pre(struct osmo_fsm_inst *fi)
+{
+	struct lu_fsm_priv *lfp = lu_fsm_fi_priv(fi);
+	struct vlr_instance *vlr = lfp->vlr;
+
+	LOGPFSM(fi, "%s()\n", __func__);
+
+	if (vlr->cfg.check_imei_rqd && vlr->cfg.retrieve_imeisv_early) {
+		osmo_fsm_inst_state_chg(fi, VLR_ULA_S_WAIT_HLR_CHECK_IMEI_EARLY, vlr_timer(lfp->vlr, 3270), 3270);
+		vlr_subscr_tx_req_check_imei(lfp->vsub);
+	} else {
+		vlr_loc_upd_node1(fi);
+	}
+}
+
+/* End of Check_IMEI Procedure. Executed early (before the location update), so we can send the IMEI to the HLR even if
+ * the MS would be rejected in LU. See the "Configuring the Subscribers Create on Demand Feature" section of the OsmoHLR
+ * user manual for a detailed explanation of the use case. */
+static void lu_fsm_wait_hlr_check_imei_early(struct osmo_fsm_inst *fi, uint32_t event, void *data)
+{
+	switch (event) {
+	case VLR_ULA_E_HLR_IMEI_ACK:
+		vlr_loc_upd_node1(fi);
+		break;
+	case VLR_ULA_E_HLR_IMEI_NACK:
+		lu_fsm_failure(fi, GSM48_REJECT_ILLEGAL_ME);
+		break;
+	default:
+		OSMO_ASSERT(0);
+		break;
+	}
+}
+
 static void vlr_loc_upd_want_imsi(struct osmo_fsm_inst *fi)
 {
 	struct lu_fsm_priv *lfp = lu_fsm_fi_priv(fi);
@@ -937,7 +971,7 @@ static void vlr_loc_upd_want_imsi(struct osmo_fsm_inst *fi)
 	osmo_fsm_inst_state_chg(fi, VLR_ULA_S_WAIT_IMSI,
 				vlr_timer(vlr, 3270), 3270);
 	vlr->ops.tx_id_req(lfp->msc_conn_ref, GSM_MI_TYPE_IMSI);
-	/* will continue at vlr_loc_upd_node1() once IMSI arrives */
+	/* will continue at vlr_loc_upd_node1_pre() once IMSI arrives */
 }
 
 static int assoc_lfp_with_sub(struct osmo_fsm_inst *fi, struct vlr_subscr *vsub)
@@ -1043,7 +1077,7 @@ static void _start_lu_main(struct osmo_fsm_inst *fi)
 	if (!lfp->vsub->imsi[0])
 		vlr_loc_upd_want_imsi(fi);
 	else
-		vlr_loc_upd_node1(fi);
+		vlr_loc_upd_node1_pre(fi);
 }
 
 static void lu_fsm_idle(struct osmo_fsm_inst *fi, uint32_t event,
@@ -1097,7 +1131,7 @@ static void lu_fsm_wait_pvlr(struct osmo_fsm_inst *fi, uint32_t event,
 {
 	switch (event) {
 	case VLR_ULA_E_SEND_ID_ACK:
-		vlr_loc_upd_node1(fi);
+		vlr_loc_upd_node1_pre(fi);
 		break;
 	case VLR_ULA_E_SEND_ID_NACK:
 		vlr_loc_upd_want_imsi(fi);
@@ -1165,7 +1199,7 @@ static void lu_fsm_wait_imsi(struct osmo_fsm_inst *fi, uint32_t event,
 	switch (event) {
 	case VLR_ULA_E_ID_IMSI:
 		vlr_subscr_set_imsi(vsub, mi_string);
-		vlr_loc_upd_node1(fi);
+		vlr_loc_upd_node1_pre(fi);
 		break;
 	default:
 		OSMO_ASSERT(0);
@@ -1305,6 +1339,7 @@ static const struct osmo_fsm_state vlr_lu_fsm_states[] = {
 				  S(VLR_ULA_S_WAIT_IMSI) |
 				  S(VLR_ULA_S_WAIT_AUTH) |
 				  S(VLR_ULA_S_WAIT_CIPH) |
+				  S(VLR_ULA_S_WAIT_HLR_CHECK_IMEI_EARLY) |
 				  S(VLR_ULA_S_WAIT_HLR_UPD) |
 				  S(VLR_ULA_S_DONE),
 		.name = OSMO_STRINGIFY(VLR_ULA_S_IDLE),
@@ -1316,6 +1351,7 @@ static const struct osmo_fsm_state vlr_lu_fsm_states[] = {
 				  S(VLR_ULA_S_WAIT_IMSI) |
 				  S(VLR_ULA_S_WAIT_AUTH) |
 				  S(VLR_ULA_S_WAIT_CIPH) |
+				  S(VLR_ULA_S_WAIT_HLR_CHECK_IMEI_EARLY) |
 				  S(VLR_ULA_S_WAIT_HLR_UPD) |
 				  S(VLR_ULA_S_DONE),
 		.name = OSMO_STRINGIFY(VLR_ULA_S_WAIT_IMEISV),
@@ -1327,6 +1363,7 @@ static const struct osmo_fsm_state vlr_lu_fsm_states[] = {
 		.out_state_mask = S(VLR_ULA_S_WAIT_IMSI) |
 				  S(VLR_ULA_S_WAIT_AUTH) |
 				  S(VLR_ULA_S_WAIT_CIPH) |
+				  S(VLR_ULA_S_WAIT_HLR_CHECK_IMEI_EARLY) |
 				  S(VLR_ULA_S_DONE),
 		.name = OSMO_STRINGIFY(VLR_ULA_S_WAIT_PVLR),
 		.action = lu_fsm_wait_pvlr,
@@ -1352,10 +1389,22 @@ static const struct osmo_fsm_state vlr_lu_fsm_states[] = {
 		.in_event_mask = S(VLR_ULA_E_ID_IMSI),
 		.out_state_mask = S(VLR_ULA_S_WAIT_AUTH) |
 				  S(VLR_ULA_S_WAIT_CIPH) |
+				  S(VLR_ULA_S_WAIT_HLR_CHECK_IMEI_EARLY) |
 				  S(VLR_ULA_S_WAIT_HLR_UPD) |
 				  S(VLR_ULA_S_DONE),
 		.name = OSMO_STRINGIFY(VLR_ULA_S_WAIT_IMSI),
 		.action = lu_fsm_wait_imsi,
+	},
+	[VLR_ULA_S_WAIT_HLR_CHECK_IMEI_EARLY] = {
+		.in_event_mask = S(VLR_ULA_E_HLR_IMEI_ACK) |
+				 S(VLR_ULA_E_HLR_IMEI_NACK),
+		.out_state_mask = S(VLR_ULA_S_WAIT_AUTH) |
+				  S(VLR_ULA_S_WAIT_CIPH) |
+				  S(VLR_ULA_S_WAIT_HLR_UPD) |
+				  S(VLR_ULA_S_WAIT_LU_COMPL) |
+				  S(VLR_ULA_S_DONE),
+		.name = OSMO_STRINGIFY(VLR_ULA_S_WAIT_HLR_CHECK_IMEI_EARLY),
+		.action = lu_fsm_wait_hlr_check_imei_early,
 	},
 	[VLR_ULA_S_WAIT_HLR_UPD] = {
 		.in_event_mask = S(VLR_ULA_E_HLR_LU_RES) |
