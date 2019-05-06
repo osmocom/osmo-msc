@@ -28,6 +28,7 @@ noinst_HEADERS = \
 	msc_t_remote.h \
 	msub.h \
 	neighbor_ident.h \
+	osmux.h \
 	paging.h \
 	ran_conn.h \
 	ran_infra.h \

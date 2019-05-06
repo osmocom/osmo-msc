@@ -45,6 +45,7 @@ OsmoMSC(config-msc)# list
   emergency-call route-to-msisdn MSISDN
   sms-over-gsup
   no sms-over-gsup
+  osmux (on|off|only)
   handover-number range MSISDN_FIRST MSISDN_LAST
   neighbor (a|iu) lac <0-65535> (ran-pc|msc-ipa-name) RAN_PC_OR_MSC_IPA_NAME
   neighbor (a|iu) lac-ci <0-65535> <0-65535> (ran-pc|msc-ipa-name) RAN_PC_OR_MSC_IPA_NAME

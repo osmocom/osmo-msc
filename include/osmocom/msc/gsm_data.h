@@ -19,6 +19,7 @@
 #include <osmocom/msc/neighbor_ident.h>
 
 #include "gsm_data_shared.h"
+#include "osmux.h"
 
 /** annotations for msgb ownership */
 #define __uses
@@ -231,6 +232,9 @@ struct gsm_network {
 		uint64_t range_end;
 		uint64_t next;
 	} handover_number;
+
+	/* Whether we want to use Osmux against BSCs. Controlled via VTY */
+	enum osmux_usage use_osmux;
 };
 
 struct osmo_esme;
