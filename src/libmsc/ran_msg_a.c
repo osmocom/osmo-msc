@@ -34,6 +34,7 @@
 #include <osmocom/msc/debug.h>
 #include <osmocom/msc/ran_msg_a.h>
 #include <osmocom/msc/sccp_ran.h>
+#include <osmocom/msc/gsm_data.h>
 
 #define LOG_RAN_A_DEC(RAN_DEC, level, fmt, args...) \
 	LOG_RAN_DEC(RAN_DEC, DBSSAP, level, "BSSMAP: " fmt, ## args)
@@ -1239,16 +1240,37 @@ enum reset_msg_type bssmap_is_reset_msg(const struct sccp_ran_inst *sri, const s
 	}
 }
 
+/* Patch regular BSSMAP RESET to add extra T to announce Osmux support (osmocom extension) */
+static void _gsm0808_extend_announce_osmux(struct msgb *msg)
+{
+	OSMO_ASSERT(msg->l3h[1] == msgb_l3len(msg) - 2); /*TL not in len */
+	msgb_put_u8(msg, GSM0808_IE_OSMO_OSMUX_SUPPORT);
+	msg->l3h[1] = msgb_l3len(msg) - 2;
+}
+
 struct msgb *bssmap_make_reset_msg(const struct sccp_ran_inst *sri, enum reset_msg_type type)
 {
+	struct gsm_network *net = sri->user_data;
+	struct msgb *msg;
+
 	switch (type) {
 	case SCCP_RAN_MSG_RESET:
-		return gsm0808_create_reset();
+		msg = gsm0808_create_reset();
+		break;
 	case SCCP_RAN_MSG_RESET_ACK:
-		return gsm0808_create_reset_ack();
+		msg = gsm0808_create_reset_ack();
+		break;
 	default:
 		return NULL;
 	}
+
+	if (!msg)
+		return NULL;
+
+	if (net->use_osmux != OSMUX_USAGE_OFF)
+		_gsm0808_extend_announce_osmux(msg);
+
+	return msg;
 }
 
 struct msgb *bssmap_make_paging_msg(const struct sccp_ran_inst *sri, const struct gsm0808_cell_id *page_cell_id,
