@@ -51,6 +51,9 @@ struct ran_peer {
 
 	/* See cell_id_list.h */
 	struct llist_head cells_seen;
+
+	/* Whether we detected the BSC supports Osmux (during BSSMAP_RESET) */
+	bool remote_supports_osmux;
 };
 
 #define ran_peer_for_each_ran_conn(RAN_CONN, RAN_PEER) \

@@ -122,12 +122,40 @@ void ran_peer_discard_all_conns(struct ran_peer *rp)
 	}
 }
 
+/* TODO: create an sccp_ran_ops.rx_reset(_ack) to handle this differently on 2g and 3G */
+/* We expect RAN peer to provide use with an Osmocom extension TLV in BSSMAP_RESET to
+ * announce Osmux support */
+static void ran_peer_update_osmux_support(struct ran_peer *rp, struct msgb *msg)
+{
+	struct tlv_parsed tp;
+	int rc;
+	bool old_value = rp->remote_supports_osmux;
+
+	OSMO_ASSERT(msg);
+	msg->l3h = msg->l2h + sizeof(struct bssmap_header);
+	rc = tlv_parse(&tp, gsm0808_att_tlvdef(), msg->l3h + 1, msgb_l3len(msg) - 1, 0, 0);
+	if (rc < 0)
+		LOG_RAN_PEER(rp, LOGL_NOTICE, "Failed parsing TLV looking for Osmux support\n");
+
+	if (TLVP_PRESENT(&tp, GSM0808_IE_OSMO_OSMUX_SUPPORT)) {
+		rp->remote_supports_osmux = true;
+	} else {
+		rp->remote_supports_osmux = false;
+	}
+
+	if (old_value != rp->remote_supports_osmux)
+		LOG_RAN_PEER(rp, LOGL_INFO, "BSC detected AoIP Osmux support changed: %d->%d\n",
+		     old_value, rp->remote_supports_osmux);
+}
+
 /* Drop all SCCP connections for this ran_peer, respond with RESET ACKNOWLEDGE and move to READY state. */
-static void ran_peer_rx_reset(struct ran_peer *rp)
+static void ran_peer_rx_reset(struct ran_peer *rp, struct msgb* msg)
 {
 	struct msgb *reset_ack;
 
 	ran_peer_discard_all_conns(rp);
+
+	ran_peer_update_osmux_support(rp, msg);
 
 	reset_ack = rp->sri->ran->sccp_ran_ops.make_reset_msg(rp->sri, SCCP_RAN_MSG_RESET_ACK);
 
@@ -152,9 +180,10 @@ static void ran_peer_rx_reset(struct ran_peer *rp)
 	ran_peer_state_chg(rp, RAN_PEER_ST_READY);
 }
 
-static void ran_peer_rx_reset_ack(struct ran_peer *rp)
+static void ran_peer_rx_reset_ack(struct ran_peer *rp, struct msgb* msg)
 {
 	ran_peer_state_chg(rp, RAN_PEER_ST_READY);
+	ran_peer_update_osmux_support(rp, msg);
 }
 
 void ran_peer_reset(struct ran_peer *rp)
@@ -228,6 +257,7 @@ void ran_peer_st_wait_rx_reset(struct osmo_fsm_inst *fi, uint32_t event, void *d
 {
 	struct ran_peer *rp = fi->priv;
 	struct ran_peer_ev_ctx *ctx;
+	struct msgb *msg;
 
 	switch (event) {
 
@@ -257,7 +287,8 @@ void ran_peer_st_wait_rx_reset(struct osmo_fsm_inst *fi, uint32_t event, void *d
 		return;
 
 	case RAN_PEER_EV_RX_RESET:
-		ran_peer_rx_reset(rp);
+		msg = (struct msgb*)data;
+		ran_peer_rx_reset(rp, msg);
 		return;
 
 	default:
@@ -270,11 +301,13 @@ void ran_peer_st_wait_rx_reset_ack(struct osmo_fsm_inst *fi, uint32_t event, voi
 {
 	struct ran_peer *rp = fi->priv;
 	struct ran_peer_ev_ctx *ctx;
+	struct msgb *msg;
 
 	switch (event) {
 
 	case RAN_PEER_EV_RX_RESET_ACK:
-		ran_peer_rx_reset_ack(rp);
+		msg = (struct msgb*)data;
+		ran_peer_rx_reset_ack(rp, msg);
 		return;
 
 	case RAN_PEER_EV_MSG_UP_CO:
@@ -289,7 +322,8 @@ void ran_peer_st_wait_rx_reset_ack(struct osmo_fsm_inst *fi, uint32_t event, voi
 		return;
 
 	case RAN_PEER_EV_RX_RESET:
-		ran_peer_rx_reset(rp);
+		msg = (struct msgb*)data;
+		ran_peer_rx_reset(rp, msg);
 		return;
 
 	default:
@@ -330,6 +364,7 @@ void ran_peer_st_ready(struct osmo_fsm_inst *fi, uint32_t event, void *data)
 	struct ran_peer_ev_ctx *ctx;
 	struct ran_conn *conn;
 	struct an_apdu an_apdu;
+	struct msgb *msg;
 
 	switch (event) {
 
@@ -397,7 +432,8 @@ void ran_peer_st_ready(struct osmo_fsm_inst *fi, uint32_t event, void *data)
 		return;
 
 	case RAN_PEER_EV_RX_RESET:
-		ran_peer_rx_reset(rp);
+		msg = (struct msgb*)data;
+		ran_peer_rx_reset(rp, msg);
 		return;
 
 	default:
