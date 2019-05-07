@@ -451,6 +451,9 @@ void vlr_subscr_set_imeisv(struct vlr_subscr *vsub, const char *imeisv)
 	OSMO_STRLCPY_ARRAY(vsub->imeisv, imeisv);
 	DEBUGP(DVLR, "set IMEISV on subscriber; IMSI=%s IMEISV=%s\n",
 	       vsub->imsi, vsub->imeisv);
+
+	/* Copy IMEISV to IMEI (additional SV digits get cut off) */
+	vlr_subscr_set_imei(vsub, imeisv);
 }
 
 /* Safely copy the given MSISDN string to vsub->msisdn */
