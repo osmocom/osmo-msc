@@ -1,3 +1,62 @@
+osmo-msc (1.4.0) unstable; urgency=medium
+
+  [ Max ]
+  * Handle LCLS-NOTIFICATION message from BSS
+  * Various logging fixes
+  * VLR tests: use msgb_eq_data_print() for comparison
+  * transaction: drop meaningless ti_flag of trans_assign_trans_id()
+  * transaction: clarify magic 0xff transaction ID
+
+  [ Vadim Yanitskiy ]
+  * transaction.c: cosmetic: use 'default' branch in trans_free()
+  * libmsc/ran_conn.c: cosmetic: use tabs instead of N * 8 spaces
+  * transaction: change arguments of trans_find_by_sm_rp_mr()
+  * libmsc/gsm_04_11.c: also assign SM-RP-MR to MO transactions
+  * libmsc/gsm_04_11.c: introduce and use gsm411_assign_sm_rp_mr()
+  * libmsc/gsm_04_80.c: use gsm0480_create_release_complete()
+  * libmsc/gsm_04_80.c: add msc_send_ussd_release_complete_cause()
+  * libmsc/osmo_msc.c: move connection ref-counting code to 'ran_conn.c'
+  * transaction: fix description of trans_assign_trans_id()
+  * transaction.h: use #pragma once as include guard
+  * libmsc/gsm_09_11.c: implement guard timer for NCSS sessions
+  * libmsc/ran_conn.c: add missing 'break' to OSMO_RAT_EUTRAN_SGS
+  * libmsc/sgs_iface.c: fix SGS_STATE_NS11 counter reference
+  * libmsc/sgs_vty.c: always write server address and VLR name
+  * libmsc/msc_vty.c: drop dead comparison against null
+
+  [ Harald Welte ]
+  * Add SGs Interface
+  * debian: depend on libsctp-dev
+  * configure.ac: Check for libsctp
+  * a_iface: Centralize/wrap BSSAP / N-DATA transmission
+  * a_iface: use 'const' qualifier for ran_conn whenever possible
+  * a_iface: Fix hexdumping of N-DATA.req
+  * a_iface: OSMO_ASSERT() if we ever want to send BSSAP with invalid length
+
+  [ Philipp Maier ]
+  * a_iface: Include CSFB Indication into BSSMAP CLEAR COMMAND
+  * silent_call: use osmo_strlcpy() instead of strncpy()
+  * msc_vty: add missing header file
+
+  [ Oliver Smith ]
+  * debian: depend on libdbd-sqlite3
+
+  [ Keith ]
+  * Don't deliver alert notifications to ESME not yet bound.
+
+  [ Neels Hofmeyr ]
+  * use only accepted ran_conns for new transactions
+  * gsm_04_11_gsup.c: drop unused conn lookup
+  * SMS queue: properly log failed attempts number
+  * vty: add cmd subscriber ID sms delete-all
+  * vlr_subscr_name(): use OSMO_STRBUF
+
+  [ Sylvain Munaut ]
+  * libmsc: Allow different channel types to be requested as silent calls
+  * libvlr: Allow 2G auth tuples to be re-used without going through AUTH
+
+ -- Pau Espin Pedrol <pespin@sysmocom.de>  Tue, 07 May 2019 18:45:05 +0200
+
 osmo-msc (1.3.1) unstable; urgency=medium
 
   [ Neels Hofmeyr ]
