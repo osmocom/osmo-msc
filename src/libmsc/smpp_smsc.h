@@ -13,8 +13,8 @@
 #include <smpp34_structs.h>
 #include <smpp34_params.h>
 
-#define SMPP_SYS_ID_LEN	16
-#define SMPP_PASSWD_LEN	16
+#define SMPP_SYS_ID_LEN	15
+#define SMPP_PASSWD_LEN	8
 
 #define MODE_7BIT	7
 #define MODE_8BIT	8
