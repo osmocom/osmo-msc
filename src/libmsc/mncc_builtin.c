@@ -67,7 +67,7 @@ static struct gsm_call *get_call_ref(uint32_t callref)
 }
 
 /* on incoming call, look up database and send setup to remote subscr. */
-static int mncc_setup_ind(struct gsm_call *call, int msg_type,
+static int mncc_setup_ind(struct gsm_call *call,
 			  struct gsm_mncc *setup)
 {
 	struct gsm_mncc mncc;
@@ -116,29 +116,33 @@ static int mncc_setup_ind(struct gsm_call *call, int msg_type,
 	/* send call proceeding */
 	memset(&mncc, 0, sizeof(struct gsm_mncc));
 	mncc.callref = call->callref;
+	mncc.msg_type = MNCC_CALL_PROC_REQ;
 	DEBUGCC(call, remote, "Accepting call.\n");
-	mncc_tx_to_cc(call->net, MNCC_CALL_PROC_REQ, &mncc);
+	mncc_tx_to_cc(call->net, &mncc);
 
 	/* modify mode */
 	memset(&mncc, 0, sizeof(struct gsm_mncc));
 	mncc.callref = call->callref;
+	mncc.msg_type = MNCC_LCHAN_MODIFY;
 	DEBUGCC(call, remote, "Modify channel mode.\n");
-	mncc_tx_to_cc(call->net, MNCC_LCHAN_MODIFY, &mncc);
+	mncc_tx_to_cc(call->net, &mncc);
 
 	/* send setup to remote */
 //	setup->fields |= MNCC_F_SIGNAL;
 //	setup->signal = GSM48_SIGNAL_DIALTONE;
 	setup->callref = remote->callref;
+	setup->msg_type = MNCC_SETUP_REQ;
 	DEBUGCC(call, remote, "Forwarding SETUP to remote.\n");
-	return mncc_tx_to_cc(remote->net, MNCC_SETUP_REQ, setup);
+	return mncc_tx_to_cc(remote->net, setup);
 
 out_reject:
-	mncc_tx_to_cc(call->net, MNCC_REJ_REQ, &mncc);
+	mncc.msg_type = MNCC_REJ_REQ;
+	mncc_tx_to_cc(call->net, &mncc);
 	free_call(call);
 	return 0;
 }
 
-static int mncc_alert_ind(struct gsm_call *call, int msg_type,
+static int mncc_alert_ind(struct gsm_call *call,
 			  struct gsm_mncc *alert)
 {
 	struct gsm_call *remote;
@@ -147,11 +151,12 @@ static int mncc_alert_ind(struct gsm_call *call, int msg_type,
 	if (!(remote = get_call_ref(call->remote_ref)))
 		return 0;
 	alert->callref = remote->callref;
+	alert->msg_type = MNCC_ALERT_REQ;
 	DEBUGCC(call, remote, "Forwarding ALERT to remote.\n");
-	return mncc_tx_to_cc(remote->net, MNCC_ALERT_REQ, alert);
+	return mncc_tx_to_cc(remote->net, alert);
 }
 
-static int mncc_notify_ind(struct gsm_call *call, int msg_type,
+static int mncc_notify_ind(struct gsm_call *call,
 			   struct gsm_mncc *notify)
 {
 	struct gsm_call *remote;
@@ -160,11 +165,12 @@ static int mncc_notify_ind(struct gsm_call *call, int msg_type,
 	if (!(remote = get_call_ref(call->remote_ref)))
 		return 0;
 	notify->callref = remote->callref;
+	notify->msg_type = MNCC_NOTIFY_REQ;
 	DEBUGCC(call, remote, "Forwarding NOTIF to remote.\n");
-	return mncc_tx_to_cc(remote->net, MNCC_NOTIFY_REQ, notify);
+	return mncc_tx_to_cc(remote->net, notify);
 }
 
-static int mncc_setup_cnf(struct gsm_call *call, int msg_type,
+static int mncc_setup_cnf(struct gsm_call *call,
 			  struct gsm_mncc *connect)
 {
 	struct gsm_mncc connect_ack;
@@ -173,26 +179,29 @@ static int mncc_setup_cnf(struct gsm_call *call, int msg_type,
 
 	/* acknowledge connect */
 	memset(&connect_ack, 0, sizeof(struct gsm_mncc));
+	connect_ack.msg_type = MNCC_SETUP_COMPL_REQ;
 	connect_ack.callref = call->callref;
 	DEBUGP(DMNCC, "(call %x) Acknowledge SETUP.\n", call->callref);
-	mncc_tx_to_cc(call->net, MNCC_SETUP_COMPL_REQ, &connect_ack);
+	mncc_tx_to_cc(call->net, &connect_ack);
 
 	/* send connect message to remote */
 	if (!(remote = get_call_ref(call->remote_ref)))
 		return 0;
+	connect->msg_type = MNCC_SETUP_RSP;
 	connect->callref = remote->callref;
 	DEBUGCC(call, remote, "Sending CONNECT to remote.\n");
-	mncc_tx_to_cc(remote->net, MNCC_SETUP_RSP, connect);
+	mncc_tx_to_cc(remote->net, connect);
 
 	/* bridge tch */
+	bridge.msg_type = MNCC_BRIDGE;
 	bridge.callref[0] = call->callref;
 	bridge.callref[1] = call->remote_ref;
 	DEBUGCC(call, remote, "Bridging with remote.\n");
 
-	return mncc_tx_to_cc(call->net, MNCC_BRIDGE, &bridge);
+	return mncc_tx_to_cc(call->net, &bridge);
 }
 
-static int mncc_disc_ind(struct gsm_call *call, int msg_type,
+static int mncc_disc_ind(struct gsm_call *call,
 			 struct gsm_mncc *disc)
 {
 	struct gsm_call *remote;
@@ -200,18 +209,20 @@ static int mncc_disc_ind(struct gsm_call *call, int msg_type,
 	/* send release */
 	DEBUGP(DMNCC, "(call %x) Releasing call with cause %d\n",
 		call->callref, disc->cause.value);
-	mncc_tx_to_cc(call->net, MNCC_REL_REQ, disc);
+	disc->msg_type = MNCC_REL_REQ;
+	mncc_tx_to_cc(call->net, disc);
 
 	/* send disc to remote */
 	if (!(remote = get_call_ref(call->remote_ref))) {
 		return 0;
 	}
+	disc->msg_type = MNCC_DISC_REQ;
 	disc->callref = remote->callref;
 	DEBUGCC(call, remote, "Disconnecting remote with cause %d\n", disc->cause.value);
-	return mncc_tx_to_cc(remote->net, MNCC_DISC_REQ, disc);
+	return mncc_tx_to_cc(remote->net, disc);
 }
 
-static int mncc_rel_ind(struct gsm_call *call, int msg_type, struct gsm_mncc *rel)
+static int mncc_rel_ind(struct gsm_call *call, struct gsm_mncc *rel)
 {
 	struct gsm_call *remote;
 
@@ -221,6 +232,7 @@ static int mncc_rel_ind(struct gsm_call *call, int msg_type, struct gsm_mncc *re
 		return 0;
 	}
 
+	rel->msg_type = MNCC_REL_REQ;
 	rel->callref = remote->callref;
 	DEBUGCC(call, remote, "Releasing remote with cause %d\n", rel->cause.value);
 
@@ -230,12 +242,12 @@ static int mncc_rel_ind(struct gsm_call *call, int msg_type, struct gsm_mncc *re
 	 * it and then we will end up with a double free and a crash
 	 */
 	free_call(call);
-	mncc_tx_to_cc(remote->net, MNCC_REL_REQ, rel);
+	mncc_tx_to_cc(remote->net, rel);
 
 	return 0;
 }
 
-static int mncc_rel_cnf(struct gsm_call *call, int msg_type, struct gsm_mncc *rel)
+static int mncc_rel_cnf(struct gsm_call *call, struct gsm_mncc *rel)
 {
 	free_call(call);
 	return 0;
@@ -273,10 +285,11 @@ int int_mncc_recv(struct gsm_network *net, struct msgb *msg)
 			struct gsm_mncc rel;
 
 			memset(&rel, 0, sizeof(struct gsm_mncc));
+			rel.msg_type = MNCC_REL_REQ;
 			rel.callref = callref;
 			mncc_set_cause(&rel, GSM48_CAUSE_LOC_PRN_S_LU,
 				       GSM48_CC_CAUSE_RESOURCE_UNAVAIL);
-			mncc_tx_to_cc(net, MNCC_REL_REQ, &rel);
+			mncc_tx_to_cc(net, &rel);
 			goto out_free;
 		}
 		llist_add_tail(&call->entry, &call_list);
@@ -296,47 +309,51 @@ int int_mncc_recv(struct gsm_network *net, struct msgb *msg)
 
 	switch(msg_type) {
 	case MNCC_SETUP_IND:
-		rc = mncc_setup_ind(call, msg_type, arg);
+		rc = mncc_setup_ind(call, arg);
 		break;
 	case MNCC_SETUP_CNF:
-		rc = mncc_setup_cnf(call, msg_type, arg);
+		rc = mncc_setup_cnf(call, arg);
 		break;
 	case MNCC_SETUP_COMPL_IND:
 		break;
 	case MNCC_CALL_CONF_IND:
 		/* we now need to MODIFY the channel */
-		mncc_tx_to_cc(call->net, MNCC_LCHAN_MODIFY, data);
+		data->msg_type = MNCC_LCHAN_MODIFY;
+		mncc_tx_to_cc(call->net, data);
 		break;
 	case MNCC_ALERT_IND:
-		rc = mncc_alert_ind(call, msg_type, arg);
+		rc = mncc_alert_ind(call, arg);
 		break;
 	case MNCC_NOTIFY_IND:
-		rc = mncc_notify_ind(call, msg_type, arg);
+		rc = mncc_notify_ind(call, arg);
 		break;
 	case MNCC_DISC_IND:
-		rc = mncc_disc_ind(call, msg_type, arg);
+		rc = mncc_disc_ind(call, arg);
 		break;
 	case MNCC_REL_IND:
 	case MNCC_REJ_IND:
-		rc = mncc_rel_ind(call, msg_type, arg);
+		rc = mncc_rel_ind(call, arg);
 		break;
 	case MNCC_REL_CNF:
-		rc = mncc_rel_cnf(call, msg_type, arg);
+		rc = mncc_rel_cnf(call, arg);
 		break;
 	case MNCC_FACILITY_IND:
 		break;
 	case MNCC_START_DTMF_IND:
-		rc = mncc_tx_to_cc(net, MNCC_START_DTMF_REJ, data);
+		data->msg_type = MNCC_START_DTMF_REJ;
+		rc = mncc_tx_to_cc(net, data);
 		break;
 	case MNCC_STOP_DTMF_IND:
-		rc = mncc_tx_to_cc(net, MNCC_STOP_DTMF_RSP, data);
+		data->msg_type = MNCC_STOP_DTMF_RSP;
+		rc = mncc_tx_to_cc(net, data);
 		break;
 	case MNCC_MODIFY_IND:
 		mncc_set_cause(data, GSM48_CAUSE_LOC_PRN_S_LU,
 				GSM48_CC_CAUSE_SERV_OPT_UNIMPL);
 		DEBUGP(DMNCC, "(call %x) Rejecting MODIFY with cause %d\n",
 			call->callref, data->cause.value);
-		rc = mncc_tx_to_cc(net, MNCC_MODIFY_REJ, data);
+		data->msg_type = MNCC_MODIFY_REJ;
+		rc = mncc_tx_to_cc(net, data);
 		break;
 	case MNCC_MODIFY_CNF:
 		break;
@@ -345,14 +362,16 @@ int int_mncc_recv(struct gsm_network *net, struct msgb *msg)
 				GSM48_CC_CAUSE_SERV_OPT_UNIMPL);
 		DEBUGP(DMNCC, "(call %x) Rejecting HOLD with cause %d\n",
 			call->callref, data->cause.value);
-		rc = mncc_tx_to_cc(net, MNCC_HOLD_REJ, data);
+		data->msg_type = MNCC_HOLD_REJ;
+		rc = mncc_tx_to_cc(net, data);
 		break;
 	case MNCC_RETRIEVE_IND:
 		mncc_set_cause(data, GSM48_CAUSE_LOC_PRN_S_LU,
 				GSM48_CC_CAUSE_SERV_OPT_UNIMPL);
 		DEBUGP(DMNCC, "(call %x) Rejecting RETRIEVE with cause %d\n",
 			call->callref, data->cause.value);
-		rc = mncc_tx_to_cc(net, MNCC_RETRIEVE_REJ, data);
+		data->msg_type = MNCC_RETRIEVE_REJ;
+		rc = mncc_tx_to_cc(net, data);
 		break;
 	default:
 		LOGP(DMNCC, LOGL_NOTICE, "(call %x) Message unhandled\n", callref);

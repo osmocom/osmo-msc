@@ -118,7 +118,7 @@ static int mncc_sock_read(struct osmo_fd *bfd)
 
 	rc = mncc_prim_check(mncc_prim, rc);
 	if (rc == 0)
-		rc = mncc_tx_to_cc(state->net, mncc_prim->msg_type, mncc_prim);
+		rc = mncc_tx_to_cc(state->net, mncc_prim);
 
 	/* as we always synchronously process the message in mncc_send() and
 	 * its callbacks, we can free the message here. */

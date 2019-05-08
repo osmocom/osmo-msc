@@ -680,7 +680,7 @@ int mncc_recv(struct gsm_network *net, struct msgb *msg)
 		log("MNCC: callref 0x%x: Call Release triggering %s", mncc->callref,
 		    get_mncc_name(on_call_release_mncc_sends_to_cc_data->msg_type));
 
-		mncc_tx_to_cc(net, on_call_release_mncc_sends_to_cc_data->msg_type,
+		mncc_tx_to_cc(net,
 			      on_call_release_mncc_sends_to_cc_data);
 
 		on_call_release_mncc_sends_to_cc_data = NULL;

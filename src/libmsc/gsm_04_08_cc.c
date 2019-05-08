@@ -2010,11 +2010,10 @@ struct mncc_call *mncc_find_by_callref_from_msg(const union mncc_msg *msg)
 }
 
 /* Demux incoming genuine calls to GSM CC from MNCC forwarding for inter-MSC handover */
-int mncc_tx_to_cc(struct gsm_network *net, int msg_type, void *arg)
+int mncc_tx_to_cc(struct gsm_network *net, void *arg)
 {
 	const union mncc_msg *msg = arg;
 	struct mncc_call *mncc_call = NULL;
-	OSMO_ASSERT(msg_type == msg->msg_type);
 
 	if (msg->msg_type == MNCC_SETUP_REQ) {
 		/* Incoming call to forward for inter-MSC Handover? */

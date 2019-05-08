@@ -29,7 +29,7 @@
 static void mncc_sends_to_cc(uint32_t msg_type, struct gsm_mncc *mncc)
 {
 	mncc->msg_type = msg_type;
-	mncc_tx_to_cc(net, msg_type, mncc);
+	mncc_tx_to_cc(net, mncc);
 }
 
 /*
