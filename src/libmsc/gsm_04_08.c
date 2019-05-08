@@ -916,8 +916,8 @@ static int parse_umts_auth_resp(uint8_t *res, uint8_t *res_len,
 	data_len = msgb_l3len(msg) - (data - (uint8_t*)msgb_l3(msg));
 
 	if (data_len < 3) {
-		LOG_MSC_A_CAT(msc_a, DMM, LOGL_ERROR, "MM AUTHENTICATION RESPONSE: l3 length invalid: %u\n",
-			      msgb_l3len(msg));
+		LOG_MSC_A_CAT(msc_a, DMM, LOGL_ERROR, "MM AUTHENTICATION RESPONSE: "
+			      "message length=%u is too short\n", data_len);
 		return -EINVAL;
 	}
 
