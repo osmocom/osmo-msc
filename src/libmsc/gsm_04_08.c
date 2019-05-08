@@ -700,28 +700,47 @@ accept_reuse:
 int gsm48_rx_mm_serv_req(struct msc_a *msc_a, struct msgb *msg)
 {
 	struct gsm_network *net = msc_a_net(msc_a);
-	uint8_t mi_type;
-	struct gsm48_hdr *gh = msgb_l3(msg);
-	struct gsm48_service_request *req =
-			(struct gsm48_service_request *)gh->data;
-	/* unfortunately in Phase1 the classmark2 length is variable */
-	uint8_t classmark2_len = gh->data[1];
-	uint8_t *classmark2_buf = gh->data+2;
-	struct gsm48_classmark2 *cm2 = (void*)classmark2_buf;
-	uint8_t *mi_p = classmark2_buf + classmark2_len;
-	uint8_t mi_len = *mi_p;
-	uint8_t *mi = mi_p + 1;
+	struct gsm48_hdr *gh;
+	struct gsm48_service_request *req;
+	struct gsm48_classmark2 *cm2;
+	uint8_t *cm2_buf, cm2_len;
+	uint8_t *mi_buf, mi_len;
+	uint8_t *mi, mi_type;
 	bool is_utran;
 	struct vlr_subscr *vsub;
 
-	if (msg->data_len < sizeof(struct gsm48_service_request*)) {
+	/* Make sure that both header and CM Service Request fit into the buffer */
+	if (msgb_l3len(msg) < sizeof(*gh) + sizeof(*req)) {
 		LOG_MSC_A(msc_a, LOGL_ERROR, "Rx CM SERVICE REQUEST: wrong message size (%u < %zu)\n",
-			  msg->data_len, sizeof(struct gsm48_service_request*));
+			  msgb_l3len(msg), sizeof(*gh) + sizeof(*req));
 		return msc_gsm48_tx_mm_serv_rej(msc_a, GSM48_REJECT_INCORRECT_MESSAGE);
 	}
 
-	if (msg->data_len < req->mi_len + 6) {
-		LOG_MSC_A(msc_a, LOGL_ERROR, "Rx CM SERVICE REQUEST: message does not fit in packet\n");
+	gh = (struct gsm48_hdr *) msgb_l3(msg);
+	req = (struct gsm48_service_request *) gh->data;
+
+	/* Unfortunately in Phase1 the Classmark2 length is variable, so we cannot
+	 * just use gsm48_service_request struct, and need to parse it manually. */
+	cm2_len = gh->data[1];
+	cm2_buf = gh->data + 2;
+	cm2 = (struct gsm48_classmark2 *) cm2_buf;
+
+	/* Prevent buffer overrun: check the length of Classmark2 */
+	if (cm2_buf + cm2_len > msg->tail) {
+		LOG_MSC_A(msc_a, LOGL_ERROR, "Rx CM SERVICE REQUEST: Classmark2 "
+					     "length=%u is too big\n", cm2_len);
+		return msc_gsm48_tx_mm_serv_rej(msc_a, GSM48_REJECT_INCORRECT_MESSAGE);
+	}
+
+	/* MI (Mobile Identity) LV follows the Classmark2 */
+	mi_buf = cm2_buf + cm2_len;
+	mi_len = mi_buf[0];
+	mi = mi_buf + 1;
+
+	/* Prevent buffer overrun: check the length of MI */
+	if (mi_buf + mi_len > msg->tail) {
+		LOG_MSC_A(msc_a, LOGL_ERROR, "Rx CM SERVICE REQUEST: Mobile Identity "
+					     "length=%u is too big\n", cm2_len);
 		return msc_gsm48_tx_mm_serv_rej(msc_a, GSM48_REJECT_INCORRECT_MESSAGE);
 	}
 
@@ -759,9 +778,9 @@ int gsm48_rx_mm_serv_req(struct msc_a *msc_a, struct msgb *msg)
 		return msc_gsm48_tx_mm_serv_rej(msc_a, GSM48_REJECT_SRV_OPT_NOT_SUPPORTED);
 
 	if (msc_a_is_accepted(msc_a))
-		return cm_serv_reuse_conn(msc_a, mi_p, req->cm_service_type);
+		return cm_serv_reuse_conn(msc_a, mi_buf, req->cm_service_type);
 
-	osmo_signal_dispatch(SS_SUBSCR, S_SUBSCR_IDENTITY, mi_p);
+	osmo_signal_dispatch(SS_SUBSCR, S_SUBSCR_IDENTITY, mi_buf);
 
 	msc_a_get(msc_a, msc_a_cm_service_type_to_use(req->cm_service_type));
 
@@ -775,7 +794,7 @@ int gsm48_rx_mm_serv_req(struct msc_a *msc_a, struct msgb *msg)
 			 is_utran || net->authentication_required,
 			 is_utran || net->a5_encryption_mask > 0x01,
 			 req->cipher_key_seq,
-			 osmo_gsm48_classmark2_is_r99(cm2, classmark2_len),
+			 osmo_gsm48_classmark2_is_r99(cm2, cm2_len),
 			 is_utran);
 
 	/* From vlr_proc_acc_req() we expect an implicit dispatch of PR_ARQ_E_START we expect
@@ -787,7 +806,7 @@ int gsm48_rx_mm_serv_req(struct msc_a *msc_a, struct msgb *msg)
 	}
 
 	vsub->classmark.classmark2 = *cm2;
-	vsub->classmark.classmark2_len = classmark2_len;
+	vsub->classmark.classmark2_len = cm2_len;
 	return 0;
 }
 
