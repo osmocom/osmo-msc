@@ -140,10 +140,14 @@ static void ran_peer_rx_reset(struct ran_peer *rp)
 	if (sccp_ran_down_l2_cl(rp->sri, &rp->peer_addr, reset_ack)) {
 		LOG_RAN_PEER(rp, LOGL_ERROR, "Failed to send RESET ACKNOWLEDGE message\n");
 		ran_peer_state_chg(rp, RAN_PEER_ST_WAIT_RX_RESET);
+		msgb_free(reset_ack);
 		return;
 	}
 
 	LOG_RAN_PEER(rp, LOGL_INFO, "Sent RESET ACKNOWLEDGE\n");
+
+	/* sccp_ran_down_l2_cl() doesn't free msgb */
+	msgb_free(reset_ack);
 
 	ran_peer_state_chg(rp, RAN_PEER_ST_READY);
 }
