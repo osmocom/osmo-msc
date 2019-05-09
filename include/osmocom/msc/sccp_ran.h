@@ -13,17 +13,17 @@
  *      msc_a_up_l3()                                            msc_a_tx_dtap_to_i(dtap_msgb)
  *       ^                                                        |
  *       |                                                        v
- *      msc_a_nas_decode_cb(struct nas_dec_msg)                  msc_a_nas_enc(struct nas_enc_msg)
+ *      msc_a_ran_decode_cb(struct ran_dec_msg)                  msc_a_ran_enc(struct ran_enc_msg)
  *       ^                ^                    .                  |
  *       |  -Decode NAS-  |                       .  NAS          v
- *       |                |                          .           ran_infra[type]->nas_encode(struct nas_enc_msg)
- *      nas_a_decode_l2()    nas_iu_decode_l2()         .         |                      |
+ *       |                |                          .           ran_infra[type]->ran_encode(struct ran_enc_msg)
+ *      ran_a_decode_l2()    ran_iu_decode_l2()         .         |                      |
  *       ^                ^                                .      v                      v
- *       |                |                                   .  nas_a_encode()    nas_iu_encode()
- *      ran_infra[type]->nas_dec_l2()                             |                      |
+ *       |                |                                   .  ran_a_encode()    ran_iu_encode()
+ *      ran_infra[type]->ran_dec_l2()                             |                      |
  *       ^                                                        | -Encode BSSAP/RANAP- |
  *       |                                                        v                      v
- *      msc_a_nas_dec()                                           msub_tx_an_apdu(from MSC_ROLE_A to MSC_ROLE_I)
+ *      msc_a_ran_dec()                                           msub_tx_an_apdu(from MSC_ROLE_A to MSC_ROLE_I)
  *       ^                                                        |
  *       |                             MSC-A                      v
  *    . msc_a FSM .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  . msc_a FSM .  .  .  .  .  .  .  .  .  .
@@ -78,12 +78,12 @@
  *
  * MSC-A:
  * - Receives MSC_A_EV_FROM_I_COMPLETE_LAYER_3 AN-APDU, notices an_proto indicating BSSAP or RANAP.
- * - Passes L2 message to ran_infra[]->nas_dec_l2(), which decodes the BSSAP or RANAP.
- * - contained information is passed to msc_a_nas_decode_cb().
+ * - Passes L2 message to ran_infra[]->ran_dec_l2(), which decodes the BSSAP or RANAP.
+ * - contained information is passed to msc_a_ran_decode_cb().
  * - which msc_a starts Complete-L3 and VLR procedures,
  * - associates msub with a vlr_subscr,
  * - sends DTAP requests back down by calling msc_a_tx_dtap_to_i() (possibly other more specialized tx functions)
- * - according to ran_infra[]->nas_encode(), the nas_enc_msg gets encoded as BSSAP or RANAP.
+ * - according to ran_infra[]->ran_encode(), the ran_enc_msg gets encoded as BSSAP or RANAP.
  * - passes as AN-APDU to MSC-I in MSC_I_EV_FROM_A_FORWARD_ACCESS_SIGNALLING_REQUEST signal.
  *
  * MSC-I, receiving AN-APDU from local MSC-A:
@@ -147,10 +147,10 @@
  *
  *   MSC-A role:
  *   - Receives MSC_A_EV_FROM_I_PROCESS_ACCESS_SIGNALLING_REQUEST, notices an_proto indicating BSSAP or RANAP.
- *   - Passes L2 message to ran_infra[]->nas_dec_l2(), which decodes the BSSAP or RANAP.
- *   - contained information is passed to msc_a_nas_decode_cb().
+ *   - Passes L2 message to ran_infra[]->ran_dec_l2(), which decodes the BSSAP or RANAP.
+ *   - contained information is passed to msc_a_ran_decode_cb().
  *   - sends DTAP requests back down by calling msc_a_tx_dtap_to_i() (possibly other more specialized tx functions)
- *   - according to ran_infra[]->nas_encode(), the nas_enc_msg gets encoded as BSSAP or RANAP.
+ *   - according to ran_infra[]->ran_encode(), the ran_enc_msg gets encoded as BSSAP or RANAP.
  *   - passes as AN-APDU to MSC-I in MSC_I_EV_FROM_A_FORWARD_ACCESS_SIGNALLING_REQUEST signal.
  *
  *   MSC-I-Remote:
