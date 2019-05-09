@@ -168,10 +168,7 @@ static inline int trans_log_subsys(const struct gsm_trans *trans)
 	case TRANS_SMS:
 		return DLSMS;
 	case TRANS_USSD:
-		/* FIXME: traditionally (before LOG_TRANS() was added in I2e60964d7a3c06d051debd1c707051a0eb3101ba /
-		 * ff7074a0c7b62025473d8f1a950905ac2cb2f31c), all USSD logging happened on DMM. Instead, it probably
-		 * deserves its own logging subsystem. */
-		return DMM;
+		return DSS;
 	default:
 		break;
 	}

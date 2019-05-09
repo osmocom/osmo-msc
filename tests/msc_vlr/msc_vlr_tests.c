@@ -660,6 +660,11 @@ static struct log_info_cat test_categories[] = {
 		.description = "BSSAP Protocol (A Interface)",
 		.enabled = 1, .loglevel = LOGL_DEBUG,
 	},
+	[DSS] = {
+		.name = "DSS",
+		.description = "Supplementary Services",
+		.enabled = 1, .loglevel = LOGL_DEBUG,
+	},
 };
 
 static struct log_info info = {

@@ -480,8 +480,11 @@ static const struct log_info_cat msc_default_categories[] = {
 		.description = "SGs Interface (SGsAP)",
 		.enabled = 1, .loglevel = LOGL_NOTICE,
 	},
-
-
+	[DSS] = {
+		.name = "DSS",
+		.description = "Supplementary Services",
+		.enabled = 1, .loglevel = LOGL_NOTICE,
+	},
 };
 
 static int filter_fn(const struct log_context *ctx, struct log_target *tar)

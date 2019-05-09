@@ -271,7 +271,7 @@ static void ss_paging_cb(struct msc_a *msc_a, struct gsm_trans *trans)
 
 	if (msc_a) {
 		struct gsm_network *net = msc_a_net(msc_a);
-		LOG_MSC_A_CAT(msc_a, DMM, LOGL_DEBUG, "Paging succeeded\n");
+		LOG_MSC_A_CAT(msc_a, DSS, LOGL_DEBUG, "Paging succeeded\n");
 
 		/* Assign connection */
 		msc_a_get(msc_a, MSC_A_USE_NC_SS);
@@ -297,7 +297,7 @@ static void ss_paging_cb(struct msc_a *msc_a, struct gsm_trans *trans)
 		/* Count established network-initiated NC SS/USSD sessions */
 		rate_ctr_inc(&net->msc_ctrs->ctr[MSC_CTR_NC_SS_MT_ESTABLISHED]);
 	} else {
-		LOG_MSC_A_CAT(msc_a, DMM, LOGL_DEBUG, "Paging expired\n");
+		LOG_MSC_A_CAT(msc_a, DSS, LOGL_DEBUG, "Paging expired\n");
 
 		/* TODO: inform HLR about this failure */
 
