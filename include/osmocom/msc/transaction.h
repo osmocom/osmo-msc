@@ -27,7 +27,7 @@ struct vty;
 	     ##args)
 
 #define LOG_TRANS(trans, level, fmt, args...) \
-	     LOG_TRANS_CAT(trans, trans_log_subsys(trans), level, fmt, ##args)
+	     LOG_TRANS_CAT(trans, (trans)->log_subsys, level, fmt, ##args)
 
 enum bridge_state {
 	BRIDGE_STATE_NONE,
@@ -60,6 +60,8 @@ struct gsm_trans {
 
 	/* What kind of transaction */
 	enum trans_type type;
+	/* Which category to log on, for LOG_TRANS(). */
+	int log_subsys;
 
 	/* The current transaction ID */
 	uint8_t transaction_id;
@@ -161,13 +163,17 @@ static inline int trans_log_subsys(const struct gsm_trans *trans)
 		return DMSC;
 	switch (trans->type) {
 	case TRANS_CC:
+	case TRANS_SILENT_CALL:
 		return DCC;
 	case TRANS_SMS:
 		return DLSMS;
+	case TRANS_USSD:
+		/* FIXME: traditionally (before LOG_TRANS() was added in I2e60964d7a3c06d051debd1c707051a0eb3101ba /
+		 * ff7074a0c7b62025473d8f1a950905ac2cb2f31c), all USSD logging happened on DMM. Instead, it probably
+		 * deserves its own logging subsystem. */
+		return DMM;
 	default:
 		break;
 	}
-	if (trans->msc_a)
-		return trans->msc_a->c.ran->log_subsys;
 	return DMSC;
 }

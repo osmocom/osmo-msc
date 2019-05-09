@@ -146,6 +146,7 @@ struct gsm_trans *trans_alloc(struct gsm_network *net,
 		.callref = callref,
 		.net = net,
 	};
+	trans->log_subsys = trans_log_subsys(trans);
 	vlr_subscr_get(vsub, trans_vsub_use(type));
 	llist_add_tail(&trans->entry, &net->trans_list);
 
