@@ -56,7 +56,7 @@ enum msub_fsm_event {
 static void msub_check_for_release(struct osmo_fsm_inst *fi)
 {
 	struct msub *msub = fi->priv;
-	struct msc_role_common *msc_role_a_c;
+	struct msc_role_common *msc_role_a_c = NULL;
 	enum msc_role role_idx;
 	int role_present[MSC_ROLES_COUNT] = {};
 	struct osmo_fsm_inst *child;
