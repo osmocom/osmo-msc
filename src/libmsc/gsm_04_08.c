@@ -765,7 +765,8 @@ int gsm48_rx_mm_serv_req(struct msc_a *msc_a, struct msgb *msg)
 	case GSM_MI_TYPE_IMEI:
 		if (req->cm_service_type == GSM48_CMSERV_EMERGENCY) {
 			/* We don't do emergency calls by IMEI */
-			LOG_MSC_A(msc_a, LOGL_NOTICE, "Tx CM SERVICE REQUEST REJECT\n");
+			LOG_MSC_A(msc_a, LOGL_NOTICE, "Tx CM SERVICE REQUEST REJECT: "
+				  "emergency services by IMEI are not supported\n");
 			return msc_gsm48_tx_mm_serv_rej(msc_a, GSM48_REJECT_IMEI_NOT_ACCEPTED);
 		}
 		/* fall-through for non-emergency setup */
