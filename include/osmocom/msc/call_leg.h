@@ -34,6 +34,7 @@ struct call_leg {
 	/* Array indexed by enum rtp_direction. */
 	enum mgcp_connection_mode crcx_conn_mode[2];
 
+	/* Events dispatched to the parent fi, see call_leg_alloc() doc. */
 	uint32_t parent_event_rtp_addr_available;
 	uint32_t parent_event_rtp_complete;
 

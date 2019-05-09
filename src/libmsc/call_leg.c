@@ -64,6 +64,14 @@ void call_leg_init(struct gsm_network *net)
 	OSMO_ASSERT( osmo_fsm_register(&call_leg_fsm) == 0 );
 }
 
+/* Allocate a call leg FSM instance as child of an arbitrary other FSM instance.
+ * The call leg FSM dispatches events to its parent FSM instance on specific events:
+ * - parent_event_term: dispatch this to the parent FI when the call leg terminates (call ended, either planned or by
+ *   failure).
+ * - parent_event_rtp_addr_available: one of the rtp_stream instances managed by the call leg has received an RTP
+ *   address from the MGW. The struct rtp_stream instance is passed as data argument for the event dispatch.
+ * - parent_event_rtp_complete: one of the rtp_stream instances entered the RTP_STREAM_ST_ESTABLISHED state.
+ */
 struct call_leg *call_leg_alloc(struct osmo_fsm_inst *parent_fi,
 				uint32_t parent_event_term,
 				uint32_t parent_event_rtp_addr_available,
