@@ -552,6 +552,11 @@ static int msc_ho_start_inter_msc_call_forwarding(struct msc_a *msc_a, struct ms
 		return -EINVAL;
 	}
 
+	if (!rtp_to_ran) {
+		msc_ho_failed(msc_a, GSM0808_CAUSE_EQUIPMENT_FAILURE, "Unexpected: no RTP stream is set up\n");
+		return -EINVAL;
+	}
+
 	/* Backup old cell's RTP IP:port and codec data */
 	msc_a->ho.old_cell.ran_remote_rtp = rtp_to_ran->remote;
 	msc_a->ho.old_cell.codec = rtp_to_ran->codec;
