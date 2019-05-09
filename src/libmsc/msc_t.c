@@ -902,6 +902,8 @@ struct gsm_network *msc_t_net(const struct msc_t *msc_t)
 
 struct vlr_subscr *msc_t_vsub(const struct msc_t *msc_t)
 {
+	if (!msc_t)
+		return NULL;
 	return msub_vsub(msc_t->c.msub);
 }
 

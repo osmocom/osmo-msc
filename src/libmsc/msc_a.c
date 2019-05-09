@@ -73,16 +73,22 @@ struct gsm_network *msc_a_net(const struct msc_a *msc_a)
 
 struct vlr_subscr *msc_a_vsub(const struct msc_a *msc_a)
 {
+	if (!msc_a)
+		return NULL;
 	return msub_vsub(msc_a->c.msub);
 }
 
 struct msc_i *msc_a_msc_i(const struct msc_a *msc_a)
 {
+	if (!msc_a)
+		return NULL;
 	return msub_msc_i(msc_a->c.msub);
 }
 
 struct msc_t *msc_a_msc_t(const struct msc_a *msc_a)
 {
+	if (!msc_a)
+		return NULL;
 	return msub_msc_t(msc_a->c.msub);
 }
 
