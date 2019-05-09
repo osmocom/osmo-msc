@@ -84,6 +84,8 @@ struct ran_assignment_command {
 	const struct osmo_sockaddr_str *cn_rtp;
 	const struct gsm0808_channel_type *channel_type;
 	enum nsap_addr_enc rab_assign_addr_enc;
+	bool osmux_present;
+	uint8_t osmux_cid;
 };
 
 struct ran_cipher_mode_command {
@@ -223,6 +225,8 @@ struct ran_msg {
 			struct osmo_sockaddr_str remote_rtp;
 			bool codec_present;
 			enum mgcp_codecs codec;
+			bool osmux_present;
+			uint8_t osmux_cid;
 		} assignment_complete;
 		struct {
 			enum gsm0808_cause bssap_cause;

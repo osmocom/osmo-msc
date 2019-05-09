@@ -44,6 +44,15 @@ struct rtp_stream {
 	struct osmo_mgcpc_ep_ci *ci;
 
 	enum mgcp_connection_mode crcx_conn_mode;
+
+	/* configured to use Osmux */
+	bool use_osmux;
+	/* Allocated by our MGW, negative means invalid, not yet known */
+	int local_osmux_cid;
+	/* Allocated by BSC MGW, negative means invalid, not yet known */
+	int remote_osmux_cid;
+	 /* Whether remote_osmux_cid has been communicated to MGW */
+	bool remote_osmux_cid_sent_to_mgw;
 };
 
 #define RTP_STREAM_FMT "local=" RTP_IP_PORT_FMT ",remote=" RTP_IP_PORT_FMT
@@ -57,6 +66,7 @@ int rtp_stream_do_mdcx(struct rtp_stream *rtps);
 
 void rtp_stream_set_codec(struct rtp_stream *rtps, enum mgcp_codecs codec);
 void rtp_stream_set_remote_addr(struct rtp_stream *rtps, const struct osmo_sockaddr_str *r);
+void rtp_stream_set_remote_osmux_cid(struct rtp_stream *rtps, uint8_t osmux_cid);
 int rtp_stream_commit(struct rtp_stream *rtps);
 
 void rtp_stream_release(struct rtp_stream *rtps);

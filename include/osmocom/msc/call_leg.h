@@ -44,6 +44,8 @@ struct call_leg {
 
 	/* Prevent events from deallocating for certain release code paths, to prevent use-after-free problems. */
 	bool deallocating;
+
+	bool ran_peer_supports_osmux;
 };
 
 enum call_leg_event {

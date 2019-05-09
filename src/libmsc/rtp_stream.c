@@ -82,11 +82,19 @@ void rtp_stream_update_id(struct rtp_stream *rtps)
 			OSMO_STRBUF_PRINTF(sb, ":no-codec");
 		else if (!rtps->codec_sent_to_mgw)
 			OSMO_STRBUF_PRINTF(sb, ":codec-not-sent");
+		if (rtps->use_osmux) {
+			if (rtps->remote_osmux_cid < 0)
+				OSMO_STRBUF_PRINTF(sb, ":no-remote-osmux-cid");
+			else if (!rtps->remote_osmux_cid_sent_to_mgw)
+				OSMO_STRBUF_PRINTF(sb, ":remote-osmux-cid-not-sent");
+		}
 	}
 	if (osmo_sockaddr_str_is_set(&rtps->local))
 		OSMO_STRBUF_PRINTF(sb, ":local-%s-%u", rtps->local.ip, rtps->local.port);
 	if (osmo_sockaddr_str_is_set(&rtps->remote))
 		OSMO_STRBUF_PRINTF(sb, ":remote-%s-%u", rtps->remote.ip, rtps->remote.port);
+	if (rtps->use_osmux)
+		OSMO_STRBUF_PRINTF(sb, ":osmux-%d-%d", rtps->local_osmux_cid, rtps->remote_osmux_cid);
 
 	/* Replace any dots in the IP address, dots not allowed as FSM instance name */
 	for (p = buf; *p; p++)
@@ -117,6 +125,8 @@ struct rtp_stream *rtp_stream_alloc(struct call_leg *parent_call_leg, enum rtp_d
 		.call_id = call_id,
 		.for_trans = for_trans,
 		.dir = dir,
+		.local_osmux_cid = -2,
+		.remote_osmux_cid = -2,
 	};
 
 	rtp_stream_update_id(rtps);
@@ -130,6 +140,7 @@ static void check_established(struct rtp_stream *rtps)
 	    && osmo_sockaddr_str_is_set(&rtps->local)
 	    && osmo_sockaddr_str_is_set(&rtps->remote)
 	    && rtps->remote_sent_to_mgw
+	    && (!rtps->use_osmux || rtps->remote_osmux_cid_sent_to_mgw)
 	    && rtps->codec_known)
 		rtp_stream_state_chg(rtps, RTP_STREAM_ST_ESTABLISHED);
 }
@@ -148,17 +159,27 @@ static void rtp_stream_fsm_establishing_established(struct osmo_fsm_inst *fi, ui
 		}
 
 		osmo_sockaddr_str_from_str(&rtps->local, crcx_info->addr, crcx_info->port);
+		if (rtps->use_osmux != crcx_info->x_osmo_osmux_use) {
+			LOG_RTPS(rtps, LOGL_ERROR, "Osmux usage request and response don't match: %d vs %d",
+				 rtps->use_osmux, crcx_info->x_osmo_osmux_use);
+			/* TODO: proper failure path */
+			OSMO_ASSERT(rtps->use_osmux != crcx_info->x_osmo_osmux_use);
+		}
+		if (crcx_info->x_osmo_osmux_use)
+			rtps->local_osmux_cid = crcx_info->x_osmo_osmux_cid;
 		rtp_stream_update_id(rtps);
 		osmo_fsm_inst_dispatch(fi->proc.parent, CALL_LEG_EV_RTP_STREAM_ADDR_AVAILABLE, rtps);
 		check_established(rtps);
 
 		if ((!rtps->remote_sent_to_mgw || !rtps->codec_sent_to_mgw)
 		    && osmo_sockaddr_str_is_set(&rtps->remote)
+		    && (!rtps->use_osmux || rtps->remote_osmux_cid_sent_to_mgw)
 		    && rtps->codec_known) {
 			LOG_RTPS(rtps, LOGL_DEBUG,
-				 "local ip:port set;%s%s triggering MDCX to send the new settings\n",
+				 "local ip:port set;%s%s%s triggering MDCX to send the new settings\n",
 				 (!rtps->remote_sent_to_mgw)? " remote ip:port not yet sent," : "",
-				 (!rtps->codec_sent_to_mgw)? " codec not yet sent," : "");
+				 (!rtps->codec_sent_to_mgw)? " codec not yet sent," : "",
+				 (rtps->use_osmux && !rtps->remote_osmux_cid_sent_to_mgw) ? "Osmux CID not yet sent,": "");
 			rtp_stream_do_mdcx(rtps);
 		}
 		return;
@@ -172,6 +193,7 @@ static void rtp_stream_fsm_establishing_established(struct osmo_fsm_inst *fi, ui
 	case RTP_STREAM_EV_MDCX_FAIL:
 		rtps->remote_sent_to_mgw = false;
 		rtps->codec_sent_to_mgw = false;
+		rtps->remote_osmux_cid_sent_to_mgw = false;
 		rtp_stream_update_id(rtps);
 		rtp_stream_state_chg(rtps, RTP_STREAM_ST_DISCARDING);
 		return;
@@ -280,6 +302,8 @@ static int rtp_stream_do_mgcp_verb(struct rtp_stream *rtps, enum mgcp_verb verb,
 	verb_info = (struct mgcp_conn_peer){
 		.call_id = rtps->call_id,
 		.ptime = 20,
+		.x_osmo_osmux_use = rtps->use_osmux,
+		.x_osmo_osmux_cid = rtps->remote_osmux_cid,
 	};
 
 	if (verb == MGCP_VERB_CRCX)
@@ -353,9 +377,10 @@ int rtp_stream_commit(struct rtp_stream *rtps)
 		return 0;
 	}
 
-	LOG_RTPS(rtps, LOGL_DEBUG, "Committing: Tx MDCX to update the MGW: updating%s%s\n",
+	LOG_RTPS(rtps, LOGL_DEBUG, "Committing: Tx MDCX to update the MGW: updating%s%s%s\n",
 		 rtps->remote_sent_to_mgw ? "" : " remote-RTP-IP-port",
-		 rtps->codec_sent_to_mgw ? "" : " codec");
+		 rtps->codec_sent_to_mgw ? "" : " codec",
+		 (!rtps->use_osmux || rtps->remote_osmux_cid_sent_to_mgw) ? "" : " remote-Osmux-CID");
 	return rtp_stream_do_mdcx(rtps);
 }
 
@@ -380,6 +405,16 @@ void rtp_stream_set_remote_addr(struct rtp_stream *rtps, const struct osmo_socka
 	rtp_stream_update_id(rtps);
 }
 
+void rtp_stream_set_remote_osmux_cid(struct rtp_stream *rtps, uint8_t osmux_cid)
+{
+	if (rtps->fi->state == RTP_STREAM_ST_ESTABLISHED)
+		rtp_stream_state_chg(rtps, RTP_STREAM_ST_ESTABLISHING);
+	LOG_RTPS(rtps, LOGL_DEBUG, "setting remote Osmux CID to %u\n", osmux_cid);
+	rtps->remote_osmux_cid = osmux_cid;
+	rtps->remote_osmux_cid_sent_to_mgw = false;
+	rtp_stream_update_id(rtps);
+}
+
 bool rtp_stream_is_established(struct rtp_stream *rtps)
 {
 	if (!rtps)
@@ -389,7 +424,8 @@ bool rtp_stream_is_established(struct rtp_stream *rtps)
 	if (rtps->fi->state != RTP_STREAM_ST_ESTABLISHED)
 		return false;
 	if (!rtps->remote_sent_to_mgw
-	    || !rtps->codec_sent_to_mgw)
+	    || !rtps->codec_sent_to_mgw
+	    || (rtps->use_osmux && !rtps->remote_osmux_cid_sent_to_mgw))
 		return false;
 	return true;
 }

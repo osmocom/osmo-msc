@@ -527,6 +527,8 @@ static void msc_a_call_leg_ran_local_addr_available(struct msc_a *msc_a)
 		.assignment_command = {
 			.cn_rtp = &msc_a->cc.call_leg->rtp[RTP_TO_RAN]->local,
 			.channel_type = &channel_type,
+			.osmux_present = msc_a->cc.call_leg->rtp[RTP_TO_RAN]->use_osmux,
+			.osmux_cid = msc_a->cc.call_leg->rtp[RTP_TO_RAN]->local_osmux_cid,
 		},
 	};
 	if (msc_a_ran_down(msc_a, MSC_ROLE_I, &msg)) {
@@ -620,8 +622,9 @@ static void msc_a_fsm_communicating(struct osmo_fsm_inst *fi, uint32_t event, vo
 			return;
 		}
 		LOG_MSC_A(msc_a, LOGL_DEBUG,
-			  "MGW endpoint's RTP address available for the CI %s: " OSMO_SOCKADDR_STR_FMT "\n",
-			  rtp_direction_name(rtps->dir), OSMO_SOCKADDR_STR_FMT_ARGS(&rtps->local));
+			  "MGW endpoint's RTP address available for the CI %s: " OSMO_SOCKADDR_STR_FMT " (osmux=%s:%d)\n",
+			  rtp_direction_name(rtps->dir), OSMO_SOCKADDR_STR_FMT_ARGS(&rtps->local),
+			  rtps->use_osmux ? "yes" : "no", rtps->local_osmux_cid);
 		switch (rtps->dir) {
 		case RTP_TO_RAN:
 			msc_a_call_leg_ran_local_addr_available(msc_a);
@@ -1257,9 +1260,20 @@ static void msc_a_up_call_assignment_complete(struct msc_a *msc_a, const struct 
 		return;
 	}
 
+	if (rtps_to_ran->use_osmux != ac->assignment_complete.osmux_present) {
+		LOG_MSC_A_CAT(msc_a, DCC, LOGL_ERROR, "Osmux usage ass request and complete don't match: %d vs %d\n",
+			 rtps_to_ran->use_osmux, ac->assignment_complete.osmux_present);
+		call_leg_release(msc_a->cc.call_leg);
+		return;
+	}
+
 	/* Update RAN-side endpoint CI: */
 	rtp_stream_set_codec(rtps_to_ran, ac->assignment_complete.codec);
 	rtp_stream_set_remote_addr(rtps_to_ran, &ac->assignment_complete.remote_rtp);
+	if (rtps_to_ran->use_osmux)
+		rtp_stream_set_remote_osmux_cid(rtps_to_ran,
+						ac->assignment_complete.osmux_cid);
+
 	rtp_stream_commit(rtps_to_ran);
 
 	/* Setup CN side endpoint CI:
@@ -1592,6 +1606,8 @@ int msc_tx_common_id(struct msc_a *msc_a, enum msc_role to_role)
 static int msc_a_start_assignment(struct msc_a *msc_a, struct gsm_trans *cc_trans)
 {
 	struct call_leg *cl = msc_a->cc.call_leg;
+	struct msc_i *msc_i = msc_a_msc_i(msc_a);
+	struct gsm_network *net = msc_a_net(msc_a);
 
 	OSMO_ASSERT(!msc_a->cc.active_trans);
 	msc_a->cc.active_trans = cc_trans;
@@ -1610,6 +1626,16 @@ static int msc_a_start_assignment(struct msc_a *msc_a, struct gsm_trans *cc_tran
 		 * This is a hack we need because osmo-mgw does not support IuUP yet, see OS#2459. */
 		if (msc_a->c.ran->type == OSMO_RAT_UTRAN_IU)
 			cl->crcx_conn_mode[RTP_TO_RAN] = MGCP_CONN_LOOPBACK;
+	}
+
+	if (net->use_osmux != OSMUX_USAGE_OFF) {
+		msc_i = msc_a_msc_i(msc_a);
+		if (msc_i->c.remote_to) {
+			/* TODO: investigate what to do in this case */
+			LOG_MSC_A(msc_a, LOGL_ERROR, "Osmux not yet supported for inter-MSC");
+		} else {
+			cl->ran_peer_supports_osmux = msc_i->ran_conn->ran_peer->remote_supports_osmux;
+		}
 	}
 
 	/* This will lead to either MSC_EV_CALL_LEG_LOCAL_ADDR_AVAILABLE or MSC_EV_CALL_LEG_TERM.

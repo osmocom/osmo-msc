@@ -269,6 +269,7 @@ static int ran_a_decode_assignment_complete(struct ran_dec *ran_dec, struct msgb
 {
 	struct tlv_p_entry *ie_aoip_transp_addr = TLVP_GET(tp, GSM0808_IE_AOIP_TRASP_ADDR);
 	struct tlv_p_entry *ie_speech_codec = TLVP_GET(tp, GSM0808_IE_SPEECH_CODEC);
+	struct tlv_p_entry *ie_osmux_cid = TLVP_GET(tp, GSM0808_IE_OSMO_OSMUX_CID);
 	struct sockaddr_storage rtp_addr;
 	struct sockaddr_in *rtp_addr_in;
 	struct gsm0808_speech_codec sc;
@@ -298,6 +299,15 @@ static int ran_a_decode_assignment_complete(struct ran_dec *ran_dec, struct msgb
 			LOG_RAN_A_DEC_MSG(LOGL_ERROR, "Assignment Complete: unable to decode remote RTP IP address\n");
 			return -EINVAL;
 		}
+	}
+
+	if (ie_osmux_cid) {
+		rc = gsm0808_dec_osmux_cid(&ran_dec_msg.assignment_complete.osmux_cid, ie_osmux_cid->val, ie_osmux_cid->len);
+		if (rc < 0) {
+			LOG_RAN_A_DEC_MSG(LOGL_ERROR, "Unable to decode Osmux CID\n");
+			return -EINVAL;
+		}
+		ran_dec_msg.assignment_complete.osmux_present = true;
 	}
 
 	if (ie_speech_codec) {
@@ -902,6 +912,13 @@ static int ran_a_channel_type_to_speech_codec_list(struct gsm0808_speech_codec_l
 	return 0;
 }
 
+static void _gsm0808_assignment_extend_osmux(struct msgb *msg, uint8_t cid)
+{
+	OSMO_ASSERT(msg->l3h[1] == msgb_l3len(msg) - 2); /*TL not in len */
+	msgb_tv_put(msg, GSM0808_IE_OSMO_OSMUX_CID, cid);
+	msg->l3h[1] = msgb_l3len(msg) - 2;
+}
+
 /* Compose a BSSAP Assignment Command.
  * Passing an RTP address is optional.
  * The msub is passed merely for error logging. */
@@ -912,6 +929,7 @@ static struct msgb *ran_a_make_assignment_command(struct osmo_fsm_inst *log_fi,
 	struct gsm0808_speech_codec_list *use_scl = NULL;
 	struct sockaddr_storage rtp_addr;
 	struct sockaddr_storage *use_rtp_addr = NULL;
+	struct msgb *msg;
 	int rc;
 
 	if (!ac->channel_type) {
@@ -952,7 +970,10 @@ static struct msgb *ran_a_make_assignment_command(struct osmo_fsm_inst *log_fi,
 		}
 	}
 
-	return gsm0808_create_ass(ac->channel_type, NULL, use_rtp_addr, use_scl, NULL);
+	msg = gsm0808_create_ass(ac->channel_type, NULL, use_rtp_addr, use_scl, NULL);
+	if (ac->osmux_present)
+		_gsm0808_assignment_extend_osmux(msg, ac->osmux_cid);
+	return msg;
 }
 
 /* For an A5/N number a5_n set dst to the matching GSM0808_ALG_ID_A5_<n>. */

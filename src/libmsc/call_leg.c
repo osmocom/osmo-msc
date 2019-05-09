@@ -321,6 +321,10 @@ int call_leg_ensure_ci(struct call_leg *cl, enum rtp_direction dir, uint32_t cal
 	if (call_leg_ensure_rtp_alloc(cl, dir, call_id, for_trans))
 		return -EIO;
 	cl->rtp[dir]->crcx_conn_mode = cl->crcx_conn_mode[dir];
+	if (dir == RTP_TO_RAN && cl->ran_peer_supports_osmux) {
+		cl->rtp[dir]->use_osmux = true;
+		cl->rtp[dir]->remote_osmux_cid = -1; /* wildcard */
+	}
 	if (codec_if_known)
 		rtp_stream_set_codec(cl->rtp[dir], *codec_if_known);
 	if (remote_addr_if_known && osmo_sockaddr_str_is_set(remote_addr_if_known))
