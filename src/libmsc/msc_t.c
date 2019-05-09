@@ -359,8 +359,7 @@ void msc_t_fsm_wait_local_rtp_onenter(struct osmo_fsm_inst *fi, uint32_t prev_st
 	msc_t->inter_msc.call_leg = call_leg_alloc(msc_t->c.fi,
 						   MSC_EV_CALL_LEG_TERM,
 						   MSC_EV_CALL_LEG_RTP_LOCAL_ADDR_AVAILABLE,
-						   MSC_EV_CALL_LEG_RTP_COMPLETE,
-						   MSC_EV_CALL_LEG_RTP_RELEASED);
+						   MSC_EV_CALL_LEG_RTP_COMPLETE);
 	if (!msc_t->inter_msc.call_leg
 	    || call_leg_ensure_ci(msc_t->inter_msc.call_leg, RTP_TO_RAN, msc_t->inter_msc.callref, NULL, NULL, NULL)
 	    || call_leg_ensure_ci(msc_t->inter_msc.call_leg, RTP_TO_CN, msc_t->inter_msc.callref, NULL, NULL, NULL)) {
@@ -391,7 +390,6 @@ void msc_t_fsm_wait_local_rtp(struct osmo_fsm_inst *fi, uint32_t event, void *da
 		msc_t_send_stored_ho_request(msc_t);
 		return;
 
-	case MSC_EV_CALL_LEG_RTP_RELEASED:
 	case MSC_EV_CALL_LEG_TERM:
 		msc_t->inter_msc.call_leg = NULL;
 		msc_t_error("Failed to set up MGW endpoint\n");
@@ -550,7 +548,6 @@ static void msc_t_fsm_wait_ho_request_ack(struct osmo_fsm_inst *fi, uint32_t eve
 		msc_t_down_l2_co(msc_t, an_apdu, false);
 		return;
 
-	case MSC_EV_CALL_LEG_RTP_RELEASED:
 	case MSC_EV_CALL_LEG_TERM:
 		msc_t->inter_msc.call_leg = NULL;
 		msc_t_error("Failed to set up MGW endpoint\n");
@@ -609,8 +606,7 @@ static int msc_t_wait_ho_complete_decode_cb(struct osmo_fsm_inst *msc_t_fi, void
 				  msc_i->c.fi,
 				  MSC_EV_CALL_LEG_TERM,
 				  MSC_EV_CALL_LEG_RTP_LOCAL_ADDR_AVAILABLE,
-				  MSC_EV_CALL_LEG_RTP_COMPLETE,
-				  MSC_EV_CALL_LEG_RTP_RELEASED);
+				  MSC_EV_CALL_LEG_RTP_COMPLETE);
 
 		/* msc_i_set_ran_conn() properly "steals" the ran_conn from msc_t */
 		msc_i_set_ran_conn(msc_i, msc_t->ran_conn);
@@ -657,7 +653,6 @@ static void msc_t_fsm_wait_ho_complete(struct osmo_fsm_inst *fi, uint32_t event,
 		msc_t_down_l2_co(msc_t, an_apdu, false);
 		return;
 
-	case MSC_EV_CALL_LEG_RTP_RELEASED:
 	case MSC_EV_CALL_LEG_TERM:
 		msc_t->inter_msc.call_leg = NULL;
 		msc_t_error("Failed to set up MGW endpoint\n");
@@ -795,7 +790,6 @@ static const struct osmo_fsm_state msc_t_fsm_states[] = {
 		.action = msc_t_fsm_wait_local_rtp,
 		.in_event_mask = 0
 			| S(MSC_EV_CALL_LEG_RTP_LOCAL_ADDR_AVAILABLE)
-			| S(MSC_EV_CALL_LEG_RTP_RELEASED)
 			| S(MSC_EV_CALL_LEG_TERM)
 			| S(MSC_MNCC_EV_CALL_ENDED)
 			| S(MSC_T_EV_CN_CLOSE)
@@ -810,7 +804,6 @@ static const struct osmo_fsm_state msc_t_fsm_states[] = {
 		.in_event_mask = 0
 			| S(MSC_EV_FROM_RAN_UP_L2)
 			| S(MSC_EV_FROM_RAN_CONN_RELEASED)
-			| S(MSC_EV_CALL_LEG_RTP_RELEASED)
 			| S(MSC_EV_CALL_LEG_TERM)
 			| S(MSC_MNCC_EV_CALL_ENDED)
 			| S(MSC_T_EV_FROM_A_FORWARD_ACCESS_SIGNALLING_REQUEST)
@@ -827,7 +820,6 @@ static const struct osmo_fsm_state msc_t_fsm_states[] = {
 		.in_event_mask = 0
 			| S(MSC_EV_FROM_RAN_UP_L2)
 			| S(MSC_EV_FROM_RAN_CONN_RELEASED)
-			| S(MSC_EV_CALL_LEG_RTP_RELEASED)
 			| S(MSC_EV_CALL_LEG_TERM)
 			| S(MSC_MNCC_EV_CALL_ENDED)
 			| S(MSC_T_EV_FROM_A_FORWARD_ACCESS_SIGNALLING_REQUEST)
@@ -841,7 +833,6 @@ const struct value_string msc_t_fsm_event_names[] = {
 	OSMO_VALUE_STRING(MSC_REMOTE_EV_RX_GSUP),
 	OSMO_VALUE_STRING(MSC_EV_CALL_LEG_RTP_LOCAL_ADDR_AVAILABLE),
 	OSMO_VALUE_STRING(MSC_EV_CALL_LEG_RTP_COMPLETE),
-	OSMO_VALUE_STRING(MSC_EV_CALL_LEG_RTP_RELEASED),
 	OSMO_VALUE_STRING(MSC_EV_CALL_LEG_TERM),
 	OSMO_VALUE_STRING(MSC_MNCC_EV_NEED_LOCAL_RTP),
 	OSMO_VALUE_STRING(MSC_MNCC_EV_CALL_PROCEEDING),

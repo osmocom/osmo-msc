@@ -36,7 +36,6 @@ struct call_leg {
 
 	uint32_t parent_event_rtp_addr_available;
 	uint32_t parent_event_rtp_complete;
-	uint32_t parent_event_rtp_released;
 
 	/* For internal MNCC, if RTP addresses for endpoints become assigned by the MGW, implicitly notify the other
 	 * call leg's RTP_TO_CN side rtp_stream with rtp_stream_remote_addr_available(). */
@@ -58,15 +57,13 @@ void call_leg_init(struct gsm_network *net);
 struct call_leg *call_leg_alloc(struct osmo_fsm_inst *parent_fi,
 				uint32_t parent_event_term,
 				uint32_t parent_event_rtp_addr_available,
-				uint32_t parent_event_rtp_complete,
-				uint32_t parent_event_rtp_released);
+				uint32_t parent_event_rtp_complete);
 
 void call_leg_reparent(struct call_leg *cl,
 		       struct osmo_fsm_inst *parent_fi,
 		       uint32_t parent_event_term,
 		       uint32_t parent_event_rtp_addr_available,
-		       uint32_t parent_event_rtp_complete,
-		       uint32_t parent_event_rtp_released);
+		       uint32_t parent_event_rtp_complete);
 
 int call_leg_local_bridge(struct call_leg *cl1, uint32_t call_id1, struct gsm_trans *trans1,
 			  struct call_leg *cl2, uint32_t call_id2, struct gsm_trans *trans2);

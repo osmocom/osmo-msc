@@ -148,7 +148,6 @@ enum msc_common_events {
 
 	MSC_EV_CALL_LEG_RTP_LOCAL_ADDR_AVAILABLE,
 	MSC_EV_CALL_LEG_RTP_COMPLETE,
-	MSC_EV_CALL_LEG_RTP_RELEASED,
 	MSC_EV_CALL_LEG_TERM,
 
 	/* MNCC has told us to RTP_CREATE, but local RTP port has not yet been set up.

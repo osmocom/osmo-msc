@@ -67,8 +67,7 @@ void call_leg_init(struct gsm_network *net)
 struct call_leg *call_leg_alloc(struct osmo_fsm_inst *parent_fi,
 				uint32_t parent_event_term,
 				uint32_t parent_event_rtp_addr_available,
-				uint32_t parent_event_rtp_complete,
-				uint32_t parent_event_rtp_released)
+				uint32_t parent_event_rtp_complete)
 {
 	struct call_leg *cl;
 	struct osmo_fsm_inst *fi = osmo_fsm_inst_alloc_child(&call_leg_fsm, parent_fi, parent_event_term);
@@ -82,7 +81,6 @@ struct call_leg *call_leg_alloc(struct osmo_fsm_inst *parent_fi,
 		.fi = fi,
 		.parent_event_rtp_addr_available = parent_event_rtp_addr_available,
 		.parent_event_rtp_complete = parent_event_rtp_complete,
-		.parent_event_rtp_released = parent_event_rtp_released,
 	};
 
 	return cl;
@@ -92,8 +90,7 @@ void call_leg_reparent(struct call_leg *cl,
 		       struct osmo_fsm_inst *new_parent_fi,
 		       uint32_t parent_event_term,
 		       uint32_t parent_event_rtp_addr_available,
-		       uint32_t parent_event_rtp_complete,
-		       uint32_t parent_event_rtp_released)
+		       uint32_t parent_event_rtp_complete)
 {
 	LOG_CALL_LEG(cl, LOGL_DEBUG, "Reparenting from parent %s to parent %s\n",
 		     cl->fi->proc.parent->name, new_parent_fi->name);
@@ -101,7 +98,6 @@ void call_leg_reparent(struct call_leg *cl,
 	talloc_steal(new_parent_fi, cl->fi);
 	cl->parent_event_rtp_addr_available = parent_event_rtp_addr_available;
 	cl->parent_event_rtp_complete = parent_event_rtp_complete;
-	cl->parent_event_rtp_released = parent_event_rtp_released;
 }
 
 static int call_leg_fsm_timer_cb(struct osmo_fsm_inst *fi)

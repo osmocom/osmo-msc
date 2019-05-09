@@ -546,28 +546,15 @@ static struct gsm_trans *find_waiting_call(struct msc_a *msc_a)
 
 static void msc_a_cleanup_rtp_streams(struct msc_a *msc_a, uint32_t event, void *data)
 {
-	struct rtp_stream *rtps;
-
 	switch (event) {
-	case MSC_EV_CALL_LEG_RTP_RELEASED:
-		rtps = data;
-		if (msc_a->cc.mncc_forwarding_to_remote_ran
-		    && msc_a->cc.mncc_forwarding_to_remote_ran->rtps == rtps)
-			msc_a->cc.mncc_forwarding_to_remote_ran->rtps = NULL;
-		if (msc_a->ho.new_cell.mncc_forwarding_to_remote_ran
-		    && msc_a->ho.new_cell.mncc_forwarding_to_remote_ran->rtps == rtps)
-			msc_a->ho.new_cell.mncc_forwarding_to_remote_ran->rtps = NULL;
-		return;
 
 	case MSC_EV_CALL_LEG_TERM:
 		msc_a->cc.call_leg = NULL;
 		if (msc_a->cc.mncc_forwarding_to_remote_ran)
 			msc_a->cc.mncc_forwarding_to_remote_ran->rtps = NULL;
 
-		if (msc_a->ho.new_cell.mncc_forwarding_to_remote_ran) {
-			fprintf(stderr, "FOCKEN %p\n", msc_a->ho.new_cell.mncc_forwarding_to_remote_ran->rtps);
+		if (msc_a->ho.new_cell.mncc_forwarding_to_remote_ran)
 			msc_a->ho.new_cell.mncc_forwarding_to_remote_ran->rtps = NULL;
-		}
 		return;
 
 	case MSC_MNCC_EV_CALL_ENDED:
@@ -633,7 +620,6 @@ static void msc_a_fsm_communicating(struct osmo_fsm_inst *fi, uint32_t event, vo
 		/* Nothing to do. */
 		return;
 
-	case MSC_EV_CALL_LEG_RTP_RELEASED:
 	case MSC_MNCC_EV_CALL_ENDED:
 		/* Cleaned up above */
 		return;
@@ -765,7 +751,6 @@ static void msc_a_fsm_releasing(struct osmo_fsm_inst *fi, uint32_t event, void *
 		/* Already releasing */
 		return;
 
-	case MSC_EV_CALL_LEG_RTP_RELEASED:
 	case MSC_EV_CALL_LEG_TERM:
 	case MSC_MNCC_EV_CALL_ENDED:
 		/* RTP streams cleaned up above */
@@ -819,7 +804,6 @@ const struct value_string msc_a_fsm_event_names[] = {
 	OSMO_VALUE_STRING(MSC_REMOTE_EV_RX_GSUP),
 	OSMO_VALUE_STRING(MSC_EV_CALL_LEG_RTP_LOCAL_ADDR_AVAILABLE),
 	OSMO_VALUE_STRING(MSC_EV_CALL_LEG_RTP_COMPLETE),
-	OSMO_VALUE_STRING(MSC_EV_CALL_LEG_RTP_RELEASED),
 	OSMO_VALUE_STRING(MSC_EV_CALL_LEG_TERM),
 	OSMO_VALUE_STRING(MSC_MNCC_EV_NEED_LOCAL_RTP),
 	OSMO_VALUE_STRING(MSC_MNCC_EV_CALL_PROCEEDING),
@@ -934,7 +918,6 @@ static const struct osmo_fsm_state msc_a_fsm_states[] = {
 			| S(MSC_A_EV_UNUSED)
 			| S(MSC_EV_CALL_LEG_RTP_LOCAL_ADDR_AVAILABLE)
 			| S(MSC_EV_CALL_LEG_RTP_COMPLETE)
-			| S(MSC_EV_CALL_LEG_RTP_RELEASED)
 			| S(MSC_EV_CALL_LEG_TERM)
 			| S(MSC_MNCC_EV_CALL_ENDED)
 			| S(MSC_A_EV_HANDOVER_REQUIRED)
@@ -950,7 +933,6 @@ static const struct osmo_fsm_state msc_a_fsm_states[] = {
 			| S(MSC_A_EV_FROM_I_PROCESS_ACCESS_SIGNALLING_REQUEST)
 			| S(MSC_A_EV_FROM_I_SEND_END_SIGNAL_REQUEST)
 			| S(MSC_A_EV_UNUSED)
-			| S(MSC_EV_CALL_LEG_RTP_RELEASED)
 			| S(MSC_EV_CALL_LEG_TERM)
 			| S(MSC_MNCC_EV_CALL_ENDED)
 			,
@@ -1590,8 +1572,7 @@ static int msc_a_start_assignment(struct msc_a *msc_a, struct gsm_trans *cc_tran
 		cl = msc_a->cc.call_leg = call_leg_alloc(msc_a->c.fi,
 							 MSC_EV_CALL_LEG_TERM,
 							 MSC_EV_CALL_LEG_RTP_LOCAL_ADDR_AVAILABLE,
-							 MSC_EV_CALL_LEG_RTP_COMPLETE,
-							 MSC_EV_CALL_LEG_RTP_RELEASED);
+							 MSC_EV_CALL_LEG_RTP_COMPLETE);
 		OSMO_ASSERT(cl);
 
 		/* HACK: We put the connection in loopback mode at the beginnig to
