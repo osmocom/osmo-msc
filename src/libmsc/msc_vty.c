@@ -606,6 +606,8 @@ static int config_write_msc(struct vty *vty)
 	ranap_iu_vty_config_write(vty, " ");
 #endif
 
+	neighbor_ident_vty_write(vty);
+
 	return CMD_SUCCESS;
 }
 

@@ -235,3 +235,23 @@ OsmoMSC(config-msc)# do show neighbor a lac 65535
  neighbor a cgi 901 70 65535 65531 msc-ipa-name msc-901-70-2
  neighbor a lac 65535 ran-pc 6.6.6
  neighbor a lac-ci 65535 65533 msc-ipa-name different-msc
+
+OsmoMSC(config-msc)# show running-config
+...
+msc
+...
+ neighbor a lac 11 ran-pc 1.2.3
+ neighbor a lac-ci 11 12 ran-pc 1.2.3
+ neighbor a cgi 901 70 11 13 ran-pc 1.2.3
+ neighbor iu lac 11 ran-pc 2.3.4
+ neighbor iu lac-ci 11 22 ran-pc 2.3.4
+ neighbor iu cgi 901 070 11 23 ran-pc 2.3.4
+ neighbor a lac 65535 msc-ipa-name msc-901-70-2
+ neighbor a lac-ci 65535 65533 msc-ipa-name msc-901-70-2
+ neighbor a cgi 901 70 65535 65531 msc-ipa-name msc-901-70-2
+ neighbor iu lac 65529 msc-ipa-name msc-901-70-2
+ neighbor iu lac-ci 65529 65528 msc-ipa-name msc-901-70-2
+ neighbor iu cgi 901 070 65529 65527 msc-ipa-name msc-901-70-2
+ neighbor a lac 65535 ran-pc 6.6.6
+ neighbor a lac-ci 65535 65533 msc-ipa-name different-msc
+...
