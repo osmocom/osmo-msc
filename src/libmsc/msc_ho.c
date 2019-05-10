@@ -463,9 +463,8 @@ static void msc_ho_fsm_wait_request_ack_onenter(struct osmo_fsm_inst *fi, uint32
 			       msc_i->ran_conn->ran_peer->fi->id, rp->fi->id);
 		}
 
-		msc_t_alloc(msc_a->c.msub, rp);
-		msc_ho_send_handover_request(msc_a);
-		return;
+		msc_t = msc_t_alloc(msc_a->c.msub, rp);
+		break;
 
 	case MSC_NEIGHBOR_TYPE_REMOTE_MSC:
 		ipa_name = msc_a->ho.new_cell.msc_ipa_name;
@@ -482,22 +481,24 @@ static void msc_ho_fsm_wait_request_ack_onenter(struct osmo_fsm_inst *fi, uint32
 			       osmo_quote_str(ipa_name, -1));
 		}
 
-		msc_t_remote_alloc(msc_a->c.msub, msc_a->c.ran, (const uint8_t*)ipa_name, strlen(ipa_name));
-		msc_ho_send_handover_request(msc_a);
-		return;
+		msc_t = msc_t_remote_alloc(msc_a->c.msub, msc_a->c.ran,
+					   (const uint8_t *) ipa_name,
+					   strlen(ipa_name));
+		break;
 
 	default:
 		msc_ho_try_next_cell(msc_a, "unknown Handover target type %d\n", msc_a->ho.new_cell.type);
 		return;
 	}
 
-	msc_t = msc_a_msc_t(msc_a);
 	if (!msc_t) {
 		/* There should definitely be one now. */
 		msc_ho_failed(msc_a, GSM0808_CAUSE_EQUIPMENT_FAILURE,
 			      "Cannot initiate Handover Request, failed to set up a target MSC-T\n");
 		return;
 	}
+
+	msc_ho_send_handover_request(msc_a);
 }
 
 static void msc_ho_rx_request_ack(struct msc_a *msc_a, struct msc_a_ran_dec_data *hra);
