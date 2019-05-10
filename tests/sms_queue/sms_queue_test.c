@@ -96,7 +96,7 @@ struct gsm_sms *__wrap_db_sms_get_next_unsent_rr_msisdn(struct gsm_network *net,
 	static struct vlr_subscr arbitrary_vsub = {};
 	static bool arbitrary_vsub_set_up = false;
 	struct gsm_sms *sms;
-	int i;
+	int i, rc = 0;
 	printf("     hitting database: looking for MSISDN > '%s', failed_attempts <= %d\n",
 	       last_msisdn, max_failed);
 
@@ -110,9 +110,10 @@ struct gsm_sms *__wrap_db_sms_get_next_unsent_rr_msisdn(struct gsm_network *net,
 	 * may call vlr_subscr_put() on our arbitrary_vsub, what would
 	 * lead to a segfault if its use_count <= 0. To prevent this,
 	 * let's ensure a big enough initial value. */
-	osmo_use_count_get_put(&arbitrary_vsub.use_count, VSUB_USE_SMS_RECEIVER, 1000);
-	osmo_use_count_get_put(&arbitrary_vsub.use_count, VSUB_USE_SMS_PENDING, 1000);
+	rc += osmo_use_count_get_put(&arbitrary_vsub.use_count, VSUB_USE_SMS_RECEIVER, 1000);
+	rc += osmo_use_count_get_put(&arbitrary_vsub.use_count, VSUB_USE_SMS_PENDING, 1000);
 	arbitrary_vsub.lu_complete = true;
+	OSMO_ASSERT(rc == 0);
 
 	for (i = 0; i < ARRAY_SIZE(fake_sms_db); i++) {
 		if (!fake_sms_db[i].nr_of_sms)
