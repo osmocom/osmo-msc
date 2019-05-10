@@ -457,14 +457,25 @@ static int gsm340_rx_tpdu(struct gsm_trans *trans, struct msgb *msg,
 	uint8_t da_len_bytes;
 	uint8_t address_lv[12]; /* according to 03.40 / 9.1.2.5 */
 	int rc = 0;
-	struct msc_a *msc_a = trans->msc_a;
-	struct gsm_network *net = msc_a_net(msc_a);
-	struct vlr_subscr *vsub = msc_a_vsub(msc_a);
+	struct gsm_network *net;
+	struct vlr_subscr *vsub;
 
-	rate_ctr_inc(&net->msc_ctrs->ctr[MSC_CTR_SMS_SUBMITTED]);
-
-	if (!msc_a || !vsub)
+	if (!trans->msc_a) {
+		LOG_TRANS(trans, LOGL_ERROR, "Insufficient info to process TPDU: "
+					     "MSC-A role is NULL?!?\n");
 		return GSM411_RP_CAUSE_MO_NET_OUT_OF_ORDER;
+	}
+
+	net = msc_a_net(trans->msc_a);
+	vsub = msc_a_vsub(trans->msc_a);
+	if (!net || !vsub) {
+		LOG_TRANS(trans, LOGL_ERROR, "Insufficient info to process TPDU: "
+					     "gsm_network and/or vlr_subscr is NULL?!?\n");
+		return GSM411_RP_CAUSE_MO_NET_OUT_OF_ORDER;
+	}
+
+	/* FIXME: should we do this on success, after all checks? */
+	rate_ctr_inc(&net->msc_ctrs->ctr[MSC_CTR_SMS_SUBMITTED]);
 
 	gsms = sms_alloc();
 	if (!gsms)
