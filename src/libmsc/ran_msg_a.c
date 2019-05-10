@@ -375,13 +375,7 @@ static int ran_a_decode_lcls_notification(struct ran_dec *ran_dec, const struct 
 	struct ran_msg ran_dec_msg;
 
 	/* Either §3.2.2.119 LCLS-BSS-Status or §3.2.2.120 LCLS-Break-Request shall be present */
-	if ((!ie_lcls_bss_status && !ie_lcls_break_req)
-	    || (ie_lcls_bss_status && ie_lcls_break_req)) {
-		LOG_RAN_A_DEC(ran_dec, LOGL_ERROR, "Ignoring broken LCLS Notification message\n");
-		return -EINVAL;
-	}
-
-	if (ie_lcls_bss_status) {
+	if (ie_lcls_bss_status && !ie_lcls_break_req) {
 		ran_dec_msg = (struct ran_msg){
 			.msg_type = RAN_MSG_LCLS_STATUS,
 			.msg_name = "BSSMAP LCLS Notification (LCLS Status)",
@@ -391,9 +385,7 @@ static int ran_a_decode_lcls_notification(struct ran_dec *ran_dec, const struct 
 			},
 		};
 		return ran_decoded(ran_dec, &ran_dec_msg);
-	}
-
-	if (ie_lcls_break_req) {
+	} else if (ie_lcls_break_req && !ie_lcls_bss_status) {
 		ran_dec_msg = (struct ran_msg){
 			.msg_type = RAN_MSG_LCLS_BREAK_REQ,
 			.msg_name = "BSSMAP LCLS Notification (LCLS Break Req)",
@@ -404,6 +396,7 @@ static int ran_a_decode_lcls_notification(struct ran_dec *ran_dec, const struct 
 		return ran_decoded(ran_dec, &ran_dec_msg);
 	}
 
+	LOG_RAN_A_DEC(ran_dec, LOGL_ERROR, "Ignoring broken LCLS Notification message\n");
 	return -EINVAL;
 }
 
