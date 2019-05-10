@@ -1086,8 +1086,7 @@ static void lu_fsm_wait_imeisv(struct osmo_fsm_inst *fi, uint32_t event,
 		_start_lu_main(fi);
 		break;
 	default:
-		LOGPFSML(fi, LOGL_ERROR, "event without effect: %s\n",
-			 osmo_fsm_event_name(fi->fsm, event));
+		OSMO_ASSERT(0);
 		break;
 	}
 }
@@ -1104,8 +1103,7 @@ static void lu_fsm_wait_pvlr(struct osmo_fsm_inst *fi, uint32_t event,
 		vlr_loc_upd_want_imsi(fi);
 		break;
 	default:
-		LOGPFSML(fi, LOGL_ERROR, "event without effect: %s\n",
-			 osmo_fsm_event_name(fi->fsm, event));
+		OSMO_ASSERT(0);
 		break;
 	}
 }
@@ -1170,8 +1168,7 @@ static void lu_fsm_wait_imsi(struct osmo_fsm_inst *fi, uint32_t event,
 		vlr_loc_upd_node1(fi);
 		break;
 	default:
-		LOGPFSML(fi, LOGL_ERROR, "event without effect: %s\n",
-			 osmo_fsm_event_name(fi->fsm, event));
+		OSMO_ASSERT(0);
 		break;
 	}
 }
@@ -1213,8 +1210,7 @@ static void lu_fsm_wait_hlr_ul_res(struct osmo_fsm_inst *fi, uint32_t event,
 		}
 		break;
 	default:
-		LOGPFSML(fi, LOGL_ERROR, "event without effect: %s\n",
-			 osmo_fsm_event_name(fi->fsm, event));
+		OSMO_ASSERT(0);
 		break;
 	}
 }
@@ -1264,8 +1260,7 @@ static void lu_fsm_wait_lu_compl(struct osmo_fsm_inst *fi, uint32_t event,
 		lu_fsm_failure(fi, cause);
 		break;
 	default:
-		LOGPFSML(fi, LOGL_ERROR, "event without effect: %s\n",
-			 osmo_fsm_event_name(fi->fsm, event));
+		OSMO_ASSERT(0);
 		break;
 	}
 }
@@ -1297,8 +1292,7 @@ static void lu_fsm_wait_lu_compl_standalone(struct osmo_fsm_inst *fi,
 		lu_fsm_failure(fi, cause);
 		break;
 	default:
-		LOGPFSML(fi, LOGL_ERROR, "event without effect: %s\n",
-			 osmo_fsm_event_name(fi->fsm, event));
+		OSMO_ASSERT(0);
 		break;
 	}
 }
