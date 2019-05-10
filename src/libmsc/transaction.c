@@ -127,11 +127,12 @@ struct gsm_trans *trans_alloc(struct gsm_network *net,
 			      enum trans_type type, uint8_t trans_id,
 			      uint32_t callref)
 {
-	struct gsm_trans *trans = NULL; /* (NULL for LOG_TRANS() before allocation) */
+	int subsys = trans_log_subsys(type);
+	struct gsm_trans *trans;
 
 	/* a valid subscriber is indispensable */
 	if (vsub == NULL) {
-		LOG_TRANS(trans, LOGL_ERROR, "unable to alloc transaction, invalid subscriber (NULL)\n");
+		LOGP(subsys, LOGL_ERROR, "unable to alloc transaction, invalid subscriber (NULL)\n");
 		return NULL;
 	}
 
@@ -142,11 +143,11 @@ struct gsm_trans *trans_alloc(struct gsm_network *net,
 	*trans = (struct gsm_trans){
 		.vsub = vsub,
 		.type = type,
+		.log_subsys = subsys,
 		.transaction_id = trans_id,
 		.callref = callref,
 		.net = net,
 	};
-	trans->log_subsys = trans_log_subsys(trans);
 	vlr_subscr_get(vsub, trans_vsub_use(type));
 	llist_add_tail(&trans->entry, &net->trans_list);
 

@@ -159,11 +159,9 @@ int trans_assign_trans_id(const struct gsm_network *net, const struct vlr_subscr
 struct gsm_trans *trans_has_conn(const struct msc_a *msc_a);
 void trans_conn_closed(const struct msc_a *msc_a);
 
-static inline int trans_log_subsys(const struct gsm_trans *trans)
+static inline int trans_log_subsys(enum trans_type type)
 {
-	if (!trans)
-		return DMSC;
-	switch (trans->type) {
+	switch (type) {
 	case TRANS_CC:
 	case TRANS_SILENT_CALL:
 		return DCC;
