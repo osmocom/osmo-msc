@@ -322,7 +322,9 @@ int ran_iu_decode_l2(struct ran_dec *ran_iu_decode, struct msgb *ranap)
 static struct msgb *ran_iu_wrap_dtap(struct msgb *dtap)
 {
 	struct msgb *an_apdu;
-	an_apdu = ranap_new_msg_dt(0, dtap->data, msgb_length(dtap));
+	uint8_t sapi = OMSC_LINKID_CB(dtap);
+
+	an_apdu = ranap_new_msg_dt(sapi, dtap->data, msgb_length(dtap));
 	an_apdu->l2h = an_apdu->data;
 	msgb_free(dtap);
 	return an_apdu;
