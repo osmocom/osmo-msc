@@ -199,7 +199,7 @@ int mncc_call_set_rtp_stream(struct mncc_call *mncc_call, struct rtp_stream *rtp
 void mncc_call_detach_rtp_stream(struct mncc_call *mncc_call)
 {
 	struct rtp_stream *rtps = mncc_call->rtps;
-	struct osmo_sockaddr_str clear;
+	struct osmo_sockaddr_str clear = { 0 };
 	if (!rtps)
 		return;
 	mncc_call->rtps = NULL;
