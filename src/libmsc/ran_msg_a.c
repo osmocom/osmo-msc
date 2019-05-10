@@ -1080,7 +1080,9 @@ struct msgb *ran_a_make_handover_request(struct osmo_fsm_inst *log_fi, const str
 	/* Encryption Information */
 	make_encrypt_info_perm_algo(log_fi, &r.encryption_information, n->geran.a5_encryption_mask, n->classmark);
 	if (n->geran.chosen_encryption && n->geran.chosen_encryption->key_len) {
-		if (n->geran.chosen_encryption->key_len > sizeof(r.encryption_information.key)) {
+		/* Prevent both source / destination buffer overrun / overflow */
+		if (n->geran.chosen_encryption->key_len > sizeof(r.encryption_information.key)
+		    || n->geran.chosen_encryption->key_len > sizeof(n->geran.chosen_encryption->key)) {
 			LOG_RAN_A_ENC(log_fi, LOGL_ERROR, "Handover Request: invalid chosen encryption key size %u\n",
 				       n->geran.chosen_encryption->key_len);
 			return NULL;
