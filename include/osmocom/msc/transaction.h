@@ -27,7 +27,7 @@ struct vty;
 	     ##args)
 
 #define LOG_TRANS(trans, level, fmt, args...) \
-	     LOG_TRANS_CAT(trans, (trans)->log_subsys, level, fmt, ##args)
+	     LOG_TRANS_CAT(trans, (trans) ? (trans)->log_subsys : DMSC, level, fmt, ##args)
 
 enum bridge_state {
 	BRIDGE_STATE_NONE,
