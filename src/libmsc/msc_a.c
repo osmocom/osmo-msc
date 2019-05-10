@@ -245,10 +245,18 @@ static int msc_a_ran_enc_ciphering(struct msc_a *msc_a, bool umts_aka, bool retr
 int msc_a_vlr_set_cipher_mode(void *_msc_a, bool umts_aka, bool retrieve_imeisv)
 {
 	struct msc_a *msc_a = _msc_a;
-	struct vlr_subscr *vsub = msc_a_vsub(msc_a);
+	struct vlr_subscr *vsub;
 
-	if (!msc_a || !vsub || !vsub->last_tuple) {
-		LOG_MSC_A(msc_a, LOGL_ERROR, "Insufficient info to start ciphering\n");
+	if (!msc_a) {
+		LOGP(DMSC, LOGL_ERROR, "Insufficient info to start ciphering: "
+				       "MSC-A role is NULL?!?\n");
+		return -EINVAL;
+	}
+
+	vsub = msc_a_vsub(msc_a);
+	if (!vsub || !vsub->last_tuple) {
+		LOG_MSC_A(msc_a, LOGL_ERROR, "Insufficient info to start ciphering: "
+					     "vlr_subscr is NULL?!?\n");
 		return -EINVAL;
 	}
 
@@ -280,12 +288,22 @@ int msc_a_vlr_set_cipher_mode(void *_msc_a, bool umts_aka, bool retrieve_imeisv)
 
 static int msc_a_ran_enc_ciphering(struct msc_a *msc_a, bool umts_aka, bool retrieve_imeisv)
 {
-	struct gsm_network *net = msc_a_net(msc_a);
-	struct vlr_subscr *vsub = msc_a_vsub(msc_a);
+	struct gsm_network *net;
+	struct vlr_subscr *vsub;
 	struct ran_msg msg;
 
-	if (!msc_a || !vsub || !vsub->last_tuple) {
-		LOG_MSC_A(msc_a, LOGL_ERROR, "Insufficient info to start ciphering\n");
+	if (!msc_a) {
+		LOGP(DMSC, LOGL_ERROR, "Insufficient info to start ciphering: "
+				       "MSC-A role is NULL?!?\n");
+		return -EINVAL;
+	}
+
+	net = msc_a_net(msc_a);
+	vsub = msc_a_vsub(msc_a);
+
+	if (!net || !vsub || !vsub->last_tuple) {
+		LOG_MSC_A(msc_a, LOGL_ERROR, "Insufficient info to start ciphering: "
+					     "gsm_network and/or vlr_subscr is NULL?!?\n");
 		return -EINVAL;
 	}
 
