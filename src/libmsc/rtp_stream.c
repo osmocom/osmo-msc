@@ -141,6 +141,12 @@ static void rtp_stream_fsm_establishing_established(struct osmo_fsm_inst *fi, ui
 	switch (event) {
 	case RTP_STREAM_EV_CRCX_OK:
 		crcx_info = osmo_mgcpc_ep_ci_get_rtp_info(rtps->ci);
+		if (!crcx_info) {
+			LOG_RTPS(rtps, LOGL_ERROR, "osmo_mgcpc_ep_ci_get_rtp_info() has "
+				 "failed, ignoring %s\n", osmo_fsm_event_name(fi->fsm, event));
+			return;
+		}
+
 		osmo_sockaddr_str_from_str(&rtps->local, crcx_info->addr, crcx_info->port);
 		rtp_stream_update_id(rtps);
 		osmo_fsm_inst_dispatch(fi->proc.parent, CALL_LEG_EV_RTP_STREAM_ADDR_AVAILABLE, rtps);
