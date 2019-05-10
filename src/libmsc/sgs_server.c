@@ -40,7 +40,7 @@ static int sgs_conn_readable_cb(struct osmo_stream_srv *conn)
 	struct msgb *msg = gsm29118_msgb_alloc();
 	struct sctp_sndrcvinfo sinfo;
 	int flags = 0;
-	int rc;
+	int rc = 0;
 
 	/* we cannot use osmo_stream_srv_recv() here, as we might get some out-of-band info from
 	 * SCTP. FIXME: add something like osmo_stream_srv_recv_sctp() to libosmo-netif and use
@@ -72,7 +72,6 @@ static int sgs_conn_readable_cb(struct osmo_stream_srv *conn)
 		default:
 			break;
 		}
-		rc = 0;
 		goto out;
 	}
 
