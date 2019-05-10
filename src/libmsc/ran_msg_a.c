@@ -1068,9 +1068,6 @@ struct msgb *ran_a_make_handover_request(struct osmo_fsm_inst *log_fi, const str
 
 		.speech_version_used = n->speech_version_used,
 
-		.chosen_encryption_algorithm_serving =
-			n->geran.chosen_encryption ? n->geran.chosen_encryption->alg_id : 0,
-
 		.old_bss_to_new_bss_info_raw = n->old_bss_to_new_bss_info_raw,
 		.old_bss_to_new_bss_info_raw_len = n->old_bss_to_new_bss_info_raw_len,
 
@@ -1098,6 +1095,7 @@ struct msgb *ran_a_make_handover_request(struct osmo_fsm_inst *log_fi, const str
 		memcpy(r.encryption_information.key,
 		       n->geran.chosen_encryption->key, n->geran.chosen_encryption->key_len);
 		r.encryption_information.key_len = n->geran.chosen_encryption->key_len;
+		r.chosen_encryption_algorithm_serving = n->geran.chosen_encryption->alg_id;
 	}
 
 	if (n->classmark)
