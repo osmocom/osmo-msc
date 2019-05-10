@@ -646,6 +646,12 @@ static void msc_a_fsm_communicating(struct osmo_fsm_inst *fi, uint32_t event, vo
 		msc_ho_start(msc_a, (struct ran_handover_required*)data);
 		return;
 
+	case MSC_A_EV_HANDOVER_END:
+		/* Termination event of the msc_ho_fsm. No action needed, it's all done in the msc_ho_fsm cleanup. This
+		 * event only exists because osmo_fsm_inst_alloc_child() requires a parent term event; and maybe
+		 * interesting for logging. */
+		return;
+
 	case MSC_A_EV_MO_CLOSE:
 	case MSC_A_EV_CN_CLOSE:
 	case MSC_A_EV_UNUSED:
@@ -754,6 +760,10 @@ static void msc_a_fsm_releasing(struct osmo_fsm_inst *fi, uint32_t event, void *
 	case MSC_EV_CALL_LEG_TERM:
 	case MSC_MNCC_EV_CALL_ENDED:
 		/* RTP streams cleaned up above */
+		return;
+
+	case MSC_A_EV_HANDOVER_END:
+		/* msc_ho_fsm does cleanup. */
 		return;
 
 	default:
@@ -921,6 +931,7 @@ static const struct osmo_fsm_state msc_a_fsm_states[] = {
 			| S(MSC_EV_CALL_LEG_TERM)
 			| S(MSC_MNCC_EV_CALL_ENDED)
 			| S(MSC_A_EV_HANDOVER_REQUIRED)
+			| S(MSC_A_EV_HANDOVER_END)
 			,
 		.out_state_mask = 0
 			| S(MSC_A_ST_RELEASING)
@@ -935,6 +946,7 @@ static const struct osmo_fsm_state msc_a_fsm_states[] = {
 			| S(MSC_A_EV_UNUSED)
 			| S(MSC_EV_CALL_LEG_TERM)
 			| S(MSC_MNCC_EV_CALL_ENDED)
+			| S(MSC_A_EV_HANDOVER_END)
 			,
 		.out_state_mask = 0
 			| S(MSC_A_ST_RELEASED)
