@@ -234,6 +234,7 @@ static int gsm411_gsup_mt_handler(struct vlr_subscr *vsub,
 	const struct osmo_gsup_message *gsup_msg)
 {
 	struct gsm_network *net;
+	bool sm_rp_mmts_ind;
 	int rc;
 
 	/* Obtain required pointers */
@@ -267,10 +268,17 @@ static int gsm411_gsup_mt_handler(struct vlr_subscr *vsub,
 	if (gsup_msg->sm_rp_oa_type != OSMO_GSUP_SMS_SM_RP_ODA_SMSC_ADDR)
 		goto msg_error;
 
+	/* MMS (More Messages to Send) IE is optional */
+	if (gsup_msg->sm_rp_mms)
+		sm_rp_mmts_ind = *gsup_msg->sm_rp_mms > 0;
+	else
+		sm_rp_mmts_ind = false;
+
 	/* Send RP-DATA */
 	rc = gsm411_send_rp_data(net, vsub,
 		gsup_msg->sm_rp_oa_len, gsup_msg->sm_rp_oa,
-		gsup_msg->sm_rp_ui_len, gsup_msg->sm_rp_ui);
+		gsup_msg->sm_rp_ui_len, gsup_msg->sm_rp_ui,
+		sm_rp_mmts_ind);
 	if (rc) {
 		LOGP(DLSMS, LOGL_NOTICE, "Failed to send MT SMS, "
 			"ignoring MT-forwardSM-Req message...\n");

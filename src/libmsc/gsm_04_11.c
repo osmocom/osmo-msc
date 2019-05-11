@@ -129,6 +129,28 @@ static int gsm411_sendmsg(struct gsm_trans *trans, struct msgb *msg)
 	return msc_a_tx_dtap_to_i(trans->msc_a, msg);
 }
 
+/* Handle MMTS (More Messages to Send) indication */
+static void gsm411_handle_mmts_ind(const struct gsm_trans *trans)
+{
+	int32_t use_count;
+
+	OSMO_ASSERT(trans);
+	OSMO_ASSERT(trans->msc_a);
+
+	use_count = osmo_use_count_by(&trans->msc_a->use_count, MSC_A_USE_SMS_MMTS);
+	OSMO_ASSERT(use_count >= 0); /* Shall not be negative */
+
+	if (trans->sms.sm_rp_mmts_ind && use_count == 0) {
+		LOG_TRANS(trans, LOGL_INFO, "Multi-part SMS delivery is initiated\n");
+		msc_a_get(trans->msc_a, MSC_A_USE_SMS_MMTS);
+	} else if (trans->sms.sm_rp_mmts_ind && use_count > 0) {
+		LOG_TRANS(trans, LOGL_INFO, "Continuing multi-part SMS delivery\n");
+	} else if (!trans->sms.sm_rp_mmts_ind && use_count > 0) {
+		LOG_TRANS(trans, LOGL_INFO, "Multi-part SMS delivery has been completed\n");
+		msc_a_put(trans->msc_a, MSC_A_USE_SMS_MMTS);
+	}
+}
+
 /* Paging callback for MT SMS (Paging is triggered by SMC) */
 static void mmsms_paging_cb(struct msc_a *msc_a, struct gsm_trans *trans)
 {
@@ -141,6 +163,10 @@ static void mmsms_paging_cb(struct msc_a *msc_a, struct gsm_trans *trans)
 		/* Associate transaction with established connection */
 		msc_a_get(msc_a, MSC_A_USE_SMS);
 		trans->msc_a = msc_a;
+
+		/* Multi-part SMS: handle MMTS (More Messages to Send) indication */
+		gsm411_handle_mmts_ind(trans);
+
 		/* Confirm successful connection establishment */
 		gsm411_smc_recv(&trans->sms.smc_inst, GSM411_MMSMS_EST_CNF, NULL, 0);
 	} else {
@@ -1180,7 +1206,8 @@ int gsm411_send_sms(struct gsm_network *net,
 /* Low-level function to send raw RP-DATA to a given subscriber */
 int gsm411_send_rp_data(struct gsm_network *net, struct vlr_subscr *vsub,
 			size_t sm_rp_oa_len, const uint8_t *sm_rp_oa,
-			size_t sm_rp_ud_len, const uint8_t *sm_rp_ud)
+			size_t sm_rp_ud_len, const uint8_t *sm_rp_ud,
+			bool sm_rp_mmts_ind)
 {
 	struct gsm_trans *trans;
 	struct msgb *msg;
@@ -1189,6 +1216,11 @@ int gsm411_send_rp_data(struct gsm_network *net, struct vlr_subscr *vsub,
 	trans = gsm411_alloc_mt_trans(net, vsub);
 	if (!trans)
 		return -ENOMEM;
+
+	/* Multi-part SMS: handle MMTS (More Messages to Send) indication */
+	trans->sms.sm_rp_mmts_ind = sm_rp_mmts_ind;
+	if (trans->msc_a != NULL)
+		gsm411_handle_mmts_ind(trans);
 
 	/* Allocate a message buffer for to be encoded SMS */
 	msg = gsm411_msgb_alloc();

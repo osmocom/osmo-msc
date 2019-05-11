@@ -110,6 +110,8 @@ struct gsm_trans {
 
 			/* SM-RP-MR, Message Reference (see GSM TS 04.11, section 8.2.3) */
 			uint8_t sm_rp_mr;
+			/* More Messages to Send (see 3GPP TS 29.002, section 7.6.8.7) */
+			bool sm_rp_mmts_ind;
 
 			struct gsm_sms *sms;
 		} sms;
