@@ -532,8 +532,6 @@ DREF VLR subscr IMSI-901700000004620:MSISDN-46071 + SMS: now used by 4 (attached
 DLSMS trans(SMS IMSI-901700000004620:MSISDN-46071 callref-0x40000001 tid-0) New transaction
 DLSMS SMC(0) instance created for network
 DLSMS SMR(0) instance created for network.
-DLSMS SMC(0) instance created for network
-DLSMS SMR(0) instance created for network.
 DLSMS trans(SMS IMSI-901700000004620:MSISDN-46071 callref-0x40000001 tid-0) Going to send a MT SMS
 DLSMS SMR(0) message SM-RL-DATA_REQ received in state IDLE
 DLSMS SMR(0) TX SMS RP-DATA
@@ -557,8 +555,6 @@ DREF VLR subscr IMSI-901700000004620:MSISDN-46071 + test_ms_timeout_paging: now 
 DREF VLR subscr IMSI-901700000004620:MSISDN-46071 + SMS-receiver: now used by 6 (attached,2*SMS-receiver,SMS,Paging,test_ms_timeout_paging)
 DREF VLR subscr IMSI-901700000004620:MSISDN-46071 + SMS: now used by 7 (attached,2*SMS-receiver,2*SMS,Paging,test_ms_timeout_paging)
 DLSMS trans(SMS IMSI-901700000004620:MSISDN-46071 callref-0x40000002 tid-1) New transaction
-DLSMS SMC(0) instance created for network
-DLSMS SMR(0) instance created for network.
 DLSMS SMC(0) instance created for network
 DLSMS SMR(0) instance created for network.
 DLSMS trans(SMS IMSI-901700000004620:MSISDN-46071 callref-0x40000002 tid-1) Going to send a MT SMS
@@ -618,8 +614,6 @@ DREF VLR subscr IMSI-901700000004620:MSISDN-46071 + test_ms_timeout_paging: now 
 DREF VLR subscr IMSI-901700000004620:MSISDN-46071 + SMS-receiver: now used by 3 (attached,test_ms_timeout_paging,SMS-receiver)
 DREF VLR subscr IMSI-901700000004620:MSISDN-46071 + SMS: now used by 4 (attached,test_ms_timeout_paging,SMS-receiver,SMS)
 DLSMS trans(SMS IMSI-901700000004620:MSISDN-46071 callref-0x40000003 tid-0) New transaction
-DLSMS SMC(0) instance created for network
-DLSMS SMR(0) instance created for network.
 DLSMS SMC(0) instance created for network
 DLSMS SMR(0) instance created for network.
 DLSMS trans(SMS IMSI-901700000004620:MSISDN-46071 callref-0x40000003 tid-0) Going to send a MT SMS

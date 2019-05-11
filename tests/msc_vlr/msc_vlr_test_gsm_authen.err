@@ -320,8 +320,6 @@ DREF VLR subscr IMSI-901700000004620:MSISDN-46071 + SMS: now used by 4 (attached
 DLSMS trans(SMS IMSI-901700000004620:MSISDN-46071 callref-0x40000001 tid-0) New transaction
 DLSMS SMC(0) instance created for network
 DLSMS SMR(0) instance created for network.
-DLSMS SMC(0) instance created for network
-DLSMS SMR(0) instance created for network.
 DLSMS trans(SMS IMSI-901700000004620:MSISDN-46071 callref-0x40000001 tid-0) Going to send a MT SMS
 DLSMS SMR(0) message SM-RL-DATA_REQ received in state IDLE
 DLSMS SMR(0) TX SMS RP-DATA
@@ -947,8 +945,6 @@ DREF VLR subscr IMSI-901700000004620:MSISDN-46071:TMSI-0x03020100 + test_gsm_aut
 DREF VLR subscr IMSI-901700000004620:MSISDN-46071:TMSI-0x03020100 + SMS-receiver: now used by 3 (attached,test_gsm_authen_tmsi,SMS-receiver)
 DREF VLR subscr IMSI-901700000004620:MSISDN-46071:TMSI-0x03020100 + SMS: now used by 4 (attached,test_gsm_authen_tmsi,SMS-receiver,SMS)
 DLSMS trans(SMS IMSI-901700000004620:MSISDN-46071:TMSI-0x03020100 callref-0x40000002 tid-0) New transaction
-DLSMS SMC(0) instance created for network
-DLSMS SMR(0) instance created for network.
 DLSMS SMC(0) instance created for network
 DLSMS SMR(0) instance created for network.
 DLSMS trans(SMS IMSI-901700000004620:MSISDN-46071:TMSI-0x03020100 callref-0x40000002 tid-0) Going to send a MT SMS
@@ -2886,8 +2882,6 @@ DREF VLR subscr IMSI-901700000010650:MSISDN-42342 + test_gsm_milenage_authen: no
 DREF VLR subscr IMSI-901700000010650:MSISDN-42342 + SMS-receiver: now used by 3 (attached,test_gsm_milenage_authen,SMS-receiver)
 DREF VLR subscr IMSI-901700000010650:MSISDN-42342 + SMS: now used by 4 (attached,test_gsm_milenage_authen,SMS-receiver,SMS)
 DLSMS trans(SMS IMSI-901700000010650:MSISDN-42342 callref-0x40000003 tid-0) New transaction
-DLSMS SMC(0) instance created for network
-DLSMS SMR(0) instance created for network.
 DLSMS SMC(0) instance created for network
 DLSMS SMR(0) instance created for network.
 DLSMS trans(SMS IMSI-901700000010650:MSISDN-42342 callref-0x40000003 tid-0) Going to send a MT SMS

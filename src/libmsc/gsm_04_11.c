@@ -1012,10 +1012,6 @@ static struct gsm_trans *gsm411_trans_init(struct gsm_network *net, struct vlr_s
 		return NULL;
 	}
 
-	/* Init both SMC and SMR state machines */
-	gsm411_smc_init(&trans->sms.smc_inst, 0, 1, gsm411_mn_recv, gsm411_mm_send);
-	gsm411_smr_init(&trans->sms.smr_inst, 0, 1, gsm411_rl_recv, gsm411_mn_send);
-
 	if (msc_a) {
 		msc_a_get(msc_a, MSC_A_USE_SMS);
 		trans->msc_a = msc_a;
