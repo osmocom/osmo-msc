@@ -233,13 +233,11 @@ int gsm411_gsup_mt_fwd_sm_err(struct gsm_trans *trans,
 static int gsm411_gsup_mt_handler(struct vlr_subscr *vsub,
 	const struct osmo_gsup_message *gsup_msg)
 {
-	struct vlr_instance *vlr;
 	struct gsm_network *net;
 	int rc;
 
 	/* Obtain required pointers */
-	vlr = vsub->vlr;
-	net = (struct gsm_network *) vlr->user_ctx;
+	net = (struct gsm_network *) vsub->vlr->user_ctx;
 
 	/* Associate logging messages with this subscriber */
 	log_set_context(LOG_CTX_VLR_SUBSCR, vsub);
