@@ -216,22 +216,20 @@ static int gsm411_mm_send(struct gsm411_smc_inst *inst, int msg_type,
 	switch (msg_type) {
 	case GSM411_MMSMS_EST_REQ:
 		rc = gsm411_mmsms_est_req(trans);
-		msgb_free(msg); /* upper layer does not free msg */
 		break;
 	case GSM411_MMSMS_DATA_REQ:
 		rc = gsm411_cp_sendmsg(msg, trans, cp_msg_type);
-		break;
+		return rc; /* gsm411_cp_sendmsg() takes msg ownership */
 	case GSM411_MMSMS_REL_REQ:
 		LOG_TRANS(trans, LOGL_DEBUG, "Got MMSMS_REL_REQ, destroying transaction.\n");
-		msgb_free(msg);
 		trans_free(trans);
 		break;
 	default:
 		LOG_TRANS(trans, LOGL_NOTICE, "Unhandled MMCCSMS msg 0x%x\n", msg_type);
-		msgb_free(msg);
 		rc = -EINVAL;
 	}
 
+	msgb_free(msg);
 	return rc;
 }
 
