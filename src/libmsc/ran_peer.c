@@ -152,6 +152,11 @@ static void ran_peer_rx_reset(struct ran_peer *rp)
 	ran_peer_state_chg(rp, RAN_PEER_ST_READY);
 }
 
+static void ran_peer_rx_reset_ack(struct ran_peer *rp)
+{
+	ran_peer_state_chg(rp, RAN_PEER_ST_READY);
+}
+
 void ran_peer_reset(struct ran_peer *rp)
 {
 	struct msgb *reset;
@@ -269,7 +274,7 @@ void ran_peer_st_wait_rx_reset_ack(struct osmo_fsm_inst *fi, uint32_t event, voi
 	switch (event) {
 
 	case RAN_PEER_EV_RX_RESET_ACK:
-		ran_peer_state_chg(rp, RAN_PEER_ST_READY);
+		ran_peer_rx_reset_ack(rp);
 		return;
 
 	case RAN_PEER_EV_MSG_UP_CO:
