@@ -42,7 +42,6 @@ LDADD = \
 	$(LIBOSMOGSUPCLIENT_LIBS) \
 	$(LIBRARY_GSM) \
 	-ldbi \
-	-lrt \
 	$(NULL)
 
 noinst_HEADERS = \
