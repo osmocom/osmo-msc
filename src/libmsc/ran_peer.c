@@ -657,7 +657,13 @@ page_it:
 		LOG_RAN_PEER_CAT(rp, DPAG, LOGL_ERROR,
 				 "Paging for %s matched this RAN peer, but emitting a Paging failed\n",
 				 gsm0808_cell_id_name(page_id));
+		msgb_free(l2);
 		return 0;
 	}
+
+	/* The RAN_PEER_EV_MSG_DOWN_CL handler calls sccp_ran_down_l2_cl(),
+	 * which doesn't free msgb. We have to do this ourselves. */
+	msgb_free(l2);
+
 	return 1;
 }
