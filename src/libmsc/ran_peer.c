@@ -640,15 +640,11 @@ int ran_peer_down_paging(struct ran_peer *rp, const struct gsm0808_cell_id *page
 {
 	struct msgb *l2;
 
-	if (cell_id_list_find(&rp->cells_seen, page_id, 0, false))
-		goto page_it;
-
 	/* There are also the RAN peers that are configured in the neighbor ident for Handover, but if those aren't
 	 * connected, then we can't Page there. */
+	if (!cell_id_list_find(&rp->cells_seen, page_id, 0, false))
+		return 0;
 
-	return 0;
-
-page_it:
 	LOG_RAN_PEER_CAT(rp, DPAG, LOGL_DEBUG, "Paging for %s on %s\n", vlr_subscr_name(vsub),
 			 gsm0808_cell_id_name(page_id));
 	l2 = rp->sri->ran->sccp_ran_ops.make_paging_msg(rp->sri, page_id, vsub->imsi, vsub->tmsi, cause);
