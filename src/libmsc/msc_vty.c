@@ -661,58 +661,6 @@ DEFUN(show_bsc, show_bsc_cmd,
 	return CMD_SUCCESS;
 }
 
-/*
-_Subscriber_______________________________________ _LAC_ _RAN___________________ _MSC-A_state_________ _MSC-A_use_
-IMSI-123456789012345:MSISDN-12345:TMSI-0x12345678  1     GERAN-A-4294967295:A5-3 WAIT_CLASSMARK_UPDATE 2=cm_service,trans_cc
-IMSI-123456789012356:MSISDN-234567:TMSI-0x123ABC78 65535 UTRAN-Iu-4294967295     COMMUNICATING         2=cm_service,trans_sms
-IMSI-123456789012367:MSISDN-98712345890:TMSI-0xF.. -     EUTRAN-SGs              RELEASING             0=none
-IMSI-123456789012378:HONR-12345432101              2     MSC-901-700-423:9876    REMOTE_MSC_A          1=inter_msc
-*/
-static void vty_dump_one_conn(struct vty *vty, const struct msub *msub, int *idx)
-{
-	struct msc_a *msc_a = msub_msc_a(msub);
-	struct vlr_subscr *vsub = msub_vsub(msub);
-	char buf[128];
-
-	if (!(*idx))
-		vty_out(vty,
-			"_Subscriber_______________________________________ _LAC_ _RAN___________________"
-			" _MSC-A_state_________ _MSC-A_use_%s",
-			VTY_NEWLINE);
-	(*idx)++;
-
-	vty_out(vty, "%50s %5u %23s %20s %d=%s%s",
-		vlr_subscr_short_name(msub_vsub(msub), 50),
-		vsub ? vsub->cgi.lai.lac : 0,
-		msub_ran_conn_name(msub),
-		osmo_fsm_inst_state_name(msc_a->c.fi),
-		osmo_use_count_total(&msc_a->use_count),
-		osmo_use_count_name_buf(buf, sizeof(buf), &msc_a->use_count),
-		VTY_NEWLINE);
-}
-
-DEFUN(show_msc_conn, show_msc_conn_cmd,
-	"show connection", SHOW_STR "Subscriber Connections\n")
-{
-	struct msub *msub;
-	int idx = 0;
-	llist_for_each_entry(msub, &msub_list, entry) {
-		vty_dump_one_conn(vty, msub, &idx);
-	}
-	return CMD_SUCCESS;
-}
-
-static void vty_trans_hdr(struct vty *vty)
-{
-	if (llist_empty(&gsmnet->trans_list))
-		return;
-
-	vty_out(vty,
-		"_Subscriber_______________________________________ _RAN___________________"
-		" _P__ TI CallRef_ _state_%s",
-		VTY_NEWLINE);
-}
-
 static const char *get_trans_proto_str(const struct gsm_trans *trans)
 {
 	static char buf[256];
@@ -725,146 +673,311 @@ static const char *get_trans_proto_str(const struct gsm_trans *trans)
 			 trans->cc.T308_second);
 		break;
 	case TRANS_SMS:
-		snprintf(buf, sizeof(buf), "%s %s",
+		snprintf(buf, sizeof(buf), "CP:%s RP:%s",
 			gsm411_cp_state_name(trans->sms.smc_inst.cp_state),
 			gsm411_rp_state_name(trans->sms.smr_inst.rp_state));
 		break;
 	default:
-		buf[0] = '\0';
-		break;
+		return NULL;
 	}
 
 	return buf;
 }
 
-static void vty_dump_one_trans(struct vty *vty, const struct gsm_trans *trans)
+/* Prefix a given format string with a given amount of spaces */
+#define MSC_VTY_DUMP(vty, offset, fmt, args...) \
+	vty_out(vty, "%*s" fmt, offset, "", ##args)
+
+#define MSC_VTY_DUMP_FLAG(vty, offset, name, flag) \
+	MSC_VTY_DUMP(vty, offset + 2, "%s: %*s%s%s", \
+		     name, 30 - (int)strlen(name), "", \
+		     flag ? "true" : "false", \
+		     VTY_NEWLINE)
+
+enum msc_vty_dump_flags {
+	MSC_VTY_DUMP_F_SUBSCR		= (1 << 0),
+	MSC_VTY_DUMP_F_CONNECTION	= (1 << 1),
+	MSC_VTY_DUMP_F_TRANSACTION	= (1 << 2),
+};
+
+static void vty_dump_one_trans(struct vty *vty, const struct gsm_trans *trans,
+			       int offset, uint8_t dump_flags)
 {
-	vty_out(vty, "%50s %23s %4s %02u %08x %s%s",
-		vlr_subscr_short_name(msc_a_vsub(trans->msc_a), 50),
-		msub_ran_conn_name(trans->msc_a->c.msub),
-		trans_type_name(trans->type),
-		trans->transaction_id,
-		trans->callref,
-		get_trans_proto_str(trans),
-		VTY_NEWLINE);
+	const char *proto_str;
+
+	if (dump_flags & MSC_VTY_DUMP_F_SUBSCR) {
+		MSC_VTY_DUMP(vty, offset, "Subscriber: %s%s",
+			     vlr_subscr_name(msc_a_vsub(trans->msc_a)),
+			     VTY_NEWLINE);
+	}
+
+	if (dump_flags & MSC_VTY_DUMP_F_CONNECTION) {
+		MSC_VTY_DUMP(vty, offset, "RAN connection: %s%s",
+			     trans->msc_a ? msub_ran_conn_name(trans->msc_a->c.msub)
+					  : "(not established)",
+			     VTY_NEWLINE);
+	}
+
+	MSC_VTY_DUMP(vty, offset, "Unique (global) identifier: 0x%08x%s",
+		     trans->callref, VTY_NEWLINE);
+	MSC_VTY_DUMP(vty, offset, "GSM 04.07 identifier (%s): %u%s",
+		     (trans->transaction_id & 0x08) ? "MO" : "MT",
+		     trans->transaction_id,
+		     VTY_NEWLINE);
+
+	MSC_VTY_DUMP(vty, offset, "Type: %s%s",
+		     trans_type_name(trans->type),
+		     VTY_NEWLINE);
+
+	if ((proto_str = get_trans_proto_str(trans))) {
+		MSC_VTY_DUMP(vty, offset, "Protocol specific: %s%s",
+			     proto_str, VTY_NEWLINE);
+	}
+}
+
+static void vty_dump_one_conn(struct vty *vty, const struct msub *msub,
+			      int offset, uint8_t dump_flags)
+{
+	struct vlr_subscr *vsub = msub_vsub(msub);
+	struct msc_a *msc_a = msub_msc_a(msub);
+	char buf[128];
+
+	if (dump_flags & MSC_VTY_DUMP_F_SUBSCR) {
+		dump_flags = dump_flags &~ MSC_VTY_DUMP_F_SUBSCR;
+		MSC_VTY_DUMP(vty, offset, "Subscriber: %s%s",
+			     vlr_subscr_name(vsub),
+			     VTY_NEWLINE);
+	}
+
+	MSC_VTY_DUMP(vty, offset, "RAN connection: %s%s",
+		     msub_ran_conn_name(msub),
+		     VTY_NEWLINE);
+	MSC_VTY_DUMP(vty, offset, "RAN connection state: %s%s",
+		     osmo_fsm_inst_state_name(msc_a->c.fi),
+		     VTY_NEWLINE);
+
+	if (vsub) {
+		MSC_VTY_DUMP(vty, offset, "LAC / cell ID: %u / %u%s",
+			     vsub->cgi.lai.lac, vsub->cgi.cell_identity,
+			     VTY_NEWLINE);
+	}
+
+	MSC_VTY_DUMP(vty, offset, "Use count total: %d%s",
+		     osmo_use_count_total(&msc_a->use_count),
+		     VTY_NEWLINE);
+	MSC_VTY_DUMP(vty, offset, "Use count: %s%s",
+		     osmo_use_count_name_buf(buf, sizeof(buf), &msc_a->use_count),
+		     VTY_NEWLINE);
+
+	/* Transactions of this connection */
+	if (dump_flags & MSC_VTY_DUMP_F_TRANSACTION) {
+		struct gsm_trans *trans;
+		unsigned int i = 0;
+
+		/* Both subscriber and connection info is already printed */
+		dump_flags = dump_flags &~ MSC_VTY_DUMP_F_CONNECTION;
+		dump_flags = dump_flags &~ MSC_VTY_DUMP_F_SUBSCR;
+
+		llist_for_each_entry(trans, &gsmnet->trans_list, entry) {
+			if (trans->msc_a != msc_a)
+				continue;
+			MSC_VTY_DUMP(vty, offset, "Transaction #%02u: %s",
+				     i++, VTY_NEWLINE);
+			vty_dump_one_trans(vty, trans, offset + 2, dump_flags);
+		}
+	}
+}
+
+static void vty_dump_one_subscr(struct vty *vty, struct vlr_subscr *vsub,
+				int offset, uint8_t dump_flags)
+{
+	char buf[128];
+
+	if (strlen(vsub->name)) {
+		MSC_VTY_DUMP(vty, offset, "Name: '%s'%s",
+			     vsub->name, VTY_NEWLINE);
+	}
+	if (strlen(vsub->msisdn)) {
+		MSC_VTY_DUMP(vty, offset, "MSISDN: %s%s",
+			     vsub->msisdn, VTY_NEWLINE);
+	}
+
+	MSC_VTY_DUMP(vty, offset, "LAC / cell ID: %u / %u%s",
+		     vsub->cgi.lai.lac, vsub->cgi.cell_identity,
+		     VTY_NEWLINE);
+	MSC_VTY_DUMP(vty, offset, "RAN type: %s%s",
+		     osmo_rat_type_name(vsub->cs.attached_via_ran),
+		     VTY_NEWLINE);
+
+	MSC_VTY_DUMP(vty, offset, "IMSI: %s%s",
+		     vsub->imsi, VTY_NEWLINE);
+	if (vsub->tmsi != GSM_RESERVED_TMSI) {
+		MSC_VTY_DUMP(vty, offset, "TMSI: %08X%s",
+			     vsub->tmsi, VTY_NEWLINE);
+	}
+	if (vsub->tmsi_new != GSM_RESERVED_TMSI) {
+		MSC_VTY_DUMP(vty, offset, "New TMSI: %08X%s",
+			     vsub->tmsi_new, VTY_NEWLINE);
+	}
+	if (vsub->imei[0] != '\0') {
+		MSC_VTY_DUMP(vty, offset, "IMEI: %s%s",
+			     vsub->imei, VTY_NEWLINE);
+	}
+	if (vsub->imeisv[0] != '\0') {
+		MSC_VTY_DUMP(vty, offset, "IMEISV: %s%s",
+			     vsub->imeisv, VTY_NEWLINE);
+	}
+
+	MSC_VTY_DUMP(vty, offset, "Flags: %s", VTY_NEWLINE);
+	MSC_VTY_DUMP_FLAG(vty, offset, "IMSI detached",
+			  vsub->imsi_detached_flag);
+	MSC_VTY_DUMP_FLAG(vty, offset, "Conf. by radio contact",
+			  vsub->conf_by_radio_contact_ind);
+	MSC_VTY_DUMP_FLAG(vty, offset, "Subscr. data conf. by HLR",
+			  vsub->sub_dataconf_by_hlr_ind);
+	MSC_VTY_DUMP_FLAG(vty, offset, "Location conf. in HLR",
+			  vsub->loc_conf_in_hlr_ind);
+	MSC_VTY_DUMP_FLAG(vty, offset, "Subscriber dormant",
+			  vsub->dormant_ind);
+	MSC_VTY_DUMP_FLAG(vty, offset, "Received cancel location",
+			  vsub->cancel_loc_rx);
+	MSC_VTY_DUMP_FLAG(vty, offset, "MS not reachable",
+			  vsub->ms_not_reachable_flag);
+	MSC_VTY_DUMP_FLAG(vty, offset, "LA allowed",
+			  vsub->la_allowed);
+
+	if (vsub->last_tuple) {
+		struct vlr_auth_tuple *t = vsub->last_tuple;
+		MSC_VTY_DUMP(vty, offset, "A3A8 last tuple (used %d times): %s",
+			     t->use_count, VTY_NEWLINE);
+		MSC_VTY_DUMP(vty, offset + 2, "seq # : %d%s",
+			     t->key_seq, VTY_NEWLINE);
+		MSC_VTY_DUMP(vty, offset + 2, "RAND  : %s%s",
+			     osmo_hexdump(t->vec.rand, sizeof(t->vec.rand)),
+			     VTY_NEWLINE);
+		MSC_VTY_DUMP(vty, offset + 2, "SRES  : %s%s",
+			     osmo_hexdump(t->vec.sres, sizeof(t->vec.sres)),
+			     VTY_NEWLINE);
+		MSC_VTY_DUMP(vty, offset + 2, "Kc    : %s%s",
+			     osmo_hexdump(t->vec.kc, sizeof(t->vec.kc)),
+			     VTY_NEWLINE);
+	}
+
+	MSC_VTY_DUMP(vty, offset, "Paging: %s paging for %d requests%s",
+		     vsub->cs.is_paging ? "is" : "not",
+		     llist_count(&vsub->cs.requests),
+		     VTY_NEWLINE);
+
+	/* SGs related */
+	MSC_VTY_DUMP(vty, offset, "SGs-state: %s%s",
+		     osmo_fsm_inst_state_name(vsub->sgs_fsm),
+		     VTY_NEWLINE);
+	MSC_VTY_DUMP(vty, offset, "SGs-MME: %s%s",
+		     strlen(vsub->sgs.mme_name) ?
+		             vsub->sgs.mme_name : "(none)",
+		     VTY_NEWLINE);
+
+	MSC_VTY_DUMP(vty, offset, "Use count total: %d%s",
+		     osmo_use_count_total(&vsub->use_count),
+		     VTY_NEWLINE);
+	MSC_VTY_DUMP(vty, offset, "Use count: %s%s",
+		     osmo_use_count_name_buf(buf, sizeof(buf), &vsub->use_count),
+		     VTY_NEWLINE);
+
+	/* Connection(s) and/or transactions of this subscriber */
+	if (dump_flags & MSC_VTY_DUMP_F_CONNECTION) {
+		struct msub *msub = msub_for_vsub(vsub);
+		if (!msub)
+			return;
+
+		/* Subscriber info is already printed */
+		dump_flags = dump_flags &~ MSC_VTY_DUMP_F_SUBSCR;
+
+		MSC_VTY_DUMP(vty, offset, "Connection: %s", VTY_NEWLINE);
+		vty_dump_one_conn(vty, msub, offset + 2, dump_flags);
+	} else if (dump_flags & MSC_VTY_DUMP_F_TRANSACTION) {
+		struct gsm_trans *trans;
+		unsigned int i = 0;
+
+		/* Subscriber info is already printed */
+		dump_flags = dump_flags &~ MSC_VTY_DUMP_F_SUBSCR;
+		/* Do not print connection info, but mention it */
+		dump_flags |= MSC_VTY_DUMP_F_CONNECTION;
+
+		llist_for_each_entry(trans, &gsmnet->trans_list, entry) {
+			if (trans->vsub != vsub)
+				continue;
+			MSC_VTY_DUMP(vty, offset, "Transaction #%02u: %s",
+				     i++, VTY_NEWLINE);
+			vty_dump_one_trans(vty, trans, offset + 2, dump_flags);
+		}
+	}
 }
 
 DEFUN(show_msc_transaction, show_msc_transaction_cmd,
-	"show transaction", SHOW_STR "Transactions\n")
+	"show transaction",
+	SHOW_STR "Transactions\n")
 {
 	struct gsm_trans *trans;
+	uint8_t flags = 0x00;
+	unsigned int i = 0;
 
-	vty_trans_hdr(vty);
-	llist_for_each_entry(trans, &gsmnet->trans_list, entry)
-		vty_dump_one_trans(vty, trans);
+	flags |= MSC_VTY_DUMP_F_CONNECTION;
+	flags |= MSC_VTY_DUMP_F_SUBSCR;
+
+	llist_for_each_entry(trans, &gsmnet->trans_list, entry) {
+		vty_out(vty, "  Transaction #%02u: %s", i++, VTY_NEWLINE);
+		vty_dump_one_trans(vty, trans, 4, flags);
+	}
 
 	return CMD_SUCCESS;
 }
 
-static void subscr_dump_full_vty(struct vty *vty, struct vlr_subscr *vsub)
+DEFUN(show_msc_conn, show_msc_conn_cmd,
+	"show connection [trans]",
+	SHOW_STR "Subscriber Connections\n"
+	"Show child transactions of each connection\n")
 {
-	struct gsm_trans *trans;
-	char buf[128];
+	uint8_t flags = 0x00;
+	unsigned int i = 0;
+	struct msub *msub;
 
-	if (strlen(vsub->name))
-		vty_out(vty, "    Name: '%s'%s", vsub->name, VTY_NEWLINE);
-	if (strlen(vsub->msisdn))
-		vty_out(vty, "    Extension: %s%s", vsub->msisdn,
-			VTY_NEWLINE);
-	vty_out(vty, "    LAC: %d/0x%x%s",
-		vsub->cgi.lai.lac, vsub->cgi.lai.lac, VTY_NEWLINE);
-	vty_out(vty, "    RAN: %s%s",
-		osmo_rat_type_name(vsub->cs.attached_via_ran), VTY_NEWLINE);
-	vty_out(vty, "    IMSI: %s%s", vsub->imsi, VTY_NEWLINE);
-	if (vsub->tmsi != GSM_RESERVED_TMSI)
-		vty_out(vty, "    TMSI: %08X%s", vsub->tmsi,
-			VTY_NEWLINE);
-	if (vsub->tmsi_new != GSM_RESERVED_TMSI)
-		vty_out(vty, "    new TMSI: %08X%s", vsub->tmsi_new,
-			VTY_NEWLINE);
-	if (vsub->imei[0] != '\0')
-		vty_out(vty, "    IMEI: %s%s", vsub->imei, VTY_NEWLINE);
-	if (vsub->imeisv[0] != '\0')
-		vty_out(vty, "    IMEISV: %s%s", vsub->imeisv, VTY_NEWLINE);
+	if (argc > 0)
+		flags |= MSC_VTY_DUMP_F_TRANSACTION;
+	flags |= MSC_VTY_DUMP_F_SUBSCR;
 
-	vty_out(vty, "    Flags: %s", VTY_NEWLINE);
-	vty_out(vty, "     IMSI detached:             %s%s",
-		vsub->imsi_detached_flag ? "true" : "false", VTY_NEWLINE);
-	vty_out(vty, "     Conf. by radio contact:    %s%s",
-		vsub->conf_by_radio_contact_ind ? "true" : "false",
-		VTY_NEWLINE);
-	vty_out(vty, "     Subscr. data conf. by HLR: %s%s",
-		vsub->sub_dataconf_by_hlr_ind ? "true" : "false", VTY_NEWLINE);
-	vty_out(vty, "     Location conf. in HLR:     %s%s",
-		vsub->loc_conf_in_hlr_ind ? "true" : "false", VTY_NEWLINE);
-	vty_out(vty, "     Subscriber dormant:        %s%s",
-		vsub->dormant_ind ? "true" : "false", VTY_NEWLINE);
-	vty_out(vty, "     Received cancel locataion: %s%s",
-		vsub->cancel_loc_rx ? "true" : "false", VTY_NEWLINE);
-	vty_out(vty, "     MS not reachable:          %s%s",
-		vsub->ms_not_reachable_flag ? "true" : "false", VTY_NEWLINE);
-	vty_out(vty, "     LA allowed:                %s%s",
-		vsub->la_allowed ? "true" : "false", VTY_NEWLINE);
-
-	if (vsub->last_tuple) {
-		struct vlr_auth_tuple *t = vsub->last_tuple;
-		vty_out(vty, "    A3A8 last tuple (used %d times):%s",
-			t->use_count, VTY_NEWLINE);
-		vty_out(vty, "     seq # : %d%s",
-			t->key_seq, VTY_NEWLINE);
-		vty_out(vty, "     RAND  : %s%s",
-			osmo_hexdump(t->vec.rand, sizeof(t->vec.rand)),
-			VTY_NEWLINE);
-		vty_out(vty, "     SRES  : %s%s",
-			osmo_hexdump(t->vec.sres, sizeof(t->vec.sres)),
-			VTY_NEWLINE);
-		vty_out(vty, "     Kc    : %s%s",
-			osmo_hexdump(t->vec.kc, sizeof(t->vec.kc)),
-			VTY_NEWLINE);
+	llist_for_each_entry(msub, &msub_list, entry) {
+		vty_out(vty, "  Connection #%02u: %s", i++, VTY_NEWLINE);
+		vty_dump_one_conn(vty, msub, 4, flags);
 	}
 
-	vty_out(vty, "    Paging: %s paging for %d requests%s",
-		vsub->cs.is_paging ? "is" : "not",
-		llist_count(&vsub->cs.requests),
-		VTY_NEWLINE);
-
-	/* SGs related */
-	vty_out(vty, "    SGs-state: %s%s",
-		osmo_fsm_inst_state_name(vsub->sgs_fsm), VTY_NEWLINE);
-	if (strlen(vsub->sgs.mme_name))
-		vty_out(vty, "    SGs-MME: %s%s", vsub->sgs.mme_name, VTY_NEWLINE);
-	else
-		vty_out(vty, "    SGs-MME: (none)%s", VTY_NEWLINE);
-
-	vty_out(vty, "    Use: %s%s", osmo_use_count_name_buf(buf, sizeof(buf), &vsub->use_count), VTY_NEWLINE);
-
-	/* Connection */
-	if (vsub->msc_conn_ref) {
-		struct msub *msub = msub_for_vsub(vsub);
-		int idx = 0;
-		if (msub) {
-			vty_dump_one_conn(vty, msub, &idx);
-		}
-	}
-
-	/* Transactions */
-	vty_trans_hdr(vty);
-	llist_for_each_entry(trans, &gsmnet->trans_list, entry) {
-		if (trans->vsub != vsub)
-			continue;
-		vty_dump_one_trans(vty, trans);
-	}
+	return CMD_SUCCESS;
 }
 
+#define SUBSCR_FLAGS "[(conn|trans|conn+trans)]"
+#define SUBSCR_FLAGS_HELP \
+	"Show child connections\n" \
+	"Show child transactions\n" \
+	"Show child connections and transactions\n"
+
 /* Subscriber */
-DEFUN(show_subscr_cache,
-      show_subscr_cache_cmd,
-      "show subscriber cache",
+DEFUN(show_subscr_cache, show_subscr_cache_cmd,
+	"show subscriber cache " SUBSCR_FLAGS,
 	SHOW_STR "Show information about subscribers\n"
-	"Display contents of subscriber cache\n")
+	"Display contents of subscriber cache\n"
+	SUBSCR_FLAGS_HELP)
 {
 	struct vlr_subscr *vsub;
-	int count = 0;
+	unsigned int count = 0;
+	uint8_t flags = 0x00;
+	unsigned int i = 0;
+
+	if (argc && strcmp(argv[0], "conn") == 0)
+		flags |= MSC_VTY_DUMP_F_CONNECTION;
+	else if (argc && strcmp(argv[0], "trans") == 0)
+		flags |= MSC_VTY_DUMP_F_TRANSACTION;
+	else if (argc && strcmp(argv[0], "conn+trans") == 0)
+		flags |= MSC_VTY_DUMP_F_CONNECTION | MSC_VTY_DUMP_F_TRANSACTION;
 
 	llist_for_each_entry(vsub, &gsmnet->vlr->subscribers, list) {
 		if (++count > 100) {
@@ -872,8 +985,8 @@ DEFUN(show_subscr_cache,
 				" stopping here.%s", count-1, VTY_NEWLINE);
 			break;
 		}
-		vty_out(vty, "  Subscriber:%s", VTY_NEWLINE);
-		subscr_dump_full_vty(vty, vsub);
+		vty_out(vty, "  Subscriber #%02u: %s", i++, VTY_NEWLINE);
+		vty_dump_one_subscr(vty, vsub, 4, flags);
 	}
 
 	return CMD_SUCCESS;
@@ -982,14 +1095,14 @@ static struct vlr_subscr *get_vsub_by_argv(struct gsm_network *gsmnet,
 	"Legacy alias for 'imsi'\n"					\
 	"Identifier for the subscriber\n"
 
-DEFUN(show_subscr,
-      show_subscr_cmd,
-      "show subscriber " SUBSCR_TYPES " ID",
-	SHOW_STR SUBSCR_HELP)
+DEFUN(show_subscr, show_subscr_cmd,
+	"show subscriber " SUBSCR_TYPES " ID " SUBSCR_FLAGS,
+	SHOW_STR SUBSCR_HELP SUBSCR_FLAGS_HELP)
 {
-	struct vlr_subscr *vsub = get_vsub_by_argv(gsmnet, argv[0],
-						       argv[1]);
+	struct vlr_subscr *vsub;
+	uint8_t flags = 0x00;
 
+	vsub = get_vsub_by_argv(gsmnet, argv[0], argv[1]);
 	if (!vsub) {
 		vty_out(vty, "%% No subscriber found for %s %s%s",
 			argv[0], argv[1], VTY_NEWLINE);
@@ -1001,7 +1114,15 @@ DEFUN(show_subscr,
 	 * this, and since this is not multi-threaded, this vlr_subscr_put() cannot possibly reach a count of 0. */
 	vlr_subscr_put(vsub, VSUB_USE_VTY);
 
-	subscr_dump_full_vty(vty, vsub);
+	if (argc > 2 && strcmp(argv[2], "conn") == 0)
+		flags |= MSC_VTY_DUMP_F_CONNECTION;
+	else if (argc > 2 && strcmp(argv[2], "trans") == 0)
+		flags |= MSC_VTY_DUMP_F_TRANSACTION;
+	else if (argc > 2 && strcmp(argv[2], "conn+trans") == 0)
+		flags |= MSC_VTY_DUMP_F_CONNECTION | MSC_VTY_DUMP_F_TRANSACTION;
+
+	vty_out(vty, "  Subscriber: %s", VTY_NEWLINE);
+	vty_dump_one_subscr(vty, vsub, 4, flags);
 
 	return CMD_SUCCESS;
 }
