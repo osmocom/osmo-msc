@@ -960,7 +960,7 @@ static struct vlr_subscr *get_vsub_by_argv(struct gsm_network *gsmnet,
 	"Legacy alias for 'msisdn'\n"		\
 	"Identify subscriber by IMSI\n"					\
 	"Identify subscriber by TMSI\n"					\
-	"Identify subscriber by database ID\n"				\
+	"Legacy alias for 'imsi'\n"					\
 	"Identifier for the subscriber\n"
 
 DEFUN(show_subscr,
