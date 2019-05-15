@@ -742,8 +742,6 @@ DEFUN(show_msc_transaction, show_msc_transaction_cmd,
 static void subscr_dump_full_vty(struct vty *vty, struct vlr_subscr *vsub)
 {
 	struct gsm_trans *trans;
-	int reqs;
-	struct llist_head *entry;
 	char buf[128];
 
 	if (strlen(vsub->name))
@@ -803,11 +801,10 @@ static void subscr_dump_full_vty(struct vty *vty, struct vlr_subscr *vsub)
 			VTY_NEWLINE);
 	}
 
-	reqs = 0;
-	llist_for_each(entry, &vsub->cs.requests)
-		reqs += 1;
 	vty_out(vty, "    Paging: %s paging for %d requests%s",
-		vsub->cs.is_paging ? "is" : "not", reqs, VTY_NEWLINE);
+		vsub->cs.is_paging ? "is" : "not",
+		llist_count(&vsub->cs.requests),
+		VTY_NEWLINE);
 
 	/* SGs related */
 	vty_out(vty, "    SGs-state: %s%s",
