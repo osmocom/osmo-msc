@@ -821,7 +821,7 @@ static void subscr_dump_full_vty(struct vty *vty, struct vlr_subscr *vsub)
 
 	/* Connection */
 	if (vsub->msc_conn_ref) {
-		struct msub *msub = vsub->msc_conn_ref;
+		struct msub *msub = msub_for_vsub(vsub);
 		int idx = 0;
 		if (msub) {
 			vty_dump_one_conn(vty, msub, &idx);
