@@ -75,7 +75,7 @@ static int msc_t_assign_handover_number(struct msc_t *msc_t)
 	int rc;
 	uint64_t started_at;
 	uint64_t ho_nr;
-	char ho_nr_str[VLR_MSISDN_LENGTH+1];
+	char ho_nr_str[GSM23003_MSISDN_MAX_DIGITS+1];
 	struct gsm_network *net = msc_t_net(msc_t);
 	bool usable = false;
 
@@ -417,7 +417,7 @@ static int msc_t_patch_and_send_ho_request_ack(struct msc_t *msc_t, const struct
 	struct rtp_stream *rtp_cn = msc_t->inter_msc.call_leg? msc_t->inter_msc.call_leg->rtp[RTP_TO_CN] : NULL;
 	/* Since it's BCD, it needs rounded-up half the char* length of an MSISDN plus a type byte.
 	 * But no need to introduce obscure math to save a few stack bytes, just have more. */
-	uint8_t msisdn_enc_buf[VLR_MSISDN_LENGTH + 1];
+	uint8_t msisdn_enc_buf[GSM23003_MSISDN_MAX_DIGITS+1];
 	/* Copy an_apdu and an_apdu->e_info in "copy-on-write" method, because they are const and we
 	 * need to add the Handover Number to e_info. */
 	const struct ran_handover_request_ack *r = &ran_dec->handover_request_ack;

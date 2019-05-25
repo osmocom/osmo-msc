@@ -158,7 +158,7 @@ void show_fake_sms_db()
 static void test_next_sms()
 {
 	int i;
-	char last_msisdn[VLR_MSISDN_LENGTH+1] = "";
+	char last_msisdn[GSM23003_MSISDN_MAX_DIGITS+1] = "";
 
 	printf("Testing smsq_take_next_sms()\n");
 

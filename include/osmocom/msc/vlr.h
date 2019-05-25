@@ -113,7 +113,6 @@ struct sgsn_mm_ctx;
 struct vlr_instance;
 
 #define VLR_NAME_LENGTH 160
-#define VLR_MSISDN_LENGTH 15
 
 /* The VLR subscriber is the part of the GSM subscriber state in VLR (CS) or
  * SGSN (PS), particularly while interacting with the HLR via GSUP */
@@ -127,7 +126,7 @@ struct vlr_subscr {
 	/* Data from HLR */				/* 3GPP TS 23.008 */
 	/* Always use vlr_subscr_set_imsi() to write to imsi[] */
 	char imsi[GSM23003_IMSI_MAX_DIGITS+1];		/* 2.1.1.1 */
-	char msisdn[VLR_MSISDN_LENGTH+1];		/* 2.1.2 */
+	char msisdn[GSM23003_MSISDN_MAX_DIGITS+1];	/* 2.1.2 */
 	char name[VLR_NAME_LENGTH+1];			/* proprietary */
 	OSMO_LBUF_DECL(hlr, 16);			/* 2.4.7 */
 	uint32_t periodic_lu_timer;			/* 2.4.24 */
