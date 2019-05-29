@@ -793,11 +793,11 @@ static void vty_dump_one_subscr(struct vty *vty, struct vlr_subscr *vsub,
 {
 	char buf[128];
 
-	if (strlen(vsub->name)) {
+	if (vsub->name[0] != '\0') {
 		MSC_VTY_DUMP(vty, offset, "Name: '%s'%s",
 			     vsub->name, VTY_NEWLINE);
 	}
-	if (strlen(vsub->msisdn)) {
+	if (vsub->msisdn[0] != '\0') {
 		MSC_VTY_DUMP(vty, offset, "MSISDN: %s%s",
 			     vsub->msisdn, VTY_NEWLINE);
 	}
@@ -873,8 +873,7 @@ static void vty_dump_one_subscr(struct vty *vty, struct vlr_subscr *vsub,
 		     osmo_fsm_inst_state_name(vsub->sgs_fsm),
 		     VTY_NEWLINE);
 	MSC_VTY_DUMP(vty, offset, "SGs-MME: %s%s",
-		     strlen(vsub->sgs.mme_name) ?
-		             vsub->sgs.mme_name : "(none)",
+		     vsub->sgs.mme_name[0] != '\0' ? vsub->sgs.mme_name : "(none)",
 		     VTY_NEWLINE);
 
 	MSC_VTY_DUMP(vty, offset, "Use count total: %d%s",
