@@ -793,7 +793,8 @@ static struct gsm_sms *sms_from_result(struct gsm_network *net, dbi_result resul
 	user_data = dbi_result_get_binary(result, "user_data");
 	if (sms->user_data_len > sizeof(sms->user_data))
 		sms->user_data_len = (uint8_t) sizeof(sms->user_data);
-	memcpy(sms->user_data, user_data, sms->user_data_len);
+	if (user_data)
+		memcpy(sms->user_data, user_data, sms->user_data_len);
 
 	text = dbi_result_get_string(result, "text");
 	if (text)
