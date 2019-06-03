@@ -118,10 +118,12 @@ static void proc_arq_vlr_dispatch_result(struct osmo_fsm_inst *fi,
 	 * MS. Rather send the CM Service Accept message first and then signal
 	 * success. Since messages are handled synchronously, the success event
 	 * will be processed before we handle new incoming data from the MS. */
-
+	 LOGPFSML(fi, LOGL_ERROR, "pespin: proc_arq_vlr_dispatch_result: type %d\n", par->type);
 	if (par->type == VLR_PR_ARQ_T_CM_SERV_REQ) {
+		LOGPFSML(fi, LOGL_ERROR, "pespin: success=%d, implicitly_accepted=%d\n", success, par->implicitly_accepted_parq_by_ciphering_cmd);
 		if (success
 		    && !par->implicitly_accepted_parq_by_ciphering_cmd) {
+			LOGPFSML(fi, LOGL_ERROR, "pespin: calling tx_cm_serv_acc()\n");
 			rc = par->vlr->ops.tx_cm_serv_acc(par->msc_conn_ref,
 							  par->cm_service_type);
 			if (rc) {
