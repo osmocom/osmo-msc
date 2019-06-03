@@ -22,7 +22,7 @@
  */
 
 #include "msc_vlr_tests.h"
-#include "stubs.h"
+
 #include <osmocom/msc/vlr.h>
 
 #if 0

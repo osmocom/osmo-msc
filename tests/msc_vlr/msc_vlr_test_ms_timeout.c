@@ -22,7 +22,6 @@
  */
 
 #include "msc_vlr_tests.h"
-#include "stubs.h"
 
 static void test_ms_timeout_lu_auth_resp()
 {

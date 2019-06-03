@@ -22,7 +22,6 @@
  */
 
 #include "msc_vlr_tests.h"
-#include "stubs.h"
 
 static void _test_umts_authen(enum osmo_rat_type via_ran)
 {

@@ -18,6 +18,9 @@
  *
  */
 
+#include <osmocom/core/linuxlist.h>
+#include <osmocom/netif/stream.h>
+
 void osmo_stream_srv_link_set_data(struct osmo_stream_srv_link *link, void *data) {}
 struct osmo_fd *osmo_stream_srv_get_ofd(struct osmo_stream_srv *srv) { return NULL; }
 void osmo_stream_srv_destroy(struct osmo_stream_srv *conn) {}

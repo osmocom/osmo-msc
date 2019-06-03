@@ -24,7 +24,6 @@
 /* NOTE that further auth re-use tests exist in msc_vlr_test_hlr_reject.c */
 
 #include "msc_vlr_tests.h"
-#include "stubs.h"
 
 static void _test_auth_reuse(enum osmo_rat_type via_ran,
 			     int set_max_reuse_count,

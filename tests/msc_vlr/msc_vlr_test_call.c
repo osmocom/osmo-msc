@@ -22,7 +22,6 @@
  */
 
 #include "msc_vlr_tests.h"
-#include "stubs.h"
 
 #include <osmocom/msc/gsm_04_08.h>
 

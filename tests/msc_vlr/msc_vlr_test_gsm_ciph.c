@@ -22,7 +22,6 @@
  */
 
 #include "msc_vlr_tests.h"
-#include "stubs.h"
 
 static const struct osmo_gsm48_classmark classmark = {
 	// TODO

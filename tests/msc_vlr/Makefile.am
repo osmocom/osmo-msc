@@ -13,6 +13,7 @@ AM_CFLAGS = \
 	$(LIBOSMOABIS_CFLAGS) \
 	$(LIBOSMOSIGTRAN_CFLAGS) \
 	$(LIBOSMORANAP_CFLAGS) \
+	$(LIBOSMONETIF_CFLAGS) \
 	$(LIBASN1C_CFLAGS) \
 	$(LIBOSMOMGCPCLIENT_CFLAGS) \
 	$(LIBOSMOGSUPCLIENT_CFLAGS) \
@@ -46,7 +47,6 @@ LDADD = \
 
 noinst_HEADERS = \
 	msc_vlr_tests.h \
-	stubs.h \
 	$(NULL)
 
 EXTRA_DIST = \
@@ -94,61 +94,73 @@ noinst_PROGRAMS = \
 msc_vlr_test_no_authen_SOURCES = \
 	msc_vlr_test_no_authen.c \
 	msc_vlr_tests.c \
+	$(srcdir)/../stubs.c \
 	$(NULL)
 
 msc_vlr_test_gsm_authen_SOURCES = \
 	msc_vlr_test_gsm_authen.c \
 	msc_vlr_tests.c \
+	$(srcdir)/../stubs.c \
 	$(NULL)
 
 msc_vlr_test_gsm_ciph_SOURCES = \
 	msc_vlr_test_gsm_ciph.c \
 	msc_vlr_tests.c \
+	$(srcdir)/../stubs.c \
 	$(NULL)
 
 msc_vlr_test_umts_authen_SOURCES = \
 	msc_vlr_test_umts_authen.c \
 	msc_vlr_tests.c \
+	$(srcdir)/../stubs.c \
 	$(NULL)
 
 msc_vlr_test_authen_reuse_SOURCES = \
 	msc_vlr_test_authen_reuse.c \
 	msc_vlr_tests.c \
+	$(srcdir)/../stubs.c \
 	$(NULL)
 
 msc_vlr_test_hlr_reject_SOURCES = \
 	msc_vlr_test_hlr_reject.c \
 	msc_vlr_tests.c \
+	$(srcdir)/../stubs.c \
 	$(NULL)
 
 msc_vlr_test_hlr_timeout_SOURCES = \
 	msc_vlr_test_hlr_timeout.c \
 	msc_vlr_tests.c \
+	$(srcdir)/../stubs.c \
 	$(NULL)
 
 msc_vlr_test_ms_timeout_SOURCES = \
 	msc_vlr_test_ms_timeout.c \
 	msc_vlr_tests.c \
+	$(srcdir)/../stubs.c \
 	$(NULL)
 
 msc_vlr_test_reject_concurrency_SOURCES = \
 	msc_vlr_test_reject_concurrency.c \
 	msc_vlr_tests.c \
+	$(srcdir)/../stubs.c \
 	$(NULL)
 
 msc_vlr_test_call_SOURCES = \
 	msc_vlr_test_call.c \
 	msc_vlr_tests.c \
+	$(srcdir)/../stubs.c \
 	$(NULL)
 
 msc_vlr_test_rest_SOURCES = \
 	msc_vlr_test_rest.c \
 	msc_vlr_tests.c \
+	$(srcdir)/../stubs.c \
 	$(NULL)
 
 msc_vlr_test_ss_SOURCES = \
 	msc_vlr_test_ss.c \
 	msc_vlr_tests.c \
+	$(srcdir)/../stubs.c \
 	$(NULL)
 
 .PHONY: update_exp
