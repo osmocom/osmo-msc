@@ -357,16 +357,14 @@ static int verify_sms(const struct sms_test *test, const struct gsm_sms *sms)
 	rc = memcmp(sms->user_data, test->sms.user_data,
                     sizeof(sms->user_data));
 	if (rc) {
-		LOGPC(DDB, LOGL_ERROR, "TP-User-Data mismatch (diff=%d/%zu)\n",
-		      rc, sizeof(sms->user_data));
+		LOGPC(DDB, LOGL_ERROR, "TP-User-Data mismatch\n");
 		return -EINVAL;
 	}
 
 	/* Compare decoded text */
 	rc = strncmp(sms->text, test->sms.text, sizeof(sms->text));
 	if (rc) {
-		LOGPC(DDB, LOGL_ERROR, "TP-User-Data (text) mismatch (diff=%d/%zu)\n",
-		      rc, sizeof(sms->text));
+		LOGPC(DDB, LOGL_ERROR, "TP-User-Data (text) mismatch\n");
 		return -EINVAL;
 	}
 

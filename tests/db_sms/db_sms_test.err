@@ -18,15 +18,15 @@ DDB NOTICE verify_sms('Regular MO SMS'): match
 DDB NOTICE test_db_sms_get('Regular MT SMS'): success, as expected
 DDB NOTICE verify_sms('Regular MT SMS'): match
 DDB NOTICE test_db_sms_get('Complete TP-UD (160 septets, 7-bit encoding)'): success, as expected
-DDB NOTICE verify_sms('Complete TP-UD (160 septets, 7-bit encoding)'): TP-User-Data mismatch (diff=-65/256)
+DDB NOTICE verify_sms('Complete TP-UD (160 septets, 7-bit encoding)'): TP-User-Data mismatch
 DDB NOTICE test_db_sms_get('Complete TP-UD (140 octets, 8-bit encoding)'): success, as expected
-DDB NOTICE verify_sms('Complete TP-UD (140 octets, 8-bit encoding)'): TP-User-Data mismatch (diff=-66/256)
+DDB NOTICE verify_sms('Complete TP-UD (140 octets, 8-bit encoding)'): TP-User-Data mismatch
 DDB NOTICE test_db_sms_get('TP-UD buffer overflow (UDH-Length > UD-Length)'): success, as expected
 DDB NOTICE verify_sms('TP-UD buffer overflow (UDH-Length > UD-Length)'): match
 DDB NOTICE test_db_sms_get('Truncated TP-UD (200 septets, 7-bit encoding)'): success, as expected
-DDB NOTICE verify_sms('Truncated TP-UD (200 septets, 7-bit encoding)'): TP-User-Data mismatch (diff=-65/256)
+DDB NOTICE verify_sms('Truncated TP-UD (200 septets, 7-bit encoding)'): TP-User-Data mismatch
 DDB NOTICE test_db_sms_get('Truncated TP-UD (255 octets, 8-bit encoding)'): success, as expected
-DDB NOTICE verify_sms('Truncated TP-UD (255 octets, 8-bit encoding)'): TP-User-Data mismatch (diff=-16896/256)
+DDB NOTICE verify_sms('Truncated TP-UD (255 octets, 8-bit encoding)'): TP-User-Data mismatch
 DDB NOTICE test_db_sms_get('Same MSISDN #1'): success, as expected
 DDB NOTICE verify_sms('Same MSISDN #1'): match
 DDB NOTICE test_db_sms_get('Same MSISDN #2'): success, as expected
@@ -43,7 +43,7 @@ DDB NOTICE verify_sms('Regular MT SMS'): match
 DDB DEBUG Marking #1 as delivered: rc=0
 DDB DEBUG Marking #2 as delivered: rc=0
 DDB NOTICE db_sms_get_next_unsent(starting from #1): found
-DDB NOTICE verify_sms('Complete TP-UD (160 septets, 7-bit encoding)'): TP-User-Data mismatch (diff=-65/256)
+DDB NOTICE verify_sms('Complete TP-UD (160 septets, 7-bit encoding)'): TP-User-Data mismatch
 DDB INFO Testing db_sms_delete_sent_message_by_id()...
 DDB NOTICE db_sms_delete_sent_message_by_id(#1, sent): rc=0
 DDB NOTICE db_sms_delete_sent_message_by_id(#3, not sent): rc=0
@@ -57,15 +57,15 @@ DDB NOTICE test_db_sms_get('Regular MO SMS'): failure, as expected
 DDB NOTICE test_db_sms_get('Regular MT SMS'): success, as expected
 DDB NOTICE verify_sms('Regular MT SMS'): match
 DDB NOTICE test_db_sms_get('Complete TP-UD (160 septets, 7-bit encoding)'): success, as expected
-DDB NOTICE verify_sms('Complete TP-UD (160 septets, 7-bit encoding)'): TP-User-Data mismatch (diff=-65/256)
+DDB NOTICE verify_sms('Complete TP-UD (160 septets, 7-bit encoding)'): TP-User-Data mismatch
 DDB NOTICE test_db_sms_get('Complete TP-UD (140 octets, 8-bit encoding)'): success, as expected
-DDB NOTICE verify_sms('Complete TP-UD (140 octets, 8-bit encoding)'): TP-User-Data mismatch (diff=-66/256)
+DDB NOTICE verify_sms('Complete TP-UD (140 octets, 8-bit encoding)'): TP-User-Data mismatch
 DDB NOTICE test_db_sms_get('TP-UD buffer overflow (UDH-Length > UD-Length)'): success, as expected
 DDB NOTICE verify_sms('TP-UD buffer overflow (UDH-Length > UD-Length)'): match
 DDB NOTICE test_db_sms_get('Truncated TP-UD (200 septets, 7-bit encoding)'): success, as expected
-DDB NOTICE verify_sms('Truncated TP-UD (200 septets, 7-bit encoding)'): TP-User-Data mismatch (diff=-65/256)
+DDB NOTICE verify_sms('Truncated TP-UD (200 septets, 7-bit encoding)'): TP-User-Data mismatch
 DDB NOTICE test_db_sms_get('Truncated TP-UD (255 octets, 8-bit encoding)'): success, as expected
-DDB NOTICE verify_sms('Truncated TP-UD (255 octets, 8-bit encoding)'): TP-User-Data mismatch (diff=-16896/256)
+DDB NOTICE verify_sms('Truncated TP-UD (255 octets, 8-bit encoding)'): TP-User-Data mismatch
 DDB NOTICE test_db_sms_get('Same MSISDN #1'): failure, as expected
 DDB NOTICE test_db_sms_get('Same MSISDN #2'): failure, as expected
 DDB NOTICE test_db_sms_get('Expired SMS'): unexpected result
