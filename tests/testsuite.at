@@ -20,7 +20,8 @@ AT_SETUP([db_sms_test])
 AT_KEYWORDS([db_sms_test])
 cat $abs_srcdir/db_sms/db_sms_test.ok > expout
 cat $abs_srcdir/db_sms/db_sms_test.err > experr
-AT_CHECK([$abs_top_builddir/tests/db_sms/db_sms_test], [], [expout], [experr])
+# swap the output from stderr and stdout so we can drop libdbi prints to stderr when trying to load wrong drivers
+AT_CHECK([$abs_top_builddir/tests/db_sms/db_sms_test 3>&1 1>&2 2>&3 | grep -v "Failed to load driver" | grep -v "cannot open shared object file"], [], [expout], [experr])
 AT_CLEANUP
 
 AT_SETUP([msc_vlr_test_no_authen])

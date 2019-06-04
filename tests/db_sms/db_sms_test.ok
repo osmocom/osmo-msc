@@ -1,0 +1,75 @@
+DDB DEBUG Init a new database
+DDB DEBUG Init complete
+DDB INFO Testing db_sms_store()...
+DDB NOTICE test_db_sms_store('Regular MO SMS'): success, as expected
+DDB NOTICE test_db_sms_store('Regular MT SMS'): success, as expected
+DDB NOTICE test_db_sms_store('Complete TP-UD (160 septets, 7-bit encoding)'): success, as expected
+DDB NOTICE test_db_sms_store('Complete TP-UD (140 octets, 8-bit encoding)'): success, as expected
+DDB NOTICE test_db_sms_store('TP-UD buffer overflow (UDH-Length > UD-Length)'): success, as expected
+DDB NOTICE test_db_sms_store('Truncated TP-UD (200 septets, 7-bit encoding)'): success, as expected
+DDB NOTICE test_db_sms_store('Truncated TP-UD (255 octets, 8-bit encoding)'): success, as expected
+DDB NOTICE test_db_sms_store('Same MSISDN #1'): success, as expected
+DDB NOTICE test_db_sms_store('Same MSISDN #2'): success, as expected
+DDB NOTICE test_db_sms_store('Expired SMS'): success, as expected
+DDB NOTICE test_db_sms_store('Empty TP-UD'): success, as expected
+DDB INFO Testing db_sms_get()...
+DDB NOTICE test_db_sms_get('Regular MO SMS'): success, as expected
+DDB NOTICE verify_sms('Regular MO SMS'): match
+DDB NOTICE test_db_sms_get('Regular MT SMS'): success, as expected
+DDB NOTICE verify_sms('Regular MT SMS'): match
+DDB NOTICE test_db_sms_get('Complete TP-UD (160 septets, 7-bit encoding)'): success, as expected
+DDB NOTICE verify_sms('Complete TP-UD (160 septets, 7-bit encoding)'): TP-User-Data mismatch
+DDB NOTICE test_db_sms_get('Complete TP-UD (140 octets, 8-bit encoding)'): success, as expected
+DDB NOTICE verify_sms('Complete TP-UD (140 octets, 8-bit encoding)'): TP-User-Data mismatch
+DDB NOTICE test_db_sms_get('TP-UD buffer overflow (UDH-Length > UD-Length)'): success, as expected
+DDB NOTICE verify_sms('TP-UD buffer overflow (UDH-Length > UD-Length)'): match
+DDB NOTICE test_db_sms_get('Truncated TP-UD (200 septets, 7-bit encoding)'): success, as expected
+DDB NOTICE verify_sms('Truncated TP-UD (200 septets, 7-bit encoding)'): TP-User-Data mismatch
+DDB NOTICE test_db_sms_get('Truncated TP-UD (255 octets, 8-bit encoding)'): success, as expected
+DDB NOTICE verify_sms('Truncated TP-UD (255 octets, 8-bit encoding)'): TP-User-Data mismatch
+DDB NOTICE test_db_sms_get('Same MSISDN #1'): success, as expected
+DDB NOTICE verify_sms('Same MSISDN #1'): match
+DDB NOTICE test_db_sms_get('Same MSISDN #2'): success, as expected
+DDB NOTICE verify_sms('Same MSISDN #2'): match
+DDB NOTICE test_db_sms_get('Expired SMS'): success, as expected
+DDB NOTICE verify_sms('Expired SMS'): match
+DDB NOTICE test_db_sms_get('Empty TP-UD'): success, as expected
+DDB NOTICE verify_sms('Empty TP-UD'): match
+DDB INFO Testing db_sms_get_next_unsent() and db_sms_mark_delivered()...
+DDB NOTICE db_sms_get_next_unsent(#1): found
+DDB NOTICE verify_sms('Regular MO SMS'): match
+DDB NOTICE db_sms_get_next_unsent(#2): found
+DDB NOTICE verify_sms('Regular MT SMS'): match
+DDB DEBUG Marking #1 as delivered: rc=0
+DDB DEBUG Marking #2 as delivered: rc=0
+DDB NOTICE db_sms_get_next_unsent(starting from #1): found
+DDB NOTICE verify_sms('Complete TP-UD (160 septets, 7-bit encoding)'): TP-User-Data mismatch
+DDB INFO Testing db_sms_delete_sent_message_by_id()...
+DDB NOTICE db_sms_delete_sent_message_by_id(#1, sent): rc=0
+DDB NOTICE db_sms_delete_sent_message_by_id(#3, not sent): rc=0
+DDB INFO Testing db_sms_delete_by_msisdn()...
+DDB NOTICE db_sms_delete_by_msisdn('72631'): rc=0
+DDB INFO Testing db_sms_delete_oldest_expired_message()...
+DDB NOTICE db_sms_delete_oldest_expired_message()
+DDB INFO Expectations updated, retrieving all messages again
+DDB INFO Testing db_sms_get()...
+DDB NOTICE test_db_sms_get('Regular MO SMS'): failure, as expected
+DDB NOTICE test_db_sms_get('Regular MT SMS'): success, as expected
+DDB NOTICE verify_sms('Regular MT SMS'): match
+DDB NOTICE test_db_sms_get('Complete TP-UD (160 septets, 7-bit encoding)'): success, as expected
+DDB NOTICE verify_sms('Complete TP-UD (160 septets, 7-bit encoding)'): TP-User-Data mismatch
+DDB NOTICE test_db_sms_get('Complete TP-UD (140 octets, 8-bit encoding)'): success, as expected
+DDB NOTICE verify_sms('Complete TP-UD (140 octets, 8-bit encoding)'): TP-User-Data mismatch
+DDB NOTICE test_db_sms_get('TP-UD buffer overflow (UDH-Length > UD-Length)'): success, as expected
+DDB NOTICE verify_sms('TP-UD buffer overflow (UDH-Length > UD-Length)'): match
+DDB NOTICE test_db_sms_get('Truncated TP-UD (200 septets, 7-bit encoding)'): success, as expected
+DDB NOTICE verify_sms('Truncated TP-UD (200 septets, 7-bit encoding)'): TP-User-Data mismatch
+DDB NOTICE test_db_sms_get('Truncated TP-UD (255 octets, 8-bit encoding)'): success, as expected
+DDB NOTICE verify_sms('Truncated TP-UD (255 octets, 8-bit encoding)'): TP-User-Data mismatch
+DDB NOTICE test_db_sms_get('Same MSISDN #1'): failure, as expected
+DDB NOTICE test_db_sms_get('Same MSISDN #2'): failure, as expected
+DDB NOTICE test_db_sms_get('Expired SMS'): unexpected result
+DDB NOTICE verify_sms('Expired SMS'): match
+DDB NOTICE test_db_sms_get('Empty TP-UD'): success, as expected
+DDB NOTICE verify_sms('Empty TP-UD'): match
+full talloc report on 'null_context' (total      0 bytes in   1 blocks)
