@@ -153,6 +153,7 @@ void gsup_client_mux_tx_error_reply(struct gsup_client_mux *gcm, const struct os
 	gsup_reply = (struct osmo_gsup_message){
 		.cause = cause,
 		.message_type = OSMO_GSUP_TO_MSGT_ERROR(gsup_orig->message_type),
+		.message_class = gsup_orig->message_class,
 	};
 
 	OSMO_STRLCPY_ARRAY(gsup_reply.imsi, gsup_orig->imsi);
