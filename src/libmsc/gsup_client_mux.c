@@ -157,6 +157,12 @@ void gsup_client_mux_tx_error_reply(struct gsup_client_mux *gcm, const struct os
 
 	OSMO_STRLCPY_ARRAY(gsup_reply.imsi, gsup_orig->imsi);
 
+	/* For SS/USSD, it's important to keep both session state and ID IEs */
+	if (gsup_orig->session_state != OSMO_GSUP_SESSION_STATE_NONE) {
+		gsup_reply.session_state = OSMO_GSUP_SESSION_STATE_END;
+		gsup_reply.session_id = gsup_orig->session_id;
+	}
+
 	if (osmo_gsup_client_enc_send(gcm->gsup_client, &gsup_reply))
 		LOGP(DLGSUP, LOGL_ERROR, "Failed to send Error reply (imsi=%s)\n",
 		     osmo_quote_str(gsup_orig->imsi, -1));
