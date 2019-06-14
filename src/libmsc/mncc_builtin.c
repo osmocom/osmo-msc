@@ -263,10 +263,6 @@ int int_mncc_recv(struct gsm_network *net, struct msgb *msg)
 	struct gsm_call *call = NULL, *callt;
 	int rc = 0;
 
-	/* Special messages */
-	switch(msg_type) {
-	}
-
 	/* find callref */
 	callref = data->callref;
 	llist_for_each_entry(callt, &call_list, entry) {
