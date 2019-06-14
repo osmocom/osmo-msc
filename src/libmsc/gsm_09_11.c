@@ -443,6 +443,8 @@ int gsm0911_gsup_rx(struct gsup_client_mux *gcm, void *data, const struct osmo_g
 	struct vlr_subscr *vsub = vlr_subscr_find_by_imsi(vlr, gsup_msg->imsi, __func__);
 
 	if (!vsub) {
+		LOGP(DSS, LOGL_ERROR, "Rx %s for unknown subscriber, rejecting\n",
+		     osmo_gsup_message_type_name(gsup_msg->message_type));
 		gsup_client_mux_tx_error_reply(gcm, gsup_msg, GMM_CAUSE_IMSI_UNKNOWN);
 		return -GMM_CAUSE_IMSI_UNKNOWN;
 	}
