@@ -150,12 +150,12 @@ void gsup_client_mux_tx_error_reply(struct gsup_client_mux *gcm, const struct os
 	if (!OSMO_GSUP_IS_MSGT_REQUEST(gsup_orig->message_type))
 		return;
 
-	OSMO_STRLCPY_ARRAY(gsup_reply.imsi, gsup_orig->imsi);
-
 	gsup_reply = (struct osmo_gsup_message){
 		.cause = cause,
 		.message_type = OSMO_GSUP_TO_MSGT_ERROR(gsup_orig->message_type),
 	};
+
+	OSMO_STRLCPY_ARRAY(gsup_reply.imsi, gsup_orig->imsi);
 
 	if (osmo_gsup_client_enc_send(gcm->gsup_client, &gsup_reply))
 		LOGP(DLGSUP, LOGL_ERROR, "Failed to send Error reply (imsi=%s)\n",
