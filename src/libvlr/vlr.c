@@ -336,11 +336,11 @@ int vlr_subscr_alloc_tmsi(struct vlr_subscr *vsub)
 		/* Section 2.4 of 23.003: MSC has two MSB 00/01/10, SGSN 11 */
 		if (vlr->cfg.is_ps) {
 			/* SGSN */
-			tmsi |= 0xC000000;
+			tmsi |= GSM23003_TMSI_SGSN_MASK;
 		} else {
 			/* MSC */
-			if ((tmsi & 0xC0000000) == 0xC0000000)
-				tmsi &= ~0xC0000000;
+			if ((tmsi & GSM23003_TMSI_SGSN_MASK) == GSM23003_TMSI_SGSN_MASK)
+				tmsi &= ~GSM23003_TMSI_SGSN_MASK;
 		}
 
 		/* If this TMSI is already in use, try another one. */
