@@ -154,6 +154,9 @@ void gsup_client_mux_tx_error_reply(struct gsup_client_mux *gcm, const struct os
 		.cause = cause,
 		.message_type = OSMO_GSUP_TO_MSGT_ERROR(gsup_orig->message_type),
 		.message_class = gsup_orig->message_class,
+
+		/* RP-Message-Reference is mandatory for SM Service */
+		.sm_rp_mr = gsup_orig->sm_rp_mr,
 	};
 
 	OSMO_STRLCPY_ARRAY(gsup_reply.imsi, gsup_orig->imsi);
