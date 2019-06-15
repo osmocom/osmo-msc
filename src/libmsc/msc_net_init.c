@@ -117,8 +117,8 @@ int msc_gsup_client_start(struct gsm_network *net)
 		.rx_cb = {
 			/* vlr.c sets up its own cb and data */
 			/* MSC-A and MSC-B set up their own cb and data */
-			[OSMO_GSUP_MESSAGE_CLASS_SMS] = { .func = gsm411_gsup_rx, .data = net->vlr },
-			[OSMO_GSUP_MESSAGE_CLASS_USSD] = { .func = gsm0911_gsup_rx, .data = net->vlr },
+			[OSMO_GSUP_MESSAGE_CLASS_SMS] = { .func = gsm411_gsup_rx, .data = net },
+			[OSMO_GSUP_MESSAGE_CLASS_USSD] = { .func = gsm0911_gsup_rx, .data = net },
 		},
 	};
 

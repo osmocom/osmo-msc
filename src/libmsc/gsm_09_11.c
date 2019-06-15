@@ -402,14 +402,13 @@ void _gsm911_nc_ss_trans_free(struct gsm_trans *trans)
 
 int gsm0911_gsup_rx(struct gsup_client_mux *gcm, void *data, const struct osmo_gsup_message *gsup_msg)
 {
-	struct vlr_instance *vlr = data;
-	struct gsm_network *net;
+	struct gsm_network *net = (struct gsm_network *) data;
 	struct gsm_trans *trans;
 	struct gsm48_hdr *gh;
 	struct msgb *ss_msg;
 	bool trans_end;
 	struct msc_a *msc_a;
-	struct vlr_subscr *vsub = vlr_subscr_find_by_imsi(vlr, gsup_msg->imsi, __func__);
+	struct vlr_subscr *vsub = vlr_subscr_find_by_imsi(net->vlr, gsup_msg->imsi, __func__);
 
 	if (!vsub) {
 		LOGP(DSS, LOGL_ERROR, "Rx %s for unknown subscriber, rejecting\n",
@@ -420,14 +419,6 @@ int gsm0911_gsup_rx(struct gsup_client_mux *gcm, void *data, const struct osmo_g
 
 	/* Associate logging messages with this subscriber */
 	log_set_context(LOG_CTX_VLR_SUBSCR, vsub);
-
-	/* Obtain pointer to vlr_instance */
-	vlr = vsub->vlr;
-	OSMO_ASSERT(vlr);
-
-	/* Obtain pointer to gsm_network */
-	net = (struct gsm_network *) vlr->user_ctx;
-	OSMO_ASSERT(net);
 
 	/* Handle errors */
 	if (OSMO_GSUP_IS_MSGT_ERROR(gsup_msg->message_type)) {

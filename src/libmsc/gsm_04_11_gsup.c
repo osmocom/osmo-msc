@@ -117,18 +117,12 @@ int gsm411_gsup_mo_ready_for_sm_req(struct gsm_trans *trans, uint8_t sm_rp_mr)
 }
 
 /* Triggers either RP-ACK or RP-ERROR on response from SMSC */
-static int gsm411_gsup_mo_handler(struct vlr_subscr *vsub,
-	const struct osmo_gsup_message *gsup_msg)
+static int gsm411_gsup_mo_handler(struct gsm_network *net, struct vlr_subscr *vsub,
+				  const struct osmo_gsup_message *gsup_msg)
 {
-	struct vlr_instance *vlr;
-	struct gsm_network *net;
 	struct gsm_trans *trans;
 	const char *msg_name;
 	bool msg_is_err;
-
-	/* Obtain required pointers */
-	vlr = vsub->vlr;
-	net = (struct gsm_network *) vlr->user_ctx;
 
 	/* Associate logging messages with this subscriber */
 	log_set_context(LOG_CTX_VLR_SUBSCR, vsub);
@@ -230,15 +224,11 @@ int gsm411_gsup_mt_fwd_sm_err(struct gsm_trans *trans,
 }
 
 /* Handles MT SMS (and triggers Paging Request if required) */
-static int gsm411_gsup_mt_handler(struct vlr_subscr *vsub,
-	const struct osmo_gsup_message *gsup_msg)
+static int gsm411_gsup_mt_handler(struct gsm_network *net, struct vlr_subscr *vsub,
+				  const struct osmo_gsup_message *gsup_msg)
 {
-	struct gsm_network *net;
 	bool sm_rp_mmts_ind;
 	int rc;
-
-	/* Obtain required pointers */
-	net = (struct gsm_network *) vsub->vlr->user_ctx;
 
 	/* Associate logging messages with this subscriber */
 	log_set_context(LOG_CTX_VLR_SUBSCR, vsub);
@@ -296,8 +286,8 @@ msg_error:
 
 int gsm411_gsup_rx(struct gsup_client_mux *gcm, void *data, const struct osmo_gsup_message *gsup_msg)
 {
-	struct vlr_instance *vlr = data;
-	struct vlr_subscr *vsub = vlr_subscr_find_by_imsi(vlr, gsup_msg->imsi, __func__);
+	struct gsm_network *net = (struct gsm_network *) data;
+	struct vlr_subscr *vsub = vlr_subscr_find_by_imsi(net->vlr, gsup_msg->imsi, __func__);
 
 	if (!vsub) {
 		LOGP(DLSMS, LOGL_ERROR, "Rx %s for unknown subscriber, rejecting\n",
@@ -313,12 +303,12 @@ int gsm411_gsup_rx(struct gsup_client_mux *gcm, void *data, const struct osmo_gs
 	case OSMO_GSUP_MSGT_READY_FOR_SM_ERROR:
 	case OSMO_GSUP_MSGT_READY_FOR_SM_RESULT:
 		DEBUGP(DMSC, "Routed to GSM 04.11 MO handler\n");
-		return gsm411_gsup_mo_handler(vsub, gsup_msg);
+		return gsm411_gsup_mo_handler(net, vsub, gsup_msg);
 
 	/* GSM 04.11 code implementing MT SMS */
 	case OSMO_GSUP_MSGT_MT_FORWARD_SM_REQUEST:
 		DEBUGP(DMSC, "Routed to GSM 04.11 MT handler\n");
-		return gsm411_gsup_mt_handler(vsub, gsup_msg);
+		return gsm411_gsup_mt_handler(net, vsub, gsup_msg);
 
 	default:
 		LOGP(DMM, LOGL_ERROR, "No handler found for %s, dropping message...\n",
