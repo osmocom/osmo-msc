@@ -84,7 +84,7 @@ struct paging_request *paging_request_start(struct vlr_subscr *vsub, enum paging
 	struct paging_request *pr;
 	struct gsm_network *net = vsub->vlr->user_ctx;
 
-	pr = talloc_zero(vsub, struct paging_request);
+	pr = talloc(vsub, struct paging_request);
 	OSMO_ASSERT(pr);
 	*pr = (struct paging_request){
 		.label = label,
