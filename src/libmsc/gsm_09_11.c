@@ -317,52 +317,42 @@ static struct gsm_trans *establish_nc_ss_trans(struct gsm_network *net,
 	struct gsm_trans *trans, *transt;
 	int tid;
 
-	/* Allocate transaction first, for log context */
-	trans = trans_alloc(net, vsub, TRANS_USSD,
-		TRANS_ID_UNASSIGNED, gsup_msg->session_id);
-
-	if (!trans) {
-		LOG_TRANS(trans, LOGL_ERROR, " -> No memory for trans\n");
-		return NULL;
-	}
-
 	if (gsup_msg->session_state != OSMO_GSUP_SESSION_STATE_BEGIN) {
-		LOG_TRANS(trans, LOGL_ERROR, "Received non-BEGIN message "
-			"for non-existing transaction\n");
-		trans_free(trans);
+		LOGP(DSS, LOGL_ERROR, "Received non-BEGIN message for non-existing transaction\n");
 		return NULL;
 	}
+
+	LOGP(DSS, LOGL_DEBUG, "(%s) Establishing a network-originated session (id=0x%x)\n",
+			      vlr_subscr_name(vsub), gsup_msg->session_id);
 
 	if (!gsup_msg->ss_info || gsup_msg->ss_info_len < 2) {
-		LOG_TRANS(trans, LOGL_ERROR, "Missing mandatory Facility IE\n");
-		trans_free(trans);
+		LOGP(DSS, LOGL_ERROR, "Missing mandatory Facility IE\n");
 		return NULL;
 	}
 
 	/* If subscriber is not "attached" */
 	if (!vsub->cgi.lai.lac) {
-		LOG_TRANS(trans, LOGL_ERROR, "Network-originated session "
+		LOGP(DSS, LOGL_ERROR, "Network-originated session "
 			"rejected - subscriber is not attached\n");
-		trans_free(trans);
 		return NULL;
 	}
 
-	LOG_TRANS(trans, LOGL_DEBUG, "Establishing network-originated session\n");
+	/* Obtain an unused transaction ID */
+	tid = trans_assign_trans_id(net, vsub, TRANS_USSD);
+	if (tid < 0) {
+		LOGP(DSS, LOGL_ERROR, "No free transaction ID\n");
+		return NULL;
+	}
+
+	/* Allocate a new NCSS transaction */
+	trans = trans_alloc(net, vsub, TRANS_USSD, tid, gsup_msg->session_id);
+	if (!trans) {
+		LOGP(DSS, LOGL_ERROR, " -> No memory for trans\n");
+		return NULL;
+	}
 
 	/* Count active NC SS/USSD sessions */
 	osmo_counter_inc(net->active_nc_ss);
-
-	/* Assign transaction ID */
-	tid = trans_assign_trans_id(trans->net, trans->vsub, TRANS_USSD);
-	if (tid < 0) {
-		LOG_TRANS(trans, LOGL_ERROR, "No free transaction ID\n");
-		/* TODO: inform HLR about this */
-		/* TODO: release connection with subscriber */
-		trans->callref = 0;
-		trans_free(trans);
-		return NULL;
-	}
-	trans->transaction_id = tid;
 
 	/* Init inactivity timer */
 	osmo_timer_setup(&trans->ss.timer_guard,

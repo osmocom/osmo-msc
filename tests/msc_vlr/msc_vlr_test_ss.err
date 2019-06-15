@@ -367,9 +367,9 @@ DREF VLR subscr IMSI-901700000004620:MSISDN-46071 + _test_ss_ussd_no: now used b
   llist_count(&vsub->cs.requests) == 0
 <-- GSUP rx OSMO_GSUP_MSGT_PROC_SS_REQUEST: 20010809710000004026f03004200001013101013515a11302010102013b300b04010f0406aa510c061b010a0103
 DREF VLR subscr IMSI-901700000004620:MSISDN-46071 + gsm0911_gsup_rx: now used by 3 (attached,_test_ss_ussd_no,gsm0911_gsup_rx)
+DSS (IMSI-901700000004620:MSISDN-46071) Establishing a network-originated session (id=0x20000101)
 DREF VLR subscr IMSI-901700000004620:MSISDN-46071 + NCSS: now used by 4 (attached,_test_ss_ussd_no,gsm0911_gsup_rx,NCSS)
-DSS trans(NCSS IMSI-901700000004620:MSISDN-46071 callref-0x20000101 tid-255) New transaction
-DSS trans(NCSS IMSI-901700000004620:MSISDN-46071 callref-0x20000101 tid-255) Establishing network-originated session
+DSS trans(NCSS IMSI-901700000004620:MSISDN-46071 callref-0x20000101 tid-0) New transaction
 DSS trans(NCSS IMSI-901700000004620:MSISDN-46071 callref-0x20000101 tid-0) Triggering Paging Request
 DPAG Paging: IMSI-901700000004620:MSISDN-46071 for GSM 09.11 SS/USSD: Starting paging
   paging request (SIGNALLING_HIGH_PRIO) to IMSI-901700000004620:MSISDN-46071 on GERAN-A
