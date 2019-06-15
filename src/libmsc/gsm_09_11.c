@@ -475,7 +475,7 @@ int gsm0911_gsup_rx(struct gsup_client_mux *gcm, void *data, const struct osmo_g
 		/* Attempt to establish a new transaction */
 		trans = establish_nc_ss_trans(net, vsub, gsup_msg);
 		if (!trans) {
-			/* FIXME: send ERROR back to the HLR */
+			gsup_client_mux_tx_error_reply(gcm, gsup_msg, GMM_CAUSE_NET_FAIL);
 			return -EINVAL;
 		}
 
@@ -520,7 +520,7 @@ int gsm0911_gsup_rx(struct gsup_client_mux *gcm, void *data, const struct osmo_g
 	default:
 		LOG_TRANS(trans, LOGL_ERROR, "Unexpected session state %d\n",
 			gsup_msg->session_state);
-		/* FIXME: send ERROR back to the HLR */
+		gsup_client_mux_tx_error_reply(gcm, gsup_msg, GMM_CAUSE_MSGT_INCOMP_P_STATE);
 		msgb_free(ss_msg);
 		return -EINVAL;
 	}
@@ -530,7 +530,7 @@ int gsm0911_gsup_rx(struct gsup_client_mux *gcm, void *data, const struct osmo_g
 		if (!gsup_msg->ss_info || gsup_msg->ss_info_len < 2) {
 			LOG_TRANS(trans, LOGL_ERROR, "Missing mandatory Facility IE "
 				"for mapped 0x%02x message\n", gh->msg_type);
-			/* FIXME: send ERROR back to the HLR */
+			gsup_client_mux_tx_error_reply(gcm, gsup_msg, GMM_CAUSE_INV_MAND_INFO);
 			msgb_free(ss_msg);
 			return -EINVAL;
 		}
@@ -553,6 +553,7 @@ int gsm0911_gsup_rx(struct gsup_client_mux *gcm, void *data, const struct osmo_g
 	msc_a = trans->msc_a;
 	if (!msc_a) {
 		LOG_TRANS(trans, LOGL_ERROR, "Cannot send SS message, no local MSC-A role defined for subscriber\n");
+		gsup_client_mux_tx_error_reply(gcm, gsup_msg, GMM_CAUSE_NET_FAIL);
 		msgb_free(ss_msg);
 		return -EINVAL;
 	}
