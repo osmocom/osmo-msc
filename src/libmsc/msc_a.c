@@ -809,16 +809,6 @@ static void msc_a_fsm_released(struct osmo_fsm_inst *fi, uint32_t event, void *d
 		osmo_fsm_inst_term(fi, OSMO_FSM_TERM_REGULAR, fi);
 }
 
-void msc_a_fsm_allstate_action(struct osmo_fsm_inst *fi, uint32_t event, void *data)
-{
-	//struct msc_a *a = msc_a_fi_priv(fi);
-	switch (event) {
-
-	default:
-		return;
-	}
-}
-
 void msc_a_fsm_cleanup(struct osmo_fsm_inst *fi, enum osmo_fsm_term_cause cause)
 {
 	struct msc_a *msc_a = msc_a_fi_priv(fi);
@@ -991,9 +981,6 @@ static struct osmo_fsm msc_a_fsm = {
 	.num_states = ARRAY_SIZE(msc_a_fsm_states),
 	.log_subsys = DMSC,
 	.event_names = msc_a_fsm_event_names,
-	.allstate_action = msc_a_fsm_allstate_action,
-	.allstate_event_mask = 0
-		,
 	.timer_cb = msc_a_fsm_timer_cb,
 	.cleanup = msc_a_fsm_cleanup,
 };
