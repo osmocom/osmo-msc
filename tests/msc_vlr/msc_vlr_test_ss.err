@@ -375,7 +375,7 @@ DPAG Paging: IMSI-901700000004620:MSISDN-46071 for GSM 09.11 SS/USSD: Starting p
   paging request (SIGNALLING_HIGH_PRIO) to IMSI-901700000004620:MSISDN-46071 on GERAN-A
   strcmp(paging_expecting_imsi, vsub->imsi) == 0
 DREF VLR subscr IMSI-901700000004620:MSISDN-46071 + Paging: now used by 5 (attached,_test_ss_ussd_no,gsm0911_gsup_rx,NCSS,Paging)
-<-- GSUP rx OSMO_GSUP_MSGT_PROC_SS_REQUEST: vlr_gsupc_read_cb() returns -22
+<-- GSUP rx OSMO_GSUP_MSGT_PROC_SS_REQUEST: vlr_gsupc_read_cb() returns 0
   llist_count(&vsub->cs.requests) == 1
 DREF VLR subscr IMSI-901700000004620:MSISDN-46071 - _test_ss_ussd_no: now used by 4 (attached,gsm0911_gsup_rx,NCSS,Paging)
   paging_sent == 1

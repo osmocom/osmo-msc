@@ -409,7 +409,7 @@ static struct gsm_trans *establish_nc_ss_trans(struct gsm_network *net,
 	msgb_tlv_put(trans->ss.msg, GSM0480_IE_FACILITY,
 		gsup_msg->ss_info_len, gsup_msg->ss_info);
 
-	return NULL;
+	return trans;
 }
 
 /* NC SS specific transaction release.
