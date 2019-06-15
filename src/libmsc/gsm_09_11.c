@@ -297,9 +297,25 @@ static void ss_paging_cb(struct msc_a *msc_a, struct gsm_trans *trans)
 		/* Count established network-initiated NC SS/USSD sessions */
 		rate_ctr_inc(&net->msc_ctrs->ctr[MSC_CTR_NC_SS_MT_ESTABLISHED]);
 	} else {
+		struct osmo_gsup_message gsup_msg;
+
 		LOG_MSC_A_CAT(msc_a, DSS, LOGL_DEBUG, "Paging expired\n");
 
-		/* TODO: inform HLR about this failure */
+		gsup_msg = (struct osmo_gsup_message){
+			.message_class = OSMO_GSUP_MESSAGE_CLASS_USSD,
+			.message_type = OSMO_GSUP_MSGT_PROC_SS_ERROR,
+
+			.session_state = OSMO_GSUP_SESSION_STATE_END,
+			.session_id = trans->callref,
+			/* FIXME: we need message class specific cause values */
+			.cause = GMM_CAUSE_IMPL_DETACHED,
+		};
+
+		/* Fill in subscriber's IMSI */
+		OSMO_STRLCPY_ARRAY(gsup_msg.imsi, trans->vsub->imsi);
+
+		/* Inform HLR/EUSE about the failure */
+		gsup_client_mux_tx(trans->net->gcm, &gsup_msg);
 
 		msgb_free(trans->ss.msg);
 		trans->ss.msg = NULL;
