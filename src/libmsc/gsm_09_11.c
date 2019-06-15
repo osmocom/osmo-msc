@@ -465,6 +465,9 @@ int gsm0911_gsup_rx(struct gsup_client_mux *gcm, void *data, const struct osmo_g
 		/* Attempt to establish a new transaction */
 		trans = establish_nc_ss_trans(net, vsub, gsup_msg);
 		if (!trans) {
+			LOGP(DSS, LOGL_ERROR, "Failed to establish a network-originated "
+					      "SS/USSD transaction, rejecting %s\n",
+					      osmo_gsup_message_type_name(gsup_msg->message_type));
 			gsup_client_mux_tx_error_reply(gcm, gsup_msg, GMM_CAUSE_NET_FAIL);
 			return -EINVAL;
 		}
