@@ -29,32 +29,19 @@
 #include <errno.h>
 #include <time.h>
 #include <netinet/in.h>
-#include <regex.h>
 #include <sys/types.h>
 
 #include "config.h"
 
-#include <osmocom/msc/db.h>
 #include <osmocom/msc/debug.h>
 #include <osmocom/msc/gsm_data.h>
-#include <osmocom/msc/gsm_subscriber.h>
-#include <osmocom/msc/gsm_04_11.h>
 #include <osmocom/msc/gsm_04_08.h>
-#include <osmocom/msc/gsm_04_80.h>
-#include <osmocom/msc/gsm_04_14.h>
-#include <osmocom/msc/gsm_09_11.h>
 #include <osmocom/msc/signal.h>
 #include <osmocom/msc/transaction.h>
-#include <osmocom/msc/silent_call.h>
-#include <osmocom/msc/mncc_int.h>
-#include <osmocom/abis/e1_input.h>
-#include <osmocom/core/bitvec.h>
 #include <osmocom/msc/vlr.h>
 #include <osmocom/msc/msc_a.h>
-#include <osmocom/msc/paging.h>
 
 #include <osmocom/gsm/gsm48.h>
-#include <osmocom/gsm/gsm0480.h>
 #include <osmocom/gsm/gsm_utils.h>
 #include <osmocom/gsm/protocol/gsm_04_08.h>
 #include <osmocom/core/msgb.h>
