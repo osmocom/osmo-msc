@@ -330,13 +330,6 @@ static struct gsm_trans *establish_nc_ss_trans(struct gsm_network *net,
 		return NULL;
 	}
 
-	/* If subscriber is not "attached" */
-	if (!vsub->cgi.lai.lac) {
-		LOGP(DSS, LOGL_ERROR, "Network-originated session "
-			"rejected - subscriber is not attached\n");
-		return NULL;
-	}
-
 	/* Obtain an unused transaction ID */
 	tid = trans_assign_trans_id(net, vsub, TRANS_USSD);
 	if (tid < 0) {
