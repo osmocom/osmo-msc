@@ -314,7 +314,7 @@ static struct gsm_trans *establish_nc_ss_trans(struct gsm_network *net,
 	struct vlr_subscr *vsub, const struct osmo_gsup_message *gsup_msg)
 {
 	struct msc_a *msc_a;
-	struct gsm_trans *trans, *transt;
+	struct gsm_trans *trans;
 	int tid;
 
 	if (gsup_msg->session_state != OSMO_GSUP_SESSION_STATE_BEGIN) {
@@ -362,20 +362,6 @@ static struct gsm_trans *establish_nc_ss_trans(struct gsm_network *net,
 	}
 
 	LOG_TRANS(trans, LOGL_DEBUG, "Triggering Paging Request\n");
-
-	/* Find transaction with this subscriber already paging */
-	llist_for_each_entry(transt, &net->trans_list, entry) {
-		/* Transaction of our conn? */
-		if (transt == trans || transt->vsub != vsub)
-			continue;
-
-		LOG_TRANS(trans, LOGL_ERROR, "Paging already started, "
-			"rejecting message...\n");
-		trans_free(trans);
-		/* FIXME: WTF IS THIS!? This is completely insane. Presence of a trans doesn't indicate Paging, and even
-		 * if, why drop the current request??? */
-		return NULL;
-	}
 
 	/* Trigger Paging Request */
 	trans->paging_request = paging_request_start(vsub, PAGING_CAUSE_SIGNALLING_HIGH_PRIO,
