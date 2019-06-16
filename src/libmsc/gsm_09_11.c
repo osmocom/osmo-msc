@@ -436,14 +436,36 @@ int gsm0911_gsup_rx(struct gsup_client_mux *gcm, void *data, const struct osmo_g
 	/* Associate logging messages with this subscriber */
 	log_set_context(LOG_CTX_VLR_SUBSCR, vsub);
 
+	/* Attempt to find DTAP-transaction */
+	trans = trans_find_by_callref(net, gsup_msg->session_id);
+
 	/* Handle errors */
 	if (OSMO_GSUP_IS_MSGT_ERROR(gsup_msg->message_type)) {
-		/* FIXME: handle this error somehow! */
+		LOGP(DSS, LOGL_NOTICE, "Rx %s from HLR/EUSE (cause=0x%02x, sid=0x%x)\n",
+		     osmo_gsup_message_type_name(gsup_msg->message_type),
+		     gsup_msg->cause, gsup_msg->session_id);
+
+		if (!trans) {
+			LOGP(DSS, LOGL_ERROR, "No transaction found for "
+			     "sid=0x%x, nothing to abort\n", gsup_msg->session_id);
+			return -ENODEV;
+		}
+
+		LOG_TRANS(trans, LOGL_NOTICE, "Aborting the session: sending RELEASE COMPLETE\n");
+
+		/* Indicate connection release to subscriber (if active) */
+		if (trans->msc_a != NULL) {
+			/* TODO: implement GSUP - GSM 04.80 cause mapping */
+			msc_send_ussd_release_complete_cause(trans->msc_a, trans->transaction_id,
+				GSM48_CAUSE_LOC_PUN_S_LU, GSM48_CC_CAUSE_TEMP_FAILURE);
+		}
+
+		/* Terminate transaction */
+		trans_free(trans);
+
 		return 0;
 	}
 
-	/* Attempt to find DTAP-transaction */
-	trans = trans_find_by_callref(net, gsup_msg->session_id);
 	if (!trans) {
 		/* Count network-initiated attempts to establish a NC SS/USSD session */
 		rate_ctr_inc(&net->msc_ctrs->ctr[MSC_CTR_NC_SS_MT_REQUESTS]);
