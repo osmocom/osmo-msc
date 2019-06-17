@@ -242,7 +242,7 @@ int gsm0911_rcv_nc_ss(struct msc_a *msc_a, struct msgb *msg)
 	if (msg_type == GSM0480_MTYPE_REGISTER)
 		rate_ctr_inc(&net->msc_ctrs->ctr[MSC_CTR_NC_SS_MO_ESTABLISHED]);
 
-	return 0;
+	return rc;
 
 error:
 	/* Abort transaction on DTAP-interface */
