@@ -1,6 +1,7 @@
 EXTRA_DIST = osmomsc-usermanual.adoc \
     osmomsc-usermanual-docinfo.xml \
     osmomsc-vty-reference.xml \
+    regen_doc.sh \
     chapters \
     images \
     vty
