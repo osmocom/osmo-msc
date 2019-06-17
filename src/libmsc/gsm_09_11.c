@@ -135,8 +135,9 @@ int gsm0911_rcv_nc_ss(struct msc_a *msc_a, struct msgb *msg)
 		 * a supplementary service.
 		 */
 		if (msg_type != GSM0480_MTYPE_REGISTER) {
-			LOG_TRANS(trans, LOGL_ERROR, "Rx wrong SS/USSD message type for new transaction: %s\n",
-				  gsm48_pdisc_msgtype_name(GSM48_PDISC_NC_SS, msg_type));
+			LOGP(DSS, LOGL_ERROR, "Rx %s message for non-existing transaction (tid-%u)\n",
+				  gsm48_pdisc_msgtype_name(GSM48_PDISC_NC_SS, msg_type),
+				  gsm48_hdr_trans_id(gh));
 			gsm48_tx_simple(msc_a,
 				GSM48_PDISC_NC_SS | (tid << 4),
 				GSM0480_MTYPE_RELEASE_COMPLETE);
@@ -145,7 +146,7 @@ int gsm0911_rcv_nc_ss(struct msc_a *msc_a, struct msgb *msg)
 
 		trans = trans_alloc(net, vsub, TRANS_USSD, tid, new_callref++);
 		if (!trans) {
-			LOG_TRANS(trans, LOGL_ERROR, " -> No memory for trans\n");
+			LOGP(DSS, LOGL_ERROR, " -> No memory for trans\n");
 			gsm48_tx_simple(msc_a,
 				GSM48_PDISC_NC_SS | (tid << 4),
 				GSM0480_MTYPE_RELEASE_COMPLETE);
