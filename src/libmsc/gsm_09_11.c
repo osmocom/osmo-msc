@@ -424,8 +424,9 @@ int gsm0911_gsup_rx(struct gsup_client_mux *gcm, void *data, const struct osmo_g
 	struct msgb *ss_msg;
 	bool trans_end;
 	struct msc_a *msc_a;
-	struct vlr_subscr *vsub = vlr_subscr_find_by_imsi(net->vlr, gsup_msg->imsi, __func__);
+	struct vlr_subscr *vsub;
 
+	vsub = vlr_subscr_find_by_imsi(net->vlr, gsup_msg->imsi, __func__);
 	if (!vsub) {
 		LOGP(DSS, LOGL_ERROR, "Rx %s for unknown subscriber, rejecting\n",
 		     osmo_gsup_message_type_name(gsup_msg->message_type));
@@ -444,6 +445,9 @@ int gsm0911_gsup_rx(struct gsup_client_mux *gcm, void *data, const struct osmo_g
 		LOGP(DSS, LOGL_NOTICE, "Rx %s from HLR/EUSE (cause=0x%02x, sid=0x%x)\n",
 		     osmo_gsup_message_type_name(gsup_msg->message_type),
 		     gsup_msg->cause, gsup_msg->session_id);
+
+		/* We don't need subscriber info anymore */
+		vlr_subscr_put(vsub, __func__);
 
 		if (!trans) {
 			LOGP(DSS, LOGL_ERROR, "No transaction found for "
@@ -477,13 +481,19 @@ int gsm0911_gsup_rx(struct gsup_client_mux *gcm, void *data, const struct osmo_g
 					      "SS/USSD transaction, rejecting %s\n",
 					      osmo_gsup_message_type_name(gsup_msg->message_type));
 			gsup_client_mux_tx_error_reply(gcm, gsup_msg, GMM_CAUSE_NET_FAIL);
+			vlr_subscr_put(vsub, __func__);
 			return -EINVAL;
 		}
 
 		/* Wait for Paging Response */
-		if (trans->paging_request)
+		if (trans->paging_request) {
+			vlr_subscr_put(vsub, __func__);
 			return 0;
+		}
 	}
+
+	/* We don't need subscriber info anymore */
+	vlr_subscr_put(vsub, __func__);
 
 	/* (Re)schedule the inactivity timer */
 	if (net->ncss_guard_timeout > 0) {
