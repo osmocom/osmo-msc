@@ -57,7 +57,7 @@ static uint32_t new_callref = 0x20000001;
 static void ncss_session_timeout_handler(void *_trans)
 {
 	struct gsm_trans *trans = (struct gsm_trans *) _trans;
-	struct osmo_gsup_message gsup_msg = { 0 };
+	struct osmo_gsup_message gsup_msg;
 
 	/* The timeout might be disabled from the VTY */
 	if (trans->net->ncss_guard_timeout == 0)
