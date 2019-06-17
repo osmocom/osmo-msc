@@ -279,7 +279,7 @@
         <param name='MASK' doc='List of logging categories to log, e.g. &apos;abc:mno:xyz&apos;. Available log categories depend on the specific application, refer to the &apos;logging level&apos; command. Optionally add individual log levels like &apos;abc,1:mno,3:xyz,5&apos;, where the level numbers are LOGL_DEBUG=1 LOGL_INFO=3 LOGL_NOTICE=5 LOGL_ERROR=7 LOGL_FATAL=8' />
       </params>
     </command>
-    <command id='logging level (rll|cc|mm|rr|mncc|pag|msc|mgcp|ho|db|ref|ctrl|smpp|ranap|vlr|iucs|bssap|lglobal|llapd|linp|lmux|lmi|lmib|lsms|lctrl|lgtp|lstats|lgsup|loap|lss7|lsccp|lsua|lm3ua|lmgcp|ljibuf) (debug|info|notice|error|fatal)'>
+    <command id='logging level (rll|cc|mm|rr|mncc|pag|msc|mgcp|ho|db|ref|ctrl|smpp|ranap|vlr|iucs|bssap|sgs|lglobal|llapd|linp|lmux|lmi|lmib|lsms|lctrl|lgtp|lstats|lgsup|loap|lss7|lsccp|lsua|lm3ua|lmgcp|ljibuf|lrspro) (debug|info|notice|error|fatal)'>
       <params>
         <param name='logging' doc='Configure logging' />
         <param name='level' doc='Set the log level for a specified category' />
@@ -300,6 +300,7 @@
         <param name='vlr' doc='Visitor Location Register' />
         <param name='iucs' doc='Iu-CS Protocol' />
         <param name='bssap' doc='BSSAP Protocol (A Interface)' />
+        <param name='sgs' doc='SGs Interface (SGsAP)' />
         <param name='lglobal' doc='Library-internal global log family' />
         <param name='llapd' doc='LAPD in libosmogsm' />
         <param name='linp' doc='A-bis Intput Subsystem' />
@@ -318,6 +319,7 @@
         <param name='lm3ua' doc='libosmo-sigtran MTP3 User Adaptation' />
         <param name='lmgcp' doc='libosmo-mgcp Media Gateway Control Protocol' />
         <param name='ljibuf' doc='libosmo-netif Jitter Buffer' />
+        <param name='lrspro' doc='Remote SIM protocol' />
         <param name='debug' doc='Log debug messages and higher levels' />
         <param name='info' doc='Log informational messages and higher levels' />
         <param name='notice' doc='Log noticeable messages and higher levels' />
@@ -464,6 +466,12 @@
         <param name='all' doc='Display a list of all FSM instances of all finite state machine' />
       </params>
     </command>
+    <command id='show sgs-connections'>
+      <params>
+        <param name='show' doc='Show running system information' />
+        <param name='sgs-connections' doc='Show SGs interface connections / MMEs' />
+      </params>
+    </command>
     <command id='show subscriber (msisdn|extension|imsi|tmsi|id) ID'>
       <params>
         <param name='show' doc='Show running system information' />
@@ -481,6 +489,12 @@
         <param name='show' doc='Show running system information' />
         <param name='subscriber' doc='Show information about subscribers' />
         <param name='cache' doc='Display contents of subscriber cache' />
+      </params>
+    </command>
+    <command id='show bsc'>
+      <params>
+        <param name='show' doc='Show running system information' />
+        <param name='bsc' doc='BSC' />
       </params>
     </command>
     <command id='show connection'>
@@ -559,7 +573,7 @@
         <param name='.LINE' doc='Actual SMS Text' />
       </params>
     </command>
-    <command id='subscriber (msisdn|extension|imsi|tmsi|id) ID silent-call start (any|tch/f|tch/any|sdcch)'>
+    <command id='subscriber (msisdn|extension|imsi|tmsi|id) ID silent-call start (any|tch/f|tch/h|tch/any|sdcch) (signalling|speech-hr|speech-fr|speech-efr|speech-amr) [IP] [&lt;0-65535&gt;]'>
       <params>
         <param name='subscriber' doc='Operations on a Subscriber' />
         <param name='msisdn' doc='Identify subscriber by MSISDN (phone number)' />
@@ -572,8 +586,16 @@
         <param name='start' doc='Start silent call' />
         <param name='any' doc='Any channel' />
         <param name='tch/f' doc='TCH/F channel' />
+        <param name='tch/h' doc='TCH/H channel' />
         <param name='tch/any' doc='Any TCH channel' />
         <param name='sdcch' doc='SDCCH channel' />
+        <param name='signalling' doc='Signalling only' />
+        <param name='speech-hr' doc='Speech with HR codec' />
+        <param name='speech-fr' doc='Speech with FR codec' />
+        <param name='speech-efr' doc='Speech with EFR codec' />
+        <param name='speech-amr' doc='Speech with AMR codec' />
+        <param name='[IP]' doc='Target IP for RTP traffic (default 127.0.0.1)' />
+        <param name='[&lt;0-65535&gt;]' doc='Target port for RTP traffic (default: 4000)' />
       </params>
     </command>
     <command id='subscriber (msisdn|extension|imsi|tmsi|id) ID silent-call stop'>
@@ -674,7 +696,7 @@
       <params>
         <param name='show' doc='Show running system information' />
         <param name='smpp' doc='SMPP Interface' />
-        <param name='esme' doc='SMPP Extrenal SMS Entity' />
+        <param name='esme' doc='SMPP External SMS Entity' />
       </params>
     </command>
   </node>
@@ -937,7 +959,7 @@
         <param name='MASK' doc='List of logging categories to log, e.g. &apos;abc:mno:xyz&apos;. Available log categories depend on the specific application, refer to the &apos;logging level&apos; command. Optionally add individual log levels like &apos;abc,1:mno,3:xyz,5&apos;, where the level numbers are LOGL_DEBUG=1 LOGL_INFO=3 LOGL_NOTICE=5 LOGL_ERROR=7 LOGL_FATAL=8' />
       </params>
     </command>
-    <command id='logging level (rll|cc|mm|rr|mncc|pag|msc|mgcp|ho|db|ref|ctrl|smpp|ranap|vlr|iucs|bssap|lglobal|llapd|linp|lmux|lmi|lmib|lsms|lctrl|lgtp|lstats|lgsup|loap|lss7|lsccp|lsua|lm3ua|lmgcp|ljibuf) (debug|info|notice|error|fatal)'>
+    <command id='logging level (rll|cc|mm|rr|mncc|pag|msc|mgcp|ho|db|ref|ctrl|smpp|ranap|vlr|iucs|bssap|sgs|lglobal|llapd|linp|lmux|lmi|lmib|lsms|lctrl|lgtp|lstats|lgsup|loap|lss7|lsccp|lsua|lm3ua|lmgcp|ljibuf|lrspro) (debug|info|notice|error|fatal)'>
       <params>
         <param name='logging' doc='Configure logging' />
         <param name='level' doc='Set the log level for a specified category' />
@@ -958,6 +980,7 @@
         <param name='vlr' doc='Visitor Location Register' />
         <param name='iucs' doc='Iu-CS Protocol' />
         <param name='bssap' doc='BSSAP Protocol (A Interface)' />
+        <param name='sgs' doc='SGs Interface (SGsAP)' />
         <param name='lglobal' doc='Library-internal global log family' />
         <param name='llapd' doc='LAPD in libosmogsm' />
         <param name='linp' doc='A-bis Intput Subsystem' />
@@ -976,6 +999,7 @@
         <param name='lm3ua' doc='libosmo-sigtran MTP3 User Adaptation' />
         <param name='lmgcp' doc='libosmo-mgcp Media Gateway Control Protocol' />
         <param name='ljibuf' doc='libosmo-netif Jitter Buffer' />
+        <param name='lrspro' doc='Remote SIM protocol' />
         <param name='debug' doc='Log debug messages and higher levels' />
         <param name='info' doc='Log informational messages and higher levels' />
         <param name='notice' doc='Log noticeable messages and higher levels' />
@@ -1122,6 +1146,12 @@
         <param name='all' doc='Display a list of all FSM instances of all finite state machine' />
       </params>
     </command>
+    <command id='show sgs-connections'>
+      <params>
+        <param name='show' doc='Show running system information' />
+        <param name='sgs-connections' doc='Show SGs interface connections / MMEs' />
+      </params>
+    </command>
     <command id='show subscriber (msisdn|extension|imsi|tmsi|id) ID'>
       <params>
         <param name='show' doc='Show running system information' />
@@ -1139,6 +1169,12 @@
         <param name='show' doc='Show running system information' />
         <param name='subscriber' doc='Show information about subscribers' />
         <param name='cache' doc='Display contents of subscriber cache' />
+      </params>
+    </command>
+    <command id='show bsc'>
+      <params>
+        <param name='show' doc='Show running system information' />
+        <param name='bsc' doc='BSC' />
       </params>
     </command>
     <command id='show connection'>
@@ -1217,7 +1253,7 @@
         <param name='.LINE' doc='Actual SMS Text' />
       </params>
     </command>
-    <command id='subscriber (msisdn|extension|imsi|tmsi|id) ID silent-call start (any|tch/f|tch/any|sdcch)'>
+    <command id='subscriber (msisdn|extension|imsi|tmsi|id) ID silent-call start (any|tch/f|tch/h|tch/any|sdcch) (signalling|speech-hr|speech-fr|speech-efr|speech-amr) [IP] [&lt;0-65535&gt;]'>
       <params>
         <param name='subscriber' doc='Operations on a Subscriber' />
         <param name='msisdn' doc='Identify subscriber by MSISDN (phone number)' />
@@ -1230,8 +1266,16 @@
         <param name='start' doc='Start silent call' />
         <param name='any' doc='Any channel' />
         <param name='tch/f' doc='TCH/F channel' />
+        <param name='tch/h' doc='TCH/H channel' />
         <param name='tch/any' doc='Any TCH channel' />
         <param name='sdcch' doc='SDCCH channel' />
+        <param name='signalling' doc='Signalling only' />
+        <param name='speech-hr' doc='Speech with HR codec' />
+        <param name='speech-fr' doc='Speech with FR codec' />
+        <param name='speech-efr' doc='Speech with EFR codec' />
+        <param name='speech-amr' doc='Speech with AMR codec' />
+        <param name='[IP]' doc='Target IP for RTP traffic (default 127.0.0.1)' />
+        <param name='[&lt;0-65535&gt;]' doc='Target port for RTP traffic (default: 4000)' />
       </params>
     </command>
     <command id='subscriber (msisdn|extension|imsi|tmsi|id) ID silent-call stop'>
@@ -1379,11 +1423,24 @@
         <param name='pending-send' doc='Send pending SMS' />
       </params>
     </command>
+    <command id='subscriber (msisdn|extension|imsi|tmsi|id) ID sms delete-all'>
+      <params>
+        <param name='subscriber' doc='Operations on a Subscriber' />
+        <param name='msisdn' doc='Identify subscriber by MSISDN (phone number)' />
+        <param name='extension' doc='Legacy alias for &apos;msisdn&apos;' />
+        <param name='imsi' doc='Identify subscriber by IMSI' />
+        <param name='tmsi' doc='Identify subscriber by TMSI' />
+        <param name='id' doc='Identify subscriber by database ID' />
+        <param name='ID' doc='Identifier for the subscriber' />
+        <param name='sms' doc='SMS Operations' />
+        <param name='delete-all' doc='Delete all SMS to be delivered to this subscriber -- WARNING: the SMS data for all unsent SMS for this subscriber WILL BE LOST.' />
+      </params>
+    </command>
     <command id='show smpp esme'>
       <params>
         <param name='show' doc='Show running system information' />
         <param name='smpp' doc='SMPP Interface' />
-        <param name='esme' doc='SMPP Extrenal SMS Entity' />
+        <param name='esme' doc='SMPP External SMS Entity' />
       </params>
     </command>
   </node>
@@ -1639,6 +1696,11 @@
         <param name='msc' doc='Configure MSC options' />
       </params>
     </command>
+    <command id='sgs'>
+      <params>
+        <param name='sgs' doc='Configure the SGs interface' />
+      </params>
+    </command>
     <command id='mncc-int'>
       <params>
         <param name='mncc-int' doc='Configure internal MNCC handler' />
@@ -1729,7 +1791,7 @@
         <param name='[last]' doc='Log source file info at the end of a log line. If omitted, log source file info just before the log text.' />
       </params>
     </command>
-    <command id='logging level (rll|cc|mm|rr|mncc|pag|msc|mgcp|ho|db|ref|ctrl|smpp|ranap|vlr|iucs|bssap|lglobal|llapd|linp|lmux|lmi|lmib|lsms|lctrl|lgtp|lstats|lgsup|loap|lss7|lsccp|lsua|lm3ua|lmgcp|ljibuf) (debug|info|notice|error|fatal)'>
+    <command id='logging level (rll|cc|mm|rr|mncc|pag|msc|mgcp|ho|db|ref|ctrl|smpp|ranap|vlr|iucs|bssap|sgs|lglobal|llapd|linp|lmux|lmi|lmib|lsms|lctrl|lgtp|lstats|lgsup|loap|lss7|lsccp|lsua|lm3ua|lmgcp|ljibuf|lrspro) (debug|info|notice|error|fatal)'>
       <params>
         <param name='logging' doc='Configure logging' />
         <param name='level' doc='Set the log level for a specified category' />
@@ -1750,6 +1812,7 @@
         <param name='vlr' doc='Visitor Location Register' />
         <param name='iucs' doc='Iu-CS Protocol' />
         <param name='bssap' doc='BSSAP Protocol (A Interface)' />
+        <param name='sgs' doc='SGs Interface (SGsAP)' />
         <param name='lglobal' doc='Library-internal global log family' />
         <param name='llapd' doc='LAPD in libosmogsm' />
         <param name='linp' doc='A-bis Intput Subsystem' />
@@ -1768,6 +1831,7 @@
         <param name='lm3ua' doc='libosmo-sigtran MTP3 User Adaptation' />
         <param name='lmgcp' doc='libosmo-mgcp Media Gateway Control Protocol' />
         <param name='ljibuf' doc='libosmo-netif Jitter Buffer' />
+        <param name='lrspro' doc='Remote SIM protocol' />
         <param name='debug' doc='Log debug messages and higher levels' />
         <param name='info' doc='Log informational messages and higher levels' />
         <param name='notice' doc='Log noticeable messages and higher levels' />
@@ -1898,10 +1962,11 @@
         <param name='login' doc='Enable password checking' />
       </params>
     </command>
-    <command id='bind A.B.C.D'>
+    <command id='bind A.B.C.D [&lt;0-65535&gt;]'>
       <params>
         <param name='bind' doc='Accept VTY telnet connections on local interface' />
         <param name='A.B.C.D' doc='Local interface IP address (default: 127.0.0.1)' />
+        <param name='[&lt;0-65535&gt;]' doc='Local TCP port number' />
       </params>
     </command>
   </node>
@@ -2368,10 +2433,31 @@
         <param name='assign-tmsi' doc='Assign TMSI during Location Updating.' />
       </params>
     </command>
-    <command id='mncc-guard-timeout &lt;0-255&gt;'>
+    <command id='mncc internal'>
       <params>
-        <param name='mncc-guard-timeout' doc='Set global guard timer for mncc interface activity' />
+        <param name='mncc' doc='Configure Mobile Network Call Control' />
+        <param name='internal' doc='Use internal MNCC handler (default; changes need a program restart)' />
+      </params>
+    </command>
+    <command id='mncc external MNCC_SOCKET_PATH'>
+      <params>
+        <param name='mncc' doc='Configure Mobile Network Call Control' />
+        <param name='external' doc='Use external MNCC handler (changes need a program restart)' />
+        <param name='MNCC_SOCKET_PATH' doc='File system path to create the MNCC unix domain socket at' />
+      </params>
+    </command>
+    <command id='mncc guard-timeout &lt;0-255&gt;'>
+      <params>
+        <param name='mncc' doc='Configure Mobile Network Call Control' />
+        <param name='guard-timeout' doc='Set global guard timer for mncc interface activity' />
         <param name='&lt;0-255&gt;' doc='guard timer value (sec.)' />
+      </params>
+    </command>
+    <command id='ncss guard-timeout &lt;0-255&gt;'>
+      <params>
+        <param name='ncss' doc='Configure call independent Supplementary Services' />
+        <param name='guard-timeout' doc='Set guard timer for session activity' />
+        <param name='&lt;0-255&gt;' doc='guard timer value (sec.), or 0 to disable' />
       </params>
     </command>
     <command id='no assign-tmsi'>
@@ -2389,8 +2475,15 @@
     <command id='auth-tuple-reuse-on-error (0|1)'>
       <params>
         <param name='auth-tuple-reuse-on-error' doc='Configure authentication tuple re-use when HLR is not responsive' />
-        <param name='0' doc='0 = never re-use auth tuples beyond auth-tuple-max-reuse-count (default)' />
-        <param name='1' doc='1 = if the HLR does not deliver new tuples, do re-use already available old ones.' />
+        <param name='0' doc='Never re-use auth tuples beyond auth-tuple-max-reuse-count (default)' />
+        <param name='1' doc='If the HLR does not deliver new tuples, do re-use already available old ones.' />
+      </params>
+    </command>
+    <command id='check-imei-rqd (0|1)'>
+      <params>
+        <param name='check-imei-rqd' doc='Send each IMEI to the EIR to ask if it is permitted or not. The EIR is implemented as part of OsmoHLR, and can optionally save the IMEI in the HLR.' />
+        <param name='0' doc='Do not send IMEIs to the EIR' />
+        <param name='1' doc='Send each IMEI to the EIR' />
       </params>
     </command>
     <command id='cs7-instance-a &lt;0-15&gt;'>
@@ -2418,6 +2511,17 @@
         <param name='emergency-call' doc='Configure Emergency Call Behaviour' />
         <param name='route-to-msisdn' doc='MSISDN to which Emergency Calls are Dispatched' />
         <param name='MSISDN' doc='MSISDN (E.164 Phone Number)' />
+      </params>
+    </command>
+    <command id='sms-over-gsup'>
+      <params>
+        <param name='sms-over-gsup' doc='Enable routing of SMS messages over GSUP' />
+      </params>
+    </command>
+    <command id='no sms-over-gsup'>
+      <params>
+        <param name='no' doc='Negate a command or set its defaults' />
+        <param name='sms-over-gsup' doc='Disable routing of SMS messages over GSUP' />
       </params>
     </command>
     <command id='mgw local-ip A.B.C.D'>
@@ -2448,19 +2552,11 @@
         <param name='&lt;0-65535&gt;' doc='remote port' />
       </params>
     </command>
-    <command id='mgw endpoint-range &lt;1-65534&gt; &lt;1-65534&gt;'>
+    <command id='mgw endpoint-domain NAME'>
       <params>
         <param name='mgw' doc='Configure MGCP connection to Media Gateway' />
-        <param name='endpoint-range' doc='usable range of endpoint identifiers' />
-        <param name='&lt;1-65534&gt;' doc='set first usable endpoint identifier' />
-        <param name='&lt;1-65534&gt;' doc='set last usable endpoint identifier' />
-      </params>
-    </command>
-    <command id='mgw bts-base &lt;0-65534&gt;'>
-      <params>
-        <param name='mgw' doc='Configure MGCP connection to Media Gateway' />
-        <param name='bts-base' doc='First UDP port allocated for the BTS side' />
-        <param name='&lt;0-65534&gt;' doc='UDP Port number' />
+        <param name='endpoint-domain' doc='Set the domain name to send in MGCP messages, e.g. the part &apos;foo&apos; in &apos;rtpbridge/*@foo&apos;.' />
+        <param name='NAME' doc='Domain name, should be alphanumeric.' />
       </params>
     </command>
     <command id='iu rab-assign-addr-enc (x213|v4raw)'>
@@ -2543,7 +2639,7 @@
     <command id='policy (accept-all|closed)'>
       <params>
         <param name='policy' doc='Set the authentication policy of this SMSC' />
-        <param name='accept-all' doc='Accept all SMPP connections independeint of system ID / passwd' />
+        <param name='accept-all' doc='Accept all SMPP connections independent of system ID / password' />
         <param name='closed' doc='Accept only SMPP connections from ESMEs explicitly configured' />
       </params>
     </command>
@@ -2568,7 +2664,8 @@
         <param name='password' doc='Set the password for this ESME' />
         <param name='PASSWORD' doc='Alphanumeric password string' />
       </params>
-    </command>    <command id='no password'>
+    </command>
+    <command id='no password'>
       <params>
         <param name='no' doc='Negate a command or set its defaults' />
         <param name='password' doc='Remove the password for this ESME' />
@@ -2667,6 +2764,17 @@
         <param name='dcs-transparent' doc='Disable the transparent pass-through of TP-DCS to SMPP DataCoding' />
       </params>
     </command>
+    <command id='alert-notifications'>
+      <params>
+        <param name='alert-notifications' doc='Disable sending of SMPP Alert Notifications for this ESME' />
+      </params>
+    </command>
+    <command id='no alert-notifications'>
+      <params>
+        <param name='no' doc='Negate a command or set its defaults' />
+        <param name='alert-notifications' doc='Disable sending of SMPP Alert Notifications for this ESME' />
+      </params>
+    </command>
   </node>
   <node id='config-hlr'>
     <name>config-hlr</name>
@@ -2680,6 +2788,53 @@
       <params>
         <param name='remote-port' doc='Remote GSUP port of the HLR' />
         <param name='&lt;1-65535&gt;' doc='Remote GSUP port (default: MSC_HLR_REMOTE_PORT_DEFAULT)' />
+      </params>
+    </command>
+    <command id='ipa-name NAME'>
+      <params>
+        <param name='ipa-name' doc='Set the IPA name of this MSC' />
+        <param name='NAME' doc='A unique name for this MSC. For example: PLMN + redundancy server number: MSC-901-70-0. This name is used for GSUP routing and must be set if more than one MSC is connected to the HLR. The default is &apos;MSC-00-00-00-00-00-00&apos;.' />
+      </params>
+    </command>
+  </node>
+  <node id='config-sgs'>
+    <name>config-sgs</name>
+    <command id='local-ip A.B.C.D'>
+      <params>
+        <param name='local-ip' doc='Set the Local IP Address of the SGs interface' />
+        <param name='A.B.C.D' doc='Local IP Address of the SGs interface' />
+      </params>
+    </command>
+    <command id='local-port &lt;0-65535&gt;'>
+      <params>
+        <param name='local-port' doc='Set the local SCTP port of the SGs interface' />
+        <param name='&lt;0-65535&gt;' doc='Local SCTP port of the SGs interface' />
+      </params>
+    </command>
+    <command id='timer (ts5|ts6-2|ts7|ts11|ts14|ts15) &lt;1-120&gt;'>
+      <params>
+        <param name='timer' doc='Configure SGs Timer' />
+        <param name='ts5' doc='Paging procedure guard timer' />
+        <param name='ts6-2' doc='TMSI reallocation guard timer' />
+        <param name='ts7' doc='Non-EPS alert procedure guard timer' />
+        <param name='ts11' doc='VLR reset guard timer' />
+        <param name='ts14' doc='UE fallback prcoedure timer' />
+        <param name='ts15' doc='MO UE fallback procedure guard timer' />
+        <param name='&lt;1-120&gt;' doc='Time in seconds' />
+      </params>
+    </command>
+    <command id='counter (ns7|ns11) &lt;0-255&gt;'>
+      <params>
+        <param name='counter' doc='Configure SGs Counter' />
+        <param name='ns7' doc='Non-EPS alert request retry counter' />
+        <param name='ns11' doc='VLR reset retry counter' />
+        <param name='&lt;0-255&gt;' doc='Counter value' />
+      </params>
+    </command>
+    <command id='vlr-name FQDN'>
+      <params>
+        <param name='vlr-name' doc='Set the SGs VLR Name as per TS 29.118 9.4.22' />
+        <param name='FQDN' doc='Fully-Qualified Domain Name of this VLR' />
       </params>
     </command>
   </node>
