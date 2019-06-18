@@ -519,7 +519,14 @@ void vlr_subscr_expire_lu(void *data)
 {
 	struct vlr_instance *vlr = data;
 	struct vlr_subscr *vsub, *vsub_tmp;
+	struct gsm_network *net;
 	struct timespec now;
+
+	/* Periodic location update might be disabled from the VTY,
+	 * so we shall not expire subscribers until explicit IMSI Detach. */
+	net = vlr->user_ctx; /* XXX move t3212 into struct vlr_instance? */
+	if (!net->t3212)
+		goto done;
 
 	if (llist_empty(&vlr->subscribers))
 		goto done;
