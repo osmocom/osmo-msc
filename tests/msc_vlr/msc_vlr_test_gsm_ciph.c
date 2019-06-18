@@ -128,7 +128,7 @@ static void test_ciph()
 	VERBOSE_ASSERT(cm_service_result_sent, == RES_NONE, "%d");
 
 	/* Release connection */
-	expect_bssap_clear(OSMO_RAT_GERAN_A);
+	expect_bssap_clear();
 	conn_conclude_cm_service_req(g_msub, MSC_A_USE_CM_SERVICE_SMS);
 
 	btw("all requests serviced, conn has been released");
@@ -363,7 +363,7 @@ static void test_ciph_tmsi()
 	VERBOSE_ASSERT(cm_service_result_sent, == RES_NONE, "%d");
 
 	/* Release connection */
-	expect_bssap_clear(OSMO_RAT_GERAN_A);
+	expect_bssap_clear();
 	conn_conclude_cm_service_req(g_msub, MSC_A_USE_CM_SERVICE_SMS);
 
 	btw("all requests serviced, conn has been released");
@@ -967,7 +967,7 @@ static void test_gsm_ciph_in_umts_env()
 	VERBOSE_ASSERT(cm_service_result_sent, == RES_NONE, "%d");
 
 	/* Release connection */
-	expect_bssap_clear(OSMO_RAT_GERAN_A);
+	expect_bssap_clear();
 	conn_conclude_cm_service_req(g_msub, MSC_A_USE_CM_SERVICE_SMS);
 
 	btw("all requests serviced, conn has been released");
@@ -1158,7 +1158,7 @@ static void test_a5_3_supported()
 	VERBOSE_ASSERT(cm_service_result_sent, == RES_NONE, "%d");
 
 	/* Release connection */
-	expect_bssap_clear(OSMO_RAT_GERAN_A);
+	expect_bssap_clear();
 	conn_conclude_cm_service_req(g_msub, MSC_A_USE_CM_SERVICE_SMS);
 
 	btw("all requests serviced, conn has been released");
@@ -1375,7 +1375,7 @@ static void test_cm_service_needs_classmark_update()
 	VERBOSE_ASSERT(cm_service_result_sent, == RES_NONE, "%d");
 
 	/* Release connection */
-	expect_bssap_clear(OSMO_RAT_GERAN_A);
+	expect_bssap_clear();
 	conn_conclude_cm_service_req(g_msub, MSC_A_USE_CM_SERVICE_SMS);
 
 	btw("all requests serviced, conn has been released");

@@ -69,7 +69,7 @@ static void test_no_authen()
 	EXPECT_ACCEPTED(true);
 
 	/* Release connection */
-	expect_bssap_clear(OSMO_RAT_GERAN_A);
+	expect_bssap_clear();
 	conn_conclude_cm_service_req(g_msub, MSC_A_USE_CM_SERVICE_SMS);
 
 	btw("all requests serviced, conn has been released");
@@ -227,7 +227,7 @@ static void test_no_authen_tmsi()
 	EXPECT_ACCEPTED(true);
 
 	/* Release connection */
-	expect_bssap_clear(OSMO_RAT_GERAN_A);
+	expect_bssap_clear();
 	conn_conclude_cm_service_req(g_msub, MSC_A_USE_CM_SERVICE_SMS);
 
 	btw("all requests serviced, conn has been released");

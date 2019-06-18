@@ -113,7 +113,7 @@ static void test_gsm_authen()
 	VERBOSE_ASSERT(cm_service_result_sent, == RES_ACCEPT, "%d");
 
 	/* Release connection */
-	expect_bssap_clear(OSMO_RAT_GERAN_A);
+	expect_bssap_clear();
 	conn_conclude_cm_service_req(g_msub, MSC_A_USE_CM_SERVICE_SMS);
 
 	btw("all requests serviced, conn has been released");
@@ -327,7 +327,7 @@ static void test_gsm_authen_tmsi()
 	VERBOSE_ASSERT(cm_service_result_sent, == RES_ACCEPT, "%d");
 
 	/* Release connection */
-	expect_bssap_clear(OSMO_RAT_GERAN_A);
+	expect_bssap_clear();
 	conn_conclude_cm_service_req(g_msub, MSC_A_USE_CM_SERVICE_SMS);
 
 	btw("all requests serviced, conn has been released");
@@ -1017,7 +1017,7 @@ static void test_gsm_milenage_authen()
 	VERBOSE_ASSERT(cm_service_result_sent, == RES_ACCEPT, "%d");
 
 	/* Release connection */
-	expect_bssap_clear(OSMO_RAT_GERAN_A);
+	expect_bssap_clear();
 	conn_conclude_cm_service_req(g_msub, MSC_A_USE_CM_SERVICE_SMS);
 
 	btw("all requests serviced, conn has been released");
