@@ -1097,13 +1097,13 @@ static struct gsm_trans *gsm411_alloc_mt_trans(struct gsm_network *net,
 					       struct vlr_subscr *vsub)
 {
 	struct msc_a *msc_a;
-	struct gsm_trans *trans = NULL;
+	struct gsm_trans *trans;
 	int tid;
 
 	/* Generate a new transaction ID */
 	tid = trans_assign_trans_id(net, vsub, TRANS_SMS);
 	if (tid == -1) {
-		LOG_TRANS(trans, LOGL_ERROR, "No available transaction IDs\n");
+		LOGP(DLSMS, LOGL_ERROR, "No available transaction IDs\n");
 		return NULL;
 	}
 
