@@ -287,8 +287,10 @@ msg_error:
 int gsm411_gsup_rx(struct gsup_client_mux *gcm, void *data, const struct osmo_gsup_message *gsup_msg)
 {
 	struct gsm_network *net = (struct gsm_network *) data;
-	struct vlr_subscr *vsub = vlr_subscr_find_by_imsi(net->vlr, gsup_msg->imsi, __func__);
+	struct vlr_subscr *vsub;
+	int rc;
 
+	vsub = vlr_subscr_find_by_imsi(net->vlr, gsup_msg->imsi, __func__);
 	if (!vsub) {
 		LOGP(DLSMS, LOGL_ERROR, "Rx %s for unknown subscriber, rejecting\n",
 		     osmo_gsup_message_type_name(gsup_msg->message_type));
@@ -303,16 +305,21 @@ int gsm411_gsup_rx(struct gsup_client_mux *gcm, void *data, const struct osmo_gs
 	case OSMO_GSUP_MSGT_READY_FOR_SM_ERROR:
 	case OSMO_GSUP_MSGT_READY_FOR_SM_RESULT:
 		DEBUGP(DMSC, "Routed to GSM 04.11 MO handler\n");
-		return gsm411_gsup_mo_handler(net, vsub, gsup_msg);
+		rc = gsm411_gsup_mo_handler(net, vsub, gsup_msg);
+		break;
 
 	/* GSM 04.11 code implementing MT SMS */
 	case OSMO_GSUP_MSGT_MT_FORWARD_SM_REQUEST:
 		DEBUGP(DMSC, "Routed to GSM 04.11 MT handler\n");
-		return gsm411_gsup_mt_handler(net, vsub, gsup_msg);
+		rc = gsm411_gsup_mt_handler(net, vsub, gsup_msg);
+		break;
 
 	default:
 		LOGP(DMM, LOGL_ERROR, "No handler found for %s, dropping message...\n",
 			osmo_gsup_message_type_name(gsup_msg->message_type));
-		return -GMM_CAUSE_MSGT_NOTEXIST_NOTIMPL;
+		rc = -GMM_CAUSE_MSGT_NOTEXIST_NOTIMPL;
 	}
+
+	vlr_subscr_put(vsub, __func__);
+	return rc;
 }
