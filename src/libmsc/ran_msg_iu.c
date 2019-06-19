@@ -37,6 +37,7 @@
 #include <osmocom/msc/msc_common.h>
 #include <osmocom/msc/sccp_ran.h>
 #include <osmocom/msc/ran_msg_iu.h>
+#include <osmocom/msc/gsm_04_11.h>
 
 /* Implement the extern talloc_asn1_ctx from libasn1c as talloc ctx for ASN.1 message composition */
 void *talloc_asn1_ctx = NULL;
@@ -92,14 +93,23 @@ static void ran_iu_decode_l3_initial(struct ran_dec *ran_iu_decode, const RANAP_
 	msgb_free(ran);
 }
 
-static void ran_iu_decode_l3(struct ran_dec *ran_iu_decode, const RANAP_NAS_PDU_t *nas_pdu, const char *msg_name)
+static void ran_iu_decode_l3(struct ran_dec *ran_iu_decode,
+			     const RANAP_DirectTransferIEs_t *ies,
+			     const char *msg_name)
 {
+	const RANAP_NAS_PDU_t *nas_pdu = &ies->nas_pdu;
 	struct msgb *ran = msgb_alloc(256, msg_name);
 	struct ran_msg ran_dec_msg;
 
 	/* TODO: really necessary to copy the RAN PDU?? */
 	ran->l3h = msgb_put(ran, nas_pdu->size);
 	memcpy(ran->l3h, nas_pdu->buf, nas_pdu->size);
+
+	/* Handle optional SAPI IE */
+	if (ies->presenceMask & DIRECTTRANSFERIES_RANAP_SAPI_PRESENT) {
+		if (ies->sapi == RANAP_SAPI_sapi_3)
+			OMSC_LINKID_CB(ran) = UM_SAPI_SMS;
+	}
 
 	ran_dec_msg = (struct ran_msg){
 		.msg_type = RAN_MSG_DTAP,
@@ -266,7 +276,7 @@ static void ran_iu_decode_ranap_msg(void *_ran_dec, ranap_message *message)
 		return;
 
 	case RANAP_ProcedureCode_id_DirectTransfer:
-		ran_iu_decode_l3(ran_iu_decode, &message->msg.directTransferIEs.nas_pdu, "RANAP DirectTransfer RAN PDU");
+		ran_iu_decode_l3(ran_iu_decode, &message->msg.directTransferIEs, "RANAP DirectTransfer RAN PDU");
 		return;
 
 	case RANAP_ProcedureCode_id_SecurityModeControl:
