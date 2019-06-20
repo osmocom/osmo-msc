@@ -256,7 +256,7 @@ static void sms_submit_pending(void *_data)
 	unsigned long long first_sub = 0;
 	int attempted = 0, rounds = 0;
 
-	LOGP(DLSMS, LOGL_DEBUG, "Attempting to send %d SMS\n", attempts);
+	LOGP(DLSMS, LOGL_DEBUG, "Attempting to send up to %d SMS\n", attempts);
 
 	do {
 		struct gsm_sms_pending *pending;
