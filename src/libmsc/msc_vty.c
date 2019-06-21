@@ -688,6 +688,7 @@ static const char *get_trans_proto_str(const struct gsm_trans *trans)
 #define MSC_VTY_DUMP(vty, offset, fmt, args...) \
 	vty_out(vty, "%*s" fmt, offset, "", ##args)
 
+/* Print value of a named flag, prefixed with a given amount of spaces */
 #define MSC_VTY_DUMP_FLAG(vty, offset, name, flag) \
 	MSC_VTY_DUMP(vty, offset + 2, "%s: %*s%s%s", \
 		     name, 30 - (int)strlen(name), "", \
@@ -712,6 +713,7 @@ static void vty_dump_one_trans(struct vty *vty, const struct gsm_trans *trans,
 	}
 
 	if (dump_flags & MSC_VTY_DUMP_F_CONNECTION) {
+		/* (If msc_a exists, there *must* be a non-null msc_a->c.msub) */
 		MSC_VTY_DUMP(vty, offset, "RAN connection: %s%s",
 			     trans->msc_a ? msub_ran_conn_name(trans->msc_a->c.msub)
 					  : "(not established)",
