@@ -171,7 +171,7 @@ void conn_conclude_cm_service_req(struct msub *msub, const char *cm_service_use)
 	count = osmo_use_count_by(&msc_a->use_count, cm_service_use);
 	OSMO_ASSERT(count > 0);
 
-	OSMO_ASSERT(osmo_use_count_get_put(&msc_a->use_count, cm_service_use, -count) == 0)
+	OSMO_ASSERT(osmo_use_count_get_put(&msc_a->use_count, cm_service_use, -count) == 0);
 
 	ASSERT_RELEASE_CLEAR(msc_a->c.ran->type);
 }

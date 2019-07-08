@@ -370,7 +370,7 @@ void ran_peer_st_ready(struct osmo_fsm_inst *fi, uint32_t event, void *data)
 
 	case RAN_PEER_EV_MSG_UP_CO_INITIAL:
 		ctx = data;
-		OSMO_ASSERT(ctx)
+		OSMO_ASSERT(ctx);
 		OSMO_ASSERT(!ctx->conn);
 		OSMO_ASSERT(ctx->msg);
 
