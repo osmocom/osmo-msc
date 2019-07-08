@@ -791,6 +791,8 @@ static void vty_dump_one_conn(struct vty *vty, const struct msub *msub,
 static void vty_dump_one_subscr(struct vty *vty, struct vlr_subscr *vsub,
 				int offset, uint8_t dump_flags)
 {
+	struct gsm_network *net;
+	struct timespec now;
 	char buf[128];
 
 	if (vsub->name[0] != '\0') {
@@ -860,6 +862,21 @@ static void vty_dump_one_subscr(struct vty *vty, struct vlr_subscr *vsub,
 			     VTY_NEWLINE);
 		MSC_VTY_DUMP(vty, offset + 2, "Kc    : %s%s",
 			     osmo_hexdump(t->vec.kc, sizeof(t->vec.kc)),
+			     VTY_NEWLINE);
+	}
+
+	/* XXX move t3212 into struct vlr_instance? */
+	net = vsub->vlr->user_ctx;
+	if (!net->t3212) {
+		MSC_VTY_DUMP(vty, offset, "Expires: never (T3212 is disabled)%s",
+			     VTY_NEWLINE);
+	} else if (vsub->expire_lu == VLR_SUBSCRIBER_NO_EXPIRATION) {
+		MSC_VTY_DUMP(vty, offset, "Expires: never%s",
+			     VTY_NEWLINE);
+	} else if (osmo_clock_gettime(CLOCK_MONOTONIC, &now) == 0) {
+		MSC_VTY_DUMP(vty, offset, "Expires: in %ld min %ld sec%s",
+			     (vsub->expire_lu - now.tv_sec) / 60,
+			     (vsub->expire_lu - now.tv_sec) % 60,
 			     VTY_NEWLINE);
 	}
 
