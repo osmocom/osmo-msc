@@ -89,7 +89,7 @@ struct scall_signal_data {
 	struct vty *vty;
 };
 struct sms_signal_data {
-	/* The transaction where this occured */
+	/* The transaction where this occurred */
 	struct gsm_trans *trans;
 	/* Can be NULL for SMMA */
 	struct gsm_sms *sms;

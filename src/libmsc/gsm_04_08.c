@@ -389,7 +389,7 @@ static int mm_rx_loc_upd_req(struct msc_a *msc_a, struct msgb *msg)
 
 	/* From vlr_loc_update() we expect an implicit dispatch of
 	 * VLR_ULA_E_UPDATE_LA, and thus we expect msc_vlr_subscr_assoc() to
-	 * already have been called and completed. Has an error occured? */
+	 * already have been called and completed. Has an error occurred? */
 
 	vsub = msc_a_vsub(msc_a);
 	if (!vsub) {
@@ -786,7 +786,7 @@ int gsm48_rx_mm_serv_req(struct msc_a *msc_a, struct msgb *msg)
 			 is_utran);
 
 	/* From vlr_proc_acc_req() we expect an implicit dispatch of PR_ARQ_E_START we expect
-	 * msc_vlr_subscr_assoc() to already have been called and completed. Has an error occured? */
+	 * msc_vlr_subscr_assoc() to already have been called and completed. Has an error occurred? */
 	vsub = msc_a_vsub(msc_a);
 	if (!vsub) {
 		LOG_MSC_A(msc_a, LOGL_ERROR, "subscriber not allowed to do a CM Service Request\n");
@@ -1158,7 +1158,7 @@ static int gsm48_rx_rr_pag_resp(struct msc_a *msc_a, struct msgb *msg)
 			 is_utran);
 
 	/* From vlr_proc_acc_req() we expect an implicit dispatch of PR_ARQ_E_START we expect
-	 * msc_vlr_subscr_assoc() to already have been called and completed. Has an error occured? */
+	 * msc_vlr_subscr_assoc() to already have been called and completed. Has an error occurred? */
 	vsub = msc_a_vsub(msc_a);
 	if (!vsub) {
 		LOG_MSC_A(msc_a, LOGL_ERROR, "subscriber not allowed to do a Paging Response\n");
