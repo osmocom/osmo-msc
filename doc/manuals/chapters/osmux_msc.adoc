@@ -1,0 +1,65 @@
+include::{commondir}/chapters/osmux/osmux.adoc[]
+
+=== Osmux Support in {program-name}
+
+==== {program-name} in a A/IP with IPA/SCCPlite network setup
+
+In this kind of setup, the CN side of BSC co-located MGW is managed by the MSC,
+meaning the use of Osmux is transparent to BSC since MSC takes care of both peer
+MGW connections. Moreover, in this case the MSC has no dynamic information on
+Osmux support in the BSC co-located MGW until `CRCX` time, which means
+configuration on both nodes need to be carefully set up so they can work
+together.
+
+Osmux usage in {program-name} in managed through the VTY command `osmux
+(on|off|only)`. Since there's no dynamic information on Osmux support, it may be
+required in the future to have an extra VTY command which can be set per BSC to
+fine-tune which ones should use Osmux and which shouldn't.
+
+{program-name} will behave differently during call set up based on the VTY
+command presented above:
+
+* `off`: {program-name} won't include an `X-Osmux` extension to `CRCX` sent to
+  the BSC co-located MGW when configuring the CN side of the MGW endpoint. If
+  the MGW answers with a `CRCX ACK` containing an `X-Osmux`, {program-name} will
+  cancel the call establishment.
+* `on`: {program-name} will initially configure its co-located MGW to use Osmux, then
+  similarly send a `CRCX` with an `X-Osmux` extension towards the BSC co-located
+  MGW. Under this configuration, if the BSC co-located MGW didn't support Osmux,
+  it could send a `CRCX ACK` without `X-Osmux` extension or fail (depending on
+  its own configuration), and {program-name} could choose to re-create its local
+  connection as non-Osmux (RTP) (and possibly try again against BSC co-located
+  MGW), but this behavior is currently not implemented. As a result, currently
+  `on` behaves the same as `only`.
+* `only`: {program-name} will configure its co-located MGW as well as the BSC
+  co-located MGW to use Osmux by including the `X-Osmux` MGCP extension. If MGW
+  rejects to use Osmux, {program-name} will reject the call and the call
+  establishment will fail.
+
+==== {program-name} in a 3GPP AoIP network setup
+
+Osmux usage in {program-name} in managed through the VTY command `osmux
+(on|off|only)`. Once enabled (`on` or `only`), {program-name} will start
+appending the vendor specific _Osmux Support_ IE in _BSSMAP RESET_ and _BSSMAP
+RESET-ACK_ message towards the BSC in order to announce it supports Osmux, and
+BSC will do the same. This way, {program-name} can decide whether to use Osmux
+or not based on this information when setting up a call (this time using _Osmux
+CID_ IE). It should be noted that this option should not be enabled unless BSCs
+managed by {program-name} support handling this extension IE (like OsmoBSC),
+3rd-party BSCs might otherwise refuse the related _RESET_/_RESET-ACK_ messages.
+
+{program-name} will behave differently during call set up based on the VTY
+command presented above:
+
+* `off`: {program-name} won't use Osmux. That is, it will send a _BSSMAP Assign
+  Request_ without the _Osmux CID_ IE, and will send a `CRCX` without `X-Osmux`
+  extension towards its co-located MGW.
+* `on`: If BSC announced Osmux support to {program-name} during _BSSMAP RESET_
+  time, then {program-name} will set up the call to use Osmux (by adding
+  `X-Osmux` to MGCP `CRCX` and _Osmux CID_ IE to _BSSMAP Assign Request_). If
+  the BSC didn't announce Osmux support to {program-name}, then {program-name}
+  will use RTP to set up the call (by avoiding addition of previously described
+  bits).
+* `only`: Same as per `on`, except that {program-name} will allow to set up only
+  Osmux calls on the CN-side, this is, it will reject to set up voice calls for
+  BSC which didn't announce Osmux support.
