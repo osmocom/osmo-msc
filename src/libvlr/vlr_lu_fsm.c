@@ -366,13 +366,6 @@ static void vlr_lu_compl_fsm_success(struct osmo_fsm_inst *fi)
 	vlr_sgs_fsm_update_id(vsub);
 }
 
-static void vlr_lu_compl_fsm_failure(struct osmo_fsm_inst *fi, uint8_t cause)
-{
-	struct lu_compl_vlr_priv *lcvp = lu_compl_vlr_fi_priv(fi);
-	lcvp->vsub->vlr->ops.tx_lu_rej(lcvp->msc_conn_ref, cause);
-	_vlr_lu_compl_fsm_done(fi, VLR_FSM_RESULT_FAILURE, cause);
-}
-
 static void vlr_lu_compl_fsm_dispatch_result(struct osmo_fsm_inst *fi,
 					     uint32_t prev_state)
 {
@@ -434,8 +427,7 @@ static void lu_compl_vlr_new_tmsi(struct osmo_fsm_inst *fi)
 	LOGPFSM(fi, "%s()\n", __func__);
 
 	if (vlr_subscr_alloc_tmsi(vsub)) {
-		vlr_lu_compl_fsm_failure(fi,
-					 GSM48_REJECT_SRV_OPT_TMP_OUT_OF_ORDER);
+		_vlr_lu_compl_fsm_done(fi, VLR_FSM_RESULT_FAILURE, GSM48_REJECT_SRV_OPT_TMP_OUT_OF_ORDER);
 		return;
 	}
 
@@ -495,15 +487,14 @@ static void lu_compl_vlr_wait_imei(struct osmo_fsm_inst *fi, uint32_t event,
 	case LU_COMPL_VLR_E_IMEI_CHECK_ACK:
 		if (!vsub->imei[0]) {
 			/* Abort: Do nothing */
-			vlr_lu_compl_fsm_failure(fi,
-						 GSM48_REJECT_PROTOCOL_ERROR);
+			_vlr_lu_compl_fsm_done(fi, VLR_FSM_RESULT_FAILURE, GSM48_REJECT_PROTOCOL_ERROR);
 			return;
 		}
 		/* Pass */
 		break;
 
 	case LU_COMPL_VLR_E_IMEI_CHECK_NACK:
-		vlr_lu_compl_fsm_failure(fi, GSM48_REJECT_ILLEGAL_ME);
+		_vlr_lu_compl_fsm_done(fi, VLR_FSM_RESULT_FAILURE, GSM48_REJECT_ILLEGAL_ME);
 		/* FIXME: IMEI Check Fail to VLR Application (Detach IMSI VLR) */
 		return;
 	}
@@ -544,7 +535,7 @@ static void lu_compl_vlr_wait_tmsi(struct osmo_fsm_inst *fi, uint32_t event,
 		LOGPFSML(fi, LOGL_ERROR, "TMSI Realloc Compl implies that"
 			 " the subscriber has a new TMSI allocated, but"
 			 " the new TMSI is unset.\n");
-		vlr_lu_compl_fsm_failure(fi, GSM48_REJECT_NETWORK_FAILURE);
+		_vlr_lu_compl_fsm_done(fi, VLR_FSM_RESULT_FAILURE, GSM48_REJECT_NETWORK_FAILURE);
 		return;
 	}
 
