@@ -148,7 +148,10 @@ DEFUN(cfg_net_encryption,
       cfg_net_encryption_cmd,
       "encryption a5 <0-3> [<0-3>] [<0-3>] [<0-3>]",
 	"Encryption options\n"
-	"GSM A5 Air Interface Encryption\n"
+	"GSM A5 Air Interface Encryption."
+	  " NOTE: as long as OsmoMSC lacks distinct configuration for 3G encryption,"
+	  " 3G encryption is enabled exactly when any 2G encryption is enabled."
+	  " Hence configuring only A5/0 here switches off 3G encryption.\n"
 	"A5/n Algorithm Number\n"
 	"A5/n Algorithm Number\n"
 	"A5/n Algorithm Number\n"

@@ -32,6 +32,9 @@
 #include <osmocom/msc/msc_a.h>
 #include <osmocom/msc/mncc.h>
 
+#define A5_0 (1 << 0)
+#define A5_0_3 ((1 << 0) | (1 << 3))
+
 extern bool _log_lines;
 #define _log(fmt, args...) do { \
 		if (_log_lines) \

@@ -266,6 +266,8 @@ static void _test_auth_reuse(enum osmo_rat_type via_ran,
 static void test_auth_use_twice_geran()
 {
 	comment_start();
+	/* A5/0 = no encryption */
+	net->a5_encryption_mask = A5_0;
 	_test_auth_reuse(OSMO_RAT_GERAN_A, 1, 1, true);
 	comment_end();
 }
@@ -273,6 +275,8 @@ static void test_auth_use_twice_geran()
 static void test_auth_use_twice_utran()
 {
 	comment_start();
+	/* A5/0 + A5/3 = encryption enabled; so far the A5 setting also triggers UTRAN encryption */
+	net->a5_encryption_mask = A5_0_3;
 	_test_auth_reuse(OSMO_RAT_UTRAN_IU, 1, 1, true);
 	comment_end();
 }
@@ -280,6 +284,8 @@ static void test_auth_use_twice_utran()
 static void test_auth_use_infinitely_geran()
 {
 	comment_start();
+	/* A5/0 = no encryption */
+	net->a5_encryption_mask = A5_0;
 	_test_auth_reuse(OSMO_RAT_GERAN_A, -1, 3, false);
 	comment_end();
 }
@@ -287,6 +293,8 @@ static void test_auth_use_infinitely_geran()
 static void test_auth_use_infinitely_utran()
 {
 	comment_start();
+	/* A5/0 + A5/3 = encryption enabled; so far the A5 setting also triggers UTRAN encryption */
+	net->a5_encryption_mask = A5_0_3;
 	_test_auth_reuse(OSMO_RAT_UTRAN_IU, -1, 3, false);
 	comment_end();
 }
@@ -294,6 +302,8 @@ static void test_auth_use_infinitely_utran()
 static void test_no_auth_reuse_geran()
 {
 	comment_start();
+	/* A5/0 = no encryption */
+	net->a5_encryption_mask = A5_0;
 	_test_auth_reuse(OSMO_RAT_GERAN_A, 0, 0, true);
 	comment_end();
 }
@@ -301,6 +311,8 @@ static void test_no_auth_reuse_geran()
 static void test_no_auth_reuse_utran()
 {
 	comment_start();
+	/* A5/0 + A5/3 = encryption enabled; so far the A5 setting also triggers UTRAN encryption */
+	net->a5_encryption_mask = A5_0_3;
 	_test_auth_reuse(OSMO_RAT_UTRAN_IU, 0, 0, true);
 	comment_end();
 }

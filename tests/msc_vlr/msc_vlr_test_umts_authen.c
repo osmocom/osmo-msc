@@ -306,6 +306,8 @@ static void _test_umts_authen(enum osmo_rat_type via_ran)
 static void test_umts_authen_geran()
 {
 	comment_start();
+	/* A5/0 = no encryption */
+	net->a5_encryption_mask = A5_0;
 	_test_umts_authen(OSMO_RAT_GERAN_A);
 	comment_end();
 }
@@ -313,6 +315,8 @@ static void test_umts_authen_geran()
 static void test_umts_authen_utran()
 {
 	comment_start();
+	/* A5/0 + A5/3 = encryption enabled; so far the A5 setting also triggers UTRAN encryption */
+	net->a5_encryption_mask = A5_0_3;
 	_test_umts_authen(OSMO_RAT_UTRAN_IU);
 	comment_end();
 }
@@ -544,6 +548,8 @@ static void _test_umts_authen_resync(enum osmo_rat_type via_ran)
 static void test_umts_authen_resync_geran()
 {
 	comment_start();
+	/* A5/0 = no encryption */
+	net->a5_encryption_mask = A5_0;
 	_test_umts_authen_resync(OSMO_RAT_GERAN_A);
 	comment_end();
 }
@@ -551,6 +557,8 @@ static void test_umts_authen_resync_geran()
 static void test_umts_authen_resync_utran()
 {
 	comment_start();
+	/* A5/0 + A5/3 = encryption enabled; so far the A5 setting also triggers UTRAN encryption */
+	net->a5_encryption_mask = A5_0_3;
 	_test_umts_authen_resync(OSMO_RAT_UTRAN_IU);
 	comment_end();
 }
@@ -644,6 +652,8 @@ static void _test_umts_authen_too_short_res(enum osmo_rat_type via_ran)
 static void test_umts_authen_too_short_res_geran()
 {
 	comment_start();
+	/* A5/0 = no encryption */
+	net->a5_encryption_mask = A5_0;
 	_test_umts_authen_too_short_res(OSMO_RAT_GERAN_A);
 	comment_end();
 }
@@ -651,6 +661,8 @@ static void test_umts_authen_too_short_res_geran()
 static void test_umts_authen_too_short_res_utran()
 {
 	comment_start();
+	/* A5/0 + A5/3 = encryption enabled; so far the A5 setting also triggers UTRAN encryption */
+	net->a5_encryption_mask = A5_0_3;
 	_test_umts_authen_too_short_res(OSMO_RAT_UTRAN_IU);
 	comment_end();
 }
@@ -744,6 +756,8 @@ static void _test_umts_authen_too_long_res(enum osmo_rat_type via_ran)
 static void test_umts_authen_too_long_res_geran()
 {
 	comment_start();
+	/* A5/0 = no encryption */
+	net->a5_encryption_mask = A5_0;
 	_test_umts_authen_too_long_res(OSMO_RAT_GERAN_A);
 	comment_end();
 }
@@ -751,6 +765,8 @@ static void test_umts_authen_too_long_res_geran()
 static void test_umts_authen_too_long_res_utran()
 {
 	comment_start();
+	/* A5/0 + A5/3 = encryption enabled; so far the A5 setting also triggers UTRAN encryption */
+	net->a5_encryption_mask = A5_0_3;
 	_test_umts_authen_too_long_res(OSMO_RAT_UTRAN_IU);
 	comment_end();
 }
@@ -849,6 +865,8 @@ static void _test_umts_authen_only_sres(enum osmo_rat_type via_ran)
 static void test_umts_authen_only_sres_geran()
 {
 	comment_start();
+	/* A5/0 = no encryption */
+	net->a5_encryption_mask = A5_0;
 	_test_umts_authen_only_sres(OSMO_RAT_GERAN_A);
 	comment_end();
 }
@@ -856,6 +874,8 @@ static void test_umts_authen_only_sres_geran()
 static void test_umts_authen_only_sres_utran()
 {
 	comment_start();
+	/* A5/0 + A5/3 = encryption enabled; so far the A5 setting also triggers UTRAN encryption */
+	net->a5_encryption_mask = A5_0_3;
 	_test_umts_authen_only_sres(OSMO_RAT_UTRAN_IU);
 	comment_end();
 }

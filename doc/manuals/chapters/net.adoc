@@ -189,6 +189,10 @@ network
 While authentication is always required on 3G, ciphering is optional.
 
 So far OsmoMSC lacks explicit configuration for ciphering on 3G. As an interim
-solution, ciphering is always enabled on 3G.
+solution, ciphering is enabled on 3G exactly when ciphering is enabled on 2G,
+i.e. when any cipher other than A5/0 is enabled in the configuration. If only
+A5/0 is configured, ciphering will be disabled on both 2G and 3G. The future
+aim is to add comprehensive configuration for 3G ciphering that is independent
+from the 2G setting.
 
 OsmoMSC indicates UEA1 and UEA2 as permitted encryption algorithms on 3G.

@@ -46,6 +46,7 @@ static void standard_lu()
 	struct vlr_subscr *vsub;
 
 	net->authentication_required = true;
+	net->a5_encryption_mask = A5_0_3;
 	net->vlr->cfg.assign_tmsi = true;
 	rx_from_ran = OSMO_RAT_UTRAN_IU;
 
