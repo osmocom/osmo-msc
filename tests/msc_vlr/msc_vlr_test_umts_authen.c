@@ -122,23 +122,30 @@ static void _test_umts_authen(enum osmo_rat_type via_ran)
 	VERBOSE_ASSERT(auth_request_sent, == true, "%d");
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
-	if (via_ran == OSMO_RAT_GERAN_A) {
-		btw("MS sends Authen Response, VLR accepts and sends GSUP LU Req to HLR");
-		gsup_expect_tx("04010809710000000156f0280102" VLR_TO_HLR);
-		ms_sends_msg("0554" "e229c19e" "2104" "791f2e41");
-		VERBOSE_ASSERT(gsup_tx_confirmed, == true, "%d");
-		VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
-	} else {
-		/* On UTRAN */
-		btw("MS sends Authen Response, VLR accepts and sends SecurityModeControl");
-		expect_security_mode_ctrl(NULL, "27497388b6cb044648f396aa155b95ef");
-		ms_sends_msg("0554" "e229c19e" "2104" "791f2e41");
-		VERBOSE_ASSERT(security_mode_ctrl_sent, == true, "%d");
-		VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
+	if (net->a5_encryption_mask > 0x1) {
+		/* Encryption enabled */
+		if (via_ran == OSMO_RAT_GERAN_A) {
+			btw("Test code not implemented");
+			OSMO_ASSERT(false);
+		} else {
+			/* On UTRAN */
+			btw("Encryption enabled. MS sends Authen Response, VLR accepts and sends SecurityModeControl");
+			expect_security_mode_ctrl(NULL, "27497388b6cb044648f396aa155b95ef");
+			ms_sends_msg("0554" "e229c19e" "2104" "791f2e41");
+			VERBOSE_ASSERT(security_mode_ctrl_sent, == true, "%d");
+			VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
-		btw("MS sends SecurityModeControl acceptance, VLR accepts and sends GSUP LU Req to HLR");
+			btw("MS sends SecurityModeControl acceptance, VLR accepts and sends GSUP LU Req to HLR");
+			gsup_expect_tx("04010809710000000156f0280102" VLR_TO_HLR);
+			ms_sends_security_mode_complete();
+			VERBOSE_ASSERT(gsup_tx_confirmed, == true, "%d");
+			VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
+		}
+	} else {
+		/* Encryption disabled */
+		btw("Encryption disabled. MS sends Authen Response, VLR accepts and sends GSUP LU Req to HLR");
 		gsup_expect_tx("04010809710000000156f0280102" VLR_TO_HLR);
-		ms_sends_security_mode_complete();
+		ms_sends_msg("0554" "e229c19e" "2104" "791f2e41");
 		VERBOSE_ASSERT(gsup_tx_confirmed, == true, "%d");
 		VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 	}
@@ -190,22 +197,29 @@ static void _test_umts_authen(enum osmo_rat_type via_ran)
 	EXPECT_ACCEPTED(false);
 	thwart_rx_non_initial_requests();
 
-	if (via_ran == OSMO_RAT_GERAN_A) {
-		btw("MS sends Authen Response, VLR accepts with a CM Service Accept");
+	if (net->a5_encryption_mask > 0x1) {
+		/* Encryption enabled */
+		if (via_ran == OSMO_RAT_GERAN_A) {
+			btw("Test code not implemented");
+			OSMO_ASSERT(false);
+		} else {
+			/* On UTRAN */
+			btw("Encryption enabled. MS sends Authen Response, VLR accepts and sends SecurityModeControl");
+			expect_security_mode_ctrl(NULL, "1159ec926a50e98c034a6b7d7c9f418d");
+			ms_sends_msg("0554" "7db47cf7" "2104" "f81e4dc7"); /* 2nd vector's res, s.a. */
+			VERBOSE_ASSERT(security_mode_ctrl_sent, == true, "%d");
+			VERBOSE_ASSERT(cm_service_result_sent, == RES_NONE, "%d");
+
+			btw("MS sends SecurityModeControl acceptance, VLR accepts; above Ciphering is an implicit CM Service Accept");
+			ms_sends_security_mode_complete();
+			VERBOSE_ASSERT(cm_service_result_sent, == RES_NONE, "%d");
+		}
+	} else {
+		/* Encryption disabled */
+		btw("Encryption disabled. MS sends Authen Response, VLR accepts with a CM Service Accept");
 		gsup_expect_tx(NULL);
 		ms_sends_msg("0554" "7db47cf7" "2104" "f81e4dc7"); /* 2nd vector's res, s.a. */
 		VERBOSE_ASSERT(cm_service_result_sent, == RES_ACCEPT, "%d");
-	} else {
-		/* On UTRAN */
-		btw("MS sends Authen Response, VLR accepts and sends SecurityModeControl");
-		expect_security_mode_ctrl(NULL, "1159ec926a50e98c034a6b7d7c9f418d");
-		ms_sends_msg("0554" "7db47cf7" "2104" "f81e4dc7"); /* 2nd vector's res, s.a. */
-		VERBOSE_ASSERT(security_mode_ctrl_sent, == true, "%d");
-		VERBOSE_ASSERT(cm_service_result_sent, == RES_NONE, "%d");
-
-		btw("MS sends SecurityModeControl acceptance, VLR accepts; above Ciphering is an implicit CM Service Accept");
-		ms_sends_security_mode_complete();
-		VERBOSE_ASSERT(cm_service_result_sent, == RES_NONE, "%d");
 	}
 
 	/* Release connection */
@@ -251,21 +265,28 @@ static void _test_umts_authen(enum osmo_rat_type via_ran)
 	EXPECT_ACCEPTED(false);
 	thwart_rx_non_initial_requests();
 
-	if (via_ran == OSMO_RAT_GERAN_A) {
-		btw("MS sends Authen Response, VLR accepts and sends pending SMS");
+	if (net->a5_encryption_mask > 0x1) {
+		/* Encryption enabled */
+		if (via_ran == OSMO_RAT_GERAN_A) {
+			btw("Test code not implemented");
+			OSMO_ASSERT(false);
+		} else {
+			/* On UTRAN */
+			btw("Encryption enabled. MS sends Authen Response, VLR accepts and sends SecurityModeControl");
+			expect_security_mode_ctrl(NULL, "eb50e770ddcc3060101d2f43b6c2b884");
+			ms_sends_msg("0554" "706f9967" "2104" "19ba609c"); /* 3nd vector's res, s.a. */
+			VERBOSE_ASSERT(security_mode_ctrl_sent, == true, "%d");
+
+			btw("MS sends SecurityModeControl acceptance, VLR accepts and sends SMS");
+			dtap_expect_tx(sms);
+			ms_sends_security_mode_complete();
+		}
+	} else {
+		/* Encryption disabled */
+		btw("Encryption disabled. MS sends Authen Response, VLR accepts and sends pending SMS");
 		dtap_expect_tx(sms);
 		ms_sends_msg("0554" "706f9967" "2104" "19ba609c"); /* 3nd vector's res, s.a. */
 		VERBOSE_ASSERT(dtap_tx_confirmed, == true, "%d");
-	} else {
-		/* On UTRAN */
-		btw("MS sends Authen Response, VLR accepts and sends SecurityModeControl");
-		expect_security_mode_ctrl(NULL, "eb50e770ddcc3060101d2f43b6c2b884");
-		ms_sends_msg("0554" "706f9967" "2104" "19ba609c"); /* 3nd vector's res, s.a. */
-		VERBOSE_ASSERT(security_mode_ctrl_sent, == true, "%d");
-
-		btw("MS sends SecurityModeControl acceptance, VLR accepts and sends SMS");
-		dtap_expect_tx(sms);
-		ms_sends_security_mode_complete();
 	}
 
 	btw("SMS was delivered, no requests pending for subscr");
@@ -313,6 +334,15 @@ static void test_umts_authen_geran()
 }
 
 static void test_umts_authen_utran()
+{
+	comment_start();
+	/* A5/0 = no encryption; so far the A5 setting also triggers UTRAN encryption */
+	net->a5_encryption_mask = A5_0;
+	_test_umts_authen(OSMO_RAT_UTRAN_IU);
+	comment_end();
+}
+
+static void test_umts_auth_ciph_utran()
 {
 	comment_start();
 	/* A5/0 + A5/3 = encryption enabled; so far the A5 setting also triggers UTRAN encryption */
@@ -489,23 +519,30 @@ static void _test_umts_authen_resync(enum osmo_rat_type via_ran)
 	VERBOSE_ASSERT(auth_request_sent, == true, "%d");
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
-	if (via_ran == OSMO_RAT_GERAN_A) {
-		btw("MS sends Authen Response, VLR accepts and sends GSUP LU Req to HLR");
-		gsup_expect_tx("04010809710000000156f0280102" VLR_TO_HLR);
-		ms_sends_msg("0554" "1df5f0b4" "2104" "f22b696e");
-		VERBOSE_ASSERT(gsup_tx_confirmed, == true, "%d");
-		VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
-	} else {
-		/* On UTRAN */
-		btw("MS sends Authen Response, VLR accepts and sends SecurityModeControl");
-		expect_security_mode_ctrl(NULL, "8a90c769b7272f3bb7a1c1fbb1ea9349");
-		ms_sends_msg("0554" "1df5f0b4" "2104" "f22b696e");
-		VERBOSE_ASSERT(security_mode_ctrl_sent, == true, "%d");
-		VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
+	if (net->a5_encryption_mask > 0x1) {
+		/* Encryption enabled */
+		if (via_ran == OSMO_RAT_GERAN_A) {
+			btw("Test code not implemented");
+			OSMO_ASSERT(false);
+		} else {
+			/* On UTRAN */
+			btw("Encryption enabled. MS sends Authen Response, VLR accepts and sends SecurityModeControl");
+			expect_security_mode_ctrl(NULL, "8a90c769b7272f3bb7a1c1fbb1ea9349");
+			ms_sends_msg("0554" "1df5f0b4" "2104" "f22b696e");
+			VERBOSE_ASSERT(security_mode_ctrl_sent, == true, "%d");
+			VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
-		btw("MS sends SecurityModeControl acceptance, VLR accepts and sends GSUP LU Req to HLR");
+			btw("MS sends SecurityModeControl acceptance, VLR accepts and sends GSUP LU Req to HLR");
+			gsup_expect_tx("04010809710000000156f0280102" VLR_TO_HLR);
+			ms_sends_security_mode_complete();
+			VERBOSE_ASSERT(gsup_tx_confirmed, == true, "%d");
+			VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
+		}
+	} else {
+		/* Encryption disabled */
+		btw("Encryption disabled. MS sends Authen Response, VLR accepts and sends GSUP LU Req to HLR");
 		gsup_expect_tx("04010809710000000156f0280102" VLR_TO_HLR);
-		ms_sends_security_mode_complete();
+		ms_sends_msg("0554" "1df5f0b4" "2104" "f22b696e");
 		VERBOSE_ASSERT(gsup_tx_confirmed, == true, "%d");
 		VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 	}
@@ -555,6 +592,15 @@ static void test_umts_authen_resync_geran()
 }
 
 static void test_umts_authen_resync_utran()
+{
+	comment_start();
+	/* A5/0 = no encryption; so far the A5 setting also triggers UTRAN encryption */
+	net->a5_encryption_mask = A5_0;
+	_test_umts_authen_resync(OSMO_RAT_UTRAN_IU);
+	comment_end();
+}
+
+static void test_umts_auth_ciph_resync_utran()
 {
 	comment_start();
 	/* A5/0 + A5/3 = encryption enabled; so far the A5 setting also triggers UTRAN encryption */
@@ -884,8 +930,10 @@ static void test_umts_authen_only_sres_utran()
 msc_vlr_test_func_t msc_vlr_tests[] = {
 	test_umts_authen_geran,
 	test_umts_authen_utran,
+	test_umts_auth_ciph_utran,
 	test_umts_authen_resync_geran,
 	test_umts_authen_resync_utran,
+	test_umts_auth_ciph_resync_utran,
 	test_umts_authen_too_short_res_geran,
 	test_umts_authen_too_short_res_utran,
 	test_umts_authen_too_long_res_geran,
