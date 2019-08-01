@@ -100,6 +100,7 @@ const char *get_mncc_name(int value)
 void mncc_set_cause(struct gsm_mncc *data, int loc, int val)
 {
 	data->fields |= MNCC_F_CAUSE;
+	data->cause.coding = GSM48_CAUSE_CODING_GSM;
 	data->cause.location = loc;
 	data->cause.value = val;
 }

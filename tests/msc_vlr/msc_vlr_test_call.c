@@ -401,7 +401,7 @@ static void test_call_mt2()
 	 * this only worked synchronously, i.e. only with internal MNCC. Instead of mimicking that, we need a proper
 	 * async solution that also works with a PBX. */
 	cc_to_mncc_expect_tx("", MNCC_REL_CNF);
-	dtap_expect_tx("032d080281af"); /* CC: Release */
+	dtap_expect_tx("032d0802e1af"); /* CC: Release */
 	expect_iu_release();
 	msc_a_release_cn(msub_msc_a(g_msub));
 	OSMO_ASSERT(dtap_tx_confirmed);
