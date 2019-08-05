@@ -6,17 +6,17 @@ charts: msc dot
 EXTRA_DIST = \
 	inter_bsc_ho.msc \
 	inter_msc_ho.msc \
-	mncc_fsm.msc \
+	mncc_call_fsm.msc \
 	$(NULL)
 
 CLEANFILES = \
 	inter_bsc_ho.png \
 	inter_msc_ho.png \
-	mncc_fsm.png \
+	mncc_call_fsm.png \
 	$(NULL)
 
 msc: \
-	$(builddir)/mncc_fsm.png \
+	$(builddir)/mncc_call_fsm.png \
 	$(builddir)/inter_bsc_ho.png \
 	$(builddir)/inter_msc_ho.png \
 	$(NULL)

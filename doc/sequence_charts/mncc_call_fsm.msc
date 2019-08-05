@@ -1,15 +1,15 @@
 msc {
 	hscale=3;
-	msc1[label="osmo-msc"], mncc1[label="MNCC FSM\n(osmo-msc mncc_fsm.c)"], sipcon1[label="osmo-sip-connector"], sip[label="PBX"], sipcon2[label="osmo-sip-connector"], mncc2[label="MNCC FSM\n(osmo-msc mncc_fsm.c)"], msc2[label="osmo-msc"];
+	msc1[label="osmo-msc"], mncc1[label="MNCC FSM\n(osmo-msc mncc_call.c)"], sipcon1[label="osmo-sip-connector"], sip[label="PBX"], sipcon2[label="osmo-sip-connector"], mncc2[label="MNCC FSM\n(osmo-msc mncc_call.c)"], msc2[label="osmo-msc"];
 
 	msc1 note sipcon1 [label="MO call"];
 	sipcon2 note msc2 [label="MT call"];
 
-	mncc1 abox mncc1 [label="MNCC_ST_NOT_STARTED"];
+	mncc1 abox mncc1 [label="MNCC_CALL_ST_NOT_STARTED"];
 	msc1 rbox msc1 [label="mncc_outgoing_start()"];
-	msc1 -> mncc1 [label="MNCC_EV_OUTGOING_START"];
+	msc1 -> mncc1 [label="MNCC_CALL_EV_OUTGOING_START"];
 
-	mncc1 abox mncc1 [label="MNCC_ST_OUTGOING_WAIT_PROCEEDING"];
+	mncc1 abox mncc1 [label="MNCC_CALL_ST_OUTGOING_WAIT_PROCEEDING"];
 	mncc1 => sipcon1 [label="MNCC_SETUP_IND
 			    \n callref, IMSI, called and calling number, SDP"];
 	sipcon1 => sip [label="SIP INVITE
@@ -22,7 +22,7 @@ msc {
 			\n callref, RTP IP address and port"];
 	mncc1 <= sipcon1 [label="MNCC_CALL_PROC_REQ
 			\n callref, RTP IP address and port"];
-	mncc1 abox mncc1 [label="MNCC_ST_OUTGOING_WAIT_COMPLETE"];
+	mncc1 abox mncc1 [label="MNCC_CALL_ST_OUTGOING_WAIT_COMPLETE"];
 
 	sip => sipcon2 [label="SIP INVITE
 			\n from, to, SDP"];
@@ -30,10 +30,10 @@ msc {
 	msc2 <= sipcon2 [label="MNCC_SETUP_REQ
 			\n callref, called and calling number
 			\n SDP"];
-	mncc2 abox mncc2 [label="MNCC_ST_NOT_STARTED"];
+	mncc2 abox mncc2 [label="MNCC_CALL_ST_NOT_STARTED"];
 	msc2 rbox msc2 [label="mncc_incoming_start()"];
-	msc2 -> mncc2 [label="MNCC_EV_INCOMING_START"];
-	mncc2 abox mncc2 [label="MNCC_ST_INCOMING_WAIT_COMPLETE"];
+	msc2 -> mncc2 [label="MNCC_CALL_EV_INCOMING_START"];
+	mncc2 abox mncc2 [label="MNCC_CALL_ST_INCOMING_WAIT_COMPLETE"];
 	mncc2 => sipcon2 [label="MNCC_CALL_CONF_IND
 			\n callref, bearer capabilities, cccap and IMSI, SDP?"];
 	mncc2 <= sipcon2 [label="MNCC_RTP_CREATE
@@ -67,14 +67,14 @@ msc {
 	mncc2 rbox mncc2 [label="mncc_rx_rtp_connect()"];
 	mncc2 <= sipcon2 [label="MNCC_SETUP_COMPL_REQ
 			\n callref"];
-	mncc2 abox mncc2 [label="MNCC_ST_TALKING"];
+	mncc2 abox mncc2 [label="MNCC_CALL_ST_TALKING"];
 
 	sipcon1 <= sip [label="SIP 200 OK INVITE"];
 	mncc1 <= sipcon1 [label="MNCC_SETUP_RSP
 			\n callref"];
 	mncc1 => sipcon1 [label="MNCC_SETUP_COMPL_IND
 			\n callref"];
-	mncc1 abox mncc1 [label="MNCC_ST_TALKING"];
+	mncc1 abox mncc1 [label="MNCC_CALL_ST_TALKING"];
 	sipcon1 => sip [label="SIP ACK"];
 
 	...;
@@ -84,7 +84,7 @@ msc {
 	mncc1 rbox mncc1 [label="mncc_release()"];
 	mncc1 => sipcon1 [label="MNCC_DISC_IND
 			\n callref and cause"];
-	mncc1 abox mncc1 [label="MNCC_ST_WAIT_RELEASE_ACK"];
+	mncc1 abox mncc1 [label="MNCC_CALL_ST_WAIT_RELEASE_ACK"];
 	sipcon1 => sip [label="SIP BYE"];
 	sipcon1 <= sip [label="SIP 200 OK"];
 	mncc1 <= sipcon1 [label="MNCC_REL_REQ
