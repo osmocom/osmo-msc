@@ -1,84 +1,104 @@
 msc {
-	hscale=2;
-	msc1[label="osmo-msc"], mncc1[label="MNCC FSM"], pbx[label="MNCC server (osmo-sip-connector)"], mncc2[label="MNCC FSM"], msc2[label="osmo-msc"];
+	hscale=3;
+	msc1[label="osmo-msc"], mncc1[label="MNCC FSM\n(osmo-msc mncc_fsm.c)"], sipcon1[label="osmo-sip-connector"], sip[label="PBX"], sipcon2[label="osmo-sip-connector"], mncc2[label="MNCC FSM\n(osmo-msc mncc_fsm.c)"], msc2[label="osmo-msc"];
 
-	mncc1 note mncc1 [label="The typical progression of an outgoing call, i.e. a call initiated by osmo-msc, as
-		implemented in mncc_fsm.h, mncc_fsm.c"];
-	mncc2 note mncc2 [label="The typical progression of an incoming call, i.e. a call initiated by the PBX, as
-		implemented in mncc_fsm.h, mncc_fsm.c"];
+	msc1 note sipcon1 [label="MO call"];
+	sipcon2 note msc2 [label="MT call"];
 
 	mncc1 abox mncc1 [label="MNCC_ST_NOT_STARTED"];
 	msc1 rbox msc1 [label="mncc_outgoing_start()"];
 	msc1 -> mncc1 [label="MNCC_EV_OUTGOING_START"];
 
 	mncc1 abox mncc1 [label="MNCC_ST_OUTGOING_WAIT_PROCEEDING"];
-	mncc1 => pbx [label="MNCC_SETUP_IND
-			    \n callref, IMSI, called and calling number"];
-	mncc1 <= pbx [label="MNCC_RTP_CREATE
+	mncc1 => sipcon1 [label="MNCC_SETUP_IND
+			    \n callref, IMSI, called and calling number, SDP"];
+	sipcon1 => sip [label="SIP INVITE
+			\n from, to, SDP"];
+	sipcon1 <= sip [label="SIP 100 Trying"];
+	mncc1 <= sipcon1 [label="MNCC_RTP_CREATE
 			\n callref"];
 	mncc1 rbox mncc1 [label="mncc_rx_rtp_create()"];
-	mncc1 => pbx [label="MNCC_RTP_CREATE
+	mncc1 => sipcon1 [label="MNCC_RTP_CREATE
 			\n callref, RTP IP address and port"];
-	mncc1 <= pbx [label="MNCC_CALL_PROC_REQ
+	mncc1 <= sipcon1 [label="MNCC_CALL_PROC_REQ
 			\n callref, RTP IP address and port"];
 	mncc1 abox mncc1 [label="MNCC_ST_OUTGOING_WAIT_COMPLETE"];
 
-	msc2 <= pbx [label="MNCC_SETUP_REQ
-			\n callref, called and calling number"];
+	sip => sipcon2 [label="SIP INVITE
+			\n from, to, SDP"];
+	sipcon2 => sip [label="SIP 100 Trying"];
+	msc2 <= sipcon2 [label="MNCC_SETUP_REQ
+			\n callref, called and calling number
+			\n SDP"];
 	mncc2 abox mncc2 [label="MNCC_ST_NOT_STARTED"];
 	msc2 rbox msc2 [label="mncc_incoming_start()"];
 	msc2 -> mncc2 [label="MNCC_EV_INCOMING_START"];
 	mncc2 abox mncc2 [label="MNCC_ST_INCOMING_WAIT_COMPLETE"];
-	mncc2 => pbx [label="MNCC_CALL_CONF_IND
-			\n callref, bearer capabilities, cccap and IMSI"];
-	mncc2 <= pbx [label="MNCC_RTP_CREATE
+	mncc2 => sipcon2 [label="MNCC_CALL_CONF_IND
+			\n callref, bearer capabilities, cccap and IMSI, SDP?"];
+	mncc2 <= sipcon2 [label="MNCC_RTP_CREATE
 			\n callref"];
 	mncc2 rbox mncc2 [label="mncc_rx_rtp_create()"];
-	mncc2 => pbx [label="MNCC_RTP_CREATE
-			\n callref, RTP IP address and port"];
-	mncc2 => pbx [label="MNCC_ALERT_IND
+	mncc2 => sipcon2 [label="MNCC_RTP_CREATE
+			\n callref, RTP IP address and port, SDP?"];
+	mncc2 => sipcon2 [label="MNCC_ALERT_IND
 			\n callref"];
+	sipcon2 => sip [label="SIP 180 Ringing
+			\n SDP"];
 
-	mncc1 <= pbx [label="MNCC_ALERT_REQ
+	sipcon1 <= sip [label="SIP 180 Ringing
+			\n SDP"];
+	mncc1 <= sipcon1 [label="MNCC_ALERT_REQ
 			\n callref and progress"];
+	sipcon1 => sip [label="SIP PRACK 180 Ringing"];
+	sipcon1 <= sip [label="SIP PRACK 200"];
 
-	mncc2 => pbx [label="MNCC_SETUP_CNF
-			\n callref, imsi and connected number"];
-	mncc2 <= pbx [label="MNCC_RTP_CONNECT
-			\n callref, RTP IP and port"];
-	mncc2 rbox mncc2 [label="mncc_rx_rtp_connect()"];
-	mncc2 <= pbx [label="MNCC_SETUP_COMPL_REQ
-			\n callref"];
-	mncc2 abox mncc2 [label="MNCC_ST_TALKING"];
-
-	mncc1 <= pbx [label="MNCC_RTP_CONNECT
+	mncc1 <= sipcon1 [label="MNCC_RTP_CONNECT
 			\n callref, RTP IP and port"];
 	mncc1 rbox mncc1 [label="mncc_rx_rtp_connect()"];
 	msc1 <- mncc1 [label="rtp_stream_set_remote_addr()"];
-	mncc1 <= pbx [label="MNCC_SETUP_RSP
+
+	mncc2 => sipcon2 [label="MNCC_SETUP_CNF
+			\n callref, imsi and connected number, SDP?"];
+	sipcon2 => sip [label="SIP 200 OK
+			\n SDP"];
+	mncc2 <= sipcon2 [label="MNCC_RTP_CONNECT
+			\n callref, RTP IP and port"];
+	mncc2 rbox mncc2 [label="mncc_rx_rtp_connect()"];
+	mncc2 <= sipcon2 [label="MNCC_SETUP_COMPL_REQ
 			\n callref"];
-	mncc1 => pbx [label="MNCC_SETUP_COMPL_IND
+	mncc2 abox mncc2 [label="MNCC_ST_TALKING"];
+
+	sipcon1 <= sip [label="SIP 200 OK INVITE"];
+	mncc1 <= sipcon1 [label="MNCC_SETUP_RSP
+			\n callref"];
+	mncc1 => sipcon1 [label="MNCC_SETUP_COMPL_IND
 			\n callref"];
 	mncc1 abox mncc1 [label="MNCC_ST_TALKING"];
+	sipcon1 => sip [label="SIP ACK"];
 
 	...;
 	... [label="Call goes on for a while..."];
 	...;
 
 	mncc1 rbox mncc1 [label="mncc_release()"];
-	mncc1 => pbx [label="MNCC_DISC_IND
+	mncc1 => sipcon1 [label="MNCC_DISC_IND
 			\n callref and cause"];
 	mncc1 abox mncc1 [label="MNCC_ST_WAIT_RELEASE_ACK"];
-	mncc1 <= pbx [label="MNCC_REL_REQ
+	sipcon1 => sip [label="SIP BYE"];
+	sipcon1 <= sip [label="SIP 200 OK"];
+	mncc1 <= sipcon1 [label="MNCC_REL_REQ
 			\n callref and cause"];
 
-	mncc2 <= pbx [label="MNCC_DISC_REQ
+	sip => sipcon2 [label="SIP BYE"];
+	sip <= sipcon2 [label="SIP 200 OK"];
+	mncc2 <= sipcon2 [label="MNCC_DISC_REQ
 			\n callref and cause"];
-	mncc2 => pbx [label="MNCC_REL_IND
+	mncc2 => sipcon2 [label="MNCC_REL_IND
 			\n callref and cause"];
 	mncc2 abox mncc2 [label="terminated"];
 
-	mncc1 => pbx [label="MNCC_REL_CNF
+	mncc1 => sipcon1 [label="MNCC_REL_CNF
 			\n callref"];
 	mncc1 abox mncc1 [label="terminated"];
 }
