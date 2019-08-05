@@ -544,7 +544,7 @@ int main(int argc, char **argv)
 	}
 
 	ctrl_vty_init(tall_msc_ctx);
-	logging_vty_add_cmds(&log_info);
+	logging_vty_add_cmds();
 	osmo_talloc_vty_add_cmds();
 	msc_vty_init(msc_network);
 
