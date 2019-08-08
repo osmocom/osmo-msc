@@ -1,3 +1,230 @@
+osmo-msc (1.5.0) unstable; urgency=medium
+
+  [ Max ]
+  * Handle LCLS-NOTIFICATION message from BSS
+  * Various logging fixes
+  * VLR tests: use msgb_eq_data_print() for comparison
+  * transaction: drop meaningless ti_flag of trans_assign_trans_id()
+  * transaction: clarify magic 0xff transaction ID
+
+  [ Vadim Yanitskiy ]
+  * transaction.c: cosmetic: use 'default' branch in trans_free()
+  * libmsc/ran_conn.c: cosmetic: use tabs instead of N * 8 spaces
+  * transaction: change arguments of trans_find_by_sm_rp_mr()
+  * libmsc/gsm_04_11.c: also assign SM-RP-MR to MO transactions
+  * libmsc/gsm_04_11.c: introduce and use gsm411_assign_sm_rp_mr()
+  * libmsc/gsm_04_80.c: use gsm0480_create_release_complete()
+  * libmsc/gsm_04_80.c: add msc_send_ussd_release_complete_cause()
+  * libmsc/osmo_msc.c: move connection ref-counting code to 'ran_conn.c'
+  * transaction: fix description of trans_assign_trans_id()
+  * transaction.h: use #pragma once as include guard
+  * libmsc/gsm_09_11.c: implement guard timer for NCSS sessions
+  * libmsc/ran_conn.c: add missing 'break' to OSMO_RAT_EUTRAN_SGS
+  * libmsc/sgs_iface.c: fix SGS_STATE_NS11 counter reference
+  * libmsc/sgs_vty.c: always write server address and VLR name
+  * libmsc/msc_vty.c: drop dead comparison against null
+  * libmsc/sgs_iface.c: fix copy-paste error
+  * libmsc/sgs_iface.c: register sgs_vlr_reset_fsm on DSO load
+  * libmsc/sgs_vty.c: don't print SGs socket error twice
+  * libmsc: fix: properly initialize the SGs server
+  * libmsc/sms_queue.c: fix memleak in smsq_take_next_sms()
+  * tests/sms_queue: track the use of NULL talloc memory contexts
+  * msc/gsm_data.h: drop unused SMS_HDR_SIZE macro
+  * configure.ac: drop rudimentary check for -fvisibility=hidden
+  * configure.ac: drop useless SQLite3 dependency
+  * libmsc/db.c: print info about database name and libdbi version
+  * libmsc/gsm_04_11.c: clarify implicit CP-ACK handling
+  * libmsc/ran_peer.c: fix msgb memleak in ran_peer_rx_reset()
+  * libmsc/gsm_04_11.c: properly handle TP-User-Data-Length
+  * libmsc/gsm_04_11.c: fix double init of both SMR and SMC FSMs
+  * libmsc/gsm_04_11.c: cosmetic: restructure gsm411_mm_send()
+  * libmsc/gsm_04_08.c: fix: print proper length value
+  * libmsc/gsm_04_08.c: refactor CM Service Request parsing
+  * libmsc/gsm_04_08.c: clarify IMEI rejection in gsm48_rx_mm_serv_req()
+  * libmsc/gsm_04_11_gsup.c: cosmetic: drop useless variable
+  * tests/.../Makefile.am avoid redundant linkage with librt
+  * libmsc/sgs_server.c: do not override rc in case of SCTP_SHUTDOWN_EVENT
+  * libmsc/msc_ho.c: fix unreacheable check of MSC-T role allocation
+  * libmsc/msc_a.c: fix possible NULL-pointer dereferences
+  * sms_queue_test: assert return value of osmo_use_count_get_put()
+  * libmsc/gsm_04_11.c: fix NULL-pointer dereference in gsm340_rx_tpdu()
+  * libmsc/ran_msg_a.c: avoid ternary operator in struct initialization
+  * libmsc/ran_msg_a.c: refactor ran_a_decode_lcls_notification()
+  * libmsc/ran_msg_a.c: prevent chosen_encryption->key buffer overrun
+  * libmsc/mncc_call.c: fix uninitialized access of stack memory
+  * libmsc/ran_peer.c: fix msgb memleaks in ran_peer_down_paging()
+  * libmsc/ran_peer.c: avoid unreasonable use of goto in ran_peer_down_paging()
+  * libmsc/msc_vty.c: fix: use msub_for_vsub() in subscr_dump_full_vty()
+  * libmsc/msc_vty.c: fix documentation of 'show subscriber id'
+  * libmsc/msc_vty.c: use llist_count() in subscr_dump_full_vty()
+  * libmsc/rtp_stream.c: prevent NULL-pointer dereference
+  * libmsc/gsm_04_11.c: properly handle MMTS indication
+  * transaction: accept trans_type enum in trans_log_subsys()
+  * Use GSM23003_MSISDN_MAX_DIGITS from libosmogsm
+  * libmsc/msc_vty.c: refactor 'show subscr / conn / trans' commands
+  * libmsc/msc_vty.c: do not abuse strlen() to check char buffers
+  * tests: share stubs.h from msc_vlr_test as stubs.c
+  * Introduce initial unit test for db_sms_* API
+  * libmsc/db.c: fix storing SMS with empty TP-User-Data
+  * debian/control: add missing libdbd-sqlite3 to Build-Depends
+  * libmsc/db.c: fix potential integer overflow
+  * libmsc/db.c: introduce and use parse_sm_ud_from_result()
+  * libmsc/db.c: warn user about SMS text truncation
+  * libmsc/db.c: get rid of hard-coded SMS expiry threshold
+  * libmsc/mncc_builtin.c: drop dummy switch in int_mncc_recv()
+  * libmsc/gsm_0(4|9)_11_gsup.c: print error message if subscr is not known
+  * gsup_client_mux_tx_error_reply(): fix: do not override IMSI
+  * gsup_client_mux_tx_error_reply(): fix: do not omit session IEs
+  * gsup_client_mux_tx_error_reply(): fix: do not omit message class IE
+  * gsup_client_mux_tx_error_reply(): fix: do not omit SM-RP-MR IE
+  * libmsc/gsm_09_11.c: fix: return trans from establish_nc_ss_trans()
+  * libmsc/gsm_09_11.c: send GSUP PROS_SS ERROR message when needed
+  * libmsc/gsm_04_08.c: clean up unused leftover includes
+  * libmsc/msc_a.c: fix: remove dummy allstate_action of msc_a_fsm
+  * libmsc/paging.c: avoid double zero-initialization
+  * libmsc/paging.c: cosmetic: actually use default branch of switch
+  * libmsc/paging.c: cosmetic: remove leading space in log line
+  * libmsc/gsm_09_11.c: do not abuse LOG_TRANS() and early trans allocation
+  * libmsc/gsm_09_11.c: log network-originated session establishment error
+  * libmsc/gsm_09_11.c: drop rudimentary vsub->cgi.lai.lac check
+  * libmsc/gsm_09_11.c: drop meaningless check for concurrent paging
+  * libmsc/msc_net_init.c: pass pointer to gsm_network directly
+  * libmsc/gsm_09_11.c: inform HLR/EUSE if Paging has failed
+  * libmsc/gsm_09_11.c: properly handle OSMO_GSUP_MSGT_PROC_SS_ERROR
+  * libmsc/gsm_09_11.c: avoid double zero-initialization of gsup_msg
+  * libmsc/gsm_09_11.c: fix broken reference counting for vsub
+  * libmsc/gsm_09_11.c: do not abuse LOG_TRANS() in gsm0911_rcv_nc_ss()
+  * libmsc/gsm_09_11.c: do not suppress rc of gsup_client_mux_tx()
+  * tests/msc_vlr: fix: do not pass RAT type to expect_bssap_clear()
+  * libvlr/vlr.c: do not expire subscribers if periodic LU is disabled
+  * gsm_04_11_gsup.c: fix broken reference counting for vsub
+  * libmsc/gsm_04_11.c: do not abuse LOG_TRANS() in gsm411_alloc_mt_trans()
+  * libmsc/ran_msg_iu.c: fix: properly handle SAPI IE of RANAP_DirectTransfer
+  * Fix: add missing semicolons to OSMO_ASSERT statements
+  * libmsc/msc_vty.c: print subscriber expiration time
+
+  [ Harald Welte ]
+  * Add SGs Interface
+  * debian: depend on libsctp-dev
+  * configure.ac: Check for libsctp
+  * a_iface: Centralize/wrap BSSAP / N-DATA transmission
+  * a_iface: use 'const' qualifier for ran_conn whenever possible
+  * a_iface: Fix hexdumping of N-DATA.req
+  * a_iface: OSMO_ASSERT() if we ever want to send BSSAP with invalid length
+  * smpp_smsc: Call destroy_tlv() when using build_tlv()
+  * smpp: Make libsmpp34 use talloc for its allocations
+  * msub_check_for_release(): Initialize msc_role_a_c
+  * SMPP: Don't accept password or system-id exceeding spec length
+  * Iu: Send SMS over SAPI-3
+
+  [ Philipp Maier ]
+  * a_iface: Include CSFB Indication into BSSMAP CLEAR COMMAND
+  * silent_call: use osmo_strlcpy() instead of strncpy()
+  * msc_vty: add missing header file
+  * vlr_sgs: fix SGs IMSI detech from non EPS services
+  * vlr_sgs: start lu expiration timer on sgs eps detach
+  * sgs_iface: fix nullpointer dereference
+  * vlr_sgs_fsm: make sure vsub is marked used when LA is present
+  * sgs_iface: detect and react to VLR/HLR failure
+
+  [ Oliver Smith ]
+  * debian: depend on libdbd-sqlite3
+  * vlr_lu_fsm.c: assert for invalid events
+  * vty: make retrieve-imeisv-early configurable
+  * vlr: fix IMEI length
+  * vlr: when setting IMEISV, also set IMEI
+  * vlr: optionally send IMEI early to HLR
+  * debian: create -doc subpackage with pdf manuals
+  * contrib/jenkins.sh: run "make maintainer-clean"
+  * vlr_lu_fsm.c: don't send LU reject twice
+
+  [ Keith ]
+  * Don't deliver alert notifications to ESME not yet bound.
+  * Write configuration correctly from vty (alert notifications)
+
+  [ Neels Hofmeyr ]
+  * use only accepted ran_conns for new transactions
+  * gsm_04_11_gsup.c: drop unused conn lookup
+  * SMS queue: properly log failed attempts number
+  * vty: add cmd subscriber ID sms delete-all
+  * vlr_subscr_name(): use OSMO_STRBUF
+  * enable osmo_fsm_term_safely(), apply logging changes
+  * sms queue: avoid repeated Paging for a failed SMS
+  * vlr_subscr: use osmo_use_count
+  * add LOG_TRANS, proper context for all transactions
+  * gsm_04_08_cc: improve logging for CC trans
+  * smpp: fix vlr_subscr use count bugs
+  * vlr subscr get/put: also check against NULL
+  * fix various missing line endings in logging
+  * gsm_04_11: use gsm48_decode_bcd_number2(), evaluate rc
+  * large refactoring: support inter-BSC and inter-MSC Handover
+  * GSUP: include terminating nul in inter-MSC source/destination name
+  * rename bscconfig.h to config.h, cleanup
+  * fix regression: fix internal MNCC operation
+  * vty/cfg: add missing write-back of inter-BSC and inter-MSC HO config
+  * comment: apply function renames to message cycle explanation
+  * ran_a_make_handover_request(): allow no encryption
+  * make msc_a_vsub() and others NULL-safe
+  * no HO call forwarding if no RTP stream
+  * LOG_TRANS: store subsys in trans, unify USSD logging back to DMM
+  * call_leg: remove unused event MSC_EV_CALL_LEG_RTP_RELEASED
+  * call_leg: document the parent_event_* items
+  * add DSS logging category
+  * silence error messages about HANDOVER_END not permitted
+  * build osmo-msc: add "missing" LIBASN1C_LIBS
+  * minor comments in msc_vty.c
+  * manual: adjust and fix auth and ciph docs
+  * do not force encryption on UTRAN
+  * add msc_vlr tests for UMTS without ciphering
+  * doc/sequence_charts/mncc_fsm.msc: add SIP messages, tweak
+  * doc/sequence_charts: fix naming of mncc_fsm to mncc_call
+  * vlr_lu_fsm: fix missing event for IMEISV
+
+  [ Sylvain Munaut ]
+  * libmsc: Allow different channel types to be requested as silent calls
+  * libvlr: Allow 2G auth tuples to be re-used without going through AUTH
+  * make LOG_TRANS() NULL-safe again
+
+  [ Pau Espin Pedrol ]
+  * debian/control: Fix typo
+  * sms_queue: Print dest msisdn instead of unknown subscriber
+  * ran_peer: Move rx_reset_ack logic into its own func
+  * vty: Add option to enable osmux towards BSCs
+  * bssap: Detect BSC Osmux support on RESET (ACK) recv
+  * a_iface: Announce Osmux support on RESET (ACK) send
+  * Request Osmux CID and forward it in Assign Req and Assign Compl
+  * db: Fix call to mempcy with NULL src ptr
+  * db_sms_test: Do not print exact memcmp result
+  * db_sms_test: Remove libdbi expected driver load errors
+  * sms_queue.c: Improve misleading log line
+  * doc: Add Osmux documentation to User Manual
+  * Remove undefined param passed to logging_vty_add_cmds
+  * Fix dependency version requirements
+
+  [ Omar Ramadan ]
+  * Allow MME name preformatted as FQDN in SGsAP
+
+  [ Alexander Couzens ]
+  * remove msc specific db counters
+  * replace osmo_counter with stat_items
+
+  [ Eric Wild ]
+  * libvlr: fix sgsn tmsi creation, replace constant with define
+  * turn -Werror=null-dereference into a warning
+
+  [ Daniel Willmann ]
+  * manuals: Add script to update vty/counter documentation from docker
+  * manuals: Update counter/vty documentation
+  * manuals: Include overview chapter about counters
+
+  [ Thorsten Alteholz ]
+  * fix spelling detected by lintian
+
+  [ Keith Whyte ]
+  * Set coding in mncc_set_cause()
+
+ -- Pau Espin Pedrol <pespin@sysmocom.de>  Thu, 08 Aug 2019 16:01:38 +0200
+
 osmo-msc (1.3.1) unstable; urgency=medium
 
   [ Neels Hofmeyr ]
