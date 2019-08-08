@@ -1253,6 +1253,7 @@ static void lu_fsm_wait_lu_compl(struct osmo_fsm_inst *fi, uint32_t event,
 				       LU_COMPL_VLR_E_NEW_TMSI_ACK, NULL);
 		break;
 	case VLR_ULA_E_ID_IMEI:
+	case VLR_ULA_E_ID_IMEISV:
 		/* Got the IMEI from ME, now send it to HLR */
 		vlr_subscr_tx_req_check_imei(lfp->vsub);
 		break;
