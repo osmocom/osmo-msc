@@ -13,17 +13,17 @@ Build-Depends: debhelper (>=9),
                libdbd-sqlite3,
                libsctp-dev,
                libtalloc-dev,
-               libsmpp34-dev (>= 1.12),
-               libasn1c-dev (>= 0.9.28),
-               libosmocore-dev (>= 0.10.0),
-               libosmo-sccp-dev,
-               libosmo-sigtran-dev (>= 0.8.0),
-               libosmo-abis-dev,
-               libosmo-mgcp-client-dev (>= 1.1.0),
-               libosmo-gsup-client-dev (>= 0.2.1),
-               libosmo-netif-dev (>= 0.1.0),
-               libosmo-ranap-dev (>= 0.2.0),
-               osmo-gsm-manuals-dev
+               libsmpp34-dev (>= 1.14.0),
+               libasn1c-dev (>= 0.9.30),
+               libosmocore-dev (>= 1.2.0),
+               libosmo-sccp-dev (>= 1.1.0),
+               libosmo-sigtran-dev (>= 1.1.0),
+               libosmo-abis-dev (>= 0.6.0),
+               libosmo-mgcp-client-dev (>= 1.6.0),
+               libosmo-gsup-client-dev (>= 1.0.0),
+               libosmo-netif-dev (>= 0.6.0),
+               libosmo-ranap-dev (>= 0.3.0),
+               osmo-gsm-manuals-dev (>= 0.2.0)
 Standards-Version: 3.9.8
 Vcs-Git: git://git.osmocom.org/osmo-msc.git
 Vcs-Browser: https://git.osmocom.org/osmo-msc/

@@ -35,15 +35,15 @@ m4_ifdef([AX_CHECK_COMPILE_FLAG], [], [
 	])
 
 
-PKG_CHECK_MODULES(LIBOSMOCORE, libosmocore >= 1.0.0)
-PKG_CHECK_MODULES(LIBOSMOVTY, libosmovty >= 1.0.0)
-PKG_CHECK_MODULES(LIBOSMOCTRL, libosmoctrl >= 1.0.0)
-PKG_CHECK_MODULES(LIBOSMOGSM, libosmogsm >= 1.0.0)
+PKG_CHECK_MODULES(LIBOSMOCORE, libosmocore >= 1.2.0)
+PKG_CHECK_MODULES(LIBOSMOVTY, libosmovty >= 1.2.0)
+PKG_CHECK_MODULES(LIBOSMOCTRL, libosmoctrl >= 1.2.0)
+PKG_CHECK_MODULES(LIBOSMOGSM, libosmogsm >= 1.2.0)
 PKG_CHECK_MODULES(LIBOSMOABIS, libosmoabis >= 0.6.0)
-PKG_CHECK_MODULES(LIBOSMONETIF, libosmo-netif >= 0.4.0)
-PKG_CHECK_MODULES(LIBOSMOSIGTRAN, libosmo-sigtran >= 1.0.0)
-PKG_CHECK_MODULES(LIBOSMOSCCP, libosmo-sccp >= 1.0.0)
-PKG_CHECK_MODULES(LIBOSMOMGCPCLIENT, libosmo-mgcp-client >= 1.5.0)
+PKG_CHECK_MODULES(LIBOSMONETIF, libosmo-netif >= 0.6.0)
+PKG_CHECK_MODULES(LIBOSMOSIGTRAN, libosmo-sigtran >= 1.1.0)
+PKG_CHECK_MODULES(LIBOSMOSCCP, libosmo-sccp >= 1.1.0)
+PKG_CHECK_MODULES(LIBOSMOMGCPCLIENT, libosmo-mgcp-client >= 1.6.0)
 PKG_CHECK_MODULES(LIBOSMOGSUPCLIENT, libosmo-gsup-client >= 1.0.0)
 
 old_LIBS=$LIBS
@@ -91,7 +91,7 @@ fi
 AC_ARG_ENABLE([smpp], [AS_HELP_STRING([--enable-smpp], [Build the SMPP interface])],
     [osmo_ac_build_smpp="$enableval"],[osmo_ac_build_smpp="no"])
 if test "$osmo_ac_build_smpp" = "yes" ; then
-    PKG_CHECK_MODULES(LIBSMPP34, libsmpp34 >= 1.13.0)
+    PKG_CHECK_MODULES(LIBSMPP34, libsmpp34 >= 1.14.0)
     AC_DEFINE(BUILD_SMPP, 1, [Define if we want to build SMPP])
 fi
 AM_CONDITIONAL(BUILD_SMPP, test "x$osmo_ac_build_smpp" = "xyes")
