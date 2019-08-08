@@ -1909,6 +1909,25 @@ static int mncc_tx_to_gsm_cc(struct gsm_network *net, const union mncc_msg *msg)
 						GSM48_CAUSE_LOC_PRN_S_LU,
 						GSM48_CC_CAUSE_DEST_OOO);
 		}
+
+		/* Find valid conn */
+		msc_a = msc_a_for_vsub(vsub, true);
+
+		/* If subscriber is BUSY and we do not DO call in call aka "call-waiting" */
+		if (!net->call_waiting && msc_a) {
+			struct gsm_trans *existing_cc_trans = trans_find_by_type(msc_a, TRANS_CC);
+			if (existing_cc_trans && existing_cc_trans->cc.state != GSM_CSTATE_NULL) {
+				LOG_TRANS_CAT(existing_cc_trans, DCC, LOGL_NOTICE,
+					      "rx '%s' for subscriber %s with trans state (%s)"
+					      " rejecting with USER_BUSY\n",
+					get_mncc_name(msg->msg_type), data->called.number,
+					gsm48_cc_state_name(existing_cc_trans->cc.state));
+				return mncc_release_ind(net, NULL, data->callref,
+							GSM48_CAUSE_LOC_PRN_S_LU,
+							GSM48_CC_CAUSE_USER_BUSY);
+			}
+		}
+
 		/* Create transaction */
 		trans = trans_alloc(net, vsub, TRANS_CC,
 				    TRANS_ID_UNASSIGNED, data->callref);
@@ -1921,9 +1940,6 @@ static int mncc_tx_to_gsm_cc(struct gsm_network *net, const union mncc_msg *msg)
 					 GSM48_CC_CAUSE_RESOURCE_UNAVAIL);
 			return -ENOMEM;
 		}
-
-		/* Find valid conn */
-		msc_a = msc_a_for_vsub(vsub, true);
 
 		/* If subscriber has no conn */
 		if (!msc_a) {

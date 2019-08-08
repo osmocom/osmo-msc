@@ -26,6 +26,8 @@ OsmoMSC(config-net)# list
   no timezone
   periodic location update <6-1530>
   no periodic location update
+  call-waiting
+  no call-waiting
 
 OsmoMSC(config-net)# encryption?
   encryption  Encryption options

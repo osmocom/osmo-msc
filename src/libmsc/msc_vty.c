@@ -330,6 +330,29 @@ DEFUN(cfg_net_no_per_loc_upd, cfg_net_no_per_loc_upd_cmd,
 	return CMD_SUCCESS;
 }
 
+DEFUN(cfg_net_call_wait, cfg_net_call_wait_cmd,
+      "call-waiting",
+      "Enable Call Waiting on the Network\n")
+{
+	struct gsm_network *net = vty->index;
+
+	net->call_waiting = true;
+
+	return CMD_SUCCESS;
+}
+
+DEFUN(cfg_net_no_call_wait, cfg_net_no_call_wait_cmd,
+      "no call-waiting",
+      NO_STR
+      "Disable Call Waiting on the Network\n")
+{
+	struct gsm_network *net = vty->index;
+
+	net->call_waiting = false;
+
+	return CMD_SUCCESS;
+}
+
 static int config_write_net(struct vty *vty)
 {
 	int i;
@@ -375,6 +398,9 @@ static int config_write_net(struct vty *vty)
 		vty_out(vty, " emergency-call route-to-msisdn %s%s",
 			gsmnet->emergency.route_to_msisdn, VTY_NEWLINE);
 	}
+
+	if (!gsmnet->call_waiting)
+		vty_out(vty, " no call-waiting%s", VTY_NEWLINE);
 
 	return CMD_SUCCESS;
 }
@@ -1946,6 +1972,8 @@ void msc_vty_init(struct gsm_network *msc_network)
 	install_element(GSMNET_NODE, &cfg_net_no_timezone_cmd);
 	install_element(GSMNET_NODE, &cfg_net_per_loc_upd_cmd);
 	install_element(GSMNET_NODE, &cfg_net_no_per_loc_upd_cmd);
+	install_element(GSMNET_NODE, &cfg_net_call_wait_cmd);
+	install_element(GSMNET_NODE, &cfg_net_no_call_wait_cmd);
 
 	install_element(CONFIG_NODE, &cfg_msc_cmd);
 	install_node(&msc_node, config_write_msc);

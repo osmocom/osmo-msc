@@ -258,6 +258,9 @@ struct gsm_network {
 
 	/* Whether we want to use Osmux against BSCs. Controlled via VTY */
 	enum osmux_usage use_osmux;
+
+	/* Whether to use call waiting on the network */
+	bool call_waiting;
 };
 
 struct osmo_esme;

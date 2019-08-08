@@ -216,6 +216,7 @@ struct gsm_network *msc_network_alloc(void *ctx,
 
 	mgcp_client_conf_init(&net->mgw.conf);
 	net->mgw.tdefs = g_mgw_tdefs;
+	net->call_waiting = true;
 
 	return net;
 }
