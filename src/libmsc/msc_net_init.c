@@ -49,6 +49,7 @@ struct gsm_network *gsm_network_init(void *ctx, mncc_recv_cb_t mncc_recv)
 
 	/* Permit a compile-time default of A5/3 and A5/1 */
 	net->a5_encryption_mask = (1 << 3) | (1 << 1);
+	net->uea_encryption = true;
 
 	/* Use 30 min periodic update interval as sane default */
 	net->t3212 = 5;

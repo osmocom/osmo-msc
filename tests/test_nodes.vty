@@ -17,6 +17,7 @@ OsmoMSC(config-net)# list
   short name NAME
   long name NAME
   encryption a5 <0-3> [<0-3>] [<0-3>] [<0-3>]
+  encryption uea <0-2> [<0-2>] [<0-2>]
   authentication (optional|required)
   rrlp mode (none|ms-based|ms-preferred|ass-preferred)
   mm info (0|1)
@@ -25,6 +26,21 @@ OsmoMSC(config-net)# list
   no timezone
   periodic location update <6-1530>
   no periodic location update
+
+OsmoMSC(config-net)# encryption?
+  encryption  Encryption options
+OsmoMSC(config-net)# encryption ?
+  a5   GSM A5 Air Interface Encryption.
+  uea  UTRAN (3G) encryption algorithms to allow: 0 = UEA0 (no encryption), 1 = UEA1, 2 = UEA2. NOTE: the current implementation does not allow free choice of combining encryption algorithms yet. The only valid settings are either 'encryption uea 0' or 'encryption uea 1 2'.
+
+OsmoMSC(config-net)# encryption uea ?
+  <0-2>  UEAn Algorithm Number
+OsmoMSC(config-net)# encryption uea 0 ?
+  [<0-2>]  UEAn Algorithm Number
+OsmoMSC(config-net)# encryption uea 0 1 ?
+  [<0-2>]  UEAn Algorithm Number
+OsmoMSC(config-net)# encryption uea 0 1 2 ?
+  <cr>  
 
 OsmoMSC(config-net)# exit
 OsmoMSC(config)# msc
@@ -130,6 +146,7 @@ network
  short name OsmoMSC
  long name OsmoMSC
  encryption a5 0
+ encryption uea 1 2
  authentication optional
  rrlp mode none
  mm info 1
@@ -157,3 +174,52 @@ sgs
  local-ip 0.0.0.0
  vlr-name vlr.example.net
 end
+
+OsmoMSC# configure terminal
+OsmoMSC(config)# network
+OsmoMSC(config-net)# encryption uea 0
+OsmoMSC(config-net)# show running-config
+...
+ encryption uea 0
+...
+
+OsmoMSC(config-net)# encryption uea 1
+% Error: the current implementation does not allow free choice of combining
+% encryption algorithms yet. The only valid settings are either
+%   encryption uea 0
+% or
+%   encryption uea 1 2
+OsmoMSC(config-net)# show running-config
+...
+ encryption uea 0
+...
+
+OsmoMSC(config-net)# encryption uea 2
+% Error: the current implementation does not allow free choice of combining
+...
+OsmoMSC(config-net)# show running-config
+...
+ encryption uea 0
+...
+
+OsmoMSC(config-net)# encryption uea 0 1
+% Error: the current implementation does not allow free choice of combining
+...
+OsmoMSC(config-net)# show running-config
+...
+ encryption uea 0
+...
+
+OsmoMSC(config-net)# encryption uea 0 2
+% Error: the current implementation does not allow free choice of combining
+...
+OsmoMSC(config-net)# show running-config
+...
+ encryption uea 0
+...
+
+OsmoMSC(config-net)# encryption uea 1 2
+OsmoMSC(config-net)# show running-config
+...
+ encryption uea 1 2
+...

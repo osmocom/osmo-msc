@@ -149,6 +149,11 @@ struct gsm_network {
 	bool authentication_required;
 	int send_mm_info;
 
+	/* Whether to use encryption on UTRAN.
+	 * TODO: we should offer a choice of UEA1 and/or UEA2, and probably replace this bool with a bit-mask of
+	 * permitted Iu encryption algorithms. See also OS#4143 and the 'encryption uea' vty command. */
+	bool uea_encryption;
+
 	struct rate_ctr_group *msc_ctrs;
 	struct osmo_stat_item_group *statg;
 

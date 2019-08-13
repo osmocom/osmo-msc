@@ -144,14 +144,13 @@ DEFUN(cfg_net_name_long,
 	return CMD_SUCCESS;
 }
 
+#define ENCRYPTION_STR "Encryption options\n"
+
 DEFUN(cfg_net_encryption,
       cfg_net_encryption_cmd,
       "encryption a5 <0-3> [<0-3>] [<0-3>] [<0-3>]",
-	"Encryption options\n"
-	"GSM A5 Air Interface Encryption."
-	  " NOTE: as long as OsmoMSC lacks distinct configuration for 3G encryption,"
-	  " 3G encryption is enabled exactly when any 2G encryption is enabled."
-	  " Hence configuring only A5/0 here switches off 3G encryption.\n"
+	ENCRYPTION_STR
+	"GSM A5 Air Interface Encryption.\n"
 	"A5/n Algorithm Number\n"
 	"A5/n Algorithm Number\n"
 	"A5/n Algorithm Number\n"
@@ -162,6 +161,45 @@ DEFUN(cfg_net_encryption,
 	gsmnet->a5_encryption_mask = 0;
 	for (i = 0; i < argc; i++)
 		gsmnet->a5_encryption_mask |= (1 << atoi(argv[i]));
+
+	return CMD_SUCCESS;
+}
+
+/* So far just a boolean switch, a future patch might add individual config for UEA1 and UEA2, see OS#4143 */
+DEFUN(cfg_net_encryption_uea,
+      cfg_net_encryption_uea_cmd,
+      "encryption uea <0-2> [<0-2>] [<0-2>]",
+      ENCRYPTION_STR
+      "UTRAN (3G) encryption algorithms to allow: 0 = UEA0 (no encryption), 1 = UEA1, 2 = UEA2."
+        " NOTE: the current implementation does not allow free choice of combining encryption algorithms yet."
+	" The only valid settings are either 'encryption uea 0' or 'encryption uea 1 2'.\n"
+      "UEAn Algorithm Number\n"
+      "UEAn Algorithm Number\n"
+      "UEAn Algorithm Number\n"
+     )
+{
+	unsigned int i;
+	uint8_t mask = 0;
+
+	for (i = 0; i < argc; i++)
+		mask |= (1 << atoi(argv[i]));
+
+	if (mask == (1 << 0)) {
+		/* UEA0. Disable encryption. */
+		gsmnet->uea_encryption = false;
+	} else if (mask == ((1 << 1) | (1 << 2))) {
+		/* UEA1 and UEA2. Enable encryption. */
+		gsmnet->uea_encryption = true;
+	} else {
+		vty_out(vty,
+			"%% Error: the current implementation does not allow free choice of combining%s"
+			"%% encryption algorithms yet. The only valid settings are either%s"
+			"%%   encryption uea 0%s"
+			"%% or%s"
+			"%%   encryption uea 1 2%s",
+			VTY_NEWLINE, VTY_NEWLINE, VTY_NEWLINE, VTY_NEWLINE, VTY_NEWLINE);
+		return CMD_WARNING;
+	}
 
 	return CMD_SUCCESS;
 }
@@ -308,6 +346,11 @@ static int config_write_net(struct vty *vty)
 			vty_out(vty, " %u", i);
 	}
 	vty_out(vty, "%s", VTY_NEWLINE);
+
+	if (!gsmnet->uea_encryption)
+		vty_out(vty, " encryption uea 0%s", VTY_NEWLINE);
+	else
+		vty_out(vty, " encryption uea 1 2%s", VTY_NEWLINE);
 	vty_out(vty, " authentication %s%s",
 		gsmnet->authentication_required ? "required" : "optional", VTY_NEWLINE);
 	vty_out(vty, " rrlp mode %s%s", msc_rrlp_mode_name(gsmnet->rrlp.mode),
@@ -1894,6 +1937,7 @@ void msc_vty_init(struct gsm_network *msc_network)
 	install_element(GSMNET_NODE, &cfg_net_name_short_cmd);
 	install_element(GSMNET_NODE, &cfg_net_name_long_cmd);
 	install_element(GSMNET_NODE, &cfg_net_encryption_cmd);
+	install_element(GSMNET_NODE, &cfg_net_encryption_uea_cmd);
 	install_element(GSMNET_NODE, &cfg_net_authentication_cmd);
 	install_element(GSMNET_NODE, &cfg_net_rrlp_mode_cmd);
 	install_element(GSMNET_NODE, &cfg_net_mm_info_cmd);
