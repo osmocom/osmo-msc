@@ -754,6 +754,11 @@ static void msc_a_fsm_releasing_onenter(struct osmo_fsm_inst *fi, uint32_t prev_
 		};
 		msc_a_get(msc_a, MSC_A_USE_WAIT_CLEAR_COMPLETE);
 		msc_a_ran_down(msc_a, MSC_ROLE_I, &msg);
+
+		/* The connection is cleared. The MS will now go back to 4G,
+		   Switch the RAN type back to SGS. */
+		if (vsub && vsub->sgs_fsm->state == SGS_UE_ST_ASSOCIATED)
+			vsub->cs.attached_via_ran = OSMO_RAT_EUTRAN_SGS;
 	}
 
 	if (vsub)
