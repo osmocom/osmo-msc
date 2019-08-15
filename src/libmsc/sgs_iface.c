@@ -886,9 +886,10 @@ static int sgs_rx_csfb_ind(struct sgs_connection *sgc, struct msgb *msg, const s
 {
 	struct vlr_subscr *vsub;
 
-	/* The MME informs us with this message that the UE has returned back
-	 * to the 4G network, so we use the SGs interface again for further
-	 * communication with the UE. */
+	/* The MME informs us with this message that the UE has initiated a
+	 * service request for MO CS fallback. There is not much we can do with
+	 * this information, however, we can check if the subscriber actually
+	 * exists in the VLR and if there are any lingering connections open.*/
 
 	vsub = vlr_subscr_find_by_imsi(gsm_network->vlr, imsi, __func__);
 	if (!vsub)
@@ -897,7 +898,6 @@ static int sgs_rx_csfb_ind(struct sgs_connection *sgc, struct msgb *msg, const s
 	/* Check for lingering connections */
 	subscr_conn_toss(vsub);
 
-	vsub->cs.attached_via_ran = OSMO_RAT_EUTRAN_SGS;
 	vlr_subscr_put(vsub, __func__);
 	return 0;
 }
