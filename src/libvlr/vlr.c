@@ -680,6 +680,7 @@ int vlr_subscr_tx_req_check_imei(const struct vlr_subscr *vsub)
 {
 	struct osmo_gsup_message gsup_msg = {
 		.message_class = OSMO_GSUP_MESSAGE_CLASS_SUBSCRIBER_MANAGEMENT,
+		.message_type = OSMO_GSUP_MSGT_CHECK_IMEI_REQUEST,
 	};
 	uint8_t imei_enc[GSM23003_IMEI_NUM_DIGITS+2]; /* +2: IE header */
 	int len;
@@ -694,7 +695,6 @@ int vlr_subscr_tx_req_check_imei(const struct vlr_subscr *vsub)
 	gsup_msg.imei_enc_len = len;
 
 	/* Send CHECK_IMEI_REQUEST */
-	gsup_msg.message_type = OSMO_GSUP_MSGT_CHECK_IMEI_REQUEST;
 	OSMO_STRLCPY_ARRAY(gsup_msg.imsi, vsub->imsi);
 	return gsup_client_mux_tx(vsub->vlr->gcm, &gsup_msg);
 }
@@ -704,9 +704,9 @@ int vlr_subscr_tx_auth_fail_rep(const struct vlr_subscr *vsub)
 {
 	struct osmo_gsup_message gsup_msg = {
 		.message_class = OSMO_GSUP_MESSAGE_CLASS_SUBSCRIBER_MANAGEMENT,
+		.message_type = OSMO_GSUP_MSGT_AUTH_FAIL_REPORT,
 	};
 
-	gsup_msg.message_type = OSMO_GSUP_MSGT_AUTH_FAIL_REPORT;
 	OSMO_STRLCPY_ARRAY(gsup_msg.imsi, vsub->imsi);
 	return gsup_client_mux_tx(vsub->vlr->gcm, &gsup_msg);
 }
