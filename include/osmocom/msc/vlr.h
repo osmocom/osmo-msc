@@ -473,3 +473,6 @@ bool vlr_use_umts_aka(struct osmo_auth_vector *vec, bool is_r99);
 
 void log_set_filter_vlr_subscr(struct log_target *target,
 			       struct vlr_subscr *vlr_subscr);
+
+void vlr_gmm_cause_to_mm_cause(enum gsm48_gmm_cause gmm_cause,
+			       enum gsm48_reject_value *gsm48_rej_p);
