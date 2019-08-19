@@ -919,8 +919,8 @@ static int vlr_subscr_handle_lu_err(struct vlr_subscr *vsub,
 	return 0;
 }
 
-static void gmm_cause_to_mm_cause(enum gsm48_gmm_cause gmm_cause,
-				  enum gsm48_reject_value *gsm48_rej_p)
+void vlr_gmm_cause_to_mm_cause(enum gsm48_gmm_cause gmm_cause,
+			       enum gsm48_reject_value *gsm48_rej_p)
 {
 	enum gsm48_reject_value gsm48_rej = GSM48_REJECT_NETWORK_FAILURE;
 
@@ -1029,7 +1029,7 @@ static int vlr_subscr_handle_cancel_req(struct vlr_subscr *vsub,
 	gsup_reply.message_type = OSMO_GSUP_MSGT_LOCATION_CANCEL_RESULT;
 	rc = vlr_subscr_tx_gsup_message(vsub, &gsup_reply);
 
-	gmm_cause_to_mm_cause(gsup_msg->cause, &gsm48_rej);
+	vlr_gmm_cause_to_mm_cause(gsup_msg->cause, &gsm48_rej);
 	vlr_subscr_cancel_attach_fsm(vsub, fsm_cause, gsm48_rej);
 
 	vlr_subscr_rx_imsi_detach(vsub);
