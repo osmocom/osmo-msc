@@ -917,11 +917,9 @@ static int vlr_subscr_handle_lu_err(struct vlr_subscr *vsub,
 	return 0;
 }
 
-static void gmm_cause_to_fsm_and_mm_cause(enum gsm48_gmm_cause gmm_cause,
-					  enum osmo_fsm_term_cause *fsm_cause_p,
-					  enum gsm48_reject_value *gsm48_rej_p)
+static void gmm_cause_to_mm_cause(enum gsm48_gmm_cause gmm_cause,
+				  enum gsm48_reject_value *gsm48_rej_p)
 {
-	enum osmo_fsm_term_cause fsm_cause = OSMO_FSM_TERM_ERROR;
 	enum gsm48_reject_value gsm48_rej = GSM48_REJECT_NETWORK_FAILURE;
 	switch (gmm_cause) {
 	case GMM_CAUSE_IMSI_UNKNOWN:
@@ -1004,16 +1002,8 @@ static void gmm_cause_to_fsm_and_mm_cause(enum gsm48_gmm_cause gmm_cause,
 		gsm48_rej = GSM48_REJECT_NETWORK_FAILURE;
 		break;
 	}
-	switch (gmm_cause) {
-		/* refine any error causes here? */
-	default:
-		fsm_cause = OSMO_FSM_TERM_ERROR;
-		break;
-	}
-	if (fsm_cause_p)
-		*fsm_cause_p = fsm_cause;
-	if (gsm48_rej_p)
-		*gsm48_rej_p = gsm48_rej;
+
+	*gsm48_rej_p = gsm48_rej;
 }
 
 /* Handle LOCATION CANCEL request from HLR */
@@ -1021,7 +1011,7 @@ static int vlr_subscr_handle_cancel_req(struct vlr_subscr *vsub,
 					const struct osmo_gsup_message *gsup_msg)
 {
 	enum gsm48_reject_value gsm48_rej;
-	enum osmo_fsm_term_cause fsm_cause;
+	enum osmo_fsm_term_cause fsm_cause = OSMO_FSM_TERM_ERROR;
 	struct osmo_gsup_message gsup_reply = {0};
 	int rc, is_update_procedure = !gsup_msg->cancel_type ||
 		gsup_msg->cancel_type == OSMO_GSUP_CANCEL_TYPE_UPDATE;
@@ -1033,7 +1023,7 @@ static int vlr_subscr_handle_cancel_req(struct vlr_subscr *vsub,
 	gsup_reply.message_type = OSMO_GSUP_MSGT_LOCATION_CANCEL_RESULT;
 	rc = vlr_subscr_tx_gsup_message(vsub, &gsup_reply);
 
-	gmm_cause_to_fsm_and_mm_cause(gsup_msg->cause, &fsm_cause, &gsm48_rej);
+	gmm_cause_to_mm_cause(gsup_msg->cause, &gsm48_rej);
 	vlr_subscr_cancel_attach_fsm(vsub, fsm_cause, gsm48_rej);
 
 	vlr_subscr_rx_imsi_detach(vsub);
