@@ -331,6 +331,7 @@ static void auth_fsm_wait_ai(struct osmo_fsm_inst *fi, uint32_t event,
 	struct auth_fsm_priv *afp = fi->priv;
 	struct vlr_subscr *vsub = afp->vsub;
 	struct osmo_gsup_message *gsup = data;
+	enum gsm48_reject_value gsm48_rej;
 
 	if (event == VLR_AUTH_E_HLR_SAI_NACK)
 		LOGPFSM(fi, "GSUP: rx Auth Info Error cause: %d: %s\n",
@@ -340,9 +341,9 @@ static void auth_fsm_wait_ai(struct osmo_fsm_inst *fi, uint32_t event,
 	/* We are in what corresponds to the
 	 * Wait_For_Authentication_Sets state of TS 23.018 OAS_VLR */
 	if ((event == VLR_AUTH_E_HLR_SAI_ACK && !gsup->num_auth_vectors)
-	    || (event == VLR_AUTH_E_HLR_SAI_NACK &&
-		gsup->cause != GMM_CAUSE_IMSI_UNKNOWN)
-	    || (event == VLR_AUTH_E_HLR_SAI_ABORT)) {
+		|| (event == VLR_AUTH_E_HLR_SAI_NACK &&
+		    gsup->cause != GMM_CAUSE_IMSI_UNKNOWN)
+		|| (event == VLR_AUTH_E_HLR_SAI_ABORT)) {
 		if (vsub->vlr->cfg.auth_reuse_old_sets_on_error
 		    && vlr_subscr_has_auth_tuple(vsub, -1)) {
 			/* To re-use an old tuple, disable the max_reuse_count
@@ -350,21 +351,21 @@ static void auth_fsm_wait_ai(struct osmo_fsm_inst *fi, uint32_t event,
 			afp->auth_tuple_max_reuse_count = -1;
 			goto pass;
 		}
-		/* result = procedure error */
-		auth_fsm_term(fi, GSM48_REJECT_NETWORK_FAILURE);
-		return;
 	}
 
 	switch (event) {
 	case VLR_AUTH_E_HLR_SAI_ACK:
+		if (!gsup->num_auth_vectors) {
+			auth_fsm_term(fi, GSM48_REJECT_NETWORK_FAILURE);
+			return;
+		}
 		vlr_subscr_update_tuples(vsub, gsup);
 		goto pass;
 		break;
 	case VLR_AUTH_E_HLR_SAI_NACK:
-		auth_fsm_term(fi,
-			      gsup->cause == GMM_CAUSE_IMSI_UNKNOWN?
-				      GSM48_REJECT_IMSI_UNKNOWN_IN_HLR
-				      : GSM48_REJECT_NETWORK_FAILURE);
+	case VLR_AUTH_E_HLR_SAI_ABORT:
+		vlr_gmm_cause_to_mm_cause(gsup->cause, &gsm48_rej);
+		auth_fsm_term(fi, gsm48_rej);
 		break;
 	}
 
