@@ -341,9 +341,9 @@ static void auth_fsm_wait_ai(struct osmo_fsm_inst *fi, uint32_t event,
 	/* We are in what corresponds to the
 	 * Wait_For_Authentication_Sets state of TS 23.018 OAS_VLR */
 	if ((event == VLR_AUTH_E_HLR_SAI_ACK && !gsup->num_auth_vectors)
-	    || (event == VLR_AUTH_E_HLR_SAI_NACK &&
-		gsup->cause != GMM_CAUSE_IMSI_UNKNOWN)
-	    || (event == VLR_AUTH_E_HLR_SAI_ABORT)) {
+		|| (event == VLR_AUTH_E_HLR_SAI_NACK &&
+		    gsup->cause != GMM_CAUSE_IMSI_UNKNOWN)
+		|| (event == VLR_AUTH_E_HLR_SAI_ABORT)) {
 		if (vsub->vlr->cfg.auth_reuse_old_sets_on_error
 		    && vlr_subscr_has_auth_tuple(vsub, -1)) {
 			/* To re-use an old tuple, disable the max_reuse_count
