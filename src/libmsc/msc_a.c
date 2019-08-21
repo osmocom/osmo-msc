@@ -1562,6 +1562,15 @@ int msc_a_tx_dtap_to_i(struct msc_a *msc_a, struct msgb *dtap)
 {
 	struct ran_msg ran_msg;
 
+	if (!msc_a) {
+		struct gsm48_hdr *gh = msgb_l3(dtap) ? : dtap->data;
+		uint8_t pdisc = gsm48_hdr_pdisc(gh);
+		LOGP(DMSC, LOGL_ERROR, "Attempt to send DTAP to NULL MSC-A, dropping message: %s %s\n",
+		     gsm48_pdisc_name(pdisc), gsm48_pdisc_msgtype_name(pdisc, gsm48_hdr_msg_type(gh)));
+		msgb_free(dtap);
+		return -EIO;
+	}
+
 	if (msc_a->c.ran->type == OSMO_RAT_EUTRAN_SGS) {
 		/* The SGs connection to the MME always is at the MSC-A. */
 		return sgs_iface_tx_dtap_ud(msc_a, dtap);
