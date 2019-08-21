@@ -1076,8 +1076,16 @@ static int gsm48_cc_rx_release(struct gsm_trans *trans, struct msgb *msg)
 static int gsm48_cc_tx_release(struct gsm_trans *trans, void *arg)
 {
 	struct gsm_mncc *rel = arg;
-	struct msgb *msg = gsm48_msgb_alloc_name("GSM 04.08 CC REL");
-	struct gsm48_hdr *gh = (struct gsm48_hdr *) msgb_put(msg, sizeof(*gh));
+	struct msgb *msg;
+	struct gsm48_hdr *gh;
+
+	if (!trans->msc_a) {
+		LOG_TRANS(trans, LOGL_DEBUG, "Cannot send CC REL, there is no MSC-A connection\n");
+		return -EINVAL;
+	}
+
+	msg = gsm48_msgb_alloc_name("GSM 04.08 CC REL");
+	gh = (struct gsm48_hdr *) msgb_put(msg, sizeof(*gh));
 
 	gh->msg_type = GSM48_MT_CC_RELEASE;
 
