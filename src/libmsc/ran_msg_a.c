@@ -761,13 +761,17 @@ static int ran_a_decode_bssmap(struct ran_dec *ran_dec, struct msgb *bssmap)
 	}
 
 	if (msgb_l3len(bssmap) < h->length) {
-		LOG_RAN_A_DEC(ran_dec, LOGL_ERROR, "BSSMAP data truncated, discarding message\n");
+		LOG_RAN_A_DEC(ran_dec, LOGL_ERROR, "BSSMAP data truncated, discarding message:"
+			      " msgb_l3len(bssmap) == %u < bssmap_header->length == %u\n",
+			      msgb_l3len(bssmap), h->length);
 		return -1;
 	}
 
 	if (msgb_l3len(bssmap) > h->length) {
-		LOG_RAN_A_DEC(ran_dec, LOGL_NOTICE, "There are %u extra bytes after the BSSMAP data, truncating\n",
-			     msgb_l3len(bssmap) - h->length);
+		LOG_RAN_A_DEC(ran_dec, LOGL_NOTICE, "There are %u extra bytes after the BSSMAP data, truncating:"
+			      " msgb_l3len(bssmap) == %u > bssmap_header->length == %u\n",
+			      msgb_l3len(bssmap) - h->length,
+			      msgb_l3len(bssmap), h->length);
 		msgb_l3trim(bssmap, h->length);
 	}
 
