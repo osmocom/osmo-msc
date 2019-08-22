@@ -1892,7 +1892,7 @@ static int mncc_tx_to_gsm_cc(struct gsm_network *net, const union mncc_msg *msg)
 		}
 		if (!vsub)
 			return mncc_release_ind(net, NULL, data->callref, GSM48_CAUSE_LOC_PRN_S_LU,
-						GSM48_CC_CAUSE_UNASSIGNED_NR);
+						GSM48_CC_CAUSE_USER_NOTRESPOND);
 		/* update the subscriber we deal with */
 		log_set_context(LOG_CTX_VLR_SUBSCR, vsub);
 
