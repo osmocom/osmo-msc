@@ -1234,6 +1234,10 @@ static void lu_fsm_wait_hlr_ul_res(struct osmo_fsm_inst *fi, uint32_t event,
 			}
 		}
 		break;
+	case VLR_ULA_E_ID_IMEI:
+	case VLR_ULA_E_ID_IMEISV:
+		/* Got the IMEI from ME, nothing to do right now though. */
+		break;
 	default:
 		OSMO_ASSERT(0);
 		break;
@@ -1400,7 +1404,9 @@ static const struct osmo_fsm_state vlr_lu_fsm_states[] = {
 	},
 	[VLR_ULA_S_WAIT_HLR_UPD] = {
 		.in_event_mask = S(VLR_ULA_E_HLR_LU_RES) |
-				 S(VLR_ULA_E_UPD_HLR_COMPL),
+				 S(VLR_ULA_E_UPD_HLR_COMPL) |
+				 S(VLR_ULA_E_ID_IMEI) |
+				 S(VLR_ULA_E_ID_IMEISV),
 		.out_state_mask = S(VLR_ULA_S_WAIT_LU_COMPL) |
 				  S(VLR_ULA_S_WAIT_LU_COMPL_STANDALONE) |
 				  S(VLR_ULA_S_DONE),
