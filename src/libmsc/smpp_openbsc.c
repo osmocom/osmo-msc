@@ -326,7 +326,7 @@ static void alert_all_esme(struct smsc *smsc, struct vlr_subscr *vsub,
 				"ESME is not (yet) bound, skipping alert\n");
 			continue;
 		}
-		if (!esme->acl->alert_notifications) {
+		if (esme->acl && !esme->acl->alert_notifications) {
 			LOGP(DSMPP, LOGL_DEBUG,
 				"[%s] is not set to receive Alert Notifications\n",
 					esme->system_id);
