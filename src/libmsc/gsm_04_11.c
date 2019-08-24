@@ -308,7 +308,7 @@ static int gsm340_gen_sms_deliver_tpdu(struct gsm_trans *trans, struct msgb *msg
 	/* TP-MTI (message type indicator) */
 	*smsp = GSM340_SMS_DELIVER_SC2MS;
 	/* TP-MMS (more messages to send) */
-	if (0 /* FIXME */)
+	if (1 /* FIXME */)
 		*smsp |= 0x04;
 	/* TP-SRI(deliver)/SRR(submit) */
 	if (sms->status_rep_req)
