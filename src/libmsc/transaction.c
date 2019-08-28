@@ -147,6 +147,10 @@ struct gsm_trans *trans_alloc(struct gsm_network *net,
 		.transaction_id = trans_id,
 		.callref = callref,
 		.net = net,
+		/* empty bearer_cap: make sure the speech_ver array is empty */
+		.bearer_cap = {
+			.speech_ver = { -1 },
+		},
 	};
 	vlr_subscr_get(vsub, trans_vsub_use(type));
 	llist_add_tail(&trans->entry, &net->trans_list);
