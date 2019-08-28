@@ -1185,7 +1185,7 @@ static int gsm48_rx_rr_ciphering_mode_complete(struct msc_a *msc_a, struct msgb 
 	if (!mi)
 		return 0;
 
-	LOG_MSC_A(msc_a, LOGL_DEBUG, "Ciphering Mode Complete contains Mobile Identity: %s\n",
+	LOG_MSC_A(msc_a, LOGL_DEBUG, "RR Ciphering Mode Complete contains Mobile Identity: %s\n",
 		  osmo_mi_name(mi->val, mi->len));
 
 	if (!vsub)
