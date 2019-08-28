@@ -210,6 +210,7 @@ struct ran_msg {
 			 * alg_id == 0 means no such IE was present. */
 			uint8_t alg_id;
 			const char *imeisv;
+			const struct tlv_p_entry *l3_msg;
 		} cipher_mode_complete;
 		struct {
 			enum gsm0808_cause bssap_cause;

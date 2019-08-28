@@ -1407,6 +1407,18 @@ int msc_a_ran_dec_from_msc_i(struct msc_a *msc_a, struct msc_a_ran_dec_data *d)
 		};
 		vlr_subscr_rx_ciph_res(vsub, VLR_CIPH_COMPL);
 		rc = 0;
+
+		/* Evaluate enclosed L3 message, typically Identity Response (IMEISV) */
+		if (msg->cipher_mode_complete.l3_msg) {
+			unsigned char *data = (unsigned char*)(msg->cipher_mode_complete.l3_msg->val);
+			uint16_t len = msg->cipher_mode_complete.l3_msg->len;
+			struct msgb *dtap = msgb_alloc(len, "DTAP from Cipher Mode Complete");
+			unsigned char *pos = msgb_put(dtap, len);
+			memcpy(pos, data, len);
+			dtap->l3h = pos;
+			rc = msc_a_up_l3(msc_a, dtap);
+			msgb_free(dtap);
+		}
 		break;
 
 	case RAN_MSG_CIPHER_MODE_REJECT:

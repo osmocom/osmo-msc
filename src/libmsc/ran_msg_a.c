@@ -194,18 +194,10 @@ static int ran_a_decode_cipher_mode_complete(struct ran_dec *ran_dec, struct msg
 			ran_dec_msg.cipher_mode_complete.alg_id = ie_chosen_encr_alg->val[0];
 	}
 
-	rc = ran_decoded(ran_dec, &ran_dec_msg);
+	if (ie_l3_msg)
+		ran_dec_msg.cipher_mode_complete.l3_msg = ie_l3_msg;
 
-	if (ie_l3_msg) {
-		msg->l3h = (uint8_t*)ie_l3_msg->val;
-		msgb_l3trim(msg, ie_l3_msg->len);
-		ran_dec_msg = (struct ran_msg){
-			.msg_type = RAN_MSG_DTAP,
-			.msg_name = "BSSMAP Ciphering Mode Complete (L3 Message Contents)",
-			.dtap = msg,
-		};
-		ran_decoded(ran_dec, &ran_dec_msg);
-	}
+	rc = ran_decoded(ran_dec, &ran_dec_msg);
 
 	return rc;
 }
