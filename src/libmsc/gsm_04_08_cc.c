@@ -598,6 +598,7 @@ static int gsm48_cc_tx_setup(struct gsm_trans *trans, void *arg)
 				      GSM48_CC_CAUSE_RESOURCE_UNAVAIL);
 		trans->callref = 0;
 		trans_free(trans);
+		msgb_free(msg);
 		return rc;
 	}
 
@@ -610,6 +611,7 @@ static int gsm48_cc_tx_setup(struct gsm_trans *trans, void *arg)
 				      GSM48_CC_CAUSE_RESOURCE_UNAVAIL);
 		trans->callref = 0;
 		trans_free(trans);
+		msgb_free(msg);
 		return rc;
 	}
 	trans->transaction_id = trans_id;
