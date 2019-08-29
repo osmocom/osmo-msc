@@ -31,6 +31,8 @@
 #include <osmocom/msc/msub.h>
 #include <osmocom/msc/msc_a.h>
 #include <osmocom/msc/mncc.h>
+#include <osmocom/msc/call_leg.h>
+#include <osmocom/msc/rtp_stream.h>
 
 extern bool _log_lines;
 #define _log(fmt, args...) do { \
@@ -140,6 +142,23 @@ static inline void expect_release_clear(enum osmo_rat_type via_ran)
 	}
 }
 
+extern bool bssap_assignment_expected;
+extern bool bssap_assignment_sent;
+extern bool iu_rab_assignment_expected;
+extern bool iu_rab_assignment_sent;
+
+static inline void expect_bssap_assignment()
+{
+	bssap_assignment_expected = true;
+	bssap_assignment_sent = false;
+}
+
+static inline void expect_iu_rab_assignment()
+{
+	iu_rab_assignment_expected = true;
+	iu_rab_assignment_sent = false;
+}
+
 struct msc_vlr_test_cmdline_opts {
 	bool verbose;
 	int run_test_nr;
@@ -163,10 +182,12 @@ void ms_sends_msg(const char *hex);
 void ms_sends_classmark_update(const struct osmo_gsm48_classmark *classmark);
 void ms_sends_ciphering_mode_complete(const char *inner_nas_msg);
 void ms_sends_security_mode_complete();
+void ms_sends_assignment_complete(enum mgcp_codecs assigned_codec);
 void gsup_rx(const char *rx_hex, const char *expect_tx_hex);
 void send_sms(struct vlr_subscr *receiver,
 	      struct vlr_subscr *sender,
 	      char *str);
+void crcx_ok(enum rtp_direction dir);
 
 void ran_sends_clear_complete();
 
@@ -248,3 +269,6 @@ extern const struct timeval fake_time_start_time;
 #define VLR_TO_HLR "0a0101"
 #define EUSE_TO_MSC_USSD "0a0103"
 #define MSC_USSD_TO_EUSE "0a0103"
+
+extern bool got_crcx;
+void expect_crcx(enum rtp_direction towards);

@@ -73,10 +73,18 @@ bool iu_release_sent = false;
 bool bssap_clear_expected = false;
 bool bssap_clear_sent = false;
 
+bool bssap_assignment_expected = false;
+bool bssap_assignment_sent = false;
+bool iu_rab_assignment_expected = false;
+bool iu_rab_assignment_sent = false;
+
 uint32_t cc_to_mncc_tx_expected_msg_type = 0;
 const char *cc_to_mncc_tx_expected_imsi = NULL;
 bool cc_to_mncc_tx_confirmed = false;
 uint32_t cc_to_mncc_tx_got_callref = 0;
+
+enum rtp_direction expecting_crcx = -1;
+bool got_crcx = false;
 
 extern int ran_dec_dtap_undup_pdisc_ctr_bin(uint8_t pdisc);
 
@@ -296,6 +304,20 @@ static int bssap_validate_cipher_mode_cmd(const struct ran_cipher_mode_command *
 	return 0;
 }
 
+static void bssap_validate_assignment_cmd()
+{
+	OSMO_ASSERT(bssap_assignment_expected);
+	bssap_assignment_expected = false;
+	bssap_assignment_sent = true;
+}
+
+static void iucs_validate_assignment_cmd()
+{
+	OSMO_ASSERT(iu_rab_assignment_expected);
+	iu_rab_assignment_expected = false;
+	iu_rab_assignment_sent = true;
+}
+
 static int iucs_validate_security_mode_ctrl(const struct ran_cipher_mode_command *cmd)
 {
 	const char *got_ik;
@@ -341,6 +363,18 @@ struct msgb *dont_ran_encode(struct osmo_fsm_inst *caller_fi, const struct ran_m
 			break;
 		case OSMO_RAT_UTRAN_IU:
 			iucs_validate_security_mode_ctrl(&ran_enc_msg->cipher_mode_command);
+			break;
+		default:
+			OSMO_ASSERT(false);
+		}
+		break;
+	case RAN_MSG_ASSIGNMENT_COMMAND:
+		switch (ran_type) {
+		case OSMO_RAT_GERAN_A:
+			bssap_validate_assignment_cmd();
+			break;
+		case OSMO_RAT_UTRAN_IU:
+			iucs_validate_assignment_cmd();
 			break;
 		default:
 			OSMO_ASSERT(false);
@@ -602,6 +636,14 @@ void clear_vlr()
 	bssap_clear_sent = false;
 
 	osmo_gettimeofday_override = false;
+
+	expecting_crcx = -1;
+	got_crcx = false;
+
+	bssap_assignment_expected = false;
+	bssap_assignment_sent = false;
+	iu_rab_assignment_expected = false;
+	iu_rab_assignment_sent = false;
 }
 
 static struct log_info_cat test_categories[] = {
@@ -763,12 +805,71 @@ int __wrap_osmo_gsup_client_send(struct osmo_gsup_client *gsupc, struct msgb *ms
 	return 0;
 }
 
-/* override, requires '-Wl,--wrap=call_leg_ensure_ci' */
-int __real_call_leg_ensure_ci(struct call_leg *cl, enum rtp_direction dir, uint32_t call_id, struct gsm_trans *for_trans);
-int __wrap_call_leg_ensure_ci(struct call_leg *cl, enum rtp_direction dir, uint32_t call_id, struct gsm_trans *for_trans)
+struct rtp_stream fake_rtp[2] = {
+	{
+		.dir = RTP_TO_RAN,
+		.local = {
+			.ip = "10.23.42.1",
+			.port = 99,
+		},
+		.remote = {
+			.ip = "10.23.42.2",
+			.port = 100,
+		},
+	},
+	{
+		.dir = RTP_TO_CN,
+		.local = {
+			.ip = "10.23.42.1",
+			.port = 23,
+		},
+		.remote = {
+			.ip = "10.23.42.2",
+			.port = 42,
+		},
+	},
+};
+
+void expect_crcx(enum rtp_direction towards)
 {
-	log("MS <--Call Assignment-- MSC: callref=0x%x", call_id);
+	OSMO_ASSERT(expecting_crcx == -1);
+	expecting_crcx = towards;
+	got_crcx = false;
+}
+
+/* override, requires '-Wl,--wrap=call_leg_ensure_ci' */
+int __real_call_leg_ensure_ci(struct call_leg *cl, enum rtp_direction dir, uint32_t call_id, struct gsm_trans *for_trans,
+			      const enum mgcp_codecs *codec_if_known, const struct osmo_sockaddr_str *remote_addr_if_known);
+int __wrap_call_leg_ensure_ci(struct call_leg *cl, enum rtp_direction dir, uint32_t call_id, struct gsm_trans *for_trans,
+			      const enum mgcp_codecs *codec_if_known, const struct osmo_sockaddr_str *remote_addr_if_known)
+{
+	if (!cl->rtp[dir]) {
+		log("MGW <--CRCX to %s-- MSC: callref=0x%x", rtp_direction_name(dir), call_id);
+
+		OSMO_ASSERT(expecting_crcx == dir);
+		expecting_crcx = -1;
+		got_crcx = true;
+
+		call_leg_ensure_rtp_alloc(cl, dir, call_id, for_trans);
+		if (codec_if_known)
+			rtp_stream_set_codec(cl->rtp[dir], *codec_if_known);
+		if (remote_addr_if_known && osmo_sockaddr_str_is_nonzero(remote_addr_if_known))
+			rtp_stream_set_remote_addr(cl->rtp[dir], remote_addr_if_known);
+	}
+
 	return 0;
+}
+
+void crcx_ok(enum rtp_direction dir)
+{
+	struct msc_a *msc_a = msub_msc_a(g_msub);
+	struct call_leg *cl = msc_a->cc.call_leg;
+	OSMO_ASSERT(cl);
+	OSMO_ASSERT(cl->rtp[dir]);
+	osmo_sockaddr_str_from_str(&cl->rtp[dir]->local, "10.23.23.1", 23);
+	//osmo_sockaddr_str_from_str(&cl->rtp[dir].remote, "10.42.42.1", 42);
+	log("MGW --CRCX OK to %s--> MSC", rtp_direction_name(dir));
+	osmo_fsm_inst_dispatch(cl->fi, CALL_LEG_EV_RTP_STREAM_ADDR_AVAILABLE, cl->rtp[dir]);
 }
 
 static int fake_vlr_tx_lu_acc(void *msc_conn_ref, uint32_t send_tmsi)
@@ -888,6 +989,22 @@ void ms_sends_security_mode_complete()
 
 	ran_dec = (struct ran_msg){
 		.msg_type = RAN_MSG_CIPHER_MODE_COMPLETE,
+	};
+	fake_msc_a_ran_dec(&ran_dec);
+
+	if (!conn_exists(g_msub))
+		g_msub = NULL;
+}
+
+void ms_sends_assignment_complete(enum mgcp_codecs assigned_codec)
+{
+	struct ran_msg ran_dec;
+
+	ran_dec = (struct ran_msg){
+		.msg_type = RAN_MSG_ASSIGNMENT_COMPLETE,
+		.assignment_complete = {
+			.codec = assigned_codec,
+		},
 	};
 	fake_msc_a_ran_dec(&ran_dec);
 

@@ -213,6 +213,25 @@ static void test_call_mo()
 	OSMO_ASSERT(cc_to_mncc_tx_confirmed);
 	mncc.callref = cc_to_mncc_tx_got_callref;
 
+	btw("MNCC replies with MNCC_RTP_CREATE, causing MGW endpoint CRCX to RAN");
+	expect_crcx(RTP_TO_RAN);
+	mncc_sends_to_cc(MNCC_RTP_CREATE, &mncc);
+	OSMO_ASSERT(got_crcx);
+
+	btw("MGW acknowledges the CRCX, triggering Assignment");
+	expect_iu_rab_assignment();
+	crcx_ok(RTP_TO_RAN);
+	OSMO_ASSERT(iu_rab_assignment_sent);
+
+	btw("Assignment succeeds, triggering CRCX to CN");
+	expect_crcx(RTP_TO_CN);
+	ms_sends_assignment_complete(CODEC_AMR_8000_1);
+	OSMO_ASSERT(got_crcx);
+
+	btw("CN RTP address is available, trigger MNCC_RTP_CREATE");
+	cc_to_mncc_expect_tx("", MNCC_RTP_CREATE);
+	crcx_ok(RTP_TO_CN);
+
 	btw("MNCC says that's fine");
 	dtap_expect_tx("8302" /* CC: Call Proceeding */);
 	mncc_sends_to_cc(MNCC_CALL_PROC_REQ, &mncc);
@@ -298,11 +317,32 @@ static void test_call_mt()
 	dtap_expect_tx("0305" /* CC: Setup */);
 	ms_sends_security_mode_complete();
 
+	btw("MS confirms call, we create a RAN-side RTP and forward MNCC_CALL_CONF_IND");
+	expect_crcx(RTP_TO_RAN);
 	cc_to_mncc_expect_tx(IMSI, MNCC_CALL_CONF_IND);
 	ms_sends_msg("8348" /* CC: Call Confirmed */
 		     "0406600402000581" /* Bearer Capability */
 		     "15020100" /* Call Control Capabilities */
 		     "40080402600400021f00" /* Supported Codec List */);
+	OSMO_ASSERT(got_crcx);
+	OSMO_ASSERT(cc_to_mncc_tx_confirmed);
+
+	btw("MNCC sends MNCC_RTP_CREATE");
+	mncc_sends_to_cc(MNCC_RTP_CREATE, &mncc);
+
+	btw("MGW acknowledges the CRCX to RAN, triggering Assignment");
+	expect_iu_rab_assignment();
+	crcx_ok(RTP_TO_RAN);
+	OSMO_ASSERT(iu_rab_assignment_sent);
+
+	btw("Assignment completes, triggering CRCX to CN");
+	expect_crcx(RTP_TO_CN);
+	ms_sends_assignment_complete(CODEC_AMR_8000_1);
+	OSMO_ASSERT(got_crcx);
+
+	btw("When the CN side RTP address is known, send MNCC_RTP_CREATE");
+	cc_to_mncc_expect_tx("", MNCC_RTP_CREATE);
+	crcx_ok(RTP_TO_CN);
 
 	fake_time_passes(1, 23);
 
@@ -380,13 +420,32 @@ static void test_call_mt2()
 	dtap_expect_tx("0305" /* CC: Setup */);
 	ms_sends_security_mode_complete();
 
+	btw("MS confirms call, we create a RAN-side RTP and forward MNCC_CALL_CONF_IND");
+	expect_crcx(RTP_TO_RAN);
 	cc_to_mncc_expect_tx(IMSI, MNCC_CALL_CONF_IND);
 	ms_sends_msg("8348" /* CC: Call Confirmed */
 		     "0406600402000581" /* Bearer Capability */
 		     "15020100" /* Call Control Capabilities */
 		     "40080402600400021f00" /* Supported Codec List */);
+	OSMO_ASSERT(got_crcx);
 	OSMO_ASSERT(cc_to_mncc_tx_confirmed);
 
+	btw("MNCC sends MNCC_RTP_CREATE");
+	mncc_sends_to_cc(MNCC_RTP_CREATE, &mncc);
+
+	btw("MGW acknowledges the CRCX to RAN, triggering Assignment");
+	expect_iu_rab_assignment();
+	crcx_ok(RTP_TO_RAN);
+	OSMO_ASSERT(iu_rab_assignment_sent);
+
+	btw("Assignment completes, triggering CRCX to CN");
+	expect_crcx(RTP_TO_CN);
+	ms_sends_assignment_complete(CODEC_AMR_8000_1);
+	OSMO_ASSERT(got_crcx);
+
+	btw("When the CN side RTP address is known, send MNCC_RTP_CREATE");
+	cc_to_mncc_expect_tx("", MNCC_RTP_CREATE);
+	crcx_ok(RTP_TO_CN);
 	fake_time_passes(1, 23);
 
 	cc_to_mncc_expect_tx("", MNCC_ALERT_IND);
@@ -470,6 +529,25 @@ static void test_call_mo_to_unknown()
 	OSMO_ASSERT(cc_to_mncc_tx_confirmed);
 	mncc.callref = cc_to_mncc_tx_got_callref;
 
+	btw("MNCC replies with MNCC_RTP_CREATE, causing MGW endpoint CRCX to RAN");
+	expect_crcx(RTP_TO_RAN);
+	mncc_sends_to_cc(MNCC_RTP_CREATE, &mncc);
+	OSMO_ASSERT(got_crcx);
+
+	btw("MGW acknowledges the CRCX, triggering Assignment");
+	expect_iu_rab_assignment();
+	crcx_ok(RTP_TO_RAN);
+	OSMO_ASSERT(iu_rab_assignment_sent);
+
+	btw("Assignment succeeds, triggering CRCX to CN");
+	expect_crcx(RTP_TO_CN);
+	ms_sends_assignment_complete(CODEC_AMR_8000_1);
+	OSMO_ASSERT(got_crcx);
+
+	btw("CN RTP address is available, trigger MNCC_RTP_CREATE");
+	cc_to_mncc_expect_tx("", MNCC_RTP_CREATE);
+	crcx_ok(RTP_TO_CN);
+
 	btw("MNCC says that's fine");
 	dtap_expect_tx("8302" /* CC: Call Proceeding */);
 	mncc_sends_to_cc(MNCC_CALL_PROC_REQ, &mncc);
@@ -546,6 +624,25 @@ static void test_call_mo_to_unknown_timeout()
 		    );
 	OSMO_ASSERT(cc_to_mncc_tx_confirmed);
 	mncc.callref = cc_to_mncc_tx_got_callref;
+
+	btw("MNCC replies with MNCC_RTP_CREATE, causing MGW endpoint CRCX to RAN");
+	expect_crcx(RTP_TO_RAN);
+	mncc_sends_to_cc(MNCC_RTP_CREATE, &mncc);
+	OSMO_ASSERT(got_crcx);
+
+	btw("MGW acknowledges the CRCX, triggering Assignment");
+	expect_iu_rab_assignment();
+	crcx_ok(RTP_TO_RAN);
+	OSMO_ASSERT(iu_rab_assignment_sent);
+
+	btw("Assignment succeeds, triggering CRCX to CN");
+	expect_crcx(RTP_TO_CN);
+	ms_sends_assignment_complete(CODEC_AMR_8000_1);
+	OSMO_ASSERT(got_crcx);
+
+	btw("CN RTP address is available, trigger MNCC_RTP_CREATE");
+	cc_to_mncc_expect_tx("", MNCC_RTP_CREATE);
+	crcx_ok(RTP_TO_CN);
 
 	btw("MNCC says that's fine");
 	dtap_expect_tx("8302" /* CC: Call Proceeding */);
