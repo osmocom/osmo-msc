@@ -1700,7 +1700,10 @@ int gsm48_tch_rtp_create(struct gsm_trans *trans)
 
 	/* Payload Type number */
 	mgcp_info = osmo_mgcpc_ep_ci_get_rtp_info(rtp_cn->ci);
-	payload_type = map_codec_to_pt(mgcp_info->ptmap, mgcp_info->ptmap_len, rtp_cn->codec);
+	if (mgcp_info && mgcp_info->ptmap_len)
+		payload_type = map_codec_to_pt(mgcp_info->ptmap, mgcp_info->ptmap_len, rtp_cn->codec);
+	else
+		payload_type = rtp_cn->codec;
 
 	rtp_cn_local = call_leg_local_ip(cl, RTP_TO_CN);
 	if (!rtp_cn_local) {
