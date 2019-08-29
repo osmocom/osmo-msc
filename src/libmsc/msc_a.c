@@ -1653,7 +1653,7 @@ int msc_a_try_call_assignment(struct gsm_trans *cc_trans)
 	OSMO_ASSERT(cc_trans->type == TRANS_CC);
 
 	if (msc_a->cc.active_trans == cc_trans) {
-		/* Assignment for this trans already started earlier. */
+		LOG_MSC_A(msc_a, LOGL_DEBUG, "Assignment for this trans already started earlier\n");
 		return 0;
 	}
 
