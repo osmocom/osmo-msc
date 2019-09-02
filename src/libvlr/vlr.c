@@ -1182,8 +1182,6 @@ int vlr_subscr_rx_id_resp(struct vlr_subscr *vsub,
 			break;
 		}
 		osmo_fsm_inst_dispatch(vsub->lu_fsm, event, mi_string);
-	} else {
-		LOGVSUBP(LOGL_NOTICE,  vsub, "gratuitous ID RESPONSE?!?\n");
 	}
 
 	return 0;
