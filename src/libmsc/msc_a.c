@@ -63,8 +63,14 @@ static const struct osmo_tdef_state_timeout msc_a_fsm_timeouts[32] = {
 /* Transition to a state, using the T timer defined in msc_a_fsm_timeouts.
  * The actual timeout value is in turn obtained from network->T_defs.
  * Assumes local variable fi exists. */
-#define msc_a_state_chg(msc_a, state) \
+#define msc_a_state_chg_always(msc_a, state) \
 	osmo_tdef_fsm_inst_state_chg((msc_a)->c.fi, state, msc_a_fsm_timeouts, (msc_a)->c.ran->tdefs, 5)
+
+/* Same as msc_a_state_chg_always() but ignore if the msc_a already is in the target state. */
+#define msc_a_state_chg(msc_a, STATE) do { \
+		if ((msc_a)->c.fi->state != STATE) \
+			msc_a_state_chg_always(msc_a, STATE); \
+	} while(0)
 
 struct gsm_network *msc_a_net(const struct msc_a *msc_a)
 {
@@ -1036,7 +1042,7 @@ struct msc_a *msc_a_alloc(struct msub *msub, struct ran_infra *ran)
 	};
 	osmo_use_count_make_static_entries(&msc_a->use_count, msc_a->use_count_buf, ARRAY_SIZE(msc_a->use_count_buf));
 	/* Start timeout for first state */
-	msc_a_state_chg(msc_a, MSC_A_ST_VALIDATE_L3);
+	msc_a_state_chg_always(msc_a, MSC_A_ST_VALIDATE_L3);
 	return msc_a;
 }
 
