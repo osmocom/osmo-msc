@@ -757,6 +757,12 @@ static int vlr_subscr_handle_sai_res(struct vlr_subscr *vsub,
 	struct osmo_fsm_inst *auth_fi = vsub->auth_fsm;
 	void *data = (void *) gsup;
 
+	if (!auth_fi) {
+		LOGVSUBP(LOGL_ERROR, vsub, "Received GSUP %s, but there is no auth_fsm\n",
+			 osmo_gsup_message_type_name(gsup->message_type));
+		return -1;
+	}
+
 	switch (gsup->message_type) {
 	case OSMO_GSUP_MSGT_SEND_AUTH_INFO_RESULT:
 		osmo_fsm_inst_dispatch(auth_fi, VLR_AUTH_E_HLR_SAI_ACK, data);
