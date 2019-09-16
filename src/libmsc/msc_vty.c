@@ -557,7 +557,7 @@ DEFUN(cfg_msc_paging_response_timer, cfg_msc_paging_response_timer_cmd,
       "Set to default timeout (" OSMO_STRINGIFY_VAL(MSC_PAGING_RESPONSE_TIMER_DEFAULT) " seconds)\n"
       "Set paging timeout in seconds\n")
 {
-	if (!strcmp(argv[1], "default"))
+	if (!strcmp(argv[0], "default"))
 		gsmnet->paging_response_timer = MSC_PAGING_RESPONSE_TIMER_DEFAULT;
 	else
 		gsmnet->paging_response_timer = atoi(argv[0]);
