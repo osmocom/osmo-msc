@@ -945,10 +945,8 @@ int sgs_iface_rx(struct sgs_connection *sgc, struct msgb *msg)
 
 	/* Parse TLV elements */
 	rc = tlv_parse(&tp, &sgsap_ie_tlvdef, msgb_l2(msg) + 1, msgb_l2len(msg) - 1, 0, 0);
-	if (rc < 0) {
-		TX_STATUS_AND_LOG(sgc, msg_type, SGSAP_SGS_CAUSE_SEMANT_INCORR_MSG, "SGsAP Message %s parsing error\n");
-		goto error;
-	}
+	if (rc < 0)
+		LOGSGC(sgc, LOGL_NOTICE, "SGsAP Message %s contains unknown TLV IEs\n", sgsap_msg_type_name(msg_type));
 
 	/* Most of the messages contain an IMSI as mandatory IE, parse it right here */
 	if (!TLVP_PRESENT(&tp, SGSAP_IE_IMSI) &&
