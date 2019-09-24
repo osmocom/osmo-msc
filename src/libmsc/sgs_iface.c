@@ -1256,6 +1256,28 @@ void sgs_iface_tx_release(struct vlr_subscr *vsub)
 	sgs_tx(mme->conn, msg_sgs);
 }
 
+/*! Send SGsAP-SERVICE-ABORT-REQUEST message to MME
+ *  \param[in] vsub subscriber context */
+void sgs_iface_tx_serv_abrt(struct vlr_subscr *vsub)
+{
+	struct msgb *msg_sgs;
+	struct sgs_mme_ctx *mme;
+
+	OSMO_ASSERT(vsub);
+
+	/* The service abort procedure is only defined for MT calls,
+	 * see also 3GPP TS 29.118, chapter 5.13.2 */
+	if (vsub->sgs.paging_serv_ind != SGSAP_SERV_IND_CS_CALL)
+		return;
+
+	mme = sgs_mme_ctx_by_vsub(vsub, SGSAP_MSGT_DL_UD);
+	if (!mme)
+		return;
+
+	msg_sgs = gsm29118_create_service_abort_req(vsub->imsi);
+	sgs_tx(mme->conn, msg_sgs);
+}
+
 /*! initalize SGs new interface
  *  \param[in] ctx talloc context
  *  \param[in] network associated gsm network

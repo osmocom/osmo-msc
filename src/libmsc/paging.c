@@ -49,6 +49,10 @@ const struct value_string paging_cause_names[] = {
 static void paging_response_timer_cb(void *data)
 {
 	struct vlr_subscr *vsub = data;
+
+	if (vsub->cs.attached_via_ran == OSMO_RAT_EUTRAN_SGS)
+		sgs_iface_tx_serv_abrt(vsub);
+
 	paging_expired(vsub);
 }
 
