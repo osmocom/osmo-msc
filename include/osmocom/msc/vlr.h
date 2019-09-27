@@ -311,7 +311,7 @@ void vlr_loc_update_cancel(struct osmo_fsm_inst *fi,
 /* tell the VLR that the RAN connection is gone */
 int vlr_subscr_disconnected(struct vlr_subscr *vsub);
 bool vlr_subscr_expire(struct vlr_subscr *vsub);
-int vlr_subscr_rx_id_resp(struct vlr_subscr *vsub, const uint8_t *mi, size_t mi_len);
+int vlr_subscr_rx_id_resp(struct vlr_subscr *vsub, struct vlr_subscr **changed_vsub, const uint8_t *mi, size_t mi_len);
 int vlr_subscr_rx_auth_resp(struct vlr_subscr *vsub, bool is_r99, bool is_utran,
 			    const uint8_t *res, uint8_t res_len);
 int vlr_subscr_rx_auth_fail(struct vlr_subscr *vsub, const uint8_t *auts);

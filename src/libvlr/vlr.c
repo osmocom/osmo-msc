@@ -1121,11 +1121,14 @@ int vlr_gsup_rx(struct gsup_client_mux *gcm, void *data, const struct osmo_gsup_
 }
 
 /* MSC->VLR: Subscriber has provided IDENTITY RESPONSE */
-int vlr_subscr_rx_id_resp(struct vlr_subscr *vsub,
+int vlr_subscr_rx_id_resp(struct vlr_subscr *vsub, struct vlr_subscr **changed_vsub,
 			  const uint8_t *mi, size_t mi_len)
 {
 	char mi_string[GSM48_MI_SIZE];
 	uint8_t mi_type = mi[0] & GSM_MI_TYPE_MASK;
+	struct vlr_subscr *twin;
+
+	*changed_vsub = NULL;
 
 	gsm48_mi_to_string(mi_string, sizeof(mi_string), mi, mi_len);
 
@@ -1141,8 +1144,23 @@ int vlr_subscr_rx_id_resp(struct vlr_subscr *vsub,
 			LOGVSUBP(LOGL_ERROR, vsub, "IMSI in ID RESP differs:"
 				 " %s\n", mi_string);
 			/* XXX Should we return an error, e.g. -EINVAL ? */
-		} else
-			vlr_subscr_set_imsi(vsub, mi_string);
+			break;
+		}
+
+		/* Guard against creating evil twin vlr_subscr (duplicate entries for an IMSI) */
+		twin = vlr_subscr_find_by_imsi(vsub->vlr, mi_string, __func__);
+		if (twin) {
+			/* We already have a different vlr_subscr for this IMSI. Instruct the caller to use that one
+			 * instead. */
+			LOGVSUBP(LOGL_INFO, twin,
+				 "On ID Response (IMSI), found an already existing VLR entry for this IMSI."
+				 " Switching to the already existing VLR entry.\n");
+			*changed_vsub = twin;
+			/* The other vsub should be released by use count release of the caller. */
+			return 0;
+		}
+
+		vlr_subscr_set_imsi(vsub, mi_string);
 		break;
 	case GSM_MI_TYPE_IMEI:
 		vlr_subscr_set_imei(vsub, mi_string);

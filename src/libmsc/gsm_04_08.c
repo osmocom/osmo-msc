@@ -183,6 +183,8 @@ static int mm_rx_id_resp(struct msc_a *msc_a, struct msgb *msg)
 	uint8_t *mi = gh->data+1;
 	uint8_t mi_len = gh->data[0];
 	struct vlr_subscr *vsub = msc_a_vsub(msc_a);
+	struct vlr_subscr *changed_vsub;
+	int rc;
 
 	if (!vsub) {
 		LOGP(DMM, LOGL_ERROR,
@@ -194,7 +196,15 @@ static int mm_rx_id_resp(struct msc_a *msc_a, struct msgb *msg)
 
 	osmo_signal_dispatch(SS_SUBSCR, S_SUBSCR_IDENTITY, gh->data);
 
-	return vlr_subscr_rx_id_resp(vsub, mi, mi_len);
+	rc = vlr_subscr_rx_id_resp(vsub, &changed_vsub, mi, mi_len);
+
+	if (changed_vsub) {
+		/* VLR instructs us to use this other vsub record instead */
+		msub_set_vsub(msc_a->c.msub, NULL);
+		msub_set_vsub(msc_a->c.msub, changed_vsub);
+	}
+
+	return rc;
 }
 
 /* 9.2.5 CM service accept */
@@ -1174,10 +1184,12 @@ static int gsm48_rx_rr_pag_resp(struct msc_a *msc_a, struct msgb *msg)
 static int gsm48_rx_rr_ciphering_mode_complete(struct msc_a *msc_a, struct msgb *msg)
 {
 	struct vlr_subscr *vsub = msc_a_vsub(msc_a);
+	struct vlr_subscr *changed_vsub;
 	struct gsm48_hdr *gh = msgb_l3(msg);
 	unsigned int payload_len = msgb_l3len(msg) - sizeof(*gh);
 	struct tlv_parsed tp;
 	struct tlv_p_entry *mi;
+	int rc;
 
 	tlv_parse(&tp, &gsm48_att_tlvdef, gh->data, payload_len, 0, 0);
 	mi = TLVP_GET(&tp, GSM48_IE_MOBILE_ID);
@@ -1191,7 +1203,15 @@ static int gsm48_rx_rr_ciphering_mode_complete(struct msc_a *msc_a, struct msgb 
 	if (!vsub)
 		return 0;
 
-	return vlr_subscr_rx_id_resp(vsub, mi->val, mi->len);
+	rc = vlr_subscr_rx_id_resp(vsub, &changed_vsub, mi->val, mi->len);
+
+	if (changed_vsub) {
+		/* VLR instructs us to use this other vsub record instead */
+		msub_set_vsub(msc_a->c.msub, NULL);
+		msub_set_vsub(msc_a->c.msub, changed_vsub);
+	}
+
+	return rc;
 }
 
 static int gsm48_rx_rr_app_info(struct msc_a *msc_a, struct msgb *msg)
