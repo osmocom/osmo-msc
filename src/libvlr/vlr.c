@@ -1155,9 +1155,10 @@ int vlr_subscr_rx_id_resp(struct vlr_subscr *vsub, struct vlr_subscr **changed_v
 			LOGVSUBP(LOGL_INFO, twin,
 				 "On ID Response (IMSI), found an already existing VLR entry for this IMSI."
 				 " Switching to the already existing VLR entry.\n");
-			*changed_vsub = twin;
+			vsub = twin;
+			*changed_vsub = vsub;
 			/* The other vsub should be released by use count release of the caller. */
-			return 0;
+			break;
 		}
 
 		vlr_subscr_set_imsi(vsub, mi_string);
