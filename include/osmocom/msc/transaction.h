@@ -103,6 +103,7 @@ struct gsm_trans {
 			struct osmo_timer_list timer;
 			struct osmo_timer_list timer_guard;
 			struct gsm_mncc msg;	/* stores setup/disconnect/release message */
+			bool mncc_initiated;	/* Whether an MNCC Release is necessary on failure */
 		} cc;
 		struct {
 			struct gsm411_smc_inst smc_inst;

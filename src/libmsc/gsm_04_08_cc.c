@@ -244,6 +244,9 @@ static int mncc_recvmsg(struct gsm_network *net, struct gsm_trans *trans,
 	memcpy(data, mncc, sizeof(struct gsm_mncc));
 
 	cc_tx_to_mncc(net, msg);
+	/* trans may be NULL when sending an MNCC error reply upon an invalid MNCC request */
+	if (trans)
+		trans->cc.mncc_initiated = true;
 
 	return 0;
 }
@@ -278,9 +281,10 @@ void _gsm48_cc_trans_free(struct gsm_trans *trans)
 			gsm48_cc_tx_release(trans, &rel);
 		}
 		/* Ressource unavailable */
-		mncc_release_ind(trans->net, trans, trans->callref,
-				 GSM48_CAUSE_LOC_PRN_S_LU,
-				 GSM48_CC_CAUSE_RESOURCE_UNAVAIL);
+		if (trans->cc.mncc_initiated)
+			mncc_release_ind(trans->net, trans, trans->callref,
+					 GSM48_CAUSE_LOC_PRN_S_LU,
+					 GSM48_CC_CAUSE_RESOURCE_UNAVAIL);
 		/* This is a final freeing of the transaction. The MNCC release may have triggered the
 		 * T308 release timer, but we don't have the luxury of graceful CC Release here. */
 		gsm48_stop_cc_timer(trans);
@@ -1981,6 +1985,7 @@ static int mncc_tx_to_gsm_cc(struct gsm_network *net, const union mncc_msg *msg)
 	LOG_TRANS_CAT(trans, DMNCC, LOGL_DEBUG, "rx %s\n", get_mncc_name(msg->msg_type));
 
 	gsm48_start_guard_timer(trans);
+	trans->cc.mncc_initiated = true;
 
 	if (trans->msc_a)
 		msc_a = trans->msc_a;
