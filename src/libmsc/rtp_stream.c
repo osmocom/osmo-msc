@@ -220,6 +220,7 @@ static void rtp_stream_fsm_cleanup(struct osmo_fsm_inst *fi, enum osmo_fsm_term_
 {
 	struct rtp_stream *rtps = fi->priv;
 	if (rtps->ci) {
+		osmo_mgcpc_ep_cancel_notify(osmo_mgcpc_ep_ci_ep(rtps->ci), fi);
 		osmo_mgcpc_ep_ci_dlcx(rtps->ci);
 		rtps->ci = NULL;
 	}
