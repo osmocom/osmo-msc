@@ -301,7 +301,7 @@ struct osmo_sockaddr_str *call_leg_local_ip(struct call_leg *cl, enum rtp_direct
 	rtps = cl->rtp[dir];
 	if (!rtps)
 		return NULL;
-	if (!osmo_sockaddr_str_is_set(&rtps->local))
+	if (!osmo_sockaddr_str_is_nonzero(&rtps->local))
 		return NULL;
 	return &rtps->local;
 }
@@ -327,7 +327,7 @@ int call_leg_ensure_ci(struct call_leg *cl, enum rtp_direction dir, uint32_t cal
 	}
 	if (codec_if_known)
 		rtp_stream_set_codec(cl->rtp[dir], *codec_if_known);
-	if (remote_addr_if_known && osmo_sockaddr_str_is_set(remote_addr_if_known))
+	if (remote_addr_if_known && osmo_sockaddr_str_is_nonzero(remote_addr_if_known))
 		rtp_stream_set_remote_addr(cl->rtp[dir], remote_addr_if_known);
 	return rtp_stream_ensure_ci(cl->rtp[dir], cl->mgw_endpoint);
 }

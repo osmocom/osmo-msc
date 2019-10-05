@@ -74,7 +74,7 @@ void rtp_stream_update_id(struct rtp_stream *rtps)
 		OSMO_STRBUF_PRINTF(sb, ":no-CI");
 	} else {
 		OSMO_STRBUF_PRINTF(sb, ":CI-%s", osmo_mgcpc_ep_ci_id(rtps->ci));
-		if (!osmo_sockaddr_str_is_set(&rtps->remote))
+		if (!osmo_sockaddr_str_is_nonzero(&rtps->remote))
 			OSMO_STRBUF_PRINTF(sb, ":no-remote-port");
 		else if (!rtps->remote_sent_to_mgw)
 			OSMO_STRBUF_PRINTF(sb, ":remote-port-not-sent");
@@ -89,9 +89,9 @@ void rtp_stream_update_id(struct rtp_stream *rtps)
 				OSMO_STRBUF_PRINTF(sb, ":remote-osmux-cid-not-sent");
 		}
 	}
-	if (osmo_sockaddr_str_is_set(&rtps->local))
+	if (osmo_sockaddr_str_is_nonzero(&rtps->local))
 		OSMO_STRBUF_PRINTF(sb, ":local-%s-%u", rtps->local.ip, rtps->local.port);
-	if (osmo_sockaddr_str_is_set(&rtps->remote))
+	if (osmo_sockaddr_str_is_nonzero(&rtps->remote))
 		OSMO_STRBUF_PRINTF(sb, ":remote-%s-%u", rtps->remote.ip, rtps->remote.port);
 	if (rtps->use_osmux)
 		OSMO_STRBUF_PRINTF(sb, ":osmux-%d-%d", rtps->local_osmux_cid, rtps->remote_osmux_cid);
@@ -137,8 +137,8 @@ struct rtp_stream *rtp_stream_alloc(struct call_leg *parent_call_leg, enum rtp_d
 static void check_established(struct rtp_stream *rtps)
 {
 	if (rtps->fi->state != RTP_STREAM_ST_ESTABLISHED
-	    && osmo_sockaddr_str_is_set(&rtps->local)
-	    && osmo_sockaddr_str_is_set(&rtps->remote)
+	    && osmo_sockaddr_str_is_nonzero(&rtps->local)
+	    && osmo_sockaddr_str_is_nonzero(&rtps->remote)
 	    && rtps->remote_sent_to_mgw
 	    && (!rtps->use_osmux || rtps->remote_osmux_cid_sent_to_mgw)
 	    && rtps->codec_known)
@@ -172,7 +172,7 @@ static void rtp_stream_fsm_establishing_established(struct osmo_fsm_inst *fi, ui
 		check_established(rtps);
 
 		if ((!rtps->remote_sent_to_mgw || !rtps->codec_sent_to_mgw)
-		    && osmo_sockaddr_str_is_set(&rtps->remote)
+		    && osmo_sockaddr_str_is_nonzero(&rtps->remote)
 		    && (!rtps->use_osmux || rtps->remote_osmux_cid_sent_to_mgw)
 		    && rtps->codec_known) {
 			LOG_RTPS(rtps, LOGL_DEBUG,
@@ -315,7 +315,7 @@ static int rtp_stream_do_mgcp_verb(struct rtp_stream *rtps, enum mgcp_verb verb,
 		verb_info.codecs_len = 1;
 		rtps->codec_sent_to_mgw = true;
 	}
-	if (osmo_sockaddr_str_is_set(&rtps->remote)) {
+	if (osmo_sockaddr_str_is_nonzero(&rtps->remote)) {
 		int rc = osmo_strlcpy(verb_info.addr, rtps->remote.ip, sizeof(verb_info.addr));
 		if (rc <= 0 || rc >= sizeof(verb_info.addr)) {
 			LOG_RTPS(rtps, LOGL_ERROR, "Failure to write IP address to MGCP message (rc=%d)\n", rc);
@@ -365,7 +365,7 @@ int rtp_stream_commit(struct rtp_stream *rtps)
 		LOG_RTPS(rtps, LOGL_DEBUG, "Not committing: no MGW endpoint CI set up\n");
 		return -1;
 	}
-	if (!osmo_sockaddr_str_is_set(&rtps->remote)) {
+	if (!osmo_sockaddr_str_is_nonzero(&rtps->remote)) {
 		LOG_RTPS(rtps, LOGL_DEBUG, "Not committing: no remote RTP address known\n");
 		return -1;
 	}

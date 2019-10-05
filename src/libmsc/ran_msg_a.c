@@ -942,7 +942,7 @@ static struct msgb *ran_a_make_assignment_command(struct osmo_fsm_inst *log_fi,
 		use_scl = &scl;
 
 		/* Package RTP-Address data */
-		if (osmo_sockaddr_str_is_set(ac->cn_rtp)) {
+		if (osmo_sockaddr_str_is_nonzero(ac->cn_rtp)) {
 			struct sockaddr_in rtp_addr_in;
 
 			memset(&rtp_addr_in, 0, sizeof(rtp_addr_in));
@@ -1114,7 +1114,7 @@ struct msgb *ran_a_make_handover_request(struct osmo_fsm_inst *log_fi, const str
 	if (n->classmark)
 		r.classmark_information = *n->classmark;
 
-	if (osmo_sockaddr_str_is_set(n->rtp_ran_local)) {
+	if (osmo_sockaddr_str_is_nonzero(n->rtp_ran_local)) {
 		if (osmo_sockaddr_str_to_sockaddr(n->rtp_ran_local, &ss)) {
 			LOG_RAN_A_ENC(log_fi, LOGL_ERROR,
 				       "Handover Request: invalid AoIP Transport Layer address/port: "
@@ -1139,7 +1139,7 @@ static struct msgb *ran_a_make_handover_request_ack(struct osmo_fsm_inst *caller
 		.chosen_speech_version = r->chosen_speech_version,
 	};
 
-	if (osmo_sockaddr_str_is_set(&r->remote_rtp)) {
+	if (osmo_sockaddr_str_is_nonzero(&r->remote_rtp)) {
 		osmo_sockaddr_str_to_sockaddr(&r->remote_rtp, &ss);
 		params.aoip_transport_layer = &ss;
 	}

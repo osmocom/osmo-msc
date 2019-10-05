@@ -661,7 +661,7 @@ static void msc_ho_rx_request_ack(struct msc_a *msc_a, struct msc_a_ran_dec_data
 	}
 
 	msc_a->ho.new_cell.ran_remote_rtp = hra->ran_dec->handover_request_ack.remote_rtp;
-	if (osmo_sockaddr_str_is_set(&msc_a->ho.new_cell.ran_remote_rtp)) {
+	if (osmo_sockaddr_str_is_nonzero(&msc_a->ho.new_cell.ran_remote_rtp)) {
 		LOG_HO(msc_a, LOGL_DEBUG, "Request Ack contains cell's RTP address " OSMO_SOCKADDR_STR_FMT "\n",
 		       OSMO_SOCKADDR_STR_FMT_ARGS(&msc_a->ho.new_cell.ran_remote_rtp));
 	}
@@ -684,7 +684,7 @@ static void msc_ho_rtp_switch_to_new_cell(struct msc_a *msc_a)
 		return;
 	}
 
-	if (!osmo_sockaddr_str_is_set(&msc_a->ho.new_cell.ran_remote_rtp)) {
+	if (!osmo_sockaddr_str_is_nonzero(&msc_a->ho.new_cell.ran_remote_rtp)) {
 		LOG_HO(msc_a, LOGL_DEBUG, "New cell's RTP IP:port not yet known, not switching RTP stream\n");
 		return;
 	}
@@ -738,7 +738,7 @@ static void msc_ho_rtp_rollback_to_old_cell(struct msc_a *msc_a)
 		return;
 	}
 
-	if (!osmo_sockaddr_str_is_set(&msc_a->ho.old_cell.ran_remote_rtp)) {
+	if (!osmo_sockaddr_str_is_nonzero(&msc_a->ho.old_cell.ran_remote_rtp)) {
 		LOG_HO(msc_a, LOGL_DEBUG, "Have no RTP IP:port for the old cell, not switching back to\n");
 		return;
 	}

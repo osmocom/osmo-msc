@@ -444,7 +444,7 @@ static int msc_t_patch_and_send_ho_request_ack(struct msc_t *msc_t, const struct
 
 	/* Also need to fetch the RTP IP:port from AoIP Transport Address IE to tell the MGW about it */
 	if (rtp_ran) {
-		if (osmo_sockaddr_str_is_set(&r->remote_rtp)) {
+		if (osmo_sockaddr_str_is_nonzero(&r->remote_rtp)) {
 			LOG_MSC_T(msc_t, LOGL_DEBUG, "From Handover Request Ack, got " OSMO_SOCKADDR_STR_FMT "\n",
 				  OSMO_SOCKADDR_STR_FMT_ARGS(&r->remote_rtp));
 			rtp_stream_set_remote_addr(rtp_ran, &r->remote_rtp);

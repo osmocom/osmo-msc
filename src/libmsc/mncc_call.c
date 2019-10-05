@@ -256,7 +256,7 @@ static bool mncc_call_rx_rtp_create(struct mncc_call *mncc_call)
 		return true;
 	}
 
-	if (!osmo_sockaddr_str_is_set(&mncc_call->rtps->local)) {
+	if (!osmo_sockaddr_str_is_nonzero(&mncc_call->rtps->local)) {
 		LOG_MNCC_CALL(mncc_call, LOGL_DEBUG, "Got RTP_CREATE, but RTP stream has no local address\n");
 		return true;
 	}
@@ -294,7 +294,7 @@ uint32_t mgcp_codec_to_mncc_payload_msg_type(enum mgcp_codecs codec)
 
 static bool mncc_call_tx_rtp_create(struct mncc_call *mncc_call)
 {
-	if (!mncc_call->rtps || !osmo_sockaddr_str_is_set(&mncc_call->rtps->local)) {
+	if (!mncc_call->rtps || !osmo_sockaddr_str_is_nonzero(&mncc_call->rtps->local)) {
 		mncc_call_error(mncc_call, "Cannot send RTP_CREATE, no local RTP address set up\n");
 		return false;
 	}
