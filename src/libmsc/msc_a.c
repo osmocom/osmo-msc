@@ -523,7 +523,7 @@ static void msc_a_call_leg_ran_local_addr_available(struct msc_a *msc_a)
 
 	if (mncc_bearer_cap_to_channel_type(&channel_type, &cc_trans->bearer_cap)) {
 		LOG_MSC_A(msc_a, LOGL_ERROR, "Cannot compose Channel Type from bearer capabilities\n");
-		/* FIXME: ERROR HANDLING */
+		trans_free(cc_trans);
 		return;
 	}
 
@@ -539,7 +539,7 @@ static void msc_a_call_leg_ran_local_addr_available(struct msc_a *msc_a)
 	};
 	if (msc_a_ran_down(msc_a, MSC_ROLE_I, &msg)) {
 		LOG_MSC_A(msc_a, LOGL_ERROR, "Cannot send Assignment\n");
-		/* FIXME: ERROR HANDLING */
+		trans_free(cc_trans);
 		return;
 	}
 }
@@ -548,7 +548,7 @@ static void msc_a_call_leg_cn_local_addr_available(struct msc_a *msc_a, struct g
 {
 	if (gsm48_tch_rtp_create(cc_trans)) {
 		LOG_MSC_A(msc_a, LOGL_ERROR, "Cannot inform MNCC of RTP address\n");
-		/* FIXME: ERROR HANDLING */
+		trans_free(cc_trans);
 		return;
 	}
 }
