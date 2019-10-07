@@ -1579,10 +1579,10 @@ int _msc_a_msg_down(struct msc_a *msc_a, enum msc_role to_role, uint32_t to_role
 int msc_a_tx_dtap_to_i(struct msc_a *msc_a, struct msgb *dtap)
 {
 	struct ran_msg ran_msg;
+	struct gsm48_hdr *gh = msgb_l3(dtap) ? : dtap->data;
+	uint8_t pdisc = gsm48_hdr_pdisc(gh);
 
 	if (!msc_a) {
-		struct gsm48_hdr *gh = msgb_l3(dtap) ? : dtap->data;
-		uint8_t pdisc = gsm48_hdr_pdisc(gh);
 		LOGP(DMSC, LOGL_ERROR, "Attempt to send DTAP to NULL MSC-A, dropping message: %s %s\n",
 		     gsm48_pdisc_name(pdisc), gsm48_pdisc_msgtype_name(pdisc, gsm48_hdr_msg_type(gh)));
 		msgb_free(dtap);
@@ -1593,6 +1593,9 @@ int msc_a_tx_dtap_to_i(struct msc_a *msc_a, struct msgb *dtap)
 		/* The SGs connection to the MME always is at the MSC-A. */
 		return sgs_iface_tx_dtap_ud(msc_a, dtap);
 	}
+
+	LOG_MSC_A(msc_a, LOGL_DEBUG, "Sending DTAP: %s %s\n",
+		  gsm48_pdisc_name(pdisc), gsm48_pdisc_msgtype_name(pdisc, gsm48_hdr_msg_type(gh)));
 
 	ran_msg = (struct ran_msg){
 		.msg_type = RAN_MSG_DTAP,
