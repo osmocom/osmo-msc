@@ -303,3 +303,19 @@ uint8_t trans_type_to_gsm48_proto(enum trans_type type)
 	}
 
 }
+
+const char *trans_name(const struct gsm_trans *trans)
+{
+	static char namebuf[32];
+	if (!trans)
+		return "NULL";
+	switch (trans->type) {
+	case TRANS_CC:
+		snprintf(namebuf, sizeof(namebuf), "%s:%s",
+			 trans_type_name(trans->type), gsm48_cc_state_name(trans->cc.state));
+		return namebuf;
+
+	default:
+		return trans_type_name(trans->type);
+	}
+}
