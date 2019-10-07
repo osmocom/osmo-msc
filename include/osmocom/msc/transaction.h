@@ -19,7 +19,7 @@ struct vty;
 #define LOG_TRANS_CAT(trans, subsys, level, fmt, args...) \
 	LOGP(subsys, level, \
 	     "trans(%s %s callref-0x%x tid-%u%s) " fmt, \
-	     (trans) ? trans_type_name((trans)->type) : "NULL", \
+	     (trans) ? trans_name(trans) : "NULL", \
 	     (trans) ? ((trans)->msc_a ? (trans)->msc_a->c.fi->id : vlr_subscr_name((trans)->vsub)) : "NULL", \
 	     (trans) ? (trans)->callref : 0, \
 	     (trans) ? (trans)->transaction_id : 0, \
@@ -174,3 +174,5 @@ static inline int trans_log_subsys(enum trans_type type)
 	}
 	return DMSC;
 }
+
+const char *trans_name(const struct gsm_trans *trans);
