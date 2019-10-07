@@ -1756,8 +1756,6 @@ static int tch_rtp_connect(struct gsm_network *net, const struct gsm_mncc_rtp *r
 		return -EINVAL;
 	}
 
-	LOG_TRANS_CAT(trans, DMNCC, LOGL_DEBUG, "rx %s\n", get_mncc_name(MNCC_RTP_CONNECT));
-
 	osmo_sockaddr_str_from_32n(&rtp_addr, rtp->ip, rtp->port);
 	rtp_stream_set_remote_addr(rtps, &rtp_addr);
 	rtp_stream_commit(rtps);
