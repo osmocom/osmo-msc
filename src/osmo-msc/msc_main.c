@@ -500,7 +500,8 @@ int main(int argc, char **argv)
 	/* Track the use of talloc NULL memory contexts */
 	talloc_enable_null_tracking();
 
-	osmo_fsm_term_safely(true);
+	osmo_fsm_set_dealloc_ctx(OTC_SELECT);
+	osmo_fsm_set_term_stops_actions(true);
 
 	msc_vty_info.copyright	= osmomsc_copyright;
 
@@ -721,7 +722,7 @@ TODO: we probably want some of the _net_ ctrl commands from bsc_base_ctrl_cmds_i
 
 	while (!quit) {
 		log_reset_context();
-		osmo_select_main(0);
+		osmo_select_main_ctx(0);
 	}
 
 	msc_network_shutdown(msc_network);
