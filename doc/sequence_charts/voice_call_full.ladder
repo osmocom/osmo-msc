@@ -1,173 +1,154 @@
 {hscale=3}
-moms = MS,BSS (MO)
+moms = MS,BSS (MO)\nUE,hNodeB (MO)
 momgw = MGW for MSC (MO)
 momsc = MSC (MO)
 sip = MNCC to PBX via
 	osmo-sip-connector
 mtmsc = MSC (MT)
 mtmgw = MGW for MSC (MT)
-mtms = hNodeB,UE (MT)
-
-
-moms > momsc	CC Setup
-		Bearer Cap
-momsc [] .	CC starts guard timer (180s)
-momsc <> .	CC state:
-		INITIATED
-		callref = 0x80000001
-momsc > sip	MNCC_SETUP_IND
-		Bearer Cap: Speech Ver list
-momsc < sip	MNCC_RTP_CREATE
-momgw < momsc	for RAN: CRCX 1
-		rtpbridge/*@msc
-momgw > momsc	CRCX 1 OK
-		rtpbridge/0@msc, CI: ABCD1234, MGW RTP IP:port
-moms < momsc	Assignment Command
-		MGW RTP IP:port
-moms > momsc	Assignment Complete
-		Speech Codec (Chosen), BSC RTP IP:port
-momgw < momsc	for RAN: MDCX 2
-		rtpbridge/0@msc, CI: ABCD1234, codec (112="AMR/8000")
-momgw > momsc	MDCX 2 OK
-momgw < momsc	for CN: CRCX 3
-		rtpbridge/0@msc
-momgw > momsc	CRCX 3 OK
-		rtpbridge/0@msc, CI: BCDE2345, MGW RTP IP:port
-momsc > sip	MNCC_RTP_CREATE
-		MGW RTP IP:port, payload_type=112, payload_msg_type=GSM_TCH_FRAME_AMR
-
-momsc < sip	MNCC_CALL_PROC_REQ
-
-momsc <> .	CC state:
-		MO_CALL_PROC
-moms < momsc	DTAP: CC Call Proceeding
-
-sip > mtmsc	MNCC_SETUP_REQ
-		callref = 5002, called + calling MSISDN
-mtmsc <> .	CC state:
-		NULL
-mtmsc > mtms	Paging
-mtmsc < mtms	Paging Response
-mtmsc [] .	CC starts T303 (30s)
-mtmsc <> .	CC state:
-		CALL_PRESENT
-mtmsc > mtms	DTAP: CC Setup
-mtmsc < mtms	DTAP: CC Call Confirmed
-		Bearer Cap: Speech Ver list
-mtmsc [] .	CC stops T303
-		starts T310 (30s)
-mtmsc <> .	CC state:
-		MO_TERM_CALL_CONF
-mtmgw < mtmsc	for RAN: CRCX 4
-		rtpbridge/*@msc
-sip < mtmsc	MNCC_CALL_CONF_IND
-		Bearer Cap: Speech Ver list
-sip > mtmsc	MNCC_RTP_CREATE
-mtmgw > mtmsc	CRCX 4 OK
-		rtpbridge/1@msc, CI: CDEF3456, MGW RTP IP:port
-mtmsc > mtms	RAB Assignment Request
-		MGW RTP IP:port
-mtmsc < mtms	RAB Assignment Response
-		hNodeB RTP IP:port
-mtmgw < mtmsc	for RAN: MDCX 5
-		rtpbridge/1@msc, CI: CDEF3456, codec (112="AMR/8000")
-mtmgw > mtmsc	MDCX 5 OK
-mtmgw < mtmsc	for CN: CRCX 6
-		rtpbridge/1@msc
-mtmgw > mtmsc	CRCX 6 OK
-		CI: DEFA4567, MGW RTP IP:port
-sip < mtmsc	MNCC_RTP_CREATE
-		MGW RTP IP:port, payload_type=112, payload_msg_type=GSM_TCH_FRAME_AMR
-mtmsc < mtms	DTAP: CC Alerting
-mtmsc [] .	CC stops T310
-		starts T301 (180s)
-mtmsc <> .	CC state:
-		CALL_RECEIVED
-sip < mtmsc	MNCC_ALERT_IND
-momsc < sip	MNCC_ALERT_REQ
-		
-momsc [] . 	CC stops guard timer
-momsc <> . 	CC state:
-		CALL_DELIVERED
-moms < momsc	DTAP: CC Alerting
-...
-...		ringing
-...
-mtmsc < mtms	DTAP: CC Connect
-mtmsc [] .	CC stops T301
-mtmsc <> .	CC state:
-		CONNECT_REQUEST
-sip < mtmsc	MNCC_SETUP_CNF
-sip > mtmsc	MNCC_RTP_CONNECT
-		SIP RTP IP:port
-mtmgw < mtmsc	for CN: MDCX 7
-		rtpbridge/1@msc, CI: DEFA4567, MGW RTP IP:port
-sip > mtmsc	MNCC_SETUP_COMPL_REQ
-mtmsc [] .	CC starts guard timer (180s)
-mtmsc <> .	CC state:
-		ACTIVE
-mtmsc [] .	CC stops guard timer
-mtmsc > mtms	DTAP: CC Connect Acknowledge
-
-momsc < sip	MNCC_RTP_CONNECT
-		SIP RTP IP:port
-momgw < momsc	for CN: MDCX 8
-		rtpbridge/0@msc, CI: BCDE2345, MGW RTP IP:port
-mtmsc < mtmgw	MDCX 7 OK
-
-momsc < sip	MNCC_SETUP_RSP
-
-momsc [] .	CC starts guard timer (180s)
-		also starts T313 (30s)
-momsc <> .	CC state:
-		CONNECT_IND
-moms < momsc	DTAP: CC Connect
-momgw > momsc	MDCX 8 OK
-moms > momsc	DTAP: CC Connect Acknowledge
-momsc [] .	CC stops T313
-momsc <> .	CC state:
-		ACTIVE
-momsc [] .	CC stops guard timer
-momsc > sip	MNCC_SETUP_COMPL_IND
-
-...
-... call ongoing
-...
-
-mtmsc < mtms	DTAP: CC Disconnect
-mtmsc <> .	CC state:
-		DISCONNECT_IND
-sip < mtmsc	MNCC_DISC_IND
-sip > mtmsc	MNCC_REL_REQ
-mtmsc [] .	CC starts guard timer (180s)
-		and starts T308 (10s)
-mtmsc > mtms	DTAP: CC Release
-
-momsc < sip	MNCC_DISC_REQ
-momsc [] .	CC starts guard timer (180s)
-		and starts T306 (30s)
-momsc <> .	CC state:
-		DISCONNECT_IND
-moms < momsc	DTAP: CC Disconnect
-moms > momsc	DTAP: CC Release
-momsc [] .	CC stops T306
-moms < momsc	DTAP: CC Release Complete
-momsc > sip	MNCC_REL_IND
-momsc <> .	CC state:
-		NULL
-momsc [] .	CC frees transaction
-		stops guard timer
-momgw < momsc	for CN: DLCX
-momgw < momsc	for RAN: DLCX
-moms < momsc	Clear Command
-moms > momsc	Clear Complete
-
-mtmsc < mtms	DTAP: CC Release Complete
-mtmsc [] .	CC stops timer T308
-sip < mtmsc	MNCC_REL_CNF
-mtmsc [] .	CC frees transaction
-		stops guard timer
-mtmgw < mtmsc	for CN: DLCX
-mtmgw < mtmsc	for RAN: DLCX
-mtms < mtmsc	Iu Release Command
-mtms > mtmsc	Iu Release Command: Successful Outcome
+mtms = BSS,MS (MT)\nhNodeB,UE (MT)
+moms > momsc MM LOC_UPD_REQUEST
+moms < momsc MM AUTH_REQ
+moms > momsc MM AUTH_RESP
+moms < momsc (BSSMAP) CLASSMARK_REQUEST
+moms > momsc (BSSMAP) Classmark Update
+moms < momsc (BSSMAP) CIPHER_MODE_COMMAND
+moms > momsc (BSSMAP) Ciphering Mode Complete
+moms > momsc RR CIPH_M_COMPL
+moms < momsc MM ID_REQ
+moms > momsc MM ID_RESP
+moms < momsc MM LOC_UPD_ACCEPT
+moms > momsc MM TMSI_REALL_COMPL
+moms < momsc (BSSMAP) CLEAR_COMMAND
+moms > momsc (BSSMAP) Clear Complete
+mtms > mtmsc MM LOC_UPD_REQUEST
+mtms < mtmsc MM AUTH_REQ
+mtms > mtmsc MM NULL
+mtms > mtmsc MM AUTH_RESP
+mtms < mtmsc (RANAP) SecurityModeCommand
+mtms > mtmsc (RANAP) SecurityModeControl successfulOutcome
+mtms < mtmsc (RANAP) CommonId
+mtms < mtmsc MM ID_REQ
+mtms > mtmsc MM ID_RESP
+mtms < mtmsc MM LOC_UPD_ACCEPT
+mtms > mtmsc MM TMSI_REALL_COMPL
+mtms < mtmsc (RANAP) Iu Release
+mtms > mtmsc (RANAP) Iu Release successfulOutcome
+moms > momsc MM CM_SERV_REQ
+moms < momsc MM AUTH_REQ
+moms > momsc MM AUTH_RESP
+moms < momsc (BSSMAP) CIPHER_MODE_COMMAND
+moms > momsc (BSSMAP) Ciphering Mode Complete
+moms > momsc RR CIPH_M_COMPL
+moms > momsc CC SETUP
+momsc [] . CC starts guard timer (180s)
+momsc <> . CC state:\nINITIATED
+momsc > sip MNCC_SETUP_IND
+momsc < sip MNCC_RTP_CREATE
+momgw < momsc for RAN: CRCX\nrtpbridge/*@msc
+momgw > momsc for RAN: CRCX OK\nrtpbridge/0@msc 07ABE655
+moms < momsc (BSSMAP) ASSIGNMENT_COMMAND
+moms > momsc (BSSMAP) Assignment Complete
+momgw < momsc for RAN: MDCX\nrtpbridge/0@msc 07ABE655
+momgw > momsc for RAN: MDCX OK\nrtpbridge/0@msc 07ABE655
+momgw < momsc for CN: CRCX\nrtpbridge/0@msc
+momgw > momsc for CN: CRCX OK\nrtpbridge/0@msc C609C9D7
+momsc > sip MNCC_RTP_CREATE\n192.168.178.66:50006
+momsc < sip MNCC_CALL_PROC_REQ
+momsc [] . CC stops guard timer
+momsc [] . CC starts guard timer (180s)
+momsc <> . CC state:\nMO_CALL_PROC
+moms < momsc CC CALL_PROC
+mtmsc < sip MNCC_SETUP_REQ
+mtms < mtmsc Paging
+mtms > mtmsc RR PAG_RESP
+mtms < mtmsc MM AUTH_REQ
+mtms > mtmsc MM NULL
+mtms > mtmsc MM AUTH_RESP
+mtms < mtmsc (RANAP) SecurityModeCommand
+mtms > mtmsc (RANAP) SecurityModeControl successfulOutcome
+mtms < mtmsc (RANAP) CommonId
+mtmsc [] . CC starts timer T303 (30s)
+mtmsc <> . CC state:\nCALL_PRESENT
+mtms < mtmsc CC SETUP
+mtms > mtmsc CC CALL_CONF
+mtmsc [] . CC stops timer T303
+mtmsc [] . CC starts timer T310 (30s)
+mtmsc <> . CC state:\nMO_TERM_CALL_CONF
+mtmgw < mtmsc for RAN: CRCX\nrtpbridge/*@msc
+mtmsc > sip MNCC_CALL_CONF_IND
+mtmsc < sip MNCC_RTP_CREATE
+mtmgw > mtmsc for RAN: CRCX OK\nrtpbridge/1@msc 8882BB31
+mtms < mtmsc (RANAP) RAB AssignmentRequest
+mtms > mtmsc (RANAP) RAB Assignment Response
+mtmgw < mtmsc for RAN: MDCX\nrtpbridge/1@msc 8882BB31
+mtmgw > mtmsc for RAN: MDCX OK\nrtpbridge/1@msc 8882BB31
+mtmgw < mtmsc for CN: CRCX\nrtpbridge/1@msc
+mtmgw > mtmsc for CN: CRCX OK\nrtpbridge/1@msc 1CF15A90
+mtmsc > sip MNCC_RTP_CREATE\n192.168.178.66:50010
+mtms > mtmsc CC ALERTING
+mtmsc [] . CC stops timer T310
+mtmsc [] . CC starts timer T301 (180s)
+mtmsc <> . CC state:\nCALL_RECEIVED
+mtmsc > sip MNCC_ALERT_IND
+momsc < sip MNCC_ALERT_REQ
+momsc [] . CC stops guard timer
+momsc [] . CC starts guard timer (180s)
+momsc <> . CC state:\nCALL_DELIVERED
+moms < momsc CC ALERTING
+mtms > mtmsc CC CONNECT
+mtmsc [] . CC stops timer T301
+mtmsc <> . CC state:\nCONNECT_REQUEST
+mtmsc > sip MNCC_SETUP_CNF
+mtmsc < sip MNCC_RTP_CONNECT\n192.168.178.66:50006
+mtmgw < mtmsc for CN: MDCX\nrtpbridge/1@msc 1CF15A90
+mtmsc < sip MNCC_SETUP_COMPL_REQ
+mtmsc [] . CC starts guard timer (180s)
+mtmsc <> . CC state:\nACTIVE
+mtmsc [] . CC stops guard timer
+mtms < mtmsc CC CONNECT_ACK
+mtmgw > mtmsc for CN: MDCX OK\nrtpbridge/1@msc 1CF15A90
+momsc < sip MNCC_RTP_CONNECT\n192.168.178.66:50010
+momgw < momsc for CN: MDCX\nrtpbridge/0@msc C609C9D7
+momsc < sip MNCC_SETUP_RSP
+momsc [] . CC stops guard timer
+momsc [] . CC starts guard timer (180s)
+momsc [] . CC starts timer T313 (30s)
+momsc <> . CC state:\nCONNECT_IND
+moms < momsc CC CONNECT
+momgw > momsc for CN: MDCX OK\nrtpbridge/0@msc C609C9D7
+moms > momsc CC CONNECT_ACK
+momsc [] . CC stops timer T313
+momsc <> . CC state:\nACTIVE
+momsc [] . CC stops guard timer
+momsc > sip MNCC_SETUP_COMPL_IND
+moms > momsc CC DISCONNECT
+momsc <> . CC state:\nDISCONNECT_IND
+momsc > sip MNCC_DISC_IND
+momsc < sip MNCC_REL_REQ
+momsc [] . CC starts guard timer (180s)
+momsc [] . CC starts timer T308 (10s)
+momsc <> . CC state:\nRELEASE_REQ
+moms < momsc CC RELEASE
+mtmsc < sip MNCC_DISC_REQ
+mtmsc [] . CC starts guard timer (180s)
+mtmsc [] . CC starts timer T306 (30s)
+mtmsc <> . CC state:\nDISCONNECT_IND
+mtms < mtmsc CC DISCONNECT
+moms > momsc CC RELEASE_COMPL
+momsc [] . CC stops timer T308
+momsc <> . CC state:\nNULL
+momsc [] . CC stops guard timer
+moms < momsc (BSSMAP) CLEAR_COMMAND
+momsc > sip MNCC_REL_CNF
+moms > momsc (BSSMAP) Clear Complete
+mtms > mtmsc CC RELEASE
+mtmsc [] . CC stops timer T306
+mtms < mtmsc CC RELEASE_COMPL
+mtmsc <> . CC state:\nNULL
+mtmsc [] . CC stops guard timer
+mtms < mtmsc (RANAP) Iu Release
+mtmsc > sip MNCC_REL_IND
+mtms > mtmsc (RANAP) Iu Release successfulOutcome
+moms > momsc IMSI Detach
+mtms > mtmsc IMSI Detach
