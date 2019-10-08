@@ -396,25 +396,28 @@ static struct msgb *ran_iu_make_release_command(struct osmo_fsm_inst *caller_fi,
 
 struct msgb *ran_iu_encode(struct osmo_fsm_inst *caller_fi, const struct ran_msg *ran_enc_msg)
 {
-	LOG_RAN_IU_ENC(caller_fi, LOGL_DEBUG, "%s\n", ran_msg_type_name(ran_enc_msg->msg_type));
-
 	switch (ran_enc_msg->msg_type) {
 
 	case RAN_MSG_DTAP:
+		LOG_RAN_IU_ENC(caller_fi, LOGL_DEBUG, "DirectTransfer\n");
 		return ran_iu_wrap_dtap(ran_enc_msg->dtap);
 
 	// TODO: RAN_MSG_CLASSMARK_REQUEST ??
 
 	case RAN_MSG_CIPHER_MODE_COMMAND:
+		LOG_RAN_IU_ENC(caller_fi, LOGL_DEBUG, "SecurityModeCommand\n");
 		return ran_iu_make_security_mode_command(caller_fi, &ran_enc_msg->cipher_mode_command);
 
 	case RAN_MSG_ASSIGNMENT_COMMAND:
+		LOG_RAN_IU_ENC(caller_fi, LOGL_DEBUG, "RAB AssignmentRequest\n");
 		return ran_iu_make_rab_assignment(caller_fi, &ran_enc_msg->assignment_command);
 
 	case RAN_MSG_COMMON_ID:
+		LOG_RAN_IU_ENC(caller_fi, LOGL_DEBUG, "CommonId\n");
 		return ranap_new_msg_common_id(ran_enc_msg->common_id.imsi);
 
 	case RAN_MSG_CLEAR_COMMAND:
+		LOG_RAN_IU_ENC(caller_fi, LOGL_DEBUG, "Iu Release\n");
 		return ran_iu_make_release_command(caller_fi, &ran_enc_msg->clear_command);
 
 	default:
