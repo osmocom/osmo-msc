@@ -776,7 +776,7 @@ static int ran_a_decode_bssmap(struct ran_dec *ran_dec, struct msgb *bssmap)
 		return -EINVAL;
 	}
 
-	LOG_RAN_A_DEC(ran_dec, LOGL_DEBUG, "Rx BSSMAP DT1 %s\n", gsm0808_bssmap_name(msg_type));
+	LOG_RAN_A_DEC(ran_dec, LOGL_DEBUG, "%s\n", gsm0808_bssmap_name(msg_type));
 
 	switch (msg_type) {
 	case BSS_MAP_MSG_COMPLETE_LAYER_3:
