@@ -1941,6 +1941,9 @@ static int mncc_tx_to_gsm_cc(struct gsm_network *net, const union mncc_msg *msg)
 
 		/* If subscriber has no conn */
 		if (!msc_a) {
+			/* This condition will return before the common logging of the received MNCC message below, so
+			 * log it now. */
+			LOG_TRANS_CAT(trans, DMNCC, LOGL_DEBUG, "rx %s\n", get_mncc_name(msg->msg_type));
 
 			if (vsub->cs.is_paging) {
 				LOG_TRANS(trans, LOGL_DEBUG,
