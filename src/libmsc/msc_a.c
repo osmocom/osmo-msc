@@ -46,6 +46,7 @@
 #include <osmocom/msc/call_leg.h>
 #include <osmocom/msc/rtp_stream.h>
 #include <osmocom/msc/msc_ho.h>
+#include <osmocom/msc/codec_sdp_cc_t9n.h>
 
 #define MSC_A_USE_WAIT_CLEAR_COMPLETE "wait-Clear-Complete"
 
@@ -550,12 +551,87 @@ static void msc_a_fsm_authenticated(struct osmo_fsm_inst *fi, uint32_t event, vo
 	}
 }
 
+static struct call_leg *msc_a_ensure_call_leg(struct msc_a *msc_a, struct gsm_trans *for_cc_trans)
+{
+	struct call_leg *cl = msc_a->cc.call_leg;
+	struct gsm_network *net = msc_a_net(msc_a);
+
+	/* Ensure that events about RTP endpoints coming from the msc_a->cc.call_leg know which gsm_trans to abort on
+	 * error */
+	if (!msc_a->cc.active_trans)
+		msc_a->cc.active_trans = for_cc_trans;
+	if (msc_a->cc.active_trans != for_cc_trans) {
+		LOG_TRANS(for_cc_trans, LOGL_ERROR,
+			  "Cannot create call leg, another trans is already active for this conn\n");
+		return NULL;
+	}
+
+	if (!cl) {
+		cl = msc_a->cc.call_leg = call_leg_alloc(msc_a->c.fi,
+							 MSC_EV_CALL_LEG_TERM,
+							 MSC_EV_CALL_LEG_RTP_LOCAL_ADDR_AVAILABLE,
+							 MSC_EV_CALL_LEG_RTP_COMPLETE);
+		OSMO_ASSERT(cl);
+
+		/* HACK: We put the connection in loopback mode at the beginnig to
+		 * trick the hNodeB into doing the IuUP negotiation with itself.
+		 * This is a hack we need because osmo-mgw does not support IuUP yet, see OS#2459. */
+		if (msc_a->c.ran->type == OSMO_RAT_UTRAN_IU)
+			cl->crcx_conn_mode[RTP_TO_RAN] = MGCP_CONN_LOOPBACK;
+
+		if (net->use_osmux != OSMUX_USAGE_OFF) {
+			struct msc_i *msc_i = msc_a_msc_i(msc_a);
+			if (msc_i->c.remote_to) {
+				/* TODO: investigate what to do in this case */
+				LOG_MSC_A(msc_a, LOGL_ERROR, "Osmux not yet supported for inter-MSC");
+			} else {
+				cl->ran_peer_supports_osmux = msc_i->ran_conn->ran_peer->remote_supports_osmux;
+			}
+		}
+
+	}
+	return cl;
+}
+
+int msc_a_ensure_cn_local_rtp(struct msc_a *msc_a, struct gsm_trans *cc_trans)
+{
+	struct call_leg *cl;
+	struct rtp_stream *rtp_to_ran;
+
+	cl = msc_a_ensure_call_leg(msc_a, cc_trans);
+	if (!cl)
+		return -EINVAL;
+	rtp_to_ran = cl->rtp[RTP_TO_RAN];
+
+	if (call_leg_local_ip(cl, RTP_TO_CN)) {
+		/* Already has an RTP address and port towards the CN, continue right away. */
+		return osmo_fsm_inst_dispatch(msc_a->c.fi, MSC_EV_CALL_LEG_RTP_LOCAL_ADDR_AVAILABLE, cl->rtp[RTP_TO_CN]);
+	}
+
+	/* No CN RTP address available yet, ask the MGW to create one.
+	 * Set a codec to be used: if Assignment on the RAN side is already done, take the same codec as the RTP_TO_RAN.
+	 * If no RAN side RTP is established, try to guess a preliminary codec from SDP -- before Assignment, picking a
+	 * codec from the SDP is more politeness/avoiding confusion than necessity. The actual codec to be used would be
+	 * determined later. If no codec could be determined, pass none for the time being. */
+	return call_leg_ensure_ci(cl, RTP_TO_CN, cc_trans->callref, cc_trans,
+				  rtp_to_ran->codecs_known ? &rtp_to_ran->codecs : NULL, NULL);
+}
+
+static void msc_a_call_leg_cn_local_addr_available(struct msc_a *msc_a, struct gsm_trans *cc_trans)
+{
+	cc_cn_local_rtp_port_known(cc_trans);
+}
+
+
 /* The MGW has given us a local IP address for the RAN side. Ready to start the Assignment of a voice channel. */
 static void msc_a_call_leg_ran_local_addr_available(struct msc_a *msc_a)
 {
 	struct ran_msg msg;
 	struct gsm_trans *cc_trans = msc_a->cc.active_trans;
-	struct gsm0808_channel_type channel_type;
+	struct gsm0808_channel_type channel_type = {
+		.ch_indctr = GSM0808_CHAN_SPEECH,
+		.ch_rate_type = GSM0808_SPEECH_FULL_PREF,
+	};
 
 	if (!cc_trans) {
 		LOG_MSC_A(msc_a, LOGL_ERROR, "No CC transaction active\n");
@@ -565,9 +641,21 @@ static void msc_a_call_leg_ran_local_addr_available(struct msc_a *msc_a)
 
 	/* Once a CI is known, we could also CRCX the CN side of the MGW endpoint, but it makes sense to wait for the
 	 * codec to be determined by the Assignment Complete message, first. */
+	cc_sdp_filter(&cc_trans->cc.sdp);
+	LOG_TRANS(cc_trans, LOGL_DEBUG, "Sending Assignment Command with codecs: %s\n", cc_sdp_name(&cc_trans->cc.sdp));
 
-	if (mncc_bearer_cap_to_channel_type(&channel_type, &cc_trans->bearer_cap)) {
-		LOG_MSC_A(msc_a, LOGL_ERROR, "Cannot compose Channel Type from bearer capabilities\n");
+	if (!cc_trans->cc.sdp.result.audio_codecs.count) {
+		LOG_TRANS(cc_trans, LOGL_ERROR, "Assignment not possible, no matching codec: %s\n",
+			  cc_sdp_name(&cc_trans->cc.sdp));
+		call_leg_release(msc_a->cc.call_leg);
+		return;
+	}
+
+	/* Compose 48.008 Channel Type from the current set of codecs determined from both local and remote codec
+	 * capabilities. */
+	if (sdp_audio_codecs_to_gsm0808_channel_type(&channel_type, &cc_trans->cc.sdp.result.audio_codecs)) {
+		LOG_MSC_A(msc_a, LOGL_ERROR, "Cannot compose Channel Type (Permitted Speech) from codecs: %s\n",
+			  cc_sdp_name(&cc_trans->cc.sdp));
 		trans_free(cc_trans);
 		return;
 	}
@@ -587,15 +675,6 @@ static void msc_a_call_leg_ran_local_addr_available(struct msc_a *msc_a)
 	};
 	if (msc_a_ran_down(msc_a, MSC_ROLE_I, &msg)) {
 		LOG_MSC_A(msc_a, LOGL_ERROR, "Cannot send Assignment\n");
-		trans_free(cc_trans);
-		return;
-	}
-}
-
-static void msc_a_call_leg_cn_local_addr_available(struct msc_a *msc_a, struct gsm_trans *cc_trans)
-{
-	if (gsm48_tch_rtp_create(cc_trans)) {
-		LOG_MSC_A(msc_a, LOGL_ERROR, "Cannot inform MNCC of RTP address\n");
 		trans_free(cc_trans);
 		return;
 	}
@@ -1313,6 +1392,7 @@ static void msc_a_up_call_assignment_complete(struct msc_a *msc_a, const struct 
 	struct rtp_stream *rtps_to_ran = msc_a->cc.call_leg ? msc_a->cc.call_leg->rtp[RTP_TO_RAN] : NULL;
 	const enum mgcp_codecs *codec_if_known = ac->assignment_complete.codec_present ?
 							&ac->assignment_complete.codec : NULL;
+	const struct codec_mapping *m;
 
 	if (!rtps_to_ran) {
 		LOG_MSC_A(msc_a, LOGL_ERROR, "Rx Assignment Complete, but no RTP stream is set up\n");
@@ -1330,25 +1410,33 @@ static void msc_a_up_call_assignment_complete(struct msc_a *msc_a, const struct 
 		return;
 	}
 
-	/* Update RAN-side endpoint CI: */
-	if (codec_if_known)
-		rtp_stream_set_codec(rtps_to_ran, *codec_if_known);
+	if (codec_if_known) {
+		m = codec_mapping_by_mgcp_codec(*codec_if_known);
+		if (!m) {
+			LOG_TRANS(cc_trans, LOGL_ERROR, "Unknown codec in Assignment Complete: %s\n",
+				  osmo_mgcpc_codec_name(ac->assignment_complete.codec));
+			call_leg_release(msc_a->cc.call_leg);
+			return;
+		}
+
+		/* Update RAN-side endpoint CI: */
+		rtp_stream_set_one_codec(rtps_to_ran, &m->sdp);
+	}
+
 	rtp_stream_set_remote_addr(rtps_to_ran, &ac->assignment_complete.remote_rtp);
 	if (rtps_to_ran->use_osmux)
 		rtp_stream_set_remote_osmux_cid(rtps_to_ran,
 						ac->assignment_complete.osmux_cid);
-
 	rtp_stream_commit(rtps_to_ran);
 
-	/* Setup CN side endpoint CI:
-	 * Now that
-	 * - the first CI has been created and a definitive endpoint name is assigned to the call_leg's MGW
-	 *   endpoint,
-	 * - the Assignment has chosen a speech codec
-	 * go on to create the CN side RTP stream's CI. */
-	if (call_leg_ensure_ci(msc_a->cc.call_leg, RTP_TO_CN, cc_trans->callref, cc_trans,
-			       codec_if_known, NULL)) {
-		LOG_MSC_A_CAT(msc_a, DCC, LOGL_ERROR, "Error creating MGW CI towards CN\n");
+	/* Remember the Codec List (BSS Supported) */
+	if (ac->assignment_complete.codec_list_bss_supported)
+		cc_sdp_set_cell(&cc_trans->cc.sdp, ac->assignment_complete.codec_list_bss_supported);
+
+	cc_trans->cc.sdp.assignment = m->sdp;
+
+	if (cc_assignment_done(cc_trans)) {
+		/* If an error occured, it was logged in cc_assignment_done() */
 		call_leg_release(msc_a->cc.call_leg);
 		return;
 	}
@@ -1430,6 +1518,15 @@ int msc_a_ran_dec_from_msc_i(struct msc_a *msc_a, struct msc_a_ran_dec_data *d)
 			.lai.plmn = msc_a_net(msc_a)->plmn,
 		};
 		gsm0808_cell_id_to_cgi(&msc_a->via_cell, msg->compl_l3.cell_id);
+		if (msg->compl_l3.codec_list_bss_supported) {
+			msc_a->cc.codec_list_bss_supported = *msg->compl_l3.codec_list_bss_supported;
+			if (log_check_level(msc_a->c.ran->log_subsys, LOGL_DEBUG)) {
+				struct sdp_audio_codecs ac = {};
+				sdp_audio_codecs_from_speech_codec_list(&ac, &msc_a->cc.codec_list_bss_supported);
+				LOG_MSC_A(msc_a, LOGL_DEBUG, "Complete Layer 3: Codec List (BSS Supported): %s\n",
+					  sdp_audio_codecs_name(&ac));
+			}
+		}
 		rc = msc_a_up_l3(msc_a, msg->compl_l3.msg);
 		if (!rc) {
 			struct ran_conn *conn = msub_ran_conn(msc_a->c.msub);
@@ -1725,52 +1822,42 @@ int msc_tx_common_id(struct msc_a *msc_a, enum msc_role to_role)
 
 static int msc_a_start_assignment(struct msc_a *msc_a, struct gsm_trans *cc_trans)
 {
-	struct call_leg *cl = msc_a->cc.call_leg;
-	struct msc_i *msc_i = msc_a_msc_i(msc_a);
-	struct gsm_network *net = msc_a_net(msc_a);
-	enum mgcp_codecs codec, *codec_ptr;
+	struct call_leg *cl;
+	bool cn_rtp_available;
+	bool ran_rtp_available;
+	struct sdp_audio_codecs *codecs;
 
 	OSMO_ASSERT(!msc_a->cc.active_trans);
 	msc_a->cc.active_trans = cc_trans;
 
 	OSMO_ASSERT(cc_trans && cc_trans->type == TRANS_CC);
+	cl = msc_a_ensure_call_leg(msc_a, cc_trans);
+	if (!cl)
+		return -EINVAL;
 
-	if (!cl) {
-		cl = msc_a->cc.call_leg = call_leg_alloc(msc_a->c.fi,
-							 MSC_EV_CALL_LEG_TERM,
-							 MSC_EV_CALL_LEG_RTP_LOCAL_ADDR_AVAILABLE,
-							 MSC_EV_CALL_LEG_RTP_COMPLETE);
-		OSMO_ASSERT(cl);
+	/* See if we can set a preliminary codec. If not, pass none for the time being. */
+	cc_sdp_filter(&cc_trans->cc.sdp);
+	codecs = cc_trans->cc.sdp.result.audio_codecs.count ? &cc_trans->cc.sdp.result.audio_codecs : NULL;
 
-		/* HACK: We put the connection in loopback mode at the beginning to
-		 * trick the hNodeB into doing the IuUP negotiation with itself.
-		 * This is a hack we need because osmo-mgw does not support IuUP yet, see OS#2459. */
-		if (msc_a->c.ran->type == OSMO_RAT_UTRAN_IU)
-			cl->crcx_conn_mode[RTP_TO_RAN] = MGCP_CONN_LOOPBACK;
-	}
+	cn_rtp_available = call_leg_local_ip(cl, RTP_TO_CN);
+	ran_rtp_available = call_leg_local_ip(cl, RTP_TO_RAN);
 
-	if (net->use_osmux != OSMUX_USAGE_OFF) {
-		msc_i = msc_a_msc_i(msc_a);
-		if (msc_i->c.remote_to) {
-			/* TODO: investigate what to do in this case */
-			LOG_MSC_A(msc_a, LOGL_ERROR, "Osmux not yet supported for inter-MSC");
-		} else {
-			cl->ran_peer_supports_osmux = msc_i->ran_conn->ran_peer->remote_supports_osmux;
-		}
-	}
+	/* Set up RTP ports for both RAN and CN side. Even though we ask for both at the same time, the
+	 * osmo_mgcpc_ep_fsm automagically waits for the first CRCX to complete before firing the second CRCX. The one
+	 * issued first here will also be the first CRCX sent to the MGW. Usually both still need to be set up. */
+	if (!cn_rtp_available)
+		call_leg_ensure_ci(cl, RTP_TO_CN, cc_trans->callref, cc_trans, codecs, NULL);
+	if (!ran_rtp_available)
+		call_leg_ensure_ci(cl, RTP_TO_RAN, cc_trans->callref, cc_trans, codecs, NULL);
 
-	/* This will lead to either MSC_EV_CALL_LEG_LOCAL_ADDR_AVAILABLE or MSC_EV_CALL_LEG_TERM.
-	 * If the local address is already known, then immediately trigger. */
-	if (call_leg_local_ip(cl, RTP_TO_RAN))
+	/* Should these already be set up, immediately continue by retriggering the events signalling that the RTP
+	 * ports are available. The ordering is: first CN, then RAN. */
+	if (cn_rtp_available && ran_rtp_available)
 		return osmo_fsm_inst_dispatch(msc_a->c.fi, MSC_EV_CALL_LEG_RTP_LOCAL_ADDR_AVAILABLE, cl->rtp[RTP_TO_RAN]);
-
-	if (msc_a->c.ran->type == OSMO_RAT_UTRAN_IU) {
-		codec = CODEC_IUFP;
-		codec_ptr = &codec;
-	} else {
-		codec_ptr = NULL;
-	}
-	return call_leg_ensure_ci(msc_a->cc.call_leg, RTP_TO_RAN, cc_trans->callref, cc_trans, codec_ptr, NULL);
+	else if (cn_rtp_available)
+		return osmo_fsm_inst_dispatch(msc_a->c.fi, MSC_EV_CALL_LEG_RTP_LOCAL_ADDR_AVAILABLE, cl->rtp[RTP_TO_CN]);
+	/* Otherwise wait for MGCP response and continue from there.  */
+	return 0;
 }
 
 int msc_a_try_call_assignment(struct gsm_trans *cc_trans)

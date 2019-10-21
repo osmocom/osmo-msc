@@ -29,7 +29,9 @@ noinst_LIBRARIES = \
 
 libmsc_a_SOURCES = \
 	call_leg.c \
+	cc_sdp.c \
 	cell_id_list.c \
+	codec_sdp_cc_t9n.c \
 	sccp_ran.c \
 	msc_vty.c \
 	db.c \

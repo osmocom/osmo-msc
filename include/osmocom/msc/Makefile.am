@@ -1,6 +1,8 @@
 noinst_HEADERS = \
 	call_leg.h \
+	cc_sdp.h \
 	cell_id_list.h \
+	codec_sdp_cc_t9n.h \
 	db.h \
 	debug.h \
 	e_link.h \
