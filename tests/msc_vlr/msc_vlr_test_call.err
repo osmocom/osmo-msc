@@ -189,11 +189,11 @@ DMSC msub_fsm{terminating}: Deferring: will deallocate with msc_a(IMSI-901700000
 DMSC msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:LU){MSC_A_ST_RELEASED}: Deallocated, including all deferred deallocations
 - msub gone
   llist_count(&msub_list) == 0
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + standard_lu: now used by 2 (attached,standard_lu)
+DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + lu_utran_tmsi: now used by 2 (attached,lu_utran_tmsi)
   vsub != NULL == 1
   strcmp(vsub->imsi, IMSI) == 0
   LAC == 23
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - standard_lu: now used by 1 (attached)
+DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - lu_utran_tmsi: now used by 1 (attached)
 
 
 - after a while, a new conn sends a CM Service Request. VLR responds with Auth Req, 2nd auth vector
@@ -663,11 +663,11 @@ DMSC msub_fsm{terminating}: Deferring: will deallocate with msc_a(IMSI-901700000
 DMSC msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:LU){MSC_A_ST_RELEASED}: Deallocated, including all deferred deallocations
 - msub gone
   llist_count(&msub_list) == 0
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + standard_lu: now used by 2 (attached,standard_lu)
+DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + lu_utran_tmsi: now used by 2 (attached,lu_utran_tmsi)
   vsub != NULL == 1
   strcmp(vsub->imsi, IMSI) == 0
   LAC == 23
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - standard_lu: now used by 1 (attached)
+DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - lu_utran_tmsi: now used by 1 (attached)
 
 
 - after a while, MNCC asks us to setup a call, causing Paging
@@ -1134,11 +1134,11 @@ DMSC msub_fsm{terminating}: Deferring: will deallocate with msc_a(IMSI-901700000
 DMSC msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:LU){MSC_A_ST_RELEASED}: Deallocated, including all deferred deallocations
 - msub gone
   llist_count(&msub_list) == 0
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + standard_lu: now used by 2 (attached,standard_lu)
+DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + lu_utran_tmsi: now used by 2 (attached,lu_utran_tmsi)
   vsub != NULL == 1
   strcmp(vsub->imsi, IMSI) == 0
   LAC == 23
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - standard_lu: now used by 1 (attached)
+DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - lu_utran_tmsi: now used by 1 (attached)
 
 
 - after a while, MNCC asks us to setup a call, causing Paging
@@ -1559,11 +1559,11 @@ DMSC msub_fsm{terminating}: Deferring: will deallocate with msc_a(IMSI-901700000
 DMSC msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:LU){MSC_A_ST_RELEASED}: Deallocated, including all deferred deallocations
 - msub gone
   llist_count(&msub_list) == 0
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + standard_lu: now used by 2 (attached,standard_lu)
+DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + lu_utran_tmsi: now used by 2 (attached,lu_utran_tmsi)
   vsub != NULL == 1
   strcmp(vsub->imsi, IMSI) == 0
   LAC == 23
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - standard_lu: now used by 1 (attached)
+DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - lu_utran_tmsi: now used by 1 (attached)
 
 
 - after a while, a new conn sends a CM Service Request. VLR responds with Auth Req, 2nd auth vector
@@ -1987,11 +1987,11 @@ DMSC msub_fsm{terminating}: Deferring: will deallocate with msc_a(IMSI-901700000
 DMSC msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:LU){MSC_A_ST_RELEASED}: Deallocated, including all deferred deallocations
 - msub gone
   llist_count(&msub_list) == 0
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + standard_lu: now used by 2 (attached,standard_lu)
+DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + lu_utran_tmsi: now used by 2 (attached,lu_utran_tmsi)
   vsub != NULL == 1
   strcmp(vsub->imsi, IMSI) == 0
   LAC == 23
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - standard_lu: now used by 1 (attached)
+DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - lu_utran_tmsi: now used by 1 (attached)
 
 
 - after a while, a new conn sends a CM Service Request. VLR responds with Auth Req, 2nd auth vector

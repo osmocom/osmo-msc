@@ -43,7 +43,7 @@ static void on_call_release_mncc_sends_to_cc(uint32_t msg_type, struct gsm_mncc 
 
 #define IMSI "901700000010650"
 
-static void standard_lu()
+static void lu_utran_tmsi()
 {
 	struct vlr_subscr *vsub;
 
@@ -173,7 +173,7 @@ static void test_call_mo()
 
 	fake_time_start();
 
-	standard_lu();
+	lu_utran_tmsi();
 
 	BTW("after a while, a new conn sends a CM Service Request. VLR responds with Auth Req, 2nd auth vector");
 	auth_request_sent = false;
@@ -291,7 +291,7 @@ static void test_call_mt()
 
 	fake_time_start();
 
-	standard_lu();
+	lu_utran_tmsi();
 
 	BTW("after a while, MNCC asks us to setup a call, causing Paging");
 
@@ -394,7 +394,7 @@ static void test_call_mt2()
 
 	fake_time_start();
 
-	standard_lu();
+	lu_utran_tmsi();
 
 	BTW("after a while, MNCC asks us to setup a call, causing Paging");
 
@@ -489,7 +489,7 @@ static void test_call_mo_to_unknown()
 
 	fake_time_start();
 
-	standard_lu();
+	lu_utran_tmsi();
 
 	BTW("after a while, a new conn sends a CM Service Request. VLR responds with Auth Req, 2nd auth vector");
 	auth_request_sent = false;
@@ -585,7 +585,7 @@ static void test_call_mo_to_unknown_timeout()
 
 	fake_time_start();
 
-	standard_lu();
+	lu_utran_tmsi();
 
 	BTW("after a while, a new conn sends a CM Service Request. VLR responds with Auth Req, 2nd auth vector");
 	auth_request_sent = false;
