@@ -52,6 +52,8 @@ static int ran_a_decode_l3_compl(struct ran_dec *ran_dec, struct msgb *msg, stru
 	struct gsm0808_cell_id cell_id;
 	struct tlv_p_entry *ie_cell_id = TLVP_GET(tp, GSM0808_IE_CELL_IDENTIFIER);
 	struct tlv_p_entry *ie_l3_info = TLVP_GET(tp, GSM0808_IE_LAYER_3_INFORMATION);
+	struct tlv_p_entry *ie_codec_list_bss_supported = TLVP_GET(tp, GSM0808_IE_SPEECH_CODEC_LIST);
+	struct gsm0808_speech_codec_list codec_list_bss_supported;
 	struct ran_msg ran_dec_msg = {
 		.msg_type = RAN_MSG_COMPL_L3,
 		.msg_name = "BSSMAP Complete Layer 3 Information",
@@ -112,6 +114,19 @@ static int ran_a_decode_l3_compl(struct ran_dec *ran_dec, struct msgb *msg, stru
 	if (msgb_l3len(msg) < sizeof(struct gsm48_hdr)) {
 		LOG_RAN_A_DEC_MSG(LOGL_ERROR, "too short L3 info (%d), discarding message\n", msgb_l3len(msg));
 		return -ENODATA;
+	}
+
+	/* Decode Codec List (BSS Supported) */
+	if (ie_codec_list_bss_supported) {
+		rc = gsm0808_dec_speech_codec_list(&codec_list_bss_supported,
+						   ie_codec_list_bss_supported->val, ie_codec_list_bss_supported->len);
+		if (rc < 0) {
+			LOG_RAN_A_DEC_MSG(LOGL_ERROR,
+					  "Complete Layer 3 Information: unable to decode IE Codec List (BSS Supported)"
+					  " (rc=%d), continuing anyway\n", rc);
+			/* This IE is not critical, do not abort with error. */
+		} else
+			ran_dec_msg.compl_l3.codec_list_bss_supported = &codec_list_bss_supported;
 	}
 
 	return ran_decoded(ran_dec, &ran_dec_msg);
@@ -261,10 +276,12 @@ static int ran_a_decode_assignment_complete(struct ran_dec *ran_dec, struct msgb
 {
 	struct tlv_p_entry *ie_aoip_transp_addr = TLVP_GET(tp, GSM0808_IE_AOIP_TRASP_ADDR);
 	struct tlv_p_entry *ie_speech_codec = TLVP_GET(tp, GSM0808_IE_SPEECH_CODEC);
+	struct tlv_p_entry *ie_codec_list_bss_supported = TLVP_GET(tp, GSM0808_IE_SPEECH_CODEC_LIST);
 	struct tlv_p_entry *ie_osmux_cid = TLVP_GET(tp, GSM0808_IE_OSMO_OSMUX_CID);
 	struct sockaddr_storage rtp_addr;
 	struct sockaddr_in *rtp_addr_in;
 	struct gsm0808_speech_codec sc;
+	struct gsm0808_speech_codec_list codec_list_bss_supported;
 	int rc;
 	struct ran_msg ran_dec_msg = {
 		.msg_type = RAN_MSG_ASSIGNMENT_COMPLETE,
@@ -312,6 +329,19 @@ static int ran_a_decode_assignment_complete(struct ran_dec *ran_dec, struct msgb
 		}
 		ran_dec_msg.assignment_complete.codec_present = true;
 		ran_dec_msg.assignment_complete.codec = ran_a_mgcp_codec_from_sc(&sc);
+	}
+
+	if (ie_codec_list_bss_supported) {
+		/* Decode Codec List (BSS Supported) */
+		rc = gsm0808_dec_speech_codec_list(&codec_list_bss_supported,
+						   ie_codec_list_bss_supported->val, ie_codec_list_bss_supported->len);
+		if (rc < 0) {
+			LOG_RAN_A_DEC_MSG(LOGL_ERROR,
+					  "Assignment Complete: unable to decode IE Codec List (BSS Supported)"
+					  " (rc=%d), continuing anyway\n", rc);
+			/* This IE is not critical, do not abort with error. */
+		} else
+			ran_dec_msg.assignment_complete.codec_list_bss_supported = &codec_list_bss_supported;
 	}
 
 	return ran_decoded(ran_dec, &ran_dec_msg);
