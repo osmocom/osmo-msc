@@ -254,8 +254,10 @@ static int _validate_dtap(struct msgb *msg, enum osmo_rat_type to_ran)
 
 	/* Mask the sequence number out before comparing */
 	msg->data[1] &= 0x3f;
-	if (!msgb_eq_data_print(msg, dtap_tx_expected->data, dtap_tx_expected->len))
+	if (!msgb_eq_data_print(msg, dtap_tx_expected->data, dtap_tx_expected->len)) {
+		btw("Expected %s", osmo_hexdump(dtap_tx_expected->data, dtap_tx_expected->len));
 		abort();
+	}
 
 	btw("DTAP matches expected message");
 
