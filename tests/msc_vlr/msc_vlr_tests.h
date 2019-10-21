@@ -55,6 +55,8 @@ extern bool _log_lines;
 #define comment_start() fprintf(stderr, "===== %s\n", __func__);
 #define comment_end() fprintf(stderr, "===== %s: SUCCESS\n\n", __func__);
 
+extern void *msc_vlr_tests_ctx;
+
 extern struct msub *g_msub;
 extern struct gsm_network *net;
 extern void *msgb_ctx;
@@ -115,6 +117,7 @@ extern uint32_t cc_to_mncc_tx_expected_msg_type;
 extern const char *cc_to_mncc_tx_expected_imsi;
 extern bool cc_to_mncc_tx_confirmed;
 extern uint32_t cc_to_mncc_tx_got_callref;
+extern char cc_to_mncc_tx_last_sdp[1024];
 
 extern struct gsm_mncc *on_call_release_mncc_sends_to_cc_data;
 
@@ -147,6 +150,7 @@ static inline void expect_release_clear(enum osmo_rat_type via_ran)
 
 extern bool bssap_assignment_expected;
 extern bool bssap_assignment_sent;
+extern struct gsm0808_channel_type bssap_assignment_command_last_channel_type;
 extern bool iu_rab_assignment_expected;
 extern bool iu_rab_assignment_sent;
 
@@ -182,10 +186,12 @@ void paging_expect_imsi(const char *imsi);
 void paging_expect_tmsi(uint32_t tmsi);
 
 void ms_sends_msg(const char *hex);
+void ms_sends_msgf(const char *fmt, ...);
+void ms_sends_compl_l3(const char *hex, const struct gsm0808_speech_codec_list *codec_list_bss_supported);
 void ms_sends_classmark_update(const struct osmo_gsm48_classmark *classmark);
 void ms_sends_ciphering_mode_complete(const char *inner_nas_msg);
 void ms_sends_security_mode_complete();
-void ms_sends_assignment_complete(enum mgcp_codecs assigned_codec);
+void ms_sends_assignment_complete(const char *sdp_codec_name);
 void gsup_rx(const char *rx_hex, const char *expect_tx_hex);
 void send_sms(struct vlr_subscr *receiver,
 	      struct vlr_subscr *sender,
@@ -274,5 +280,5 @@ extern const struct timeval fake_time_start_time;
 #define EUSE_TO_MSC_USSD "0a0103"
 #define MSC_USSD_TO_EUSE "0a0103"
 
-extern bool got_crcx;
 void expect_crcx(enum rtp_direction towards);
+bool crcx_scheduled(enum rtp_direction towards);
