@@ -12,6 +12,7 @@ struct gsm_network;
 struct gsm_trans;
 struct rtp_stream;
 enum rtp_direction;
+struct sdp_audio_codecs;
 
 extern struct osmo_tdef g_mgw_tdefs[];
 
@@ -74,7 +75,8 @@ int call_leg_local_bridge(struct call_leg *cl1, uint32_t call_id1, struct gsm_tr
 int call_leg_ensure_rtp_alloc(struct call_leg *cl, enum rtp_direction dir, uint32_t call_id,
 			      struct gsm_trans *for_trans);
 int call_leg_ensure_ci(struct call_leg *cl, enum rtp_direction dir, uint32_t call_id, struct gsm_trans *for_trans,
-		       const enum mgcp_codecs *codec_if_known, const struct osmo_sockaddr_str *remote_addr_if_known);
+		       const struct sdp_audio_codecs *codecs_if_known,
+		       const struct osmo_sockaddr_str *remote_addr_if_known);
 struct osmo_sockaddr_str *call_leg_local_ip(struct call_leg *cl, enum rtp_direction dir);
 
 void call_leg_rtp_stream_gone(struct call_leg *cl, struct rtp_stream *rtps);
