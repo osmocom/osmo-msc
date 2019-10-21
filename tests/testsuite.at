@@ -114,3 +114,10 @@ cat $abs_srcdir/sdp_msg/sdp_msg_test.ok > expout
 cat $abs_srcdir/sdp_msg/sdp_msg_test.err > experr
 AT_CHECK([$abs_top_builddir/tests/sdp_msg/sdp_msg_test], [], [expout], [experr])
 AT_CLEANUP
+
+AT_SETUP([mncc_test])
+AT_KEYWORDS([mncc_test])
+cat $abs_srcdir/mncc/mncc_test.ok > expout
+cat $abs_srcdir/mncc/mncc_test.err > experr
+AT_CHECK([$abs_top_builddir/tests/mncc/mncc_test], [], [expout], [experr])
+AT_CLEANUP

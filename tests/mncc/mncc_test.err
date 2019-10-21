@@ -1,0 +1,10 @@
+DMNCC Short <empty SDP, zero len>
+DMNCC Short <terminated SDP str, but len excludes nul>
+DMNCC Short <terminated SDP str, but len too short>
+DMNCC Short <len way too short>
+DMNCC Short <len zero>
+DMNCC Short <empty SDP, zero len>
+DMNCC Short <terminated SDP str, but len excludes nul>
+DMNCC Short <terminated SDP str, but len too short>
+DMNCC Short <len way too short>
+DMNCC Short <len zero>

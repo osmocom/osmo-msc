@@ -3,6 +3,7 @@ SUBDIRS = \
 	msc_vlr \
 	db_sms \
 	sdp_msg \
+	mncc \
 	$(NULL)
 
 if BUILD_SMPP

@@ -235,6 +235,34 @@ static int mncc_prim_check_sign(const struct gsm_mncc *mncc_prim)
 	return 0;
 }
 
+/* Make sure that the SDP section has a terminating \0. The MNCC message may end after that \0, and if SDP is omitted it
+ * must contain at least one \0 byte. */
+int mncc_check_sdp_termination(const char *label, const struct gsm_mncc *mncc, unsigned int len, const char *sdp)
+{
+	size_t sdp_offset;
+	size_t sdp_data_len;
+	size_t sdp_str_len;
+
+	OSMO_ASSERT(((char*)mncc) < sdp);
+
+	sdp_offset = sdp - (char*)mncc;
+	if (len < sdp_offset)
+		goto too_short;
+
+	sdp_data_len = len - sdp_offset;
+	if (sdp_data_len < 1)
+		goto too_short;
+
+	sdp_str_len = strnlen(sdp, sdp_data_len);
+	/* There must be a \0, so sdp_str_len must be at most sdp_data_len - 1 */
+	if (sdp_str_len >= sdp_data_len)
+		goto too_short;
+	return 0;
+too_short:
+	LOGP(DMNCC, LOGL_ERROR, "Short %s\n", label);
+	return -EINVAL;
+}
+
 int mncc_prim_check(const struct gsm_mncc *mncc_prim, unsigned int len)
 {
 	if (len < sizeof(mncc_prim->msg_type)) {
@@ -262,11 +290,7 @@ int mncc_prim_check(const struct gsm_mncc *mncc_prim, unsigned int len)
 	case MNCC_RTP_FREE:
 	case MNCC_RTP_CONNECT:
 	case MNCC_RTP_CREATE:
-		if (len < sizeof(struct gsm_mncc_rtp)) {
-			LOGP(DMNCC, LOGL_ERROR, "Short MNCC RTP\n");
-			return -EINVAL;
-		}
-		break;
+		return mncc_check_sdp_termination("MNCC RTP", mncc_prim, len, ((struct gsm_mncc_rtp*)mncc_prim)->sdp);
 	case MNCC_LCHAN_MODIFY:
 	case MNCC_FRAME_DROP:
 	case MNCC_FRAME_RECV:
@@ -279,10 +303,8 @@ int mncc_prim_check(const struct gsm_mncc *mncc_prim, unsigned int len)
 		}
 		break;
 	default:
-		if (len < sizeof(struct gsm_mncc)) {
-			LOGP(DMNCC, LOGL_ERROR, "Short MNCC Signalling\n");
+		if (mncc_check_sdp_termination("MNCC Signalling", mncc_prim, len, mncc_prim->sdp))
 			return -EINVAL;
-		}
 		return mncc_prim_check_sign(mncc_prim);
 	}
 	return 0;

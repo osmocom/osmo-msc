@@ -255,6 +255,7 @@ AC_OUTPUT(
     tests/sms_queue/Makefile
     tests/msc_vlr/Makefile
     tests/sdp_msg/Makefile
+    tests/mncc/Makefile
     doc/Makefile
     doc/examples/Makefile
     doc/manuals/Makefile
