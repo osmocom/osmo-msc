@@ -25,11 +25,13 @@
 
 #include <osmocom/msc/gsm_04_08.h>
 
-static void mncc_sends_to_cc(uint32_t msg_type, struct gsm_mncc *mncc)
-{
-	mncc->msg_type = msg_type;
-	mncc_tx_to_cc(net, mncc);
-}
+#define mncc_sends_to_cc(MSG_TYPE, MNCC) do { \
+		(MNCC)->msg_type = MSG_TYPE; \
+		log("MSC <-- MNCC: callref 0x%x: %s\n%s", (MNCC)->callref, \
+		    get_mncc_name((MNCC)->msg_type), \
+		    (MNCC)->sdp); \
+		mncc_tx_to_cc(net, MNCC); \
+	} while(0)
 
 /*
 static void on_call_release_mncc_sends_to_cc(uint32_t msg_type, struct gsm_mncc *mncc)
