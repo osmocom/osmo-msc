@@ -1935,19 +1935,11 @@ static int mncc_tx_to_gsm_cc(struct gsm_network *net, const union mncc_msg *msg)
 			 * log it now. */
 			LOG_TRANS_CAT(trans, DMNCC, LOGL_DEBUG, "rx %s\n", get_mncc_name(msg->msg_type));
 
-			if (vsub->cs.is_paging) {
-				LOG_TRANS(trans, LOGL_DEBUG,
-					  "rx %s, subscriber not yet connected, paging already started\n",
-					  get_mncc_name(msg->msg_type));
-				vlr_subscr_put(vsub, __func__);
-				trans_free(trans);
-				return 0;
-			}
-
 			/* store setup information until paging succeeds */
 			memcpy(&trans->cc.msg, data, sizeof(struct gsm_mncc));
 
-			/* Request a channel */
+			/* Request a channel. If Paging already started, paging_request_start() will append the new
+			 * trans to the already ongoing Paging. */
 			trans->paging_request = paging_request_start(vsub, PAGING_CAUSE_CALL_CONVERSATIONAL,
 								     cc_paging_cb, trans, "MNCC: establish call");
 			if (!trans->paging_request) {
