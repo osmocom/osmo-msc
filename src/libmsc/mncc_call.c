@@ -35,6 +35,7 @@
 #include <osmocom/msc/rtp_stream.h>
 #include <osmocom/msc/msub.h>
 #include <osmocom/msc/vlr.h>
+#include <osmocom/msc/codec_sdp_cc_t9n.h>
 
 struct osmo_fsm mncc_call_fsm;
 static bool mncc_call_tx_rtp_create(struct mncc_call *mncc_call);
@@ -262,35 +263,16 @@ static bool mncc_call_rx_rtp_create(struct mncc_call *mncc_call)
 		return true;
 	}
 
-	if (!mncc_call->rtps->codec_known) {
+	if (!mncc_call->rtps->codecs_known) {
 		LOG_MNCC_CALL(mncc_call, LOGL_DEBUG, "Got RTP_CREATE, but RTP stream has no codec set\n");
 		return true;
 	}
 
 	LOG_MNCC_CALL(mncc_call, LOGL_DEBUG, "Got RTP_CREATE, responding with " OSMO_SOCKADDR_STR_FMT " %s\n",
 		      OSMO_SOCKADDR_STR_FMT_ARGS(&mncc_call->rtps->local),
-		      osmo_mgcpc_codec_name(mncc_call->rtps->codec));
+		      sdp_audio_codecs_name(&mncc_call->rtps->codecs));
 	/* Already know what RTP IP:port to tell the MNCC. Send it. */
 	return mncc_call_tx_rtp_create(mncc_call);
-}
-
-/* Convert enum mgcp_codecs to an gsm_mncc_rtp->payload_msg_type value. */
-uint32_t mgcp_codec_to_mncc_payload_msg_type(enum mgcp_codecs codec)
-{
-	switch (codec) {
-	default:
-		/* disclaimer: i have no idea what i'm doing. */
-	case CODEC_GSM_8000_1:
-		return GSM_TCHF_FRAME;
-	case CODEC_GSMEFR_8000_1:
-		return GSM_TCHF_FRAME_EFR;
-	case CODEC_GSMHR_8000_1:
-		return GSM_TCHH_FRAME;
-	case CODEC_AMR_8000_1:
-	case CODEC_AMRWB_16000_1:
-		//return GSM_TCHF_FRAME;
-		return GSM_TCH_FRAME_AMR;
-	}
 }
 
 static bool mncc_call_tx_rtp_create(struct mncc_call *mncc_call)
@@ -313,9 +295,16 @@ static bool mncc_call_tx_rtp_create(struct mncc_call *mncc_call)
 		return false;
 	}
 
-	if (mncc_call->rtps->codec_known) {
-		mncc_msg.rtp.payload_type = 0; /* ??? */
-		mncc_msg.rtp.payload_msg_type = mgcp_codec_to_mncc_payload_msg_type(mncc_call->rtps->codec);
+	if (mncc_call->rtps->codecs_known) {
+		struct sdp_audio_codec *codec = &mncc_call->rtps->codecs.codec[0];
+		const struct codec_mapping *m = codec_mapping_by_subtype_name(codec->subtype_name);
+
+		if (!m) {
+			mncc_call_error(mncc_call, "Failed to resolve audio codec '%s'\n", sdp_audio_codec_name(codec));
+			return false;
+		}
+		mncc_msg.rtp.payload_type = codec->payload_type;
+		mncc_msg.rtp.payload_msg_type = m->mncc_payload_msg_type;
 	}
 
 	if (mncc_call_tx(mncc_call, &mncc_msg))

@@ -55,6 +55,9 @@
 #include <osmocom/msc/rtp_stream.h>
 #include <osmocom/msc/mncc_call.h>
 #include <osmocom/msc/msc_t.h>
+#include <osmocom/msc/sdp_msg.h>
+#include <osmocom/msc/cc_sdp.h>
+#include <osmocom/msc/codec_sdp_cc_t9n.h>
 
 #include <osmocom/gsm/gsm48.h>
 #include <osmocom/gsm/gsm0480.h>
@@ -254,7 +257,11 @@ static int mncc_recvmsg(struct gsm_network *net, struct gsm_trans *trans,
 int mncc_release_ind(struct gsm_network *net, struct gsm_trans *trans,
 		     uint32_t callref, int location, int value)
 {
+	/* BEWARE: trans may be passed as NULL to reply to invalid MNCC requests */
 	struct gsm_mncc rel;
+
+	if (trans && trans->cc.mncc_release_sent)
+		return 0;
 
 	memset(&rel, 0, sizeof(rel));
 	rel.callref = callref;
@@ -498,6 +505,8 @@ static int gsm48_cc_rx_setup(struct gsm_trans *trans, struct msgb *msg)
 	memset(&setup, 0, sizeof(struct gsm_mncc));
 	setup.callref = trans->callref;
 
+	OSMO_ASSERT(trans->msc_a);
+
 	tlv_parse(&tp, &gsm48_att_tlvdef, gh->data, payload_len, 0, 0);
 	/* emergency setup is identified by msg_type */
 	if (msg_type == GSM48_MT_CC_EMERG_SETUP) {
@@ -567,25 +576,77 @@ static int gsm48_cc_rx_setup(struct gsm_trans *trans, struct msgb *msg)
 			     TLVP_VAL(&tp, GSM48_IE_CC_CAP)-1);
 	}
 
-	new_cc_state(trans, GSM_CSTATE_INITIATED);
+	cc_sdp_init(&trans->cc.sdp, trans->msc_a->c.ran->type,
+		    setup.fields & MNCC_F_BEARER_CAP ? &trans->bearer_cap : NULL,
+		    &trans->msc_a->cc.codec_list_bss_supported);
+	cc_sdp_filter(&trans->cc.sdp);
 
 	LOG_TRANS(trans, setup.emergency ? LOGL_NOTICE : LOGL_INFO, "%sSETUP to %s\n",
 		  setup.emergency ? "EMERGENCY_" : "", setup.called.number);
+	LOG_TRANS(trans, LOGL_DEBUG, "codecs: %s\n", cc_sdp_name(&trans->cc.sdp));
 
 	rate_ctr_inc(&trans->net->msc_ctrs->ctr[MSC_CTR_CALL_MO_SETUP]);
 
+	new_cc_state(trans, GSM_CSTATE_INITIATED);
+
+	/* To complete the MNCC_SETUP_IND, we need to provide an RTP address and port. First instruct the MGW to create
+	 * a CN-side RTP conn, and continue with MNCC_SETUP_IND once that is done. Leave trans.cc in GSM_CSTATE_NULL and
+	 * note down the msg_type to indicate that we indeed composed an MNCC_SETUP_IND for later. */
+	setup.msg_type = MNCC_SETUP_IND;
+	trans->cc.msg = setup;
+	return msc_a_try_call_assignment(trans);
+	/* continue in gsm48_cc_rx_setup_cn_local_rtp_port_known() */
+}
+
+/* Callback for MNCC_SETUP_IND waiting for the core network RTP port to be established by the MGW (via msc_a) */
+void gsm48_cc_rx_setup_cn_local_rtp_port_known(struct gsm_trans *trans)
+{
+	struct msc_a *msc_a = trans->msc_a;
+	struct gsm_mncc setup = trans->cc.msg;
+	struct osmo_sockaddr_str *rtp_cn_local;
+	struct sdp_msg *sdp;
+
+	if (trans->cc.state != GSM_CSTATE_INITIATED
+	    || setup.msg_type != MNCC_SETUP_IND) {
+		LOG_TRANS(trans, LOGL_ERROR,
+			  "Unexpected CC state. Expected GSM_CSTATE_NULL and a buffered MNCC_SETUP_IND message,"
+			  " found CC state %d and msg_type %s\n",
+			  trans->cc.state, get_mncc_name(setup.msg_type));
+		trans->callref = 0;
+		trans_free(trans);
+		return;
+	}
+
+	if (!msc_a) {
+		LOG_TRANS(trans, LOGL_ERROR, "No connection for CC trans\n");
+		trans->callref = 0;
+		trans_free(trans);
+		return;
+	}
+
+	/* 'setup' above has taken the value of trans->cc.msg, we can now clear that. */
+	trans->cc.msg = (struct gsm_mncc){};
+
+	/* Insert the CN side RTP port now available into SDP and compose SDP string */
+	rtp_cn_local = call_leg_local_ip(msc_a->cc.call_leg, RTP_TO_CN);
+	if (!osmo_sockaddr_str_is_nonzero(rtp_cn_local)) {
+		LOG_TRANS(trans, LOGL_ERROR, "Cannot compose SDP for MNCC_SETUP_IND: no RTP set up for the CN side\n");
+		trans_free(trans);
+		return;
+	}
+
+	cc_sdp_filter(&trans->cc.sdp);
+	sdp = &trans->cc.sdp.result;
+	sdp->rtp = *rtp_cn_local;
+	sdp_msg_to_str(setup.sdp, sizeof(setup.sdp), sdp);
+
 	/* indicate setup to MNCC */
 	mncc_recvmsg(trans->net, trans, MNCC_SETUP_IND, &setup);
-
-	/* MNCC code will modify the channel asynchronously, we should
-	 * ipaccess-bind only after the modification has been made to the
-	 * lchan->tch_mode */
-	return 0;
 }
 
 static int gsm48_cc_tx_setup(struct gsm_trans *trans, void *arg)
 {
-	struct msgb *msg = gsm48_msgb_alloc_name("GSM 04.08 CC STUP");
+	struct msgb *msg = gsm48_msgb_alloc_name("GSM 04.08 CC SETUP");
 	struct gsm48_hdr *gh;
 	struct gsm_mncc *setup = arg;
 	int rc, trans_id;
@@ -622,15 +683,65 @@ static int gsm48_cc_tx_setup(struct gsm_trans *trans, void *arg)
 
 	gh->msg_type = GSM48_MT_CC_SETUP;
 
-	gsm48_start_cc_timer(trans, 0x303, GSM48_T303);
+	/* We must not pass bearer_cap to cc_sdp_init(), because we haven't received the MS's Bearer Capabilities yet;
+	 * the Bearer Capabilities handled here are actually the remote call leg's Bearer Capabilities to be passed on
+	 * during the CC Setup. */
+	cc_sdp_init(&trans->cc.sdp, trans->msc_a->c.ran->type, NULL,
+		    &trans->msc_a->cc.codec_list_bss_supported);
 
-	/* bearer capability */
-	if (setup->fields & MNCC_F_BEARER_CAP) {
-		/* Create a copy of the bearer capability in the transaction struct, so we
-		 * can use this information later */
-		memcpy(&trans->bearer_cap, &setup->bearer_cap, sizeof(trans->bearer_cap));
-		gsm48_encode_bearer_cap(msg, 0, &setup->bearer_cap);
+	/* sdp.remote: if SDP is included in the MNCC, take that as definitive list of remote audio codecs. */
+	if (setup->sdp[0]) {
+		rc = sdp_msg_from_str(&trans->cc.sdp.remote, setup->sdp);
+		if (rc)
+			LOG_TRANS(trans, LOGL_ERROR, "Failed to parse remote call leg SDP: %d\n", rc);
 	}
+
+	/* sdp.remote: if there is no SDP information or we failed to parse it, try using the Bearer Capability from
+	 * MNCC, if any. */
+	if (!trans->cc.sdp.remote.audio_codecs.count && (setup->fields & MNCC_F_BEARER_CAP)) {
+		trans->cc.sdp.remote = (struct sdp_msg){};
+		sdp_audio_codecs_from_bearer_cap(&trans->cc.sdp.remote.audio_codecs,
+						 &setup->bearer_cap);
+	}
+
+	if (!trans->cc.sdp.remote.audio_codecs.count)
+		LOG_TRANS(trans, LOGL_ERROR,
+			  "Got no information of remote audio codecs: neither SDP nor Bearer Capability. Trying anyway.\n");
+
+	/* Translate SDP to bearer capability Speech Version entries.
+	 * If we supported transcoding, this could add arbitrary speech versions.
+	 * For now add speech_ver entries for each codec in the SDP that matches a GSM speech_ver constant. */
+	cc_sdp_filter(&trans->cc.sdp);
+	LOG_TRANS(trans, LOGL_DEBUG, "codecs: %s\n", cc_sdp_name(&trans->cc.sdp));
+	trans->bearer_cap = (struct gsm_mncc_bearer_cap){
+		.speech_ver = { -1 },
+	};
+	sdp_audio_codecs_to_bearer_cap(&trans->bearer_cap, &trans->cc.sdp.result.audio_codecs);
+	rc = bearer_cap_set_radio(&trans->bearer_cap);
+	if (rc) {
+		LOG_TRANS(trans, LOGL_ERROR, "Error composing Bearer Capability for CC Setup\n");
+		trans_free(trans);
+		msgb_free(msg);
+		return rc;
+	}
+
+	/* If no resulting codecs remain, error out. If the MGW were able to transcode, we would just use unidentical
+	 * codecs on each conn of the MGW endpoint. */
+	if (trans->bearer_cap.speech_ver[0] == -1) {
+		LOG_TRANS(trans, LOGL_ERROR, "%s: no codec match possible: %s\n",
+			  get_mncc_name(setup->msg_type), cc_sdp_name(&trans->cc.sdp));
+
+		/* incompatible codecs */
+		rc = mncc_release_ind(trans->net, trans, trans->callref,
+				      GSM48_CAUSE_LOC_PRN_S_LU,
+				      GSM48_CC_CAUSE_INCOMPAT_DEST /* TODO: correct cause code? */);
+		trans->cc.mncc_release_sent = true;
+		trans_free(trans);
+		msgb_free(msg);
+		return rc;
+	}
+	gsm48_encode_bearer_cap(msg, 0, &trans->bearer_cap);
+
 	/* facility */
 	if (setup->fields & MNCC_F_FACILITY)
 		gsm48_encode_facility(msg, 0, &setup->facility);
@@ -656,6 +767,8 @@ static int gsm48_cc_tx_setup(struct gsm_trans *trans, void *arg)
 	new_cc_state(trans, GSM_CSTATE_CALL_PRESENT);
 
 	rate_ctr_inc(&trans->net->msc_ctrs->ctr[MSC_CTR_CALL_MT_SETUP]);
+
+	gsm48_start_cc_timer(trans, 0x303, GSM48_T303);
 
 	return trans_tx_gsm48(trans, msg);
 }
@@ -691,9 +804,14 @@ static int gsm48_cc_rx_call_conf(struct gsm_trans *trans, struct msgb *msg)
 		/* Create a copy of the bearer capability
 		 * in the transaction struct, so we can use
 		 * this information later */
-		memcpy(&trans->bearer_cap,&call_conf.bearer_cap,
+		memcpy(&trans->bearer_cap, &call_conf.bearer_cap,
 		       sizeof(trans->bearer_cap));
+
+		/* Note MS codec capabilities for codec negotiation */
+		trans->cc.sdp.ms = (struct sdp_audio_codecs){};
+		sdp_audio_codecs_from_bearer_cap(&trans->cc.sdp.ms, &call_conf.bearer_cap);
 	}
+
 	/* cause */
 	if (TLVP_PRESENT(&tp, GSM48_IE_CAUSE)) {
 		call_conf.fields |= MNCC_F_CAUSE;
@@ -710,8 +828,6 @@ static int gsm48_cc_rx_call_conf(struct gsm_trans *trans, struct msgb *msg)
 	/* IMSI of called subscriber */
 	OSMO_STRLCPY_ARRAY(call_conf.imsi, trans->vsub->imsi);
 
-	new_cc_state(trans, GSM_CSTATE_MO_TERM_CALL_CONF);
-
 	/* Assign call (if not done yet) */
 	rc = msc_a_try_call_assignment(trans);
 
@@ -720,8 +836,53 @@ static int gsm48_cc_rx_call_conf(struct gsm_trans *trans, struct msgb *msg)
 	if (rc)
 		return rc;
 
-	return mncc_recvmsg(trans->net, trans, MNCC_CALL_CONF_IND,
-			    &call_conf);
+	/* Directly ack with MNCC_CALL_CONF_IND, not yet containing SDP or RTP IP:port information. */
+	new_cc_state(trans, GSM_CSTATE_MO_TERM_CALL_CONF);
+	return mncc_recvmsg(trans->net, trans, MNCC_CALL_CONF_IND, &call_conf);
+}
+
+static int mncc_recv_rtp(struct gsm_network *net, struct gsm_trans *trans, uint32_t callref,
+			 int cmd, struct osmo_sockaddr_str *rtp_addr, uint32_t payload_type,
+			 uint32_t payload_msg_type, const struct sdp_msg *sdp);
+
+int gsm48_cc_mt_rtp_port_and_codec_known(struct gsm_trans *trans)
+{
+	struct msc_a *msc_a = trans->msc_a;
+	struct osmo_sockaddr_str *rtp_cn_local;
+	struct rtp_stream *rtp_ran;
+	struct gsm_mncc_rtp;
+
+	if (!msc_a) {
+		LOG_TRANS(trans, LOGL_ERROR, "No connection for CC trans\n");
+		trans->callref = 0;
+		trans_free(trans);
+		return -EINVAL;
+	}
+
+	/* Set chosen codec in SDP. This is the result of the Assignment, the actual codec the BSS has chosen for this
+	 * MT side. */
+	rtp_ran = msc_a->cc.call_leg->rtp[RTP_TO_RAN];
+	if (!rtp_ran->codecs_known) {
+		LOG_TRANS(trans, LOGL_ERROR, "RAN codecs not known but should be, cannot continue.\n");
+		trans_free(trans);
+		return -EINVAL;
+	}
+	trans->cc.sdp.assignment = rtp_ran->codecs.codec[0];
+
+	/* Insert the CN side RTP port now available into SDP */
+	rtp_cn_local = call_leg_local_ip(msc_a->cc.call_leg, RTP_TO_CN);
+	if (!rtp_cn_local) {
+		LOG_TRANS(trans, LOGL_ERROR, "Cannot compose SDP for MNCC_RTP_CREATE: no RTP set up for the CN side\n");
+		trans_free(trans);
+		return -EINVAL;
+	}
+	trans->cc.sdp.result.rtp = *rtp_cn_local;
+
+	cc_sdp_filter(&trans->cc.sdp);
+	LOG_TRANS(trans, LOGL_DEBUG, "codecs: %s\n", cc_sdp_name(&trans->cc.sdp));
+
+	return mncc_recv_rtp(msc_a_net(msc_a), trans, trans->callref, MNCC_RTP_CREATE, rtp_cn_local, 0, 0,
+			     &trans->cc.sdp.result);
 }
 
 static int gsm48_cc_tx_call_proc_and_assign(struct gsm_trans *trans, void *arg)
@@ -790,6 +951,10 @@ static int gsm48_cc_rx_alerting(struct gsm_trans *trans, struct msgb *msg)
 
 	new_cc_state(trans, GSM_CSTATE_CALL_RECEIVED);
 
+	cc_sdp_filter(&trans->cc.sdp);
+	LOG_TRANS(trans, LOGL_DEBUG, "codecs: %s\n", cc_sdp_name(&trans->cc.sdp));
+	sdp_msg_to_str(alerting.sdp, sizeof(alerting.sdp), &trans->cc.sdp.result);
+
 	return mncc_recvmsg(trans->net, trans, MNCC_ALERT_IND,
 			    &alerting);
 }
@@ -813,6 +978,19 @@ static int gsm48_cc_tx_alerting(struct gsm_trans *trans, void *arg)
 		gsm48_encode_useruser(msg, 0, &alerting->useruser);
 
 	new_cc_state(trans, GSM_CSTATE_CALL_DELIVERED);
+
+	if (alerting->sdp[0]) {
+		struct call_leg *cl = trans->msc_a->cc.call_leg;
+		struct rtp_stream *rtp_cn = cl ? cl->rtp[RTP_TO_CN] : NULL;
+		sdp_msg_from_str(&trans->cc.sdp.remote, alerting->sdp);
+		LOG_TRANS(trans, LOGL_DEBUG, "%s codecs: %s\n",
+			  get_mncc_name(alerting->msg_type),
+			  cc_sdp_name(&trans->cc.sdp));
+		if (rtp_cn) {
+			rtp_stream_set_remote_addr_and_codecs(rtp_cn, &trans->cc.sdp.remote);
+			rtp_stream_commit(rtp_cn);
+		}
+	}
 
 	return trans_tx_gsm48(trans, msg);
 }
@@ -860,6 +1038,20 @@ static int gsm48_cc_tx_connect(struct gsm_trans *trans, void *arg)
 
 	new_cc_state(trans, GSM_CSTATE_CONNECT_IND);
 
+	/* Received an MNCC_SETUP_RSP with the remote leg's SDP information. Apply codec choice. */
+	if (connect->sdp[0]) {
+		struct call_leg *cl = trans->msc_a->cc.call_leg;
+		struct rtp_stream *rtp_cn = cl ? cl->rtp[RTP_TO_CN] : NULL;
+		sdp_msg_from_str(&trans->cc.sdp.remote, connect->sdp);
+		LOG_TRANS(trans, LOGL_DEBUG, "%s codecs: %s\n",
+			  get_mncc_name(connect->msg_type),
+			  cc_sdp_name(&trans->cc.sdp));
+		if (rtp_cn) {
+			rtp_stream_set_remote_addr_and_codecs(rtp_cn, &trans->cc.sdp.remote);
+			rtp_stream_commit(rtp_cn);
+		}
+	}
+
 	return trans_tx_gsm48(trans, msg);
 }
 
@@ -902,6 +1094,8 @@ static int gsm48_cc_rx_connect(struct gsm_trans *trans, struct msgb *msg)
 	new_cc_state(trans, GSM_CSTATE_CONNECT_REQUEST);
 	rate_ctr_inc(&trans->net->msc_ctrs->ctr[MSC_CTR_CALL_MT_CONNECT]);
 
+	cc_sdp_filter(&trans->cc.sdp);
+	sdp_msg_to_str(connect.sdp, sizeof(connect.sdp), &trans->cc.sdp.result);
 	return mncc_recvmsg(trans->net, trans, MNCC_SETUP_CNF, &connect);
 }
 
@@ -1027,7 +1221,6 @@ static int gsm48_cc_rx_release(struct gsm_trans *trans, struct msgb *msg)
 	unsigned int payload_len = msgb_l3len(msg) - sizeof(*gh);
 	struct tlv_parsed tp;
 	struct gsm_mncc rel;
-	int rc;
 
 	gsm48_stop_cc_timer(trans);
 
@@ -1059,14 +1252,16 @@ static int gsm48_cc_rx_release(struct gsm_trans *trans, struct msgb *msg)
 				 TLVP_VAL(&tp, GSM48_IE_SS_VERS)-1);
 	}
 
-	if (trans->cc.state == GSM_CSTATE_RELEASE_REQ) {
-		/* release collision 5.4.5 */
-		rc = mncc_recvmsg(trans->net, trans, MNCC_REL_CNF, &rel);
-	} else {
-		rc = gsm48_tx_simple(trans->msc_a,
-				     GSM48_PDISC_CC | (trans->transaction_id << 4),
-				     GSM48_MT_CC_RELEASE_COMPL);
-		rc = mncc_recvmsg(trans->net, trans, MNCC_REL_IND, &rel);
+	if (!trans->cc.mncc_release_sent) {
+		if (trans->cc.state == GSM_CSTATE_RELEASE_REQ) {
+			/* release collision 5.4.5 */
+			mncc_recvmsg(trans->net, trans, MNCC_REL_CNF, &rel);
+		} else {
+			gsm48_tx_simple(trans->msc_a,
+					     GSM48_PDISC_CC | (trans->transaction_id << 4),
+					     GSM48_MT_CC_RELEASE_COMPL);
+			mncc_recvmsg(trans->net, trans, MNCC_REL_IND, &rel);
+		}
 	}
 
 	new_cc_state(trans, GSM_CSTATE_NULL);
@@ -1074,7 +1269,7 @@ static int gsm48_cc_rx_release(struct gsm_trans *trans, struct msgb *msg)
 	trans->callref = 0;
 	trans_free(trans);
 
-	return rc;
+	return 0;
 }
 
 static int gsm48_cc_tx_release(struct gsm_trans *trans, void *arg)
@@ -1153,19 +1348,21 @@ static int gsm48_cc_rx_release_compl(struct gsm_trans *trans, struct msgb *msg)
 				 TLVP_VAL(&tp, GSM48_IE_SS_VERS)-1);
 	}
 
-	if (trans->callref) {
-		switch (trans->cc.state) {
-		case GSM_CSTATE_CALL_PRESENT:
-			rc = mncc_recvmsg(trans->net, trans,
-					  MNCC_REJ_IND, &rel);
-			break;
-		case GSM_CSTATE_RELEASE_REQ:
-			rc = mncc_recvmsg(trans->net, trans,
-					  MNCC_REL_CNF, &rel);
-			break;
-		default:
-			rc = mncc_recvmsg(trans->net, trans,
-					  MNCC_REL_IND, &rel);
+	if (!trans->cc.mncc_release_sent) {
+		if (trans->callref) {
+			switch (trans->cc.state) {
+			case GSM_CSTATE_CALL_PRESENT:
+				rc = mncc_recvmsg(trans->net, trans,
+						  MNCC_REJ_IND, &rel);
+				break;
+			case GSM_CSTATE_RELEASE_REQ:
+				rc = mncc_recvmsg(trans->net, trans,
+						  MNCC_REL_CNF, &rel);
+				break;
+			default:
+				rc = mncc_recvmsg(trans->net, trans,
+						  MNCC_REL_IND, &rel);
+			}
 		}
 	}
 
@@ -1612,7 +1809,7 @@ static int gsm48_cc_rx_userinfo(struct gsm_trans *trans, struct msgb *msg)
 
 static int mncc_recv_rtp(struct gsm_network *net, struct gsm_trans *trans, uint32_t callref,
 			 int cmd, struct osmo_sockaddr_str *rtp_addr, uint32_t payload_type,
-			 uint32_t payload_msg_type)
+			 uint32_t payload_msg_type, const struct sdp_msg *sdp)
 {
 	uint8_t data[sizeof(struct gsm_mncc)];
 	struct gsm_mncc_rtp *rtp;
@@ -1628,12 +1825,18 @@ static int mncc_recv_rtp(struct gsm_network *net, struct gsm_trans *trans, uint3
 	}
 	rtp->payload_type = payload_type;
 	rtp->payload_msg_type = payload_msg_type;
+	if (sdp) {
+		LOG_TRANS(trans, LOGL_DEBUG, "%s SDP: %s\n",
+			  get_mncc_name(rtp->msg_type),
+			  sdp_msg_name(sdp));
+		sdp_msg_to_str(rtp->sdp, sizeof(rtp->sdp), sdp);
+	}
 	return mncc_recvmsg(net, trans, cmd, (struct gsm_mncc *)data);
 }
 
 static void mncc_recv_rtp_err(struct gsm_network *net, struct gsm_trans *trans, uint32_t callref, int cmd)
 {
-	mncc_recv_rtp(net, trans, callref, cmd, NULL, 0, 0);
+	mncc_recv_rtp(net, trans, callref, cmd, NULL, 0, 0, NULL);
 }
 
 static int tch_rtp_create(struct gsm_network *net, uint32_t callref)
@@ -1659,6 +1862,57 @@ static int tch_rtp_create(struct gsm_network *net, uint32_t callref)
 	return msc_a_try_call_assignment(trans);
 }
 
+int cc_cn_local_rtp_port_known(struct gsm_trans *cc_trans)
+{
+	switch(cc_trans->cc.state) {
+	case GSM_CSTATE_INITIATED:
+		if (cc_trans->cc.msg.msg_type != MNCC_SETUP_IND) {
+			LOG_TRANS(cc_trans, LOGL_ERROR, "Assuming MO call, expected MNCC_SETUP_IND to be prepared\n");
+			return -EINVAL;
+		}
+		/* This is the MO call leg, waiting for a CN RTP be able to send initial MNCC_SETUP_IND. */
+		gsm48_cc_rx_setup_cn_local_rtp_port_known(cc_trans);
+		return 0;
+
+	case GSM_CSTATE_MO_TERM_CALL_CONF:
+		/* This is the MT call leg, waiting for a CN RTP to be able to send MNCC_CALL_CONF_IND. */
+		return gsm48_cc_mt_rtp_port_and_codec_known(cc_trans);
+
+	default:
+		LOG_TRANS(cc_trans, LOGL_ERROR, "CN RTP address available, but in unexpected state %d\n",
+			  cc_trans->cc.state);
+		return -EINVAL;
+	}
+}
+
+int cc_assignment_done(struct gsm_trans *trans)
+{
+	struct msc_a *msc_a = trans->msc_a;
+
+	switch (trans->cc.state) {
+	case GSM_CSTATE_INITIATED:
+	case GSM_CSTATE_MO_CALL_PROC:
+		/* MO call */
+		break;
+
+	case GSM_CSTATE_CALL_RECEIVED:
+	case GSM_CSTATE_MO_TERM_CALL_CONF:
+		/* MT call */
+		break;
+
+	default:
+		LOG_TRANS(trans, LOGL_ERROR, "Assignment done in unexpected CC state: %d\n", trans->cc.state);
+		return -EINVAL;
+	}
+
+	if (!call_leg_local_ip(msc_a->cc.call_leg, RTP_TO_CN)) {
+		LOG_TRANS(trans, LOGL_DEBUG,
+			  "Assignment complete, but still waiting for the CRCX OK on the CN side RTP\n");
+		return 0;
+	}
+	return gsm48_tch_rtp_create(trans);
+}
+
 /* Trigger TCH_RTP_CREATE acknowledgement */
 int gsm48_tch_rtp_create(struct gsm_trans *trans)
 {
@@ -1670,30 +1924,32 @@ int gsm48_tch_rtp_create(struct gsm_trans *trans)
 	struct call_leg *cl = msc_a->cc.call_leg;
 	struct osmo_sockaddr_str *rtp_cn_local;
 	struct rtp_stream *rtp_cn = cl ? cl->rtp[RTP_TO_CN] : NULL;
-	uint32_t payload_type;
-	int payload_msg_type;
-	const struct mgcp_conn_peer *mgcp_info;
+	int mncc_payload_msg_type;
+	struct sdp_audio_codec *codec;
+	const struct codec_mapping *m;
 
 	if (!rtp_cn) {
 		LOG_TRANS_CAT(trans, DMNCC, LOGL_ERROR, "Cannot RTP CREATE to MNCC, no RTP set up for the CN side\n");
 		return -EINVAL;
 	}
 
-	if (!rtp_cn->codec_known) {
+	cc_sdp_filter(&trans->cc.sdp);
+	LOG_TRANS(trans, LOGL_DEBUG, "codecs: %s\n", cc_sdp_name(&trans->cc.sdp));
+
+	if (!trans->cc.sdp.result.audio_codecs.count) {
 		LOG_TRANS_CAT(trans, DMNCC, LOGL_ERROR,
-			      "Cannot RTP CREATE to MNCC, no codec set up for the RTP CN side\n");
+			      "Cannot RTP CREATE to MNCC, there is no codec available\n");
 		return -EINVAL;
 	}
 
-	/* Codec */
-	payload_msg_type = mgcp_codec_to_mncc_payload_msg_type(rtp_cn->codec);
+	/* Modify the MGW endpoint if necessary, usually this should already match and not cause MGCP. */
+	rtp_stream_set_codecs(rtp_cn, &trans->cc.sdp.result.audio_codecs);
+	rtp_stream_commit(rtp_cn);
 
-	/* Payload Type number */
-	mgcp_info = osmo_mgcpc_ep_ci_get_rtp_info(rtp_cn->ci);
-	if (mgcp_info && mgcp_info->ptmap_len)
-		payload_type = map_codec_to_pt(mgcp_info->ptmap, mgcp_info->ptmap_len, rtp_cn->codec);
-	else
-		payload_type = rtp_cn->codec;
+	/* Populate the legacy MNCC codec elements: payload_type and payload_msg_type */
+	codec = &rtp_cn->codecs.codec[0];
+	m = codec_mapping_by_subtype_name(codec->subtype_name);
+	mncc_payload_msg_type = m ? m->mncc_payload_msg_type : 0;
 
 	rtp_cn_local = call_leg_local_ip(cl, RTP_TO_CN);
 	if (!rtp_cn_local) {
@@ -1701,7 +1957,9 @@ int gsm48_tch_rtp_create(struct gsm_trans *trans)
 		return -EINVAL;
 	}
 
-	return mncc_recv_rtp(net, trans, trans->callref, MNCC_RTP_CREATE, rtp_cn_local, payload_type, payload_msg_type);
+	return mncc_recv_rtp(net, trans, trans->callref, MNCC_RTP_CREATE, rtp_cn_local,
+			     codec->payload_type, mncc_payload_msg_type,
+			     &trans->cc.sdp.result);
 }
 
 static int tch_rtp_connect(struct gsm_network *net, const struct gsm_mncc_rtp *rtp)
@@ -1709,7 +1967,6 @@ static int tch_rtp_connect(struct gsm_network *net, const struct gsm_mncc_rtp *r
 	struct gsm_trans *trans;
 	struct call_leg *cl;
 	struct rtp_stream *rtps;
-	struct osmo_sockaddr_str rtp_addr;
 	char ipbuf[INET6_ADDRSTRLEN];
 
 	/* FIXME: in *rtp we should get the codec information of the remote
@@ -1736,7 +1993,7 @@ static int tch_rtp_connect(struct gsm_network *net, const struct gsm_mncc_rtp *r
 		return -EIO;
 	}
 
-	LOG_TRANS_CAT(trans, DMNCC, LOGL_DEBUG, "rx %s %s:%u\n", get_mncc_name(MNCC_RTP_CONNECT),
+	LOG_TRANS_CAT(trans, DMNCC, LOGL_DEBUG, "rx %s %s:%u\n", get_mncc_name(rtp->msg_type),
 		      osmo_sockaddr_ntop((const struct sockaddr*)&rtp->addr, ipbuf),
 		      osmo_sockaddr_port((const struct sockaddr*)&rtp->addr));
 
@@ -1749,12 +2006,26 @@ static int tch_rtp_connect(struct gsm_network *net, const struct gsm_mncc_rtp *r
 		return -EINVAL;
 	}
 
-	if (osmo_sockaddr_str_from_sockaddr(&rtp_addr, &rtp->addr) < 0) {
-		LOG_TRANS_CAT(trans, DMNCC, LOGL_ERROR, "RTP connect with invalid IP addr\n");
-		mncc_recv_rtp_err(net, trans, rtp->callref, MNCC_RTP_CONNECT);
-		return -EINVAL;
+	if (rtp->sdp[0]) {
+		sdp_msg_from_str(&trans->cc.sdp.remote, rtp->sdp);
+		LOG_TRANS(trans, LOGL_DEBUG, "%s contained SDP %s\n",
+			  get_mncc_name(rtp->msg_type),
+			  sdp_msg_name(&trans->cc.sdp.remote));
 	}
-	rtp_stream_set_remote_addr(rtps, &rtp_addr);
+
+	rtp_stream_set_remote_addr_and_codecs(rtps, &trans->cc.sdp.remote);
+
+	if (!osmo_sockaddr_str_is_nonzero(&rtps->remote)) {
+		/* Didn't get an IP address from SDP. Try legacy MNCC IP address */
+		struct osmo_sockaddr_str rtp_addr;
+		if (osmo_sockaddr_str_from_sockaddr(&rtp_addr, &rtp->addr) < 0) {
+			LOG_TRANS_CAT(trans, DMNCC, LOGL_ERROR, "RTP connect with invalid IP addr\n");
+			mncc_recv_rtp_err(net, trans, rtp->callref, MNCC_RTP_CONNECT);
+			return -EINVAL;
+		}
+		rtp_stream_set_remote_addr(rtps, &rtp_addr);
+	}
+
 	rtp_stream_commit(rtps);
 	return 0;
 }
@@ -1936,6 +2207,19 @@ static int mncc_tx_to_gsm_cc(struct gsm_network *net, const union mncc_msg *msg)
 			return -ENOMEM;
 		}
 
+		/* Remember remote SDP, if any */
+		if (data->sdp[0]) {
+			if (sdp_msg_from_str(&trans->cc.sdp.remote, data->sdp)) {
+				LOG_TRANS(trans, LOGL_ERROR, "Failed to parse incoming SDP: %s\n",
+					  osmo_quote_str(data->sdp, -1));
+				vlr_subscr_put(vsub, __func__);
+				mncc_release_ind(net, NULL, data->callref,
+						 GSM48_CAUSE_LOC_PRN_S_LU,
+						 GSM48_CC_CAUSE_NORMAL_UNSPEC);
+				return -EINVAL;
+			}
+		}
+
 		/* If subscriber has no conn */
 		if (!msc_a) {
 			/* This condition will return before the common logging of the received MNCC message below, so
@@ -1983,6 +2267,7 @@ static int mncc_tx_to_gsm_cc(struct gsm_network *net, const union mncc_msg *msg)
 		LOG_TRANS(trans, LOGL_DEBUG, "rx %s in paging state\n", get_mncc_name(msg->msg_type));
 		mncc_set_cause(&rel, GSM48_CAUSE_LOC_PRN_S_LU,
 				GSM48_CC_CAUSE_NORM_CALL_CLEAR);
+		trans->cc.mncc_release_sent = true;
 		if (msg->msg_type == MNCC_REL_REQ)
 			rc = mncc_recvmsg(net, trans, MNCC_REL_CNF, &rel);
 		else
