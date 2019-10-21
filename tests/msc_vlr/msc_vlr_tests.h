@@ -35,9 +35,12 @@
 #include <osmocom/msc/rtp_stream.h>
 
 extern bool _log_lines;
+#define LOG_COLOR "\033[1;33m"
+#define LOG_COLOR_OFF "\033[0;m"
+
 #define _log(fmt, args...) do { \
 		if (_log_lines) \
-			fprintf(stderr, " %4d:%s: " fmt "\n", \
+			fprintf(stderr, LOG_COLOR " %4d:%s: " fmt LOG_COLOR_OFF "\n", \
 				__LINE__, __FILE__, ## args ); \
 		else \
 			fprintf(stderr, fmt "\n", ## args ); \
