@@ -107,3 +107,10 @@ cat $abs_srcdir/msc_vlr/msc_vlr_test_ss.ok > expout
 cat $abs_srcdir/msc_vlr/msc_vlr_test_ss.err > experr
 AT_CHECK([$abs_top_builddir/tests/msc_vlr/msc_vlr_test_ss], [], [expout], [experr])
 AT_CLEANUP
+
+AT_SETUP([sdp_msg_test])
+AT_KEYWORDS([sdp_msg_test])
+cat $abs_srcdir/sdp_msg/sdp_msg_test.ok > expout
+cat $abs_srcdir/sdp_msg/sdp_msg_test.err > experr
+AT_CHECK([$abs_top_builddir/tests/sdp_msg/sdp_msg_test], [], [expout], [experr])
+AT_CLEANUP

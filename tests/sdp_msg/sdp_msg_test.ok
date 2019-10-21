@@ -1,0 +1,590 @@
+
+
+test_parse_and_compose
+
+[0]
+sdp input: v=0\r\n
+sdp input: o=- 5628250 5628250 IN IP4 192.168.11.121\r\n
+sdp input: s=-\r\n
+sdp input: c=IN IP4 192.168.11.121\r\n
+sdp input: t=0 0\r\n
+sdp input: m=audio 10020 RTP/AVP 18 0 2 4 8 96 97 98 100 101\r\n
+sdp input: a=rtpmap:18 G729/8000\r\n
+sdp input: a=rtpmap:0 PCMU/8000\r\n
+sdp input: a=rtpmap:2 G726-32/8000\r\n
+sdp input: a=rtpmap:4 G723/8000\r\n
+sdp input: a=rtpmap:8 PCMA/8000\r\n
+sdp input: a=rtpmap:96 G726-40/8000\r\n
+sdp input: a=rtpmap:97 G726-24/8000\r\n
+sdp input: a=rtpmap:98 G726-16/8000\r\n
+sdp input: a=rtpmap:100 NSE/8000\r\n
+sdp input: a=fmtp:100 192-193\r\n
+sdp input: a=rtpmap:101 telephone-event/8000\r\n
+sdp input: a=fmtp:101 0-15\r\n
+sdp input: a=ptime:20\r\n
+sdp input: a=sendrecv\r\n
+sdp_msg_to_str: v=0\r\n
+sdp_msg_to_str: o=OsmoMSC 0 0 IN IP4 192.168.11.121\r\n
+sdp_msg_to_str: s=GSM Call\r\n
+sdp_msg_to_str: c=IN IP4 192.168.11.121\r\n
+sdp_msg_to_str: t=0 0\r\n
+sdp_msg_to_str: m=audio 10020 RTP/AVP 18 0 2 4 8 96 97 98 100 101\r\n
+sdp_msg_to_str: a=rtpmap:18 G729/8000\r\n
+sdp_msg_to_str: a=rtpmap:0 PCMU/8000\r\n
+sdp_msg_to_str: a=rtpmap:2 G726-32/8000\r\n
+sdp_msg_to_str: a=rtpmap:4 G723/8000\r\n
+sdp_msg_to_str: a=rtpmap:8 PCMA/8000\r\n
+sdp_msg_to_str: a=rtpmap:96 G726-40/8000\r\n
+sdp_msg_to_str: a=rtpmap:97 G726-24/8000\r\n
+sdp_msg_to_str: a=rtpmap:98 G726-16/8000\r\n
+sdp_msg_to_str: a=rtpmap:100 NSE/8000\r\n
+sdp_msg_to_str: a=fmtp:100 192-193\r\n
+sdp_msg_to_str: a=rtpmap:101 telephone-event/8000\r\n
+sdp_msg_to_str: a=fmtp:101 0-15\r\n
+sdp_msg_to_str: a=ptime:20\r\n
+[0] ok
+
+[1]
+sdp input: v=0\r\n
+sdp input: o=FooBar 1565090289 1565090290 IN IP4 192.168.11.151\r\n
+sdp input: s=FooBar\r\n
+sdp input: c=IN IP4 192.168.11.151\r\n
+sdp input: t=0 0\r\n
+sdp input: m=audio 16398 RTP/AVP 98\r\n
+sdp input: a=rtpmap:98 AMR/8000\r\n
+sdp input: a=fmtp:98 octet-align=1; mode-set=4\r\n
+sdp input: a=ptime:20\r\n
+sdp input: a=rtcp:16399 IN IP4 192.168.11.151\r\n
+sdp_msg_to_str: v=0\r\n
+sdp_msg_to_str: o=OsmoMSC 0 0 IN IP4 192.168.11.151\r\n
+sdp_msg_to_str: s=GSM Call\r\n
+sdp_msg_to_str: c=IN IP4 192.168.11.151\r\n
+sdp_msg_to_str: t=0 0\r\n
+sdp_msg_to_str: m=audio 16398 RTP/AVP 98\r\n
+sdp_msg_to_str: a=rtpmap:98 AMR/8000\r\n
+sdp_msg_to_str: a=fmtp:98 octet-align=1; mode-set=4\r\n
+sdp_msg_to_str: a=ptime:20\r\n
+[1] ok
+
+[2]
+sdp input: v=0\r\n
+sdp input: o=FooBar 1565090289 1565090290 IN IP4 192.168.11.151\r\n
+sdp input: s=FooBar\r\n
+sdp input: c=IN IP4 192.168.11.140\r\n
+sdp input: t=0 0\r\n
+sdp input: m=audio 30436 RTP/AVP 18 0 4 8 101\r\n
+sdp input: a=rtpmap:18 G729/8000\r\n
+sdp input: a=rtpmap:0 PCMU/8000\r\n
+sdp input: a=rtpmap:4 G723/8000\r\n
+sdp input: a=rtpmap:8 PCMA/8000\r\n
+sdp input: a=rtpmap:101 telephone-event/8000\r\n
+sdp input: a=fmtp:101 0-15\r\n
+sdp input: a=sendrecv\r\n
+sdp input: a=rtcp:30437\r\n
+sdp input: a=ptime:20\r\n
+sdp_msg_to_str: v=0\r\n
+sdp_msg_to_str: o=OsmoMSC 0 0 IN IP4 192.168.11.140\r\n
+sdp_msg_to_str: s=GSM Call\r\n
+sdp_msg_to_str: c=IN IP4 192.168.11.140\r\n
+sdp_msg_to_str: t=0 0\r\n
+sdp_msg_to_str: m=audio 30436 RTP/AVP 18 0 4 8 101\r\n
+sdp_msg_to_str: a=rtpmap:18 G729/8000\r\n
+sdp_msg_to_str: a=rtpmap:0 PCMU/8000\r\n
+sdp_msg_to_str: a=rtpmap:4 G723/8000\r\n
+sdp_msg_to_str: a=rtpmap:8 PCMA/8000\r\n
+sdp_msg_to_str: a=rtpmap:101 telephone-event/8000\r\n
+sdp_msg_to_str: a=fmtp:101 0-15\r\n
+sdp_msg_to_str: a=ptime:20\r\n
+[2] ok
+
+
+test_intersect
+
+[0] identical codecs lead to no change
+SDP A: v=0\r\n
+SDP A: o=OsmoMSC 0 0 IN IP4 23.42.23.42\r\n
+SDP A: s=GSM Call\r\n
+SDP A: c=IN IP4 23.42.23.42\r\n
+SDP A: t=0 0\r\n
+SDP A: m=audio 30436 RTP/AVP 112 3 111 110\r\n
+SDP A: a=rtpmap:112 AMR/8000\r\n
+SDP A: a=fmtp:112 octet-align=1\r\n
+SDP A: a=rtpmap:3 GSM/8000\r\n
+SDP A: a=rtpmap:111 GSM-HR-08/8000\r\n
+SDP A: a=rtpmap:110 GSM-EFR/8000\r\n
+SDP A: a=ptime:20\r\n
+ SDP B: c=IN IP4 5.6.7.8\r\n
+ SDP B: m=audio 12345 RTP/AVP 112 3 111 110\r\n
+ SDP B: a=rtpmap:112 AMR/8000\r\n
+ SDP B: a=fmtp:112 octet-align=1\r\n
+ SDP B: a=rtpmap:3 GSM/8000\r\n
+ SDP B: a=rtpmap:111 GSM-HR-08/8000\r\n
+ SDP B: a=rtpmap:110 GSM-EFR/8000\r\n
+parsed SDP A: v=0\r\n
+parsed SDP A: o=OsmoMSC 0 0 IN IP4 23.42.23.42\r\n
+parsed SDP A: s=GSM Call\r\n
+parsed SDP A: c=IN IP4 23.42.23.42\r\n
+parsed SDP A: t=0 0\r\n
+parsed SDP A: m=audio 30436 RTP/AVP 112 3 111 110\r\n
+parsed SDP A: a=rtpmap:112 AMR/8000\r\n
+parsed SDP A: a=fmtp:112 octet-align=1\r\n
+parsed SDP A: a=rtpmap:3 GSM/8000\r\n
+parsed SDP A: a=rtpmap:111 GSM-HR-08/8000\r\n
+parsed SDP A: a=rtpmap:110 GSM-EFR/8000\r\n
+parsed SDP A: a=ptime:20\r\n
+parsed SDP B: v=0\r\n
+parsed SDP B: o=OsmoMSC 0 0 IN IP4 5.6.7.8\r\n
+parsed SDP B: s=GSM Call\r\n
+parsed SDP B: c=IN IP4 5.6.7.8\r\n
+parsed SDP B: t=0 0\r\n
+parsed SDP B: m=audio 12345 RTP/AVP 112 3 111 110\r\n
+parsed SDP B: a=rtpmap:112 AMR/8000\r\n
+parsed SDP B: a=fmtp:112 octet-align=1\r\n
+parsed SDP B: a=rtpmap:3 GSM/8000\r\n
+parsed SDP B: a=rtpmap:111 GSM-HR-08/8000\r\n
+parsed SDP B: a=rtpmap:110 GSM-EFR/8000\r\n
+parsed SDP B: a=ptime:20\r\n
+sdp_msg_intersection(a,b): v=0\r\n
+sdp_msg_intersection(a,b): o=OsmoMSC 0 0 IN IP4 23.42.23.42\r\n
+sdp_msg_intersection(a,b): s=GSM Call\r\n
+sdp_msg_intersection(a,b): c=IN IP4 23.42.23.42\r\n
+sdp_msg_intersection(a,b): t=0 0\r\n
+sdp_msg_intersection(a,b): m=audio 30436 RTP/AVP 112 3 111 110\r\n
+sdp_msg_intersection(a,b): a=rtpmap:112 AMR/8000\r\n
+sdp_msg_intersection(a,b): a=fmtp:112 octet-align=1\r\n
+sdp_msg_intersection(a,b): a=rtpmap:3 GSM/8000\r\n
+sdp_msg_intersection(a,b): a=rtpmap:111 GSM-HR-08/8000\r\n
+sdp_msg_intersection(a,b): a=rtpmap:110 GSM-EFR/8000\r\n
+sdp_msg_intersection(a,b): a=ptime:20\r\n
+[0] ok
+
+[1] identical codecs in different order also lead to no change
+SDP A: v=0\r\n
+SDP A: o=OsmoMSC 0 0 IN IP4 23.42.23.42\r\n
+SDP A: s=GSM Call\r\n
+SDP A: c=IN IP4 23.42.23.42\r\n
+SDP A: t=0 0\r\n
+SDP A: m=audio 30436 RTP/AVP 112 3 111 110\r\n
+SDP A: a=rtpmap:112 AMR/8000\r\n
+SDP A: a=fmtp:112 octet-align=1\r\n
+SDP A: a=rtpmap:3 GSM/8000\r\n
+SDP A: a=rtpmap:111 GSM-HR-08/8000\r\n
+SDP A: a=rtpmap:110 GSM-EFR/8000\r\n
+SDP A: a=ptime:20\r\n
+ SDP B: c=IN IP4 5.6.7.8\r\n
+ SDP B: m=audio 12345 RTP/AVP 3 110 111 112\r\n
+ SDP B: a=rtpmap:3 GSM/8000\r\n
+ SDP B: a=rtpmap:110 GSM-EFR/8000\r\n
+ SDP B: a=rtpmap:111 GSM-HR-08/8000\r\n
+ SDP B: a=rtpmap:112 AMR/8000\r\n
+ SDP B: a=fmtp:112 octet-align=1\r\n
+parsed SDP A: v=0\r\n
+parsed SDP A: o=OsmoMSC 0 0 IN IP4 23.42.23.42\r\n
+parsed SDP A: s=GSM Call\r\n
+parsed SDP A: c=IN IP4 23.42.23.42\r\n
+parsed SDP A: t=0 0\r\n
+parsed SDP A: m=audio 30436 RTP/AVP 112 3 111 110\r\n
+parsed SDP A: a=rtpmap:112 AMR/8000\r\n
+parsed SDP A: a=fmtp:112 octet-align=1\r\n
+parsed SDP A: a=rtpmap:3 GSM/8000\r\n
+parsed SDP A: a=rtpmap:111 GSM-HR-08/8000\r\n
+parsed SDP A: a=rtpmap:110 GSM-EFR/8000\r\n
+parsed SDP A: a=ptime:20\r\n
+parsed SDP B: v=0\r\n
+parsed SDP B: o=OsmoMSC 0 0 IN IP4 5.6.7.8\r\n
+parsed SDP B: s=GSM Call\r\n
+parsed SDP B: c=IN IP4 5.6.7.8\r\n
+parsed SDP B: t=0 0\r\n
+parsed SDP B: m=audio 12345 RTP/AVP 3 110 111 112\r\n
+parsed SDP B: a=rtpmap:3 GSM/8000\r\n
+parsed SDP B: a=rtpmap:110 GSM-EFR/8000\r\n
+parsed SDP B: a=rtpmap:111 GSM-HR-08/8000\r\n
+parsed SDP B: a=rtpmap:112 AMR/8000\r\n
+parsed SDP B: a=fmtp:112 octet-align=1\r\n
+parsed SDP B: a=ptime:20\r\n
+sdp_msg_intersection(a,b): v=0\r\n
+sdp_msg_intersection(a,b): o=OsmoMSC 0 0 IN IP4 23.42.23.42\r\n
+sdp_msg_intersection(a,b): s=GSM Call\r\n
+sdp_msg_intersection(a,b): c=IN IP4 23.42.23.42\r\n
+sdp_msg_intersection(a,b): t=0 0\r\n
+sdp_msg_intersection(a,b): m=audio 30436 RTP/AVP 112 3 111 110\r\n
+sdp_msg_intersection(a,b): a=rtpmap:112 AMR/8000\r\n
+sdp_msg_intersection(a,b): a=fmtp:112 octet-align=1\r\n
+sdp_msg_intersection(a,b): a=rtpmap:3 GSM/8000\r\n
+sdp_msg_intersection(a,b): a=rtpmap:111 GSM-HR-08/8000\r\n
+sdp_msg_intersection(a,b): a=rtpmap:110 GSM-EFR/8000\r\n
+sdp_msg_intersection(a,b): a=ptime:20\r\n
+[1] ok
+
+[2] identical codecs with mismatching payload type numbers also lead to no change
+SDP A: v=0\r\n
+SDP A: o=OsmoMSC 0 0 IN IP4 23.42.23.42\r\n
+SDP A: s=GSM Call\r\n
+SDP A: c=IN IP4 23.42.23.42\r\n
+SDP A: t=0 0\r\n
+SDP A: m=audio 30436 RTP/AVP 112 3 111 110\r\n
+SDP A: a=rtpmap:112 AMR/8000\r\n
+SDP A: a=fmtp:112 octet-align=1\r\n
+SDP A: a=rtpmap:3 GSM/8000\r\n
+SDP A: a=rtpmap:111 GSM-HR-08/8000\r\n
+SDP A: a=rtpmap:110 GSM-EFR/8000\r\n
+SDP A: a=ptime:20\r\n
+ SDP B: c=IN IP4 5.6.7.8\r\n
+ SDP B: m=audio 12345 RTP/AVP 96 97 98 99\r\n
+ SDP B: a=rtpmap:96 GSM/8000\r\n
+ SDP B: a=rtpmap:97 GSM-EFR/8000\r\n
+ SDP B: a=rtpmap:98 GSM-HR-08/8000\r\n
+ SDP B: a=rtpmap:99 AMR/8000\r\n
+ SDP B: a=fmtp:99 octet-align=1\r\n
+parsed SDP A: v=0\r\n
+parsed SDP A: o=OsmoMSC 0 0 IN IP4 23.42.23.42\r\n
+parsed SDP A: s=GSM Call\r\n
+parsed SDP A: c=IN IP4 23.42.23.42\r\n
+parsed SDP A: t=0 0\r\n
+parsed SDP A: m=audio 30436 RTP/AVP 112 3 111 110\r\n
+parsed SDP A: a=rtpmap:112 AMR/8000\r\n
+parsed SDP A: a=fmtp:112 octet-align=1\r\n
+parsed SDP A: a=rtpmap:3 GSM/8000\r\n
+parsed SDP A: a=rtpmap:111 GSM-HR-08/8000\r\n
+parsed SDP A: a=rtpmap:110 GSM-EFR/8000\r\n
+parsed SDP A: a=ptime:20\r\n
+parsed SDP B: v=0\r\n
+parsed SDP B: o=OsmoMSC 0 0 IN IP4 5.6.7.8\r\n
+parsed SDP B: s=GSM Call\r\n
+parsed SDP B: c=IN IP4 5.6.7.8\r\n
+parsed SDP B: t=0 0\r\n
+parsed SDP B: m=audio 12345 RTP/AVP 96 97 98 99\r\n
+parsed SDP B: a=rtpmap:96 GSM/8000\r\n
+parsed SDP B: a=rtpmap:97 GSM-EFR/8000\r\n
+parsed SDP B: a=rtpmap:98 GSM-HR-08/8000\r\n
+parsed SDP B: a=rtpmap:99 AMR/8000\r\n
+parsed SDP B: a=fmtp:99 octet-align=1\r\n
+parsed SDP B: a=ptime:20\r\n
+sdp_msg_intersection(a,b): v=0\r\n
+sdp_msg_intersection(a,b): o=OsmoMSC 0 0 IN IP4 23.42.23.42\r\n
+sdp_msg_intersection(a,b): s=GSM Call\r\n
+sdp_msg_intersection(a,b): c=IN IP4 23.42.23.42\r\n
+sdp_msg_intersection(a,b): t=0 0\r\n
+sdp_msg_intersection(a,b): m=audio 30436 RTP/AVP 112 3 111 110\r\n
+sdp_msg_intersection(a,b): a=rtpmap:112 AMR/8000\r\n
+sdp_msg_intersection(a,b): a=fmtp:112 octet-align=1\r\n
+sdp_msg_intersection(a,b): a=rtpmap:3 GSM/8000\r\n
+sdp_msg_intersection(a,b): a=rtpmap:111 GSM-HR-08/8000\r\n
+sdp_msg_intersection(a,b): a=rtpmap:110 GSM-EFR/8000\r\n
+sdp_msg_intersection(a,b): a=ptime:20\r\n
+[2] ok
+
+[3] identical codecs plus some extra codecs also lead to no change
+SDP A: v=0\r\n
+SDP A: o=OsmoMSC 0 0 IN IP4 23.42.23.42\r\n
+SDP A: s=GSM Call\r\n
+SDP A: c=IN IP4 23.42.23.42\r\n
+SDP A: t=0 0\r\n
+SDP A: m=audio 30436 RTP/AVP 112 3 111 110\r\n
+SDP A: a=rtpmap:112 AMR/8000\r\n
+SDP A: a=fmtp:112 octet-align=1\r\n
+SDP A: a=rtpmap:3 GSM/8000\r\n
+SDP A: a=rtpmap:111 GSM-HR-08/8000\r\n
+SDP A: a=rtpmap:110 GSM-EFR/8000\r\n
+SDP A: a=ptime:20\r\n
+ SDP B: c=IN IP4 5.6.7.8\r\n
+ SDP B: m=audio 12345 RTP/AVP 8 0 96 97 98 99\r\n
+ SDP B: a=rtpmap:8 PCMA/8000\r\n
+ SDP B: a=rtpmap:0 PCMU/8000\r\n
+ SDP B: a=rtpmap:96 GSM/8000\r\n
+ SDP B: a=rtpmap:97 GSM-EFR/8000\r\n
+ SDP B: a=rtpmap:98 GSM-HR-08/8000\r\n
+ SDP B: a=rtpmap:99 AMR/8000\r\n
+ SDP B: a=fmtp:99 octet-align=1\r\n
+parsed SDP A: v=0\r\n
+parsed SDP A: o=OsmoMSC 0 0 IN IP4 23.42.23.42\r\n
+parsed SDP A: s=GSM Call\r\n
+parsed SDP A: c=IN IP4 23.42.23.42\r\n
+parsed SDP A: t=0 0\r\n
+parsed SDP A: m=audio 30436 RTP/AVP 112 3 111 110\r\n
+parsed SDP A: a=rtpmap:112 AMR/8000\r\n
+parsed SDP A: a=fmtp:112 octet-align=1\r\n
+parsed SDP A: a=rtpmap:3 GSM/8000\r\n
+parsed SDP A: a=rtpmap:111 GSM-HR-08/8000\r\n
+parsed SDP A: a=rtpmap:110 GSM-EFR/8000\r\n
+parsed SDP A: a=ptime:20\r\n
+parsed SDP B: v=0\r\n
+parsed SDP B: o=OsmoMSC 0 0 IN IP4 5.6.7.8\r\n
+parsed SDP B: s=GSM Call\r\n
+parsed SDP B: c=IN IP4 5.6.7.8\r\n
+parsed SDP B: t=0 0\r\n
+parsed SDP B: m=audio 12345 RTP/AVP 8 0 96 97 98 99\r\n
+parsed SDP B: a=rtpmap:8 PCMA/8000\r\n
+parsed SDP B: a=rtpmap:0 PCMU/8000\r\n
+parsed SDP B: a=rtpmap:96 GSM/8000\r\n
+parsed SDP B: a=rtpmap:97 GSM-EFR/8000\r\n
+parsed SDP B: a=rtpmap:98 GSM-HR-08/8000\r\n
+parsed SDP B: a=rtpmap:99 AMR/8000\r\n
+parsed SDP B: a=fmtp:99 octet-align=1\r\n
+parsed SDP B: a=ptime:20\r\n
+sdp_msg_intersection(a,b): v=0\r\n
+sdp_msg_intersection(a,b): o=OsmoMSC 0 0 IN IP4 23.42.23.42\r\n
+sdp_msg_intersection(a,b): s=GSM Call\r\n
+sdp_msg_intersection(a,b): c=IN IP4 23.42.23.42\r\n
+sdp_msg_intersection(a,b): t=0 0\r\n
+sdp_msg_intersection(a,b): m=audio 30436 RTP/AVP 112 3 111 110\r\n
+sdp_msg_intersection(a,b): a=rtpmap:112 AMR/8000\r\n
+sdp_msg_intersection(a,b): a=fmtp:112 octet-align=1\r\n
+sdp_msg_intersection(a,b): a=rtpmap:3 GSM/8000\r\n
+sdp_msg_intersection(a,b): a=rtpmap:111 GSM-HR-08/8000\r\n
+sdp_msg_intersection(a,b): a=rtpmap:110 GSM-EFR/8000\r\n
+sdp_msg_intersection(a,b): a=ptime:20\r\n
+[3] ok
+
+[4] some codecs removed
+SDP A: v=0\r\n
+SDP A: o=OsmoMSC 0 0 IN IP4 23.42.23.42\r\n
+SDP A: s=GSM Call\r\n
+SDP A: c=IN IP4 23.42.23.42\r\n
+SDP A: t=0 0\r\n
+SDP A: m=audio 30436 RTP/AVP 112 3 111 110\r\n
+SDP A: a=rtpmap:112 AMR/8000\r\n
+SDP A: a=fmtp:112 octet-align=1\r\n
+SDP A: a=rtpmap:3 GSM/8000\r\n
+SDP A: a=rtpmap:111 GSM-HR-08/8000\r\n
+SDP A: a=rtpmap:110 GSM-EFR/8000\r\n
+SDP A: a=ptime:20\r\n
+ SDP B: v=0\r\n
+ SDP B: o=OsmoMSC 0 0 IN IP4 23.42.23.42\r\n
+ SDP B: s=GSM Call\r\n
+ SDP B: c=IN IP4 23.42.23.42\r\n
+ SDP B: t=0 0\r\n
+ SDP B: m=audio 30436 RTP/AVP 112 110\r\n
+ SDP B: a=rtpmap:112 AMR/8000\r\n
+ SDP B: a=fmtp:112 octet-align=1\r\n
+ SDP B: a=rtpmap:110 GSM-EFR/8000\r\n
+ SDP B: a=ptime:20\r\n
+parsed SDP A: v=0\r\n
+parsed SDP A: o=OsmoMSC 0 0 IN IP4 23.42.23.42\r\n
+parsed SDP A: s=GSM Call\r\n
+parsed SDP A: c=IN IP4 23.42.23.42\r\n
+parsed SDP A: t=0 0\r\n
+parsed SDP A: m=audio 30436 RTP/AVP 112 3 111 110\r\n
+parsed SDP A: a=rtpmap:112 AMR/8000\r\n
+parsed SDP A: a=fmtp:112 octet-align=1\r\n
+parsed SDP A: a=rtpmap:3 GSM/8000\r\n
+parsed SDP A: a=rtpmap:111 GSM-HR-08/8000\r\n
+parsed SDP A: a=rtpmap:110 GSM-EFR/8000\r\n
+parsed SDP A: a=ptime:20\r\n
+parsed SDP B: v=0\r\n
+parsed SDP B: o=OsmoMSC 0 0 IN IP4 23.42.23.42\r\n
+parsed SDP B: s=GSM Call\r\n
+parsed SDP B: c=IN IP4 23.42.23.42\r\n
+parsed SDP B: t=0 0\r\n
+parsed SDP B: m=audio 30436 RTP/AVP 112 110\r\n
+parsed SDP B: a=rtpmap:112 AMR/8000\r\n
+parsed SDP B: a=fmtp:112 octet-align=1\r\n
+parsed SDP B: a=rtpmap:110 GSM-EFR/8000\r\n
+parsed SDP B: a=ptime:20\r\n
+sdp_msg_intersection(a,b): v=0\r\n
+sdp_msg_intersection(a,b): o=OsmoMSC 0 0 IN IP4 23.42.23.42\r\n
+sdp_msg_intersection(a,b): s=GSM Call\r\n
+sdp_msg_intersection(a,b): c=IN IP4 23.42.23.42\r\n
+sdp_msg_intersection(a,b): t=0 0\r\n
+sdp_msg_intersection(a,b): m=audio 30436 RTP/AVP 112 110\r\n
+sdp_msg_intersection(a,b): a=rtpmap:112 AMR/8000\r\n
+sdp_msg_intersection(a,b): a=fmtp:112 octet-align=1\r\n
+sdp_msg_intersection(a,b): a=rtpmap:110 GSM-EFR/8000\r\n
+sdp_msg_intersection(a,b): a=ptime:20\r\n
+[4] ok
+
+[5] other codecs removed
+SDP A: v=0\r\n
+SDP A: o=OsmoMSC 0 0 IN IP4 23.42.23.42\r\n
+SDP A: s=GSM Call\r\n
+SDP A: c=IN IP4 23.42.23.42\r\n
+SDP A: t=0 0\r\n
+SDP A: m=audio 30436 RTP/AVP 112 3 111 110\r\n
+SDP A: a=rtpmap:112 AMR/8000\r\n
+SDP A: a=fmtp:112 octet-align=1\r\n
+SDP A: a=rtpmap:3 GSM/8000\r\n
+SDP A: a=rtpmap:111 GSM-HR-08/8000\r\n
+SDP A: a=rtpmap:110 GSM-EFR/8000\r\n
+SDP A: a=ptime:20\r\n
+ SDP B: v=0\r\n
+ SDP B: o=OsmoMSC 0 0 IN IP4 23.42.23.42\r\n
+ SDP B: s=GSM Call\r\n
+ SDP B: c=IN IP4 23.42.23.42\r\n
+ SDP B: t=0 0\r\n
+ SDP B: m=audio 30436 RTP/AVP 3 111\r\n
+ SDP B: a=rtpmap:3 GSM/8000\r\n
+ SDP B: a=rtpmap:111 GSM-HR-08/8000\r\n
+ SDP B: a=ptime:20\r\n
+parsed SDP A: v=0\r\n
+parsed SDP A: o=OsmoMSC 0 0 IN IP4 23.42.23.42\r\n
+parsed SDP A: s=GSM Call\r\n
+parsed SDP A: c=IN IP4 23.42.23.42\r\n
+parsed SDP A: t=0 0\r\n
+parsed SDP A: m=audio 30436 RTP/AVP 112 3 111 110\r\n
+parsed SDP A: a=rtpmap:112 AMR/8000\r\n
+parsed SDP A: a=fmtp:112 octet-align=1\r\n
+parsed SDP A: a=rtpmap:3 GSM/8000\r\n
+parsed SDP A: a=rtpmap:111 GSM-HR-08/8000\r\n
+parsed SDP A: a=rtpmap:110 GSM-EFR/8000\r\n
+parsed SDP A: a=ptime:20\r\n
+parsed SDP B: v=0\r\n
+parsed SDP B: o=OsmoMSC 0 0 IN IP4 23.42.23.42\r\n
+parsed SDP B: s=GSM Call\r\n
+parsed SDP B: c=IN IP4 23.42.23.42\r\n
+parsed SDP B: t=0 0\r\n
+parsed SDP B: m=audio 30436 RTP/AVP 3 111\r\n
+parsed SDP B: a=rtpmap:3 GSM/8000\r\n
+parsed SDP B: a=rtpmap:111 GSM-HR-08/8000\r\n
+parsed SDP B: a=ptime:20\r\n
+sdp_msg_intersection(a,b): v=0\r\n
+sdp_msg_intersection(a,b): o=OsmoMSC 0 0 IN IP4 23.42.23.42\r\n
+sdp_msg_intersection(a,b): s=GSM Call\r\n
+sdp_msg_intersection(a,b): c=IN IP4 23.42.23.42\r\n
+sdp_msg_intersection(a,b): t=0 0\r\n
+sdp_msg_intersection(a,b): m=audio 30436 RTP/AVP 3 111\r\n
+sdp_msg_intersection(a,b): a=rtpmap:3 GSM/8000\r\n
+sdp_msg_intersection(a,b): a=rtpmap:111 GSM-HR-08/8000\r\n
+sdp_msg_intersection(a,b): a=ptime:20\r\n
+[5] ok
+
+[6] all codecs removed
+SDP A: v=0\r\n
+SDP A: o=OsmoMSC 0 0 IN IP4 23.42.23.42\r\n
+SDP A: s=GSM Call\r\n
+SDP A: c=IN IP4 23.42.23.42\r\n
+SDP A: t=0 0\r\n
+SDP A: m=audio 30436 RTP/AVP 112 3 111 110\r\n
+SDP A: a=rtpmap:112 AMR/8000\r\n
+SDP A: a=fmtp:112 octet-align=1\r\n
+SDP A: a=rtpmap:3 GSM/8000\r\n
+SDP A: a=rtpmap:111 GSM-HR-08/8000\r\n
+SDP A: a=rtpmap:110 GSM-EFR/8000\r\n
+SDP A: a=ptime:20\r\n
+ SDP B: s=empty
+parsed SDP A: v=0\r\n
+parsed SDP A: o=OsmoMSC 0 0 IN IP4 23.42.23.42\r\n
+parsed SDP A: s=GSM Call\r\n
+parsed SDP A: c=IN IP4 23.42.23.42\r\n
+parsed SDP A: t=0 0\r\n
+parsed SDP A: m=audio 30436 RTP/AVP 112 3 111 110\r\n
+parsed SDP A: a=rtpmap:112 AMR/8000\r\n
+parsed SDP A: a=fmtp:112 octet-align=1\r\n
+parsed SDP A: a=rtpmap:3 GSM/8000\r\n
+parsed SDP A: a=rtpmap:111 GSM-HR-08/8000\r\n
+parsed SDP A: a=rtpmap:110 GSM-EFR/8000\r\n
+parsed SDP A: a=ptime:20\r\n
+parsed SDP B: v=0\r\n
+parsed SDP B: o=OsmoMSC 0 0 IN IP4 0.0.0.0\r\n
+parsed SDP B: s=GSM Call\r\n
+parsed SDP B: c=IN IP4 0.0.0.0\r\n
+parsed SDP B: t=0 0\r\n
+parsed SDP B: m=audio 0 RTP/AVP\r\n
+parsed SDP B: a=ptime:20\r\n
+sdp_msg_intersection(a,b): v=0\r\n
+sdp_msg_intersection(a,b): o=OsmoMSC 0 0 IN IP4 23.42.23.42\r\n
+sdp_msg_intersection(a,b): s=GSM Call\r\n
+sdp_msg_intersection(a,b): c=IN IP4 23.42.23.42\r\n
+sdp_msg_intersection(a,b): t=0 0\r\n
+sdp_msg_intersection(a,b): m=audio 30436 RTP/AVP\r\n
+sdp_msg_intersection(a,b): a=ptime:20\r\n
+[6] ok
+
+[7] some real world test case
+SDP A: v=0\r\n
+SDP A: o=OsmoMSC 0 0 IN IP4 0.0.0.0\r\n
+SDP A: s=GSM Call\r\n
+SDP A: c=IN IP4 0.0.0.0\r\n
+SDP A: t=0 0\r\n
+SDP A: m=audio 0 RTP/AVP 112 113 110 3 111\r\n
+SDP A: a=rtpmap:112 AMR/8000\r\n
+SDP A: a=fmtp:112 octet-align=1;mode-set=0,1,2,3\r\n
+SDP A: a=rtpmap:113 AMR-WB/8000\r\n
+SDP A: a=fmtp:113 octet-align=1\r\n
+SDP A: a=rtpmap:110 GSM-EFR/8000\r\n
+SDP A: a=rtpmap:3 GSM/8000\r\n
+SDP A: a=rtpmap:111 GSM-HR-08/8000\r\n
+SDP A: a=ptime:20\r\n
+ SDP B: v=0\r\n
+ SDP B: o=OsmoMSC 0 0 IN IP4 0.0.0.0\r\n
+ SDP B: s=GSM Call\r\n
+ SDP B: c=IN IP4 0.0.0.0\r\n
+ SDP B: t=0 0\r\n
+ SDP B: m=audio 0 RTP/AVP 112 113 110 3 111\r\n
+ SDP B: a=rtpmap:112 AMR/8000\r\n
+ SDP B: a=fmtp:112 octet-align=1;mode-set=0,1,2,3\r\n
+ SDP B: a=rtpmap:113 AMR-WB/8000\r\n
+ SDP B: a=fmtp:113 octet-align=1\r\n
+ SDP B: a=rtpmap:110 GSM-EFR/8000\r\n
+ SDP B: a=rtpmap:3 GSM/8000\r\n
+ SDP B: a=rtpmap:111 GSM-HR-08/8000\r\n
+ SDP B: a=ptime:20\r\n
+parsed SDP A: v=0\r\n
+parsed SDP A: o=OsmoMSC 0 0 IN IP4 0.0.0.0\r\n
+parsed SDP A: s=GSM Call\r\n
+parsed SDP A: c=IN IP4 0.0.0.0\r\n
+parsed SDP A: t=0 0\r\n
+parsed SDP A: m=audio 0 RTP/AVP 112 113 110 3 111\r\n
+parsed SDP A: a=rtpmap:112 AMR/8000\r\n
+parsed SDP A: a=fmtp:112 octet-align=1;mode-set=0,1,2,3\r\n
+parsed SDP A: a=rtpmap:113 AMR-WB/8000\r\n
+parsed SDP A: a=fmtp:113 octet-align=1\r\n
+parsed SDP A: a=rtpmap:110 GSM-EFR/8000\r\n
+parsed SDP A: a=rtpmap:3 GSM/8000\r\n
+parsed SDP A: a=rtpmap:111 GSM-HR-08/8000\r\n
+parsed SDP A: a=ptime:20\r\n
+parsed SDP B: v=0\r\n
+parsed SDP B: o=OsmoMSC 0 0 IN IP4 0.0.0.0\r\n
+parsed SDP B: s=GSM Call\r\n
+parsed SDP B: c=IN IP4 0.0.0.0\r\n
+parsed SDP B: t=0 0\r\n
+parsed SDP B: m=audio 0 RTP/AVP 112 113 110 3 111\r\n
+parsed SDP B: a=rtpmap:112 AMR/8000\r\n
+parsed SDP B: a=fmtp:112 octet-align=1;mode-set=0,1,2,3\r\n
+parsed SDP B: a=rtpmap:113 AMR-WB/8000\r\n
+parsed SDP B: a=fmtp:113 octet-align=1\r\n
+parsed SDP B: a=rtpmap:110 GSM-EFR/8000\r\n
+parsed SDP B: a=rtpmap:3 GSM/8000\r\n
+parsed SDP B: a=rtpmap:111 GSM-HR-08/8000\r\n
+parsed SDP B: a=ptime:20\r\n
+sdp_msg_intersection(a,b): v=0\r\n
+sdp_msg_intersection(a,b): o=OsmoMSC 0 0 IN IP4 0.0.0.0\r\n
+sdp_msg_intersection(a,b): s=GSM Call\r\n
+sdp_msg_intersection(a,b): c=IN IP4 0.0.0.0\r\n
+sdp_msg_intersection(a,b): t=0 0\r\n
+sdp_msg_intersection(a,b): m=audio 0 RTP/AVP 112 113 110 3 111\r\n
+sdp_msg_intersection(a,b): a=rtpmap:112 AMR/8000\r\n
+sdp_msg_intersection(a,b): a=fmtp:112 octet-align=1;mode-set=0,1,2,3\r\n
+sdp_msg_intersection(a,b): a=rtpmap:113 AMR-WB/8000\r\n
+sdp_msg_intersection(a,b): a=fmtp:113 octet-align=1\r\n
+sdp_msg_intersection(a,b): a=rtpmap:110 GSM-EFR/8000\r\n
+sdp_msg_intersection(a,b): a=rtpmap:3 GSM/8000\r\n
+sdp_msg_intersection(a,b): a=rtpmap:111 GSM-HR-08/8000\r\n
+sdp_msg_intersection(a,b): a=ptime:20\r\n
+[7] ok
+
+
+test_select
+
+[0]
+SDP: AMR:octet-align=1,GSM,GSM-HR-08,GSM-EFR
+Select: AMR:octet-align=1
+SDP: AMR:octet-align=1,GSM,GSM-HR-08,GSM-EFR
+[0] ok
+
+[1]
+SDP: AMR:octet-align=1,GSM,GSM-HR-08,GSM-EFR
+Select: GSM
+SDP: GSM,AMR:octet-align=1,GSM-HR-08,GSM-EFR
+[1] ok
+
+[2]
+SDP: AMR:octet-align=1,GSM,GSM-HR-08,GSM-EFR
+Select: GSM-HR-08
+SDP: GSM-HR-08,AMR:octet-align=1,GSM,GSM-EFR
+[2] ok
+
+[3]
+SDP: AMR:octet-align=1,GSM,GSM-HR-08,GSM-EFR
+Select: GSM-EFR
+SDP: GSM-EFR,AMR:octet-align=1,GSM,GSM-HR-08
+[3] ok

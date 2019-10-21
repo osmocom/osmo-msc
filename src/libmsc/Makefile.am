@@ -64,6 +64,7 @@ libmsc_a_SOURCES = \
 	ran_peer.c \
 	rrlp.c \
 	rtp_stream.c \
+	sdp_msg.c \
 	silent_call.c \
 	sms_queue.c \
 	transaction.c \

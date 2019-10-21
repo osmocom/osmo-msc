@@ -39,6 +39,7 @@ noinst_HEADERS = \
 	rrlp.h \
 	rtp_stream.h \
 	sccp_ran.h \
+	sdp_msg.h \
 	sgs_iface.h \
 	sgs_server.h \
 	sgs_vty.h \
