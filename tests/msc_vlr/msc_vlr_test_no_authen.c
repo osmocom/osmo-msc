@@ -51,6 +51,11 @@ static void test_no_authen()
 
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
+	btw("MS sends (unexpected) Identity Response");
+	/* 3GPP TS 23.003: 6.2.1 Composition of IMEI: the IMEI ends with a
+	 * spare digit that shall be sent as zero by the MS. */
+	ms_sends_msg("0559084a32244332244302");
+
 	btw("HLR also sends GSUP _UPDATE_LOCATION_RESULT");
 	expect_bssap_clear();
 	gsup_rx("06010809710000004026f0" HLR_TO_VLR, NULL);
