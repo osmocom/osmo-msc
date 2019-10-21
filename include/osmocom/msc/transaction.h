@@ -10,6 +10,7 @@
 #include <osmocom/msc/debug.h>
 #include <osmocom/gsm/gsm0411_smc.h>
 #include <osmocom/gsm/gsm0411_smr.h>
+#include <osmocom/msc/cc_sdp.h>
 
 struct vty;
 
@@ -87,6 +88,10 @@ struct gsm_trans {
 	/* bearer capabilities (rate and codec) */
 	struct gsm_mncc_bearer_cap bearer_cap;
 
+	/* if true, TCH_RTP_CREATE is sent after the
+	 * assignment is done */
+	bool tch_rtp_create;
+
 	union {
 		struct {
 
@@ -100,6 +105,8 @@ struct gsm_trans {
 			struct osmo_timer_list timer_guard;
 			struct gsm_mncc msg;	/* stores setup/disconnect/release message */
 			bool mncc_initiated;	/* Whether an MNCC Release is necessary on failure */
+			bool mncc_release_sent; /* Mark when special error handling already did MNCC rel */
+			struct cc_sdp sdp;	/* Track SDP codec info from BSS and remote call leg */
 		} cc;
 		struct {
 			struct gsm411_smc_inst smc_inst;
