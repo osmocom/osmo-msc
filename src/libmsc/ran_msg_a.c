@@ -54,7 +54,7 @@ static int ran_a_decode_l3_compl(struct ran_dec *ran_dec, struct msgb *msg, stru
 	struct tlv_p_entry *ie_l3_info = TLVP_GET(tp, GSM0808_IE_LAYER_3_INFORMATION);
 	struct ran_msg ran_dec_msg = {
 		.msg_type = RAN_MSG_COMPL_L3,
-		.msg_name = "BSSMAP Complete Layer 3",
+		.msg_name = "BSSMAP Complete Layer 3 Information",
 		.compl_l3 = {
 			.cell_id = &cell_id,
 			.msg = msg,
