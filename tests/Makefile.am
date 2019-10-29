@@ -59,8 +59,13 @@ python-tests: $(BUILT_SOURCES)
 endif
 
 vty-python-test: $(BUILT_SOURCES)
-	osmotestvty.py -p $(abs_top_srcdir) -w $(abs_top_builddir) -v
-	osmotestconfig.py -p $(abs_top_srcdir) -w $(abs_top_builddir) -v
+if BUILD_IU
+	IU=1 osmotestvty.py -p $(abs_top_srcdir) -w $(abs_top_builddir) -v
+	IU=1 osmotestconfig.py -p $(abs_top_srcdir) -w $(abs_top_builddir) -v
+else
+	IU=0 osmotestvty.py -p $(abs_top_srcdir) -w $(abs_top_builddir) -v
+	IU=0 osmotestconfig.py -p $(abs_top_srcdir) -w $(abs_top_builddir) -v
+endif
 	$(srcdir)/vty_test_runner.py -w $(abs_top_builddir) -v
 	rm -f $(top_builddir)/sms.db
 

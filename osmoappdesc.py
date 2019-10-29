@@ -14,12 +14,15 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>
 
+import os
+
 app_configs = {
-    "msc": ["doc/examples/osmo-msc/osmo-msc.cfg",
-            "doc/examples/osmo-msc/osmo-msc_custom-sccp.cfg",
-            "doc/examples/osmo-msc/osmo-msc_multi-cs7.cfg",
-	   ],
+    "msc": ["doc/examples/osmo-msc/osmo-msc.cfg"],
 }
+
+if os.environ["IU"] == "1":
+    app_configs["msc"] += ["doc/examples/osmo-msc/osmo-msc_custom-sccp.cfg",
+                           "doc/examples/osmo-msc/osmo-msc_multi-cs7.cfg"]
 
 apps = [(4254, "src/osmo-msc/osmo-msc", "OsmoMSC", "msc"),
         ]
