@@ -1655,20 +1655,6 @@ static int tch_rtp_create(struct gsm_network *net, uint32_t callref)
 	}
 	LOG_TRANS_CAT(trans, DMNCC, LOGL_DEBUG, "rx %s\n", get_mncc_name(MNCC_RTP_CREATE));
 
-	/* When we call msc_mgcp_call_assignment() we will trigger, depending
-	 * on the RAN type the call assignment on the A or Iu interface.
-	 * msc_mgcp_call_assignment() also takes care about sending the CRCX
-	 * command to the MGCP-GW. The CRCX will return the port number,
-	 * where the PBX (e.g. Asterisk) will send its RTP stream to. We
-	 * have to return this port number back to the MNCC by sending
-	 * it back with the TCH_RTP_CREATE message. To make sure that
-	 * this message is sent AFTER the response to CRCX from the
-	 * MGCP-GW has arrived, we need will instruct msc_mgcp_call_assignment()
-	 * to take care of this by setting trans->tch_rtp_create to true.
-	 * This will make sure that gsm48_tch_rtp_create() (below) is
-	 * called as soon as the local port number has become known. */
-	trans->tch_rtp_create = true;
-
 	/* Assign call (if not done yet) */
 	return msc_a_try_call_assignment(trans);
 }
