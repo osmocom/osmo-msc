@@ -44,7 +44,7 @@ const struct value_string sgs_state_counter_names[] = {
 };
 
 /* Reset all SGs-Associations back to zero.
- * \param[in] vlr VLR instace. */
+ * \param[in] vlr VLR instance. */
 void vlr_sgs_reset(struct vlr_instance *vlr)
 {
 	struct vlr_subscr *vsub;
@@ -59,11 +59,11 @@ void vlr_sgs_reset(struct vlr_instance *vlr)
 }
 
 /*! Perform an SGs location update.
- * \param[in] vlr VLR instace.
+ * \param[in] vlr VLR instance.
  * \param[in] cfg SGs interface configuration parameters.
- * \param[in] response_cb calback function that is called when LU is done.
- * \param[in] paging_cb calback function that is called when LU needs to page.
- * \param[in] mminfo_cb calback function that is called to provide MM info to the UE.
+ * \param[in] response_cb callback function that is called when LU is done.
+ * \param[in] paging_cb callback function that is called when LU needs to page.
+ * \param[in] mminfo_cb callback function that is called to provide MM info to the UE.
  * \param[in] mme_name fqdn of the requesting MME (mme-name).
  * \param[in] type location update type (normal or IMSI attach).
  * \param[in] imsi mobile identity (IMSI).
@@ -299,7 +299,7 @@ static void Ts5_timeout_cb(void *arg)
 {
 	struct vlr_subscr *vsub = arg;
 
-	/* 3GPP TS 29.118 does not specify a specif action that has to happen
+	/* 3GPP TS 29.118 does not specify a specific action that has to happen
 	 * in case Ts5 times out. The timeout just indicates that the paging
 	 * failed. Other actions may check the status of Ts5 to see if a paging
 	 * is still ongoing or not. */
@@ -327,7 +327,7 @@ void vlr_sgs_pag(struct vlr_subscr *vsub, enum sgsap_service_ind serv_ind)
 	/* Note: 3GPP TS 29.118, chapter 4.2.2 mentions paging in the FSM
 	 * diagram, but paging never causes a state transition except when
 	 * an explicit failure is indicated (MME actively rejects paging).
-	 * Apparantly it is also possible that an LU happens while the paging
+	 * Apparently it is also possible that an LU happens while the paging
 	 * is still ongoing and Ts5 is running. (chapter 5.1.2.3). This means
 	 * that the paging procedure is intended to run in parallel to the
 	 * SGs FSM and given that the benaviour around Ts5 must be implemented

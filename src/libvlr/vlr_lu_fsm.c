@@ -688,7 +688,7 @@ struct lu_fsm_priv {
 static bool lai_in_this_vlr(struct vlr_instance *vlr,
 			    const struct osmo_location_area_id *lai)
 {
-	/* TODO: VLR needs to keep a locally configued list of LAIs */
+	/* TODO: VLR needs to keep a locally configured list of LAIs */
 	return true;
 }
 

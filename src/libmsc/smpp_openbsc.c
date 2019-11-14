@@ -319,7 +319,7 @@ static void alert_all_esme(struct smsc *smsc, struct vlr_subscr *vsub,
 
 	llist_for_each_entry(esme, &smsc->esme_list, list) {
 		/* we currently send an alert notification to each ESME that is
-		 * connected, and do not require a (non-existant) delivery
+		 * connected, and do not require a (non-existent) delivery
 		 * pending flag to be set before. */
 		if (!esme->bind_flags) {
 			LOGP(DSMPP, LOGL_DEBUG,
@@ -367,7 +367,7 @@ static int smpp_sms_cb(unsigned int subsys, unsigned int signal,
 		 * to the ESME */
 	case S_SMS_UNKNOWN_ERROR:
 		if (sms->smpp.transaction_mode) {
-			/* Send back the SUBMIT-SM response with apropriate error */
+			/* Send back the SUBMIT-SM response with appropriate error */
 			LOGP(DLSMS, LOGL_INFO, "SMPP SUBMIT-SM: Error\n");
 			rc = smpp_tx_submit_r(sms->smpp.esme,
 					      sms->smpp.sequence_nr,

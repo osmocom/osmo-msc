@@ -265,7 +265,7 @@ static void ss_paging_cb(struct msc_a *msc_a, struct gsm_trans *trans)
 
 	if (trans->msc_a) {
 		LOG_MSC_A_CAT(msc_a, DPAG, LOGL_ERROR,
-			      "Handle paging error: transaction already associated with subsciber,"
+			      "Handle paging error: transaction already associated with subscriber,"
 			      " apparently it was already handled. Skip.\n");
 		return;
 	}

@@ -1,4 +1,4 @@
-/* SMS queue to continously attempt to deliver SMS */
+/* SMS queue to continuously attempt to deliver SMS */
 /*
  * (C) 2010 by Holger Hans Peter Freyther <zecke@selfish.org>
  * All Rights Reserved

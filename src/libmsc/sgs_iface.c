@@ -336,7 +336,7 @@ const char *subscr_info(const char *imsi)
 }
 
 /* Comfortable status message generator that also generates some basic
- * context-dependent dependand log output */
+ * context-dependent log output */
 static int sgs_tx_status(struct sgs_connection *sgc, const char *imsi, enum sgsap_sgs_cause cause, struct msgb *msg,
 			 int sgsap_iei)
 {
@@ -352,7 +352,7 @@ static int sgs_tx_status(struct sgs_connection *sgc, const char *imsi, enum sgsa
 		LOGSGC_VSUB(sgc, subscr_info(imsi), LOGL_ERROR, "Rx %s with invalid mandatory %s IEI!\n",
 			    sgsap_msg_type_name(msg->data[0]), sgsap_iei_name(sgsap_iei));
 	} else if (cause == SGSAP_SGS_CAUSE_COND_IE_ERROR) {
-		LOGSGC_VSUB(sgc, subscr_info(imsi), LOGL_ERROR, "Rx %s with errornous conditional %s IEI!\n",
+		LOGSGC_VSUB(sgc, subscr_info(imsi), LOGL_ERROR, "Rx %s with erroneous conditional %s IEI!\n",
 			    sgsap_msg_type_name(msg->data[0]), sgsap_iei_name(sgsap_iei));
 	} else {
 		LOGSGC_VSUB(sgc, subscr_info(imsi), LOGL_ERROR, "Rx %s failed with cause %s at %s IEI!\n",
@@ -860,7 +860,7 @@ static int sgs_rx_ul_ud(struct sgs_connection *sgc, struct msgb *msg, const stru
 	vlr_subscr_put(vsub, __func__);
 
 	/* If we do not find an existing connection and allocating a new one
-	 * faild, give up and return status. */
+	 * failed, give up and return status. */
 	if (!msc_a)
 		return sgs_tx_status(sgc, imsi, SGSAP_SGS_CAUSE_MSG_INCOMP_STATE, msg, 0);
 
@@ -1278,7 +1278,7 @@ void sgs_iface_tx_serv_abrt(struct vlr_subscr *vsub)
 	sgs_tx(mme->conn, msg_sgs);
 }
 
-/*! initalize SGs new interface
+/*! initialize SGs new interface
  *  \param[in] ctx talloc context
  *  \param[in] network associated gsm network
  *  \returns returns allocated sgs_stae, NULL in case of error. */

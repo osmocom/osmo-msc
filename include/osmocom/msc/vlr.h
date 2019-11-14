@@ -40,7 +40,7 @@ struct log_target;
 
 /* VLR subscriber authentication state */
 enum vlr_subscr_auth_state {
-	/* subscriber needs to be autenticated */
+	/* subscriber needs to be authenticated */
 	VLR_SUB_AS_NEEDS_AUTH,
 	/* waiting for AuthInfo from HLR/AUC */
 	VLR_SUB_AS_NEEDS_AUTH_WAIT_AI,
@@ -66,7 +66,7 @@ enum vlr_lu_event {
 	VLR_ULA_E_SEND_ID_NACK,	/* Result of Send-ID from PVLR */
 	VLR_ULA_E_AUTH_RES,	/* Result of auth procedure */
 	VLR_ULA_E_CIPH_RES,	/* Result of Ciphering Mode Command */
-	VLR_ULA_E_ID_IMSI,	/* IMSI recieved from MS */
+	VLR_ULA_E_ID_IMSI,	/* IMSI received from MS */
 	VLR_ULA_E_ID_IMEI,	/* IMEI received from MS */
 	VLR_ULA_E_ID_IMEISV,	/* IMEISV received from MS */
 	VLR_ULA_E_HLR_IMEI_ACK,	/* Check_IMEI_VLR result from HLR */
@@ -420,7 +420,7 @@ void vlr_subscr_cancel_attach_fsm(struct vlr_subscr *vsub,
 
 void vlr_subscr_enable_expire_lu(struct vlr_subscr *vsub);
 
-/* Process Acccess Request FSM */
+/* Process Access Request FSM */
 
 enum proc_arq_vlr_event {
 	PR_ARQ_E_START,

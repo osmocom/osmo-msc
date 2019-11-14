@@ -83,7 +83,7 @@ static const struct rate_ctr_desc msc_ctr_description[] = {
 	[MSC_CTR_SMS_DELIVER_UNKNOWN_ERROR] =	{"sms:deliver_unknown_error", "Unknown error occurred during sms delivery."},
 	/* FIXME: count also sms delivered */
 	[MSC_CTR_CALL_MO_SETUP] = 		{"call:mo_setup", "Received setup requests from a MS to init a MO call."},
-	[MSC_CTR_CALL_MO_CONNECT_ACK] = 		{"call:mo_connect_ack", "Received a connect ack from MS of a MO call. Call is now succesful connected up."},
+	[MSC_CTR_CALL_MO_CONNECT_ACK] = 		{"call:mo_connect_ack", "Received a connect ack from MS of a MO call. Call is now successful connected up."},
 	[MSC_CTR_CALL_MT_SETUP] = 		{"call:mt_setup", "Sent setup requests to the MS (MT)."},
 	[MSC_CTR_CALL_MT_CONNECT] = 		{"call:mt_connect", "Sent a connect to the MS (MT)."},
 	[MSC_CTR_CALL_ACTIVE] =			{"call:active", "Count total amount of calls that ever reached active state."},

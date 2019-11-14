@@ -44,7 +44,7 @@ struct sgs_state {
 		char vlr_name[SGS_VLR_NAME_MAXLEN];
 		/* timers on VLR side */
 		unsigned int timer[_NUM_SGS_STATE_TIMERS];
-		/* countrs on VLR side */
+		/* counters on VLR side */
 		unsigned int counter[_NUM_SGS_STATE_COUNTERS];
 	} cfg;
 };

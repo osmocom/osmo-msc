@@ -280,7 +280,7 @@ void _gsm48_cc_trans_free(struct gsm_trans *trans)
 			mncc_set_cause(&rel, GSM48_CAUSE_LOC_PRN_S_LU, GSM48_CC_CAUSE_RESOURCE_UNAVAIL);
 			gsm48_cc_tx_release(trans, &rel);
 		}
-		/* Ressource unavailable */
+		/* Resource unavailable */
 		if (trans->cc.mncc_initiated)
 			mncc_release_ind(trans->net, trans, trans->callref,
 					 GSM48_CAUSE_LOC_PRN_S_LU,
@@ -1922,7 +1922,7 @@ static int mncc_tx_to_gsm_cc(struct gsm_network *net, const union mncc_msg *msg)
 		if (!trans) {
 			LOG_TRANS(trans, LOGL_ERROR, "No memory for trans.\n");
 			vlr_subscr_put(vsub, __func__);
-			/* Ressource unavailable */
+			/* Resource unavailable */
 			mncc_release_ind(net, NULL, data->callref,
 					 GSM48_CAUSE_LOC_PRN_S_LU,
 					 GSM48_CC_CAUSE_RESOURCE_UNAVAIL);

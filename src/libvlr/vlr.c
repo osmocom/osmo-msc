@@ -360,7 +360,7 @@ int vlr_subscr_alloc_tmsi(struct vlr_subscr *vsub)
 }
 
 /* Find subscriber by IMSI, or create new subscriber if not found.
- * \param[in] vlr  VLR instace.
+ * \param[in] vlr  VLR instance.
  * \param[in] imsi  IMSI string.
  * \param[out] created  if non-NULL, returns whether a new entry was created. */
 struct vlr_subscr *_vlr_subscr_find_or_create_by_imsi(struct vlr_instance *vlr,
@@ -390,7 +390,7 @@ struct vlr_subscr *_vlr_subscr_find_or_create_by_imsi(struct vlr_instance *vlr,
 }
 
 /* Find subscriber by TMSI, or create new subscriber if not found.
- * \param[in] vlr  VLR instace.
+ * \param[in] vlr  VLR instance.
  * \param[in] tmsi  TMSI.
  * \param[out] created  if non-NULL, returns whether a new entry was created. */
 struct vlr_subscr *_vlr_subscr_find_or_create_by_tmsi(struct vlr_instance *vlr,
@@ -730,7 +730,7 @@ void vlr_subscr_update_tuples(struct vlr_subscr *vsub,
 
 		if (key_seq >= ARRAY_SIZE(vsub->auth_tuples)) {
 			LOGVSUBP(LOGL_NOTICE, vsub,
-				"Skipping auth tuple wih invalid cksn %zu\n",
+				"Skipping auth tuple with invalid cksn %zu\n",
 				key_seq);
 			continue;
 		}

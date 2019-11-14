@@ -514,7 +514,7 @@ static int ran_a_decode_handover_request(struct ran_dec *ran_dec, const struct m
 		int i;
 		if (gsm0808_dec_encrypt_info(&encr_info, ie_encryption_information->val, ie_encryption_information->len)
 		    <= 0) {
-			LOG_RAN_A_DEC_MSG(LOGL_ERROR, "Failed to decode Encryption Informaiton IE\n");
+			LOG_RAN_A_DEC_MSG(LOGL_ERROR, "Failed to decode Encryption Information IE\n");
 			return -EINVAL;
 		}
 
@@ -524,7 +524,7 @@ static int ran_a_decode_handover_request(struct ran_dec *ran_dec, const struct m
 		}
 
 		if (encr_info.key_len > sizeof(geran_encr.key)) {
-			LOG_RAN_A_DEC_MSG(LOGL_ERROR, "Failed to decode Encryption Informaiton IE:"
+			LOG_RAN_A_DEC_MSG(LOGL_ERROR, "Failed to decode Encryption Information IE:"
 					  " encryption key is too long: %u\n", geran_encr.key_len);
 			return -EINVAL;
 		}

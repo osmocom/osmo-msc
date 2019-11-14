@@ -82,7 +82,7 @@ static void mncc_sock_close(struct mncc_sock_state *state)
 	/* re-enable the generation of ACCEPT for new connections */
 	state->listen_bfd.when |= BSC_FD_READ;
 
-	/* release all exisitng calls */
+	/* release all existing calls */
 	gsm0408_clear_all_trans(state->net, TRANS_CC);
 
 	/* flush the queue */

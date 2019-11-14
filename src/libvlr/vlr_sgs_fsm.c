@@ -54,7 +54,7 @@ static void to_null(struct osmo_fsm_inst *fi)
 	struct vlr_subscr *vsub = fi->priv;
 	osmo_fsm_inst_state_chg(fi, SGS_UE_ST_NULL, 0, 0);
 
-	/* Note: This is only relevent for cases where we are in the middle
+	/* Note: This is only relevant for cases where we are in the middle
 	 * of an TMSI reallocation procedure. Should a failure of some sort
 	 * put us to NULL state, we have to free the pending TMSI */
 	vsub->tmsi_new = GSM_RESERVED_TMSI;
@@ -156,7 +156,7 @@ static void sgs_ue_fsm_lau_present(struct osmo_fsm_inst *fi, uint32_t event, voi
 		/* Check if we expect a TMSI REALLOCATION COMPLETE message from the MME
 		 * by checking the tmsi_new flag. If this flag is not GSM_RESERVED_TMSI
 		 * we know that we have a TMSI pending and need to wait for the MME
-		 * to acknowlege first */
+		 * to acknowledge first */
 		if (vsub->tmsi_new != GSM_RESERVED_TMSI) {
 			osmo_fsm_inst_state_chg(fi, SGS_UE_ST_ASSOCIATED, vsub->sgs.cfg.timer[SGS_STATE_TS6_2],
 						SGS_STATE_TS6_2);
@@ -355,7 +355,7 @@ static struct osmo_fsm sgs_ue_fsm = {
 	.event_names = sgs_ue_fsm_event_names,
 };
 
-/*! Initalize/Register SGs FSM in osmo-fsm subsystem */
+/*! Initialize/Register SGs FSM in osmo-fsm subsystem */
 void vlr_sgs_fsm_init(void)
 {
 	if (osmo_fsm_find_by_name(sgs_ue_fsm.name) != &sgs_ue_fsm)

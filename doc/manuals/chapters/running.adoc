@@ -44,7 +44,7 @@ arguments:
 	Same as option -M (deprecated).
 *-C, --no-dbcounter*::
 	Deprecated. DB statistics and counter has been removed.
-	This option is only valid for compatiblity and does nothing.
+	This option is only valid for compatibility and does nothing.
 
 
 === Multiple instances

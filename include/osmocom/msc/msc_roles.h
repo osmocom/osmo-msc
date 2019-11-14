@@ -236,7 +236,7 @@ enum msc_a_events {
 	MSC_A_EV_FROM_T_SEND_END_SIGNAL_REQUEST,
 
 	/* gsm_04_08.c has successfully received a valid Complete Layer 3 message, i.e. Location Updating, CM Service
-	 * Request, Paging Reponse or IMSI Detach. */
+	 * Request, Paging Response or IMSI Detach. */
 	MSC_A_EV_COMPLETE_LAYER_3_OK,
 
 	/* Received a Classmark Update -- during GERAN ciphering, msc_a may have to wait for Classmark information to

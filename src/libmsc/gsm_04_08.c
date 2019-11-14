@@ -341,7 +341,7 @@ static int mm_rx_loc_upd_req(struct msc_a *msc_a, struct msgb *msg)
 	}
 
 	/* TODO: 10.5.1.6 MS Classmark for UMTS / Classmark 2 */
-	/* TODO: 10.5.3.14 Aditional update parameters (CS fallback calls) */
+	/* TODO: 10.5.3.14 Additional update parameters (CS fallback calls) */
 	/* TODO: 10.5.7.8 Device properties */
 	/* TODO: 10.5.1.15 MS network feature support */
 
@@ -676,7 +676,7 @@ accept_reuse:
 /*
  * Handle CM Service Requests
  * a) Verify that the packet is long enough to contain the information
- *    we require otherwsie reject with INCORRECT_MESSAGE
+ *    we require otherwise reject with INCORRECT_MESSAGE
  * b) Try to parse the TMSI. If we do not have one reject
  * c) Check that we know the subscriber with the TMSI otherwise reject
  *    with a HLR cause

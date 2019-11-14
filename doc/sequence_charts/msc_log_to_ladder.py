@@ -713,7 +713,7 @@ if __name__ == '__main__':
 			help='Pick output format: mscgen format or libosmocore/contrib/ladder_to_msc.py format')
 	parser.add_argument('-m', '--mask-values', dest='mask_values', action='store_true',
 			help='Do not output specific values like IP address, port, endpoint CI, instead just indicate that a value is'
-			     ' present. This makes the output reproducable across various logs.')
+			     ' present. This makes the output reproducible across various logs.')
 	parser.add_argument('-s', '--start-with', dest='start_with_re', default=None,
 			help='Skip until the first message with this label (regex), e.g. -s "CC SETUP"')
 

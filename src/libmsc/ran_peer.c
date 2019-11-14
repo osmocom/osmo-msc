@@ -650,7 +650,7 @@ int ran_peers_down_paging(struct sccp_ran_inst *sri, enum CELL_IDENT page_where,
 
 	switch (page_where) {
 	case CELL_IDENT_NO_CELL:
-		LOG_SCCP_RAN_CAT(sri, DPAG, LOGL_ERROR, "Asked to page on NO_CELL, wich doesn't make sense.\n");
+		LOG_SCCP_RAN_CAT(sri, DPAG, LOGL_ERROR, "Asked to page on NO_CELL, which doesn't make sense.\n");
 		return 0;
 
 	case CELL_IDENT_UTRAN_PLMN_LAC_RNC:

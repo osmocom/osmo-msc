@@ -1,4 +1,4 @@
-/* Osmocom Visitor Location Register (VLR) Autentication FSM */
+/* Osmocom Visitor Location Register (VLR) Authentication FSM */
 
 /* (C) 2016 by Harald Welte <laforge@gnumonks.org>
  *

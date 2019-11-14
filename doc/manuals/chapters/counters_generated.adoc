@@ -27,7 +27,7 @@ These counters and their description based on OsmoMSC 1.4.0 (OsmoMSC).
 | sms:rp_err_other | <<msc_sms:rp_err_other>> | Other error of MS responses on a sms delive attempt.
 | sms:deliver_unknown_error | <<msc_sms:deliver_unknown_error>> | Unknown error occurred during sms delivery.
 | call:mo_setup | <<msc_call:mo_setup>> | Received setup requests from a MS to init a MO call.
-| call:mo_connect_ack | <<msc_call:mo_connect_ack>> | Received a connect ack from MS of a MO call. Call is now succesful connected up.
+| call:mo_connect_ack | <<msc_call:mo_connect_ack>> | Received a connect ack from MS of a MO call. Call is now successful connected up.
 | call:mt_setup | <<msc_call:mt_setup>> | Sent setup requests to the MS (MT).
 | call:mt_connect | <<msc_call:mt_connect>> | Sent a connect to the MS (MT).
 | call:active | <<msc_call:active>> | Count total amount of calls that ever reached active state.

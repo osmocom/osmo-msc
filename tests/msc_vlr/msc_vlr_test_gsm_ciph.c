@@ -1267,7 +1267,7 @@ static void test_a5_3_supported()
 }
 
 /* During CM Service Request or Paging Response we already have Classmark 2 that indicates A5/3
- * availablity. Here, in a hacky way remove the knowledge of Classmark 2 to tickle a code path where
+ * availability. Here, in a hacky way remove the knowledge of Classmark 2 to tickle a code path where
  * proc_arq_fsm needs a Classmark Update during Ciphering. Shouldn't happen in reality though. */
 static void test_cm_service_needs_classmark_update()
 {

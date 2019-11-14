@@ -192,7 +192,7 @@ int mncc_call_set_rtp_stream(struct mncc_call *mncc_call, struct rtp_stream *rtp
 
 /* Disassociate the rtp_stream from this MNCC call instance, and clear the remote RTP IP:port info.
  * When the MNCC FSM ends for any reason, it will release the RTP stream (which usually triggers complete tear down of
- * the call_leg and CC transaction). If the RTP stream should still remain in use, e.g. during Subseqent inter-MSC
+ * the call_leg and CC transaction). If the RTP stream should still remain in use, e.g. during Subsequent inter-MSC
  * Handover where this MNCC was a forwarding to a remote MSC that is no longer needed, this function must be called
  * before the MNCC FSM instance terminates. Call this *before* setting a new remote RTP address on the rtp_stream, since
  * this clears the rtp_stream->remote ip:port information. */
