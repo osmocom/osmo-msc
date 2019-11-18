@@ -293,6 +293,7 @@ struct gsm_sms {
 	} gsm411;
 
 	struct {
+		bool ongoing;
 		struct osmo_esme *esme;
 		uint32_t sequence_nr;
 		int transaction_mode;
