@@ -272,7 +272,7 @@ static void sms_submit_pending(void *_data)
 		}
 
 		rounds += 1;
-		LOGP(DLSMS, LOGL_DEBUG, "Sending SMS round %d\n", rounds);
+		LOGP(DLSMS, LOGL_DEBUG, "Found SMS %llu\n", sms->id);
 
 		/*
 		 * This code needs to detect a loop. It assumes that no SMS
