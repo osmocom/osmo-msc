@@ -272,9 +272,12 @@ int gsm411_mn_send(struct gsm411_smr_inst *inst, int msg_type,
 
 static int gsm340_rx_sms_submit(struct gsm_trans *trans, struct gsm_sms *gsms)
 {
-	if (db_sms_store(gsms) != 0) {
-		LOG_TRANS(trans, LOGL_ERROR, "Failed to store SMS in Database\n");
-		return GSM411_RP_CAUSE_MO_NET_OUT_OF_ORDER;
+	if (!gsms->smpp.ongoing) {
+		LOG_TRANS(trans, LOGL_NOTICE, "SMS Store %llu\n", gsms->id);
+		if (db_sms_store(gsms) != 0) {
+			LOG_TRANS(trans, LOGL_ERROR, "Failed to store SMS in Database\n");
+			return GSM411_RP_CAUSE_MO_NET_OUT_OF_ORDER;
+		}
 	}
 	/* dispatch a signal to tell higher level about it */
 	send_signal(S_SMS_SUBMITTED, NULL, gsms, 0);
@@ -424,10 +427,17 @@ static int sms_route_mt_sms(struct gsm_trans *trans, struct gsm_sms *gsms)
 	 * delivery of the SMS.
 	 */
 	if (smpp_route_smpp_first()) {
+		/* In case the ESME returns the SMS to this MSC, another entry for this SMS will be created (as usual
+		 * for incoming SMPP requests). However, this code path soon also adds a DB entry, which would create
+		 * duplicate entries, which would send the SMS twice. Avoid that by marking as SMPP ongoing to skip db */
+		gsms->smpp.ongoing = true;
+
 		rc = smpp_try_deliver(gsms, msc_a);
-		if (rc == GSM411_RP_CAUSE_MO_NUM_UNASSIGNED)
+		if (rc == GSM411_RP_CAUSE_MO_NUM_UNASSIGNED) {
 			/* unknown subscriber, try local */
+			gsms->smpp.ongoing = false;
 			goto try_local;
+		}
 		if (rc < 0) {
 			LOG_TRANS(trans, LOGL_ERROR, "SMS delivery error: %d\n", rc);
 	 		rc = GSM411_RP_CAUSE_MO_TEMP_FAIL;
