@@ -769,6 +769,9 @@ int db_sms_store(struct gsm_sms *sms)
 		return -EIO;
 
 	dbi_result_free(result);
+
+	sms->id = dbi_conn_sequence_last(conn, "id");
+	LOGP(DLSMS, LOGL_INFO, "Stored SMS id=%llu in DB\n", sms->id);
 	return 0;
 }
 
