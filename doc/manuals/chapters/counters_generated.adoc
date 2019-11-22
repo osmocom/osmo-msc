@@ -20,12 +20,12 @@ These counters and their description based on OsmoMSC 1.4.0 (OsmoMSC).
 | cm_service_request:accepted | <<msc_cm_service_request:accepted>> | Accepted CM Service Request.
 | paging_resp:rejected | <<msc_paging_resp:rejected>> | Rejected Paging Response.
 | paging_resp:accepted | <<msc_paging_resp:accepted>> | Accepted Paging Response.
-| sms:submitted | <<msc_sms:submitted>> | Received a RPDU from a MS (MO).
-| sms:no_receiver | <<msc_sms:no_receiver>> | Counts SMS which couldn't routed because no receiver found.
-| sms:delivered | <<msc_sms:delivered>> | Global SMS Deliver attempts.
-| sms:rp_err_mem | <<msc_sms:rp_err_mem>> | CAUSE_MT_MEM_EXCEEDED errors of MS responses on a sms deliver attempt.
-| sms:rp_err_other | <<msc_sms:rp_err_other>> | Other error of MS responses on a sms delive attempt.
-| sms:deliver_unknown_error | <<msc_sms:deliver_unknown_error>> | Unknown error occurred during sms delivery.
+| sms:submitted | <<msc_sms:submitted>> | Total MO SMS received from the MS.
+| sms:no_receiver | <<msc_sms:no_receiver>> | Failed MO SMS delivery attempts (no receiver found).
+| sms:deliver_unknown_error | <<msc_sms:deliver_unknown_error>> | Failed MO SMS delivery attempts (other reason).
+| sms:delivered | <<msc_sms:delivered>> | Total MT SMS delivery attempts.
+| sms:rp_err_mem | <<msc_sms:rp_err_mem>> | Failed MT SMS delivery attempts (no memory).
+| sms:rp_err_other | <<msc_sms:rp_err_other>> | Failed MT SMS delivery attempts (other reason).
 | call:mo_setup | <<msc_call:mo_setup>> | Received setup requests from a MS to init a MO call.
 | call:mo_connect_ack | <<msc_call:mo_connect_ack>> | Received a connect ack from MS of a MO call. Call is now successful connected up.
 | call:mt_setup | <<msc_call:mt_setup>> | Sent setup requests to the MS (MT).
