@@ -10,12 +10,12 @@ These counters and their description based on OsmoMSC 1.4.0 (OsmoMSC).
 [options="header"]
 |===
 | Name | Reference | Description
-| loc_update_type:attach | <<msc_loc_update_type:attach>> | Received location update imsi attach requests.
-| loc_update_type:normal | <<msc_loc_update_type:normal>> | Received location update normal requests.
-| loc_update_type:periodic | <<msc_loc_update_type:periodic>> | Received location update periodic requests.
-| loc_update_type:detach | <<msc_loc_update_type:detach>> | Received location update detach indication.
-| loc_update_resp:failed | <<msc_loc_update_resp:failed>> | Rejected location updates.
-| loc_update_resp:completed | <<msc_loc_update_resp:completed>> | Successful location updates.
+| loc_update_type:attach | <<msc_loc_update_type:attach>> | Received Location Update (IMSI Attach) requests.
+| loc_update_type:normal | <<msc_loc_update_type:normal>> | Received Location Update (LAC change) requests.
+| loc_update_type:periodic | <<msc_loc_update_type:periodic>> | Received (periodic) Location Update requests.
+| loc_update_type:detach | <<msc_loc_update_type:detach>> | Received IMSI Detach indications.
+| loc_update_resp:failed | <<msc_loc_update_resp:failed>> | Rejected Location Updates requests.
+| loc_update_resp:completed | <<msc_loc_update_resp:completed>> | Successful Location Update procedures.
 | cm_service_request:rejected | <<msc_cm_service_request:rejected>> | Rejected CM Service Request.
 | cm_service_request:accepted | <<msc_cm_service_request:accepted>> | Accepted CM Service Request.
 | paging_resp:rejected | <<msc_paging_resp:rejected>> | Rejected Paging Response.

@@ -65,12 +65,12 @@ enum {
 };
 
 static const struct rate_ctr_desc msc_ctr_description[] = {
-	[MSC_CTR_LOC_UPDATE_TYPE_ATTACH] = 		{"loc_update_type:attach", "Received location update imsi attach requests."},
-	[MSC_CTR_LOC_UPDATE_TYPE_NORMAL] = 		{"loc_update_type:normal", "Received location update normal requests."},
-	[MSC_CTR_LOC_UPDATE_TYPE_PERIODIC] = 		{"loc_update_type:periodic", "Received location update periodic requests."},
-	[MSC_CTR_LOC_UPDATE_TYPE_DETACH] = 		{"loc_update_type:detach", "Received location update detach indication."},
-	[MSC_CTR_LOC_UPDATE_FAILED] = 		{"loc_update_resp:failed", "Rejected location updates."},
-	[MSC_CTR_LOC_UPDATE_COMPLETED] = 	{"loc_update_resp:completed", "Successful location updates."},
+	[MSC_CTR_LOC_UPDATE_TYPE_ATTACH] = 		{"loc_update_type:attach", "Received Location Update (IMSI Attach) requests."},
+	[MSC_CTR_LOC_UPDATE_TYPE_NORMAL] = 		{"loc_update_type:normal", "Received Location Update (LAC change) requests."},
+	[MSC_CTR_LOC_UPDATE_TYPE_PERIODIC] = 		{"loc_update_type:periodic", "Received (periodic) Location Update requests."},
+	[MSC_CTR_LOC_UPDATE_TYPE_DETACH] = 		{"loc_update_type:detach", "Received IMSI Detach indications."},
+	[MSC_CTR_LOC_UPDATE_FAILED] = 		{"loc_update_resp:failed", "Rejected Location Update requests."},
+	[MSC_CTR_LOC_UPDATE_COMPLETED] = 	{"loc_update_resp:completed", "Successful Location Update procedures."},
 	[MSC_CTR_CM_SERVICE_REQUEST_REJECTED] = {"cm_service_request:rejected", "Rejected CM Service Request."},
 	[MSC_CTR_CM_SERVICE_REQUEST_ACCEPTED] = {"cm_service_request:accepted", "Accepted CM Service Request."},
 	[MSC_CTR_PAGING_RESP_REJECTED] = 	{"paging_resp:rejected", "Rejected Paging Response."},
