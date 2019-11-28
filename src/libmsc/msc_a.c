@@ -627,6 +627,12 @@ static void msc_a_fsm_communicating(struct osmo_fsm_inst *fi, uint32_t event, vo
 			LOG_MSC_A(msc_a, LOGL_ERROR, "Invalid data for %s\n", osmo_fsm_event_name(fi->fsm, event));
 			return;
 		}
+		if (!osmo_sockaddr_str_is_nonzero(&rtps->local)) {
+			LOG_MSC_A(msc_a, LOGL_ERROR, "Invalid RTP address received from MGW: " OSMO_SOCKADDR_STR_FMT "\n",
+				 OSMO_SOCKADDR_STR_FMT_ARGS(&rtps->local));
+			call_leg_release(msc_a->cc.call_leg);
+			return;
+		}
 		LOG_MSC_A(msc_a, LOGL_DEBUG,
 			  "MGW endpoint's RTP address available for the CI %s: " OSMO_SOCKADDR_STR_FMT " (osmux=%s:%d)\n",
 			  rtp_direction_name(rtps->dir), OSMO_SOCKADDR_STR_FMT_ARGS(&rtps->local),
