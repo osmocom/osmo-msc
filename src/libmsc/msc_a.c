@@ -518,6 +518,12 @@ static void msc_a_call_leg_ran_local_addr_available(struct msc_a *msc_a)
 	struct gsm_trans *cc_trans = msc_a->cc.active_trans;
 	struct gsm0808_channel_type channel_type;
 
+	if (!cc_trans) {
+		LOG_MSC_A(msc_a, LOGL_ERROR, "No CC transaction active\n");
+		call_leg_release(msc_a->cc.call_leg);
+		return;
+	}
+
 	/* Once a CI is known, we could also CRCX the CN side of the MGW endpoint, but it makes sense to wait for the
 	 * codec to be determined by the Assignment Complete message, first. */
 
@@ -625,6 +631,10 @@ static void msc_a_fsm_communicating(struct osmo_fsm_inst *fi, uint32_t event, vo
 		rtps = data;
 		if (!rtps) {
 			LOG_MSC_A(msc_a, LOGL_ERROR, "Invalid data for %s\n", osmo_fsm_event_name(fi->fsm, event));
+			return;
+		}
+		if (!msc_a->cc.call_leg) {
+			LOG_MSC_A(msc_a, LOGL_ERROR, "No call leg active\n");
 			return;
 		}
 		if (!osmo_sockaddr_str_is_nonzero(&rtps->local)) {
