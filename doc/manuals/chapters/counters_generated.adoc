@@ -26,13 +26,13 @@ These counters and their description based on OsmoMSC 1.4.0 (OsmoMSC).
 | sms:delivered | <<msc_sms:delivered>> | Total MT SMS delivery attempts.
 | sms:rp_err_mem | <<msc_sms:rp_err_mem>> | Failed MT SMS delivery attempts (no memory).
 | sms:rp_err_other | <<msc_sms:rp_err_other>> | Failed MT SMS delivery attempts (other reason).
-| call:mo_setup | <<msc_call:mo_setup>> | Received setup requests from a MS to init a MO call.
-| call:mo_connect_ack | <<msc_call:mo_connect_ack>> | Received a connect ack from MS of a MO call. Call is now successful connected up.
-| call:mt_setup | <<msc_call:mt_setup>> | Sent setup requests to the MS (MT).
-| call:mt_connect | <<msc_call:mt_connect>> | Sent a connect to the MS (MT).
-| call:active | <<msc_call:active>> | Count total amount of calls that ever reached active state.
-| call:complete | <<msc_call:complete>> | Count total amount of calls which got terminated by disconnect req or ind after reaching active state.
-| call:incomplete | <<msc_call:incomplete>> | Count total amount of call which got terminated by any other reason after reaching active state.
+| call:mo_setup | <<msc_call:mo_setup>> | Received MO SETUP messages (MO call establishment).
+| call:mo_connect_ack | <<msc_call:mo_connect_ack>> | Received MO CONNECT messages (MO call establishment).
+| call:mt_setup | <<msc_call:mt_setup>> | Sent MT SETUP messages (MT call establishment).
+| call:mt_connect | <<msc_call:mt_connect>> | Sent MT CONNECT messages (MT call establishment).
+| call:active | <<msc_call:active>> | Calls that ever reached the active state.
+| call:complete | <<msc_call:complete>> | Calls terminated by DISCONNECT message after reaching the active state.
+| call:incomplete | <<msc_call:incomplete>> | Calls terminated by any other reason after reaching the active state.
 | nc_ss:mo_requests | <<msc_nc_ss:mo_requests>> | Received MS-initiated call independent SS/USSD requests.
 | nc_ss:mo_established | <<msc_nc_ss:mo_established>> | Established MS-initiated call independent SS/USSD sessions.
 | nc_ss:mt_requests | <<msc_nc_ss:mt_requests>> | Received network-initiated call independent SS/USSD requests.
