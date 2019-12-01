@@ -16,10 +16,10 @@ These counters and their description based on OsmoMSC 1.4.0 (OsmoMSC).
 | loc_update_type:detach | <<msc_loc_update_type:detach>> | Received IMSI Detach indications.
 | loc_update_resp:failed | <<msc_loc_update_resp:failed>> | Rejected Location Updates requests.
 | loc_update_resp:completed | <<msc_loc_update_resp:completed>> | Successful Location Update procedures.
-| cm_service_request:rejected | <<msc_cm_service_request:rejected>> | Rejected CM Service Request.
-| cm_service_request:accepted | <<msc_cm_service_request:accepted>> | Accepted CM Service Request.
-| paging_resp:rejected | <<msc_paging_resp:rejected>> | Rejected Paging Response.
-| paging_resp:accepted | <<msc_paging_resp:accepted>> | Accepted Paging Response.
+| cm_service_request:rejected | <<msc_cm_service_request:rejected>> | Rejected CM Service Requests.
+| cm_service_request:accepted | <<msc_cm_service_request:accepted>> | Accepted CM Service Requests.
+| paging_resp:rejected | <<msc_paging_resp:rejected>> | Rejected Paging Responses.
+| paging_resp:accepted | <<msc_paging_resp:accepted>> | Accepted Paging Responses.
 | sms:submitted | <<msc_sms:submitted>> | Total MO SMS received from the MS.
 | sms:no_receiver | <<msc_sms:no_receiver>> | Failed MO SMS delivery attempts (no receiver found).
 | sms:deliver_unknown_error | <<msc_sms:deliver_unknown_error>> | Failed MO SMS delivery attempts (other reason).
