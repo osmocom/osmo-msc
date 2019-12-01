@@ -62,7 +62,7 @@ static const struct osmo_tdef_state_timeout msc_ho_fsm_timeouts[32] = {
 
 static __attribute__((constructor)) void msc_ho_fsm_init()
 {
-	osmo_fsm_register(&msc_ho_fsm);
+	OSMO_ASSERT(osmo_fsm_register(&msc_ho_fsm) == 0);
 }
 
 void msc_ho_down_required_reject(struct msc_a *msc_a, enum gsm0808_cause cause)

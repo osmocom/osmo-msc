@@ -60,7 +60,7 @@ struct gsm_network *gsmnet = NULL;
 
 void mncc_call_fsm_init(struct gsm_network *net)
 {
-	osmo_fsm_register(&mncc_call_fsm);
+	OSMO_ASSERT(osmo_fsm_register(&mncc_call_fsm) == 0);
 	gsmnet = net;
 }
 
