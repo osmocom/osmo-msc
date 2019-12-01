@@ -523,7 +523,7 @@ int main(int argc, char **argv)
 	/* For --version, vty_init() must be called before handling options */
 	vty_init(&msc_vty_info);
 
-	osmo_ss7_init();
+	OSMO_ASSERT(osmo_ss7_init() == 0);
 	osmo_ss7_vty_init_asp(tall_msc_ctx);
 	osmo_sccp_vty_init();
 
