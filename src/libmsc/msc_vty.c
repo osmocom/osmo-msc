@@ -1148,6 +1148,11 @@ static int _send_sms_str(struct vlr_subscr *receiver,
 	struct gsm_sms *sms;
 
 	sms = sms_from_text(receiver, sender_msisdn, 0, str);
+	if (!sms) {
+		LOGP(DLSMS, LOGL_ERROR, "Failed to allocate SMS\n");
+		return CMD_WARNING;
+	}
+
 	sms->protocol_id = tp_pid;
 
 	/* store in database for the queue */

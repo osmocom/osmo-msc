@@ -67,8 +67,11 @@ static __attribute__((constructor)) void msc_ho_fsm_init()
 
 void msc_ho_down_required_reject(struct msc_a *msc_a, enum gsm0808_cause cause)
 {
-	struct msc_i *msc_i = msc_a_msc_i(msc_a);
+	struct msc_i *msc_i;
 	uint32_t event;
+
+	msc_i = msc_a_msc_i(msc_a);
+	OSMO_ASSERT(msc_i);
 
 	struct ran_msg ran_enc_msg = {
 		.msg_type = RAN_MSG_HANDOVER_REQUIRED_REJECT,
