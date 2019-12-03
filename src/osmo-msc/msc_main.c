@@ -198,6 +198,11 @@ static void handle_options(int argc, char **argv)
 			exit(-1);
 		}
 	}
+
+	if (argc > optind) {
+		fprintf(stderr, "Unsupported positional arguments on command line\n");
+		exit(2);
+	}
 }
 
 struct gsm_network *msc_network_alloc(void *ctx,
