@@ -1111,6 +1111,15 @@ int vlr_gsup_rx(struct gsup_client_mux *gcm, void *data, const struct osmo_gsup_
 	case OSMO_GSUP_MSGT_CHECK_IMEI_RESULT:
 		rc = vlr_subscr_handle_check_imei(vsub, gsup);
 		break;
+	case OSMO_GSUP_MSGT_ROUTING_ERROR:
+		LOGVSUBP(LOGL_ERROR, vsub,
+			 "Rx GSUP Routing Error: cannot attach subscriber, because of core network problems."
+			 " Either the (remote) home HLR is down, or there is a config error,"
+			 " like duplicate GSUP ipa-name\n");
+		/* It is not technically an IMSI Detach, but this function does all of: cancel attach FSMs, remove the
+		 * subscriber from SGs, and expire the VLR entry. */
+		vlr_subscr_rx_imsi_detach(vsub);
+		break;
 	default:
 		LOGP(DLGSUP, LOGL_ERROR, "GSUP Message type not handled by VLR: %d\n", gsup->message_type);
 		rc = -EINVAL;
