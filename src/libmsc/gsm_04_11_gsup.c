@@ -228,7 +228,7 @@ static int gsm411_gsup_mt_handler(struct gsm_network *net, struct vlr_subscr *vs
 				  const struct osmo_gsup_message *gsup_msg)
 {
 	bool sm_rp_mmts_ind;
-	int rc;
+	int rc = -EINVAL;
 
 	/* Associate logging messages with this subscriber */
 	log_set_context(LOG_CTX_VLR_SUBSCR, vsub);
@@ -239,8 +239,8 @@ static int gsm411_gsup_mt_handler(struct gsm_network *net, struct vlr_subscr *vs
 	if (!net->sms_over_gsup) {
 		LOGP(DLSMS, LOGL_NOTICE, "Unexpected MT SMS over GSUP, "
 			"ignoring message...\n");
-		/* TODO: notify sender about that? */
-		return -EIO;
+		rc = -EIO;
+		goto msg_error;
 	}
 
 	/**
@@ -249,14 +249,23 @@ static int gsm411_gsup_mt_handler(struct gsm_network *net, struct vlr_subscr *vs
 	 * FIXME: SM-RP-MR is not known yet (to be assigned by MSC)
 	 * NOTE: SM-RP-DA is out of our interest
 	 */
-	if (!gsup_msg->sm_rp_mr)
+	if (!gsup_msg->sm_rp_mr) {
+		LOGP(DLSMS, LOGL_NOTICE, "RX malformed MT-forwardSM-Req: missing sm_rp_mr\n");
 		goto msg_error;
-	if (!gsup_msg->sm_rp_ui)
+	}
+	if (!gsup_msg->sm_rp_ui){
+		LOGP(DLSMS, LOGL_NOTICE, "RX malformed MT-forwardSM-Req: missing sm_rp_ui\n");
 		goto msg_error;
+	}
 
+#if 0
 	/* SM-RP-OA shall contain SMSC address */
-	if (gsup_msg->sm_rp_oa_type != OSMO_GSUP_SMS_SM_RP_ODA_SMSC_ADDR)
+	if (gsup_msg->sm_rp_oa_type != OSMO_GSUP_SMS_SM_RP_ODA_SMSC_ADDR) {
+		LOGP(DLSMS, LOGL_NOTICE, "RX malformed MT-forwardSM-Req: sm_rp_oa_type != SMSC Address (is %d)\n",
+		     gsup_msg->sm_rp_oa_type);
 		goto msg_error;
+	}
+#endif
 
 	/* MMS (More Messages to Send) IE is optional */
 	if (gsup_msg->sm_rp_mms)
@@ -272,16 +281,14 @@ static int gsm411_gsup_mt_handler(struct gsm_network *net, struct vlr_subscr *vs
 	if (rc) {
 		LOGP(DLSMS, LOGL_NOTICE, "Failed to send MT SMS, "
 			"ignoring MT-forwardSM-Req message...\n");
-		/* TODO: notify sender about that? */
-		return rc;
+		goto msg_error;
 	}
 
 	return 0;
 
 msg_error:
 	/* TODO: notify sender about that? */
-	LOGP(DLSMS, LOGL_NOTICE, "RX malformed MT-forwardSM-Req\n");
-	return -EINVAL;
+	return rc;
 }
 
 int gsm411_gsup_rx(struct gsup_client_mux *gcm, void *data, const struct osmo_gsup_message *gsup_msg)
