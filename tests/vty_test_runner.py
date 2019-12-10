@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
 # (C) 2013 by Katerina Barone-Adesi <kat.obsc@gmail.com>
 # (C) 2013 by Holger Hans Peter Freyther
@@ -33,9 +33,9 @@ class TestVTYBase(unittest.TestCase):
     def checkForEndAndExit(self):
         res = self.vty.command("list")
         #print ('looking for "exit"\n')
-        self.assert_(res.find('  exit\r') > 0)
+        self.assertTrue(res.find('  exit\r') > 0)
         #print 'found "exit"\nlooking for "end"\n'
-        self.assert_(res.find('  end\r') > 0)
+        self.assertTrue(res.find('  end\r') > 0)
         #print 'found "end"\n'
 
     def vty_command(self):
@@ -54,8 +54,8 @@ class TestVTYBase(unittest.TestCase):
         try:
             self.proc = osmoutil.popen_devnull(osmo_vty_cmd)
         except OSError:
-            print >> sys.stderr, "Current directory: %s" % os.getcwd()
-            print >> sys.stderr, "Consider setting -b"
+            print("Current directory: %s" % os.getcwd(), file=sys.stderr)
+            print("Consider setting -b", file=sys.stderr)
 
         appstring = self.vty_app()[2]
         appport = self.vty_app()[0]
@@ -79,14 +79,14 @@ class TestVTYMSC(TestVTYBase):
     def testConfigNetworkTree(self, include_bsc_items=True):
         self.vty.enable()
         self.assertTrue(self.vty.verify("configure terminal",['']))
-        self.assertEquals(self.vty.node(), 'config')
+        self.assertEqual(self.vty.node(), 'config')
         self.checkForEndAndExit()
         self.assertTrue(self.vty.verify("network",['']))
-        self.assertEquals(self.vty.node(), 'config-net')
+        self.assertEqual(self.vty.node(), 'config-net')
         self.checkForEndAndExit()
         self.vty.command("write terminal")
         self.assertTrue(self.vty.verify("exit",['']))
-        self.assertEquals(self.vty.node(), 'config')
+        self.assertEqual(self.vty.node(), 'config')
         self.assertTrue(self.vty.verify("exit",['']))
         self.assertTrue(self.vty.node() is None)
 
@@ -107,35 +107,35 @@ class TestVTYMSC(TestVTYBase):
 
         # check the default
         res = self.vty.command("write terminal")
-        self.assert_(res.find(' no smpp-first') > 0)
+        self.assertTrue(res.find(' no smpp-first') > 0)
 
         self.vty.verify("smpp-first", [''])
         res = self.vty.command("write terminal")
-        self.assert_(res.find(' smpp-first') > 0)
-        self.assertEquals(res.find('no smpp-first'), -1)
+        self.assertTrue(res.find(' smpp-first') > 0)
+        self.assertEqual(res.find('no smpp-first'), -1)
 
         self.vty.verify("no smpp-first", [''])
         res = self.vty.command("write terminal")
-        self.assert_(res.find('no smpp-first') > 0)
+        self.assertTrue(res.find('no smpp-first') > 0)
 
     def testVtyTree(self):
         self.vty.enable()
         self.assertTrue(self.vty.verify("configure terminal", ['']))
-        self.assertEquals(self.vty.node(), 'config')
+        self.assertEqual(self.vty.node(), 'config')
         self.checkForEndAndExit()
         self.assertTrue(self.vty.verify('mncc-int', ['']))
-        self.assertEquals(self.vty.node(), 'config-mncc-int')
+        self.assertEqual(self.vty.node(), 'config-mncc-int')
         self.checkForEndAndExit()
         self.assertTrue(self.vty.verify('exit', ['']))
 
         if self.checkForSmpp():
-            self.assertEquals(self.vty.node(), 'config')
+            self.assertEqual(self.vty.node(), 'config')
             self.assertTrue(self.vty.verify('smpp', ['']))
-            self.assertEquals(self.vty.node(), 'config-smpp')
+            self.assertEqual(self.vty.node(), 'config-smpp')
             self.checkForEndAndExit()
             self.assertTrue(self.vty.verify("exit", ['']))
 
-        self.assertEquals(self.vty.node(), 'config')
+        self.assertEqual(self.vty.node(), 'config')
         self.assertTrue(self.vty.verify("exit", ['']))
         self.assertTrue(self.vty.node() is None)
 
@@ -145,10 +145,10 @@ class TestVTYMSC(TestVTYBase):
 
         if self.checkForSmpp():
             self.vty.command('smpp')
-            self.assertEquals(self.vty.node(), 'config-smpp')
+            self.assertEqual(self.vty.node(), 'config-smpp')
             self.vty.command('mncc-int')
 
-        self.assertEquals(self.vty.node(), 'config-mncc-int')
+        self.assertEqual(self.vty.node(), 'config-mncc-int')
 
     def testSi2Q(self):
         self.vty.enable()
@@ -162,7 +162,7 @@ class TestVTYMSC(TestVTYBase):
         self.vty.command("si2quater neighbor-list del earfcn 1911")
         self.vty.command("si2quater neighbor-list del earfcn 1924")
         self.vty.command("si2quater neighbor-list del earfcn 2111")
-        self.assertEquals(before, self.vty.command("show running-config"))
+        self.assertEqual(before, self.vty.command("show running-config"))
         self.vty.command("si2quater neighbor-list add uarfcn 1976 13 1")
         self.vty.command("si2quater neighbor-list add uarfcn 1976 38 1")
         self.vty.command("si2quater neighbor-list add uarfcn 1976 44 1")
@@ -185,7 +185,7 @@ class TestVTYMSC(TestVTYBase):
         self.vty.command("si2quater neighbor-list del uarfcn 1976 224")
         self.vty.command("si2quater neighbor-list del uarfcn 1976 225")
         self.vty.command("si2quater neighbor-list del uarfcn 1976 226")
-        self.assertEquals(before, self.vty.command("show running-config"))
+        self.assertEqual(before, self.vty.command("show running-config"))
 
     def testEnableDisablePeriodicLU(self):
         self.vty.enable()
@@ -201,18 +201,18 @@ class TestVTYMSC(TestVTYBase):
         # Enable periodic lu..
         self.vty.verify("periodic location update 60", [''])
         res = self.vty.command("write terminal")
-        self.assert_(res.find('periodic location update 60') > 0)
-        self.assertEquals(res.find('no periodic location update'), -1)
+        self.assertTrue(res.find('periodic location update 60') > 0)
+        self.assertEqual(res.find('no periodic location update'), -1)
 
         # Now disable it..
         self.vty.verify("no periodic location update", [''])
         res = self.vty.command("write terminal")
-        self.assertEquals(res.find('periodic location update 60'), -1)
-        self.assert_(res.find('no periodic location update') > 0)
+        self.assertEqual(res.find('periodic location update 60'), -1)
+        self.assertTrue(res.find('no periodic location update') > 0)
 
     def testShowNetwork(self):
         res = self.vty.command("show network")
-        self.assert_(res.startswith('BSC is on Country Code') >= 0)
+        self.assertTrue(res.startswith('BSC is on Country Code') >= 0)
 
 def ipa_handle_small(x, verbose = False):
     s = data2str(x.recv(4))
@@ -220,42 +220,42 @@ def ipa_handle_small(x, verbose = False):
       raise Exception("expected to receive 4 bytes, but got %d (%r)" % (len(s)/2, s))
     if "0001fe00" == s:
         if (verbose):
-            print "\tBSC <- NAT: PING?"
+            print("\tBSC <- NAT: PING?")
         x.send(IPA().pong())
     elif "0001fe06" == s:
         if (verbose):
-            print "\tBSC <- NAT: IPA ID ACK"
+            print("\tBSC <- NAT: IPA ID ACK")
         x.send(IPA().id_ack())
     elif "0001fe00" == s:
         if (verbose):
-            print "\tBSC <- NAT: PONG!"
+            print("\tBSC <- NAT: PONG!")
     else:
         if (verbose):
-            print "\tBSC <- NAT: ", s
+            print("\tBSC <- NAT: ", s)
 
 def ipa_handle_resp(x, tk, verbose = False, proc=None):
     s = data2str(x.recv(38))
     if "0023fe040108010701020103010401050101010011" in s:
         retries = 3
         while True:
-            print "\tsending IPA identity(%s) at %s" % (tk, time.strftime("%T"))
+            print("\tsending IPA identity(%s) at %s" % (tk, time.strftime("%T")))
             try:
                 x.send(IPA().id_resp(IPA().identity(name = tk.encode('utf-8'))))
-                print "\tdone sending IPA identity(%s) at %s" % (tk,
-                                                            time.strftime("%T"))
+                print("\tdone sending IPA identity(%s) at %s" % (tk,
+                                                            time.strftime("%T")))
                 break
             except:
-                print "\tfailed sending IPA identity at", time.strftime("%T")
+                print("\tfailed sending IPA identity at", time.strftime("%T"))
                 if proc:
-                  print "\tproc.poll() = %r" % proc.poll()
+                  print("\tproc.poll() = %r" % proc.poll())
                 if retries < 1:
-                    print "\tgiving up"
+                    print("\tgiving up")
                     raise
-                print "\tretrying (%d attempts left)" % retries
+                print("\tretrying (%d attempts left)" % retries)
                 retries -= 1
     else:
         if (verbose):
-            print "\tBSC <- NAT: ", s
+            print("\tBSC <- NAT: ", s)
 
 if __name__ == '__main__':
     import argparse
@@ -283,9 +283,9 @@ if __name__ == '__main__':
     if args.p:
         confpath = args.p
 
-    print "confpath %s, workdir %s" % (confpath, workdir)
+    print("confpath %s, workdir %s" % (confpath, workdir))
     os.chdir(workdir)
-    print "Running tests for specific VTY commands"
+    print("Running tests for specific VTY commands")
     suite = unittest.TestSuite()
     suite.addTest(unittest.TestLoader().loadTestsFromTestCase(TestVTYMSC))
 
