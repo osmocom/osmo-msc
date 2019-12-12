@@ -30,7 +30,7 @@ static void test_reject_2nd_conn()
 
 	btw("Location Update Request on one connection");
 	lu_result_sent = RES_NONE;
-	gsup_expect_tx("04010809710000004026f0280102" VLR_TO_HLR);
+	gsup_expect_tx("04010809710000004026f0" CN_DOMAIN VLR_TO_HLR);
 	ms_sends_msg("050802008168000130089910070000006402");
 	OSMO_ASSERT(gsup_tx_confirmed);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
@@ -73,7 +73,7 @@ static void _normal_lu_part1()
 {
 	btw("Location Update Request");
 	lu_result_sent = RES_NONE;
-	gsup_expect_tx("04010809710000004026f0280102" VLR_TO_HLR);
+	gsup_expect_tx("04010809710000004026f0" CN_DOMAIN VLR_TO_HLR);
 	ms_sends_msg("050802008168000130089910070000006402");
 	OSMO_ASSERT(gsup_tx_confirmed);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");

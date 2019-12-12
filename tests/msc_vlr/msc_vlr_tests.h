@@ -270,6 +270,7 @@ extern const struct timeval fake_time_start_time;
 
 #define HLR_TO_VLR "0a0101"
 #define VLR_TO_HLR "0a0101"
+#define CN_DOMAIN "280102"
 #define EUSE_TO_MSC_USSD "0a0103"
 #define MSC_USSD_TO_EUSE "0a0103"
 

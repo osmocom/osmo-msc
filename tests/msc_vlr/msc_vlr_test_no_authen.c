@@ -34,7 +34,7 @@ static void test_no_authen()
 
 	btw("Location Update request causes a GSUP LU request to HLR");
 	lu_result_sent = RES_NONE;
-	gsup_expect_tx("04010809710000004026f0280102" VLR_TO_HLR);
+	gsup_expect_tx("04010809710000004026f0" CN_DOMAIN VLR_TO_HLR);
 	ms_sends_msg("050802008168000130089910070000006402");
 	OSMO_ASSERT(gsup_tx_confirmed);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
@@ -171,7 +171,7 @@ static void test_no_authen_tmsi()
 
 	btw("Location Update request causes a GSUP LU request to HLR");
 	lu_result_sent = RES_NONE;
-	gsup_expect_tx("04010809710000004026f0280102" VLR_TO_HLR);
+	gsup_expect_tx("04010809710000004026f0" CN_DOMAIN VLR_TO_HLR);
 	ms_sends_msg("050802008168000130089910070000006402");
 	OSMO_ASSERT(gsup_tx_confirmed);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
@@ -316,7 +316,7 @@ static void test_no_authen_tmsi()
 	BTW("subscriber sends LU Request, this time with the TMSI");
 	btw("Location Update request causes a GSUP LU request to HLR");
 	lu_result_sent = RES_NONE;
-	gsup_expect_tx("04010809710000004026f0280102" VLR_TO_HLR);
+	gsup_expect_tx("04010809710000004026f0" CN_DOMAIN VLR_TO_HLR);
 	ms_sends_msg("050802008168000130" "05f4" "03020100");
 	OSMO_ASSERT(gsup_tx_confirmed);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
@@ -389,7 +389,7 @@ static void test_no_authen_imei()
 
 	btw("Location Update request causes a GSUP LU request to HLR");
 	lu_result_sent = RES_NONE;
-	gsup_expect_tx("04010809710000004026f0280102" VLR_TO_HLR);
+	gsup_expect_tx("04010809710000004026f0" CN_DOMAIN VLR_TO_HLR);
 	ms_sends_msg("050802008168000130089910070000006402");
 	OSMO_ASSERT(gsup_tx_confirmed);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
@@ -464,7 +464,7 @@ static void test_no_authen_tmsi_imei()
 
 	btw("Location Update request causes a GSUP LU request to HLR");
 	lu_result_sent = RES_NONE;
-	gsup_expect_tx("04010809710000004026f0280102" VLR_TO_HLR);
+	gsup_expect_tx("04010809710000004026f0" CN_DOMAIN VLR_TO_HLR);
 	ms_sends_msg("050802008168000130089910070000006402");
 	OSMO_ASSERT(gsup_tx_confirmed);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
@@ -552,7 +552,7 @@ static void test_no_authen_imeisv()
 	OSMO_ASSERT(dtap_tx_confirmed);
 
 	btw("MS replies with an Identity Response, causes LU to commence with a GSUP LU request to HLR");
-	gsup_expect_tx("04010809710000004026f0280102" VLR_TO_HLR);
+	gsup_expect_tx("04010809710000004026f0" CN_DOMAIN VLR_TO_HLR);
 	ms_sends_msg("0559094332244332244372f5");
 	OSMO_ASSERT(gsup_tx_confirmed);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
@@ -628,7 +628,7 @@ static void test_no_authen_imeisv_imei()
 	btw("HLR accepts the IMEI, VLR responds with LU Request");
 	expect_bssap_clear();
 	gsup_rx("32010809710000004026f0510100" HLR_TO_VLR,
-		"04010809710000004026f0280102" VLR_TO_HLR);
+		"04010809710000004026f0" CN_DOMAIN VLR_TO_HLR);
 	OSMO_ASSERT(gsup_tx_confirmed);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
@@ -686,7 +686,7 @@ static void test_no_authen_imeisv_tmsi()
 	OSMO_ASSERT(dtap_tx_confirmed);
 
 	btw("MS replies with an Identity Response, causes LU to commence with a GSUP LU request to HLR");
-	gsup_expect_tx("04010809710000004026f0280102" VLR_TO_HLR);
+	gsup_expect_tx("04010809710000004026f0" CN_DOMAIN VLR_TO_HLR);
 	ms_sends_msg("0559094332244332244372f5");
 	OSMO_ASSERT(gsup_tx_confirmed);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
@@ -742,7 +742,7 @@ static void test_no_authen_imeisv_tmsi()
 	OSMO_ASSERT(dtap_tx_confirmed);
 
 	btw("MS replies with an Identity Response, causes LU to commence with a GSUP LU request to HLR");
-	gsup_expect_tx("04010809710000004026f0280102" VLR_TO_HLR);
+	gsup_expect_tx("04010809710000004026f0" CN_DOMAIN VLR_TO_HLR);
 	ms_sends_msg("0559095332244332244372f6");
 	OSMO_ASSERT(gsup_tx_confirmed);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
@@ -841,7 +841,7 @@ static void test_no_authen_imeisv_tmsi_imei()
 	btw("HLR accepts the IMEI, VLR responds with LU Request");
 	expect_bssap_clear();
 	gsup_rx("32010809710000004026f0510100" HLR_TO_VLR,
-		"04010809710000004026f0280102" VLR_TO_HLR);
+		"04010809710000004026f0" CN_DOMAIN VLR_TO_HLR);
 	OSMO_ASSERT(gsup_tx_confirmed);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
@@ -915,7 +915,7 @@ static void test_no_authen_subscr_expire()
 
 	btw("Location Update request causes a GSUP LU request to HLR");
 	lu_result_sent = RES_NONE;
-	gsup_expect_tx("04010809710000004026f0280102" VLR_TO_HLR);
+	gsup_expect_tx("04010809710000004026f0" CN_DOMAIN VLR_TO_HLR);
 	ms_sends_msg("050802008168000130089910070000006402");
 	OSMO_ASSERT(gsup_tx_confirmed);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");

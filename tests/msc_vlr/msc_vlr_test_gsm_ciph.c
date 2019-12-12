@@ -40,7 +40,7 @@ static void test_ciph()
 
 	btw("Location Update request causes a GSUP Send Auth Info request to HLR");
 	lu_result_sent = RES_NONE;
-	gsup_expect_tx("08010809710000004026f0" VLR_TO_HLR);
+	gsup_expect_tx("08010809710000004026f0" CN_DOMAIN VLR_TO_HLR);
 	ms_sends_msg("050802008168000130089910070000006402");
 	OSMO_ASSERT(gsup_tx_confirmed);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
@@ -82,7 +82,7 @@ static void test_ciph()
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("MS sends Ciphering Mode Complete, VLR accepts and sends GSUP LU Req to HLR");
-	gsup_expect_tx("04010809710000004026f0280102" VLR_TO_HLR);
+	gsup_expect_tx("04010809710000004026f0" CN_DOMAIN VLR_TO_HLR);
 	ms_sends_ciphering_mode_complete(NULL);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
@@ -249,7 +249,7 @@ static void test_ciph_tmsi()
 
 	btw("Location Update request causes a GSUP Send Auth Info request to HLR");
 	lu_result_sent = RES_NONE;
-	gsup_expect_tx("08010809710000004026f0" VLR_TO_HLR);
+	gsup_expect_tx("08010809710000004026f0" CN_DOMAIN VLR_TO_HLR);
 	ms_sends_msg("050802008168000130089910070000006402");
 	OSMO_ASSERT(gsup_tx_confirmed);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
@@ -292,7 +292,7 @@ static void test_ciph_tmsi()
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("MS sends Ciphering Mode Complete, VLR accepts and sends GSUP LU Req to HLR");
-	gsup_expect_tx("04010809710000004026f0280102" VLR_TO_HLR);
+	gsup_expect_tx("04010809710000004026f0" CN_DOMAIN VLR_TO_HLR);
 	ms_sends_ciphering_mode_complete(NULL);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
@@ -484,7 +484,7 @@ static void test_ciph_imei()
 
 	btw("Location Update request causes a GSUP Send Auth Info request to HLR");
 	lu_result_sent = RES_NONE;
-	gsup_expect_tx("08010809710000004026f0" VLR_TO_HLR);
+	gsup_expect_tx("08010809710000004026f0" CN_DOMAIN VLR_TO_HLR);
 	ms_sends_msg("050802008168000130089910070000006402");
 	OSMO_ASSERT(gsup_tx_confirmed);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
@@ -526,7 +526,7 @@ static void test_ciph_imei()
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("MS sends Ciphering Mode Complete, VLR accepts and sends GSUP LU Req to HLR");
-	gsup_expect_tx("04010809710000004026f0280102" VLR_TO_HLR);
+	gsup_expect_tx("04010809710000004026f0" CN_DOMAIN VLR_TO_HLR);
 	ms_sends_ciphering_mode_complete(NULL);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
@@ -594,7 +594,7 @@ static void test_ciph_imeisv()
 
 	btw("Location Update request causes a GSUP Send Auth Info request to HLR");
 	lu_result_sent = RES_NONE;
-	gsup_expect_tx("08010809710000004026f0" VLR_TO_HLR);
+	gsup_expect_tx("08010809710000004026f0" CN_DOMAIN VLR_TO_HLR);
 	ms_sends_msg("050802008168000130089910070000006402");
 	OSMO_ASSERT(gsup_tx_confirmed);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
@@ -642,7 +642,7 @@ static void test_ciph_imeisv()
 	vlr_subscr_put(vsub, __func__);
 
 	btw("MS sends Ciphering Mode Complete with IMEISV, VLR accepts and sends GSUP LU Req to HLR");
-	gsup_expect_tx("04010809710000004026f0280102" VLR_TO_HLR);
+	gsup_expect_tx("04010809710000004026f0" CN_DOMAIN VLR_TO_HLR);
 	ms_sends_ciphering_mode_complete("063217094b32244332244372f5");
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
@@ -695,7 +695,7 @@ static void test_ciph_tmsi_imei()
 
 	btw("Location Update request causes a GSUP Send Auth Info request to HLR");
 	lu_result_sent = RES_NONE;
-	gsup_expect_tx("08010809710000004026f0" VLR_TO_HLR);
+	gsup_expect_tx("08010809710000004026f0" CN_DOMAIN VLR_TO_HLR);
 	ms_sends_msg("050802008168000130089910070000006402");
 	OSMO_ASSERT(gsup_tx_confirmed);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
@@ -737,7 +737,7 @@ static void test_ciph_tmsi_imei()
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("MS sends Ciphering Mode Complete, VLR accepts and sends GSUP LU Req to HLR");
-	gsup_expect_tx("04010809710000004026f0280102" VLR_TO_HLR);
+	gsup_expect_tx("04010809710000004026f0" CN_DOMAIN VLR_TO_HLR);
 	ms_sends_ciphering_mode_complete(NULL);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
@@ -844,7 +844,7 @@ static void test_gsm_ciph_in_umts_env()
 
 	btw("Location Update request causes a GSUP Send Auth Info request to HLR");
 	lu_result_sent = RES_NONE;
-	gsup_expect_tx("080108" "09710000000156f0" VLR_TO_HLR);
+	gsup_expect_tx("080108" "09710000000156f0" CN_DOMAIN VLR_TO_HLR);
 	ms_sends_msg("0508" /* MM LU */
 		     "7" /* ciph key seq: no key available */
 		     "0" /* LU type: normal */
@@ -922,7 +922,7 @@ static void test_gsm_ciph_in_umts_env()
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("MS sends Ciphering Mode Complete, VLR accepts and sends GSUP LU Req to HLR");
-	gsup_expect_tx("04010809710000000156f0280102" VLR_TO_HLR);
+	gsup_expect_tx("04010809710000000156f0" CN_DOMAIN VLR_TO_HLR);
 	ms_sends_ciphering_mode_complete(NULL);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
@@ -1067,7 +1067,7 @@ static void test_a5_3_supported()
 
 	btw("Location Update request causes a GSUP Send Auth Info request to HLR");
 	lu_result_sent = RES_NONE;
-	gsup_expect_tx("08010809710000004026f0" VLR_TO_HLR);
+	gsup_expect_tx("08010809710000004026f0" CN_DOMAIN VLR_TO_HLR);
 	ms_sends_msg("050802008168000130089910070000006402");
 	OSMO_ASSERT(gsup_tx_confirmed);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
@@ -1111,7 +1111,7 @@ static void test_a5_3_supported()
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("MS sends Ciphering Mode Complete, VLR accepts and sends GSUP LU Req to HLR");
-	gsup_expect_tx("04010809710000004026f0280102" VLR_TO_HLR);
+	gsup_expect_tx("04010809710000004026f0" CN_DOMAIN VLR_TO_HLR);
 	ms_sends_ciphering_mode_complete(NULL);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
@@ -1283,7 +1283,7 @@ static void test_cm_service_needs_classmark_update()
 
 	btw("Location Update request causes a GSUP Send Auth Info request to HLR");
 	lu_result_sent = RES_NONE;
-	gsup_expect_tx("08010809710000004026f0" VLR_TO_HLR);
+	gsup_expect_tx("08010809710000004026f0" CN_DOMAIN VLR_TO_HLR);
 	ms_sends_msg("050802008168000130089910070000006402");
 	OSMO_ASSERT(gsup_tx_confirmed);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
@@ -1327,7 +1327,7 @@ static void test_cm_service_needs_classmark_update()
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("MS sends Ciphering Mode Complete, VLR accepts and sends GSUP LU Req to HLR");
-	gsup_expect_tx("04010809710000004026f0280102" VLR_TO_HLR);
+	gsup_expect_tx("04010809710000004026f0" CN_DOMAIN VLR_TO_HLR);
 	ms_sends_ciphering_mode_complete(NULL);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 

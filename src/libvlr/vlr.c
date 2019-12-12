@@ -671,6 +671,7 @@ int vlr_subscr_req_sai(struct vlr_subscr *vsub,
 	gsup_msg.message_type = OSMO_GSUP_MSGT_SEND_AUTH_INFO_REQUEST;
 	gsup_msg.auts = auts;
 	gsup_msg.rand = auts_rand;
+	gsup_msg.cn_domain = OSMO_GSUP_CN_DOMAIN_CS;
 
 	return vlr_subscr_tx_gsup_message(vsub, &gsup_msg);
 }

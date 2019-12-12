@@ -58,7 +58,7 @@ static void _test_umts_authen(enum osmo_rat_type via_ran)
 
 	btw("Location Update request causes a GSUP Send Auth Info request to HLR");
 	lu_result_sent = RES_NONE;
-	gsup_expect_tx("080108" "09710000000156f0" VLR_TO_HLR);
+	gsup_expect_tx("080108" "09710000000156f0" CN_DOMAIN VLR_TO_HLR);
 	ms_sends_msg("0508" /* MM LU */
 		     "7" /* ciph key seq: no key available */
 		     "0" /* LU type: normal */
@@ -137,7 +137,7 @@ static void _test_umts_authen(enum osmo_rat_type via_ran)
 			VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 			btw("MS sends SecurityModeControl acceptance, VLR accepts and sends GSUP LU Req to HLR");
-			gsup_expect_tx("04010809710000000156f0280102" VLR_TO_HLR);
+			gsup_expect_tx("04010809710000000156f0" CN_DOMAIN VLR_TO_HLR);
 			ms_sends_security_mode_complete();
 			VERBOSE_ASSERT(gsup_tx_confirmed, == true, "%d");
 			VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
@@ -145,7 +145,7 @@ static void _test_umts_authen(enum osmo_rat_type via_ran)
 	} else {
 		/* Encryption disabled */
 		btw("Encryption disabled. MS sends Authen Response, VLR accepts and sends GSUP LU Req to HLR");
-		gsup_expect_tx("04010809710000000156f0280102" VLR_TO_HLR);
+		gsup_expect_tx("04010809710000000156f0" CN_DOMAIN VLR_TO_HLR);
 		ms_sends_msg("0554" "e229c19e" "2104" "791f2e41");
 		VERBOSE_ASSERT(gsup_tx_confirmed, == true, "%d");
 		VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
@@ -369,7 +369,7 @@ static void _test_umts_authen_resync(enum osmo_rat_type via_ran)
 
 	btw("Location Update request causes a GSUP Send Auth Info request to HLR");
 	lu_result_sent = RES_NONE;
-	gsup_expect_tx("080108" "09710000000156f0" VLR_TO_HLR);
+	gsup_expect_tx("080108" "09710000000156f0" CN_DOMAIN VLR_TO_HLR);
 	ms_sends_msg("0508" /* MM LU */
 		     "7" /* ciph key seq: no key available */
 		     "0" /* LU type: normal */
@@ -471,7 +471,7 @@ static void _test_umts_authen_resync(enum osmo_rat_type via_ran)
 		       "0108" "09710000000156f0" /* IMSI */
 		       "260e" "979498b1f72d3e28c59fa2e72f9c" /* AUTS */
 		       "2010" "39fa2f4e3d523d8619a73b4f65c3e14d" /* RAND */
-		       VLR_TO_HLR);
+		       CN_DOMAIN VLR_TO_HLR);
 	ms_sends_msg("051c" /* 05 = MM; 1c = Auth Failure */
 		     "15"   /* cause = Synch Failure */
 		     "220e" "979498b1f72d3e28c59fa2e72f9c" /* AUTS */);
@@ -529,7 +529,7 @@ static void _test_umts_authen_resync(enum osmo_rat_type via_ran)
 			VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 			btw("MS sends SecurityModeControl acceptance, VLR accepts and sends GSUP LU Req to HLR");
-			gsup_expect_tx("04010809710000000156f0280102" VLR_TO_HLR);
+			gsup_expect_tx("04010809710000000156f0" CN_DOMAIN VLR_TO_HLR);
 			ms_sends_security_mode_complete();
 			VERBOSE_ASSERT(gsup_tx_confirmed, == true, "%d");
 			VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
@@ -537,7 +537,7 @@ static void _test_umts_authen_resync(enum osmo_rat_type via_ran)
 	} else {
 		/* Encryption disabled */
 		btw("Encryption disabled. MS sends Authen Response, VLR accepts and sends GSUP LU Req to HLR");
-		gsup_expect_tx("04010809710000000156f0280102" VLR_TO_HLR);
+		gsup_expect_tx("04010809710000000156f0" CN_DOMAIN VLR_TO_HLR);
 		ms_sends_msg("0554" "1df5f0b4" "2104" "f22b696e");
 		VERBOSE_ASSERT(gsup_tx_confirmed, == true, "%d");
 		VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
@@ -609,7 +609,7 @@ static void _test_umts_authen_too_short_res(enum osmo_rat_type via_ran)
 
 	btw("Location Update request causes a GSUP Send Auth Info request to HLR");
 	lu_result_sent = RES_NONE;
-	gsup_expect_tx("080108" "09710000000156f0" VLR_TO_HLR);
+	gsup_expect_tx("080108" "09710000000156f0" CN_DOMAIN VLR_TO_HLR);
 	ms_sends_msg("0508" /* MM LU */
 		     "7" /* ciph key seq: no key available */
 		     "0" /* LU type: normal */
@@ -709,7 +709,7 @@ static void _test_umts_authen_too_long_res(enum osmo_rat_type via_ran)
 
 	btw("Location Update request causes a GSUP Send Auth Info request to HLR");
 	lu_result_sent = RES_NONE;
-	gsup_expect_tx("080108" "09710000000156f0" VLR_TO_HLR);
+	gsup_expect_tx("080108" "09710000000156f0" CN_DOMAIN VLR_TO_HLR);
 	ms_sends_msg("0508" /* MM LU */
 		     "7" /* ciph key seq: no key available */
 		     "0" /* LU type: normal */
@@ -809,7 +809,7 @@ static void _test_umts_authen_only_sres(enum osmo_rat_type via_ran)
 
 	btw("Location Update request causes a GSUP Send Auth Info request to HLR");
 	lu_result_sent = RES_NONE;
-	gsup_expect_tx("080108" "09710000000156f0" VLR_TO_HLR);
+	gsup_expect_tx("080108" "09710000000156f0" CN_DOMAIN VLR_TO_HLR);
 	ms_sends_msg("0508" /* MM LU */
 		     "7" /* ciph key seq: no key available */
 		     "0" /* LU type: normal */

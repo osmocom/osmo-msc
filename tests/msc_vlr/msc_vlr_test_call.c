@@ -53,7 +53,7 @@ static void lu_utran_tmsi()
 
 	btw("Location Update request causes a GSUP Send Auth Info request to HLR");
 	lu_result_sent = RES_NONE;
-	gsup_expect_tx("080108" "09710000000156f0" VLR_TO_HLR);
+	gsup_expect_tx("080108" "09710000000156f0" CN_DOMAIN VLR_TO_HLR);
 	ms_sends_msg("0508" /* MM LU */
 		     "7" /* ciph key seq: no key available */
 		     "0" /* LU type: normal */
@@ -127,7 +127,7 @@ static void lu_utran_tmsi()
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("MS sends SecurityModeControl acceptance, VLR accepts and sends GSUP LU Req to HLR");
-	gsup_expect_tx("04010809710000000156f0280102" VLR_TO_HLR);
+	gsup_expect_tx("04010809710000000156f0" CN_DOMAIN VLR_TO_HLR);
 	ms_sends_security_mode_complete();
 	VERBOSE_ASSERT(gsup_tx_confirmed, == true, "%d");
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
