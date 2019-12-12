@@ -172,7 +172,7 @@ static void lu_geran_noauth()
 
 	btw("Location Update request causes a GSUP LU request to HLR");
 	lu_result_sent = RES_NONE;
-	gsup_expect_tx("04010809710000000156f0280102" VLR_TO_HLR);
+	gsup_expect_tx("04010809710000000156f0" CN_DOMAIN VLR_TO_HLR);
 	ms_sends_msg("0508" /* MM LU */
 		     "7" /* ciph key seq: no key available */
 		     "0" /* LU type: normal */
