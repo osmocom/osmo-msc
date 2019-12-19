@@ -53,7 +53,7 @@ static void gsup_sm_msg_init(struct osmo_gsup_message *gsup_msg,
 int gsm411_gsup_mo_fwd_sm_req(struct gsm_trans *trans, struct msgb *msg,
 	uint8_t sm_rp_mr, uint8_t *sm_rp_da, uint8_t sm_rp_da_len)
 {
-	uint8_t bcd_buf[GSM48_MI_SIZE] = { 0 };
+	uint8_t bcd_buf[GSM48_MI_SIZE];
 	struct osmo_gsup_message gsup_msg;
 	size_t bcd_len;
 
