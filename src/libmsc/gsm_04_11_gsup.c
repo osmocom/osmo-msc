@@ -1,5 +1,5 @@
 /*
- * (C) 2018 by Vadim Yanitskiy <axilirator@gmail.com>
+ * (C) 2018-2019 by Vadim Yanitskiy <axilirator@gmail.com>
  *
  * All Rights Reserved
  *
@@ -65,22 +65,28 @@ int gsm411_gsup_mo_fwd_sm_req(struct gsm_trans *trans, struct msgb *msg,
 	/* Assign SM-RP-MR to transaction state */
 	trans->sms.sm_rp_mr = sm_rp_mr;
 
-	/* Encode subscriber's MSISDN */
+	/* Encode subscriber's MSISDN as LHV (with room for ToN/NPI header) */
 	bcd_len = gsm48_encode_bcd_number(bcd_buf, sizeof(bcd_buf),
-		0, trans->vsub->msisdn);
+					  1, trans->vsub->msisdn);
 	if (bcd_len <= 0 || bcd_len > sizeof(bcd_buf)) {
 		LOG_TRANS(trans, LOGL_ERROR, "Failed to encode subscriber's MSISDN\n");
 		return -EINVAL;
 	}
 
+	/* NOTE: assuming default ToN/NPI values as we don't have this info */
+	bcd_buf[1] = 0x01 /* NPI: ISDN/Telephony Numbering (ITU-T Rec. E.164 / ITU-T Rec. E.163) */
+		   | (0x01 << 4) /* ToN: International Number */
+		   | (0x01 << 7); /* No Extension */
+
 	/* Initialize a new GSUP message */
 	gsup_sm_msg_init(&gsup_msg, OSMO_GSUP_MSGT_MO_FORWARD_SM_REQUEST,
 		trans->vsub->imsi, &sm_rp_mr);
 
-	/* According to 12.2.3, the MSISDN from VLR is inserted here */
+	/* According to 12.2.3, the MSISDN from VLR is inserted here.
+	 * NOTE: redundant BCD length octet is not included. */
 	gsup_msg.sm_rp_oa_type = OSMO_GSUP_SMS_SM_RP_ODA_MSISDN;
-	gsup_msg.sm_rp_oa_len = bcd_len;
-	gsup_msg.sm_rp_oa = bcd_buf;
+	gsup_msg.sm_rp_oa_len = bcd_len - 1;
+	gsup_msg.sm_rp_oa = bcd_buf + 1;
 
 	/* SM-RP-DA should (already) contain SMSC address */
 	gsup_msg.sm_rp_da_type = OSMO_GSUP_SMS_SM_RP_ODA_SMSC_ADDR;
