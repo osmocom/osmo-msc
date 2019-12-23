@@ -1069,7 +1069,7 @@ int vlr_gsup_rx(struct gsup_client_mux *gcm, void *data, const struct osmo_gsup_
 {
 	struct vlr_instance *vlr = data;
 	struct vlr_subscr *vsub;
-	int rc;
+	int rc = 0;
 
 	vsub = vlr_subscr_find_by_imsi(vlr, gsup->imsi, __func__);
 	if (!vsub) {
