@@ -99,6 +99,9 @@ struct msc_a {
 	/* After Ciphering Mode Complete on GERAN, this reflects the chosen ciphering algorithm and key */
 	struct geran_encr geran_encr;
 
+	/* Type of MI requested in MM Identity Request */
+	uint8_t mm_id_req_type;
+
 	/* N(SD) expected in the received frame, per flow (TS 24.007 11.2.3.2.3.2.2) */
 	uint8_t n_sd_next[4];
 

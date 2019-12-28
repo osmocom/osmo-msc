@@ -182,11 +182,34 @@ static int mm_rx_id_resp(struct msc_a *msc_a, struct msgb *msg)
 	struct gsm48_hdr *gh = msgb_l3(msg);
 	uint8_t *mi = gh->data+1;
 	uint8_t mi_len = gh->data[0];
+	uint8_t mi_type;
 	struct vlr_subscr *vsub = msc_a_vsub(msc_a);
 
 	if (!vsub) {
 		LOGP(DMM, LOGL_ERROR,
 		     "Rx MM Identity Response: invalid: no subscriber\n");
+		return -EINVAL;
+	}
+
+	/* There muct be at least one octet with MI type */
+	if (!mi_len) {
+		LOGP(DMM, LOGL_NOTICE, "MM Identity Response contains "
+				       "malformed Mobile Identity\n");
+		return -EINVAL;
+	}
+
+	/* Make sure we got what we expected */
+	mi_type = mi[0] & GSM_MI_TYPE_MASK;
+	if (mi_type == GSM_MI_TYPE_NONE) {
+		LOGP(DMM, LOGL_NOTICE, "MM Identity Response contains no identity, "
+				       "perhaps the MS has no Mobile Identity type %s?\n",
+				       gsm48_mi_type_name(msc_a->mm_id_req_type));
+		return -EINVAL;
+	} else if (mi_type != msc_a->mm_id_req_type) {
+		LOGP(DMM, LOGL_NOTICE, "MM Identity Response contains unexpected "
+				       "Mobile Identity type %s (extected %s)\n",
+				       gsm48_mi_type_name(mi_type),
+				       gsm48_mi_type_name(msc_a->mm_id_req_type));
 		return -EINVAL;
 	}
 
@@ -1182,8 +1205,17 @@ static int gsm48_rx_rr_ciphering_mode_complete(struct msc_a *msc_a, struct msgb 
 	tlv_parse(&tp, &gsm48_att_tlvdef, gh->data, payload_len, 0, 0);
 	mi = TLVP_GET(&tp, GSM48_IE_MOBILE_ID);
 
+	/* IMEI(SV) is optional for this message */
 	if (!mi)
 		return 0;
+	if (!mi->len)
+		return -EINVAL;
+	if ((mi->val[0] & GSM_MI_TYPE_MASK) != GSM_MI_TYPE_IMEISV) {
+		LOGP(DMM, LOGL_ERROR, "RR Ciphering Mode Complete contains "
+				      "unexpected Mobile Identity type %s\n",
+				      gsm48_mi_type_name(mi->val[0] & GSM_MI_TYPE_MASK));
+		return -EINVAL;
+	}
 
 	LOG_MSC_A(msc_a, LOGL_DEBUG, "RR Ciphering Mode Complete contains Mobile Identity: %s\n",
 		  osmo_mi_name(mi->val, mi->len));
@@ -1287,6 +1319,10 @@ static int msc_vlr_tx_auth_rej(void *msc_conn_ref)
 static int msc_vlr_tx_id_req(void *msc_conn_ref, uint8_t mi_type)
 {
 	struct msc_a *msc_a = msc_conn_ref;
+
+	/* Store requested MI type, so we can check the response */
+	msc_a->mm_id_req_type = mi_type;
+
 	return mm_tx_identity_req(msc_a, mi_type);
 }
 
