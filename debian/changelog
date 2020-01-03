@@ -1,3 +1,97 @@
+osmo-msc (1.6.0) unstable; urgency=medium
+
+  [ Philipp Maier ]
+  * cosmetic: make function mncc_tx_to_gsm_cc static
+  * sgs_iface: do not use SGsAP-MO-CSFB-INDICATION for CSFB return
+  * msc_a: switch RAN type back to SGs when a CSFB-Call is cleared
+  * sgs_iface: Accept messages with unknown TLV elements
+  * paging: Send SGsAP-SERVICE-ABORT-REQUEST on paging timeout
+
+  [ Neels Hofmeyr ]
+  * add 'encryption uea 1 2' cfg / fix ttcn3 iu tests
+  * mncc: send payload type matching chosen codec
+  * memleak on cc setup errors
+  * cc trans: make sure bearer cap is empty
+  * fix segfault: don't send CC REL on NULL msc_a
+  * vlr_lu_fsm: ignore ID_IMEISV during VLR_ULA_S_WAIT_HLR_UPD
+  * tweak CC cause for incoming call to unattached nr
+  * log, cosmetic: add "RR" to "Ciphering Mode Complete"
+  * msc_vlr_tests: GSUP: don't care about extra IEs
+  * gsm48_tch_rtp_create(): check against NULL mgcp_info
+  * msc_a.c, CC trans: change a comment to a debug log
+  * cosmetic: fix call_leg_ensure_ci() decl. arg name to match impl.
+  * vlr: don't log about "gratuitous ID RESPONSE"
+  * ran_dec logging: log message sizes on errors
+  * msc_a fsm: ignore state chg to same state
+  * fix error on BSSMAP Cipher Mode Complete L3 msg IE
+  * catch GSUP auth result without auth_fsm
+  * LOG_TRANS for CC: always log CC state
+  * log which DTAP messages are sent to RAN
+  * log: drop duplicate MNCC log
+  * also log MNCC_SETUP_REQ
+  * BSSMAP log tweak
+  * log: RANAP encode: use RANAP message names instead of BSSAP
+  * log: ran_msg_a: tweak a message name
+  * send MNCC REL only if MNCC has actually started
+  * fsm: use deferred deallocation
+  * rtp_stream: sanely cancel MGW endpoint FSM notify
+  * use osmo_sockaddr_str_is_nonzero()
+  * CC: add error handling for CRCX responses
+  * add msc_log_to_ladder.py
+  * charts: add full MO and MT voice call diagram
+  * cc trans: remove unused tch_rtp_create
+  * fix msc_vlr_test_call.c
+  * BSSMAP: decode Codec List (BSS Supported)
+  * fail on invalid RTP address from MGW
+  * msc_a CC: add some basic sanity tests
+  * fix incoming call while Paging
+  * add sdp_msg API: SDP parsing/composition
+  * MNCC v6: add optional SDP to the socket protocol
+  * msc_vlr_tests: better err logging for dtap msgs
+  * msc_vlr_test_call.c: add MNCC logging
+  * msc_vlr_tests: log descriptions in color with -v
+  * msc_vlr_test_call: rename lu_utran_tmsi
+  * gsup: indicate CN-Domain in SendAuthInfo Requests
+  * sms db: when storing an SMS, retrieve the ID
+  * sms log tweak
+
+  [ Vadim Yanitskiy ]
+  * libvlr/vlr.c: cosmetic: move message_type assignment
+  * counters: clarify documentation for MSC_CTR_SMS_* entries
+  * counters: clarify documentation for MSC_CTR_LOC_UPDATE_* entries
+  * counters: clarify documentation for MSC_CTR_CALL_* entries
+  * counters: polish documentation of cm_service_request / paging_resp
+  * libmsc: fix potential NULL-pointer dereferences detected by GCC's LTO
+  * libmsc/gsm_04_11_gsup.c: do not init a buffer in gsm411_gsup_mo_fwd_sm_req()
+  * libmsc/gsm_04_11_gsup.c: fix SM-RP-OA encoding for MO SMS over GSUP
+
+  [ Alexander Couzens ]
+  * smpp_openbsc.c: check acl before deref it
+  * vlr: gmm_cause_to_fsm_and_mm_cause() drop fsm_cause_p argument
+  * make vlr_gmm_cause_to_mm_cause public
+  * vlr_auth_fsm: on SAI use the GSUP provided GMM cause code
+
+  [ Keith Whyte ]
+  * Implement a global switch on the network to disable call waiting.
+
+  [ Pau Espin Pedrol ]
+  * vty: fix access to wrong argv in paging response-timer
+
+  [ Oliver Smith ]
+  * tests: only check IU configs if IU is enabled
+  * osmoappdesc.py, tests: switch to python 3
+
+  [ Martin Hauke ]
+  * Fix some typos
+
+  [ Harald Welte ]
+  * check for osmo_ss7_init() error return value
+  * manual: Fix copy+paste error
+  * Check for osmo_fsm_register() error return value
+  * msc: exit(2) on unsupported positional arguments on command line
+
+ -- Pau Espin Pedrol <pespin@sysmocom.de>  Fri, 03 Jan 2020 18:51:37 +0100
+
 osmo-msc (1.5.0) unstable; urgency=medium
 
   [ Max ]
