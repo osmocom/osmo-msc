@@ -2014,7 +2014,7 @@ static int tch_rtp_connect(struct gsm_network *net, const struct gsm_mncc_rtp *r
 	if (!osmo_sockaddr_str_is_nonzero(&rtps->remote)) {
 		/* Didn't get an IP address from SDP. Try legacy MNCC IP address */
 		struct osmo_sockaddr_str rtp_addr;
-		osmo_sockaddr_str_from_32n(&rtp_addr, rtp->ip, rtp->port);
+		osmo_sockaddr_str_from_32h(&rtp_addr, rtp->ip, rtp->port);
 		rtp_stream_set_remote_addr(rtps, &rtp_addr);
 	}
 
