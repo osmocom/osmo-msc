@@ -1,3 +1,14 @@
+osmo-msc (1.6.1) unstable; urgency=medium
+
+  [ Vadim Yanitskiy ]
+  * libmsc/gsm_04_08.c: fix: verify MI before calling vlr_subscr_rx_id_resp()
+
+  [ Neels Hofmeyr ]
+  * vlr_gsup_rx: fix uninitialized rc
+  * vlr.c: fix condition to check MSISDN presence
+
+ -- Pau Espin Pedrol <pespin@sysmocom.de>  Thu, 09 Jan 2020 12:29:08 +0100
+
 osmo-msc (1.6.0) unstable; urgency=medium
 
   [ Philipp Maier ]
