@@ -92,6 +92,7 @@ struct osmo_smpp_route {
 struct osmo_smpp_cmd {
 	struct llist_head	list;
 	struct vlr_subscr	*vsub;
+	struct msc_a		*msc_a;
 	uint32_t		sequence_nr;
 	uint32_t		gsm411_msg_ref;
 	uint8_t			gsm411_trans_id;

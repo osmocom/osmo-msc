@@ -569,6 +569,12 @@ static void smpp_cmd_free(struct osmo_smpp_cmd *cmd)
 {
 	osmo_timer_del(&cmd->response_timer);
 	llist_del(&cmd->list);
+
+	if (cmd->msc_a) {
+		msc_a_put(cmd->msc_a, MSC_A_USE_SMS_SMPP);
+		cmd->msc_a = NULL;
+	}
+
 	vlr_subscr_put(cmd->vsub, VSUB_USE_SMPP_CMD);
 	talloc_free(cmd);
 }
@@ -589,7 +595,9 @@ void smpp_cmd_ack(struct osmo_smpp_cmd *cmd)
 	if (cmd->is_report)
 		goto out;
 
-	msc_a = msc_a_for_vsub(cmd->vsub, true);
+	msc_a = cmd->msc_a;
+	if (!msc_a)
+		msc_a = msc_a_for_vsub(cmd->vsub, true);
 	if (!msc_a) {
 		LOGP(DSMPP, LOGL_ERROR, "No connection to subscriber %s\n", vlr_subscr_name(cmd->vsub));
 		goto out;
@@ -642,6 +650,7 @@ static void smpp_deliver_sm_cb(void *data)
 }
 
 static int smpp_cmd_enqueue(struct osmo_esme *esme,
+			    struct msc_a *msc_a,
 			    struct vlr_subscr *vsub, struct gsm_sms *sms,
 			    uint32_t sequence_number)
 {
@@ -657,6 +666,12 @@ static int smpp_cmd_enqueue(struct osmo_esme *esme,
 	cmd->gsm411_trans_id	= sms->gsm411.transaction_id;
 	vlr_subscr_get(vsub, VSUB_USE_SMPP_CMD);
 	cmd->vsub = vsub;
+
+	/* Keep the connection open until the ESME responded */
+	if (msc_a) {
+		cmd->msc_a = msc_a;
+		msc_a_get(msc_a, MSC_A_USE_SMS_SMPP);
+	}
 
 	/* FIXME: No predefined value for this response_timer as specified by
 	 * SMPP 3.4 specs, section 7.2. Make this configurable? Don't forget
@@ -773,7 +788,7 @@ static int deliver_to_esme(struct osmo_esme *esme, struct gsm_sms *sms,
 	if (ret < 0)
 		return ret;
 
-	return smpp_cmd_enqueue(esme, vsub, sms,
+	return smpp_cmd_enqueue(esme, msc_a, vsub, sms,
 				deliver.sequence_number);
 }
 

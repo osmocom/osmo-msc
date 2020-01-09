@@ -46,6 +46,7 @@ struct ran_infra;
 #define MSC_A_USE_CC		"cc"
 #define MSC_A_USE_SMS		"sms"
 #define MSC_A_USE_SMS_MMTS	"sms_mmts"
+#define MSC_A_USE_SMS_SMPP	"sms_smpp"
 #define MSC_A_USE_NC_SS		"nc_ss"
 #define MSC_A_USE_SILENT_CALL	"silent_call"
 
