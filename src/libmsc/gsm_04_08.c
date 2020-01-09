@@ -207,7 +207,7 @@ static int mm_rx_id_resp(struct msc_a *msc_a, struct msgb *msg)
 		return -EINVAL;
 	} else if (mi_type != msc_a->mm_id_req_type) {
 		LOGP(DMM, LOGL_NOTICE, "MM Identity Response contains unexpected "
-				       "Mobile Identity type %s (extected %s)\n",
+				       "Mobile Identity type %s (expected %s)\n",
 				       gsm48_mi_type_name(mi_type),
 				       gsm48_mi_type_name(msc_a->mm_id_req_type));
 		return -EINVAL;
