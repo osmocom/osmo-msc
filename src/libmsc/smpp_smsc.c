@@ -38,6 +38,7 @@
 #include <osmocom/core/logging.h>
 #include <osmocom/core/write_queue.h>
 #include <osmocom/core/talloc.h>
+#include <osmocom/gsm/protocol/gsm_04_11.h>
 
 #include "smpp_smsc.h"
 
@@ -327,9 +328,9 @@ int smpp_route(const struct smsc *smsc, const struct osmo_smpp_addr *dest, struc
 
 	*pesme = NULL;
 	if (acl)
-		return GSM48_CC_CAUSE_NETWORK_OOO;
+		return GSM411_RP_CAUSE_MO_NET_OUT_OF_ORDER;
 	else
-		return GSM48_CC_CAUSE_UNASSIGNED_NR;
+		return GSM411_RP_CAUSE_MO_NUM_UNASSIGNED;
 }
 
 
