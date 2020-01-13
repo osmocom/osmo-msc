@@ -442,29 +442,29 @@ try_local:
 
 	/* determine gsms->receiver based on dialled number */
 	gsms->receiver = vlr_subscr_find_by_msisdn(net->vlr, gsms->dst.addr, VSUB_USE_SMS_RECEIVER);
-	if (!gsms->receiver) {
-#ifdef BUILD_SMPP
-		/* Avoid a second look-up */
-		if (smpp_route_smpp_first()) {
-			rate_ctr_inc(&net->msc_ctrs->ctr[MSC_CTR_SMS_NO_RECEIVER]);
-			return GSM411_RP_CAUSE_MO_NUM_UNASSIGNED;
-		}
+	if (gsms->receiver)
+		return 0;
 
-		rc = smpp_try_deliver(gsms, msc_a);
-		if (rc == GSM411_RP_CAUSE_MO_NUM_UNASSIGNED) {
-			rate_ctr_inc(&net->msc_ctrs->ctr[MSC_CTR_SMS_NO_RECEIVER]);
-		} else if (rc < 0) {
-			LOG_TRANS(trans, LOGL_ERROR, "SMS delivery error: %d\n", rc);
-	 		rc = GSM411_RP_CAUSE_MO_TEMP_FAIL;
-			/* rc will be logged by gsm411_send_rp_error() */
-			rate_ctr_inc(&net->msc_ctrs->ctr[MSC_CTR_SMS_DELIVER_UNKNOWN_ERROR]);
-		}
-#else
-		rc = GSM411_RP_CAUSE_MO_NUM_UNASSIGNED;
+#ifdef BUILD_SMPP
+	/* Avoid a second look-up */
+	if (smpp_route_smpp_first()) {
 		rate_ctr_inc(&net->msc_ctrs->ctr[MSC_CTR_SMS_NO_RECEIVER]);
+		return GSM411_RP_CAUSE_MO_NUM_UNASSIGNED;
+	}
+
+	rc = smpp_try_deliver(gsms, msc_a);
+	if (rc == GSM411_RP_CAUSE_MO_NUM_UNASSIGNED) {
+		rate_ctr_inc(&net->msc_ctrs->ctr[MSC_CTR_SMS_NO_RECEIVER]);
+	} else if (rc < 0) {
+		LOG_TRANS(trans, LOGL_ERROR, "SMS delivery error: %d\n", rc);
+		rc = GSM411_RP_CAUSE_MO_TEMP_FAIL;
+		/* rc will be logged by gsm411_send_rp_error() */
+		rate_ctr_inc(&net->msc_ctrs->ctr[MSC_CTR_SMS_DELIVER_UNKNOWN_ERROR]);
+	}
+#else
+	rc = GSM411_RP_CAUSE_MO_NUM_UNASSIGNED;
+	rate_ctr_inc(&net->msc_ctrs->ctr[MSC_CTR_SMS_NO_RECEIVER]);
 #endif
-	} else
-		rc = 0;
 
 	return rc;
 }
