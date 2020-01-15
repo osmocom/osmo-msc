@@ -773,6 +773,10 @@ static int deliver_to_esme(struct osmo_esme *esme, struct gsm_sms *sms,
 	if (ret < 0)
 		return ret;
 
+	OSMO_ASSERT(!sms->smpp.esme);
+	smpp_esme_get(esme);
+	sms->smpp.esme = esme;
+
 	return smpp_cmd_enqueue(esme, vsub, sms,
 				deliver.sequence_number);
 }
