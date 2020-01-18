@@ -18,10 +18,11 @@
         <param name='terminal' doc='Write to terminal' />
       </params>
     </command>
-    <command id='write file'>
+    <command id='write file [PATH]'>
       <params>
         <param name='write' doc='Write running configuration to memory, network, or terminal' />
         <param name='file' doc='Write to configuration file' />
+        <param name='[PATH]' doc='Set file path to store the config, or replace if already exists' />
       </params>
     </command>
     <command id='write memory'>
@@ -279,7 +280,7 @@
         <param name='MASK' doc='List of logging categories to log, e.g. &apos;abc:mno:xyz&apos;. Available log categories depend on the specific application, refer to the &apos;logging level&apos; command. Optionally add individual log levels like &apos;abc,1:mno,3:xyz,5&apos;, where the level numbers are LOGL_DEBUG=1 LOGL_INFO=3 LOGL_NOTICE=5 LOGL_ERROR=7 LOGL_FATAL=8' />
       </params>
     </command>
-    <command id='logging level (rll|cc|mm|rr|mncc|pag|msc|mgcp|ho|db|ref|ctrl|smpp|ranap|vlr|iucs|bssap|sgs|lglobal|llapd|linp|lmux|lmi|lmib|lsms|lctrl|lgtp|lstats|lgsup|loap|lss7|lsccp|lsua|lm3ua|lmgcp|ljibuf|lrspro) (debug|info|notice|error|fatal)'>
+    <command id='logging level (rll|cc|mm|rr|mncc|pag|msc|mgcp|ho|db|ref|ctrl|smpp|ranap|vlr|iucs|bssap|sgs|ss|lglobal|llapd|linp|lmux|lmi|lmib|lsms|lctrl|lgtp|lstats|lgsup|loap|lss7|lsccp|lsua|lm3ua|lmgcp|ljibuf|lrspro) (debug|info|notice|error|fatal)'>
       <params>
         <param name='logging' doc='Configure logging' />
         <param name='level' doc='Set the log level for a specified category' />
@@ -301,6 +302,7 @@
         <param name='iucs' doc='Iu-CS Protocol' />
         <param name='bssap' doc='BSSAP Protocol (A Interface)' />
         <param name='sgs' doc='SGs Interface (SGsAP)' />
+        <param name='ss' doc='Supplementary Services' />
         <param name='lglobal' doc='Library-internal global log family' />
         <param name='llapd' doc='LAPD in libosmogsm' />
         <param name='linp' doc='A-bis Intput Subsystem' />
@@ -357,6 +359,55 @@
         <param name='logging' doc='Configure logging' />
         <param name='level' doc='Set the log level for a specified category' />
         <param name='force-all' doc='Release any globally forced log level set with &apos;logging level force-all &lt;level&gt;&apos;' />
+      </params>
+    </command>
+    <command id='logp (rll|cc|mm|rr|mncc|pag|msc|mgcp|ho|db|ref|ctrl|smpp|ranap|vlr|iucs|bssap|sgs|ss|lglobal|llapd|linp|lmux|lmi|lmib|lsms|lctrl|lgtp|lstats|lgsup|loap|lss7|lsccp|lsua|lm3ua|lmgcp|ljibuf|lrspro) (debug|info|notice|error|fatal) .LOGMESSAGE'>
+      <params>
+        <param name='logp' doc='Print a message on all log outputs; useful for placing markers in test logs' />
+        <param name='rll' doc='A-bis Radio Link Layer (RLL)' />
+        <param name='cc' doc='Layer3 Call Control (CC)' />
+        <param name='mm' doc='Layer3 Mobility Management (MM)' />
+        <param name='rr' doc='Layer3 Radio Resource (RR)' />
+        <param name='mncc' doc='MNCC API for Call Control application' />
+        <param name='pag' doc='Paging Subsystem' />
+        <param name='msc' doc='Mobile Switching Center' />
+        <param name='mgcp' doc='Media Gateway Control Protocol' />
+        <param name='ho' doc='Hand-Over' />
+        <param name='db' doc='Database Layer' />
+        <param name='ref' doc='Reference Counting' />
+        <param name='ctrl' doc='Control interface' />
+        <param name='smpp' doc='SMPP interface for external SMS apps' />
+        <param name='ranap' doc='Radio Access Network Application Part Protocol' />
+        <param name='vlr' doc='Visitor Location Register' />
+        <param name='iucs' doc='Iu-CS Protocol' />
+        <param name='bssap' doc='BSSAP Protocol (A Interface)' />
+        <param name='sgs' doc='SGs Interface (SGsAP)' />
+        <param name='ss' doc='Supplementary Services' />
+        <param name='lglobal' doc='Library-internal global log family' />
+        <param name='llapd' doc='LAPD in libosmogsm' />
+        <param name='linp' doc='A-bis Intput Subsystem' />
+        <param name='lmux' doc='A-bis B-Subchannel TRAU Frame Multiplex' />
+        <param name='lmi' doc='A-bis Input Driver for Signalling' />
+        <param name='lmib' doc='A-bis Input Driver for B-Channels (voice)' />
+        <param name='lsms' doc='Layer3 Short Message Service (SMS)' />
+        <param name='lctrl' doc='Control Interface' />
+        <param name='lgtp' doc='GPRS GTP library' />
+        <param name='lstats' doc='Statistics messages and logging' />
+        <param name='lgsup' doc='Generic Subscriber Update Protocol' />
+        <param name='loap' doc='Osmocom Authentication Protocol' />
+        <param name='lss7' doc='libosmo-sigtran Signalling System 7' />
+        <param name='lsccp' doc='libosmo-sigtran SCCP Implementation' />
+        <param name='lsua' doc='libosmo-sigtran SCCP User Adaptation' />
+        <param name='lm3ua' doc='libosmo-sigtran MTP3 User Adaptation' />
+        <param name='lmgcp' doc='libosmo-mgcp Media Gateway Control Protocol' />
+        <param name='ljibuf' doc='libosmo-netif Jitter Buffer' />
+        <param name='lrspro' doc='Remote SIM protocol' />
+        <param name='debug' doc='Log debug messages and higher levels' />
+        <param name='info' doc='Log informational messages and higher levels' />
+        <param name='notice' doc='Log noticeable messages and higher levels' />
+        <param name='error' doc='Log error messages and higher levels' />
+        <param name='fatal' doc='Log only fatal messages' />
+        <param name='.LOGMESSAGE' doc='Arbitrary message to log on given category and log level' />
       </params>
     </command>
     <command id='show logging vty'>
@@ -438,6 +489,93 @@
         <param name='rate-counters' doc='Show all rate counters' />
       </params>
     </command>
+    <command id='show neighbor'>
+      <params>
+        <param name='show' doc='Show running system information' />
+        <param name='neighbor' doc='Show Handover targets' />
+      </params>
+    </command>
+    <command id='show neighbor (a|iu) (ran-pc|msc-ipa-name) RAN_PC_OR_MSC_IPA_NAME'>
+      <params>
+        <param name='show' doc='Show running system information' />
+        <param name='neighbor' doc='Show Handover targets' />
+        <param name='a' doc='Neighbor on GERAN-A' />
+        <param name='iu' doc='Neighbor on UTRAN-Iu' />
+        <param name='ran-pc' doc='SCCP point code of RAN peer' />
+        <param name='msc-ipa-name' doc='GSUP IPA name of target MSC' />
+        <param name='RAN_PC_OR_MSC_IPA_NAME' doc='Point code or MSC IPA name value' />
+      </params>
+    </command>
+    <command id='show neighbor (a|iu)'>
+      <params>
+        <param name='show' doc='Show running system information' />
+        <param name='neighbor' doc='Show Handover targets' />
+        <param name='a' doc='Neighbor on GERAN-A' />
+        <param name='iu' doc='Neighbor on UTRAN-Iu' />
+      </params>
+    </command>
+    <command id='show neighbor (a|iu) lac &lt;0-65535&gt;'>
+      <params>
+        <param name='show' doc='Show running system information' />
+        <param name='neighbor' doc='Show Handover targets' />
+        <param name='a' doc='Neighbor on GERAN-A' />
+        <param name='iu' doc='Neighbor on UTRAN-Iu' />
+        <param name='lac' doc='Handover target cell by LAC' />
+        <param name='&lt;0-65535&gt;' doc='LAC' />
+      </params>
+    </command>
+    <command id='show neighbor (a|iu) lac-ci &lt;0-65535&gt; &lt;0-65535&gt;'>
+      <params>
+        <param name='show' doc='Show running system information' />
+        <param name='neighbor' doc='Show Handover targets' />
+        <param name='a' doc='Neighbor on GERAN-A' />
+        <param name='iu' doc='Neighbor on UTRAN-Iu' />
+        <param name='lac-ci' doc='Handover target cell by LAC and CI' />
+        <param name='&lt;0-65535&gt;' doc='LAC' />
+        <param name='&lt;0-65535&gt;' doc='CI' />
+      </params>
+    </command>
+    <command id='show neighbor (a|iu) cgi &lt;0-999&gt; &lt;0-999&gt; &lt;0-65535&gt; &lt;0-65535&gt;'>
+      <params>
+        <param name='show' doc='Show running system information' />
+        <param name='neighbor' doc='Show Handover targets' />
+        <param name='a' doc='Neighbor on GERAN-A' />
+        <param name='iu' doc='Neighbor on UTRAN-Iu' />
+        <param name='cgi' doc='Handover target cell by Cell-Global Identifier (MCC, MNC, LAC, CI)' />
+        <param name='&lt;0-999&gt;' doc='MCC' />
+        <param name='&lt;0-999&gt;' doc='MNC' />
+        <param name='&lt;0-65535&gt;' doc='LAC' />
+        <param name='&lt;0-65535&gt;' doc='CI' />
+      </params>
+    </command>
+    <command id='show neighbor lac &lt;0-65535&gt;'>
+      <params>
+        <param name='show' doc='Show running system information' />
+        <param name='neighbor' doc='Show Handover targets' />
+        <param name='lac' doc='Handover target cell by LAC' />
+        <param name='&lt;0-65535&gt;' doc='LAC' />
+      </params>
+    </command>
+    <command id='show neighbor lac-ci &lt;0-65535&gt; &lt;0-65535&gt;'>
+      <params>
+        <param name='show' doc='Show running system information' />
+        <param name='neighbor' doc='Show Handover targets' />
+        <param name='lac-ci' doc='Handover target cell by LAC and CI' />
+        <param name='&lt;0-65535&gt;' doc='LAC' />
+        <param name='&lt;0-65535&gt;' doc='CI' />
+      </params>
+    </command>
+    <command id='show neighbor cgi &lt;0-999&gt; &lt;0-999&gt; &lt;0-65535&gt; &lt;0-65535&gt;'>
+      <params>
+        <param name='show' doc='Show running system information' />
+        <param name='neighbor' doc='Show Handover targets' />
+        <param name='cgi' doc='Handover target cell by Cell-Global Identifier (MCC, MNC, LAC, CI)' />
+        <param name='&lt;0-999&gt;' doc='MCC' />
+        <param name='&lt;0-999&gt;' doc='MNC' />
+        <param name='&lt;0-65535&gt;' doc='LAC' />
+        <param name='&lt;0-65535&gt;' doc='CI' />
+      </params>
+    </command>
     <command id='show fsm NAME'>
       <params>
         <param name='show' doc='Show running system information' />
@@ -472,7 +610,7 @@
         <param name='sgs-connections' doc='Show SGs interface connections / MMEs' />
       </params>
     </command>
-    <command id='show subscriber (msisdn|extension|imsi|tmsi|id) ID'>
+    <command id='show subscriber (msisdn|extension|imsi|tmsi|id) ID [(conn|trans|conn+trans)]'>
       <params>
         <param name='show' doc='Show running system information' />
         <param name='subscriber' doc='Operations on a Subscriber' />
@@ -480,15 +618,21 @@
         <param name='extension' doc='Legacy alias for &apos;msisdn&apos;' />
         <param name='imsi' doc='Identify subscriber by IMSI' />
         <param name='tmsi' doc='Identify subscriber by TMSI' />
-        <param name='id' doc='Identify subscriber by database ID' />
+        <param name='id' doc='Legacy alias for &apos;imsi&apos;' />
         <param name='ID' doc='Identifier for the subscriber' />
+        <param name='[conn]' doc='Show child connections' />
+        <param name='[trans]' doc='Show child transactions' />
+        <param name='[conn+trans]' doc='Show child connections and transactions' />
       </params>
     </command>
-    <command id='show subscriber cache'>
+    <command id='show subscriber cache [(conn|trans|conn+trans)]'>
       <params>
         <param name='show' doc='Show running system information' />
         <param name='subscriber' doc='Show information about subscribers' />
         <param name='cache' doc='Display contents of subscriber cache' />
+        <param name='[conn]' doc='Show child connections' />
+        <param name='[trans]' doc='Show child transactions' />
+        <param name='[conn+trans]' doc='Show child connections and transactions' />
       </params>
     </command>
     <command id='show bsc'>
@@ -497,10 +641,11 @@
         <param name='bsc' doc='BSC' />
       </params>
     </command>
-    <command id='show connection'>
+    <command id='show connection [trans]'>
       <params>
         <param name='show' doc='Show running system information' />
         <param name='connection' doc='Subscriber Connections' />
+        <param name='[trans]' doc='Show child transactions of each connection' />
       </params>
     </command>
     <command id='show transaction'>
@@ -538,7 +683,7 @@
         <param name='extension' doc='Legacy alias for &apos;msisdn&apos;' />
         <param name='imsi' doc='Identify subscriber by IMSI' />
         <param name='tmsi' doc='Identify subscriber by TMSI' />
-        <param name='id' doc='Identify subscriber by database ID' />
+        <param name='id' doc='Legacy alias for &apos;imsi&apos;' />
         <param name='ID' doc='Identifier for the subscriber' />
         <param name='sms' doc='SMS Operations' />
         <param name='sender' doc='Operations on a Subscriber' />
@@ -546,7 +691,7 @@
         <param name='extension' doc='Legacy alias for &apos;msisdn&apos;' />
         <param name='imsi' doc='Identify subscriber by IMSI' />
         <param name='tmsi' doc='Identify subscriber by TMSI' />
-        <param name='id' doc='Identify subscriber by database ID' />
+        <param name='id' doc='Legacy alias for &apos;imsi&apos;' />
         <param name='SENDER_ID' doc='Identifier for the subscriber' />
         <param name='send' doc='Send SMS' />
         <param name='.LINE' doc='Actual SMS Text' />
@@ -559,7 +704,7 @@
         <param name='extension' doc='Legacy alias for &apos;msisdn&apos;' />
         <param name='imsi' doc='Identify subscriber by IMSI' />
         <param name='tmsi' doc='Identify subscriber by TMSI' />
-        <param name='id' doc='Identify subscriber by database ID' />
+        <param name='id' doc='Legacy alias for &apos;imsi&apos;' />
         <param name='ID' doc='Identifier for the subscriber' />
         <param name='silent-sms' doc='Silent SMS Operations' />
         <param name='sender' doc='Operations on a Subscriber' />
@@ -567,7 +712,7 @@
         <param name='extension' doc='Legacy alias for &apos;msisdn&apos;' />
         <param name='imsi' doc='Identify subscriber by IMSI' />
         <param name='tmsi' doc='Identify subscriber by TMSI' />
-        <param name='id' doc='Identify subscriber by database ID' />
+        <param name='id' doc='Legacy alias for &apos;imsi&apos;' />
         <param name='SENDER_ID' doc='Identifier for the subscriber' />
         <param name='send' doc='Send SMS' />
         <param name='.LINE' doc='Actual SMS Text' />
@@ -580,7 +725,7 @@
         <param name='extension' doc='Legacy alias for &apos;msisdn&apos;' />
         <param name='imsi' doc='Identify subscriber by IMSI' />
         <param name='tmsi' doc='Identify subscriber by TMSI' />
-        <param name='id' doc='Identify subscriber by database ID' />
+        <param name='id' doc='Legacy alias for &apos;imsi&apos;' />
         <param name='ID' doc='Identifier for the subscriber' />
         <param name='silent-call' doc='Silent call operation' />
         <param name='start' doc='Start silent call' />
@@ -605,7 +750,7 @@
         <param name='extension' doc='Legacy alias for &apos;msisdn&apos;' />
         <param name='imsi' doc='Identify subscriber by IMSI' />
         <param name='tmsi' doc='Identify subscriber by TMSI' />
-        <param name='id' doc='Identify subscriber by database ID' />
+        <param name='id' doc='Legacy alias for &apos;imsi&apos;' />
         <param name='ID' doc='Identifier for the subscriber' />
         <param name='silent-call' doc='Silent call operation' />
         <param name='stop' doc='Stop silent call' />
@@ -618,7 +763,7 @@
         <param name='extension' doc='Legacy alias for &apos;msisdn&apos;' />
         <param name='imsi' doc='Identify subscriber by IMSI' />
         <param name='tmsi' doc='Identify subscriber by TMSI' />
-        <param name='id' doc='Identify subscriber by database ID' />
+        <param name='id' doc='Legacy alias for &apos;imsi&apos;' />
         <param name='ID' doc='Identifier for the subscriber' />
         <param name='ussd-notify' doc='Send a USSD notify to the subscriber' />
         <param name='0' doc='Alerting Level 0' />
@@ -634,7 +779,7 @@
         <param name='extension' doc='Legacy alias for &apos;msisdn&apos;' />
         <param name='imsi' doc='Identify subscriber by IMSI' />
         <param name='tmsi' doc='Identify subscriber by TMSI' />
-        <param name='id' doc='Identify subscriber by database ID' />
+        <param name='id' doc='Legacy alias for &apos;imsi&apos;' />
         <param name='ID' doc='Identifier for the subscriber' />
         <param name='ms-test' doc='Send a TS 04.14 MS Test Command to subscriber' />
         <param name='close-loop' doc='Close a TCH Loop inside the MS' />
@@ -654,7 +799,7 @@
         <param name='extension' doc='Legacy alias for &apos;msisdn&apos;' />
         <param name='imsi' doc='Identify subscriber by IMSI' />
         <param name='tmsi' doc='Identify subscriber by TMSI' />
-        <param name='id' doc='Identify subscriber by database ID' />
+        <param name='id' doc='Legacy alias for &apos;imsi&apos;' />
         <param name='ID' doc='Identifier for the subscriber' />
         <param name='ms-test' doc='Send a TS 04.14 MS Test Command to subscriber' />
         <param name='open-loop' doc='Open a TCH Loop inside the MS' />
@@ -667,7 +812,7 @@
         <param name='extension' doc='Legacy alias for &apos;msisdn&apos;' />
         <param name='imsi' doc='Identify subscriber by IMSI' />
         <param name='tmsi' doc='Identify subscriber by TMSI' />
-        <param name='id' doc='Identify subscriber by database ID' />
+        <param name='id' doc='Legacy alias for &apos;imsi&apos;' />
         <param name='ID' doc='Identifier for the subscriber' />
         <param name='paging' doc='Issue an empty Paging for the subscriber (for debugging)' />
       </params>
@@ -959,7 +1104,7 @@
         <param name='MASK' doc='List of logging categories to log, e.g. &apos;abc:mno:xyz&apos;. Available log categories depend on the specific application, refer to the &apos;logging level&apos; command. Optionally add individual log levels like &apos;abc,1:mno,3:xyz,5&apos;, where the level numbers are LOGL_DEBUG=1 LOGL_INFO=3 LOGL_NOTICE=5 LOGL_ERROR=7 LOGL_FATAL=8' />
       </params>
     </command>
-    <command id='logging level (rll|cc|mm|rr|mncc|pag|msc|mgcp|ho|db|ref|ctrl|smpp|ranap|vlr|iucs|bssap|sgs|lglobal|llapd|linp|lmux|lmi|lmib|lsms|lctrl|lgtp|lstats|lgsup|loap|lss7|lsccp|lsua|lm3ua|lmgcp|ljibuf|lrspro) (debug|info|notice|error|fatal)'>
+    <command id='logging level (rll|cc|mm|rr|mncc|pag|msc|mgcp|ho|db|ref|ctrl|smpp|ranap|vlr|iucs|bssap|sgs|ss|lglobal|llapd|linp|lmux|lmi|lmib|lsms|lctrl|lgtp|lstats|lgsup|loap|lss7|lsccp|lsua|lm3ua|lmgcp|ljibuf|lrspro) (debug|info|notice|error|fatal)'>
       <params>
         <param name='logging' doc='Configure logging' />
         <param name='level' doc='Set the log level for a specified category' />
@@ -981,6 +1126,7 @@
         <param name='iucs' doc='Iu-CS Protocol' />
         <param name='bssap' doc='BSSAP Protocol (A Interface)' />
         <param name='sgs' doc='SGs Interface (SGsAP)' />
+        <param name='ss' doc='Supplementary Services' />
         <param name='lglobal' doc='Library-internal global log family' />
         <param name='llapd' doc='LAPD in libosmogsm' />
         <param name='linp' doc='A-bis Intput Subsystem' />
@@ -1037,6 +1183,55 @@
         <param name='logging' doc='Configure logging' />
         <param name='level' doc='Set the log level for a specified category' />
         <param name='force-all' doc='Release any globally forced log level set with &apos;logging level force-all &lt;level&gt;&apos;' />
+      </params>
+    </command>
+    <command id='logp (rll|cc|mm|rr|mncc|pag|msc|mgcp|ho|db|ref|ctrl|smpp|ranap|vlr|iucs|bssap|sgs|ss|lglobal|llapd|linp|lmux|lmi|lmib|lsms|lctrl|lgtp|lstats|lgsup|loap|lss7|lsccp|lsua|lm3ua|lmgcp|ljibuf|lrspro) (debug|info|notice|error|fatal) .LOGMESSAGE'>
+      <params>
+        <param name='logp' doc='Print a message on all log outputs; useful for placing markers in test logs' />
+        <param name='rll' doc='A-bis Radio Link Layer (RLL)' />
+        <param name='cc' doc='Layer3 Call Control (CC)' />
+        <param name='mm' doc='Layer3 Mobility Management (MM)' />
+        <param name='rr' doc='Layer3 Radio Resource (RR)' />
+        <param name='mncc' doc='MNCC API for Call Control application' />
+        <param name='pag' doc='Paging Subsystem' />
+        <param name='msc' doc='Mobile Switching Center' />
+        <param name='mgcp' doc='Media Gateway Control Protocol' />
+        <param name='ho' doc='Hand-Over' />
+        <param name='db' doc='Database Layer' />
+        <param name='ref' doc='Reference Counting' />
+        <param name='ctrl' doc='Control interface' />
+        <param name='smpp' doc='SMPP interface for external SMS apps' />
+        <param name='ranap' doc='Radio Access Network Application Part Protocol' />
+        <param name='vlr' doc='Visitor Location Register' />
+        <param name='iucs' doc='Iu-CS Protocol' />
+        <param name='bssap' doc='BSSAP Protocol (A Interface)' />
+        <param name='sgs' doc='SGs Interface (SGsAP)' />
+        <param name='ss' doc='Supplementary Services' />
+        <param name='lglobal' doc='Library-internal global log family' />
+        <param name='llapd' doc='LAPD in libosmogsm' />
+        <param name='linp' doc='A-bis Intput Subsystem' />
+        <param name='lmux' doc='A-bis B-Subchannel TRAU Frame Multiplex' />
+        <param name='lmi' doc='A-bis Input Driver for Signalling' />
+        <param name='lmib' doc='A-bis Input Driver for B-Channels (voice)' />
+        <param name='lsms' doc='Layer3 Short Message Service (SMS)' />
+        <param name='lctrl' doc='Control Interface' />
+        <param name='lgtp' doc='GPRS GTP library' />
+        <param name='lstats' doc='Statistics messages and logging' />
+        <param name='lgsup' doc='Generic Subscriber Update Protocol' />
+        <param name='loap' doc='Osmocom Authentication Protocol' />
+        <param name='lss7' doc='libosmo-sigtran Signalling System 7' />
+        <param name='lsccp' doc='libosmo-sigtran SCCP Implementation' />
+        <param name='lsua' doc='libosmo-sigtran SCCP User Adaptation' />
+        <param name='lm3ua' doc='libosmo-sigtran MTP3 User Adaptation' />
+        <param name='lmgcp' doc='libosmo-mgcp Media Gateway Control Protocol' />
+        <param name='ljibuf' doc='libosmo-netif Jitter Buffer' />
+        <param name='lrspro' doc='Remote SIM protocol' />
+        <param name='debug' doc='Log debug messages and higher levels' />
+        <param name='info' doc='Log informational messages and higher levels' />
+        <param name='notice' doc='Log noticeable messages and higher levels' />
+        <param name='error' doc='Log error messages and higher levels' />
+        <param name='fatal' doc='Log only fatal messages' />
+        <param name='.LOGMESSAGE' doc='Arbitrary message to log on given category and log level' />
       </params>
     </command>
     <command id='show logging vty'>
@@ -1118,6 +1313,93 @@
         <param name='rate-counters' doc='Show all rate counters' />
       </params>
     </command>
+    <command id='show neighbor'>
+      <params>
+        <param name='show' doc='Show running system information' />
+        <param name='neighbor' doc='Show Handover targets' />
+      </params>
+    </command>
+    <command id='show neighbor (a|iu) (ran-pc|msc-ipa-name) RAN_PC_OR_MSC_IPA_NAME'>
+      <params>
+        <param name='show' doc='Show running system information' />
+        <param name='neighbor' doc='Show Handover targets' />
+        <param name='a' doc='Neighbor on GERAN-A' />
+        <param name='iu' doc='Neighbor on UTRAN-Iu' />
+        <param name='ran-pc' doc='SCCP point code of RAN peer' />
+        <param name='msc-ipa-name' doc='GSUP IPA name of target MSC' />
+        <param name='RAN_PC_OR_MSC_IPA_NAME' doc='Point code or MSC IPA name value' />
+      </params>
+    </command>
+    <command id='show neighbor (a|iu)'>
+      <params>
+        <param name='show' doc='Show running system information' />
+        <param name='neighbor' doc='Show Handover targets' />
+        <param name='a' doc='Neighbor on GERAN-A' />
+        <param name='iu' doc='Neighbor on UTRAN-Iu' />
+      </params>
+    </command>
+    <command id='show neighbor (a|iu) lac &lt;0-65535&gt;'>
+      <params>
+        <param name='show' doc='Show running system information' />
+        <param name='neighbor' doc='Show Handover targets' />
+        <param name='a' doc='Neighbor on GERAN-A' />
+        <param name='iu' doc='Neighbor on UTRAN-Iu' />
+        <param name='lac' doc='Handover target cell by LAC' />
+        <param name='&lt;0-65535&gt;' doc='LAC' />
+      </params>
+    </command>
+    <command id='show neighbor (a|iu) lac-ci &lt;0-65535&gt; &lt;0-65535&gt;'>
+      <params>
+        <param name='show' doc='Show running system information' />
+        <param name='neighbor' doc='Show Handover targets' />
+        <param name='a' doc='Neighbor on GERAN-A' />
+        <param name='iu' doc='Neighbor on UTRAN-Iu' />
+        <param name='lac-ci' doc='Handover target cell by LAC and CI' />
+        <param name='&lt;0-65535&gt;' doc='LAC' />
+        <param name='&lt;0-65535&gt;' doc='CI' />
+      </params>
+    </command>
+    <command id='show neighbor (a|iu) cgi &lt;0-999&gt; &lt;0-999&gt; &lt;0-65535&gt; &lt;0-65535&gt;'>
+      <params>
+        <param name='show' doc='Show running system information' />
+        <param name='neighbor' doc='Show Handover targets' />
+        <param name='a' doc='Neighbor on GERAN-A' />
+        <param name='iu' doc='Neighbor on UTRAN-Iu' />
+        <param name='cgi' doc='Handover target cell by Cell-Global Identifier (MCC, MNC, LAC, CI)' />
+        <param name='&lt;0-999&gt;' doc='MCC' />
+        <param name='&lt;0-999&gt;' doc='MNC' />
+        <param name='&lt;0-65535&gt;' doc='LAC' />
+        <param name='&lt;0-65535&gt;' doc='CI' />
+      </params>
+    </command>
+    <command id='show neighbor lac &lt;0-65535&gt;'>
+      <params>
+        <param name='show' doc='Show running system information' />
+        <param name='neighbor' doc='Show Handover targets' />
+        <param name='lac' doc='Handover target cell by LAC' />
+        <param name='&lt;0-65535&gt;' doc='LAC' />
+      </params>
+    </command>
+    <command id='show neighbor lac-ci &lt;0-65535&gt; &lt;0-65535&gt;'>
+      <params>
+        <param name='show' doc='Show running system information' />
+        <param name='neighbor' doc='Show Handover targets' />
+        <param name='lac-ci' doc='Handover target cell by LAC and CI' />
+        <param name='&lt;0-65535&gt;' doc='LAC' />
+        <param name='&lt;0-65535&gt;' doc='CI' />
+      </params>
+    </command>
+    <command id='show neighbor cgi &lt;0-999&gt; &lt;0-999&gt; &lt;0-65535&gt; &lt;0-65535&gt;'>
+      <params>
+        <param name='show' doc='Show running system information' />
+        <param name='neighbor' doc='Show Handover targets' />
+        <param name='cgi' doc='Handover target cell by Cell-Global Identifier (MCC, MNC, LAC, CI)' />
+        <param name='&lt;0-999&gt;' doc='MCC' />
+        <param name='&lt;0-999&gt;' doc='MNC' />
+        <param name='&lt;0-65535&gt;' doc='LAC' />
+        <param name='&lt;0-65535&gt;' doc='CI' />
+      </params>
+    </command>
     <command id='show fsm NAME'>
       <params>
         <param name='show' doc='Show running system information' />
@@ -1152,7 +1434,7 @@
         <param name='sgs-connections' doc='Show SGs interface connections / MMEs' />
       </params>
     </command>
-    <command id='show subscriber (msisdn|extension|imsi|tmsi|id) ID'>
+    <command id='show subscriber (msisdn|extension|imsi|tmsi|id) ID [(conn|trans|conn+trans)]'>
       <params>
         <param name='show' doc='Show running system information' />
         <param name='subscriber' doc='Operations on a Subscriber' />
@@ -1160,15 +1442,21 @@
         <param name='extension' doc='Legacy alias for &apos;msisdn&apos;' />
         <param name='imsi' doc='Identify subscriber by IMSI' />
         <param name='tmsi' doc='Identify subscriber by TMSI' />
-        <param name='id' doc='Identify subscriber by database ID' />
+        <param name='id' doc='Legacy alias for &apos;imsi&apos;' />
         <param name='ID' doc='Identifier for the subscriber' />
+        <param name='[conn]' doc='Show child connections' />
+        <param name='[trans]' doc='Show child transactions' />
+        <param name='[conn+trans]' doc='Show child connections and transactions' />
       </params>
     </command>
-    <command id='show subscriber cache'>
+    <command id='show subscriber cache [(conn|trans|conn+trans)]'>
       <params>
         <param name='show' doc='Show running system information' />
         <param name='subscriber' doc='Show information about subscribers' />
         <param name='cache' doc='Display contents of subscriber cache' />
+        <param name='[conn]' doc='Show child connections' />
+        <param name='[trans]' doc='Show child transactions' />
+        <param name='[conn+trans]' doc='Show child connections and transactions' />
       </params>
     </command>
     <command id='show bsc'>
@@ -1177,10 +1465,11 @@
         <param name='bsc' doc='BSC' />
       </params>
     </command>
-    <command id='show connection'>
+    <command id='show connection [trans]'>
       <params>
         <param name='show' doc='Show running system information' />
         <param name='connection' doc='Subscriber Connections' />
+        <param name='[trans]' doc='Show child transactions of each connection' />
       </params>
     </command>
     <command id='show transaction'>
@@ -1218,7 +1507,7 @@
         <param name='extension' doc='Legacy alias for &apos;msisdn&apos;' />
         <param name='imsi' doc='Identify subscriber by IMSI' />
         <param name='tmsi' doc='Identify subscriber by TMSI' />
-        <param name='id' doc='Identify subscriber by database ID' />
+        <param name='id' doc='Legacy alias for &apos;imsi&apos;' />
         <param name='ID' doc='Identifier for the subscriber' />
         <param name='sms' doc='SMS Operations' />
         <param name='sender' doc='Operations on a Subscriber' />
@@ -1226,7 +1515,7 @@
         <param name='extension' doc='Legacy alias for &apos;msisdn&apos;' />
         <param name='imsi' doc='Identify subscriber by IMSI' />
         <param name='tmsi' doc='Identify subscriber by TMSI' />
-        <param name='id' doc='Identify subscriber by database ID' />
+        <param name='id' doc='Legacy alias for &apos;imsi&apos;' />
         <param name='SENDER_ID' doc='Identifier for the subscriber' />
         <param name='send' doc='Send SMS' />
         <param name='.LINE' doc='Actual SMS Text' />
@@ -1239,7 +1528,7 @@
         <param name='extension' doc='Legacy alias for &apos;msisdn&apos;' />
         <param name='imsi' doc='Identify subscriber by IMSI' />
         <param name='tmsi' doc='Identify subscriber by TMSI' />
-        <param name='id' doc='Identify subscriber by database ID' />
+        <param name='id' doc='Legacy alias for &apos;imsi&apos;' />
         <param name='ID' doc='Identifier for the subscriber' />
         <param name='silent-sms' doc='Silent SMS Operations' />
         <param name='sender' doc='Operations on a Subscriber' />
@@ -1247,7 +1536,7 @@
         <param name='extension' doc='Legacy alias for &apos;msisdn&apos;' />
         <param name='imsi' doc='Identify subscriber by IMSI' />
         <param name='tmsi' doc='Identify subscriber by TMSI' />
-        <param name='id' doc='Identify subscriber by database ID' />
+        <param name='id' doc='Legacy alias for &apos;imsi&apos;' />
         <param name='SENDER_ID' doc='Identifier for the subscriber' />
         <param name='send' doc='Send SMS' />
         <param name='.LINE' doc='Actual SMS Text' />
@@ -1260,7 +1549,7 @@
         <param name='extension' doc='Legacy alias for &apos;msisdn&apos;' />
         <param name='imsi' doc='Identify subscriber by IMSI' />
         <param name='tmsi' doc='Identify subscriber by TMSI' />
-        <param name='id' doc='Identify subscriber by database ID' />
+        <param name='id' doc='Legacy alias for &apos;imsi&apos;' />
         <param name='ID' doc='Identifier for the subscriber' />
         <param name='silent-call' doc='Silent call operation' />
         <param name='start' doc='Start silent call' />
@@ -1285,7 +1574,7 @@
         <param name='extension' doc='Legacy alias for &apos;msisdn&apos;' />
         <param name='imsi' doc='Identify subscriber by IMSI' />
         <param name='tmsi' doc='Identify subscriber by TMSI' />
-        <param name='id' doc='Identify subscriber by database ID' />
+        <param name='id' doc='Legacy alias for &apos;imsi&apos;' />
         <param name='ID' doc='Identifier for the subscriber' />
         <param name='silent-call' doc='Silent call operation' />
         <param name='stop' doc='Stop silent call' />
@@ -1298,7 +1587,7 @@
         <param name='extension' doc='Legacy alias for &apos;msisdn&apos;' />
         <param name='imsi' doc='Identify subscriber by IMSI' />
         <param name='tmsi' doc='Identify subscriber by TMSI' />
-        <param name='id' doc='Identify subscriber by database ID' />
+        <param name='id' doc='Legacy alias for &apos;imsi&apos;' />
         <param name='ID' doc='Identifier for the subscriber' />
         <param name='ussd-notify' doc='Send a USSD notify to the subscriber' />
         <param name='0' doc='Alerting Level 0' />
@@ -1314,7 +1603,7 @@
         <param name='extension' doc='Legacy alias for &apos;msisdn&apos;' />
         <param name='imsi' doc='Identify subscriber by IMSI' />
         <param name='tmsi' doc='Identify subscriber by TMSI' />
-        <param name='id' doc='Identify subscriber by database ID' />
+        <param name='id' doc='Legacy alias for &apos;imsi&apos;' />
         <param name='ID' doc='Identifier for the subscriber' />
         <param name='ms-test' doc='Send a TS 04.14 MS Test Command to subscriber' />
         <param name='close-loop' doc='Close a TCH Loop inside the MS' />
@@ -1334,7 +1623,7 @@
         <param name='extension' doc='Legacy alias for &apos;msisdn&apos;' />
         <param name='imsi' doc='Identify subscriber by IMSI' />
         <param name='tmsi' doc='Identify subscriber by TMSI' />
-        <param name='id' doc='Identify subscriber by database ID' />
+        <param name='id' doc='Legacy alias for &apos;imsi&apos;' />
         <param name='ID' doc='Identifier for the subscriber' />
         <param name='ms-test' doc='Send a TS 04.14 MS Test Command to subscriber' />
         <param name='open-loop' doc='Open a TCH Loop inside the MS' />
@@ -1347,7 +1636,7 @@
         <param name='extension' doc='Legacy alias for &apos;msisdn&apos;' />
         <param name='imsi' doc='Identify subscriber by IMSI' />
         <param name='tmsi' doc='Identify subscriber by TMSI' />
-        <param name='id' doc='Identify subscriber by database ID' />
+        <param name='id' doc='Legacy alias for &apos;imsi&apos;' />
         <param name='ID' doc='Identifier for the subscriber' />
         <param name='paging' doc='Issue an empty Paging for the subscriber (for debugging)' />
       </params>
@@ -1379,7 +1668,7 @@
         <param name='extension' doc='Legacy alias for &apos;msisdn&apos;' />
         <param name='imsi' doc='Identify subscriber by IMSI' />
         <param name='tmsi' doc='Identify subscriber by TMSI' />
-        <param name='id' doc='Identify subscriber by database ID' />
+        <param name='id' doc='Legacy alias for &apos;imsi&apos;' />
         <param name='ID' doc='Identifier for the subscriber' />
         <param name='expire' doc='Expire the subscriber Now' />
       </params>
@@ -1417,7 +1706,7 @@
         <param name='extension' doc='Legacy alias for &apos;msisdn&apos;' />
         <param name='imsi' doc='Identify subscriber by IMSI' />
         <param name='tmsi' doc='Identify subscriber by TMSI' />
-        <param name='id' doc='Identify subscriber by database ID' />
+        <param name='id' doc='Legacy alias for &apos;imsi&apos;' />
         <param name='ID' doc='Identifier for the subscriber' />
         <param name='sms' doc='SMS Operations' />
         <param name='pending-send' doc='Send pending SMS' />
@@ -1430,7 +1719,7 @@
         <param name='extension' doc='Legacy alias for &apos;msisdn&apos;' />
         <param name='imsi' doc='Identify subscriber by IMSI' />
         <param name='tmsi' doc='Identify subscriber by TMSI' />
-        <param name='id' doc='Identify subscriber by database ID' />
+        <param name='id' doc='Legacy alias for &apos;imsi&apos;' />
         <param name='ID' doc='Identifier for the subscriber' />
         <param name='sms' doc='SMS Operations' />
         <param name='delete-all' doc='Delete all SMS to be delivered to this subscriber -- WARNING: the SMS data for all unsent SMS for this subscriber WILL BE LOST.' />
@@ -1791,7 +2080,7 @@
         <param name='[last]' doc='Log source file info at the end of a log line. If omitted, log source file info just before the log text.' />
       </params>
     </command>
-    <command id='logging level (rll|cc|mm|rr|mncc|pag|msc|mgcp|ho|db|ref|ctrl|smpp|ranap|vlr|iucs|bssap|sgs|lglobal|llapd|linp|lmux|lmi|lmib|lsms|lctrl|lgtp|lstats|lgsup|loap|lss7|lsccp|lsua|lm3ua|lmgcp|ljibuf|lrspro) (debug|info|notice|error|fatal)'>
+    <command id='logging level (rll|cc|mm|rr|mncc|pag|msc|mgcp|ho|db|ref|ctrl|smpp|ranap|vlr|iucs|bssap|sgs|ss|lglobal|llapd|linp|lmux|lmi|lmib|lsms|lctrl|lgtp|lstats|lgsup|loap|lss7|lsccp|lsua|lm3ua|lmgcp|ljibuf|lrspro) (debug|info|notice|error|fatal)'>
       <params>
         <param name='logging' doc='Configure logging' />
         <param name='level' doc='Set the log level for a specified category' />
@@ -1813,6 +2102,7 @@
         <param name='iucs' doc='Iu-CS Protocol' />
         <param name='bssap' doc='BSSAP Protocol (A Interface)' />
         <param name='sgs' doc='SGs Interface (SGsAP)' />
+        <param name='ss' doc='Supplementary Services' />
         <param name='lglobal' doc='Library-internal global log family' />
         <param name='llapd' doc='LAPD in libosmogsm' />
         <param name='linp' doc='A-bis Intput Subsystem' />
@@ -2198,6 +2488,15 @@
         <param name='PC' doc='Override Destination Point Code' />
       </params>
     </command>
+    <command id='point-code override patch-sccp (disabled|both)'>
+      <params>
+        <param name='point-code' doc='Point Code Specific Features' />
+        <param name='override' doc='Override (force) a point-code to hard-coded value' />
+        <param name='patch-sccp' doc='Patch point code values into SCCP called/calling address' />
+        <param name='disabled' doc='Don&apos;t patch any point codes into SCCP called/calling address' />
+        <param name='both' doc='Patch both origin and destination point codes into SCCP called/calling address' />
+      </params>
+    </command>
   </node>
   <node id='config-cs7-asp'>
     <name>config-cs7-asp</name>
@@ -2223,6 +2522,21 @@
       <params>
         <param name='qos-class' doc='Specify QoS Class of ASP' />
         <param name='&lt;0-255&gt;' doc='QoS Class of ASP' />
+      </params>
+    </command>
+    <command id='role (sg|asp|ipsp)'>
+      <params>
+        <param name='role' doc='Specify the xUA role for this ASP' />
+        <param name='sg' doc='SG (Signaling Gateway)' />
+        <param name='asp' doc='ASP (Application Server Process)' />
+        <param name='ipsp' doc='IPSP (IP Signalling Point)' />
+      </params>
+    </command>
+    <command id='sctp-role (client|server)'>
+      <params>
+        <param name='sctp-role' doc='Specify the SCTP role for this ASP' />
+        <param name='client' doc='Operate as SCTP client; connect to a server' />
+        <param name='server' doc='Operate as SCTP server; wait for client connections' />
       </params>
     </command>
     <command id='block'>
@@ -2350,11 +2664,20 @@
     <command id='encryption a5 &lt;0-3&gt; [&lt;0-3&gt;] [&lt;0-3&gt;] [&lt;0-3&gt;]'>
       <params>
         <param name='encryption' doc='Encryption options' />
-        <param name='a5' doc='GSM A5 Air Interface Encryption' />
+        <param name='a5' doc='GSM A5 Air Interface Encryption.' />
         <param name='&lt;0-3&gt;' doc='A5/n Algorithm Number' />
         <param name='[&lt;0-3&gt;]' doc='A5/n Algorithm Number' />
         <param name='[&lt;0-3&gt;]' doc='A5/n Algorithm Number' />
         <param name='[&lt;0-3&gt;]' doc='A5/n Algorithm Number' />
+      </params>
+    </command>
+    <command id='encryption uea &lt;0-2&gt; [&lt;0-2&gt;] [&lt;0-2&gt;]'>
+      <params>
+        <param name='encryption' doc='Encryption options' />
+        <param name='uea' doc='UTRAN (3G) encryption algorithms to allow: 0 = UEA0 (no encryption), 1 = UEA1, 2 = UEA2. NOTE: the current implementation does not allow free choice of combining encryption algorithms yet. The only valid settings are either &apos;encryption uea 0&apos; or &apos;encryption uea 1 2&apos;.' />
+        <param name='&lt;0-2&gt;' doc='UEAn Algorithm Number' />
+        <param name='[&lt;0-2&gt;]' doc='UEAn Algorithm Number' />
+        <param name='[&lt;0-2&gt;]' doc='UEAn Algorithm Number' />
       </params>
     </command>
     <command id='authentication (optional|required)'>
@@ -2425,6 +2748,17 @@
         <param name='update' doc='Periodic Location Updating Interval' />
       </params>
     </command>
+    <command id='call-waiting'>
+      <params>
+        <param name='call-waiting' doc='Enable Call Waiting on the Network' />
+      </params>
+    </command>
+    <command id='no call-waiting'>
+      <params>
+        <param name='no' doc='Negate a command or set its defaults' />
+        <param name='call-waiting' doc='Disable Call Waiting on the Network' />
+      </params>
+    </command>
   </node>
   <node id='config-msc'>
     <name>config-msc</name>
@@ -2479,11 +2813,12 @@
         <param name='1' doc='If the HLR does not deliver new tuples, do re-use already available old ones.' />
       </params>
     </command>
-    <command id='check-imei-rqd (0|1)'>
+    <command id='check-imei-rqd (0|1|early)'>
       <params>
         <param name='check-imei-rqd' doc='Send each IMEI to the EIR to ask if it is permitted or not. The EIR is implemented as part of OsmoHLR, and can optionally save the IMEI in the HLR.' />
         <param name='0' doc='Do not send IMEIs to the EIR' />
         <param name='1' doc='Send each IMEI to the EIR' />
+        <param name='early' doc='Send each IMEI to the EIR, and do it at the start of the location update. This allows the EIR to receive the IMEI, even if the MS would get rejected when the MSC sends the location update request to the HLR.' />
       </params>
     </command>
     <command id='cs7-instance-a &lt;0-15&gt;'>
@@ -2522,6 +2857,73 @@
       <params>
         <param name='no' doc='Negate a command or set its defaults' />
         <param name='sms-over-gsup' doc='Disable routing of SMS messages over GSUP' />
+      </params>
+    </command>
+    <command id='osmux (on|off|only)'>
+      <params>
+        <param name='osmux' doc='RTP multiplexing' />
+        <param name='on' doc='Enable OSMUX' />
+        <param name='off' doc='Disable OSMUX' />
+        <param name='only' doc='Only use OSMUX' />
+      </params>
+    </command>
+    <command id='handover-number range MSISDN_FIRST MSISDN_LAST'>
+      <params>
+        <param name='handover-number' doc='Configure a range of MSISDN to be assigned to incoming inter-MSC Handovers for call forwarding.' />
+        <param name='range' doc='Configure a handover number range' />
+        <param name='MSISDN_FIRST' doc='First Handover Number MSISDN' />
+        <param name='MSISDN_LAST' doc='Last Handover Number MSISDN' />
+      </params>
+    </command>
+    <command id='neighbor (a|iu) lac &lt;0-65535&gt; (ran-pc|msc-ipa-name) RAN_PC_OR_MSC_IPA_NAME'>
+      <params>
+        <param name='neighbor' doc='Add Handover target configuration' />
+        <param name='a' doc='Neighbor on GERAN-A' />
+        <param name='iu' doc='Neighbor on UTRAN-Iu' />
+        <param name='lac' doc='Handover target cell by LAC' />
+        <param name='&lt;0-65535&gt;' doc='LAC' />
+        <param name='ran-pc' doc='SCCP point code of RAN peer' />
+        <param name='msc-ipa-name' doc='GSUP IPA name of target MSC' />
+        <param name='RAN_PC_OR_MSC_IPA_NAME' doc='Point code or MSC IPA name value' />
+      </params>
+    </command>
+    <command id='neighbor (a|iu) lac-ci &lt;0-65535&gt; &lt;0-65535&gt; (ran-pc|msc-ipa-name) RAN_PC_OR_MSC_IPA_NAME'>
+      <params>
+        <param name='neighbor' doc='Add Handover target configuration' />
+        <param name='a' doc='Neighbor on GERAN-A' />
+        <param name='iu' doc='Neighbor on UTRAN-Iu' />
+        <param name='lac-ci' doc='Handover target cell by LAC and CI' />
+        <param name='&lt;0-65535&gt;' doc='LAC' />
+        <param name='&lt;0-65535&gt;' doc='CI' />
+        <param name='ran-pc' doc='SCCP point code of RAN peer' />
+        <param name='msc-ipa-name' doc='GSUP IPA name of target MSC' />
+        <param name='RAN_PC_OR_MSC_IPA_NAME' doc='Point code or MSC IPA name value' />
+      </params>
+    </command>
+    <command id='neighbor (a|iu) cgi &lt;0-999&gt; &lt;0-999&gt; &lt;0-65535&gt; &lt;0-65535&gt; (ran-pc|msc-ipa-name) RAN_PC_OR_MSC_IPA_NAME'>
+      <params>
+        <param name='neighbor' doc='Add Handover target configuration' />
+        <param name='a' doc='Neighbor on GERAN-A' />
+        <param name='iu' doc='Neighbor on UTRAN-Iu' />
+        <param name='cgi' doc='Handover target cell by Cell-Global Identifier (MCC, MNC, LAC, CI)' />
+        <param name='&lt;0-999&gt;' doc='MCC' />
+        <param name='&lt;0-999&gt;' doc='MNC' />
+        <param name='&lt;0-65535&gt;' doc='LAC' />
+        <param name='&lt;0-65535&gt;' doc='CI' />
+        <param name='ran-pc' doc='SCCP point code of RAN peer' />
+        <param name='msc-ipa-name' doc='GSUP IPA name of target MSC' />
+        <param name='RAN_PC_OR_MSC_IPA_NAME' doc='Point code or MSC IPA name value' />
+      </params>
+    </command>
+    <command id='no neighbor (a|iu) (ran-pc|msc-ipa-name) RAN_PC_OR_MSC_IPA_NAME'>
+      <params>
+        <param name='no' doc='Negate a command or set its defaults' />
+        <param name='neighbor' doc='Remove Handover target' />
+        <param name='a' doc='Neighbor on GERAN-A' />
+        <param name='iu' doc='Neighbor on UTRAN-Iu' />
+        <param name='ran-pc' doc='SCCP point code of RAN peer' />
+        <param name='msc-ipa-name' doc='GSUP IPA name of target MSC' />
+        <param name='RAN_PC_OR_MSC_IPA_NAME' doc='Point code or MSC IPA name value' />
       </params>
     </command>
     <command id='mgw local-ip A.B.C.D'>
