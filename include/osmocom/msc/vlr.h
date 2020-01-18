@@ -129,7 +129,6 @@ struct vlr_subscr {
 	char msisdn[GSM23003_MSISDN_MAX_DIGITS+1];	/* 2.1.2 */
 	char name[VLR_NAME_LENGTH+1];			/* proprietary */
 	OSMO_LBUF_DECL(hlr, 16);			/* 2.4.7 */
-	uint32_t periodic_lu_timer;			/* 2.4.24 */
 	uint32_t age_indicator;				/* 2.17.1 */
 
 	/* Authentication Data */
