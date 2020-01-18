@@ -220,8 +220,10 @@ struct gsm_network *msc_network_alloc(void *ctx,
 	net->gsup_server_port = MSC_HLR_REMOTE_PORT_DEFAULT;
 
 	mgcp_client_conf_init(&net->mgw.conf);
-	net->mgw.tdefs = g_mgw_tdefs;
 	net->call_waiting = true;
+
+	net->mgw.tdefs = g_mgw_tdefs;
+	osmo_tdefs_reset(net->mgw.tdefs);
 
 	return net;
 }
