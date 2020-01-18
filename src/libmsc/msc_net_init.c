@@ -31,8 +31,23 @@
 #include <osmocom/msc/gsm_04_11_gsup.h>
 #include <osmocom/msc/gsm_09_11.h>
 
+/* TODO: would be great to have all timer declarations in one place */
+#include <osmocom/msc/ran_infra.h>
+#include <osmocom/msc/sccp_ran.h>
+#include <osmocom/msc/call_leg.h>
+
 struct osmo_tdef mncc_tdefs[] = {
 	{}
+};
+
+struct osmo_tdef_group msc_tdef_group[] = {
+	{ .name = "mgw", .tdefs = g_mgw_tdefs, .desc = "MGW (Media Gateway) interface" },
+	{ .name = "mncc", .tdefs = mncc_tdefs, .desc = "MNCC (Mobile Network Call Control) interface" },
+	{ .name = "sccp", .tdefs = g_sccp_tdefs, .desc = "SCCP (Signalling Connection Control Part)" },
+	{ .name = "geran", .tdefs = msc_tdefs_geran, .desc = "GERAN (GSM EDGE Radio Access Network)" },
+	{ .name = "utran", .tdefs = msc_tdefs_utran, .desc = "UTRAN (UMTS Terrestrial Radio Access Network)" },
+	{ .name = "sgs", .tdefs = msc_tdefs_sgs, .desc = "SGs interface towards MME" },
+	{ /* terminator */ }
 };
 
 #include <osmocom/core/stat_item.h>

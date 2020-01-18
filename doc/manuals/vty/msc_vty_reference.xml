@@ -576,6 +576,19 @@
         <param name='&lt;0-65535&gt;' doc='CI' />
       </params>
     </command>
+    <command id='show timer [(mgw|mncc|sccp|geran|utran|sgs)] [TNNNN]'>
+      <params>
+        <param name='show' doc='Show running system information' />
+        <param name='timer' doc='Show timers' />
+        <param name='[mgw]' doc='MGW (Media Gateway) interface' />
+        <param name='[mncc]' doc='MNCC (Mobile Network Call Control) interface' />
+        <param name='[sccp]' doc='SCCP (Signalling Connection Control Part)' />
+        <param name='[geran]' doc='GERAN (GSM EDGE Radio Access Network)' />
+        <param name='[utran]' doc='UTRAN (UMTS Terrestrial Radio Access Network)' />
+        <param name='[sgs]' doc='SGs interface towards MME' />
+        <param name='[TNNNN]' doc='T- or X-timer-number -- 3GPP compliant timer number of the format &apos;1234&apos; or &apos;T1234&apos; or &apos;t1234&apos;; Osmocom-specific timer number of the format: &apos;X1234&apos; or &apos;x1234&apos;.' />
+      </params>
+    </command>
     <command id='show fsm NAME'>
       <params>
         <param name='show' doc='Show running system information' />
@@ -1390,6 +1403,19 @@
         <param name='&lt;0-999&gt;' doc='MNC' />
         <param name='&lt;0-65535&gt;' doc='LAC' />
         <param name='&lt;0-65535&gt;' doc='CI' />
+      </params>
+    </command>
+    <command id='show timer [(mgw|mncc|sccp|geran|utran|sgs)] [TNNNN]'>
+      <params>
+        <param name='show' doc='Show running system information' />
+        <param name='timer' doc='Show timers' />
+        <param name='[mgw]' doc='MGW (Media Gateway) interface' />
+        <param name='[mncc]' doc='MNCC (Mobile Network Call Control) interface' />
+        <param name='[sccp]' doc='SCCP (Signalling Connection Control Part)' />
+        <param name='[geran]' doc='GERAN (GSM EDGE Radio Access Network)' />
+        <param name='[utran]' doc='UTRAN (UMTS Terrestrial Radio Access Network)' />
+        <param name='[sgs]' doc='SGs interface towards MME' />
+        <param name='[TNNNN]' doc='T- or X-timer-number -- 3GPP compliant timer number of the format &apos;1234&apos; or &apos;T1234&apos; or &apos;t1234&apos;; Osmocom-specific timer number of the format: &apos;X1234&apos; or &apos;x1234&apos;.' />
       </params>
     </command>
     <command id='show fsm NAME'>
@@ -2908,6 +2934,20 @@
         <param name='ran-pc' doc='SCCP point code of RAN peer' />
         <param name='msc-ipa-name' doc='GSUP IPA name of target MSC' />
         <param name='RAN_PC_OR_MSC_IPA_NAME' doc='Point code or MSC IPA name value' />
+      </params>
+    </command>
+    <command id='timer [(mgw|mncc|sccp|geran|utran|sgs)] [TNNNN] [(&lt;0-2147483647&gt;|default)]'>
+      <params>
+        <param name='timer' doc='Configure or show timers' />
+        <param name='[mgw]' doc='MGW (Media Gateway) interface' />
+        <param name='[mncc]' doc='MNCC (Mobile Network Call Control) interface' />
+        <param name='[sccp]' doc='SCCP (Signalling Connection Control Part)' />
+        <param name='[geran]' doc='GERAN (GSM EDGE Radio Access Network)' />
+        <param name='[utran]' doc='UTRAN (UMTS Terrestrial Radio Access Network)' />
+        <param name='[sgs]' doc='SGs interface towards MME' />
+        <param name='[TNNNN]' doc='T- or X-timer-number -- 3GPP compliant timer number of the format &apos;1234&apos; or &apos;T1234&apos; or &apos;t1234&apos;; Osmocom-specific timer number of the format: &apos;X1234&apos; or &apos;x1234&apos;.' />
+        <param name='[&lt;0-2147483647&gt;]' doc='New timer value' />
+        <param name='[default]' doc='Set to default timer value' />
       </params>
     </command>
     <command id='mgw local-ip A.B.C.D'>

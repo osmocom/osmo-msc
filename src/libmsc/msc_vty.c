@@ -36,6 +36,7 @@
 
 #include <osmocom/sigtran/sccp_helpers.h>
 
+#include <osmocom/vty/tdef_vty.h>
 #include <osmocom/vty/command.h>
 #include <osmocom/vty/logging.h>
 #include <osmocom/vty/misc.h>
@@ -715,6 +716,9 @@ static int config_write_msc(struct vty *vty)
 #endif
 
 	neighbor_ident_vty_write(vty);
+
+	/* Timer introspection commands (generic osmo_tdef API) */
+	osmo_tdef_vty_groups_write(vty, " ");
 
 	return CMD_SUCCESS;
 }
@@ -2001,6 +2005,9 @@ void msc_vty_init(struct gsm_network *msc_network)
 	install_element(MSC_NODE, &cfg_msc_handover_number_range_cmd);
 
 	neighbor_ident_vty_init(msc_network);
+
+	/* Timer configuration commands (generic osmo_tdef API) */
+	osmo_tdef_vty_groups_init(MSC_NODE, msc_tdef_group);
 
 	mgcp_client_vty_init(msc_network, MSC_NODE, &msc_network->mgw.conf);
 #ifdef BUILD_IU

@@ -1,11 +1,15 @@
 #pragma once
 
+#include <osmocom/core/tdef.h>
+
 #include <osmocom/gsm/protocol/gsm_04_08.h>
 #include <osmocom/gsm/gsm0808.h>
 
 struct msgb;
 struct gsm_network;
 struct vlr_subscr;
+
+extern struct osmo_tdef_group msc_tdef_group[];
 
 #define MSC_HLR_REMOTE_IP_DEFAULT "127.0.0.1"
 #define MSC_HLR_REMOTE_PORT_DEFAULT OSMO_GSUP_PORT
