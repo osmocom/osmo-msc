@@ -2744,22 +2744,6 @@
         <param name='timezone' doc='Disable network timezone override, use system tz' />
       </params>
     </command>
-    <command id='periodic location update &lt;6-1530&gt;'>
-      <params>
-        <param name='periodic' doc='Periodic Location Updating Interval' />
-        <param name='location' doc='Periodic Location Updating Interval' />
-        <param name='update' doc='Periodic Location Updating Interval' />
-        <param name='&lt;6-1530&gt;' doc='Periodic Location Updating Interval in Minutes' />
-      </params>
-    </command>
-    <command id='no periodic location update'>
-      <params>
-        <param name='no' doc='Negate a command or set its defaults' />
-        <param name='periodic' doc='Periodic Location Updating Interval' />
-        <param name='location' doc='Periodic Location Updating Interval' />
-        <param name='update' doc='Periodic Location Updating Interval' />
-      </params>
-    </command>
     <command id='call-waiting'>
       <params>
         <param name='call-waiting' doc='Enable Call Waiting on the Network' />

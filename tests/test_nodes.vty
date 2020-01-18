@@ -24,8 +24,6 @@ OsmoMSC(config-net)# list
   timezone <-19-19> (0|15|30|45)
   timezone <-19-19> (0|15|30|45) <0-2>
   no timezone
-  periodic location update <6-1530>
-  no periodic location update
   call-waiting
   no call-waiting
 
@@ -153,7 +151,6 @@ network
  authentication optional
  rrlp mode none
  mm info 1
- periodic location update 30
 msc
  mncc guard-timeout 180
  ncss guard-timeout 30

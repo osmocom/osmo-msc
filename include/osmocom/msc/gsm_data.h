@@ -205,9 +205,6 @@ struct gsm_network {
 
 	struct vlr_instance *vlr;
 
-	/* Periodic location update default value */
-	uint8_t t3212;
-
 	/* Global MNCC guard timer value */
 	int mncc_guard_timeout;
 	/* Global guard timer value for NCSS sessions */

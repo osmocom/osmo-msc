@@ -67,9 +67,6 @@ struct gsm_network *gsm_network_init(void *ctx, mncc_recv_cb_t mncc_recv)
 	net->a5_encryption_mask = (1 << 3) | (1 << 1);
 	net->uea_encryption = true;
 
-	/* Use 30 min periodic update interval as sane default */
-	net->t3212 = 5;
-
 	net->mncc_guard_timeout = 180;
 	net->ncss_guard_timeout = 30;
 

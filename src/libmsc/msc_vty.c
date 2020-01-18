@@ -303,32 +303,44 @@ DEFUN(cfg_net_no_timezone,
 	return CMD_SUCCESS;
 }
 
-DEFUN(cfg_net_per_loc_upd, cfg_net_per_loc_upd_cmd,
-      "periodic location update <6-1530>",
-      "Periodic Location Updating Interval\n"
-      "Periodic Location Updating Interval\n"
-      "Periodic Location Updating Interval\n"
-      "Periodic Location Updating Interval in Minutes\n")
+/* NOTE: actually this is subscriber expiration timeout */
+#define PER_LOC_UPD_STR "Periodic Location Updating Interval\n"
+
+DEFUN_DEPRECATED(cfg_net_per_loc_upd, cfg_net_per_loc_upd_cmd,
+		 "periodic location update <6-1530>",
+		 PER_LOC_UPD_STR PER_LOC_UPD_STR PER_LOC_UPD_STR
+		 "Periodic Location Updating Interval in Minutes\n")
 {
-	struct gsm_network *net = vty->index;
+	int minutes = atoi(argv[0]);
+	int rc;
 
-	net->t3212 = atoi(argv[0]) / 6;
+	vty_out(vty, "%% 'periodic location update' is now deprecated: "
+		     "use 'timer T3212' to change subscriber expiration "
+		     "timeout.%s", VTY_NEWLINE);
 
-	return CMD_SUCCESS;
+	/* We used to double this value and add a minute when scheduling the
+	 * expiration timer. Let's emulate the old behaviour here. */
+	minutes = minutes * 2 + 1;
+	vty_out(vty, "%% Setting T3212 to %d minutes "
+		     "(emulating the old behaviour).%s",
+		     minutes, VTY_NEWLINE);
+
+	rc = osmo_tdef_set(msc_tdefs_vlr, 3212, minutes, OSMO_TDEF_M);
+	return rc ? CMD_WARNING : CMD_SUCCESS;
 }
 
-DEFUN(cfg_net_no_per_loc_upd, cfg_net_no_per_loc_upd_cmd,
-      "no periodic location update",
-      NO_STR
-      "Periodic Location Updating Interval\n"
-      "Periodic Location Updating Interval\n"
-      "Periodic Location Updating Interval\n")
+DEFUN_DEPRECATED(cfg_net_no_per_loc_upd, cfg_net_no_per_loc_upd_cmd,
+		 "no periodic location update",
+		 NO_STR PER_LOC_UPD_STR PER_LOC_UPD_STR PER_LOC_UPD_STR)
 {
-	struct gsm_network *net = vty->index;
+	int rc;
 
-	net->t3212 = 0;
+	vty_out(vty, "%% 'periodic location update' is now deprecated: "
+		     "use 'timer T3212' to change subscriber expiration "
+		     "timeout.%s", VTY_NEWLINE);
 
-	return CMD_SUCCESS;
+	rc = osmo_tdef_set(msc_tdefs_vlr, 3212, 0, OSMO_TDEF_M);
+	return rc ? CMD_WARNING : CMD_SUCCESS;
 }
 
 DEFUN(cfg_net_call_wait, cfg_net_call_wait_cmd,
@@ -389,11 +401,6 @@ static int config_write_net(struct vty *vty)
 			vty_out(vty, " timezone %d %d%s",
 				gsmnet->tz.hr, gsmnet->tz.mn, VTY_NEWLINE);
 	}
-	if (gsmnet->t3212 == 0)
-		vty_out(vty, " no periodic location update%s", VTY_NEWLINE);
-	else
-		vty_out(vty, " periodic location update %u%s",
-			gsmnet->t3212 * 6, VTY_NEWLINE);
 
 	if (gsmnet->emergency.route_to_msisdn) {
 		vty_out(vty, " emergency-call route-to-msisdn %s%s",
@@ -869,7 +876,6 @@ static void vty_dump_one_conn(struct vty *vty, const struct msub *msub,
 static void vty_dump_one_subscr(struct vty *vty, struct vlr_subscr *vsub,
 				int offset, uint8_t dump_flags)
 {
-	struct gsm_network *net;
 	struct timespec now;
 	char buf[128];
 
@@ -943,9 +949,7 @@ static void vty_dump_one_subscr(struct vty *vty, struct vlr_subscr *vsub,
 			     VTY_NEWLINE);
 	}
 
-	/* XXX move t3212 into struct vlr_instance? */
-	net = vsub->vlr->user_ctx;
-	if (!net->t3212) {
+	if (!vlr_timer(vsub->vlr, 3212)) {
 		MSC_VTY_DUMP(vty, offset, "Expires: never (T3212 is disabled)%s",
 			     VTY_NEWLINE);
 	} else if (vsub->expire_lu == VLR_SUBSCRIBER_NO_EXPIRATION) {

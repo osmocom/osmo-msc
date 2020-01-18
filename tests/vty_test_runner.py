@@ -198,17 +198,22 @@ class TestVTYMSC(TestVTYBase):
         self.vty.verify("periodic location update 5", ['% Unknown command.'])
         self.vty.verify("periodic location update 1531", ['% Unknown command.'])
 
-        # Enable periodic lu..
-        self.vty.verify("periodic location update 60", [''])
+        depr_str = "% 'periodic location update' is now deprecated: " \
+                   "use 'timer T3212' to change subscriber expiration timeout."
+        set_str  = "% Setting T3212 to 121 minutes (emulating the old behaviour)."
+
+        # Enable periodic LU (deprecated command)
+        self.vty.verify("periodic location update 60", [depr_str, set_str])
         res = self.vty.command("write terminal")
-        self.assertTrue(res.find('periodic location update 60') > 0)
+        self.assertTrue(res.find('timer vlr T3212 121') > 0)
+        self.assertEqual(res.find('periodic location update 60'), -1)
         self.assertEqual(res.find('no periodic location update'), -1)
 
-        # Now disable it..
-        self.vty.verify("no periodic location update", [''])
+        # Now disable it (deprecated command)
+        self.vty.verify("no periodic location update", [depr_str])
         res = self.vty.command("write terminal")
-        self.assertEqual(res.find('periodic location update 60'), -1)
-        self.assertTrue(res.find('no periodic location update') > 0)
+        self.assertEqual(res.find('no periodic location update'), -1)
+        self.assertEqual(res.find('timer vlr T3212 121'), -1)
 
     def testShowNetwork(self):
         res = self.vty.command("show network")

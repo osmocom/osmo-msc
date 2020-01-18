@@ -64,7 +64,7 @@ const struct value_string vlr_ciph_names[] = {
 
 /* 3GPP TS 24.008, table 11.2 Mobility management timers (network-side) */
 struct osmo_tdef msc_tdefs_vlr[] = {
-	/* TODO: also define T3212 here */
+	{ .T = 3212, .default_val = 60, .unit = OSMO_TDEF_M, .desc = "Subscriber expiration timeout" },
 	{ .T = 3250, .default_val = 12, .desc = "TMSI Reallocation procedure" },
 	{ .T = 3260, .default_val = 12, .desc = "Authentication procedure" },
 	{ .T = 3270, .default_val = 12, .desc = "Identification procedure" },
@@ -75,6 +75,9 @@ struct osmo_tdef msc_tdefs_vlr[] = {
  * TODO: we should start using osmo_tdef_fsm_inst_state_chg() */
 uint32_t vlr_timer(struct vlr_instance *vlr, uint32_t timer)
 {
+	/* NOTE: since we usually do not need more than one instance of the VLR,
+	 * and since libosmocore's osmo_tdef API does not (yet) support dynamic
+	 * configuration, we always use the global instance of msc_tdefs_vlr. */
 	return osmo_tdef_get(msc_tdefs_vlr, timer, OSMO_TDEF_S, 0);
 }
 
@@ -496,14 +499,11 @@ int vlr_subscr_changed(struct vlr_subscr *vsub)
 
 void vlr_subscr_enable_expire_lu(struct vlr_subscr *vsub)
 {
-	struct gsm_network *net = vsub->vlr->user_ctx; /* XXX move t3212 into struct vlr_instance? */
 	struct timespec now;
 
-	/* The T3212 timeout value field is coded as the binary representation of the timeout
-	 * value for periodic updating in decihours. Mark the subscriber as inactive if it missed
-	 * two consecutive location updates. Timeout is twice the t3212 value plus one minute. */
+	/* Mark the subscriber as inactive if it stopped to do periodical location updates. */
 	if (osmo_clock_gettime(CLOCK_MONOTONIC, &now) == 0) {
-		vsub->expire_lu = now.tv_sec + (net->t3212 * 60 * 6 * 2) + 60;
+		vsub->expire_lu = now.tv_sec + vlr_timer(vsub->vlr, 3212);
 	} else {
 		LOGP(DVLR, LOGL_ERROR,
 		     "%s: Could not enable Location Update expiry: unable to read current time\n", vlr_subscr_name(vsub));
@@ -516,13 +516,11 @@ void vlr_subscr_expire_lu(void *data)
 {
 	struct vlr_instance *vlr = data;
 	struct vlr_subscr *vsub, *vsub_tmp;
-	struct gsm_network *net;
 	struct timespec now;
 
 	/* Periodic location update might be disabled from the VTY,
 	 * so we shall not expire subscribers until explicit IMSI Detach. */
-	net = vlr->user_ctx; /* XXX move t3212 into struct vlr_instance? */
-	if (!net->t3212)
+	if (!vlr_timer(vlr, 3212))
 		goto done;
 
 	if (llist_empty(&vlr->subscribers))
@@ -1262,6 +1260,9 @@ struct vlr_instance *vlr_alloc(void *ctx, const struct vlr_ops *ops)
 
 	/* defaults */
 	vlr->cfg.assign_tmsi = true;
+
+	/* reset shared timer definitions */
+	osmo_tdefs_reset(msc_tdefs_vlr);
 
 	/* osmo_auth_fsm.c */
 	OSMO_ASSERT(osmo_fsm_register(&vlr_auth_fsm) == 0);
