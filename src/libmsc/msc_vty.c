@@ -1222,13 +1222,12 @@ DEFUN(show_subscr, show_subscr_cmd,
 	return CMD_SUCCESS;
 }
 
-DEFUN(subscriber_create,
-      subscriber_create_cmd,
-      "subscriber create imsi ID",
-	"Operations on a Subscriber\n" \
-	"Create new subscriber\n" \
-	"Identify the subscriber by his IMSI\n" \
-	"Identifier for the subscriber\n")
+DEFUN_DEPRECATED(subscriber_create, subscriber_create_cmd,
+		 "subscriber create imsi ID",
+		 "Operations on a Subscriber\n"
+		 "Create new subscriber\n"
+		 "Identify the subscriber by his IMSI\n"
+		 "Identifier for the subscriber\n")
 {
 	vty_out(vty, "%% 'subscriber create' now needs to be done at osmo-hlr%s",
 		VTY_NEWLINE);

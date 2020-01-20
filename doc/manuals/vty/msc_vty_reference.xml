@@ -668,14 +668,6 @@
         <param name='expired' doc='Delete all expired SMS' />
       </params>
     </command>
-    <command id='subscriber create imsi ID'>
-      <params>
-        <param name='subscriber' doc='Operations on a Subscriber' />
-        <param name='create' doc='Create new subscriber' />
-        <param name='imsi' doc='Identify the subscriber by his IMSI' />
-        <param name='ID' doc='Identifier for the subscriber' />
-      </params>
-    </command>
     <command id='subscriber (msisdn|extension|imsi|tmsi|id) ID sms sender (msisdn|extension|imsi|tmsi|id) SENDER_ID send .LINE'>
       <params>
         <param name='subscriber' doc='Operations on a Subscriber' />
@@ -1490,14 +1482,6 @@
         <param name='sms' doc='SMS related commands' />
         <param name='delete' doc='SMS Database related commands' />
         <param name='expired' doc='Delete all expired SMS' />
-      </params>
-    </command>
-    <command id='subscriber create imsi ID'>
-      <params>
-        <param name='subscriber' doc='Operations on a Subscriber' />
-        <param name='create' doc='Create new subscriber' />
-        <param name='imsi' doc='Identify the subscriber by his IMSI' />
-        <param name='ID' doc='Identifier for the subscriber' />
       </params>
     </command>
     <command id='subscriber (msisdn|extension|imsi|tmsi|id) ID sms sender (msisdn|extension|imsi|tmsi|id) SENDER_ID send .LINE'>
