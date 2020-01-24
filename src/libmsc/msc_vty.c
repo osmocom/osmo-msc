@@ -69,7 +69,7 @@
 
 static struct gsm_network *gsmnet = NULL;
 
-struct cmd_node net_node = {
+static struct cmd_node net_node = {
 	GSMNET_NODE,
 	"%s(config-net)# ",
 	1,
