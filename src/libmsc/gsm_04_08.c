@@ -1237,8 +1237,9 @@ static int gsm48_rx_rr_app_info(struct msc_a *msc_a, struct msgb *msg)
 	apdu_len = gh->data[1];
 	apdu_data = gh->data+2;
 
-	DEBUGP(DRR, "RX APPLICATION INFO id/flags=0x%02x apdu_len=%u apdu=%s\n",
-		apdu_id_flags, apdu_len, osmo_hexdump(apdu_data, apdu_len));
+	LOG_MSC_A_CAT(msc_a, DRR, LOGL_DEBUG, "Rx RR APPLICATION INFO "
+		      "(id/flags=0x%02x apdu_len=%u apdu=%s)\n",
+		      apdu_id_flags, apdu_len, osmo_hexdump(apdu_data, apdu_len));
 
 	/* we're not using the app info blob anywhere, so ignore. */
 #if 0
