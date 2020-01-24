@@ -338,7 +338,7 @@ static void proc_arq_vlr_fn_post_imsi(struct osmo_fsm_inst *fi)
 	if (is_auth_required(par)) {
 		osmo_fsm_inst_state_chg(fi, PR_ARQ_S_WAIT_AUTH,
 					0, 0);
-		vsub->auth_fsm = auth_fsm_start(vsub, fi->log_level, fi,
+		vsub->auth_fsm = auth_fsm_start(vsub, fi,
 						PR_ARQ_E_AUTH_RES,
 						par->is_r99,
 						par->is_utran);

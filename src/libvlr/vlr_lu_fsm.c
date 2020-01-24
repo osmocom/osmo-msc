@@ -906,7 +906,7 @@ static void vlr_loc_upd_node1(struct osmo_fsm_inst *fi)
 		/* Authenticate_VLR */
 		osmo_fsm_inst_state_chg(fi, VLR_ULA_S_WAIT_AUTH,
 					LU_TIMEOUT_LONG, 0);
-		vsub->auth_fsm = auth_fsm_start(lfp->vsub, fi->log_level,
+		vsub->auth_fsm = auth_fsm_start(lfp->vsub,
 						fi, VLR_ULA_E_AUTH_RES,
 						lfp->is_r99,
 						lfp->is_utran);

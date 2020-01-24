@@ -30,7 +30,6 @@ enum vlr_fsm_auth_event {
 struct osmo_fsm vlr_auth_fsm;
 
 struct osmo_fsm_inst *auth_fsm_start(struct vlr_subscr *vsub,
-				     uint32_t log_level,
 				     struct osmo_fsm_inst *parent,
 				     uint32_t parent_term_event,
 				     bool is_r99,
