@@ -234,6 +234,7 @@ static void sgs_ue_fsm_associated(struct osmo_fsm_inst *fi, uint32_t event, void
 		if (*cause == SGSAP_SGS_CAUSE_MT_CSFB_REJ_USER)
 			break;
 		to_null(fi);
+		break;
 	case SGS_UE_E_RX_ALERT_FAILURE:
 		to_null(fi);
 		break;
