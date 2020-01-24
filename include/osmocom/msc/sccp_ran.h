@@ -189,14 +189,14 @@ struct sccp_ran_inst;
 
 #define LOG_SCCP_RAN_CO(sri, peer_addr, conn_id, level, fmt, args...) \
 	LOGP((sri) && (sri)->ran? (sri)->ran->log_subsys : DMSC, level, "(%s-%u%s%s) " fmt, \
-	     osmo_rat_type_name((sri) && (sri)->ran? (sri)->ran->type : -1), conn_id, \
+	     osmo_rat_type_name((sri) && (sri)->ran ? (sri)->ran->type : OSMO_RAT_UNKNOWN), conn_id, \
 	     peer_addr ? " from " : "", \
 	     peer_addr ? osmo_sccp_inst_addr_name((sri)->sccp, peer_addr) : "", \
 	     ## args)
 
 #define LOG_SCCP_RAN_CL_CAT(sri, peer_addr, subsys, level, fmt, args...) \
 	LOGP(subsys, level, "(%s%s%s) " fmt, \
-	     osmo_rat_type_name((sri) && (sri)->ran? (sri)->ran->type : -1), \
+	     osmo_rat_type_name((sri) && (sri)->ran ? (sri)->ran->type : OSMO_RAT_UNKNOWN), \
 	     peer_addr ? " from " : "", \
 	     peer_addr ? osmo_sccp_inst_addr_name((sri)->sccp, peer_addr) : "", \
 	     ## args)
