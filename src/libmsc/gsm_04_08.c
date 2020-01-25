@@ -1153,13 +1153,13 @@ static int gsm48_rx_rr_pag_resp(struct msc_a *msc_a, struct msgb *msg)
 	struct vlr_subscr *vsub;
 
 	if (msc_a_is_establishing_auth_ciph(msc_a)) {
-		LOG_MSC_A_CAT(msc_a, DMM, LOGL_ERROR,
+		LOG_MSC_A_CAT(msc_a, DRR, LOGL_ERROR,
 			      "Ignoring Paging Response, conn already busy establishing authenticity\n");
 		return 0;
 	}
 
 	if (msc_a_is_accepted(msc_a)) {
-		LOG_MSC_A_CAT(msc_a, DMM, LOGL_ERROR, "Ignoring Paging Response, conn already established\n");
+		LOG_MSC_A_CAT(msc_a, DRR, LOGL_ERROR, "Ignoring Paging Response, conn already established\n");
 		return 0;
 	}
 
@@ -1184,7 +1184,7 @@ static int gsm48_rx_rr_pag_resp(struct msc_a *msc_a, struct msgb *msg)
 	 * msc_vlr_subscr_assoc() to already have been called and completed. Has an error occurred? */
 	vsub = msc_a_vsub(msc_a);
 	if (!vsub) {
-		LOG_MSC_A(msc_a, LOGL_ERROR, "subscriber not allowed to do a Paging Response\n");
+		LOG_MSC_A_CAT(msc_a, DRR, LOGL_ERROR, "subscriber not allowed to do a Paging Response\n");
 		msc_a_put(msc_a, MSC_A_USE_PAGING_RESPONSE);
 		return -EIO;
 	}
