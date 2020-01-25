@@ -23,6 +23,7 @@
 #include <osmocom/core/fsm.h>
 #include <osmocom/core/utils.h>
 #include <osmocom/core/timer.h>
+#include <osmocom/core/tdef.h>
 #include <osmocom/gsm/protocol/gsm_04_08_gprs.h>
 #include <osmocom/gsm/gsup.h>
 #include <osmocom/gsm/apn.h>
@@ -61,24 +62,20 @@ const struct value_string vlr_ciph_names[] = {
 	{ 0, NULL }
 };
 
+/* 3GPP TS 24.008, table 11.2 Mobility management timers (network-side) */
+struct osmo_tdef msc_tdefs_vlr[] = {
+	/* TODO: also define T3212 here */
+	{ .T = 3250, .default_val = 12, .desc = "TMSI Reallocation procedure" },
+	{ .T = 3260, .default_val = 12, .desc = "Authentication procedure" },
+	{ .T = 3270, .default_val = 12, .desc = "Identification procedure" },
+	{ /* terminator */ }
+};
+
+/* This is just a wrapper around the osmo_tdef API.
+ * TODO: we should start using osmo_tdef_fsm_inst_state_chg() */
 uint32_t vlr_timer(struct vlr_instance *vlr, uint32_t timer)
 {
-	uint32_t tidx = 0xffffffff;
-
-	switch (timer) {
-	case 3270:
-		tidx = VLR_T_3270;
-		break;
-	case 3260:
-		tidx = VLR_T_3260;
-		break;
-	case 3250:
-		tidx = VLR_T_3250;
-		break;
-	}
-
-	OSMO_ASSERT(tidx < sizeof(vlr->cfg.timer));
-	return vlr->cfg.timer[tidx];
+	return osmo_tdef_get(msc_tdefs_vlr, timer, OSMO_TDEF_S, 0);
 }
 
 /* return static buffer with printable name of VLR subscriber */

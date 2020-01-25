@@ -252,13 +252,6 @@ struct vlr_ops {
 	int (*subscr_assoc)(void *msc_conn_ref, struct vlr_subscr *vsub);
 };
 
-enum vlr_timer {
-	VLR_T_3250,
-	VLR_T_3260,
-	VLR_T_3270,
-	_NUM_VLR_TIMERS
-};
-
 /* An instance of the VLR codebase */
 struct vlr_instance {
 	struct llist_head subscribers;
@@ -275,7 +268,6 @@ struct vlr_instance {
 		bool auth_reuse_old_sets_on_error;
 		bool parq_retrieve_imsi;
 		bool is_ps;
-		uint32_t timer[_NUM_VLR_TIMERS];
 	} cfg;
 	/* A free-form pointer for use by the caller */
 	void *user_ctx;

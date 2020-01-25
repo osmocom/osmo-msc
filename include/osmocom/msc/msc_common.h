@@ -10,6 +10,7 @@ struct gsm_network;
 struct vlr_subscr;
 
 extern struct osmo_tdef_group msc_tdef_group[];
+extern struct osmo_tdef msc_tdefs_vlr[];
 
 #define MSC_HLR_REMOTE_IP_DEFAULT "127.0.0.1"
 #define MSC_HLR_REMOTE_PORT_DEFAULT OSMO_GSUP_PORT

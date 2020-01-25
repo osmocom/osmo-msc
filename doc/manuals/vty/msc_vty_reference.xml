@@ -576,10 +576,11 @@
         <param name='&lt;0-65535&gt;' doc='CI' />
       </params>
     </command>
-    <command id='show timer [(mgw|mncc|sccp|geran|utran|sgs)] [TNNNN]'>
+    <command id='show timer [(vlr|mgw|mncc|sccp|geran|utran|sgs)] [TNNNN]'>
       <params>
         <param name='show' doc='Show running system information' />
         <param name='timer' doc='Show timers' />
+        <param name='[vlr]' doc='VLR (Visitors Location Register)' />
         <param name='[mgw]' doc='MGW (Media Gateway) interface' />
         <param name='[mncc]' doc='MNCC (Mobile Network Call Control) interface' />
         <param name='[sccp]' doc='SCCP (Signalling Connection Control Part)' />
@@ -1405,10 +1406,11 @@
         <param name='&lt;0-65535&gt;' doc='CI' />
       </params>
     </command>
-    <command id='show timer [(mgw|mncc|sccp|geran|utran|sgs)] [TNNNN]'>
+    <command id='show timer [(vlr|mgw|mncc|sccp|geran|utran|sgs)] [TNNNN]'>
       <params>
         <param name='show' doc='Show running system information' />
         <param name='timer' doc='Show timers' />
+        <param name='[vlr]' doc='VLR (Visitors Location Register)' />
         <param name='[mgw]' doc='MGW (Media Gateway) interface' />
         <param name='[mncc]' doc='MNCC (Mobile Network Call Control) interface' />
         <param name='[sccp]' doc='SCCP (Signalling Connection Control Part)' />
@@ -2936,9 +2938,10 @@
         <param name='RAN_PC_OR_MSC_IPA_NAME' doc='Point code or MSC IPA name value' />
       </params>
     </command>
-    <command id='timer [(mgw|mncc|sccp|geran|utran|sgs)] [TNNNN] [(&lt;0-2147483647&gt;|default)]'>
+    <command id='timer [(vlr|mgw|mncc|sccp|geran|utran|sgs)] [TNNNN] [(&lt;0-2147483647&gt;|default)]'>
       <params>
         <param name='timer' doc='Configure or show timers' />
+        <param name='[vlr]' doc='VLR (Visitors Location Register)' />
         <param name='[mgw]' doc='MGW (Media Gateway) interface' />
         <param name='[mncc]' doc='MNCC (Mobile Network Call Control) interface' />
         <param name='[sccp]' doc='SCCP (Signalling Connection Control Part)' />

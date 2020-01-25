@@ -41,6 +41,7 @@ struct osmo_tdef mncc_tdefs[] = {
 };
 
 struct osmo_tdef_group msc_tdef_group[] = {
+	{ .name = "vlr", .tdefs = msc_tdefs_vlr, .desc = "VLR (Visitors Location Register)" },
 	{ .name = "mgw", .tdefs = g_mgw_tdefs, .desc = "MGW (Media Gateway) interface" },
 	{ .name = "mncc", .tdefs = mncc_tdefs, .desc = "MNCC (Mobile Network Call Control) interface" },
 	{ .name = "sccp", .tdefs = g_sccp_tdefs, .desc = "SCCP (Signalling Connection Control Part)" },
