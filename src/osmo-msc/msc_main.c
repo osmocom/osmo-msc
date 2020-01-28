@@ -26,6 +26,7 @@
 
 #include <stdbool.h>
 #include <unistd.h>
+#include <stdio.h>
 #include <time.h>
 #include <errno.h>
 #include <signal.h>
@@ -609,20 +610,20 @@ int main(int argc, char **argv)
 	msc_network->ctrl = ctrl_interface_setup_dynip(msc_network, ctrl_vty_get_bind_addr(),
 						       OSMO_CTRL_PORT_MSC, NULL);
 	if (!msc_network->ctrl) {
-		printf("Failed to initialize control interface. Exiting.\n");
+		fprintf(stderr, "Failed to initialize control interface. Exiting.\n");
 		return -1;
 	}
 
 #if 0
 TODO: we probably want some of the _net_ ctrl commands from bsc_base_ctrl_cmds_install().
 	if (bsc_base_ctrl_cmds_install() != 0) {
-		printf("Failed to initialize the BSC control commands.\n");
+		fprintf(stderr, "Failed to initialize the BSC control commands.\n");
 		return -1;
 	}
 #endif
 
 	if (msc_ctrl_cmds_install(msc_network) != 0) {
-		printf("Failed to initialize the MSC control commands.\n");
+		fprintf(stderr, "Failed to initialize the MSC control commands.\n");
 		return -1;
 	}
 
@@ -632,8 +633,8 @@ TODO: we probably want some of the _net_ ctrl commands from bsc_base_ctrl_cmds_i
 	 * should try to use the nanoseconds part of the current time. */
 
 	if (db_init(msc_cmdline_config.database_name)) {
-		printf("DB: Failed to init database: %s\n",
-		       msc_cmdline_config.database_name);
+		fprintf(stderr, "DB: Failed to init database: %s\n",
+			msc_cmdline_config.database_name);
 		return 4;
 	}
 
@@ -650,7 +651,7 @@ TODO: we probably want some of the _net_ ctrl commands from bsc_base_ctrl_cmds_i
 	}
 
 	if (db_prepare()) {
-		printf("DB: Failed to prepare database.\n");
+		fprintf(stderr, "DB: Failed to prepare database.\n");
 		return 5;
 	}
 
@@ -669,17 +670,17 @@ TODO: we probably want some of the _net_ ctrl commands from bsc_base_ctrl_cmds_i
 			msc_network, &msc_network->mgw.conf);
 
 	if (mgcp_client_connect(msc_network->mgw.client)) {
-		printf("MGCPGW connect failed\n");
+		fprintf(stderr, "MGCPGW connect failed\n");
 		return 7;
 	}
 
 	if (ss7_setup(tall_msc_ctx, &sccp_a, &sccp_iu)) {
-		printf("Setting up SCCP client failed.\n");
+		fprintf(stderr, "Setting up SCCP client failed.\n");
 		return 8;
 	}
 
 	if (sgs_server_open(g_sgs)) {
-		printf("Starting SGs server failed\n");
+		fprintf(stderr, "Starting SGs server failed\n");
 		return 9;
 	}
 
@@ -687,7 +688,7 @@ TODO: we probably want some of the _net_ ctrl commands from bsc_base_ctrl_cmds_i
 					   "OsmoMSC-A", &msc_ran_infra[OSMO_RAT_GERAN_A],
 					   msc_network);
 	if (!msc_network->a.sri) {
-		printf("Setting up A receiver failed\n");
+		fprintf(stderr, "Setting up A receiver failed\n");
 		return 10;
 	}
 	LOGP(DMSC, LOGL_NOTICE, "A-interface: SCCP user %s, cs7-instance %u (%s)\n",
@@ -702,7 +703,7 @@ TODO: we probably want some of the _net_ ctrl commands from bsc_base_ctrl_cmds_i
 					   "OsmoMSC-IuCS", &msc_ran_infra[OSMO_RAT_UTRAN_IU],
 					   msc_network);
 	if (!msc_network->iu.sri) {
-		printf("Setting up IuCS receiver failed\n");
+		fprintf(stderr, "Setting up IuCS receiver failed\n");
 		return 11;
 	}
 
