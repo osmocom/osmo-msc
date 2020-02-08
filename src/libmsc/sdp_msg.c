@@ -321,7 +321,7 @@ static int sdp_parse_media_description(struct sdp_msg *sdp, const char *src)
 	if (sscanf(src, "audio %u RTP/AVP", &port) < 1)
 		return -ENOTSUP;
 
-	if (port < 0 || port > 0xffff)
+	if (port > 0xffff)
 		return -EINVAL;
 
 	sdp->rtp.port = port;
