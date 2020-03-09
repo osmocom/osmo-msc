@@ -137,6 +137,11 @@ static void paging_concludes(struct vlr_subscr *vsub, struct msc_a *msc_a)
 	struct paging_request *pr, *pr_next;
 	struct paging_signal_data sig_data;
 
+	if (!vsub) {
+		/* A Paging Response has no subscriber. (Related: OS#4449) */
+		return;
+	}
+
 	osmo_timer_del(&vsub->cs.paging_response_timer);
 
 	llist_for_each_entry_safe(pr, pr_next, &vsub->cs.requests, entry) {
