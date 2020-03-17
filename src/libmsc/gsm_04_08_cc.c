@@ -1936,6 +1936,10 @@ int cc_assignment_done(struct gsm_trans *trans)
 		/* MT call */
 		break;
 
+	case GSM_CSTATE_ACTIVE:
+		/* already active */
+		break;
+
 	default:
 		LOG_TRANS(trans, LOGL_ERROR, "Assignment done in unexpected CC state: %d\n", trans->cc.state);
 		return -EINVAL;
