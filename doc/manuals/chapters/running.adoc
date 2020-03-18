@@ -107,19 +107,20 @@ running on the same interface:
 
 ==== Configure SCCP/M3UA to accept _A_ and _IuCS_ links
 
-OsmoMSC will contact an STP instance to establish an SCCP/M3UA link. BSC and
-HNBGW will then reach the MSC via this link. By default, an STP instance is
-assumed to listen on the default M3UA port (2905) on the local host.
+OsmoMSC acts as client to contact an STP instance and establish an SCCP/M3UA
+link.
 
-Establishing an SCCP/M3UA link towards an STP instance not on the local host
-can be configured as follows:
+An example configuration of OsmoMSC's SCCP link:
 
 ----
 cs7 instance 0
- asp my-OsmoMSC 2905 0 m3ua
-  ! IP address of the remote STP:
-  remote-ip 10.23.24.1
+ point-code 0.23.1
+ asp asp-clnt-OsmoMSC-A-Iu 2905 0 m3ua
+  remote-ip 127.0.0.1
+  sctp-role client
 ----
+
+This configuration is explained in detail in <<cs7_config>>.
 
 Note that _A_ and _IuCS_ may use different SCCP instances, if so desired:
 
@@ -133,21 +134,6 @@ cs7 instance 1
 msc
  cs7-instance-a 0
  cs7-instance-iu 1
-----
-
-A full configuration needs an `asp` on an `as` -- an Application Server Process
-running on an Application Server -- as well as a local point code and routing
-configuration. The SCCP VTY automatically creates those parts that are missing,
-by assuming sane defaults. A complete configuration would look like this:
-
-----
-cs7 instance 0
- point-code 0.23.1
- asp my-OsmoMSC-A-Iu 2905 0 m3ua
-  remote-ip 127.0.0.1
- as my-as-for-OsmoMSC-A-Iu m3ua
-  asp my-OsmoMSC-A-Iu
-  routing-key 0 0.23.1
 ----
 
 ==== Configure GSUP to reach the HLR

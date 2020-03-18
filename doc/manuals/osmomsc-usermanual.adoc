@@ -22,6 +22,8 @@ include::./common/chapters/vty.adoc[]
 
 include::./common/chapters/logging.adoc[]
 
+include::./common/chapters/cs7-config.adoc[]
+
 include::{srcdir}/chapters/net.adoc[]
 
 include::./common/chapters/smpp.adoc[]
