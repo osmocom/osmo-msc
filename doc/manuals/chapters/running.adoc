@@ -115,9 +115,11 @@ An example configuration of OsmoMSC's SCCP link:
 ----
 cs7 instance 0
  point-code 0.23.1
- asp asp-clnt-OsmoMSC-A-Iu 2905 0 m3ua
+ asp my-OsmoMSC 2905 0 m3ua
   remote-ip 127.0.0.1
   sctp-role client
+ as as-clnt-OsmoMSC-A-Iu m3ua
+  asp my-OsmoMSC
 ----
 
 This configuration is explained in detail in <<cs7_config>>.
