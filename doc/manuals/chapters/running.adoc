@@ -84,6 +84,7 @@ running on the same interface:
 
 - The SCCP/M3UA links are established by OsmoMSC contacting an STP.
 - The GSUP link is established by OsmoMSC contacting an HLR.
+- The MGCP link is established by OsmoMSC contacting an MGW.
 
 
 === Configure primary links
