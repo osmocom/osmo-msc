@@ -160,7 +160,7 @@ msc
  auth-tuple-max-reuse-count 3
  auth-tuple-reuse-on-error 1
  mgw local-port 2728
- mgw remote-ip 10.23.24.1
+ mgw remote-ip 127.0.0.1
  mgw remote-port 2427
 mncc-int
  default-codec tch-f fr
