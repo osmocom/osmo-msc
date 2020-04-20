@@ -178,9 +178,8 @@ static int gsm411_gsup_mo_handler(struct gsm_network *net, struct vlr_subscr *vs
 	return 0;
 
 msg_error:
-	/* TODO: notify sender about that? */
-	LOGP(DLSMS, LOGL_NOTICE, "RX malformed %s-%s\n",
-		msg_name, msg_is_err ? "Err" : "Res");
+	LOGP(DLSMS, LOGL_NOTICE, "RX malformed %s-%s\n", msg_name, msg_is_err ? "Err" : "Res");
+	gsup_client_mux_tx_error_reply(net->gcm, gsup_msg, GMM_CAUSE_INV_MAND_INFO);
 	return -EINVAL;
 }
 
@@ -269,8 +268,8 @@ static int gsm411_gsup_mt_handler(struct gsm_network *net, struct vlr_subscr *vs
 	return 0;
 
 msg_error:
-	/* TODO: notify sender about that? */
 	LOGP(DLSMS, LOGL_NOTICE, "RX malformed MT-forwardSM-Req\n");
+	gsup_client_mux_tx_error_reply(net->gcm, gsup_msg, GMM_CAUSE_INV_MAND_INFO);
 	return -EINVAL;
 }
 
