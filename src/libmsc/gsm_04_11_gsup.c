@@ -315,6 +315,7 @@ int gsm411_gsup_rx(struct gsup_client_mux *gcm, void *data, const struct osmo_gs
 	default:
 		LOGP(DMM, LOGL_ERROR, "No handler found for %s, dropping message...\n",
 			osmo_gsup_message_type_name(gsup_msg->message_type));
+		gsup_client_mux_tx_error_reply(gcm, gsup_msg, GMM_CAUSE_MSGT_NOTEXIST_NOTIMPL);
 		rc = -GMM_CAUSE_MSGT_NOTEXIST_NOTIMPL;
 	}
 
