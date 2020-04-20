@@ -27,7 +27,7 @@ enum vlr_fsm_auth_event {
 	VLR_AUTH_E_MS_ID_IMSI,
 };
 
-struct osmo_fsm vlr_auth_fsm;
+extern struct osmo_fsm vlr_auth_fsm;
 
 struct osmo_fsm_inst *auth_fsm_start(struct vlr_subscr *vsub,
 				     uint32_t log_level,
