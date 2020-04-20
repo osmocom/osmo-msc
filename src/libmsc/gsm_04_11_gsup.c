@@ -261,7 +261,7 @@ static int gsm411_gsup_mt_handler(struct gsm_network *net, struct vlr_subscr *vs
 	if (rc) {
 		LOGP(DLSMS, LOGL_NOTICE, "Failed to send MT SMS, "
 			"ignoring MT-forwardSM-Req message...\n");
-		/* TODO: notify sender about that? */
+		gsup_client_mux_tx_error_reply(net->gcm, gsup_msg, GMM_CAUSE_NET_FAIL);
 		return rc;
 	}
 
