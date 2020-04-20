@@ -152,8 +152,8 @@ static int gsm411_gsup_mo_handler(struct gsm_network *net, struct vlr_subscr *vs
 	/* Make sure that 'SMS over GSUP' is expected */
 	if (!net->sms_over_gsup) {
 		/* TODO: notify sender about that? */
-		LOGP(DLSMS, LOGL_NOTICE, "Unexpected MO SMS over GSUP, "
-			"ignoring message...\n");
+		LOGP(DLSMS, LOGL_NOTICE, "Unexpected MO SMS over GSUP "
+			"(sms-over-gsup is not enabled), ignoring message...\n");
 		return -EIO;
 	}
 
@@ -243,8 +243,8 @@ static int gsm411_gsup_mt_handler(struct gsm_network *net, struct vlr_subscr *vs
 
 	/* Make sure that 'SMS over GSUP' is expected */
 	if (!net->sms_over_gsup) {
-		LOGP(DLSMS, LOGL_NOTICE, "Unexpected MT SMS over GSUP, "
-			"ignoring message...\n");
+		LOGP(DLSMS, LOGL_NOTICE, "Unexpected MT SMS over GSUP "
+			"(sms-over-gsup is not enabled), ignoring message...\n");
 		/* TODO: notify sender about that? */
 		return -EIO;
 	}
