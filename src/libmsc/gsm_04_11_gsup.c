@@ -161,7 +161,8 @@ static int gsm411_gsup_mo_handler(struct gsm_network *net, struct vlr_subscr *vs
 		LOGP(DLSMS, LOGL_NOTICE, "No transaction found for %s, "
 			"ignoring %s-%s message...\n", vlr_subscr_name(vsub),
 			msg_name, msg_is_err ? "Err" : "Res");
-		return -EIO; /* TODO: notify sender about that? */
+		gsup_client_mux_tx_error_reply(net->gcm, gsup_msg, GMM_CAUSE_NO_PDP_ACTIVATED);
+		return -EIO;
 	}
 
 	LOG_TRANS(trans, LOGL_DEBUG, "RX %s-%s\n", msg_name, msg_is_err ? "Err" : "Res");
