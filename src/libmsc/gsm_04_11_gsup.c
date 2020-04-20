@@ -282,9 +282,9 @@ int gsm411_gsup_rx(struct gsup_client_mux *gcm, void *data, const struct osmo_gs
 
 	/* Make sure that 'SMS over GSUP' is expected */
 	if (!net->sms_over_gsup) {
-		/* TODO: notify sender about that? */
 		LOGP(DLSMS, LOGL_NOTICE, "Unexpected MO/MT SMS over GSUP "
 			"(sms-over-gsup is not enabled), ignoring message...\n");
+		gsup_client_mux_tx_error_reply(gcm, gsup_msg, GMM_CAUSE_GPRS_NOTALLOWED);
 		return -EIO;
 	}
 
