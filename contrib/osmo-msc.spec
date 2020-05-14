@@ -12,17 +12,13 @@
 # license that conforms to the Open Source Definition (Version 1.9)
 # published by the Open Source Initiative.
 
-# Please submit bugfixes or comments via http://bugs.opensuse.org/
-#
-
 ## Disable LTO for now since it breaks compilation of the tests
 ## https://osmocom.org/issues/4115
 %define _lto_cflags %{nil}
 
-
 %define with_iu 1
 Name:           osmo-msc
-Version:        1.6.1.32
+Version:        0.0.0
 Release:        0
 Summary:        Osmocom's MSC for 2G and 3G circuit-switched mobile networks
 License:        AGPL-3.0-or-later AND GPL-2.0-only
@@ -86,6 +82,7 @@ make %{?_smp_mflags}
 %install
 %make_install
 
+%if 0%{?suse_version}
 %preun
 %service_del_preun %{name}.service
 
@@ -97,6 +94,7 @@ make %{?_smp_mflags}
 
 %post
 %service_add_post %{name}.service
+%endif
 
 %check
 make %{?_smp_mflags} check || (find . -name testsuite.log -exec cat {} +)
