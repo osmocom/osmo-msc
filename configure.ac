@@ -267,4 +267,5 @@ AC_OUTPUT(
     doc/sequence_charts/Makefile
     contrib/Makefile
     contrib/systemd/Makefile
+    contrib/osmo-msc.spec
     Makefile)
