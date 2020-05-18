@@ -39,16 +39,6 @@
 #include <osmocom/msc/ran_msg_iu.h>
 #include <osmocom/msc/gsm_04_11.h>
 
-/* Implement the extern talloc_asn1_ctx from libasn1c as talloc ctx for ASN.1 message composition */
-void *talloc_asn1_ctx = NULL;
-
-/* Implement the extern asn_debug from libasn1c to indicate whether to print asn.1 debug messages. */
-int asn_debug = 0;
-
-/* Implement the extern asn1_xer_print to indicate whether the ASN.1 binary code decoded and encoded during Iu
- * communication should be logged to stderr (see asn.1 generated code in osmo-iuh). */
-int asn1_xer_print = 0;
-
 #define LOG_RAN_IU_DEC(RAN_DEC, level, fmt, args...) \
 	LOG_RAN_DEC(RAN_DEC, DIUCS, level, "RANAP: " fmt, ## args)
 
