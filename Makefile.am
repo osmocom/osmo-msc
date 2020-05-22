@@ -17,7 +17,13 @@ SUBDIRS = \
 	$(NULL)
 
 BUILT_SOURCES = $(top_srcdir)/.version
-EXTRA_DIST = git-version-gen osmoappdesc.py .version
+EXTRA_DIST = \
+	     .version \
+	     contrib/osmo-msc.spec.in \
+	     debian \
+	     git-version-gen \
+	     osmoappdesc.py \
+	     $(NULL)
 
 AM_DISTCHECK_CONFIGURE_FLAGS = \
 	--with-systemdsystemunitdir=$$dc_install_base/$(systemdsystemunitdir)
