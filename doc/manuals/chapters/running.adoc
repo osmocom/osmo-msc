@@ -74,9 +74,25 @@ smpp
 
 More on SMPP configuration in <<smpp-config-global>>.
 
-The external MNCC handler is configured by the `--mncc-sock` commandline
-argument. Choose a different such socket path for each OsmoMSC instance running
-on the same file system. See more in <<mncc-external>>.
+The external MNCC handler is a UNIX domain socket that is created when external MNCC handling is configured. A separate
+path must be used per osmo-msc instance:
+
+----
+msc
+ mncc external /tmp/mncc_socket
+----
+
+More on MNCC in <<mncc-external>>.
+
+The SGs interface by default listens on 0.0.0.0:29118. Configure a different IP and/or port for each osmo-msc instance.
+You may also want to configure different VLR names:
+
+----
+sgs
+ local-ip 127.0.0.1
+ local-port 29118
+ vlr-name vlr.example.net
+----
 
 For the following links, OsmoMSC acts as a client and does not listen/bind to a
 specific interface, and will hence not encounter conflicts for multiple instances
