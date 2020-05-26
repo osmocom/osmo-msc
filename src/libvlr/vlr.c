@@ -25,6 +25,7 @@
 #include <osmocom/core/timer.h>
 #include <osmocom/core/tdef.h>
 #include <osmocom/gsm/protocol/gsm_04_08_gprs.h>
+#include <osmocom/gsm/gsm23236.h>
 #include <osmocom/gsm/gsup.h>
 #include <osmocom/gsm/apn.h>
 #include <osmocom/gsm/gsm48.h>
@@ -329,6 +330,15 @@ int vlr_subscr_alloc_tmsi(struct vlr_subscr *vsub)
 			LOGP(DDB, LOGL_ERROR, "osmo_get_rand_id() failed: %s\n", strerror(-rc));
 			return rc;
 		}
+
+		if (!llist_empty(&vlr->cfg.nri_ranges->entries)) {
+			int16_t nri_v;
+			osmo_tmsi_nri_v_limit_by_ranges(&tmsi, vlr->cfg.nri_ranges, vlr->cfg.nri_bitlen);
+			osmo_tmsi_nri_v_get(&nri_v, tmsi, vlr->cfg.nri_bitlen);
+			LOGP(DVLR, LOGL_DEBUG, "New NRI from range [%s] = 0x%x --> TMSI 0x%08x\n",
+			     osmo_nri_ranges_to_str_c(OTC_SELECT, vlr->cfg.nri_ranges), nri_v, tmsi);
+		}
+
 		/* throw the dice again, if the TSMI doesn't fit */
 		if (tmsi == GSM_RESERVED_TMSI)
 			continue;
@@ -1246,6 +1256,8 @@ struct vlr_instance *vlr_alloc(void *ctx, const struct vlr_ops *ops)
 
 	/* defaults */
 	vlr->cfg.assign_tmsi = true;
+	vlr->cfg.nri_bitlen = OSMO_NRI_BITLEN_DEFAULT;
+	vlr->cfg.nri_ranges = osmo_nri_ranges_alloc(vlr);
 
 	/* reset shared timer definitions */
 	osmo_tdefs_reset(msc_tdefs_vlr);

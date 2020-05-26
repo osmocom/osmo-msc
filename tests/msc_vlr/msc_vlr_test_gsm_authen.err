@@ -1,6 +1,6 @@
 DLMGCP MGCP client: using endpoint domain '@mgw'
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 19
+talloc_total_blocks(tall_bsc_ctx) == 20
 
 ===== test_gsm_authen
 - Location Update request causes a GSUP Send Auth Info request to HLR
@@ -584,7 +584,7 @@ DMSC msc_a(IMSI-901700000004620:MSISDN-46071:GERAN-A:NONE){MSC_A_ST_RELEASED}: D
 ===== test_gsm_authen: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 19
+talloc_total_blocks(tall_bsc_ctx) == 20
 
 ===== test_gsm_authen_tmsi
 - Location Update request causes a GSUP Send Auth Info request to HLR
@@ -1407,7 +1407,7 @@ DMSC msc_a(IMSI-901700000004620:MSISDN-46071:TMSI-0x07060504:GERAN-A:NONE){MSC_A
 ===== test_gsm_authen_tmsi: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 19
+talloc_total_blocks(tall_bsc_ctx) == 20
 
 ===== test_gsm_authen_imei
 - Location Update request causes a GSUP Send Auth Info request to HLR
@@ -1719,7 +1719,7 @@ DMSC msc_a(IMSI-901700000004620:MSISDN-46071:GERAN-A:NONE){MSC_A_ST_RELEASED}: D
 ===== test_gsm_authen_imei: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 19
+talloc_total_blocks(tall_bsc_ctx) == 20
 
 ===== test_gsm_authen_imei_nack
 - Location Update request causes a GSUP Send Auth Info request to HLR
@@ -1984,7 +1984,7 @@ DMSC msc_a(IMSI-901700000004620:MSISDN-46071:GERAN-A:LU){MSC_A_ST_RELEASED}: Dea
 ===== test_gsm_authen_imei_nack: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 19
+talloc_total_blocks(tall_bsc_ctx) == 20
 
 ===== test_gsm_authen_imei_err
 - Location Update request causes a GSUP Send Auth Info request to HLR
@@ -2250,7 +2250,7 @@ DMSC msc_a(IMSI-901700000004620:MSISDN-46071:GERAN-A:LU){MSC_A_ST_RELEASED}: Dea
 ===== test_gsm_authen_imei_err: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 19
+talloc_total_blocks(tall_bsc_ctx) == 20
 
 ===== test_gsm_authen_tmsi_imei
 - Location Update request causes a GSUP Send Auth Info request to HLR
@@ -2603,7 +2603,7 @@ DMSC msc_a(IMSI-901700000004620:MSISDN-46071:TMSI-0x03020100:GERAN-A:NONE){MSC_A
 ===== test_gsm_authen_tmsi_imei: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 19
+talloc_total_blocks(tall_bsc_ctx) == 20
 
 ===== test_gsm_milenage_authen
 - Location Update request causes a GSUP Send Auth Info request to HLR
@@ -3161,7 +3161,7 @@ DMSC msc_a(IMSI-901700000010650:MSISDN-42342:GERAN-A:NONE){MSC_A_ST_RELEASED}: D
 ===== test_gsm_milenage_authen: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 19
+talloc_total_blocks(tall_bsc_ctx) == 20
 
 ===== test_wrong_sres_length
 - Total time passed: 0.000000 s
@@ -3306,8 +3306,8 @@ DMSC msc_a(IMSI-901700000004620:GERAN-A:LU){MSC_A_ST_RELEASED}: Deallocated, inc
 ===== test_wrong_sres_length: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 19
+talloc_total_blocks(tall_bsc_ctx) == 20
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 19
+talloc_total_blocks(tall_bsc_ctx) == 20
 

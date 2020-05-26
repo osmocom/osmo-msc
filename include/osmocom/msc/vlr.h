@@ -269,6 +269,8 @@ struct vlr_instance {
 		bool auth_reuse_old_sets_on_error;
 		bool parq_retrieve_imsi;
 		bool is_ps;
+		uint8_t nri_bitlen;
+		struct osmo_nri_ranges *nri_ranges;
 	} cfg;
 	/* A free-form pointer for use by the caller */
 	void *user_ctx;

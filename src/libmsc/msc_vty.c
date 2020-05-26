@@ -33,6 +33,7 @@
 #include <osmocom/gsm/protocol/gsm_08_58.h>
 #include <osmocom/gsm/protocol/gsm_04_14.h>
 #include <osmocom/gsm/protocol/gsm_08_08.h>
+#include <osmocom/gsm/gsm23236.h>
 
 #include <osmocom/sigtran/sccp_helpers.h>
 
@@ -657,6 +658,76 @@ DEFUN(cfg_msc_osmux,
 	return CMD_SUCCESS;
 }
 
+#define NRI_STR "Mapping of Network Resource Indicators to this MSC, for MSC pooling\n"
+DEFUN(cfg_msc_nri_bitlen, cfg_msc_nri_bitlen_cmd,
+      "nri bitlen <0-15>",
+      NRI_STR
+      "Set number of NRI bits to place in TMSI identities (always starting just after the most significant octet)\n"
+      "bit count (default: " OSMO_STRINGIFY_VAL(NRI_BITLEN_DEFAULT) ")\n")
+{
+	gsmnet->vlr->cfg.nri_bitlen = atoi(argv[0]);
+	return CMD_SUCCESS;
+}
+
+#define NRI_STR "Mapping of Network Resource Indicators to this MSC, for MSC pooling\n"
+#define NRI_ARGS_TO_STR_FMT "%s%s%s"
+#define NRI_ARGS_TO_STR_ARGS(ARGC, ARGV) ARGV[0], (ARGC>1)? ".." : "", (ARGC>1)? ARGV[1] : ""
+#define NRI_FIRST_LAST_STR "First value of the NRI value range, should not surpass the configured 'nri bitlen'.\n" \
+	"Last value of the NRI value range, should not surpass the configured 'nri bitlen' and be larger than the" \
+	" first value; if omitted, apply only the first value.\n"
+
+DEFUN(cfg_msc_nri_add, cfg_msc_nri_add_cmd,
+      "nri add <0-32767> [<0-32767>]",
+      NRI_STR "Add NRI value or range to the NRI mapping for this MSC\n"
+      NRI_FIRST_LAST_STR)
+{
+	const char *message;
+	int rc = osmo_nri_ranges_vty_add(&message, NULL, gsmnet->vlr->cfg.nri_ranges, argc, argv, gsmnet->vlr->cfg.nri_bitlen);
+	if (message) {
+		vty_out(vty, "%% %s: " NRI_ARGS_TO_STR_FMT, message, NRI_ARGS_TO_STR_ARGS(argc, argv));
+	}
+	if (rc < 0)
+		return CMD_WARNING;
+	return CMD_SUCCESS;
+}
+
+DEFUN(cfg_msc_nri_del, cfg_msc_nri_del_cmd,
+      "nri del <0-32767> [<0-32767>]",
+      NRI_STR "Remove NRI value or range from the NRI mapping for this MSC\n"
+      NRI_FIRST_LAST_STR)
+{
+	const char *message;
+	int rc = osmo_nri_ranges_vty_del(&message, NULL, gsmnet->vlr->cfg.nri_ranges, argc, argv);
+	if (message) {
+		vty_out(vty, "%% %s: " NRI_ARGS_TO_STR_FMT, message, NRI_ARGS_TO_STR_ARGS(argc, argv));
+	}
+	if (rc < 0)
+		return CMD_WARNING;
+	return CMD_SUCCESS;
+}
+
+static void msc_write_nri(struct vty *vty)
+{
+	struct osmo_nri_range *r;
+
+	llist_for_each_entry(r, &gsmnet->vlr->cfg.nri_ranges->entries, entry) {
+		if (osmo_nri_range_validate(r, 255))
+			vty_out(vty, " %% INVALID RANGE:");
+		vty_out(vty, " nri add %d", r->first);
+		if (r->first != r->last)
+			vty_out(vty, " %d", r->last);
+		vty_out(vty, "%s", VTY_NEWLINE);
+	}
+}
+
+DEFUN(show_nri, show_nri_cmd,
+      "show nri",
+      SHOW_STR NRI_STR)
+{
+	msc_write_nri(vty);
+	return CMD_SUCCESS;
+}
+
 static int config_write_msc(struct vty *vty)
 {
 	vty_out(vty, "msc%s", VTY_NEWLINE);
@@ -721,6 +792,8 @@ static int config_write_msc(struct vty *vty)
 
 	/* Timer introspection commands (generic osmo_tdef API) */
 	osmo_tdef_vty_groups_write(vty, " ");
+
+	msc_write_nri(vty);
 
 	return CMD_SUCCESS;
 }
@@ -2002,6 +2075,9 @@ void msc_vty_init(struct gsm_network *msc_network)
 	install_element(MSC_NODE, &cfg_msc_no_sms_over_gsup_cmd);
 	install_element(MSC_NODE, &cfg_msc_osmux_cmd);
 	install_element(MSC_NODE, &cfg_msc_handover_number_range_cmd);
+	install_element(MSC_NODE, &cfg_msc_nri_bitlen_cmd);
+	install_element(MSC_NODE, &cfg_msc_nri_add_cmd);
+	install_element(MSC_NODE, &cfg_msc_nri_del_cmd);
 
 	neighbor_ident_vty_init(msc_network);
 
@@ -2023,6 +2099,7 @@ void msc_vty_init(struct gsm_network *msc_network)
 	install_element_ve(&show_bsc_cmd);
 	install_element_ve(&show_msc_conn_cmd);
 	install_element_ve(&show_msc_transaction_cmd);
+	install_element_ve(&show_nri_cmd);
 
 	install_element_ve(&sms_send_pend_cmd);
 	install_element_ve(&sms_delete_expired_cmd);

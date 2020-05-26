@@ -1,6 +1,6 @@
 DLMGCP MGCP client: using endpoint domain '@mgw'
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 19
+talloc_total_blocks(tall_bsc_ctx) == 20
 
 ===== test_no_authen
 - Location Update request causes a GSUP LU request to HLR
@@ -451,7 +451,7 @@ DMSC msc_a(IMSI-901700000004620:MSISDN-46071:GERAN-A:NONE){MSC_A_ST_RELEASED}: D
 ===== test_no_authen: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 19
+talloc_total_blocks(tall_bsc_ctx) == 20
 
 ===== test_no_authen_tmsi
 - Location Update request causes a GSUP LU request to HLR
@@ -1134,7 +1134,7 @@ DMSC msc_a(IMSI-901700000004620:MSISDN-46071:TMSI-0x07060504:GERAN-A:NONE){MSC_A
 ===== test_no_authen_tmsi: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 19
+talloc_total_blocks(tall_bsc_ctx) == 20
 
 ===== test_no_authen_imei
 - Location Update request causes a GSUP LU request to HLR
@@ -1385,7 +1385,7 @@ DMSC msc_a(IMSI-901700000004620:MSISDN-46071:GERAN-A:NONE){MSC_A_ST_RELEASED}: D
 ===== test_no_authen_imei: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 19
+talloc_total_blocks(tall_bsc_ctx) == 20
 
 ===== test_no_authen_tmsi_imei
 - Location Update request causes a GSUP LU request to HLR
@@ -1671,7 +1671,7 @@ DMSC msc_a(IMSI-901700000004620:MSISDN-46071:TMSI-0x03020100:GERAN-A:NONE){MSC_A
 ===== test_no_authen_tmsi_imei: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 19
+talloc_total_blocks(tall_bsc_ctx) == 20
 
 ===== test_no_authen_imeisv
 - Location Update request causes an IMEISV ID request back to the MS
@@ -1892,7 +1892,7 @@ DMSC msc_a(IMSI-901700000004620:MSISDN-46071:GERAN-A:NONE){MSC_A_ST_RELEASED}: D
 ===== test_no_authen_imeisv: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 19
+talloc_total_blocks(tall_bsc_ctx) == 20
 
 ===== test_no_authen_imeisv_imei
 - Location Update request causes an IMEISV ID request back to the MS
@@ -2124,7 +2124,7 @@ DMSC msc_a(IMSI-901700000004620:MSISDN-46071:GERAN-A:NONE){MSC_A_ST_RELEASED}: D
 ===== test_no_authen_imeisv_imei: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 19
+talloc_total_blocks(tall_bsc_ctx) == 20
 
 ===== test_no_authen_imeisv_tmsi
 - Location Update request causes an IMEISV ID request back to the MS
@@ -2590,7 +2590,7 @@ DMSC msc_a(IMSI-901700000004620:MSISDN-46071:TMSI-0x07060504:GERAN-A:NONE){MSC_A
 ===== test_no_authen_imeisv_tmsi: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 19
+talloc_total_blocks(tall_bsc_ctx) == 20
 
 ===== test_no_authen_imeisv_tmsi_imei
 - Location Update request causes an IMEISV ID request back to the MS
@@ -2859,7 +2859,7 @@ DMSC msc_a(IMSI-901700000004620:MSISDN-46071:TMSI-0x03020100:GERAN-A:NONE){MSC_A
 ===== test_no_authen_imeisv_tmsi_imei: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 19
+talloc_total_blocks(tall_bsc_ctx) == 20
 
 ===== test_no_authen_subscr_expire
 - Total time passed: 0.000000 s
@@ -2994,8 +2994,8 @@ DVLR freeing VLR subscr IMSI-901700000004620:MSISDN-46071 (max total use count w
 ===== test_no_authen_subscr_expire: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 19
+talloc_total_blocks(tall_bsc_ctx) == 20
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 19
+talloc_total_blocks(tall_bsc_ctx) == 20
 

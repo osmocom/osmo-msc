@@ -1,6 +1,6 @@
 DLMGCP MGCP client: using endpoint domain '@mgw'
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 19
+talloc_total_blocks(tall_bsc_ctx) == 20
 
 ===== test_ms_timeout_lu_auth_resp
 - Total time passed: 0.000000 s
@@ -129,7 +129,7 @@ DMSC msc_a(IMSI-901700000004620:GERAN-A:LU){MSC_A_ST_RELEASED}: Deallocated, inc
 ===== test_ms_timeout_lu_auth_resp: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 19
+talloc_total_blocks(tall_bsc_ctx) == 20
 
 ===== test_ms_timeout_cm_auth_resp
 - Total time passed: 0.000000 s
@@ -402,7 +402,7 @@ DVLR freeing VLR subscr IMSI-901700000004620:MSISDN-46071 (max total use count w
 ===== test_ms_timeout_cm_auth_resp: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 19
+talloc_total_blocks(tall_bsc_ctx) == 20
 
 ===== test_ms_timeout_paging
 - Total time passed: 0.000000 s
@@ -710,7 +710,7 @@ DMSC msc_a(IMSI-901700000004620:MSISDN-46071:GERAN-A:NONE){MSC_A_ST_RELEASED}: D
 ===== test_ms_timeout_paging: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 19
+talloc_total_blocks(tall_bsc_ctx) == 20
 
 ===== test_classmark_update_timeout
 - Total time passed: 0.000000 s
@@ -863,8 +863,8 @@ DMSC msc_a(IMSI-901700000004620:GERAN-A:LU){MSC_A_ST_RELEASED}: Deallocated, inc
 ===== test_classmark_update_timeout: SUCCESS
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 19
+talloc_total_blocks(tall_bsc_ctx) == 20
 
 full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 19
+talloc_total_blocks(tall_bsc_ctx) == 20
 
