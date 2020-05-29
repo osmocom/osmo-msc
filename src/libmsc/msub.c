@@ -488,9 +488,9 @@ static void _msub_update_id(struct msub *msub, const char *subscr_name)
 }
 
 /* Compose an ID almost like gsm48_mi_to_string(), but print the MI type along, and print a TMSI as hex. */
-void msub_update_id_from_mi(struct msub *msub, const uint8_t mi[], uint8_t mi_len)
+void msub_update_id_from_mi(struct msub *msub, const struct osmo_mobile_identity *mi)
 {
-	_msub_update_id(msub, osmo_mi_name(mi, mi_len));
+	_msub_update_id(msub, osmo_mobile_identity_to_str_c(OTC_SELECT, mi));
 }
 
 /* Update msub->fi id string from current msub->vsub and msub->complete_layer3_type. */

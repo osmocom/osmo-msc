@@ -23,6 +23,7 @@
 	LOGP(DVLR, level, "SUBSCR(%s) " fmt, vlr_subscr_name(vsub), ## args)
 
 struct log_target;
+struct osmo_mobile_identity;
 
 #define VLR_SUBSCRIBER_NO_EXPIRATION	0
 #define VLR_SUBSCRIBER_LU_EXPIRATION_INTERVAL	60	/* in seconds */
@@ -302,7 +303,7 @@ void vlr_loc_update_cancel(struct osmo_fsm_inst *fi,
 /* tell the VLR that the RAN connection is gone */
 int vlr_subscr_disconnected(struct vlr_subscr *vsub);
 bool vlr_subscr_expire(struct vlr_subscr *vsub);
-int vlr_subscr_rx_id_resp(struct vlr_subscr *vsub, const uint8_t *mi, size_t mi_len);
+int vlr_subscr_rx_id_resp(struct vlr_subscr *vsub, const struct osmo_mobile_identity *mi);
 int vlr_subscr_rx_auth_resp(struct vlr_subscr *vsub, bool is_r99, bool is_utran,
 			    const uint8_t *res, uint8_t res_len);
 int vlr_subscr_rx_auth_fail(struct vlr_subscr *vsub, const uint8_t *auts);
@@ -440,7 +441,7 @@ vlr_proc_acc_req(struct osmo_fsm_inst *parent,
 		 void *parent_event_data,
 		 struct vlr_instance *vlr, void *msc_conn_ref,
 		 enum vlr_parq_type type, enum osmo_cm_service_type cm_service_type,
-		 const uint8_t *mi_lv,
+		 const struct osmo_mobile_identity *mi,
 		 const struct osmo_location_area_id *lai,
 		 bool authentication_required,
 		 bool ciphering_required,

@@ -116,13 +116,15 @@ static int gsm0408_loc_upd_acc(struct msc_a *msc_a, uint32_t send_tmsi)
 	struct msgb *msg = gsm48_msgb_alloc_name("GSM 04.08 LOC UPD ACC");
 	struct gsm48_hdr *gh;
 	struct gsm48_loc_area_id *lai;
-	uint8_t *mid;
 	struct gsm_network *net = msc_a_net(msc_a);
 	struct vlr_subscr *vsub = msc_a_vsub(msc_a);
 	struct osmo_location_area_id laid = {
 		.plmn = net->plmn,
 		.lac = vsub->cgi.lai.lac,
 	};
+	uint8_t *l;
+	int rc;
+	struct osmo_mobile_identity mi = {};
 
 	gh = (struct gsm48_hdr *) msgb_put(msg, sizeof(*gh));
 	gh->proto_discr = GSM48_PDISC_MM;
@@ -135,23 +137,28 @@ static int gsm0408_loc_upd_acc(struct msc_a *msc_a, uint32_t send_tmsi)
 		/* we did not allocate a TMSI to the MS, so we need to
 		 * include the IMSI in order for the MS to delete any
 		 * old TMSI that might still be allocated */
-		uint8_t mi[10];
-		int len;
-		len = gsm48_generate_mid_from_imsi(mi, vsub->imsi);
-		mid = msgb_put(msg, len);
-		memcpy(mid, mi, len);
+		mi.type = GSM_MI_TYPE_IMSI;
+		OSMO_STRLCPY_ARRAY(mi.imsi, vsub->imsi);
 		DEBUGP(DMM, "-> %s LOCATION UPDATE ACCEPT\n",
 		       vlr_subscr_name(vsub));
 	} else {
 		/* Include the TMSI, which means that the MS will send a
 		 * TMSI REALLOCATION COMPLETE, and we should wait for
 		 * that until T3250 expiration */
-		mid = msgb_put(msg, GSM48_MID_TMSI_LEN);
-		gsm48_generate_mid_from_tmsi(mid, send_tmsi);
+		mi.type = GSM_MI_TYPE_TMSI;
+		mi.tmsi = send_tmsi;
 		DEBUGP(DMM, "-> %s LOCATION UPDATE ACCEPT (TMSI = 0x%08x)\n",
 		       vlr_subscr_name(vsub),
 		       send_tmsi);
 	}
+	l = msgb_tl_put(msg, GSM48_IE_MOBILE_ID);
+	rc = osmo_mobile_identity_encode_msgb(msg, &mi, false);
+	if (rc < 0) {
+		msgb_free(msg);
+		return -EINVAL;
+	}
+	*l = rc;
+
 	/* TODO: Follow-on proceed */
 	/* TODO: CTS permission */
 	/* TODO: Equivalent PLMNs */
@@ -180,10 +187,11 @@ static int mm_tx_identity_req(struct msc_a *msc_a, uint8_t id_type)
 static int mm_rx_id_resp(struct msc_a *msc_a, struct msgb *msg)
 {
 	struct gsm48_hdr *gh = msgb_l3(msg);
-	uint8_t *mi = gh->data+1;
+	uint8_t *mi_data = gh->data+1;
 	uint8_t mi_len = gh->data[0];
-	uint8_t mi_type;
 	struct vlr_subscr *vsub = msc_a_vsub(msc_a);
+	struct osmo_mobile_identity mi;
+	int rc;
 
 	if (!vsub) {
 		LOGP(DMM, LOGL_ERROR,
@@ -198,26 +206,26 @@ static int mm_rx_id_resp(struct msc_a *msc_a, struct msgb *msg)
 		return -EINVAL;
 	}
 
-	/* Make sure we got what we expected */
-	mi_type = mi[0] & GSM_MI_TYPE_MASK;
-	if (mi_type == GSM_MI_TYPE_NONE) {
-		LOGP(DMM, LOGL_NOTICE, "MM Identity Response contains no identity, "
-				       "perhaps the MS has no Mobile Identity type %s?\n",
-				       gsm48_mi_type_name(msc_a->mm_id_req_type));
+	rc = osmo_mobile_identity_decode(&mi, mi_data, mi_len, false);
+	if (rc) {
+		LOGP(DMM, LOGL_ERROR, "Failure to decode Mobile Identity in MM Identity Response (rc=%d)\n", rc);
 		return -EINVAL;
-	} else if (mi_type != msc_a->mm_id_req_type) {
+	}
+
+	/* Make sure we got what we expected */
+	if (mi.type != msc_a->mm_id_req_type) {
 		LOGP(DMM, LOGL_NOTICE, "MM Identity Response contains unexpected "
 				       "Mobile Identity type %s (extected %s)\n",
-				       gsm48_mi_type_name(mi_type),
+				       gsm48_mi_type_name(mi.type),
 				       gsm48_mi_type_name(msc_a->mm_id_req_type));
 		return -EINVAL;
 	}
 
-	DEBUGP(DMM, "IDENTITY RESPONSE: MI=%s\n", osmo_mi_name(mi, mi_len));
+	DEBUGP(DMM, "IDENTITY RESPONSE: %s\n", osmo_mobile_identity_to_str_c(OTC_SELECT, &mi));
 
 	osmo_signal_dispatch(SS_SUBSCR, S_SUBSCR_IDENTITY, gh->data);
 
-	return vlr_subscr_rx_id_resp(vsub, mi, mi_len);
+	return vlr_subscr_rx_id_resp(vsub, &mi);
 }
 
 /* 9.2.5 CM service accept */
@@ -311,8 +319,6 @@ static int mm_rx_loc_upd_req(struct msc_a *msc_a, struct msgb *msg)
 {
 	struct gsm48_hdr *gh = msgb_l3(msg);
 	struct gsm48_loc_upd_req *lu;
-	uint8_t mi_type;
-	char mi_string[GSM48_MI_SIZE];
 	enum vlr_lu_type vlr_lu_type = VLR_LU_TYPE_REGULAR;
 	uint32_t tmsi;
 	char *imsi;
@@ -321,6 +327,15 @@ static int mm_rx_loc_upd_req(struct msc_a *msc_a, struct msgb *msg)
 	bool is_utran;
 	struct gsm_network *net = msc_a_net(msc_a);
 	struct vlr_subscr *vsub;
+	struct osmo_mobile_identity mi;
+	int rc;
+
+	rc = osmo_mobile_identity_decode_from_l3(&mi, msg, false);
+	if (rc) {
+		LOG_MSC_A_CAT(msc_a, DMM, LOGL_ERROR,
+			      "Failed to decode Mobile Identity in Location Updating Request\n");
+		return -EINVAL;
+	}
 
  	lu = (struct gsm48_loc_upd_req *) gh->data;
 
@@ -328,7 +343,7 @@ static int mm_rx_loc_upd_req(struct msc_a *msc_a, struct msgb *msg)
 		LOG_MSC_A_CAT(msc_a, DMM, LOGL_ERROR,
 			     "Cannot accept another LU, conn already busy establishing authenticity;"
 			     " extraneous LOCATION UPDATING REQUEST: MI=%s LU-type=%s\n",
-			     osmo_mi_name(lu->mi, lu->mi_len), osmo_lu_type_name(lu->type));
+			     osmo_mobile_identity_to_str_c(OTC_SELECT, &mi), osmo_lu_type_name(lu->type));
 		return -EINVAL;
 	}
 
@@ -336,17 +351,18 @@ static int mm_rx_loc_upd_req(struct msc_a *msc_a, struct msgb *msg)
 		LOG_MSC_A_CAT(msc_a, DMM, LOGL_ERROR,
 			     "Cannot accept another LU, conn already established;"
 			     " extraneous LOCATION UPDATING REQUEST: MI=%s LU-type=%s\n",
-			     osmo_mi_name(lu->mi, lu->mi_len), osmo_lu_type_name(lu->type));
+			     osmo_mobile_identity_to_str_c(OTC_SELECT, &mi), osmo_lu_type_name(lu->type));
 		return -EINVAL;
 	}
 
 	msc_a->complete_layer3_type = COMPLETE_LAYER3_LU;
-	msub_update_id_from_mi(msc_a->c.msub, lu->mi, lu->mi_len);
+
+	msub_update_id_from_mi(msc_a->c.msub, &mi);
 
 	LOG_MSC_A_CAT(msc_a, DMM, LOGL_DEBUG, "LOCATION UPDATING REQUEST: MI=%s LU-type=%s\n",
-		     osmo_mi_name(lu->mi, lu->mi_len), osmo_lu_type_name(lu->type));
+		     osmo_mobile_identity_to_str_c(OTC_SELECT, &mi), osmo_lu_type_name(lu->type));
 
-	osmo_signal_dispatch(SS_SUBSCR, S_SUBSCR_IDENTITY, &lu->mi_len);
+	osmo_signal_dispatch(SS_SUBSCR, S_SUBSCR_IDENTITY, &mi);
 
 	switch (lu->type) {
 	case GSM48_LUPD_NORMAL:
@@ -368,15 +384,13 @@ static int mm_rx_loc_upd_req(struct msc_a *msc_a, struct msgb *msg)
 	/* TODO: 10.5.7.8 Device properties */
 	/* TODO: 10.5.1.15 MS network feature support */
 
-	mi_type = lu->mi[0] & GSM_MI_TYPE_MASK;
-	gsm48_mi_to_string(mi_string, sizeof(mi_string), lu->mi, lu->mi_len);
-	switch (mi_type) {
+	switch (mi.type) {
 	case GSM_MI_TYPE_IMSI:
 		tmsi = GSM_RESERVED_TMSI;
-		imsi = mi_string;
+		imsi = mi.imsi;
 		break;
 	case GSM_MI_TYPE_TMSI:
-		tmsi = tmsi_from_string(mi_string);
+		tmsi = mi.tmsi;
 		imsi = NULL;
 		break;
 	default:
@@ -654,37 +668,30 @@ int gsm48_tx_mm_auth_rej(struct msc_a *msc_a)
 static int msc_vlr_tx_cm_serv_rej(void *msc_conn_ref, enum osmo_cm_service_type cm_service_type,
 				  enum gsm48_reject_value cause);
 
-static int cm_serv_reuse_conn(struct msc_a *msc_a, const uint8_t *mi_lv, enum osmo_cm_service_type cm_serv_type)
+static int cm_serv_reuse_conn(struct msc_a *msc_a, const struct osmo_mobile_identity *mi, enum osmo_cm_service_type cm_serv_type)
 {
-	uint8_t mi_type;
-	char mi_string[GSM48_MI_SIZE];
-	uint32_t tmsi;
 	struct gsm_network *net = msc_a_net(msc_a);
 	struct vlr_subscr *vsub = msc_a_vsub(msc_a);
 
-	gsm48_mi_to_string(mi_string, sizeof(mi_string), mi_lv+1, mi_lv[0]);
-	mi_type = mi_lv[1] & GSM_MI_TYPE_MASK;
-
-	switch (mi_type) {
+	switch (mi->type) {
 	case GSM_MI_TYPE_IMSI:
-		if (vlr_subscr_matches_imsi(vsub, mi_string))
+		if (vlr_subscr_matches_imsi(vsub, mi->imsi))
 			goto accept_reuse;
 		break;
 	case GSM_MI_TYPE_TMSI:
-		tmsi = osmo_load32be(mi_lv+2);
-		if (vlr_subscr_matches_tmsi(vsub, tmsi))
+		if (vlr_subscr_matches_tmsi(vsub, mi->tmsi))
 			goto accept_reuse;
 		break;
 	case GSM_MI_TYPE_IMEI:
-		if (vlr_subscr_matches_imei(vsub, mi_string))
+		if (vlr_subscr_matches_imei(vsub, mi->imei))
 			goto accept_reuse;
 		break;
 	default:
 		break;
 	}
 
-	LOG_MSC_A_CAT(msc_a, DMM, LOGL_ERROR, "CM Service Request with mismatching mobile identity: %s %s\n",
-		      gsm48_mi_type_name(mi_type), mi_string);
+	LOG_MSC_A_CAT(msc_a, DMM, LOGL_ERROR, "CM Service Request with mismatching mobile identity: %s\n",
+		      osmo_mobile_identity_to_str_c(OTC_SELECT, mi));
 	msc_vlr_tx_cm_serv_rej(msc_a, cm_serv_type, GSM48_REJECT_ILLEGAL_MS);
 	return -EINVAL;
 
@@ -714,15 +721,21 @@ int gsm48_rx_mm_serv_req(struct msc_a *msc_a, struct msgb *msg)
 	struct gsm48_service_request *req;
 	struct gsm48_classmark2 *cm2;
 	uint8_t *cm2_buf, cm2_len;
-	uint8_t *mi_buf, mi_len;
-	uint8_t *mi, mi_type;
 	bool is_utran;
 	struct vlr_subscr *vsub;
+	struct osmo_mobile_identity mi;
+	int rc;
 
 	/* Make sure that both header and CM Service Request fit into the buffer */
 	if (msgb_l3len(msg) < sizeof(*gh) + sizeof(*req)) {
 		LOG_MSC_A(msc_a, LOGL_ERROR, "Rx CM SERVICE REQUEST: wrong message size (%u < %zu)\n",
 			  msgb_l3len(msg), sizeof(*gh) + sizeof(*req));
+		return msc_gsm48_tx_mm_serv_rej(msc_a, GSM48_REJECT_INCORRECT_MESSAGE);
+	}
+
+	rc = osmo_mobile_identity_decode_from_l3(&mi, msg, false);
+	if (rc) {
+		LOG_MSC_A(msc_a, LOGL_ERROR, "Rx CM SERVICE REQUEST: unable to decode Mobile Identity\n");
 		return msc_gsm48_tx_mm_serv_rej(msc_a, GSM48_REJECT_INCORRECT_MESSAGE);
 	}
 
@@ -742,18 +755,6 @@ int gsm48_rx_mm_serv_req(struct msc_a *msc_a, struct msgb *msg)
 		return msc_gsm48_tx_mm_serv_rej(msc_a, GSM48_REJECT_INCORRECT_MESSAGE);
 	}
 
-	/* MI (Mobile Identity) LV follows the Classmark2 */
-	mi_buf = cm2_buf + cm2_len;
-	mi_len = mi_buf[0];
-	mi = mi_buf + 1;
-
-	/* Prevent buffer overrun: check the length of MI */
-	if (mi_buf + mi_len > msg->tail) {
-		LOG_MSC_A(msc_a, LOGL_ERROR, "Rx CM SERVICE REQUEST: Mobile Identity "
-					     "length=%u is too big\n", cm2_len);
-		return msc_gsm48_tx_mm_serv_rej(msc_a, GSM48_REJECT_INCORRECT_MESSAGE);
-	}
-
 	if (msc_a_is_establishing_auth_ciph(msc_a)) {
 		LOG_MSC_A(msc_a, LOGL_ERROR,
 			  "Cannot accept CM Service Request, conn already busy establishing authenticity\n");
@@ -762,12 +763,11 @@ int gsm48_rx_mm_serv_req(struct msc_a *msc_a, struct msgb *msg)
 	}
 
 	msc_a->complete_layer3_type = COMPLETE_LAYER3_CM_SERVICE_REQ;
-	msub_update_id_from_mi(msc_a->c.msub, mi, mi_len);
+	msub_update_id_from_mi(msc_a->c.msub, &mi);
 	LOG_MSC_A_CAT(msc_a, DMM, LOGL_DEBUG, "Rx CM SERVICE REQUEST cm_service_type=%s\n",
 		     osmo_cm_service_type_name(req->cm_service_type));
 
-	mi_type = (mi && mi_len) ? (mi[0] & GSM_MI_TYPE_MASK) : GSM_MI_TYPE_NONE;
-	switch (mi_type) {
+	switch (mi.type) {
 	case GSM_MI_TYPE_IMSI:
 	case GSM_MI_TYPE_TMSI:
 		/* continue below */
@@ -781,7 +781,7 @@ int gsm48_rx_mm_serv_req(struct msc_a *msc_a, struct msgb *msg)
 		}
 		/* fall-through for non-emergency setup */
 	default:
-		LOG_MSC_A(msc_a, LOGL_ERROR, "MI type is not expected: %s\n", gsm48_mi_type_name(mi_type));
+		LOG_MSC_A(msc_a, LOGL_ERROR, "MI type is not expected: %s\n", gsm48_mi_type_name(mi.type));
 		return msc_gsm48_tx_mm_serv_rej(msc_a, GSM48_REJECT_INCORRECT_MESSAGE);
 	}
 
@@ -789,9 +789,9 @@ int gsm48_rx_mm_serv_req(struct msc_a *msc_a, struct msgb *msg)
 		return msc_gsm48_tx_mm_serv_rej(msc_a, GSM48_REJECT_SRV_OPT_NOT_SUPPORTED);
 
 	if (msc_a_is_accepted(msc_a))
-		return cm_serv_reuse_conn(msc_a, mi_buf, req->cm_service_type);
+		return cm_serv_reuse_conn(msc_a, &mi, req->cm_service_type);
 
-	osmo_signal_dispatch(SS_SUBSCR, S_SUBSCR_IDENTITY, mi_buf);
+	osmo_signal_dispatch(SS_SUBSCR, S_SUBSCR_IDENTITY, &mi);
 
 	msc_a_get(msc_a, msc_a_cm_service_type_to_use(req->cm_service_type));
 
@@ -801,7 +801,7 @@ int gsm48_rx_mm_serv_req(struct msc_a *msc_a, struct msgb *msg)
 			 net->vlr, msc_a,
 			 VLR_PR_ARQ_T_CM_SERV_REQ,
 			 req->cm_service_type,
-			 mi-1, &msc_a->via_cell.lai,
+			 &mi, &msc_a->via_cell.lai,
 			 is_utran || net->authentication_required,
 			 is_utran ? net->uea_encryption : net->a5_encryption_mask > 0x01,
 			 req->cipher_key_seq,
@@ -824,18 +824,9 @@ int gsm48_rx_mm_serv_req(struct msc_a *msc_a, struct msgb *msg)
 /* Receive a CM Re-establish Request */
 static int gsm48_rx_cm_reest_req(struct msc_a *msc_a, struct msgb *msg)
 {
-	uint8_t mi_type;
-	char mi_string[GSM48_MI_SIZE];
-	struct gsm48_hdr *gh = msgb_l3(msg);
-
-	uint8_t classmark2_len = gh->data[1];
-	uint8_t *classmark2 = gh->data+2;
-	uint8_t mi_len = *(classmark2 + classmark2_len);
-	uint8_t *mi = (classmark2 + classmark2_len + 1);
-
-	gsm48_mi_to_string(mi_string, sizeof(mi_string), mi, mi_len);
-	mi_type = mi[0] & GSM_MI_TYPE_MASK;
-	DEBUGP(DMM, "<- CM RE-ESTABLISH REQUEST MI(%s)=%s\n", gsm48_mi_type_name(mi_type), mi_string);
+	struct osmo_mobile_identity mi;
+	osmo_mobile_identity_decode_from_l3(&mi, msg, false);
+	DEBUGP(DMM, "<- CM RE-ESTABLISH REQUEST %s\n", osmo_mobile_identity_to_str_c(OTC_SELECT, &mi));
 
 	/* we don't support CM call re-establishment */
 	return msc_gsm48_tx_mm_serv_rej(msc_a, GSM48_REJECT_SRV_OPT_NOT_SUPPORTED);
@@ -847,39 +838,41 @@ static int gsm48_rx_mm_imsi_detach_ind(struct msc_a *msc_a, struct msgb *msg)
 	struct gsm48_hdr *gh = msgb_l3(msg);
 	struct gsm48_imsi_detach_ind *idi =
 				(struct gsm48_imsi_detach_ind *) gh->data;
-	uint8_t mi_type = idi->mi[0] & GSM_MI_TYPE_MASK;
-	char mi_string[GSM48_MI_SIZE];
+	struct osmo_mobile_identity mi;
 	struct vlr_subscr *vsub = NULL;
 
-	gsm48_mi_to_string(mi_string, sizeof(mi_string), idi->mi, idi->mi_len);
-	DEBUGP(DMM, "IMSI DETACH INDICATION: MI(%s)=%s\n",
-	       gsm48_mi_type_name(mi_type), mi_string);
+	int rc = osmo_mobile_identity_decode_from_l3(&mi, msg, false);
+	if (rc) {
+		LOGP(DMM, LOGL_ERROR, "IMSI DETACH INDICATION: cannot decode Mobile Identity\n");
+		return -EINVAL;
+	}
+
+	DEBUGP(DMM, "IMSI DETACH INDICATION: %s\n", osmo_mobile_identity_to_str_c(OTC_SELECT, &mi));
 
 	rate_ctr_inc(&net->msc_ctrs->ctr[MSC_CTR_LOC_UPDATE_TYPE_DETACH]);
 
-	switch (mi_type) {
+	switch (mi.type) {
 	case GSM_MI_TYPE_TMSI:
-		vsub = vlr_subscr_find_by_tmsi(net->vlr,
-					       tmsi_from_string(mi_string), __func__);
+		vsub = vlr_subscr_find_by_tmsi(net->vlr, mi.tmsi, __func__);
 		break;
 	case GSM_MI_TYPE_IMSI:
-		vsub = vlr_subscr_find_by_imsi(net->vlr, mi_string, __func__);
+		vsub = vlr_subscr_find_by_imsi(net->vlr, mi.imsi, __func__);
 		break;
 	case GSM_MI_TYPE_IMEI:
 	case GSM_MI_TYPE_IMEISV:
 		/* no sim card... FIXME: what to do ? */
-		LOGP(DMM, LOGL_ERROR, "MI(%s)=%s: unimplemented mobile identity type\n",
-		     gsm48_mi_type_name(mi_type), mi_string);
+		LOGP(DMM, LOGL_ERROR, "%s: unimplemented mobile identity type\n",
+		     osmo_mobile_identity_to_str_c(OTC_SELECT, &mi));
 		break;
 	default:
-		LOGP(DMM, LOGL_ERROR, "MI(%s)=%s: unknown mobile identity type\n",
-		     gsm48_mi_type_name(mi_type), mi_string);
+		LOGP(DMM, LOGL_ERROR, "%s: unknown mobile identity type\n",
+		     osmo_mobile_identity_to_str_c(OTC_SELECT, &mi));
 		break;
 	}
 
 	if (!vsub) {
-		LOGP(DMM, LOGL_ERROR, "IMSI DETACH for unknown subscriber MI(%s)=%s\n",
-		     gsm48_mi_type_name(mi_type), mi_string);
+		LOGP(DMM, LOGL_ERROR, "IMSI DETACH for unknown subscriber %s\n",
+		     osmo_mobile_identity_to_str_c(OTC_SELECT, &mi));
 	} else {
 		LOGP(DMM, LOGL_INFO, "IMSI DETACH for %s\n", vlr_subscr_name(vsub));
 		msub_set_vsub(msc_a->c.msub, vsub);
@@ -1148,9 +1141,10 @@ static int gsm48_rx_rr_pag_resp(struct msc_a *msc_a, struct msgb *msg)
 	uint8_t classmark2_len = gh->data[1];
 	uint8_t *classmark2_buf = gh->data+2;
 	struct gsm48_classmark2 *cm2 = (void*)classmark2_buf;
-	uint8_t *mi_lv = classmark2_buf + classmark2_len;
 	bool is_utran;
 	struct vlr_subscr *vsub;
+	struct osmo_mobile_identity mi;
+	int rc;
 
 	if (msc_a_is_establishing_auth_ciph(msc_a)) {
 		LOG_MSC_A_CAT(msc_a, DRR, LOGL_ERROR,
@@ -1163,9 +1157,15 @@ static int gsm48_rx_rr_pag_resp(struct msc_a *msc_a, struct msgb *msg)
 		return 0;
 	}
 
+	rc = osmo_mobile_identity_decode_from_l3(&mi, msg, false);
+	if (rc) {
+		LOG_MSC_A_CAT(msc_a, DRR, LOGL_ERROR, "Paging Response: cannot decode Mobile Identity\n");
+		return -EINVAL;
+	}
+
 	msc_a->complete_layer3_type = COMPLETE_LAYER3_PAGING_RESP;
-	msub_update_id_from_mi(msc_a->c.msub, mi_lv + 1, *mi_lv);
-	LOG_MSC_A_CAT(msc_a, DRR, LOGL_DEBUG, "Rx PAGING RESPONSE\n");
+	msub_update_id_from_mi(msc_a->c.msub, &mi);
+	LOG_MSC_A_CAT(msc_a, DRR, LOGL_DEBUG, "Rx PAGING RESPONSE %s\n", osmo_mobile_identity_to_str_c(OTC_SELECT, &mi));
 
 	msc_a_get(msc_a, MSC_A_USE_PAGING_RESPONSE);
 
@@ -1173,7 +1173,7 @@ static int gsm48_rx_rr_pag_resp(struct msc_a *msc_a, struct msgb *msg)
 	vlr_proc_acc_req(msc_a->c.fi,
 			 MSC_A_EV_AUTHENTICATED, MSC_A_EV_CN_CLOSE, NULL,
 			 net->vlr, msc_a,
-			 VLR_PR_ARQ_T_PAGING_RESP, 0, mi_lv, &msc_a->via_cell.lai,
+			 VLR_PR_ARQ_T_PAGING_RESP, 0, &mi, &msc_a->via_cell.lai,
 			 is_utran || net->authentication_required,
 			 is_utran ? net->uea_encryption : net->a5_encryption_mask > 0x01,
 			 pr->key_seq,
@@ -1200,30 +1200,37 @@ static int gsm48_rx_rr_ciphering_mode_complete(struct msc_a *msc_a, struct msgb 
 	struct gsm48_hdr *gh = msgb_l3(msg);
 	unsigned int payload_len = msgb_l3len(msg) - sizeof(*gh);
 	struct tlv_parsed tp;
-	struct tlv_p_entry *mi;
+	struct tlv_p_entry *mi_tlv;
+	struct osmo_mobile_identity mi;
 
 	tlv_parse(&tp, &gsm48_att_tlvdef, gh->data, payload_len, 0, 0);
-	mi = TLVP_GET(&tp, GSM48_IE_MOBILE_ID);
+	mi_tlv = TLVP_GET(&tp, GSM48_IE_MOBILE_ID);
 
 	/* IMEI(SV) is optional for this message */
-	if (!mi)
+	if (!mi_tlv)
 		return 0;
-	if (!mi->len)
+	if (!mi_tlv->len)
 		return -EINVAL;
-	if ((mi->val[0] & GSM_MI_TYPE_MASK) != GSM_MI_TYPE_IMEISV) {
+
+	if (osmo_mobile_identity_decode(&mi, mi_tlv->val, mi_tlv->len, false)) {
+		LOGP(DMM, LOGL_ERROR, "RR Ciphering Mode Complete contains invalid Mobile Identity %s\n",
+		     osmo_hexdump(mi_tlv->val, mi_tlv->len));
+		return -EINVAL;
+	}
+	if (mi.type != GSM_MI_TYPE_IMEISV) {
 		LOGP(DMM, LOGL_ERROR, "RR Ciphering Mode Complete contains "
 				      "unexpected Mobile Identity type %s\n",
-				      gsm48_mi_type_name(mi->val[0] & GSM_MI_TYPE_MASK));
+				      osmo_mobile_identity_to_str_c(OTC_SELECT, &mi));
 		return -EINVAL;
 	}
 
 	LOG_MSC_A(msc_a, LOGL_DEBUG, "RR Ciphering Mode Complete contains Mobile Identity: %s\n",
-		  osmo_mi_name(mi->val, mi->len));
+		  osmo_mobile_identity_to_str_c(OTC_SELECT, &mi));
 
 	if (!vsub)
 		return 0;
 
-	return vlr_subscr_rx_id_resp(vsub, mi->val, mi->len);
+	return vlr_subscr_rx_id_resp(vsub, &mi);
 }
 
 static int gsm48_rx_rr_app_info(struct msc_a *msc_a, struct msgb *msg)
@@ -1459,28 +1466,4 @@ struct msgb *gsm48_create_loc_upd_rej(uint8_t cause)
 	gh->msg_type = GSM48_MT_MM_LOC_UPD_REJECT;
 	gh->data[0] = cause;
 	return msg;
-}
-
-int gsm48_extract_mi(uint8_t *classmark2_lv, int length, char *mi_string, uint8_t *mi_type)
-{
-	/* Check the size for the classmark */
-	if (length < 1 + *classmark2_lv)
-		return -1;
-
-	uint8_t *mi_lv = classmark2_lv + *classmark2_lv + 1;
-	if (length < 2 + *classmark2_lv + mi_lv[0])
-		return -2;
-
-	*mi_type = mi_lv[1] & GSM_MI_TYPE_MASK;
-	return gsm48_mi_to_string(mi_string, GSM48_MI_SIZE, mi_lv+1, *mi_lv);
-}
-
-int gsm48_paging_extract_mi(struct gsm48_pag_resp *resp, int length,
-			    char *mi_string, uint8_t *mi_type)
-{
-	static const uint32_t classmark_offset =
-		offsetof(struct gsm48_pag_resp, classmark2);
-	uint8_t *classmark2_lv = (uint8_t *) &resp->classmark2;
-	return gsm48_extract_mi(classmark2_lv, length - classmark_offset,
-				mi_string, mi_type);
 }

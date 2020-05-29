@@ -373,7 +373,7 @@ static void sgs_tx_loc_upd_resp_cb(struct sgs_lu_response *response)
 	struct sgs_mme_ctx *mme;
 	uint8_t new_id[2 + GSM48_TMSI_LEN];
 	uint8_t *new_id_ptr = new_id;
-	unsigned int new_id_len = 0;
+	int new_id_len = 0;
 	uint8_t resp_msg_type;
 
 	/* Determine message type that is sent next (needed for logging) */
@@ -398,9 +398,13 @@ static void sgs_tx_loc_upd_resp_cb(struct sgs_lu_response *response)
 	/* Handle LU accept/reject */
 	if (response->accepted) {
 		if (vsub->tmsi_new != GSM_RESERVED_TMSI) {
-			new_id_len = gsm48_generate_mid_from_tmsi(new_id, vsub->tmsi_new);
-			new_id_ptr = new_id + 2;
-			new_id_len -= 2;
+			struct osmo_mobile_identity tmsi_mi = {
+				.type = GSM_MI_TYPE_TMSI,
+				.tmsi = vsub->tmsi_new,
+			};
+			new_id_len = osmo_mobile_identity_encode_buf(new_id, sizeof(new_id), &tmsi_mi, false);
+			if (new_id_len > 0)
+				new_id_ptr = new_id;
 		}
 		resp = gsm29118_create_lu_ack(vsub->imsi, &vsub->sgs.lai, new_id_ptr, new_id_len);
 		sgs_tx(mme->conn, resp);
@@ -958,12 +962,16 @@ int sgs_iface_rx(struct sgs_connection *sgc, struct msgb *msg)
 	}
 
 	if (TLVP_PRESENT(&tp, SGSAP_IE_IMSI)) {
-		gsm48_mi_to_string(imsi, sizeof(imsi), TLVP_VAL(&tp, SGSAP_IE_IMSI), TLVP_LEN(&tp, SGSAP_IE_IMSI));
-		if (strlen(imsi) < GSM23003_IMSI_MIN_DIGITS) {
+		struct osmo_mobile_identity mi;
+		if (osmo_mobile_identity_decode(&mi,
+						TLVP_VAL(&tp, SGSAP_IE_IMSI),
+						TLVP_LEN(&tp, SGSAP_IE_IMSI), false)
+		    ||  mi.type != GSM_MI_TYPE_IMSI) {
 			TX_STATUS_AND_LOG(sgc, msg_type, SGSAP_SGS_CAUSE_INVALID_MAND_IE,
-					  "SGsAP Message %s with short IMSI, dropping\n");
+					  "SGsAP Message %s with invalid IMSI, dropping\n");
 			goto error;
 		}
+		OSMO_STRLCPY_ARRAY(imsi, mi.imsi);
 	}
 
 	/* Some messages contain an MME-NAME as mandatore IE, parse it right here. The

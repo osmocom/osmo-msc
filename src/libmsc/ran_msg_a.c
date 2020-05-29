@@ -497,7 +497,6 @@ static int ran_a_decode_handover_request(struct ran_dec *ran_dec, const struct m
 	struct gsm0808_encrypt_info encr_info;
 	struct gsm0808_speech_codec_list scl;
 	struct geran_encr geran_encr = {};
-	char imsi[OSMO_IMSI_BUF_SIZE];
 	struct osmo_sockaddr_str rtp_ran_local;
 
 	if (!ie_channel_type) {
@@ -608,8 +607,12 @@ static int ran_a_decode_handover_request(struct ran_dec *ran_dec, const struct m
 	}
 
 	if (ie_imsi) {
-		gsm48_mi_to_string(imsi, sizeof(imsi), ie_imsi->val, ie_imsi->len);
-		r->imsi = imsi;
+		struct osmo_mobile_identity mi;
+		if (osmo_mobile_identity_decode(&mi, ie_imsi->val, ie_imsi->len, false)
+		    || mi.type != GSM_MI_TYPE_IMSI)
+			LOG_RAN_A_DEC_MSG(LOGL_ERROR, "IE IMSI: cannot decode IMSI identity\n");
+		else
+			r->imsi = mi.imsi;
 	}
 
 	if (ie_aoip_transp_addr) {

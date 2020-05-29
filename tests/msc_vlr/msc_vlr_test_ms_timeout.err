@@ -646,7 +646,7 @@ DMSC dummy_msc_i{0}: is child of msub_fsm
 DREF msc_a(unknown:GERAN-A:NONE){MSC_A_ST_VALIDATE_L3}: + rx_from_ms: now used by 1 (rx_from_ms)
 DBSSAP msc_a(unknown:GERAN-A:NONE){MSC_A_ST_VALIDATE_L3}: RAN decode: COMPL_L3
 DRLL msc_a(unknown:GERAN-A:NONE){MSC_A_ST_VALIDATE_L3}: Dispatching 04.08 message: MM GSM48_MT_MM_IMSI_DETACH_IND
-DMM IMSI DETACH INDICATION: MI(IMSI)=901700000004620
+DMM IMSI DETACH INDICATION: IMSI-901700000004620
 DREF VLR subscr IMSI-901700000004620:MSISDN-46071 + gsm48_rx_mm_imsi_detach_ind: now used by 5 (attached,SMS-receiver,SMS,Paging,gsm48_rx_mm_imsi_detach_ind)
 DMM IMSI DETACH for IMSI-901700000004620:MSISDN-46071
 DREF VLR subscr IMSI-901700000004620:MSISDN-46071 + active-conn: now used by 6 (attached,SMS-receiver,SMS,Paging,gsm48_rx_mm_imsi_detach_ind,active-conn)

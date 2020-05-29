@@ -1,5 +1,7 @@
 #pragma once
 
+#include <osmocom/gsm/gsm48.h>
+
 #include <osmocom/msc/debug.h>
 #include <osmocom/msc/msc_roles.h>
 
@@ -64,7 +66,7 @@ int _msub_role_dispatch(struct msub *msub, enum msc_role to_role, uint32_t to_ro
 			const char *file, int line);
 int msub_tx_an_apdu(struct msub *msub, enum msc_role from_role, enum msc_role to_role, struct an_apdu *an_apdu);
 
-void msub_update_id_from_mi(struct msub *msub, const uint8_t mi[], uint8_t mi_len);
+void msub_update_id_from_mi(struct msub *msub, const struct osmo_mobile_identity *mi);
 void msub_update_id(struct msub *msub);
 void msub_update_id_for_vsub(struct vlr_subscr *for_vsub);
 

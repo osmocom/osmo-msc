@@ -1117,64 +1117,49 @@ int vlr_gsup_rx(struct gsup_client_mux *gcm, void *data, const struct osmo_gsup_
 }
 
 /* MSC->VLR: Subscriber has provided IDENTITY RESPONSE */
-int vlr_subscr_rx_id_resp(struct vlr_subscr *vsub,
-			  const uint8_t *mi, size_t mi_len)
+int vlr_subscr_rx_id_resp(struct vlr_subscr *vsub, const struct osmo_mobile_identity *mi)
 {
-	char mi_string[GSM48_MI_SIZE];
-	uint8_t mi_type = mi[0] & GSM_MI_TYPE_MASK;
-
-	gsm48_mi_to_string(mi_string, sizeof(mi_string), mi, mi_len);
-
 	/* update the vlr_subscr with the given identity */
-	switch (mi_type) {
+	switch (mi->type) {
 	case GSM_MI_TYPE_IMSI:
-		if (strlen(mi_string) >= sizeof(vsub->imsi)) {
-			LOGVSUBP(LOGL_ERROR, vsub, "IMSI in ID RESP too long (>%zu bytes): %s\n",
-				 sizeof(vsub->imsi) - 1, mi_string);
-			return -ENOSPC; /* ignore message; do not avance LU FSM */
-		} else if (vsub->imsi[0]
-		    && !vlr_subscr_matches_imsi(vsub, mi_string)) {
+		if (vsub->imsi[0]
+		    && !vlr_subscr_matches_imsi(vsub, mi->imsi)) {
 			LOGVSUBP(LOGL_ERROR, vsub, "IMSI in ID RESP differs:"
-				 " %s\n", mi_string);
+				 " %s\n", mi->imsi);
 			/* XXX Should we return an error, e.g. -EINVAL ? */
 		} else
-			vlr_subscr_set_imsi(vsub, mi_string);
+			vlr_subscr_set_imsi(vsub, mi->imsi);
 		break;
 	case GSM_MI_TYPE_IMEI:
-		vlr_subscr_set_imei(vsub, mi_string);
+		vlr_subscr_set_imei(vsub, mi->imei);
 		break;
 	case GSM_MI_TYPE_IMEISV:
-		vlr_subscr_set_imeisv(vsub, mi_string);
+		vlr_subscr_set_imeisv(vsub, mi->imeisv);
 		break;
 	default:
 		return -EINVAL;
 	}
 
 	if (vsub->auth_fsm) {
-		switch (mi_type) {
+		switch (mi->type) {
 		case GSM_MI_TYPE_IMSI:
-			osmo_fsm_inst_dispatch(vsub->auth_fsm,
-					VLR_AUTH_E_MS_ID_IMSI, mi_string);
+			return osmo_fsm_inst_dispatch(vsub->auth_fsm,
+						      VLR_AUTH_E_MS_ID_IMSI, (void*)mi->imsi);
 			break;
 		}
 	}
 
 	if (vsub->lu_fsm) {
-		uint32_t event = 0;
-		switch (mi_type) {
+		switch (mi->type) {
 		case GSM_MI_TYPE_IMSI:
-			event = VLR_ULA_E_ID_IMSI;
-			break;
+			return osmo_fsm_inst_dispatch(vsub->lu_fsm, VLR_ULA_E_ID_IMSI, (void*)mi->imsi);
 		case GSM_MI_TYPE_IMEI:
-			event = VLR_ULA_E_ID_IMEI;
-			break;
+			return osmo_fsm_inst_dispatch(vsub->lu_fsm, VLR_ULA_E_ID_IMEI, (void*)mi->imei);
 		case GSM_MI_TYPE_IMEISV:
-			event = VLR_ULA_E_ID_IMEISV;
-			break;
+			return osmo_fsm_inst_dispatch(vsub->lu_fsm, VLR_ULA_E_ID_IMEISV, (void*)mi->imeisv);
 		default:
 			return -EINVAL;
 		}
-		osmo_fsm_inst_dispatch(vsub->lu_fsm, event, mi_string);
 	}
 
 	return 0;

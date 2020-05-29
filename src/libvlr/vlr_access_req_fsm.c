@@ -632,7 +632,7 @@ vlr_proc_acc_req(struct osmo_fsm_inst *parent,
 		 void *parent_event_data,
 		 struct vlr_instance *vlr, void *msc_conn_ref,
 		 enum vlr_parq_type type, enum osmo_cm_service_type cm_service_type,
-		 const uint8_t *mi_lv,
+		 const struct osmo_mobile_identity *mi,
 		 const struct osmo_location_area_id *lai,
 		 bool authentication_required,
 		 bool ciphering_required,
@@ -641,8 +641,6 @@ vlr_proc_acc_req(struct osmo_fsm_inst *parent,
 {
 	struct osmo_fsm_inst *fi;
 	struct proc_arq_priv *par;
-	char mi_string[GSM48_MI_SIZE];
-	uint8_t mi_type;
 
 	fi = osmo_fsm_inst_alloc_child(&proc_arq_vlr_fsm, parent,
 				       parent_event_failure);
@@ -678,16 +676,14 @@ vlr_proc_acc_req(struct osmo_fsm_inst *parent,
 		LOGPFSML(fi, LOGL_ERROR,
 			 "Authentication off on UTRAN network. Good luck.\n");
 
-	gsm48_mi_to_string(mi_string, sizeof(mi_string), mi_lv+1, mi_lv[0]);
-	mi_type = mi_lv[1] & GSM_MI_TYPE_MASK;
-	switch (mi_type) {
+	switch (mi->type) {
 	case GSM_MI_TYPE_IMSI:
-		osmo_strlcpy(par->imsi, mi_string, sizeof(par->imsi));
+		OSMO_STRLCPY_ARRAY(par->imsi, mi->imsi);
 		par->by_tmsi = false;
 		break;
 	case GSM_MI_TYPE_TMSI:
 		par->by_tmsi = true;
-		par->tmsi = osmo_load32be(mi_lv+2);
+		par->tmsi = mi->tmsi;
 		break;
 	case GSM_MI_TYPE_IMEI:
 		/* TODO: IMEI (emergency call) */

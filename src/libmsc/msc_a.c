@@ -1100,9 +1100,9 @@ const struct value_string complete_layer3_type_names[] = {
 
 
 /* Compose an ID almost like gsm48_mi_to_string(), but print the MI type along, and print a TMSI as hex. */
-void msc_a_update_id_from_mi(struct msc_a *msc_a, const uint8_t mi[], uint8_t mi_len)
+void msc_a_update_id_from_mi(struct msc_a *msc_a, const struct osmo_mobile_identity *mi)
 {
-	_msc_a_update_id(msc_a, "%s", osmo_mi_name(mi, mi_len));
+	_msc_a_update_id(msc_a, "%s", osmo_mobile_identity_to_str_c(OTC_SELECT, mi));
 }
 
 /* Update msc_a->fi id string from current msc_a->vsub and msc_a->complete_layer3_type. */
