@@ -643,7 +643,7 @@ static void test_ciph_imeisv()
 
 	btw("MS sends Ciphering Mode Complete with IMEISV, VLR accepts and sends GSUP LU Req to HLR");
 	gsup_expect_tx("04010809710000004026f0" CN_DOMAIN VLR_TO_HLR);
-	ms_sends_ciphering_mode_complete("063217094b32244332244372f5");
+	ms_sends_ciphering_mode_complete("063217094332244332244372f5");
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("Subscriber has the IMEISV");
