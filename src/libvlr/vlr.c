@@ -1146,6 +1146,8 @@ int vlr_subscr_rx_id_resp(struct vlr_subscr *vsub,
 	case GSM_MI_TYPE_IMEISV:
 		vlr_subscr_set_imeisv(vsub, mi_string);
 		break;
+	default:
+		return -EINVAL;
 	}
 
 	if (vsub->auth_fsm) {
@@ -1170,8 +1172,7 @@ int vlr_subscr_rx_id_resp(struct vlr_subscr *vsub,
 			event = VLR_ULA_E_ID_IMEISV;
 			break;
 		default:
-			OSMO_ASSERT(0);
-			break;
+			return -EINVAL;
 		}
 		osmo_fsm_inst_dispatch(vsub->lu_fsm, event, mi_string);
 	}
