@@ -541,6 +541,8 @@ static void msc_a_call_leg_ran_local_addr_available(struct msc_a *msc_a)
 			.channel_type = &channel_type,
 			.osmux_present = msc_a->cc.call_leg->rtp[RTP_TO_RAN]->use_osmux,
 			.osmux_cid = msc_a->cc.call_leg->rtp[RTP_TO_RAN]->local_osmux_cid,
+			.call_id_present = true,
+			.call_id = cc_trans->callref,
 		},
 	};
 	if (msc_a_ran_down(msc_a, MSC_ROLE_I, &msg)) {
