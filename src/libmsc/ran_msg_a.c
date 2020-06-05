@@ -956,6 +956,7 @@ static struct msgb *ran_a_make_assignment_command(struct osmo_fsm_inst *log_fi,
 	struct sockaddr_storage rtp_addr;
 	struct sockaddr_storage *use_rtp_addr = NULL;
 	struct msgb *msg;
+	const uint32_t *call_id = NULL;
 	int rc;
 
 	if (!ac->channel_type) {
@@ -996,7 +997,10 @@ static struct msgb *ran_a_make_assignment_command(struct osmo_fsm_inst *log_fi,
 		}
 	}
 
-	msg = gsm0808_create_ass(ac->channel_type, NULL, use_rtp_addr, use_scl, NULL);
+	if(ac->call_id_present == true)
+		call_id = &ac->call_id;
+
+	msg = gsm0808_create_ass(ac->channel_type, NULL, use_rtp_addr, use_scl, call_id);
 	if (ac->osmux_present)
 		_gsm0808_assignment_extend_osmux(msg, ac->osmux_cid);
 	return msg;
