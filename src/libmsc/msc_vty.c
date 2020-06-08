@@ -402,11 +402,6 @@ static int config_write_net(struct vty *vty)
 				gsmnet->tz.hr, gsmnet->tz.mn, VTY_NEWLINE);
 	}
 
-	if (gsmnet->emergency.route_to_msisdn) {
-		vty_out(vty, " emergency-call route-to-msisdn %s%s",
-			gsmnet->emergency.route_to_msisdn, VTY_NEWLINE);
-	}
-
 	if (!gsmnet->call_waiting)
 		vty_out(vty, " no call-waiting%s", VTY_NEWLINE);
 
