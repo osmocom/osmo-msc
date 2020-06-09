@@ -1121,6 +1121,7 @@ struct msgb *ran_a_make_handover_request(struct osmo_fsm_inst *log_fi, const str
 
 		.imsi = n->imsi,
 		.codec_list_msc_preferred = n->codec_list_msc_preferred,
+		.call_id_present = n->call_id_present,
 		.call_id = n->call_id,
 		.global_call_reference = n->global_call_reference,
 		.global_call_reference_len = n->global_call_reference_len,
