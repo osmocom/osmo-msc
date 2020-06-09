@@ -383,6 +383,7 @@ static void msc_ho_send_handover_request(struct msc_a *msc_a)
 	struct vlr_subscr *vsub = msc_a_vsub(msc_a);
 	struct gsm_network *net = msc_a_net(msc_a);
 	struct gsm0808_channel_type channel_type;
+	struct gsm_trans *cc_trans = msc_a->cc.active_trans;
 	struct ran_msg ran_enc_msg = {
 		.msg_type = RAN_MSG_HANDOVER_REQUEST,
 		.handover_request = {
@@ -402,6 +403,8 @@ static void msc_ho_send_handover_request(struct msc_a *msc_a)
 			/* Don't send AoIP Transport Layer Address for inter-MSC Handover */
 			.rtp_ran_local = (msc_a->ho.new_cell.type == MSC_NEIGHBOR_TYPE_LOCAL_RAN_PEER)
 				? call_leg_local_ip(msc_a->cc.call_leg, RTP_TO_RAN) : NULL,
+			.call_id_present = true,
+			.call_id = cc_trans->callref,
 		},
 	};
 
