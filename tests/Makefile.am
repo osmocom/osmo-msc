@@ -71,6 +71,9 @@ endif
 	$(srcdir)/vty_test_runner.py -w $(abs_top_builddir) -v
 	rm -f $(top_builddir)/sms.db
 
+# Run a specific transcript test with: 'make vty-transcript-test VTY_TEST=osmo-msc.vty'
+VTY_TEST ?= *.vty
+
 # To update the VTY script from current application behavior,
 # pass -u to vty_script_runner.py by doing:
 #   make vty-transcript-test U=-u
@@ -78,7 +81,7 @@ vty-transcript-test:
 	osmo_verify_transcript_vty.py -v \
 		-n OsmoMSC -p 4254 \
 		-r "$(top_builddir)/src/osmo-msc/osmo-msc -c $(top_srcdir)/doc/examples/osmo-msc/osmo-msc.cfg" \
-		$(U) $${T:-$(srcdir)/*.vty}
+		$(U) $(srcdir)/$(VTY_TEST)
 	rm -f $(builddir)/sms.db
 
 # don't run multiple tests concurrently so that the ports don't conflict
