@@ -9,9 +9,9 @@ AM_CPPFLAGS = \
 	$(NULL)
 
 SUBDIRS = \
-	doc \
 	include \
 	src \
+	doc \
 	contrib \
 	tests \
 	$(NULL)
