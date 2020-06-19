@@ -131,12 +131,14 @@ static void print_help()
 	printf("  -V --version               Print the version of OsmoMSC.\n");
 	printf("  -e --log-level number      Set a global loglevel.\n");
 	printf("  -M --mncc-sock-path PATH   Disable built-in MNCC handler and offer socket.\n");
+	printf("  --vty-ref-xml              Generate the VTY reference XML output and exit.\n");
 }
 
 static void handle_options(int argc, char **argv)
 {
 	while (1) {
 		int option_index = 0, c;
+		static int long_option = 0;
 		static struct option long_options[] = {
 			{"help", 0, 0, 'h'},
 			{"debug", 1, 0, 'd'},
@@ -149,6 +151,7 @@ static void handle_options(int argc, char **argv)
 			{"log-level", 1, 0, 'e'},
 			{"mncc-sock-path", 1, 0, 'M'},
 			{"no-dbcounter", 0, 0, 'C'}, /* deprecated */
+			{"vty-ref-xml", 0, &long_option, 1},
 			{0, 0, 0, 0}
 		};
 
@@ -162,6 +165,15 @@ static void handle_options(int argc, char **argv)
 			print_usage();
 			print_help();
 			exit(0);
+		case 0:
+			switch (long_option) {
+			case 1:
+				vty_dump_xml_ref(stdout);
+				exit(0);
+			default:
+				fprintf(stderr, "error parsing cmdline options\n");
+				exit(2);
+			}
 		case 's':
 			log_set_use_color(osmo_stderr_target, 0);
 			break;
@@ -534,15 +546,20 @@ int main(int argc, char **argv)
 	OSMO_ASSERT(osmo_ss7_init() == 0);
 	osmo_ss7_vty_init_asp(tall_msc_ctx);
 	osmo_sccp_vty_init();
-
-	/* Parse options */
-	handle_options(argc, argv);
+	ctrl_vty_init(tall_msc_ctx);
+	logging_vty_add_cmds();
+	osmo_talloc_vty_add_cmds();
 
 	/* Allocate global gsm_network struct.
 	 * At first set the internal MNCC as default, may be changed below according to cfg or cmdline option. */
 	msc_network = msc_network_alloc(tall_msc_ctx, int_mncc_recv);
 	if (!msc_network)
 		return -ENOMEM;
+
+	msc_vty_init(msc_network);
+
+	/* Parse options */
+	handle_options(argc, argv);
 
 	call_leg_init(msc_network);
 	mncc_call_fsm_init(msc_network);
@@ -551,11 +568,6 @@ int main(int argc, char **argv)
 		fprintf(stderr, "Failed to allocate VLR\n");
 		exit(1);
 	}
-
-	ctrl_vty_init(tall_msc_ctx);
-	logging_vty_add_cmds();
-	osmo_talloc_vty_add_cmds();
-	msc_vty_init(msc_network);
 
 #ifdef BUILD_SMPP
 	if (smpp_openbsc_alloc_init(tall_msc_ctx) < 0)
