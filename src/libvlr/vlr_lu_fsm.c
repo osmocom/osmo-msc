@@ -818,18 +818,15 @@ static void vlr_loc_upd_post_ciph(struct osmo_fsm_inst *fi)
 {
 	struct lu_fsm_priv *lfp = lu_fsm_fi_priv(fi);
 	struct vlr_subscr *vsub = lfp->vsub;
+	int rc;
 
 	LOGPFSM(fi, "%s()\n", __func__);
 
 	OSMO_ASSERT(vsub);
 
-	if (lfp->is_utran) {
-		int rc;
-		rc = lfp->vlr->ops.tx_common_id(lfp->msc_conn_ref);
-		if (rc)
-			LOGPFSML(fi, LOGL_ERROR,
-				 "Error while sending Common ID (%d)\n", rc);
-	}
+	rc = lfp->vlr->ops.tx_common_id(lfp->msc_conn_ref);
+	if (rc)
+		LOGPFSML(fi, LOGL_ERROR, "Error while sending Common ID (%d)\n", rc);
 
 	vsub->conf_by_radio_contact_ind = true;
 	/* Update LAI */
