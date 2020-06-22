@@ -114,6 +114,6 @@ make %{?_smp_mflags} check || (find . -name testsuite.log -exec cat {} +)
 %{_bindir}/osmo-msc
 %{_unitdir}/%{name}.service
 %dir %{_sysconfdir}/osmocom
-%config %{_sysconfdir}/osmocom/osmo-msc.cfg
+%config(noreplace) %{_sysconfdir}/osmocom/osmo-msc.cfg
 
 %changelog
