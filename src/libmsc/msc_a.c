@@ -1375,6 +1375,8 @@ int msc_a_ran_dec_from_msc_i(struct msc_a *msc_a, struct msc_a_ran_dec_data *d)
 	switch (msg->msg_type) {
 
 	case RAN_MSG_COMPL_L3:
+		/* In case the cell_id from Complete Layer 3 Information lacks a PLMN, write the configured PLMN code
+		 * into msc_a->via_cell. Then overwrite with those bits obtained from Complete Layer 3 Information. */
 		msc_a->via_cell = (struct osmo_cell_global_id){
 			.lai.plmn = msc_a_net(msc_a)->plmn,
 		};

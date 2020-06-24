@@ -1396,7 +1396,9 @@ static void msc_vlr_subscr_update(struct vlr_subscr *subscr)
 	msub_update_id(msub);
 }
 
-/* VLR informs us that the subscriber has been associated with a conn */
+/* VLR informs us that the subscriber has been associated with a conn.
+ * The subscriber has *not* been authenticated yet, so the vsub should be protected from potentially invalid information
+ * from the msc_a. */
 static int msc_vlr_subscr_assoc(void *msc_conn_ref,
 				 struct vlr_subscr *vsub)
 {
@@ -1406,6 +1408,10 @@ static int msc_vlr_subscr_assoc(void *msc_conn_ref,
 
 	if (msub_set_vsub(msub, vsub))
 		return -EINVAL;
+
+	/* FIXME: would be better to modify vsub->* only after the subscriber is authenticated, in
+	 * evaluate_acceptance_outcome(conn_accepted == true). */
+
 	vsub->cs.attached_via_ran = msc_a->c.ran->type;
 
 	/* In case we have already received Classmark Information before the VLR Subscriber was
