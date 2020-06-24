@@ -911,7 +911,7 @@ static void vty_dump_one_conn(struct vty *vty, const struct msub *msub,
 
 	if (vsub) {
 		MSC_VTY_DUMP(vty, offset, "LAC / cell ID: %u / %u%s",
-			     vsub->cgi.lai.lac, vsub->cgi.cell_identity,
+			     msc_a->via_cell.lai.lac, msc_a->via_cell.cell_identity,
 			     VTY_NEWLINE);
 	}
 
