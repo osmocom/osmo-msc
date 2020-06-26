@@ -233,8 +233,11 @@ struct sccp_ran_ops {
 
 	/* Return whether the given l2_cl message is a RESET, RESET ACKNOWLEDGE, or RESET-unrelated message.
 	 * This callback is stored in struct sccp_ran_inst to provide RESET handling to the caller (ran_peer),
-	 * it is not used in sccp_ran.c. */
-	enum reset_msg_type (* is_reset_msg )(const struct sccp_ran_inst *sri, const struct msgb *l2_cl);
+	 * it is not used in sccp_ran.c.
+	 * In supports_osmux, return 0 for no information, 1 for support detected, -1 for non-support detected.
+	 */
+	enum reset_msg_type (* is_reset_msg )(const struct sccp_ran_inst *sri, struct osmo_fsm_inst *log_fi,
+					      struct msgb *l2_cl, int *supports_osmux);
 
 	/* Return a RESET or RESET ACK message for this RAN type.
 	 * This callback is stored in struct sccp_ran_inst to provide RESET handling to the caller (ran_peer),

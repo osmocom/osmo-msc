@@ -438,10 +438,14 @@ static void ranap_handle_cl(void *ctx, ranap_message *message)
 	}
 }
 
-enum reset_msg_type ranap_is_reset_msg(const struct sccp_ran_inst *sri, const struct msgb *l2)
+enum reset_msg_type ranap_is_reset_msg(const struct sccp_ran_inst *sri, struct osmo_fsm_inst *log_fi,
+				       struct msgb *l2, int *supports_osmux)
 {
 	int ret = SCCP_RAN_MSG_NON_RESET;
 	int rc;
+
+	if (supports_osmux != NULL)
+		*supports_osmux = -1;
 
 	rc = ranap_cn_rx_cl(ranap_handle_cl, &ret, msgb_l2(l2), msgb_l2len(l2));
 	if (rc)

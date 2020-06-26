@@ -35,7 +35,8 @@ struct gsm_mncc_bearer_cap;
 int ran_a_decode_l2(struct ran_dec *ran_a, struct msgb *bssap);
 struct msgb *ran_a_encode(struct osmo_fsm_inst *caller_fi, const struct ran_msg *ran_enc_msg);
 
-enum reset_msg_type bssmap_is_reset_msg(const struct sccp_ran_inst *sri, const struct msgb *l2);
+enum reset_msg_type bssmap_is_reset_msg(const struct sccp_ran_inst *sri, struct osmo_fsm_inst *log_fi,
+					struct msgb *l2, int *supports_osmux);
 struct msgb *bssmap_make_reset_msg(const struct sccp_ran_inst *sri, enum reset_msg_type type);
 struct msgb *bssmap_make_paging_msg(const struct sccp_ran_inst *sri, const struct gsm0808_cell_id *page_cell_id,
 				    const char *imsi, uint32_t tmsi, enum paging_cause cause);

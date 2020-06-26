@@ -28,7 +28,8 @@
 int ran_iu_decode_l2(struct ran_dec *ran_dec_iu, struct msgb *ranap);
 struct msgb *ran_iu_encode(struct osmo_fsm_inst *caller_fi, const struct ran_msg *ran_enc_msg);
 
-enum reset_msg_type ranap_is_reset_msg(const struct sccp_ran_inst *sri, const struct msgb *l2);
+enum reset_msg_type ranap_is_reset_msg(const struct sccp_ran_inst *sri, struct osmo_fsm_inst *log_fi,
+				       struct msgb *l2, int *supports_osmux);
 struct msgb *ranap_make_reset_msg(const struct sccp_ran_inst *sri, enum reset_msg_type type);
 struct msgb *ranap_make_paging_msg(const struct sccp_ran_inst *sri, const struct gsm0808_cell_id *page_cell_id,
 				   const char *imsi, uint32_t tmsi, enum paging_cause cause);

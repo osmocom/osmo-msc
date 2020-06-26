@@ -1275,20 +1275,50 @@ struct msgb *ran_a_encode(struct osmo_fsm_inst *caller_fi, const struct ran_msg 
 	return msg;
 }
 
-/* Return 1 for a RESET, 2 for a RESET ACK message, 0 otherwise */
-enum reset_msg_type bssmap_is_reset_msg(const struct sccp_ran_inst *sri, const struct msgb *l2)
+static void cl_parse_osmux(struct osmo_fsm_inst *log_fi, struct msgb *msg, int *supports_osmux)
+{
+	struct tlv_parsed tp;
+	int rc;
+
+	if (supports_osmux == NULL)
+		return;
+
+	rc = tlv_parse(&tp, gsm0808_att_tlvdef(), msgb_l3(msg) + 1, msgb_l3len(msg) - 1, 0, 0);
+	if (rc < 0) {
+		LOGPFSMSL(log_fi, DBSSAP, LOGL_ERROR, "BSSMAP: Failed parsing TLV looking for Osmux support\n");
+		return;
+	}
+
+	if (TLVP_PRESENT(&tp, GSM0808_IE_OSMO_OSMUX_SUPPORT)) {
+		*supports_osmux = true;
+	} else {
+		*supports_osmux = false;
+	}
+}
+
+/* Return 1 for a RESET, 2 for a RESET ACK message, 0 otherwise.
+ * In supports_osmux, return 0 for no information, 1 for support detected, -1 for non-support detected. */
+enum reset_msg_type bssmap_is_reset_msg(const struct sccp_ran_inst *sri, struct osmo_fsm_inst *log_fi,
+					struct msgb *l2, int *supports_osmux)
 {
 	struct bssmap_header *bs = (struct bssmap_header *)msgb_l2(l2);
+
+	if (supports_osmux != NULL)
+		*supports_osmux = 0;
 
 	if (!bs
 	    || msgb_l2len(l2) < (sizeof(*bs) + 1)
 	    || bs->type != BSSAP_MSG_BSS_MANAGEMENT)
 		return SCCP_RAN_MSG_NON_RESET;
 
-	switch (l2->l2h[sizeof(*bs)]) {
+	l2->l3h = l2->l2h + sizeof(struct bssmap_header);
+
+	switch (l2->l3h[0]) {
 	case BSS_MAP_MSG_RESET:
+		cl_parse_osmux(log_fi, l2, supports_osmux);
 		return SCCP_RAN_MSG_RESET;
 	case BSS_MAP_MSG_RESET_ACKNOWLEDGE:
+		cl_parse_osmux(log_fi, l2, supports_osmux);
 		return SCCP_RAN_MSG_RESET_ACK;
 	default:
 		return SCCP_RAN_MSG_NON_RESET;

@@ -122,25 +122,19 @@ void ran_peer_discard_all_conns(struct ran_peer *rp)
 	}
 }
 
-/* TODO: create an sccp_ran_ops.rx_reset(_ack) to handle this differently on 2g and 3G */
-/* We expect RAN peer to provide use with an Osmocom extension TLV in BSSMAP_RESET to
- * announce Osmux support */
-static void ran_peer_update_osmux_support(struct ran_peer *rp, struct msgb *msg)
+static void ran_peer_update_osmux_support(struct ran_peer *rp, int supports_osmux)
 {
-	struct tlv_parsed tp;
-	int rc;
 	bool old_value = rp->remote_supports_osmux;
 
-	OSMO_ASSERT(msg);
-	msg->l3h = msg->l2h + sizeof(struct bssmap_header);
-	rc = tlv_parse(&tp, gsm0808_att_tlvdef(), msg->l3h + 1, msgb_l3len(msg) - 1, 0, 0);
-	if (rc < 0)
-		LOG_RAN_PEER(rp, LOGL_NOTICE, "Failed parsing TLV looking for Osmux support\n");
-
-	if (TLVP_PRESENT(&tp, GSM0808_IE_OSMO_OSMUX_SUPPORT)) {
+	switch (supports_osmux) {
+	case 1:
 		rp->remote_supports_osmux = true;
-	} else {
+		break;
+	case -1:
 		rp->remote_supports_osmux = false;
+		break;
+	default:
+		return;
 	}
 
 	if (old_value != rp->remote_supports_osmux)
@@ -154,8 +148,6 @@ static void ran_peer_rx_reset(struct ran_peer *rp, struct msgb* msg)
 	struct msgb *reset_ack;
 
 	ran_peer_discard_all_conns(rp);
-
-	ran_peer_update_osmux_support(rp, msg);
 
 	reset_ack = rp->sri->ran->sccp_ran_ops.make_reset_msg(rp->sri, SCCP_RAN_MSG_RESET_ACK);
 
@@ -183,7 +175,6 @@ static void ran_peer_rx_reset(struct ran_peer *rp, struct msgb* msg)
 static void ran_peer_rx_reset_ack(struct ran_peer *rp, struct msgb* msg)
 {
 	ran_peer_state_chg(rp, RAN_PEER_ST_READY);
-	ran_peer_update_osmux_support(rp, msg);
 }
 
 void ran_peer_reset(struct ran_peer *rp)
@@ -213,10 +204,14 @@ void ran_peer_allstate_action(struct osmo_fsm_inst *fi, uint32_t event, void *da
 	struct ran_peer *rp = fi->priv;
 	struct ran_peer_ev_ctx *ctx = data;
 	struct msgb *msg = ctx->msg;
+	int rc;
+	int supports_osmux;
 
 	switch (event) {
 	case RAN_PEER_EV_MSG_UP_CL:
-		switch (rp->sri->ran->sccp_ran_ops.is_reset_msg(rp->sri, msg)) {
+		rc = rp->sri->ran->sccp_ran_ops.is_reset_msg(rp->sri, fi, msg, &supports_osmux);
+		ran_peer_update_osmux_support(rp, supports_osmux);
+		switch (rc) {
 		case 1:
 			osmo_fsm_inst_dispatch(fi, RAN_PEER_EV_RX_RESET, msg);
 			return;
