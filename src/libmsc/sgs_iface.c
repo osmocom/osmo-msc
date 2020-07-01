@@ -372,7 +372,7 @@ static void sgs_tx_loc_upd_resp_cb(struct sgs_lu_response *response)
 	struct vlr_subscr *vsub = response->vsub;
 	struct sgs_mme_ctx *mme;
 	uint8_t new_id[2 + GSM48_TMSI_LEN];
-	uint8_t *new_id_ptr = new_id;
+	uint8_t *new_id_ptr = NULL;
 	int new_id_len = 0;
 	uint8_t resp_msg_type;
 
@@ -403,8 +403,14 @@ static void sgs_tx_loc_upd_resp_cb(struct sgs_lu_response *response)
 				.tmsi = vsub->tmsi_new,
 			};
 			new_id_len = osmo_mobile_identity_encode_buf(new_id, sizeof(new_id), &tmsi_mi, false);
-			if (new_id_len > 0)
+			if (new_id_len > 0) {
 				new_id_ptr = new_id;
+			} else {
+				/* Failure to encode the TMSI is not actually possible here, this is just for paranoia
+				 * and coverity scan. */
+				new_id_len = 0;
+				LOGPFSMSL(vsub->sgs_fsm, DMM, LOGL_ERROR, "Cannot encode TMSI Mobile Identity\n");
+			}
 		}
 		resp = gsm29118_create_lu_ack(vsub->imsi, &vsub->sgs.lai, new_id_ptr, new_id_len);
 		sgs_tx(mme->conn, resp);
