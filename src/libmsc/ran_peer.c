@@ -204,18 +204,18 @@ void ran_peer_allstate_action(struct osmo_fsm_inst *fi, uint32_t event, void *da
 	struct ran_peer *rp = fi->priv;
 	struct ran_peer_ev_ctx *ctx = data;
 	struct msgb *msg = ctx->msg;
-	int rc;
+	enum reset_msg_type is_reset;
 	int supports_osmux;
 
 	switch (event) {
 	case RAN_PEER_EV_MSG_UP_CL:
-		rc = rp->sri->ran->sccp_ran_ops.is_reset_msg(rp->sri, fi, msg, &supports_osmux);
+		is_reset = rp->sri->ran->sccp_ran_ops.is_reset_msg(rp->sri, fi, msg, &supports_osmux);
 		ran_peer_update_osmux_support(rp, supports_osmux);
-		switch (rc) {
-		case 1:
+		switch (is_reset) {
+		case SCCP_RAN_MSG_RESET:
 			osmo_fsm_inst_dispatch(fi, RAN_PEER_EV_RX_RESET, msg);
 			return;
-		case 2:
+		case SCCP_RAN_MSG_RESET_ACK:
 			osmo_fsm_inst_dispatch(fi, RAN_PEER_EV_RX_RESET_ACK, msg);
 			return;
 		default:
