@@ -779,6 +779,9 @@ static void msc_a_fsm_releasing_onenter(struct osmo_fsm_inst *fi, uint32_t prev_
 		struct ran_msg msg = {
 			.msg_type = RAN_MSG_CLEAR_COMMAND,
 			.clear_command = {
+				/* "Call Control" is the only cause code listed in 3GPP TS 48.008 3.2.1.21 CLEAR COMMAND
+				 * that qualifies for a normal release situation. (OS#4664) */
+				.gsm0808_cause = GSM0808_CAUSE_CALL_CONTROL,
 				.csfb_ind = (vsub && vsub->sgs_fsm->state == SGS_UE_ST_ASSOCIATED),
 			},
 		};
