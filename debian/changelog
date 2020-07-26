@@ -1,3 +1,9 @@
+osmo-msc (1.6.2) unstable; urgency=medium
+
+  * vlr_auth_fsm: Fix compilation with gcc-10
+
+ -- Harald Welte <laforge@osmocom.org>  Sun, 26 Jul 2020 17:28:45 +0200
+
 osmo-msc (1.6.1) unstable; urgency=medium
 
   [ Vadim Yanitskiy ]
