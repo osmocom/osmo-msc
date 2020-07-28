@@ -43,7 +43,7 @@ static struct msgb *create_gsm0414_msg(uint8_t msg_type)
 	struct msgb *msg = gsm48_msgb_alloc_name("GSM 04.14");
 	struct gsm48_hdr *gh;
 
-	gh = (struct gsm48_hdr *) msgb_put(msg, sizeof(*gh) + 1);
+	gh = (struct gsm48_hdr *) msgb_put(msg, sizeof(*gh));
 	gh->proto_discr = GSM48_PDISC_TEST;
 	gh->msg_type = msg_type;
 	return msg;
