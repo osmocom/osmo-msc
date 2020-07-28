@@ -1704,6 +1704,7 @@ DEFUN(subscriber_mstest_close,
 
 	gsm0414_tx_close_tch_loop_cmd(msc_a, loop_mode);
 
+	vlr_subscr_put(vsub, VSUB_USE_VTY);
 	return CMD_SUCCESS;
 }
 
@@ -1732,6 +1733,7 @@ DEFUN(subscriber_mstest_open,
 
 	gsm0414_tx_open_loop_cmd(msc_a);
 
+	vlr_subscr_put(vsub, VSUB_USE_VTY);
 	return CMD_SUCCESS;
 }
 
