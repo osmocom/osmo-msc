@@ -1,7 +1,7 @@
 Source: osmo-msc
 Section: net
 Priority: extra
-Maintainer: Alexander Couzens <lynxis@fe80.eu>
+Maintainer: Osmocom team <openbsc@lists.osmocom.org>
 Build-Depends: debhelper (>=9),
                dh-autoreconf,
                autotools-dev,
