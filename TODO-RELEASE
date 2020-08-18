@@ -7,6 +7,5 @@
 # If any interfaces have been added since the last public release: c:r:a + 1.
 # If any interfaces have been removed or changed since the last public release: c:r:0.
 #library	what		description / commit summary line
-manual				needs common chapter cs7-config.adoc from osmo-gsm-manuals > 0.3.0
-libosmocore	osmo_mobile_identity	Depends on libosmocore > 1.3.0
+manual				needs common chapter cs7-config.adoc, vty_cpu_sched.adoc from osmo-gsm-manuals > 0.3.0
 osmo-msc	Mobile Identity Coding	OsmoMSC is stricter in rejecting invalid coding of Mobile Identity IEs

@@ -53,6 +53,7 @@
 #include <osmocom/vty/ports.h>
 #include <osmocom/vty/logging.h>
 #include <osmocom/vty/misc.h>
+#include <osmocom/vty/cpu_sched_vty.h>
 #include <osmocom/msc/vty.h>
 #include <osmocom/msc/mncc.h>
 #include <osmocom/msc/rrlp.h>
@@ -549,6 +550,7 @@ int main(int argc, char **argv)
 	ctrl_vty_init(tall_msc_ctx);
 	logging_vty_add_cmds();
 	osmo_talloc_vty_add_cmds();
+	osmo_cpu_sched_vty_init(tall_msc_ctx);
 
 	/* Allocate global gsm_network struct.
 	 * At first set the internal MNCC as default, may be changed below according to cfg or cmdline option. */
