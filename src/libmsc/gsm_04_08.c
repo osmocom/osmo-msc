@@ -225,6 +225,20 @@ static int mm_rx_id_resp(struct msc_a *msc_a, struct msgb *msg)
 
 	osmo_signal_dispatch(SS_SUBSCR, S_SUBSCR_IDENTITY, gh->data);
 
+	/* It is possible that this ID Response reveals an IMSI that is already attached in the VLR. If so, we must
+	 * avoid creating two vlr_subscr entries with the same IMSI. */
+	if (mi.type == GSM_MI_TYPE_IMSI) {
+		struct vlr_subscr *vsub_exists = vlr_subscr_find_by_imsi(vsub->vlr, mi.imsi, __func__);
+		if (vsub_exists) {
+			/* Since the new vlr_subscr already has e.g. a lu_fsm associated with it, it is easiest to
+			 * discard the previous entry.
+			 * FIXME: an unauthenticated subscriber can thus discard arbitrary IMSIs from the VLR! */
+			LOGP(DMM, LOGL_ERROR, "MM Identity Response contains IMSI that is already attached in the VLR,"
+			     " discarding previous VLR entry: %s\n", vlr_subscr_name(vsub_exists));
+			vlr_subscr_free(vsub_exists);
+		}
+	}
+
 	return vlr_subscr_rx_id_resp(vsub, &mi);
 }
 
