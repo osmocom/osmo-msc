@@ -1185,7 +1185,12 @@ static int gsm48_rx_rr_pag_resp(struct msc_a *msc_a, struct msgb *msg)
 	vsub = msc_a_vsub(msc_a);
 	if (!vsub) {
 		LOG_MSC_A(msc_a, LOGL_ERROR, "subscriber not allowed to do a Paging Response\n");
-		msc_a_put(msc_a, MSC_A_USE_PAGING_RESPONSE);
+
+		/* Above MSC_A_USE_PAGING_RESPONSE may already have been removed by a forced release, put that use only
+		 * if it still exists. (see msc_a_fsm_releasing_onenter()) */
+		if (osmo_use_count_by(&msc_a->use_count, MSC_A_USE_PAGING_RESPONSE))
+			msc_a_put(msc_a, MSC_A_USE_PAGING_RESPONSE);
+
 		return -EIO;
 	}
 
