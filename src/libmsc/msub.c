@@ -209,6 +209,7 @@ struct msub *msub_for_vsub(const struct vlr_subscr *for_vsub)
 			return msub;
 	}
 
+	LOGP(DMSC, LOGL_DEBUG, "%s: no active conn\n", vlr_subscr_name(for_vsub));
 	return NULL;
 }
 
@@ -342,8 +343,10 @@ const char *msub_ran_conn_name(const struct msub *msub)
 int msub_set_vsub(struct msub *msub, struct vlr_subscr *vsub)
 {
 	OSMO_ASSERT(msub);
-	if (msub->vsub == vsub)
+	if (msub->vsub == vsub) {
+		LOG_MSUB(msub, LOGL_DEBUG, "msub already associated with this vsub\n");
 		return 0;
+	}
 	if (msub->vsub && vsub) {
 		LOG_MSUB(msub, LOGL_ERROR,
 			 "Changing a connection's VLR Subscriber is not allowed: not changing to %s\n",
@@ -371,6 +374,7 @@ int msub_set_vsub(struct msub *msub, struct vlr_subscr *vsub)
 		}
 	}
 	if (msub->vsub) {
+		LOG_MSUB(msub, LOGL_DEBUG, "msub dis-associating from VLR %s\n", vlr_subscr_name(msub->vsub));
 		vlr_subscr_put(msub->vsub, VSUB_USE_MSUB);
 		msub->vsub = NULL;
 	}
@@ -379,6 +383,7 @@ int msub_set_vsub(struct msub *msub, struct vlr_subscr *vsub)
 		msub->vsub = vsub;
 		vsub->cs.attached_via_ran = msub_ran(msub)->type;
 		msub_update_id(msub);
+		LOG_MSUB(msub, LOGL_DEBUG, "msub associated with VLR %s\n", vlr_subscr_name(vsub));
 	}
 	return 0;
 }
