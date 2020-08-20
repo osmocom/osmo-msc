@@ -329,7 +329,8 @@ static struct vty_app_info msc_vty_info = {
 	.is_config_node	= msc_vty_is_config_node,
 };
 
-#define DEFAULT_M3UA_REMOTE_IP "127.0.0.1"
+#define DEFAULT_M3UA_LOCAL_IP "localhost"
+#define DEFAULT_M3UA_REMOTE_IP "localhost"
 #define DEFAULT_PC "0.23.1"
 
 static struct osmo_sccp_instance *sccp_setup(void *ctx, uint32_t cs7_instance,
@@ -341,7 +342,7 @@ static struct osmo_sccp_instance *sccp_setup(void *ctx, uint32_t cs7_instance,
 
 	return osmo_sccp_simple_client_on_ss7_id(ctx, cs7_instance, label, default_pc,
 						 OSMO_SS7_ASP_PROT_M3UA,
-						 0, NULL, /* local: use arbitrary port and 0.0.0.0. */
+						 0, DEFAULT_M3UA_LOCAL_IP, /* local: use arbitrary port and 0.0.0.0. */
 						 0, /* remote: use protocol default port */
 						 DEFAULT_M3UA_REMOTE_IP);
 	/* Note: If a differing remote IP is to be used, it was already entered in the vty config at
