@@ -336,6 +336,51 @@ void sdp_audio_codecs_from_speech_codec_list(struct sdp_audio_codecs *ac, const 
 	}
 }
 
+static enum gsm0808_speech_codec_defaults codec_cfg(enum gsm0808_speech_codec_type type)
+{
+	switch (type) {
+	case GSM0808_SCT_FR3:
+		return GSM0808_SC_CFG_DEFAULT_FR_AMR;
+	case GSM0808_SCT_FR4:
+		return GSM0808_SC_CFG_DEFAULT_OFR_AMR_WB;
+	case GSM0808_SCT_FR5:
+		return GSM0808_SC_CFG_DEFAULT_FR_AMR_WB;
+	case GSM0808_SCT_HR3:
+		return GSM0808_SC_CFG_DEFAULT_HR_AMR;
+	case GSM0808_SCT_HR4:
+		return GSM0808_SC_CFG_DEFAULT_OHR_AMR_WB;
+	case GSM0808_SCT_HR6:
+		return GSM0808_SC_CFG_DEFAULT_OHR_AMR;
+	default:
+		return 0;
+	}
+}
+
+void sdp_audio_codecs_to_speech_codec_list(struct gsm0808_speech_codec_list *cl, const struct sdp_audio_codecs *ac)
+{
+	const struct sdp_audio_codec *codec;
+
+	*cl = (struct gsm0808_speech_codec_list){};
+
+	foreach_sdp_audio_codec(codec, ac) {
+		const struct codec_mapping *m;
+		foreach_codec_mapping(m) {
+			if (strcmp(m->sdp.subtype_name, codec->subtype_name))
+				continue;
+			if (!m->has_gsm0808_speech_codec_type)
+				continue;
+			if (cl->len >= ARRAY_SIZE(cl->codec))
+				break;
+			cl->codec[cl->len] = (struct gsm0808_speech_codec){
+				.fi = true,
+				.type = m->gsm0808_speech_codec_type,
+				.cfg = codec_cfg(m->gsm0808_speech_codec_type),
+			};
+			cl->len++;
+		}
+	}
+}
+
 int sdp_audio_codecs_to_gsm0808_channel_type(struct gsm0808_channel_type *ct, const struct sdp_audio_codecs *ac)
 {
 	const struct sdp_audio_codec *codec;

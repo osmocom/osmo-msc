@@ -83,6 +83,7 @@ struct ran_clear_command {
 struct ran_assignment_command {
 	const struct osmo_sockaddr_str *cn_rtp;
 	const struct gsm0808_channel_type *channel_type;
+	const struct gsm0808_speech_codec_list *speech_codec_list_msc_preferred;
 	enum nsap_addr_enc rab_assign_addr_enc;
 	bool osmux_present;
 	uint8_t osmux_cid;
