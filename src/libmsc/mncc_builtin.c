@@ -303,7 +303,7 @@ int int_mncc_recv(struct gsm_network *net, struct msgb *msg)
 	DEBUGP(DMNCC, "(call %x) Received message %s\n", call->callref,
 		get_mncc_name(msg_type));
 
-	switch(msg_type) {
+	switch (msg_type) {
 	case MNCC_SETUP_IND:
 		rc = mncc_setup_ind(call, arg);
 		break;
