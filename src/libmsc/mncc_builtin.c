@@ -370,7 +370,8 @@ int int_mncc_recv(struct gsm_network *net, struct msgb *msg)
 		rc = mncc_tx_to_cc(net, data);
 		break;
 	default:
-		LOGP(DMNCC, LOGL_NOTICE, "(call %x) Message unhandled\n", callref);
+		LOGP(DMNCC, LOGL_NOTICE, "(call %x) Message '%s' unhandled\n",
+		     callref, get_mncc_name(msg_type));
 		break;
 	}
 
