@@ -30,6 +30,7 @@ struct vlr_instance;
 struct vlr_subscr;
 struct gsup_client_mux;
 
+#define SMS_DEFAULT_DB_FILE_PATH "sms.db"
 #define tmsi_from_string(str) strtoul(str, NULL, 10)
 
 enum {
@@ -259,6 +260,7 @@ struct gsm_network {
 
 	/* Whether to use call waiting on the network */
 	bool call_waiting;
+	char *sms_db_file_path;
 };
 
 struct osmo_esme;

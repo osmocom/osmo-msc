@@ -105,7 +105,7 @@ static struct {
 	int daemonize;
 	const char *mncc_sock_path;
 } msc_cmdline_config = {
-	.database_name = "sms.db",
+	.database_name = NULL,
 	.config_file = "osmo-msc.cfg",
 };
 
@@ -647,9 +647,11 @@ TODO: we probably want some of the _net_ ctrl commands from bsc_base_ctrl_cmds_i
 	/* TODO: is this used for crypto?? Improve randomness, at least we
 	 * should try to use the nanoseconds part of the current time. */
 
-	if (db_init(msc_cmdline_config.database_name)) {
+	if (msc_cmdline_config.database_name)
+		osmo_talloc_replace_string(msc_network, &msc_network->sms_db_file_path, msc_cmdline_config.database_name);
+	if (db_init(msc_network->sms_db_file_path)) {
 		fprintf(stderr, "DB: Failed to init database: %s\n",
-			msc_cmdline_config.database_name);
+			osmo_quote_str((char*)msc_network->sms_db_file_path, -1));
 		return 4;
 	}
 

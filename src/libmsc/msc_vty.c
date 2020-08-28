@@ -426,6 +426,15 @@ DEFUN(cfg_msc, cfg_msc_cmd,
 #define MNCC_GUARD_TIMEOUT_STR "Set global guard timer for mncc interface activity\n"
 #define MNCC_GUARD_TIMEOUT_VALUE_STR "guard timer value (sec.)\n"
 
+DEFUN(cfg_sms_database, cfg_sms_database_cmd,
+	"sms-database PATH",
+	"Set the path to the MSC-SMS database file\n"
+	"Relative or absolute file system path to the database file (default is '" SMS_DEFAULT_DB_FILE_PATH "')\n")
+{
+	osmo_talloc_replace_string(gsmnet, &gsmnet->sms_db_file_path, argv[0]);
+	return CMD_SUCCESS;
+}
+
 DEFUN(cfg_msc_mncc_internal,
       cfg_msc_mncc_internal_cmd,
       "mncc internal",
@@ -731,6 +740,8 @@ DEFUN(show_nri, show_nri_cmd,
 static int config_write_msc(struct vty *vty)
 {
 	vty_out(vty, "msc%s", VTY_NEWLINE);
+	if (gsmnet->sms_db_file_path && strcmp(gsmnet->sms_db_file_path, SMS_DEFAULT_DB_FILE_PATH))
+		vty_out(vty, " sms-database %s%s", gsmnet->sms_db_file_path, VTY_NEWLINE);
 	if (gsmnet->mncc_sock_path)
 		vty_out(vty, " mncc external %s%s", gsmnet->mncc_sock_path, VTY_NEWLINE);
 	vty_out(vty, " mncc guard-timeout %i%s",
@@ -2059,6 +2070,7 @@ void msc_vty_init(struct gsm_network *msc_network)
 
 	install_element(CONFIG_NODE, &cfg_msc_cmd);
 	install_node(&msc_node, config_write_msc);
+	install_element(MSC_NODE, &cfg_sms_database_cmd);
 	install_element(MSC_NODE, &cfg_msc_assign_tmsi_cmd);
 	install_element(MSC_NODE, &cfg_msc_mncc_internal_cmd);
 	install_element(MSC_NODE, &cfg_msc_mncc_external_cmd);

@@ -46,6 +46,7 @@ OsmoMSC(config-net)# exit
 OsmoMSC(config)# msc
 OsmoMSC(config-msc)# list
 ...
+  sms-database PATH
   assign-tmsi
   mncc internal
   mncc external MNCC_SOCKET_PATH

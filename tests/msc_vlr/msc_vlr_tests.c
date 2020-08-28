@@ -1049,31 +1049,32 @@ static void check_talloc(void *msgb_ctx, void *msc_vlr_tests_ctx)
 	talloc_report_full(msgb_ctx, stderr);
 	/* Expecting these to stick around in msc_vlr_tests_ctx:
 	 * full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-	 * talloc_total_blocks(tall_bsc_ctx) == 20
-	 * full talloc report on 'msc_vlr_tests_ctx' (total   6556 bytes in  20 blocks)
-	 *      struct osmo_gsup_client        contains    264 bytes in   1 blocks (ref 0) 0x613000000260
-	 *      struct gsm_network             contains   4791 bytes in  12 blocks (ref 0) 0x6190000000e0
-	 *       struct mgcp_client             contains    688 bytes in   1 blocks (ref 0) 0x6180000000e0
-	 *       struct sccp_ran_inst           contains    152 bytes in   1 blocks (ref 0) 0x611000000320
-	 *       struct sccp_ran_inst           contains    152 bytes in   1 blocks (ref 0) 0x6110000001e0
-	 *       struct gsup_client_mux         contains    152 bytes in   2 blocks (ref 0) 0x6100000001a0
-	 *           struct ipaccess_unit           contains     64 bytes in   1 blocks (ref 0) 0x60e000023180
-	 *       struct vlr_instance            contains    264 bytes in   2 blocks (ref 0) 0x6130000000a0
-	 *           struct osmo_nri_ranges         contains     16 bytes in   1 blocks (ref 0) 0x60b000000360
-	 *       no_gsup_server                 contains     15 bytes in   1 blocks (ref 0) 0x60b0000002b0
-	 *       ../../../src/libosmocore/src/stat_item.c:96 contains    144 bytes in   2 blocks (ref 0) 0x60d000000170
-	 *           ../../../src/libosmocore/src/stat_item.c:118 contains     96 bytes in   1 blocks (ref 0) 0x6100000000a0
-	 *       ../../../src/libosmocore/src/rate_ctr.c:234 contains   2352 bytes in   1 blocks (ref 0) 0x61e0000000e0
-	 *      logging                        contains   1501 bytes in   5 blocks (ref 0) 0x60b000000200
-	 *       struct log_target              contains    244 bytes in   2 blocks (ref 0) 0x6120000000a0
-	 *           struct log_category            contains     76 bytes in   1 blocks (ref 0) 0x60f0000000a0
-	 *       struct log_info                contains   1256 bytes in   2 blocks (ref 0) 0x60d0000000a0
-	 *           struct log_info_cat            contains   1216 bytes in   1 blocks (ref 0) 0x61a0000000e0
-	 *      msgb                           contains      0 bytes in   1 blocks (ref 0) 0x608000000180
+	 * talloc_total_blocks(tall_bsc_ctx) == 21
+	 * full talloc report on 'msc_vlr_tests_ctx' (total   6571 bytes in  21 blocks)
+	 *     struct osmo_gsup_client        contains    264 bytes in   1 blocks (ref 0) 0x5605f2ea2e90
+	 *     struct gsm_network             contains   4806 bytes in  13 blocks (ref 0) 0x5605f2ea1b60
+	 *         struct mgcp_client             contains    688 bytes in   1 blocks (ref 0) 0x5605f2ea3200
+	 *         struct sccp_ran_inst           contains    152 bytes in   1 blocks (ref 0) 0x5605f2ea3100
+	 *         struct sccp_ran_inst           contains    152 bytes in   1 blocks (ref 0) 0x5605f2ea3000
+	 *         struct gsup_client_mux         contains    152 bytes in   2 blocks (ref 0) 0x5605f2ea2d20
+	 *             struct ipaccess_unit           contains     64 bytes in   1 blocks (ref 0) 0x5605f2ea2de0
+	 *         struct vlr_instance            contains    264 bytes in   2 blocks (ref 0) 0x5605f2ea2b40
+	 *             struct osmo_nri_ranges         contains     16 bytes in   1 blocks (ref 0) 0x5605f2ea2ca0
+	 *         no_gsup_server                 contains     15 bytes in   1 blocks (ref 0) 0x5605f2ea2ac0
+	 *         stat_item.c:96                 contains    144 bytes in   2 blocks (ref 0) 0x5605f2ea2950
+	 *             stat_item.c:118                contains     96 bytes in   1 blocks (ref 0) 0x5605f2ea29f0
+	 *         rate_ctr.c:234                 contains   2352 bytes in   1 blocks (ref 0) 0x5605f2ea1fb0
+	 *         sms.db                         contains      7 bytes in   1 blocks (ref 0) 0x5605f2ea1f40
+	 *     logging                        contains   1501 bytes in   5 blocks (ref 0) 0x5605f2ea1360
+	 *         struct log_target              contains    244 bytes in   2 blocks (ref 0) 0x5605f2ea1990
+	 *             struct log_category            contains     76 bytes in   1 blocks (ref 0) 0x5605f2ea1aa0
+	 *         struct log_info                contains   1256 bytes in   2 blocks (ref 0) 0x5605f2ea13d0
+	 *             struct log_info_cat            contains   1216 bytes in   1 blocks (ref 0) 0x5605f2ea1460
+	 *     msgb                           contains      0 bytes in   1 blocks (ref 0) 0x5605f2ea12f0
 	 */
 	fprintf(stderr, "talloc_total_blocks(tall_bsc_ctx) == %zu\n",
 		talloc_total_blocks(msc_vlr_tests_ctx));
-	if (talloc_total_blocks(msc_vlr_tests_ctx) != 20)
+	if (talloc_total_blocks(msc_vlr_tests_ctx) != 21)
 		talloc_report_full(msc_vlr_tests_ctx, stderr);
 	fprintf(stderr, "\n");
 }
