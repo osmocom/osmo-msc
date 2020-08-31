@@ -977,25 +977,48 @@ static struct msgb *ran_a_make_assignment_command(struct osmo_fsm_inst *log_fi,
 
 		/* Package RTP-Address data */
 		if (osmo_sockaddr_str_is_nonzero(ac->cn_rtp)) {
-			struct sockaddr_in rtp_addr_in;
-
-			memset(&rtp_addr_in, 0, sizeof(rtp_addr_in));
-			rtp_addr_in.sin_family = AF_INET;
-			rtp_addr_in.sin_port = osmo_htons(ac->cn_rtp->port),
-			rtp_addr_in.sin_addr.s_addr = inet_addr(ac->cn_rtp->ip);
-
-			if (rtp_addr_in.sin_addr.s_addr == INADDR_NONE) {
-				LOG_RAN_A_ENC(log_fi, LOGL_ERROR, "Assignment Command: Invalid RTP-Address\n");
+			struct sockaddr_in *sin;
+			struct sockaddr_in6 *sin6;
+			int family = osmo_ip_str_type(ac->cn_rtp->ip);
+			switch (family) {
+			case AF_INET:
+				sin = (struct sockaddr_in *)&rtp_addr;
+				sin->sin_family = AF_INET;
+				sin->sin_port = osmo_htons(ac->cn_rtp->port);
+				if (inet_pton(AF_INET, ac->cn_rtp->ip, &sin->sin_addr) != 1) {
+					LOG_RAN_A_ENC(log_fi, LOGL_ERROR,
+						      "Assignment Command: Invalid RTP-Address %s\n",
+						      ac->cn_rtp->ip);
+					return NULL;
+				}
+				if (sin->sin_port == 0) {
+					LOG_RAN_A_ENC(log_fi, LOGL_ERROR,
+							"Assignment Command: Invalid RTP-Port\n");
+					return NULL;
+				}
+				break;
+			case AF_INET6:
+				sin6 = (struct sockaddr_in6 *)&rtp_addr;
+				sin6->sin6_family = AF_INET6;
+				sin6->sin6_port = osmo_htons(ac->cn_rtp->port);
+				if (inet_pton(AF_INET6, ac->cn_rtp->ip, &sin6->sin6_addr) != 1) {
+					LOG_RAN_A_ENC(log_fi, LOGL_ERROR,
+						      "Assignment Command: Invalid RTP-Address %s\n",
+						      ac->cn_rtp->ip);
+					return NULL;
+				}
+				if (sin6->sin6_port == 0) {
+					LOG_RAN_A_ENC(log_fi, LOGL_ERROR,
+							"Assignment Command: Invalid RTP-Port\n");
+					return NULL;
+				}
+				break;
+			default:
+				LOG_RAN_A_ENC(log_fi, LOGL_ERROR,
+					      "Assignment Command: Invalid RTP-Address type for %s\n",
+					       ac->cn_rtp->ip);
 				return NULL;
 			}
-			if (rtp_addr_in.sin_port == 0) {
-				LOG_RAN_A_ENC(log_fi, LOGL_ERROR, "Assignment Command: Invalid RTP-Port\n");
-				return NULL;
-			}
-
-			memset(&rtp_addr, 0, sizeof(rtp_addr));
-			memcpy(&rtp_addr, &rtp_addr_in, sizeof(rtp_addr_in));
-
 			use_rtp_addr = &rtp_addr;
 		}
 	}
