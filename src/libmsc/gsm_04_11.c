@@ -633,6 +633,16 @@ static int gsm340_rx_tpdu(struct gsm_trans *trans, struct msgb *msg,
 	if (gsms->smpp.esme) {
 		return -EINPROGRESS;
 	}
+
+	/* This SMS got routed through SMPP, but the configured ESME was
+	 * unavailable at this time. This is an OOO condition.
+	 * Don't store this SMS in the database as we may never be
+	 * able to deliver it. (we would need to process the stored SMS and
+	 * attempt re-submission to the ESME)
+	 */
+	if (rc == GSM411_RP_CAUSE_MO_NET_OUT_OF_ORDER)
+		return rc;
+
 	/*
 	 * This SMS got routed through SMPP or no receiver exists.
 	 * In any case, we store it in the database for further processing.
