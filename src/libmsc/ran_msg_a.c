@@ -279,7 +279,6 @@ static int ran_a_decode_assignment_complete(struct ran_dec *ran_dec, struct msgb
 	struct tlv_p_entry *ie_codec_list_bss_supported = TLVP_GET(tp, GSM0808_IE_SPEECH_CODEC_LIST);
 	struct tlv_p_entry *ie_osmux_cid = TLVP_GET(tp, GSM0808_IE_OSMO_OSMUX_CID);
 	struct sockaddr_storage rtp_addr;
-	struct sockaddr_in *rtp_addr_in;
 	struct gsm0808_speech_codec sc;
 	struct gsm0808_speech_codec_list codec_list_bss_supported;
 	int rc;
@@ -296,15 +295,7 @@ static int ran_a_decode_assignment_complete(struct ran_dec *ran_dec, struct msgb
 			return -EINVAL;
 		}
 
-		rtp_addr_in = (struct sockaddr_in*)&rtp_addr;
-
-		if (rtp_addr.ss_family != AF_INET) {
-			LOG_RAN_A_DEC_MSG(LOGL_ERROR, "Assignment Complete: IE AoIP Transport Address:"
-				 " unsupported addressing scheme (only IPV4 supported)\n");
-			return -EINVAL;
-		}
-
-		if (osmo_sockaddr_str_from_sockaddr_in(&ran_dec_msg.assignment_complete.remote_rtp, rtp_addr_in)) {
+		if (osmo_sockaddr_str_from_sockaddr(&ran_dec_msg.assignment_complete.remote_rtp, &rtp_addr)) {
 			LOG_RAN_A_DEC_MSG(LOGL_ERROR, "Assignment Complete: unable to decode remote RTP IP address\n");
 			return -EINVAL;
 		}
