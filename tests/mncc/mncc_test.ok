@@ -12,12 +12,12 @@ len way too short: len=10 sdplen=-824 sdp=- rc=-22
 len zero: len=0 sdplen=-834 sdp=- rc=-22
 
 struct gsm_mncc_rtp:
-empty SDP: len=1048 sdplen=1024 sdp="\0" rc=0
-empty SDP, shortest possible: len=25 sdplen=1 sdp="\0" rc=0
-empty SDP, zero len: len=24 sdplen=0 sdp=- rc=-22
-terminated SDP str: len=1048 sdplen=1024 sdp="Privacy is a desirable marketing option\0" rc=0
-terminated SDP str, shortest possible: len=64 sdplen=40 sdp="Privacy is a desirable marketing option\0" rc=0
-terminated SDP str, but len excludes nul: len=63 sdplen=39 sdp="Privacy is a desirable marketing option" rc=-22
-terminated SDP str, but len too short: len=47 sdplen=23 sdp="Privacy is a desirable " rc=-22
-len way too short: len=10 sdplen=-14 sdp=- rc=-22
-len zero: len=0 sdplen=-24 sdp=- rc=-22
+empty SDP: len=1168 sdplen=1024 sdp="\0" rc=0
+empty SDP, shortest possible: len=145 sdplen=1 sdp="\0" rc=0
+empty SDP, zero len: len=144 sdplen=0 sdp=- rc=-22
+terminated SDP str: len=1168 sdplen=1024 sdp="Privacy is a desirable marketing option\0" rc=0
+terminated SDP str, shortest possible: len=184 sdplen=40 sdp="Privacy is a desirable marketing option\0" rc=0
+terminated SDP str, but len excludes nul: len=183 sdplen=39 sdp="Privacy is a desirable marketing option" rc=-22
+terminated SDP str, but len too short: len=167 sdplen=23 sdp="Privacy is a desirable " rc=-22
+len way too short: len=10 sdplen=-134 sdp=- rc=-22
+len zero: len=0 sdplen=-144 sdp=- rc=-22

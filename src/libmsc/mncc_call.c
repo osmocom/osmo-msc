@@ -303,11 +303,10 @@ static bool mncc_call_tx_rtp_create(struct mncc_call *mncc_call)
 		.rtp = {
 			.msg_type = MNCC_RTP_CREATE,
 			.callref = mncc_call->callref,
-			.port = rtp_local->port,
 		},
 	};
 
-	if (osmo_sockaddr_str_to_32n(rtp_local, &mncc_msg.rtp.ip)) {
+	if (osmo_sockaddr_str_to_sockaddr(rtp_local, &mncc_msg.rtp.addr)) {
 		mncc_call_error(mncc_call, "Failed to compose IP address " OSMO_SOCKADDR_STR_FMT "\n",
 				OSMO_SOCKADDR_STR_FMT_ARGS(rtp_local));
 		return false;
@@ -332,7 +331,7 @@ static bool mncc_call_rx_rtp_connect(struct mncc_call *mncc_call, const struct g
 		return true;
 	}
 
-	if (osmo_sockaddr_str_from_32n(&rtp, mncc_msg->ip, mncc_msg->port)) {
+	if (osmo_sockaddr_str_from_sockaddr(&rtp, &mncc_msg->addr)) {
 		mncc_call_error(mncc_call, "Cannot RTP-CONNECT, invalid RTP IP:port in incoming MNCC message\n");
 		return false;
 	}

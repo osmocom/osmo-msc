@@ -168,15 +168,16 @@ int sdp_msg_to_str(char *dst, size_t dst_size, const struct sdp_msg *sdp)
 	const struct sdp_audio_codec *codec;
 	struct osmo_strbuf sb = { .buf = dst, .len = dst_size };
 	const char *ip = sdp->rtp.ip[0] ? sdp->rtp.ip : "0.0.0.0";
+	char ipv = osmo_ip_str_type(ip) == AF_INET6 ? '6' : '4';
 
 	OSMO_STRBUF_PRINTF(sb,
 			   "v=0\r\n"
-			   "o=OsmoMSC 0 0 IN IP4 %s\r\n"
+			   "o=OsmoMSC 0 0 IN IP%c %s\r\n"
 			   "s=GSM Call\r\n"
-			   "c=IN IP4 %s\r\n"
+			   "c=IN IP%c %s\r\n"
 			   "t=0 0\r\n"
 			   "m=audio %d RTP/AVP",
-			   ip, ip,
+			   ipv, ip, ipv, ip,
 			   sdp->rtp.port);
 
 	/* Append all payload type numbers to 'm=audio <port> RTP/AVP 3 4 112' line */

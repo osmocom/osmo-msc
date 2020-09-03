@@ -1623,8 +1623,8 @@ static int mncc_recv_rtp(struct gsm_network *net, struct gsm_trans *trans, uint3
 	rtp->callref = callref;
 	rtp->msg_type = cmd;
 	if (rtp_addr) {
-		rtp->ip = osmo_htonl(inet_addr(rtp_addr->ip));
-		rtp->port = rtp_addr->port;
+		if (osmo_sockaddr_str_to_sockaddr(rtp_addr, &rtp->addr) < 0)
+			return -EINVAL;
 	}
 	rtp->payload_type = payload_type;
 	rtp->payload_msg_type = payload_msg_type;
@@ -1710,6 +1710,7 @@ static int tch_rtp_connect(struct gsm_network *net, const struct gsm_mncc_rtp *r
 	struct call_leg *cl;
 	struct rtp_stream *rtps;
 	struct osmo_sockaddr_str rtp_addr;
+	char ipbuf[INET6_ADDRSTRLEN];
 
 	/* FIXME: in *rtp we should get the codec information of the remote
 	 * leg. We will have to populate trans->conn->rtp.codec_cn with a
@@ -1735,7 +1736,9 @@ static int tch_rtp_connect(struct gsm_network *net, const struct gsm_mncc_rtp *r
 		return -EIO;
 	}
 
-	LOG_TRANS_CAT(trans, DMNCC, LOGL_DEBUG, "rx %s\n", get_mncc_name(MNCC_RTP_CONNECT));
+	LOG_TRANS_CAT(trans, DMNCC, LOGL_DEBUG, "rx %s %s:%u\n", get_mncc_name(MNCC_RTP_CONNECT),
+		      osmo_sockaddr_ntop((const struct sockaddr*)&rtp->addr, ipbuf),
+		      osmo_sockaddr_port((const struct sockaddr*)&rtp->addr));
 
 	cl = trans->msc_a->cc.call_leg;
 	rtps = cl ? cl->rtp[RTP_TO_CN] : NULL;
@@ -1746,7 +1749,11 @@ static int tch_rtp_connect(struct gsm_network *net, const struct gsm_mncc_rtp *r
 		return -EINVAL;
 	}
 
-	osmo_sockaddr_str_from_32n(&rtp_addr, rtp->ip, rtp->port);
+	if (osmo_sockaddr_str_from_sockaddr(&rtp_addr, &rtp->addr) < 0) {
+		LOG_TRANS_CAT(trans, DMNCC, LOGL_ERROR, "RTP connect with invalid IP addr\n");
+		mncc_recv_rtp_err(net, trans, rtp->callref, MNCC_RTP_CONNECT);
+		return -EINVAL;
+	}
 	rtp_stream_set_remote_addr(rtps, &rtp_addr);
 	rtp_stream_commit(rtps);
 	return 0;
