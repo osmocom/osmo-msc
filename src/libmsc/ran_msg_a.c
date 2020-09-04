@@ -607,23 +607,13 @@ static int ran_a_decode_handover_request(struct ran_dec *ran_dec, const struct m
 	}
 
 	if (ie_aoip_transp_addr) {
-		do {
-			struct sockaddr_storage rtp_addr;
-			if (gsm0808_dec_aoip_trasp_addr(&rtp_addr, ie_aoip_transp_addr->val, ie_aoip_transp_addr->len) < 0) {
-				LOG_RAN_A_DEC_MSG(LOGL_ERROR, "unable to decode AoIP transport address\n");
-				break;
-			}
-			if (rtp_addr.ss_family != AF_INET) {
-				LOG_RAN_A_DEC_MSG(LOGL_ERROR, "IE AoIP Transport Address:"
-						 " unsupported addressing scheme (only IPV4 supported)\n");
-				break;
-			}
-			if (osmo_sockaddr_str_from_sockaddr_in(&rtp_ran_local, (struct sockaddr_in*)&rtp_addr)) {
-				LOG_RAN_A_DEC_MSG(LOGL_ERROR, "unable to decode remote RTP IP address\n");
-				break;
-			}
+		struct sockaddr_storage rtp_addr;
+		if (gsm0808_dec_aoip_trasp_addr(&rtp_addr, ie_aoip_transp_addr->val, ie_aoip_transp_addr->len) < 0)
+			LOG_RAN_A_DEC_MSG(LOGL_ERROR, "unable to decode AoIP transport address\n");
+		else if (osmo_sockaddr_str_from_sockaddr(&rtp_ran_local, &rtp_addr) < 0)
+			LOG_RAN_A_DEC_MSG(LOGL_ERROR, "unable to decode remote RTP IP address\n");
+		else
 			r->rtp_ran_local = &rtp_ran_local;
-		} while(0);
 	}
 
 	if (ie_codec_list_msc_preferred
@@ -689,24 +679,14 @@ static int ran_a_decode_handover_request_ack(struct ran_dec *ran_dec, const stru
 	}
 
 	if (ie_aoip_transp_addr) {
-		do {
-			struct sockaddr_storage rtp_addr;
-			if (gsm0808_dec_aoip_trasp_addr(&rtp_addr, ie_aoip_transp_addr->val, ie_aoip_transp_addr->len) < 0) {
-				LOG_RAN_A_DEC_MSG(LOGL_ERROR, "unable to decode AoIP transport address\n");
-				break;
-			}
-			if (rtp_addr.ss_family != AF_INET) {
-				LOG_RAN_A_DEC_MSG(LOGL_ERROR, "IE AoIP Transport Address:"
-						 " unsupported addressing scheme (only IPV4 supported)\n");
-				break;
-			}
-			if (osmo_sockaddr_str_from_sockaddr_in(&ran_dec_msg.handover_request_ack.remote_rtp,
-							  (struct sockaddr_in*)&rtp_addr)) {
-				LOG_RAN_A_DEC_MSG(LOGL_ERROR, "unable to decode remote RTP IP address\n");
-				ran_dec_msg.handover_request_ack.remote_rtp = (struct osmo_sockaddr_str){};
-				break;
-			}
-		} while(0);
+		struct sockaddr_storage rtp_addr;
+		if (gsm0808_dec_aoip_trasp_addr(&rtp_addr, ie_aoip_transp_addr->val, ie_aoip_transp_addr->len) < 0) {
+			LOG_RAN_A_DEC_MSG(LOGL_ERROR, "unable to decode AoIP transport address\n");
+		} else if (osmo_sockaddr_str_from_sockaddr(&ran_dec_msg.handover_request_ack.remote_rtp,
+							   &rtp_addr)) {
+			LOG_RAN_A_DEC_MSG(LOGL_ERROR, "unable to decode remote RTP IP address\n");
+			ran_dec_msg.handover_request_ack.remote_rtp = (struct osmo_sockaddr_str){};
+		}
 	}
 
 	if (ie_speech_codec) {
