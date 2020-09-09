@@ -1,3 +1,10 @@
+osmo-msc (1.6.3) unstable; urgency=medium
+
+  [ Neels Hofmeyr ]
+  * fix crash for unknown MI during Paging Response
+
+ -- Pau Espin Pedrol <pespin@sysmocom.de>  Wed, 09 Sep 2020 16:29:49 +0200
+
 osmo-msc (1.6.2) unstable; urgency=medium
 
   * vlr_auth_fsm: Fix compilation with gcc-10
