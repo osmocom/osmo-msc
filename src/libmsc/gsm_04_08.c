@@ -825,7 +825,12 @@ int gsm48_rx_mm_serv_req(struct msc_a *msc_a, struct msgb *msg)
 static int gsm48_rx_cm_reest_req(struct msc_a *msc_a, struct msgb *msg)
 {
 	struct osmo_mobile_identity mi;
-	osmo_mobile_identity_decode_from_l3(&mi, msg, false);
+	int rc = osmo_mobile_identity_decode_from_l3(&mi, msg, false);
+	if (rc) {
+		LOGP(DMM, LOGL_ERROR, "CM RE-ESTABLISH REQUEST: cannot decode Mobile Identity\n");
+		return -EINVAL;
+	}
+
 	DEBUGP(DMM, "<- CM RE-ESTABLISH REQUEST %s\n", osmo_mobile_identity_to_str_c(OTC_SELECT, &mi));
 
 	/* we don't support CM call re-establishment */
