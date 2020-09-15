@@ -43,7 +43,7 @@ enum call_leg_state {
 };
 
 struct osmo_tdef g_mgw_tdefs[] = {
-	{ .T=-1, .default_val=4, .desc="MGCP response timeout" },
+	{ .T=-2427, .default_val=4, .desc="MGCP response timeout" },
 	{ .T=-2, .default_val=30, .desc="RTP stream establishing timeout" },
 	{}
 };
