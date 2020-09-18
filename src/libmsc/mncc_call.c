@@ -208,24 +208,25 @@ void mncc_call_detach_rtp_stream(struct mncc_call *mncc_call)
 
 static void mncc_call_tx_setup_ind(struct mncc_call *mncc_call)
 {
-	struct gsm_mncc mncc_msg = mncc_call->outgoing_req;
-	mncc_msg.msg_type = MNCC_SETUP_IND;
-	mncc_msg.callref = mncc_call->callref;
+	union mncc_msg mncc_msg;
+	mncc_msg.signal = mncc_call->outgoing_req;
+	mncc_msg.signal.msg_type = MNCC_SETUP_IND;
+	mncc_msg.signal.callref = mncc_call->callref;
 
-	OSMO_STRLCPY_ARRAY(mncc_msg.imsi, mncc_call->vsub->imsi);
+	OSMO_STRLCPY_ARRAY(mncc_msg.signal.imsi, mncc_call->vsub->imsi);
 
 	if (!(mncc_call->outgoing_req.fields & MNCC_F_CALLING)) {
 		/* No explicit calling number set, use the local subscriber */
-		mncc_msg.fields |= MNCC_F_CALLING;
-		OSMO_STRLCPY_ARRAY(mncc_msg.calling.number, mncc_call->vsub->msisdn);
+		mncc_msg.signal.fields |= MNCC_F_CALLING;
+		OSMO_STRLCPY_ARRAY(mncc_msg.signal.calling.number, mncc_call->vsub->msisdn);
 
 	}
 	mncc_call->local_msisdn_present = true;
-	mncc_call->local_msisdn = mncc_msg.calling;
+	mncc_call->local_msisdn = mncc_msg.signal.calling;
 
 	rate_ctr_inc(&gsmnet->msc_ctrs->ctr[MSC_CTR_CALL_MO_SETUP]);
 
-	mncc_call_tx(mncc_call, (union mncc_msg*)&mncc_msg);
+	mncc_call_tx(mncc_call, &mncc_msg);
 }
 
 static void mncc_call_rx_setup_req(struct mncc_call *mncc_call, const struct gsm_mncc *incoming_req)
