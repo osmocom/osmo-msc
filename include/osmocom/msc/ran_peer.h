@@ -42,7 +42,7 @@ struct neighbor_ident_entry;
  * list is kept in sccp_ran_inst. For convenience, see ran_peer_for_each_ran_conn().
  */
 struct ran_peer {
-	/* Entry in sccp_ran_inst->ran_conns */
+	/* Entry in sccp_ran_inst->ran_peers */
 	struct llist_head entry;
 
 	struct sccp_ran_inst *sri;
