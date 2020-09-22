@@ -91,7 +91,7 @@ struct ran_peer_ev_ctx {
 };
 
 struct ran_peer *ran_peer_find_or_create(struct sccp_ran_inst *sri, const struct osmo_sccp_addr *peer_addr);
-struct ran_peer *ran_peer_find(struct sccp_ran_inst *sri, const struct osmo_sccp_addr *peer_addr);
+struct ran_peer *ran_peer_find_by_addr(struct sccp_ran_inst *sri, const struct osmo_sccp_addr *peer_addr);
 
 void ran_peer_cells_seen_add(struct ran_peer *ran_peer, const struct gsm0808_cell_id *id);
 
@@ -106,4 +106,3 @@ int ran_peer_down_paging(struct ran_peer *rp, const struct gsm0808_cell_id *page
 
 struct ran_peer *ran_peer_find_by_cell_id(struct sccp_ran_inst *sri, const struct gsm0808_cell_id *cid,
 					  bool expecting_single_match);
-struct ran_peer *ran_peer_find_by_addr(struct sccp_ran_inst *sri, const struct osmo_sccp_addr *addr);

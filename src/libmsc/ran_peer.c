@@ -80,13 +80,13 @@ static struct ran_peer *ran_peer_alloc(struct sccp_ran_inst *sri, const struct o
 
 struct ran_peer *ran_peer_find_or_create(struct sccp_ran_inst *sri, const struct osmo_sccp_addr *peer_addr)
 {
-	struct ran_peer *rp = ran_peer_find(sri, peer_addr);
+	struct ran_peer *rp = ran_peer_find_by_addr(sri, peer_addr);
 	if (rp)
 		return rp;
 	return ran_peer_alloc(sri, peer_addr);
 }
 
-struct ran_peer *ran_peer_find(struct sccp_ran_inst *sri, const struct osmo_sccp_addr *peer_addr)
+struct ran_peer *ran_peer_find_by_addr(struct sccp_ran_inst *sri, const struct osmo_sccp_addr *peer_addr)
 {
 	struct ran_peer *rp;
 	llist_for_each_entry(rp, &sri->ran_peers, entry) {
@@ -622,17 +622,6 @@ struct ran_peer *ran_peer_find_by_cell_id(struct sccp_ran_inst *sri, const struc
 		}
 	}
 	return found;
-}
-
-struct ran_peer *ran_peer_find_by_addr(struct sccp_ran_inst *sri, const struct osmo_sccp_addr *addr)
-{
-	struct ran_peer *rp;
-
-	llist_for_each_entry(rp, &sri->ran_peers, entry) {
-		if (!osmo_sccp_addr_ri_cmp(addr, &rp->peer_addr))
-			return rp;
-	}
-	return NULL;
 }
 
 int ran_peers_down_paging(struct sccp_ran_inst *sri, enum CELL_IDENT page_where, struct vlr_subscr *vsub,
