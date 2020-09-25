@@ -84,7 +84,7 @@ struct paging_request *paging_request_start(struct vlr_subscr *vsub, enum paging
 {
 	int rc;
 	struct paging_request *pr;
-	struct gsm_network *net = vsub->vlr->user_ctx;
+	int paging_response_timer;
 
 	pr = talloc(vsub, struct paging_request);
 	OSMO_ASSERT(pr);
@@ -110,8 +110,9 @@ struct paging_request *paging_request_start(struct vlr_subscr *vsub, enum paging
 		/* reduced on the first paging callback */
 		vlr_subscr_get(vsub, VSUB_USE_PAGING);
 		vsub->cs.is_paging = true;
+		paging_response_timer = osmo_tdef_get(msc_ran_infra[vsub->cs.attached_via_ran].tdefs, -4, OSMO_TDEF_S, 10);
 		osmo_timer_setup(&vsub->cs.paging_response_timer, paging_response_timer_cb, vsub);
-		osmo_timer_schedule(&vsub->cs.paging_response_timer, net->paging_response_timer, 0);
+		osmo_timer_schedule(&vsub->cs.paging_response_timer, paging_response_timer, 0);
 	}
 
 	llist_add_tail(&pr->entry, &vsub->cs.requests);

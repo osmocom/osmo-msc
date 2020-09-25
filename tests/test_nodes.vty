@@ -58,7 +58,6 @@ OsmoMSC(config-msc)# list
   check-imei-rqd (0|1|early)
   cs7-instance-a <0-15>
   cs7-instance-iu <0-15>
-  paging response-timer (default|<1-65535>)
   emergency-call route-to-msisdn MSISDN
   sms-over-gsup
   no sms-over-gsup

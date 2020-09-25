@@ -67,6 +67,7 @@
 #include <osmocom/msc/sgs_vty.h>
 #include <osmocom/msc/sccp_ran.h>
 #include <osmocom/msc/ran_peer.h>
+#include <osmocom/msc/ran_infra.h>
 
 static struct gsm_network *gsmnet = NULL;
 
@@ -562,7 +563,7 @@ DEFUN(cfg_msc_check_imei_rqd, cfg_msc_check_imei_rqd_cmd,
 	return CMD_SUCCESS;
 }
 
-DEFUN(cfg_msc_paging_response_timer, cfg_msc_paging_response_timer_cmd,
+DEFUN_DEPRECATED(cfg_msc_paging_response_timer, cfg_msc_paging_response_timer_cmd,
       "paging response-timer (default|<1-65535>)",
       "Configure Paging\n"
       "Set Paging timeout, the minimum time to pass between (unsuccessful) Pagings sent towards"
@@ -570,10 +571,22 @@ DEFUN(cfg_msc_paging_response_timer, cfg_msc_paging_response_timer_cmd,
       "Set to default timeout (" OSMO_STRINGIFY_VAL(MSC_PAGING_RESPONSE_TIMER_DEFAULT) " seconds)\n"
       "Set paging timeout in seconds\n")
 {
+	int rat;
+	int paging_response_timer;
 	if (!strcmp(argv[0], "default"))
-		gsmnet->paging_response_timer = MSC_PAGING_RESPONSE_TIMER_DEFAULT;
+		paging_response_timer = MSC_PAGING_RESPONSE_TIMER_DEFAULT;
 	else
-		gsmnet->paging_response_timer = atoi(argv[0]);
+		paging_response_timer = atoi(argv[0]);
+
+	for (rat = 0; rat < OSMO_RAT_COUNT; rat++) {
+		osmo_tdef_set(msc_ran_infra[rat].tdefs, -4, paging_response_timer, OSMO_TDEF_S);
+	}
+
+	vty_out(vty, "%% paging response-timer is deprecated.%s"
+		"%% All ran timer has been modified.%s"
+		"%% use 'timer <geran|utran|sgs> X4 %s' instead%s",
+		VTY_NEWLINE, VTY_NEWLINE, argv[0], VTY_NEWLINE);
+
 	return CMD_SUCCESS;
 }
 
@@ -772,9 +785,6 @@ static int config_write_msc(struct vty *vty)
 		else
 			vty_out(vty, " check-imei-rqd 1%s", VTY_NEWLINE);
 	}
-
-	if (gsmnet->paging_response_timer != MSC_PAGING_RESPONSE_TIMER_DEFAULT)
-		vty_out(vty, " paging response-timer %u%s", gsmnet->paging_response_timer, VTY_NEWLINE);
 
 	if (gsmnet->emergency.route_to_msisdn) {
 		vty_out(vty, " emergency-call route-to-msisdn %s%s",

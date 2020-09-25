@@ -43,6 +43,7 @@ const struct value_string an_proto_names[] = {
 	{ .T = -1, .default_val = 5, .desc = "RAN connection Complete Layer 3, Authentication and Ciphering timeout" }, \
 	{ .T = -2, .default_val = 30, .desc = "RAN connection release sanity timeout" }, \
 	{ .T = -3, .default_val = 10, .desc = "Timeout to find a target BSS after Handover Required" }, \
+	{ .T = -4, .default_val = 10, .desc = "Paging response timeout" }, \
 
 struct osmo_tdef msc_tdefs_geran[] = {
 	RAN_TDEFS
@@ -55,6 +56,7 @@ struct osmo_tdef msc_tdefs_utran[] = {
 };
 
 struct osmo_tdef msc_tdefs_sgs[] = {
+	{ .T = -4, .default_val = 10, .desc = "Paging response timeout" },
 	{}
 };
 

@@ -72,8 +72,6 @@ struct gsm_network *gsm_network_init(void *ctx, mncc_recv_cb_t mncc_recv)
 	net->mncc_guard_timeout = 180;
 	net->ncss_guard_timeout = 30;
 
-	net->paging_response_timer = MSC_PAGING_RESPONSE_TIMER_DEFAULT;
-
 	INIT_LLIST_HEAD(&net->trans_list);
 	INIT_LLIST_HEAD(&net->upqueue);
 	INIT_LLIST_HEAD(&net->neighbor_ident_list);

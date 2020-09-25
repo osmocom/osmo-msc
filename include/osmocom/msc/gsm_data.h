@@ -172,8 +172,6 @@ struct gsm_network {
 	 */
 	struct llist_head trans_list;
 
-	unsigned int paging_response_timer;
-
 	/* Radio Resource Location Protocol (TS 04.31) */
 	struct {
 		enum rrlp_mode mode;
