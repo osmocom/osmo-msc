@@ -71,12 +71,12 @@ LD_LIBRARY_PATH="$inst/lib" $MAKE check \
   || cat-testlogs.sh
 LD_LIBRARY_PATH="$inst/lib" \
   DISTCHECK_CONFIGURE_FLAGS="$enable_werror --enable-smpp $IU --enable-external-tests $CONFIG" \
-  $MAKE distcheck \
+  $MAKE $PARALLEL_MAKE distcheck \
   || cat-testlogs.sh
 
 if [ "$WITH_MANUALS" = "1" ] && [ "$PUBLISH" = "1" ]; then
 	make -C "$base/doc/manuals" publish
 fi
 
-$MAKE maintainer-clean
+$MAKE $PARALLEL_MAKE maintainer-clean
 osmo-clean-workspace.sh
