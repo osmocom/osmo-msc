@@ -65,7 +65,7 @@ int mncc_sock_from_cc(struct gsm_network *net, struct msgb *msg)
 
 	/* Actually enqueue the message and mark socket write need */
 	msgb_enqueue(&net->upqueue, msg);
-	net->mncc_state->conn_bfd.when |= OSMO_FD_WRITE;
+	osmo_fd_write_enable(&net->mncc_state->conn_bfd);
 	return 0;
 }
 
@@ -80,7 +80,7 @@ static void mncc_sock_close(struct mncc_sock_state *state)
 	osmo_fd_unregister(bfd);
 
 	/* re-enable the generation of ACCEPT for new connections */
-	state->listen_bfd.when |= OSMO_FD_READ;
+	osmo_fd_read_enable(&state->listen_bfd);
 
 	/* release all existing calls */
 	gsm0408_clear_all_trans(state->net, TRANS_CC);
@@ -146,7 +146,7 @@ static int mncc_sock_write(struct osmo_fd *bfd)
 		msg = llist_entry(net->upqueue.next, struct msgb, list);
 		mncc_prim = (struct gsm_mncc *)msg->data;
 
-		bfd->when &= ~OSMO_FD_WRITE;
+		osmo_fd_write_disable(bfd);
 
 		/* bug hunter 8-): maybe someone forgot msgb_put(...) ? */
 		if (!msgb_length(msg)) {
@@ -161,7 +161,7 @@ static int mncc_sock_write(struct osmo_fd *bfd)
 			goto close;
 		if (rc < 0) {
 			if (errno == EAGAIN) {
-				bfd->when |= OSMO_FD_WRITE;
+				osmo_fd_write_enable(bfd);
 				break;
 			}
 			goto close;
@@ -222,7 +222,7 @@ static void queue_hello(struct mncc_sock_state *mncc)
 	hello->lchan_type_offset = offsetof(struct gsm_mncc, lchan_type);
 
 	msgb_enqueue(&mncc->net->upqueue, msg);
-	mncc->conn_bfd.when |= OSMO_FD_WRITE;
+	osmo_fd_write_enable(&mncc->conn_bfd);
 }
 
 /* accept a new connection */
@@ -245,7 +245,7 @@ static int mncc_sock_accept(struct osmo_fd *bfd, unsigned int flags)
 		LOGP(DMNCC, LOGL_NOTICE, "MNCC app connects but we already have "
 			"another active connection ?!?\n");
 		/* We already have one MNCC app connected, this is all we support */
-		state->listen_bfd.when &= ~OSMO_FD_READ;
+		osmo_fd_read_disable(&state->listen_bfd);
 		close(rc);
 		return 0;
 	}

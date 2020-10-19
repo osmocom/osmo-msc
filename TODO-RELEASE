@@ -10,3 +10,4 @@
 manual				needs common chapter cs7-config.adoc, vty_cpu_sched.adoc from osmo-gsm-manuals > 0.3.0
 osmo-msc	Mobile Identity Coding	OsmoMSC is stricter in rejecting invalid coding of Mobile Identity IEs
 libmosmo-mgcp-client		needs osmo-mgw.git > 1.7.0 (8667d5169df8d06e10ee3f3104e4cd533d15ac57), ABI break due to struct size in mgcp_conn_peer and mgcp_response
+osmo-msc			update version dependency to version with osmo_fd_*_{disable,enable}
