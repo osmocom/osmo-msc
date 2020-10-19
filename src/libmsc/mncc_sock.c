@@ -250,11 +250,7 @@ static int mncc_sock_accept(struct osmo_fd *bfd, unsigned int flags)
 		return 0;
 	}
 
-	conn_bfd->fd = rc;
-	conn_bfd->when = OSMO_FD_READ;
-	conn_bfd->cb = mncc_sock_cb;
-	conn_bfd->data = state;
-
+	osmo_fd_setup(conn_bfd, rc, OSMO_FD_READ, mncc_sock_cb, state, 0);
 	if (osmo_fd_register(conn_bfd) != 0) {
 		LOGP(DMNCC, LOGL_ERROR, "Failed to register new connection fd\n");
 		close(conn_bfd->fd);
@@ -294,10 +290,7 @@ int mncc_sock_init(struct gsm_network *net, const char *sock_path)
 		return -1;
 	}
 
-	bfd->when = OSMO_FD_READ;
-	bfd->cb = mncc_sock_accept;
-	bfd->data = state;
-
+	osmo_fd_setup(bfd, bfd->fd, OSMO_FD_READ, mncc_sock_accept, state, 0);
 	rc = osmo_fd_register(bfd);
 	if (rc < 0) {
 		LOGP(DMNCC, LOGL_ERROR, "Could not register listen fd: %d\n", rc);
