@@ -546,6 +546,10 @@ void msc_role_forget_conn(struct osmo_fsm_inst *role, struct ran_conn *conn)
 
 struct msgb *msc_role_ran_encode(struct osmo_fsm_inst *fi, const struct ran_msg *ran_msg)
 {
+	if (ran_msg->assignment_command.lcls) {
+		LOGPFSML(fi, LOGL_ERROR, "Have LCLS info....\n");
+	}
+
 	struct msc_role_common *c = fi->priv;
 	struct msgb *msg;
 	if (!c->ran->ran_encode) {
@@ -553,6 +557,7 @@ struct msgb *msc_role_ran_encode(struct osmo_fsm_inst *fi, const struct ran_msg 
 			 ran_msg_type_name(ran_msg->msg_type), osmo_rat_type_name(c->ran->type));
 		return NULL;
 	}
+	/* ran_a_encode  ran_msg_a.c Line 1252 */
 	msg = c->ran->ran_encode(fi, ran_msg);
 	if (!msg)
 		LOGPFSML(fi, LOGL_ERROR, "Failed to encode %s\n", ran_msg_type_name(ran_msg->msg_type));
@@ -586,5 +591,6 @@ int msc_role_ran_decode(struct osmo_fsm_inst *fi, const struct an_apdu *an_apdu,
 			 osmo_rat_type_name(c->ran->type));
 		return -ENOTSUP;
 	}
+	/* ran_a_decode_l2 */
 	return c->ran->ran_dec_l2(&ran_dec, an_apdu->msg);
 }

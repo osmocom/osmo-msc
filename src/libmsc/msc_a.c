@@ -517,7 +517,7 @@ static void msc_a_fsm_authenticated(struct osmo_fsm_inst *fi, uint32_t event, vo
 	}
 }
 
-struct osmo_lcls *lcls_compose(const struct msc_a *msc_a, struct gsm_trans *cc_trans, bool use_lac)
+struct osmo_lcls *lcls_compose2(const struct msc_a *msc_a, struct gsm_trans *cc_trans, bool use_lac)
 {
 	/* FIXME: ensure that a interface is in use for this transaction
 	   This fails test #13 because we have no sccp there Do we need this logging?
@@ -564,6 +564,7 @@ struct osmo_lcls *lcls_compose(const struct msc_a *msc_a, struct gsm_trans *cc_t
 	osmo_plmn_to_bcd(lcls->gcr.net, &cc_trans->net->plmn);
 
 	osmo_store32be(cc_trans->callref, lcls->gcr.cr);
+	//osmo_store32be(0, lcls->gcr.cr);
 	osmo_store16be(use_lac ? msc_a->via_cell.lai.lac : msc_a->via_cell.cell_identity, lcls->gcr.cr + 3);
 
 	LOGP(DCC, LOGL_INFO, "LCLS: allocated %s-based CR-ID %s\n", use_lac ? "LAC" : "CI",
@@ -602,6 +603,15 @@ static void msc_a_call_leg_ran_local_addr_available(struct msc_a *msc_a)
 		return;
 	}
 
+	if (cc_trans->lcls) {
+		LOG_MSC_A(msc_a, LOGL_ERROR, "We already have LCLS GCR: %s\n", osmo_gcr_dump(cc_trans->lcls));
+
+	} else {
+	/* Pass what here???   DATA_WE_NEED, bool use_lac   */
+		LOG_MSC_A(msc_a, LOGL_ERROR, "We don't have LCLS GCR: %s\n", osmo_gcr_dump(cc_trans->lcls));
+		//cc_trans->lcls = lcls_compose(msc_a, cc_trans, true);
+	}
+
 	/* The RAN side RTP address is known, so the voice Assignment can commence. */
 	msg = (struct ran_msg){
 		.msg_type = RAN_MSG_ASSIGNMENT_COMMAND,
@@ -612,8 +622,7 @@ static void msc_a_call_leg_ran_local_addr_available(struct msc_a *msc_a)
 			.osmux_cid = msc_a->cc.call_leg->rtp[RTP_TO_RAN]->local_osmux_cid,
 			.call_id_present = true,
 			.call_id = cc_trans->callref,
-			/* Pass what here???   DATA_WE_NEED, bool use_lac   */
-			.lcls = lcls_compose(msc_a, cc_trans, true),
+			.lcls = cc_trans->lcls,
 		},
 	};
 
@@ -1628,6 +1637,9 @@ int msc_a_ran_decode_cb(struct osmo_fsm_inst *msc_a_fi, void *data, const struct
 
 	d->ran_dec = msg;
 
+	if (msg->assignment_command.lcls)
+		LOG_MSC_A(msc_a, LOGL_ERROR, "Found Some LCLS in decode");
+
 	switch (d->from_role) {
 	case MSC_ROLE_I:
 		LOG_MSC_A(msc_a, LOGL_DEBUG, "RAN decode: %s\n", msg->msg_name ? : ran_msg_type_name(msg->msg_type));
@@ -1671,6 +1683,9 @@ int _msc_a_msg_down(struct msc_a *msc_a, enum msc_role to_role, uint32_t to_role
 		.msg = msc_role_ran_encode(msc_a->c.fi, ran_msg),
 	};
 	int rc;
+	/* We've lost the LCLS here 
+		or it's encoded in the msg???? 
+	*/
 	if (!an_apdu.msg)
 		return -EIO;
 	rc = _msub_role_dispatch(msc_a->c.msub, to_role, to_role_event, &an_apdu, file, line);

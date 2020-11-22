@@ -132,6 +132,8 @@ struct gsm_trans {
 		struct gsm_trans *peer;
 		enum bridge_state state;
 	} bridge;
+	//struct osmo_lcls lcls;
+	struct osmo_lcls *lcls;
 };
 
 

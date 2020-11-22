@@ -1251,10 +1251,20 @@ static struct msgb *_ran_a_encode(struct osmo_fsm_inst *caller_fi, const struct 
 
 struct msgb *ran_a_encode(struct osmo_fsm_inst *caller_fi, const struct ran_msg *ran_enc_msg)
 {
+	/* This msgb is what will end up down stream in CC */
+	if (ran_enc_msg->assignment_command.lcls) {
+		LOG_RAN_A_ENC(caller_fi, LOGL_ERROR, "Have got LCLS info to put into msgb......");	
+	}
+
+	/* this is going to call the ass2() thing */
+
 	struct msgb *msg = _ran_a_encode(caller_fi, ran_enc_msg);
 
 	if (!msg)
 		return NULL;
+
+
+	/* msg should contain our lcls! */
 
 	msg->l2h = msg->data;
 

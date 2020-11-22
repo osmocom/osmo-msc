@@ -485,6 +485,70 @@ static void gsm48_start_cc_timer(struct gsm_trans *trans, int current,
 	trans->cc.Tcurrent = current;
 }
 
+struct osmo_lcls *lcls_compose(struct osmo_lcls *lcls_fixme_for_member, struct gsm_trans *trans, bool use_lac)
+{
+	/* FIXME: ensure that a interface is in use for this transaction
+	   This fails test #13 because we have no sccp there Do we need this logging?
+	   Can we get primary_pc elsewhere? */
+	if (!trans->net->a.sri->sccp)
+		return NULL;
+	struct osmo_ss7_instance *ss7 = osmo_sccp_get_ss7(trans->net->a.sri->sccp);
+	struct osmo_lcls *lcls;
+	uint8_t w = osmo_ss7_pc_width(&ss7->cfg.pc_fmt);
+
+	if (!trans) {
+		LOGP(DCC, LOGL_ERROR, "LCLS: unable to fill parameters for unallocated transaction\n");
+		return NULL;
+	}
+
+	if (!trans->net->vlr->cfg.lcls_enable) {
+		LOGP(DCC, LOGL_NOTICE, "LCLS disabled globally\n");
+		return NULL;
+	}
+
+	/* Why this test? Do we need it? Where to find conn now, if this is still valid?
+	if (!cc_trans->conn) {
+		LOGP(DCC, LOGL_ERROR, "LCLS: unable to fill parameters for transaction without connection\n");
+		return NULL;
+	}*/
+
+	if (trans->msc_a->c.ran->type != OSMO_RAT_GERAN_A) {
+		LOGP(DCC, LOGL_ERROR, "LCLS: only A interface is supported at the moment\n");
+		return NULL;
+	}
+
+	lcls = talloc_zero(trans, struct osmo_lcls);
+	if (!lcls) {
+		LOGP(DCC, LOGL_ERROR, "LCLS: failed to allocate osmo_lcls\n");
+		return NULL;
+	}
+
+	LOGP(DCC, LOGL_INFO, "LCLS: using %u bits (%u bytes) for node ID\n", w, w / 8);
+
+	lcls->gcr.net_len = 3;
+	lcls->gcr.node = ss7->cfg.primary_pc;
+
+	/* net id from Q.1902.3 3-5 bytes, this function gives 3 bytes exactly */
+	osmo_plmn_to_bcd(lcls->gcr.net, &trans->net->plmn);
+
+	osmo_store32be(trans->callref, lcls->gcr.cr);
+	//osmo_store32be(0, lcls->gcr.cr);
+	osmo_store16be(use_lac ? trans->msc_a->via_cell.lai.lac : trans->msc_a->via_cell.cell_identity, lcls->gcr.cr + 3);
+
+	LOGP(DCC, LOGL_INFO, "LCLS: allocated %s-based CR-ID %s\n", use_lac ? "LAC" : "CI",
+	     osmo_hexdump(lcls->gcr.cr, 5));
+
+	lcls->config = GSM0808_LCLS_CFG_BOTH_WAY;
+	lcls->control = GSM0808_LCLS_CSC_CONNECT;
+	lcls->corr_needed = true;
+	lcls->gcr_available = true;
+
+	LOGP(DCC, LOGL_DEBUG, "Filled %s\n", osmo_lcls_dump(lcls));
+	LOGP(DCC, LOGL_DEBUG, "Filled %s\n", osmo_gcr_dump(lcls));
+
+	return lcls;
+}
+
 static int gsm48_cc_rx_setup(struct gsm_trans *trans, struct msgb *msg)
 {
 	struct gsm48_hdr *gh = msgb_l3(msg);
@@ -497,6 +561,11 @@ static int gsm48_cc_rx_setup(struct gsm_trans *trans, struct msgb *msg)
 
 	memset(&setup, 0, sizeof(struct gsm_mncc));
 	setup.callref = trans->callref;
+
+	/* New Global Call Reference */
+	trans->lcls = lcls_compose(trans->lcls, trans, true);
+	//if (lcls_compose(&trans-lcls, trans, true)
+	//	LOG_TRANS(trans, LOGL_ERROR, "LCLS Error\n");
 
 	tlv_parse(&tp, &gsm48_att_tlvdef, gh->data, payload_len, 0, 0);
 	/* emergency setup is identified by msg_type */
@@ -1856,6 +1925,9 @@ static int mncc_tx_to_gsm_cc(struct gsm_network *net, const union mncc_msg *msg)
 	/* Find callref */
 	trans = trans_find_by_callref(net, data->callref);
 
+	if (trans)
+		LOG_TRANS(trans, LOGL_ERROR, "CC MNCC TX trans->lcls %s\n", osmo_gcr_dump(trans->lcls));		
+
 	/* Callref unknown */
 	if (!trans) {
 		struct vlr_subscr *vsub;
@@ -2145,6 +2217,8 @@ int gsm0408_rcv_cc(struct msc_a *msc_a, struct msgb *msg)
 
 	/* Find transaction */
 	trans = trans_find_by_id(msc_a, TRANS_CC, transaction_id);
+	if (trans)
+		LOG_TRANS(trans, LOGL_ERROR, "RCV_CC trans->lcls %s\n", osmo_gcr_dump(trans->lcls));
 
 	/* Create transaction */
 	if (!trans) {
