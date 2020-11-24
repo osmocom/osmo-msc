@@ -604,6 +604,12 @@ static void msc_a_call_leg_ran_local_addr_available(struct msc_a *msc_a)
 	}
 
 	if (cc_trans->lcls) {
+		/* LCLS: for the MO call leg, the LCLS GCR has been created in gsm48_cc_rx_setup() where the DTAP CC
+		 * SETUP was received from the MO MS.
+		 * For the MT call leg, the LCLS GCR has been received from the MO call leg via MNCC, in
+		 * mncc_tx_to_gsm_cc(), where the MNCC SETUP was received from the CN side (PBX/sipcon or via internal
+		 * MNCC).
+		 */
 		LOG_MSC_A(msc_a, LOGL_ERROR, "We already have LCLS GCR: %s\n", osmo_gcr_dump(cc_trans->lcls));
 
 	} else {

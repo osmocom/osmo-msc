@@ -567,6 +567,9 @@ static int gsm48_cc_rx_setup(struct gsm_trans *trans, struct msgb *msg)
 	//if (lcls_compose(&trans-lcls, trans, true)
 	//	LOG_TRANS(trans, LOGL_ERROR, "LCLS Error\n");
 
+	/* pass the LCLS GCR on to the MT call leg via MNCC */
+	setup.gcr = trans->lcls->gcr;
+
 	tlv_parse(&tp, &gsm48_att_tlvdef, gh->data, payload_len, 0, 0);
 	/* emergency setup is identified by msg_type */
 	if (msg_type == GSM48_MT_CC_EMERG_SETUP) {
@@ -2007,6 +2010,12 @@ static int mncc_tx_to_gsm_cc(struct gsm_network *net, const union mncc_msg *msg)
 					 GSM48_CC_CAUSE_RESOURCE_UNAVAIL);
 			return -ENOMEM;
 		}
+
+		/* Get the GCR from the MO call leg (if any).
+		 * First make room for the LCLS info, then insert the MO call leg's GCR. */
+		trans->lcls = lcls_compose(...);
+		trans->lcls->gcr = data->gcr;
+		trans->lcls->gcr_available = true;
 
 		/* If subscriber has no conn */
 		if (!msc_a) {

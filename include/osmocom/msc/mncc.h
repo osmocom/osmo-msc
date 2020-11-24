@@ -161,6 +161,11 @@ struct gsm_mncc {
 	unsigned char	lchan_type;
 	unsigned char	lchan_mode;
 
+	struct osmo_gcr_parsed gcr;
+	// or maybe as encoded buffer? has to pass the mncc_sock to osmo-sip-connector at some point
+	// uint8_t gcr_enc[15];
+	// uint8_t gcr_enc_len;
+
 	/* A buffer to contain SDP ('\0' terminated) */
 	char		sdp[1024];
 };
@@ -171,7 +176,9 @@ struct gsm_data_frame {
 	unsigned char	data[0];
 };
 
-#define MNCC_SOCK_VERSION	7
+#define MNCC_SOCK_VERSION	8
+// this version bump has to also happen in osmo-sip-connector
+
 struct gsm_mncc_hello {
 	uint32_t	msg_type;
 	uint32_t	version;
