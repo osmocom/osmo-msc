@@ -1,15 +1,26 @@
 About OsmoMSC
 =============
 
-OsmoMSC originated from the OpenBSC project, which started as a minimalistic
-all-in-one implementation of the GSM Network. In 2017, OpenBSC had reached
-maturity and diversity (including M3UA SIGTRAN and 3G support in the form of
-IuCS and IuPS interfaces) that naturally lead to a separation of the all-in-one
-approach to fully independent separate programs as in typical GSM networks.
+OsmoMSC is an implementation of the 3GPP MSC (Mobile Switching Centre)
+network element.  It implements the following core functionality within
+the 2G (GSM) and 3G (UMTS) networks:
 
-OsmoMSC was one of the parts split off from the old openbsc.git. Before, it was
-the libmsc part of the old OsmoNITB. Since a true A interface and IuCS for 3G
-support is available, OsmoMSC exists only as a separate standalone entity.
+* mobility management
+* call control (either via built-in MNCC handler or external osmo-sip-connector)
+* USSD (exposed via GSUP)
+* SMS (either via built-in SMSC or external via GSUP)
+
+Historically, OsmoMSC originated from the OpenBSC project, which started
+as a minimalistic all-in-one implementation of the GSM Network. In 2017,
+OpenBSC had reached maturity and diversity (including M3UA SIGTRAN and
+3G support in the form of IuCS and IuPS interfaces) that naturally lead
+to a separation of the all-in-one approach to fully independent separate
+programs as in typical GSM networks.
+
+OsmoMSC was one of the parts split off from the old openbsc.git. Before,
+it was the libmsc part of the old OsmoNITB. Since a true A interface and
+IuCS for 3G support is available, OsmoMSC exists only as a separate
+standalone entity.
 
 OsmoMSC exposes
 - GSUP towards OsmoHLR (or a MAP proxy);
