@@ -15,6 +15,7 @@ config.h.in
 *.pyc
 *.gcda
 *.gcno
+*~
 
 #configure
 aclocal.m4
