@@ -225,7 +225,7 @@ static int ran_a_decode_cipher_mode_reject(struct ran_dec *ran_dec, struct msgb 
 		.msg_name = "BSSMAP Ciphering Mode Reject",
 	};
 
-	rc = gsm0808_get_cipher_reject_cause(tp);
+	rc = gsm0808_get_cause(tp);
 	if (rc < 0) {
 		LOG_RAN_A_DEC_MSG(LOGL_ERROR, "failed to extract Cause\n");
 		ran_dec_msg.cipher_mode_reject.bssap_cause = GSM0808_CAUSE_EQUIPMENT_FAILURE;
