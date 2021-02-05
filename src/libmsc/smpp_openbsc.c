@@ -250,8 +250,7 @@ static int submit_to_sms(struct gsm_sms **psms, struct gsm_network *net,
 			sms_msg_len -= ud_len;
 			padbits = 7 - (ud_len % 7);
 		}
-		gsm_septets2octets(sms->user_data+ud_len, sms_msg,
-				   sms_msg_len, padbits);
+		gsm_septet_pack(sms->user_data+ud_len, sms_msg, sms_msg_len, padbits);
 		sms->user_data_len = (ud_len*8 + padbits)/7 + sms_msg_len;/* SEPTETS */
 		/* FIXME: sms->text */
 	} else {
