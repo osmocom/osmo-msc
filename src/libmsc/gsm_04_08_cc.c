@@ -272,6 +272,13 @@ void _gsm48_cc_trans_free(struct gsm_trans *trans)
 
 	/* send release to L4, if callref still exists */
 	if (trans->callref) {
+		/* Send MNCC REL.ind (cause='Resource unavailable') */
+		if (trans->cc.mncc_initiated) {
+			mncc_release_ind(trans->net, trans, trans->callref,
+					 GSM48_CAUSE_LOC_PRN_S_LU,
+					 GSM48_CC_CAUSE_RESOURCE_UNAVAIL);
+		}
+
 		/* FIXME: currently, a CC trans that would not yet be in state GSM_CSTATE_RELEASE_REQ fails to send a
 		 * CC Release to the MS if it gets freed here. Hack it to do so. */
 		if (trans->cc.state != GSM_CSTATE_RELEASE_REQ) {
@@ -280,11 +287,6 @@ void _gsm48_cc_trans_free(struct gsm_trans *trans)
 			mncc_set_cause(&rel, GSM48_CAUSE_LOC_PRN_S_LU, GSM48_CC_CAUSE_RESOURCE_UNAVAIL);
 			gsm48_cc_tx_release(trans, &rel);
 		}
-		/* Resource unavailable */
-		if (trans->cc.mncc_initiated)
-			mncc_release_ind(trans->net, trans, trans->callref,
-					 GSM48_CAUSE_LOC_PRN_S_LU,
-					 GSM48_CC_CAUSE_RESOURCE_UNAVAIL);
 		/* This is a final freeing of the transaction. The MNCC release may have triggered the
 		 * T308 release timer, but we don't have the luxury of graceful CC Release here. */
 		gsm48_stop_cc_timer(trans);

@@ -457,11 +457,7 @@ static void test_call_mt2()
 	fake_time_passes(15, 23);
 
 	btw("The call failed, the BSC sends a BSSMAP Clear Request");
-	/* FIXME: in this scenario, we send an MNCC_REL_CNF even though MNCC never asked us to MNCC_REL_REQ.  Legacy
-	 * behavior did get to both MNCC_REL_IND, then an MNCC_REL_REQ from MNCC as well as a final MNCC_REL_CNF, but
-	 * this only worked synchronously, i.e. only with internal MNCC. Instead of mimicking that, we need a proper
-	 * async solution that also works with a PBX. */
-	cc_to_mncc_expect_tx("", MNCC_REL_CNF);
+	cc_to_mncc_expect_tx("", MNCC_REL_IND);
 	dtap_expect_tx("032d0802e1af"); /* CC: Release */
 	expect_iu_release();
 	msc_a_release_cn(msub_msc_a(g_msub));
