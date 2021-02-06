@@ -31,7 +31,7 @@ OsmoMSC(config-net)# encryption?
   encryption  Encryption options
 OsmoMSC(config-net)# encryption ?
   a5   GSM A5 Air Interface Encryption.
-  uea  UTRAN (3G) encryption algorithms to allow: 0 = UEA0 (no encryption), 1 = UEA1, 2 = UEA2. NOTE: the current implementation does not allow free choice of combining encryption algorithms yet. The only valid settings are either 'encryption uea 0' or 'encryption uea 1 2'.
+  uea  UTRAN (3G) encryption algorithms to allow: 0 = UEA0 (no encryption), 1 = UEA1, 2 = UEA2.
 
 OsmoMSC(config-net)# encryption uea ?
   <0-2>  UEAn Algorithm Number
@@ -189,38 +189,27 @@ OsmoMSC(config-net)# show running-config
 ...
 
 OsmoMSC(config-net)# encryption uea 1
-% Error: the current implementation does not allow free choice of combining
-% encryption algorithms yet. The only valid settings are either
-%   encryption uea 0
-% or
-%   encryption uea 1 2
 OsmoMSC(config-net)# show running-config
 ...
- encryption uea 0
+ encryption uea 1
 ...
 
 OsmoMSC(config-net)# encryption uea 2
-% Error: the current implementation does not allow free choice of combining
-...
 OsmoMSC(config-net)# show running-config
 ...
- encryption uea 0
+ encryption uea 2
 ...
 
 OsmoMSC(config-net)# encryption uea 0 1
-% Error: the current implementation does not allow free choice of combining
-...
 OsmoMSC(config-net)# show running-config
 ...
- encryption uea 0
+ encryption uea 0 1
 ...
 
 OsmoMSC(config-net)# encryption uea 0 2
-% Error: the current implementation does not allow free choice of combining
-...
 OsmoMSC(config-net)# show running-config
 ...
- encryption uea 0
+ encryption uea 0 2
 ...
 
 OsmoMSC(config-net)# encryption uea 1 2

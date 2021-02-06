@@ -67,7 +67,8 @@ struct gsm_network *gsm_network_init(void *ctx, mncc_recv_cb_t mncc_recv)
 
 	/* Permit a compile-time default of A5/3 and A5/1 */
 	net->a5_encryption_mask = (1 << 3) | (1 << 1);
-	net->uea_encryption = true;
+	/* Permit a compile-time default of UEA2 and UEA1 */
+	net->uea_encryption_mask = (1 << 2) | (1 << 1);
 
 	net->mncc_guard_timeout = 180;
 	net->ncss_guard_timeout = 30;

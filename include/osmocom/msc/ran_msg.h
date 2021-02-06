@@ -103,7 +103,7 @@ struct ran_cipher_mode_command {
 		struct geran_encr *chosen_key;
 	} geran;
 	struct {
-		bool uea_encryption;
+		uint8_t uea_encryption_mask;
 	} utran;
 };
 

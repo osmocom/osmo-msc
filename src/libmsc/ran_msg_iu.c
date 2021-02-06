@@ -367,9 +367,13 @@ static struct msgb *ran_iu_make_security_mode_command(struct osmo_fsm_inst *call
 						      const struct ran_cipher_mode_command *cm)
 {
 
-	LOG_RAN_IU_ENC(caller_fi, LOGL_DEBUG, "Tx RANAP SECURITY MODE COMMAND to RNC, ik %s\n",
-			osmo_hexdump_nospc(cm->vec->ik, 16));
-	return ranap_new_msg_sec_mod_cmd(cm->vec->ik, cm->utran.uea_encryption ? cm->vec->ck : NULL, RANAP_KeyStatus_new);
+	LOG_RAN_IU_ENC(caller_fi, LOGL_DEBUG, "Tx RANAP SECURITY MODE COMMAND to RNC, IK=%s, CK=%s\n",
+			osmo_hexdump_nospc(cm->vec->ik, 16),
+			cm->utran.uea_encryption_mask > 0x01 ? osmo_hexdump_nospc(cm->vec->ck, 16) : "NONE");
+	/* TODO: Do we need to check if the UE supports all of the algorithms and build an intersection like
+	 * in the case of A5? */
+	return ranap_new_msg_sec_mod_cmd2(cm->vec->ik, cm->utran.uea_encryption_mask > 0x01 ? cm->vec->ck : NULL,
+					  RANAP_KeyStatus_new, 0x06, cm->utran.uea_encryption_mask);
 }
 
 

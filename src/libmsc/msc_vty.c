@@ -169,41 +169,21 @@ DEFUN(cfg_net_encryption,
 	return CMD_SUCCESS;
 }
 
-/* So far just a boolean switch, a future patch might add individual config for UEA1 and UEA2, see OS#4143 */
 DEFUN(cfg_net_encryption_uea,
       cfg_net_encryption_uea_cmd,
       "encryption uea <0-2> [<0-2>] [<0-2>]",
       ENCRYPTION_STR
-      "UTRAN (3G) encryption algorithms to allow: 0 = UEA0 (no encryption), 1 = UEA1, 2 = UEA2."
-        " NOTE: the current implementation does not allow free choice of combining encryption algorithms yet."
-	" The only valid settings are either 'encryption uea 0' or 'encryption uea 1 2'.\n"
+      "UTRAN (3G) encryption algorithms to allow: 0 = UEA0 (no encryption), 1 = UEA1, 2 = UEA2.\n"
       "UEAn Algorithm Number\n"
       "UEAn Algorithm Number\n"
       "UEAn Algorithm Number\n"
      )
 {
 	unsigned int i;
-	uint8_t mask = 0;
 
+	gsmnet->uea_encryption_mask = 0;
 	for (i = 0; i < argc; i++)
-		mask |= (1 << atoi(argv[i]));
-
-	if (mask == (1 << 0)) {
-		/* UEA0. Disable encryption. */
-		gsmnet->uea_encryption = false;
-	} else if (mask == ((1 << 1) | (1 << 2))) {
-		/* UEA1 and UEA2. Enable encryption. */
-		gsmnet->uea_encryption = true;
-	} else {
-		vty_out(vty,
-			"%% Error: the current implementation does not allow free choice of combining%s"
-			"%% encryption algorithms yet. The only valid settings are either%s"
-			"%%   encryption uea 0%s"
-			"%% or%s"
-			"%%   encryption uea 1 2%s",
-			VTY_NEWLINE, VTY_NEWLINE, VTY_NEWLINE, VTY_NEWLINE, VTY_NEWLINE);
-		return CMD_WARNING;
-	}
+		gsmnet->uea_encryption_mask |= (1 << atoi(argv[i]));
 
 	return CMD_SUCCESS;
 }
@@ -386,10 +366,12 @@ static int config_write_net(struct vty *vty)
 	}
 	vty_out(vty, "%s", VTY_NEWLINE);
 
-	if (!gsmnet->uea_encryption)
-		vty_out(vty, " encryption uea 0%s", VTY_NEWLINE);
-	else
-		vty_out(vty, " encryption uea 1 2%s", VTY_NEWLINE);
+	vty_out(vty, " encryption uea");
+	for (i = 0; i < 8; i++) {
+		if (gsmnet->uea_encryption_mask & (1 << i))
+			vty_out(vty, " %u", i);
+	}
+	vty_out(vty, "%s", VTY_NEWLINE);
 	vty_out(vty, " authentication %s%s",
 		gsmnet->authentication_required ? "required" : "optional", VTY_NEWLINE);
 	vty_out(vty, " rrlp mode %s%s", msc_rrlp_mode_name(gsmnet->rrlp.mode),

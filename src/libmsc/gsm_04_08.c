@@ -414,7 +414,7 @@ static int mm_rx_loc_upd_req(struct msc_a *msc_a, struct msgb *msg)
 				net->vlr, msc_a, vlr_lu_type, tmsi, imsi,
 				&old_lai, &msc_a->via_cell.lai,
 				is_utran || net->authentication_required,
-				is_utran ? net->uea_encryption : net->a5_encryption_mask > 0x01,
+				is_utran ? net->uea_encryption_mask > 0x01 : net->a5_encryption_mask > 0x01,
 				lu->key_seq,
 				osmo_gsm48_classmark1_is_r99(&lu->classmark1),
 				is_utran,
@@ -805,7 +805,7 @@ int gsm48_rx_mm_serv_req(struct msc_a *msc_a, struct msgb *msg)
 			 req->cm_service_type,
 			 &mi, &msc_a->via_cell.lai,
 			 is_utran || net->authentication_required,
-			 is_utran ? net->uea_encryption : net->a5_encryption_mask > 0x01,
+			 is_utran ? net->uea_encryption_mask > 0x01 : net->a5_encryption_mask > 0x01,
 			 req->cipher_key_seq,
 			 osmo_gsm48_classmark2_is_r99(cm2, cm2_len),
 			 is_utran);
@@ -931,7 +931,7 @@ static int gsm48_rx_cm_reest_req(struct msc_a *msc_a, struct msgb *msg)
 			 VLR_PR_ARQ_T_CM_RE_ESTABLISH_REQ, 0,
 			 &mi, &msc_a->via_cell.lai,
 			 is_utran || net->authentication_required,
-			 is_utran ? net->uea_encryption : net->a5_encryption_mask > 0x01,
+			 is_utran ? net->uea_encryption_mask > 0x01 : net->a5_encryption_mask > 0x01,
 			 req->cipher_key_seq,
 			 osmo_gsm48_classmark2_is_r99(cm2, cm2_len),
 			 is_utran);
@@ -1293,7 +1293,7 @@ static int gsm48_rx_rr_pag_resp(struct msc_a *msc_a, struct msgb *msg)
 			 net->vlr, msc_a,
 			 VLR_PR_ARQ_T_PAGING_RESP, 0, &mi, &msc_a->via_cell.lai,
 			 is_utran || net->authentication_required,
-			 is_utran ? net->uea_encryption : net->a5_encryption_mask > 0x01,
+			 is_utran ? net->uea_encryption_mask > 0x01 : net->a5_encryption_mask > 0x01,
 			 pr->key_seq,
 			 osmo_gsm48_classmark2_is_r99(cm2, classmark2_len),
 			 is_utran);
