@@ -102,6 +102,9 @@ struct ran_cipher_mode_command {
 		/* out-argument to return the key to the caller, pass NULL if not needed. */
 		struct geran_encr *chosen_key;
 	} geran;
+	struct {
+		bool uea_encryption;
+	} utran;
 };
 
 struct ran_handover_request {

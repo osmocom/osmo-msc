@@ -369,7 +369,7 @@ static struct msgb *ran_iu_make_security_mode_command(struct osmo_fsm_inst *call
 
 	LOG_RAN_IU_ENC(caller_fi, LOGL_DEBUG, "Tx RANAP SECURITY MODE COMMAND to RNC, ik %s\n",
 			osmo_hexdump_nospc(cm->vec->ik, 16));
-	return ranap_new_msg_sec_mod_cmd(cm->vec->ik, NULL, RANAP_KeyStatus_new);
+	return ranap_new_msg_sec_mod_cmd(cm->vec->ik, cm->utran.uea_encryption ? cm->vec->ck : NULL, RANAP_KeyStatus_new);
 }
 
 

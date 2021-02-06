@@ -348,6 +348,9 @@ static int msc_a_ran_enc_ciphering(struct msc_a *msc_a, bool umts_aka, bool retr
 				/* for ran_a.c to store the GERAN key that is actually used */
 				.chosen_key = &msc_a->geran_encr,
 			},
+			.utran = {
+				.uea_encryption = net->uea_encryption
+			}
 		},
 	};
 
