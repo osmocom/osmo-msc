@@ -1,7 +1,4 @@
 DLMGCP MGCP client: using endpoint domain '@mgw'
-full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 21
-
 ===== test_call_mo
 - Total time passed: 0.000000 s
 - Location Update request causes a GSUP Send Auth Info request to HLR
@@ -473,9 +470,6 @@ DMSC msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:CM_SERVICE
 DVLR freeing VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 (max total use count was 4)
 ===== test_call_mo: SUCCESS
 
-full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 21
-
 ===== test_call_mt
 - Total time passed: 0.000000 s
 - Location Update request causes a GSUP Send Auth Info request to HLR
@@ -944,9 +938,6 @@ DMSC msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:PAGING_RES
 DVLR freeing VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 (max total use count was 5)
 ===== test_call_mt: SUCCESS
 
-full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 21
-
 ===== test_call_mt2
 - Total time passed: 0.000000 s
 - Location Update request causes a GSUP Send Auth Info request to HLR
@@ -1368,9 +1359,6 @@ DMSC msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:PAGING_RES
 - Total time passed: 31.000069 s
 DVLR freeing VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 (max total use count was 5)
 ===== test_call_mt2: SUCCESS
-
-full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 21
 
 ===== test_call_mo_to_unknown
 - Total time passed: 0.000000 s
@@ -1797,9 +1785,6 @@ DMSC msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:CM_SERVICE
 DVLR freeing VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 (max total use count was 4)
 ===== test_call_mo_to_unknown: SUCCESS
 
-full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 21
-
 ===== test_call_mo_to_unknown_timeout
 - Total time passed: 0.000000 s
 - Location Update request causes a GSUP Send Auth Info request to HLR
@@ -2220,10 +2205,4 @@ DMSC msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:CM_SERVICE
   llist_count(&msub_list) == 0
 DVLR freeing VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 (max total use count was 4)
 ===== test_call_mo_to_unknown_timeout: SUCCESS
-
-full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 21
-
-full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 21
 

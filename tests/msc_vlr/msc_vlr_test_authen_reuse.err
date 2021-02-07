@@ -1,7 +1,4 @@
 DLMGCP MGCP client: using endpoint domain '@mgw'
-full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 21
-
 ===== test_auth_use_twice_geran
 - Location Update request causes a GSUP Send Auth Info request to HLR
   MSC <--GERAN-A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
@@ -508,9 +505,6 @@ DMSC msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:GERAN-A:NONE){MSC_A
 - msub gone
   llist_count(&msub_list) == 0
 ===== test_auth_use_twice_geran: SUCCESS
-
-full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 21
 
 ===== test_auth_use_twice_utran
 - Location Update request causes a GSUP Send Auth Info request to HLR
@@ -1040,9 +1034,6 @@ DMSC msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:NONE){MSC_
 - msub gone
   llist_count(&msub_list) == 0
 ===== test_auth_use_twice_utran: SUCCESS
-
-full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 21
 
 ===== test_auth_use_infinitely_geran
 - Location Update request causes a GSUP Send Auth Info request to HLR
@@ -1656,9 +1647,6 @@ DMSC msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:GERAN-A:NONE){MSC_A
 - msub gone
   llist_count(&msub_list) == 0
 ===== test_auth_use_infinitely_geran: SUCCESS
-
-full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 21
 
 ===== test_auth_use_infinitely_utran
 - Location Update request causes a GSUP Send Auth Info request to HLR
@@ -2301,9 +2289,6 @@ DMSC msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:NONE){MSC_
   llist_count(&msub_list) == 0
 ===== test_auth_use_infinitely_utran: SUCCESS
 
-full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 21
-
 ===== test_no_auth_reuse_geran
 - Location Update request causes a GSUP Send Auth Info request to HLR
   MSC <--GERAN-A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
@@ -2692,9 +2677,6 @@ DMSC msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:GERAN-A:NONE){MSC_A
 - msub gone
   llist_count(&msub_list) == 0
 ===== test_no_auth_reuse_geran: SUCCESS
-
-full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 21
 
 ===== test_no_auth_reuse_utran
 - Location Update request causes a GSUP Send Auth Info request to HLR
@@ -3100,10 +3082,4 @@ DMSC msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:NONE){MSC_
 - msub gone
   llist_count(&msub_list) == 0
 ===== test_no_auth_reuse_utran: SUCCESS
-
-full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 21
-
-full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 21
 

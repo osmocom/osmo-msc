@@ -1,7 +1,4 @@
 DLMGCP MGCP client: using endpoint domain '@mgw'
-full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 21
-
 ===== test_ss_ussd_mo_geran
 - Location Update request causes a GSUP LU request to HLR
   MSC <--GERAN-A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
@@ -239,9 +236,6 @@ DMSC msc_a(IMSI-901700000004620:MSISDN-46071:GERAN-A:CM_SERVICE_REQ){MSC_A_ST_RE
   llist_count(&msub_list) == 0
 DVLR freeing VLR subscr IMSI-901700000004620:MSISDN-46071 (max total use count was 5)
 ===== test_ss_ussd_mo_geran: SUCCESS
-
-full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 21
 
 ===== test_ss_ussd_no_geran
 - Location Update request causes a GSUP LU request to HLR
@@ -505,10 +499,4 @@ DMSC msc_a(IMSI-901700000004620:MSISDN-46071:GERAN-A:PAGING_RESP){MSC_A_ST_RELEA
   llist_count(&msub_list) == 0
 DVLR freeing VLR subscr IMSI-901700000004620:MSISDN-46071 (max total use count was 5)
 ===== test_ss_ussd_no_geran: SUCCESS
-
-full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 21
-
-full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 21
 

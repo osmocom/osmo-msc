@@ -1,7 +1,4 @@
 DLMGCP MGCP client: using endpoint domain '@mgw'
-full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 21
-
 ===== test_reject_2nd_conn
 - Location Update Request on one connection
   MSC <--GERAN-A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
@@ -191,9 +188,6 @@ DMSC msc_a(IMSI-901700000004620:MSISDN-46071:GERAN-A:LU){MSC_A_ST_RELEASED}: Dea
 DVLR freeing VLR subscr IMSI-901700000004620:MSISDN-46071 (max total use count was 5)
 ===== test_reject_2nd_conn: SUCCESS
 
-full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 21
-
 ===== test_reject_lu_during_lu
 - Location Update Request
   MSC <--GERAN-A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
@@ -333,9 +327,6 @@ DMSC msc_a(IMSI-901700000004620:MSISDN-46071:GERAN-A:LU){MSC_A_ST_RELEASED}: Dea
   llist_count(&msub_list) == 0
 DVLR freeing VLR subscr IMSI-901700000004620:MSISDN-46071 (max total use count was 5)
 ===== test_reject_lu_during_lu: SUCCESS
-
-full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 21
 
 ===== test_reject_cm_during_lu
 - Location Update Request
@@ -482,9 +473,6 @@ DMSC msc_a(IMSI-901700000004620:MSISDN-46071:GERAN-A:LU){MSC_A_ST_RELEASED}: Dea
 DVLR freeing VLR subscr IMSI-901700000004620:MSISDN-46071 (max total use count was 5)
 ===== test_reject_cm_during_lu: SUCCESS
 
-full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 21
-
 ===== test_reject_paging_resp_during_lu
 - Location Update Request
   MSC <--GERAN-A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
@@ -623,9 +611,6 @@ DMSC msc_a(IMSI-901700000004620:MSISDN-46071:GERAN-A:LU){MSC_A_ST_RELEASED}: Dea
   llist_count(&msub_list) == 0
 DVLR freeing VLR subscr IMSI-901700000004620:MSISDN-46071 (max total use count was 5)
 ===== test_reject_paging_resp_during_lu: SUCCESS
-
-full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 21
 
 ===== test_reject_lu_during_cm
 
@@ -863,9 +848,6 @@ DMSC msc_a(IMSI-901700000004620:MSISDN-46071:GERAN-A:CM_SERVICE_REQ){MSC_A_ST_RE
 - msub gone
   llist_count(&msub_list) == 0
 ===== test_reject_lu_during_cm: SUCCESS
-
-full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 21
 
 ===== test_reject_cm_during_cm
 
@@ -1109,9 +1091,6 @@ DMSC msc_a(IMSI-901700000004620:MSISDN-46071:GERAN-A:CM_SERVICE_REQ){MSC_A_ST_RE
   llist_count(&msub_list) == 0
 ===== test_reject_cm_during_cm: SUCCESS
 
-full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 21
-
 ===== test_reject_paging_resp_during_cm
 
 
@@ -1337,9 +1316,6 @@ DMSC msc_a(IMSI-901700000004620:MSISDN-46071:GERAN-A:CM_SERVICE_REQ){MSC_A_ST_RE
   llist_count(&msub_list) == 0
 DVLR freeing VLR subscr IMSI-901700000004620:MSISDN-46071 (max total use count was 5)
 ===== test_reject_paging_resp_during_cm: SUCCESS
-
-full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 21
 
 ===== test_reject_lu_during_paging_resp
 
@@ -1641,9 +1617,6 @@ DMSC msc_a(IMSI-901700000004620:MSISDN-46071:GERAN-A:PAGING_RESP){MSC_A_ST_RELEA
   llist_count(&msub_list) == 0
 DVLR freeing VLR subscr IMSI-901700000004620:MSISDN-46071 (max total use count was 6)
 ===== test_reject_lu_during_paging_resp: SUCCESS
-
-full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 21
 
 ===== test_accept_cm_during_paging_resp
 
@@ -1970,9 +1943,6 @@ DMSC msc_a(IMSI-901700000004620:MSISDN-46071:GERAN-A:CM_SERVICE_REQ){MSC_A_ST_RE
   llist_count(&msub_list) == 0
 ===== test_accept_cm_during_paging_resp: SUCCESS
 
-full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 21
-
 ===== test_reject_paging_resp_during_paging_resp
 
 
@@ -2270,10 +2240,4 @@ DMSC msc_a(IMSI-901700000004620:MSISDN-46071:GERAN-A:PAGING_RESP){MSC_A_ST_RELEA
   llist_count(&msub_list) == 0
 DVLR freeing VLR subscr IMSI-901700000004620:MSISDN-46071 (max total use count was 6)
 ===== test_reject_paging_resp_during_paging_resp: SUCCESS
-
-full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 21
-
-full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 21
 

@@ -45,6 +45,7 @@
 #include "msc_vlr_tests.h"
 
 void *msc_vlr_tests_ctx = NULL;
+void *msgb_ctx = NULL;
 
 bool _log_lines = false;
 
@@ -1043,42 +1044,6 @@ void fake_time_start()
 	fake_time_passes(0, 0);
 }
 
-static void check_talloc(void *msgb_ctx, void *msc_vlr_tests_ctx)
-{
-	/* Verifying that the msgb context is empty */
-	talloc_report_full(msgb_ctx, stderr);
-	/* Expecting these to stick around in msc_vlr_tests_ctx:
-	 * full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-	 * talloc_total_blocks(tall_bsc_ctx) == 21
-	 * full talloc report on 'msc_vlr_tests_ctx' (total   6571 bytes in  21 blocks)
-	 *     struct osmo_gsup_client        contains    264 bytes in   1 blocks (ref 0) 0x5605f2ea2e90
-	 *     struct gsm_network             contains   4806 bytes in  13 blocks (ref 0) 0x5605f2ea1b60
-	 *         struct mgcp_client             contains    688 bytes in   1 blocks (ref 0) 0x5605f2ea3200
-	 *         struct sccp_ran_inst           contains    152 bytes in   1 blocks (ref 0) 0x5605f2ea3100
-	 *         struct sccp_ran_inst           contains    152 bytes in   1 blocks (ref 0) 0x5605f2ea3000
-	 *         struct gsup_client_mux         contains    152 bytes in   2 blocks (ref 0) 0x5605f2ea2d20
-	 *             struct ipaccess_unit           contains     64 bytes in   1 blocks (ref 0) 0x5605f2ea2de0
-	 *         struct vlr_instance            contains    264 bytes in   2 blocks (ref 0) 0x5605f2ea2b40
-	 *             struct osmo_nri_ranges         contains     16 bytes in   1 blocks (ref 0) 0x5605f2ea2ca0
-	 *         no_gsup_server                 contains     15 bytes in   1 blocks (ref 0) 0x5605f2ea2ac0
-	 *         stat_item.c:96                 contains    144 bytes in   2 blocks (ref 0) 0x5605f2ea2950
-	 *             stat_item.c:118                contains     96 bytes in   1 blocks (ref 0) 0x5605f2ea29f0
-	 *         rate_ctr.c:234                 contains   2352 bytes in   1 blocks (ref 0) 0x5605f2ea1fb0
-	 *         sms.db                         contains      7 bytes in   1 blocks (ref 0) 0x5605f2ea1f40
-	 *     logging                        contains   1501 bytes in   5 blocks (ref 0) 0x5605f2ea1360
-	 *         struct log_target              contains    244 bytes in   2 blocks (ref 0) 0x5605f2ea1990
-	 *             struct log_category            contains     76 bytes in   1 blocks (ref 0) 0x5605f2ea1aa0
-	 *         struct log_info                contains   1256 bytes in   2 blocks (ref 0) 0x5605f2ea13d0
-	 *             struct log_info_cat            contains   1216 bytes in   1 blocks (ref 0) 0x5605f2ea1460
-	 *     msgb                           contains      0 bytes in   1 blocks (ref 0) 0x5605f2ea12f0
-	 */
-	fprintf(stderr, "talloc_total_blocks(tall_bsc_ctx) == %zu\n",
-		talloc_total_blocks(msc_vlr_tests_ctx));
-	if (talloc_total_blocks(msc_vlr_tests_ctx) != 21)
-		talloc_report_full(msc_vlr_tests_ctx, stderr);
-	fprintf(stderr, "\n");
-}
-
 static struct {
 	bool verbose;
 	int run_test_nr;
@@ -1130,28 +1095,39 @@ static void handle_options(int argc, char **argv)
 	}
 }
 
-void *msgb_ctx = NULL;
-
 static void run_tests(int nr)
 {
 	int test_nr;
 
-	check_talloc(msgb_ctx, msc_vlr_tests_ctx);
-
 	nr--; /* arg's first test is 1, in here it's 0 */
 	for (test_nr = 0; msc_vlr_tests[test_nr]; test_nr++) {
+		size_t talloc_blocks_before_test;
+
 		if (nr >= 0 && test_nr != nr)
 			continue;
 
 		if (cmdline_opts.verbose)
 			fprintf(stderr, "(test nr %d)\n", test_nr + 1);
 
+		talloc_blocks_before_test = talloc_total_blocks(msc_vlr_tests_ctx);
+
 		msc_vlr_tests[test_nr]();
+
+		if (talloc_total_blocks(msc_vlr_tests_ctx) != talloc_blocks_before_test) {
+			fprintf(stderr, "ERROR: talloc leak: %zu blocks\n",
+				talloc_total_blocks(msc_vlr_tests_ctx) - talloc_blocks_before_test);
+			talloc_report_full(msc_vlr_tests_ctx, stderr);
+			fprintf(stderr, "\n");
+		}
+
+		if (talloc_total_blocks(msgb_ctx) > 1) {
+			fprintf(stderr, "ERROR: msgb leak:\n");
+			talloc_report_full(msgb_ctx, stderr);
+			fprintf(stderr, "\n");
+		}
 
 		if (cmdline_opts.verbose)
 			fprintf(stderr, "(test nr %d)\n", test_nr + 1);
-
-		check_talloc(msgb_ctx, msc_vlr_tests_ctx);
 	}
 }
 
@@ -1256,6 +1232,5 @@ int main(int argc, char **argv)
 
 	printf("Done\n");
 
-	check_talloc(msgb_ctx, msc_vlr_tests_ctx);
 	return 0;
 }

@@ -1,7 +1,4 @@
 DLMGCP MGCP client: using endpoint domain '@mgw'
-full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 21
-
 ===== test_hlr_timeout_lu_auth_info
 - Total time passed: 0.000000 s
 - Location Update request causes a GSUP Send Auth Info request to HLR
@@ -108,9 +105,6 @@ DMSC msc_a(IMSI-901700000004620:GERAN-A:LU){MSC_A_ST_RELEASED}: Deallocated, inc
   llist_count(&msub_list) == 0
   lu_result_sent == 2
 ===== test_hlr_timeout_lu_auth_info: SUCCESS
-
-full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 21
 
 ===== test_hlr_timeout_lu_upd_loc_result
 - Total time passed: 0.000000 s
@@ -237,10 +231,4 @@ DMSC msc_a(IMSI-901700000004620:MSISDN-46071:GERAN-A:LU){MSC_A_ST_RELEASED}: Dea
   llist_count(&msub_list) == 0
   lu_result_sent == 2
 ===== test_hlr_timeout_lu_upd_loc_result: SUCCESS
-
-full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 21
-
-full talloc report on 'msgb' (total      0 bytes in   1 blocks)
-talloc_total_blocks(tall_bsc_ctx) == 21
 
