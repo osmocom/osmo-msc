@@ -230,10 +230,6 @@ struct gsm_network {
 		struct sccp_ran_inst *sri;
 	} a;
 
-	/* A list of neighbor BSCs. This list is defined statically via VTY and does not
-	* necessarily correspond to BSCs attached to the A interface at a given moment. */
-	struct neighbor_ident_list *neighbor_list;
-
 	struct {
 		/* MSISDN to which to route MO emergency calls */
 		char *route_to_msisdn;
@@ -245,6 +241,8 @@ struct gsm_network {
 	 * and will be of the form 'MSC-00-00-00-00-00-00' */
 	char *msc_ipa_name;
 
+	/* A list of neighbor BSCs. This list is defined statically via VTY and does not
+	* necessarily correspond to BSCs attached to the A interface at a given moment. */
 	struct llist_head neighbor_ident_list;
 
 	struct {
