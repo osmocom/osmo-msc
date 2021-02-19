@@ -518,7 +518,7 @@ int main(int argc, char **argv)
 	OSMO_ASSERT(osmo_stderr_target);
 	log_set_use_color(osmo_stderr_target, 0);
 	log_set_print_timestamp(osmo_stderr_target, 0);
-	log_set_print_filename(osmo_stderr_target, 0);
+	log_set_print_filename2(osmo_stderr_target, LOG_FILENAME_NONE);
 	log_set_print_category_hex(osmo_stderr_target, 0);
 	log_set_print_category(osmo_stderr_target, 1);
 	log_set_print_level(osmo_stderr_target, 1);
