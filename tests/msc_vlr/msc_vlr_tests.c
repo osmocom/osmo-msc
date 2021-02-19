@@ -1192,6 +1192,7 @@ int main(int argc, char **argv)
 	log_set_print_timestamp(osmo_stderr_target, 0);
 	log_set_print_filename(osmo_stderr_target, 0);
 	log_set_print_category(osmo_stderr_target, 1);
+	log_set_print_category_hex(osmo_stderr_target, 0);
 	log_set_category_filter(osmo_stderr_target, DLSMS, 1, LOGL_DEBUG);
 
 	if (cmdline_opts.verbose) {
