@@ -109,7 +109,7 @@ AC_ARG_ENABLE([iu], [AS_HELP_STRING([--enable-iu], [Build 3G support, aka IuPS a
     [osmo_ac_iu="$enableval"],[osmo_ac_iu="no"])
 if test "x$osmo_ac_iu" = "xyes" ; then
     PKG_CHECK_MODULES(LIBASN1C, libasn1c >= 0.9.30)
-    PKG_CHECK_MODULES(LIBOSMORANAP, libosmo-ranap >= 0.3.0)
+    PKG_CHECK_MODULES(LIBOSMORANAP, libosmo-ranap >= 0.7.0)
     AC_DEFINE(BUILD_IU, 1, [Define if we want to build IuPS and IuCS interfaces support])
 fi
 AM_CONDITIONAL(BUILD_IU, test "x$osmo_ac_iu" = "xyes")
