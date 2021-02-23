@@ -7,8 +7,3 @@
 # If any interfaces have been added since the last public release: c:r:a + 1.
 # If any interfaces have been removed or changed since the last public release: c:r:0.
 #library	what		description / commit summary line
-manual				needs common chapter cs7-config.adoc, vty_cpu_sched.adoc from osmo-gsm-manuals > 0.3.0
-osmo-msc	Mobile Identity Coding	OsmoMSC is stricter in rejecting invalid coding of Mobile Identity IEs
-libmosmo-mgcp-client		needs osmo-mgw.git > 1.7.0 (8667d5169df8d06e10ee3f3104e4cd533d15ac57), ABI break due to struct size in mgcp_conn_peer and mgcp_response
-osmo-msc			update version dependency to version with osmo_fd_*_{disable,enable}
-osmo-msc	smpp		migrate to gsm_septet_pack(), available since Ib1aac538afeb0a5c76a1df472d555139a496e12e
