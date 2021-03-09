@@ -54,6 +54,11 @@ BuildRequires:  lksctp-tools-devel
 BuildRequires:  pkgconfig(libasn1c) >= 0.9.30
 BuildRequires:  pkgconfig(libosmo-ranap) >= 0.3.0
 %endif
+%if 0%{?suse_version}
+Requires:       libdbi-drivers-dbd-sqlite3
+%else
+Requires:       libdbi-dbd-sqlite
+%endif
 
 %description
 The Mobile Switching Center (MSC) is the heart of 2G/3G
