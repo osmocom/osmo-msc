@@ -68,11 +68,12 @@ void vlr_sgs_reset(struct vlr_instance *vlr)
  * \param[in] type location update type (normal or IMSI attach).
  * \param[in] imsi mobile identity (IMSI).
  * \param[in] new_lai identifier of the new location area.
+ * \param[in] last_eutran_plnm_id Last E-UTRAN PLMN ID (can be NULL).
  * \returns 0 in case of success, -EINVAL in case of error. */
 int vlr_sgs_loc_update(struct vlr_instance *vlr, struct vlr_sgs_cfg *cfg,
 		       vlr_sgs_lu_response_cb_t response_cb, vlr_sgs_lu_paging_cb_t paging_cb,
 		       vlr_sgs_lu_mminfo_cb_t mminfo_cb, char *mme_name, enum vlr_lu_type type, const char *imsi,
-		       struct osmo_location_area_id *new_lai)
+		       struct osmo_location_area_id *new_lai, struct osmo_plmn_id *last_eutran_plmn)
 {
 	struct vlr_subscr *vsub = NULL;
 
@@ -93,6 +94,7 @@ int vlr_sgs_loc_update(struct vlr_instance *vlr, struct vlr_sgs_cfg *cfg,
 	vsub->sgs.paging_cb = paging_cb;
 	vsub->sgs.mminfo_cb = mminfo_cb;
 	vlr_subscr_set_imsi(vsub, imsi);
+	vlr_subscr_set_last_used_eutran_plmn_id(vsub, last_eutran_plmn);
 	osmo_strlcpy(vsub->sgs.mme_name, mme_name, sizeof(vsub->sgs.mme_name));
 
 	osmo_fsm_inst_dispatch(vsub->sgs_fsm, SGS_UE_E_RX_LU_FROM_MME, NULL);

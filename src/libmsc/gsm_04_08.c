@@ -1368,12 +1368,19 @@ int msc_vlr_tx_cm_serv_acc(void *msc_conn_ref, enum osmo_cm_service_type cm_serv
 static int msc_vlr_tx_common_id(void *msc_conn_ref)
 {
 	struct msc_a *msc_a = msc_conn_ref;
+	struct vlr_subscr *vsub = msc_a_vsub(msc_a);
 	struct ran_msg msg = {
 		.msg_type = RAN_MSG_COMMON_ID,
 		.common_id = {
-			.imsi = msc_a_vsub(msc_a)->imsi,
+			.imsi = vsub->imsi,
+			.last_eutran_plmn_present = vsub->sgs.last_eutran_plmn_present,
 		},
 	};
+	if (vsub->sgs.last_eutran_plmn_present) {
+		memcpy(&msg.common_id.last_eutran_plmn, &vsub->sgs.last_eutran_plmn,
+			sizeof(vsub->sgs.last_eutran_plmn));
+	}
+
 	return msc_a_ran_down(msc_a, MSC_ROLE_I, &msg);
 }
 

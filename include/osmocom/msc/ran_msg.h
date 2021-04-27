@@ -220,6 +220,8 @@ struct ran_msg {
 		} cipher_mode_reject;
 		struct {
 			const char *imsi;
+			bool last_eutran_plmn_present;
+			struct osmo_plmn_id last_eutran_plmn;
 		} common_id;
 		struct {
 			enum gsm48_reject_value cause;

@@ -1218,7 +1218,11 @@ static struct msgb *_ran_a_encode(struct osmo_fsm_inst *caller_fi, const struct 
 		return ran_a_make_assignment_command(caller_fi, &ran_enc_msg->assignment_command);
 
 	case RAN_MSG_COMMON_ID:
-		return gsm0808_create_common_id(ran_enc_msg->common_id.imsi, NULL, NULL);
+		return gsm0808_create_common_id(ran_enc_msg->common_id.imsi, NULL,
+						ran_enc_msg->common_id.last_eutran_plmn_present ?
+							&ran_enc_msg->common_id.last_eutran_plmn :
+							NULL
+						);
 
 	case RAN_MSG_CIPHER_MODE_COMMAND:
 		return ran_a_make_cipher_mode_command(caller_fi, &ran_enc_msg->cipher_mode_command);

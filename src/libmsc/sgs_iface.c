@@ -608,12 +608,14 @@ static int sgs_rx_loc_upd_req(struct sgs_connection *sgc, struct msgb *msg, cons
 	char *mme_name;
 	struct vlr_sgs_cfg vlr_sgs_cfg;
 	struct vlr_subscr *vsub;
+	struct osmo_plmn_id last_eutran_plmn_buf, *last_eutran_plmn = NULL;
 
 	/* Check for lingering connections */
 	vsub = vlr_subscr_find_by_imsi(gsm_network->vlr, imsi, __func__);
 	if (vsub) {
 		subscr_conn_toss(vsub);
 		vlr_subscr_put(vsub, __func__);
+		vsub = NULL;
 	}
 
 	/* Determine MME-Name */
@@ -639,11 +641,29 @@ static int sgs_rx_loc_upd_req(struct sgs_connection *sgc, struct msgb *msg, cons
 		return sgs_tx_status(sgc, imsi, SGSAP_SGS_CAUSE_MISSING_MAND_IE, msg, SGSAP_IE_LAI);
 	gsm48_decode_lai2(gsm48_lai, &new_lai);
 
+	/* 3GPP TS 23.272 sec 4.3.3 (CSFB):
+	 * "During the SGs location update procedure, obtaining the last used LTE PLMN ID via TAI"
+	 */
+	if (TLVP_PRES_LEN(tp, SGSAP_IE_TAI, 3)) {
+		last_eutran_plmn = &last_eutran_plmn_buf;
+		osmo_plmn_from_bcd(TLVP_VAL(tp, SGSAP_IE_TAI), last_eutran_plmn);
+		/* TODO: we could also gather the TAC from here, but we don't need it yet */
+	} else if (TLVP_PRES_LEN(tp, SGSAP_IE_EUTRAN_CGI, 3)) {
+		/* Since TAI is optional, let's try harder getting Last Used
+		 * E-UTRAN PLMN ID by fetching it from E-UTRAN CGI */
+		last_eutran_plmn = &last_eutran_plmn_buf;
+		osmo_plmn_from_bcd(TLVP_VAL(tp, SGSAP_IE_EUTRAN_CGI), last_eutran_plmn);
+		/* TODO: we could also gather the ECI from here, but we don't need it yet */
+	} else {
+		LOGSGC(sgc, LOGL_INFO, "Receiving SGsAP-LOCATION-UPDATE-REQUEST without TAI nor "
+		       "E-CGI IEs, fast fallback GERAN->EUTRAN won't be possible!\n");
+	}
+
 	/* Perform actual location update */
 	memcpy(vlr_sgs_cfg.timer, sgc->sgs->cfg.timer, sizeof(vlr_sgs_cfg.timer));
 	memcpy(vlr_sgs_cfg.counter, sgc->sgs->cfg.counter, sizeof(vlr_sgs_cfg.counter));
 	rc = vlr_sgs_loc_update(gsm_network->vlr, &vlr_sgs_cfg, sgs_tx_loc_upd_resp_cb, sgs_iface_tx_paging,
-				sgs_tx_mm_info_cb, mme_name, type, imsi, &new_lai);
+				sgs_tx_mm_info_cb, mme_name, type, imsi, &new_lai, last_eutran_plmn);
 	if (rc != 0) {
 		resp = gsm29118_create_lu_rej(imsi, SGSAP_SGS_CAUSE_IMSI_UNKNOWN, NULL);
 		sgs_tx(sgc, resp);
@@ -904,6 +924,26 @@ static int sgs_rx_csfb_ind(struct sgs_connection *sgc, struct msgb *msg, const s
 	vsub = vlr_subscr_find_by_imsi(gsm_network->vlr, imsi, __func__);
 	if (!vsub)
 		return sgs_tx_status(sgc, imsi, SGSAP_SGS_CAUSE_IMSI_UNKNOWN, msg, SGSAP_IE_IMSI);
+
+	/* 3GPP TS 23.272 sec 4.3.3 (CSFB):
+	 * "During the SGs location update procedure, obtaining the last used LTE PLMN ID via TAI"
+	 */
+	vsub->sgs.last_eutran_plmn_present = TLVP_PRES_LEN(tp, SGSAP_IE_EUTRAN_CGI, 3);
+	if (TLVP_PRES_LEN(tp, SGSAP_IE_TAI, 3)) {
+		vsub->sgs.last_eutran_plmn_present = true;
+		osmo_plmn_from_bcd(TLVP_VAL(tp, SGSAP_IE_TAI), &vsub->sgs.last_eutran_plmn);
+		/* TODO: we could also gather the TAC from here, but we don't need it yet */
+	} else if (TLVP_PRES_LEN(tp, SGSAP_IE_EUTRAN_CGI, 3)) {
+		/* Since TAI is optional, let's try harder getting Last Used
+		 * E-UTRAN PLMN ID by fetching it from E-UTRAN CGI */
+		vsub->sgs.last_eutran_plmn_present = true;
+		osmo_plmn_from_bcd(TLVP_VAL(tp, SGSAP_IE_EUTRAN_CGI), &vsub->sgs.last_eutran_plmn);
+		/* TODO: we could also gather the ECI from here, but we don't need it yet */
+	} else if (!vsub->sgs.last_eutran_plmn_present) {
+		LOGSGC(sgc, LOGL_INFO, "Receiving SGsAP-MO-CSFB-INDICATION without TAI nor "
+		       "E-CGI IEs, and they are not known from previous SGsAP-LOCATION-UPDATE-REQUEST. "
+		       "Fast fallback GERAN->EUTRAN won't be possible!\n");
+	}
 
 	/* Check for lingering connections */
 	subscr_conn_toss(vsub);

@@ -1648,8 +1648,13 @@ int msc_tx_common_id(struct msc_a *msc_a, enum msc_role to_role)
 		.msg_type = RAN_MSG_COMMON_ID,
 		.common_id = {
 			.imsi = vsub->imsi,
+			.last_eutran_plmn_present = vsub->sgs.last_eutran_plmn_present,
 		},
 	};
+	if (vsub->sgs.last_eutran_plmn_present) {
+		memcpy(&msg.common_id.last_eutran_plmn, &vsub->sgs.last_eutran_plmn,
+			sizeof(vsub->sgs.last_eutran_plmn));
+	}
 
 	return msc_a_ran_down(msc_a, to_role, &msg);
 }

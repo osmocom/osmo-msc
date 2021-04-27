@@ -193,6 +193,8 @@ struct vlr_subscr {
 		vlr_sgs_lu_mminfo_cb_t mminfo_cb;
 		enum sgsap_service_ind paging_serv_ind;
 		struct osmo_timer_list Ts5;
+		bool last_eutran_plmn_present;
+		struct osmo_plmn_id last_eutran_plmn;
 	} sgs;
 
 	struct osmo_gsm48_classmark classmark;
@@ -398,6 +400,8 @@ void vlr_subscr_set_imsi(struct vlr_subscr *vsub, const char *imsi);
 void vlr_subscr_set_imei(struct vlr_subscr *vsub, const char *imei);
 void vlr_subscr_set_imeisv(struct vlr_subscr *vsub, const char *imeisv);
 void vlr_subscr_set_msisdn(struct vlr_subscr *vsub, const char *msisdn);
+void vlr_subscr_set_last_used_eutran_plmn_id(struct vlr_subscr *vsub,
+					     const struct osmo_plmn_id *last_eutran_plmn);
 
 bool vlr_subscr_matches_imsi(struct vlr_subscr *vsub, const char *imsi);
 bool vlr_subscr_matches_tmsi(struct vlr_subscr *vsub, uint32_t tmsi);

@@ -97,7 +97,7 @@ void vlr_sgs_reset(struct vlr_instance *vlr);
 int vlr_sgs_loc_update(struct vlr_instance *vlr, struct vlr_sgs_cfg *cfg,
 		       vlr_sgs_lu_response_cb_t response_cb, vlr_sgs_lu_paging_cb_t paging_cb,
 		       vlr_sgs_lu_mminfo_cb_t mminfo_cb, char *mme_name, enum vlr_lu_type type, const char *imsi,
-		       struct osmo_location_area_id *new_lai);
+		       struct osmo_location_area_id *new_lai, struct osmo_plmn_id *last_eutran_plmn);
 void vlr_sgs_loc_update_acc_sent(struct vlr_subscr *vsub);
 void vlr_sgs_loc_update_rej_sent(struct vlr_subscr *vsub);
 void vlr_sgs_detach(struct vlr_instance *vlr, const char *imsi, bool eps);

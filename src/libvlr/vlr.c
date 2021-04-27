@@ -476,6 +476,23 @@ void vlr_subscr_set_msisdn(struct vlr_subscr *vsub, const char *msisdn)
 	       vsub->imsi, vsub->msisdn);
 }
 
+void vlr_subscr_set_last_used_eutran_plmn_id(struct vlr_subscr *vsub,
+					     const struct osmo_plmn_id *last_eutran_plmn)
+{
+	if (!vsub)
+		return;
+	if (last_eutran_plmn) {
+		vsub->sgs.last_eutran_plmn_present = true;
+		memcpy(&vsub->sgs.last_eutran_plmn, last_eutran_plmn, sizeof(*last_eutran_plmn));
+	} else {
+		vsub->sgs.last_eutran_plmn_present = false;
+	}
+	DEBUGP(DVLR, "set Last E-UTRAN PLMN ID on subscriber: %s\n",
+	       vsub->sgs.last_eutran_plmn_present ?
+	         osmo_plmn_name(&vsub->sgs.last_eutran_plmn) :
+		 "(none)");
+}
+
 bool vlr_subscr_matches_imsi(struct vlr_subscr *vsub, const char *imsi)
 {
 	return vsub && imsi && vsub->imsi[0] && !strcmp(vsub->imsi, imsi);
