@@ -258,6 +258,7 @@ struct gsm_network *msc_network_alloc(void *ctx,
 
 	mgcp_client_conf_init(&net->mgw.conf);
 	net->call_waiting = true;
+	net->lcls_permitted = false;
 
 	net->mgw.tdefs = g_mgw_tdefs;
 	osmo_tdefs_reset(net->mgw.tdefs);

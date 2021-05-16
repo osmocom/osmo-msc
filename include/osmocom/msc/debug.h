@@ -8,6 +8,7 @@ enum {
 	DCC,
 	DMM,
 	DRR,
+	DLCLS,
 	DMNCC,
 	DPAG,
 	DMSC,

@@ -1004,7 +1004,8 @@ static struct msgb *ran_a_make_assignment_command(struct osmo_fsm_inst *log_fi,
 	if(ac->call_id_present == true)
 		call_id = &ac->call_id;
 
-	msg = gsm0808_create_ass(ac->channel_type, NULL, use_rtp_addr, use_scl, call_id);
+	msg = gsm0808_create_ass2(ac->channel_type, NULL, use_rtp_addr, use_scl, call_id,
+				  NULL, ac->lcls);
 	if (ac->osmux_present)
 		_gsm0808_assignment_extend_osmux(msg, ac->osmux_cid);
 	return msg;

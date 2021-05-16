@@ -499,6 +499,24 @@ DEFUN(cfg_msc_no_assign_tmsi, cfg_msc_no_assign_tmsi_cmd,
 	return CMD_SUCCESS;
 }
 
+DEFUN_ATTR(cfg_msc_lcls_disable, cfg_msc_lcls_disable_cmd,
+	    "lcls-permitted",
+	    "Globally allow LCLS (Local Call Local Switch) for all calls on this MSC.\n",
+	    CMD_ATTR_IMMEDIATE)
+{
+	gsmnet->lcls_permitted = true;
+	return CMD_SUCCESS;
+}
+
+DEFUN_ATTR(cfg_msc_no_lcls_disable, cfg_msc_no_lcls_disable_cmd,
+	    "no lcls-permitted",
+	    NO_STR "Globally disable LCLS (Local Call Local Switch) for all calls on this MSC.\n",
+	    CMD_ATTR_IMMEDIATE)
+{
+	gsmnet->lcls_permitted = false;
+	return CMD_SUCCESS;
+}
+
 DEFUN(cfg_msc_cs7_instance_a,
       cfg_msc_cs7_instance_a_cmd,
       "cs7-instance-a <0-15>",
@@ -764,6 +782,8 @@ static int config_write_msc(struct vty *vty)
 		gsmnet->ncss_guard_timeout, VTY_NEWLINE);
 	vty_out(vty, " %sassign-tmsi%s",
 		gsmnet->vlr->cfg.assign_tmsi? "" : "no ", VTY_NEWLINE);
+	if (gsmnet->lcls_permitted)
+		vty_out(vty, " lcls-permitted%s", VTY_NEWLINE);
 
 	vty_out(vty, " cs7-instance-a %u%s", gsmnet->a.cs7_instance,
 		VTY_NEWLINE);
@@ -2083,6 +2103,8 @@ void msc_vty_init(struct gsm_network *msc_network)
 	install_node(&msc_node, config_write_msc);
 	install_element(MSC_NODE, &cfg_sms_database_cmd);
 	install_element(MSC_NODE, &cfg_msc_assign_tmsi_cmd);
+	install_element(MSC_NODE, &cfg_msc_lcls_disable_cmd);
+	install_element(MSC_NODE, &cfg_msc_no_lcls_disable_cmd);
 	install_element(MSC_NODE, &cfg_msc_mncc_internal_cmd);
 	install_element(MSC_NODE, &cfg_msc_mncc_external_cmd);
 	install_element(MSC_NODE, &cfg_msc_mncc_guard_timeout_cmd);

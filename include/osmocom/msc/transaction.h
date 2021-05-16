@@ -100,6 +100,7 @@ struct gsm_trans {
 			struct osmo_timer_list timer_guard;
 			struct gsm_mncc msg;	/* stores setup/disconnect/release message */
 			bool mncc_initiated;	/* Whether an MNCC Release is necessary on failure */
+			struct osmo_lcls *lcls;
 		} cc;
 		struct {
 			struct gsm411_smc_inst smc_inst;
@@ -144,6 +145,8 @@ struct gsm_trans *trans_find_by_callref(const struct gsm_network *net,
 struct gsm_trans *trans_find_by_sm_rp_mr(const struct gsm_network *net,
 					 const struct vlr_subscr *vsub,
 					 uint8_t sm_rp_mr);
+
+struct osmo_lcls *trans_lcls_compose(const struct gsm_trans *trans, bool use_lac);
 
 struct gsm_trans *trans_alloc(struct gsm_network *net,
 			      struct vlr_subscr *vsub,

@@ -569,6 +569,7 @@ static void msc_a_call_leg_ran_local_addr_available(struct msc_a *msc_a)
 			.osmux_cid = msc_a->cc.call_leg->rtp[RTP_TO_RAN]->local_osmux_cid,
 			.call_id_present = true,
 			.call_id = cc_trans->callref,
+			.lcls = cc_trans->cc.lcls,
 		},
 	};
 	if (msc_a_ran_down(msc_a, MSC_ROLE_I, &msg)) {
@@ -1504,6 +1505,13 @@ int msc_a_ran_dec_from_msc_i(struct msc_a *msc_a, struct msc_a_ran_dec_data *d)
 
 	case RAN_MSG_HANDOVER_FAILURE:
 		rc = msc_a_up_ho(msc_a, d, MSC_HO_EV_RX_FAILURE);
+		break;
+
+	case RAN_MSG_LCLS_STATUS:
+		/* The BSS sends us LCLS_STATUS. We do nothing for now, but it is not an error. */
+		LOG_MSC_A(msc_a, LOGL_DEBUG, "LCLS_STATUS (%s) received from MSC-I\n",
+			  gsm0808_lcls_status_name(msg->lcls_status.status));
+		rc = 0;
 		break;
 
 	default:

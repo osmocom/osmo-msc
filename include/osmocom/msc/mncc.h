@@ -26,6 +26,7 @@
 
 #include <osmocom/core/linuxlist.h>
 #include <osmocom/gsm/mncc.h>
+#include <osmocom/gsm/gsm29205.h>
 
 #include <stdint.h>
 #include <netinet/in.h>
@@ -160,7 +161,7 @@ struct gsm_mncc {
 
 	unsigned char	lchan_type;
 	unsigned char	lchan_mode;
-
+	struct osmo_gcr_parsed gcr;
 	/* A buffer to contain SDP ('\0' terminated) */
 	char		sdp[1024];
 };
@@ -171,7 +172,7 @@ struct gsm_data_frame {
 	unsigned char	data[0];
 };
 
-#define MNCC_SOCK_VERSION	7
+#define MNCC_SOCK_VERSION	8
 struct gsm_mncc_hello {
 	uint32_t	msg_type;
 	uint32_t	version;

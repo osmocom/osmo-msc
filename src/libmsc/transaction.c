@@ -110,6 +110,66 @@ struct gsm_trans *trans_find_by_sm_rp_mr(const struct gsm_network *net,
 	return NULL;
 }
 
+struct osmo_lcls *trans_lcls_compose(const struct gsm_trans *trans, bool use_lac)
+{
+	if (!trans->net->a.sri->sccp)
+		return NULL;
+
+	struct osmo_ss7_instance *ss7 = osmo_sccp_get_ss7(trans->net->a.sri->sccp);
+	struct osmo_lcls *lcls;
+	uint8_t w = osmo_ss7_pc_width(&ss7->cfg.pc_fmt);
+
+	if (!trans) {
+		LOGP(DCC, LOGL_ERROR, "LCLS: unable to fill parameters for unallocated transaction\n");
+		return NULL;
+	}
+
+	if (!trans->net->lcls_permitted) {
+		LOGP(DCC, LOGL_NOTICE, "LCLS disabled globally\n");
+		return NULL;
+	}
+
+	if (!trans->msc_a) {
+		LOGP(DCC, LOGL_ERROR, "LCLS: unable to fill parameters for transaction without connection\n");
+		return NULL;
+	}
+
+	if (trans->msc_a->c.ran->type != OSMO_RAT_GERAN_A) {
+		LOGP(DCC, LOGL_ERROR, "LCLS: only A interface is supported at the moment\n");
+		return NULL;
+	}
+
+	lcls = talloc_zero(trans, struct osmo_lcls);
+	if (!lcls) {
+		LOGP(DCC, LOGL_ERROR, "LCLS: failed to allocate osmo_lcls\n");
+		return NULL;
+	}
+
+	LOGP(DCC, LOGL_INFO, "LCLS: using %u bits (%u bytes) for node ID\n", w, w / 8);
+
+	lcls->gcr.net_len = 3;
+	lcls->gcr.node = ss7->cfg.primary_pc;
+
+	/* net id from Q.1902.3 3-5 bytes, this function gives 3 bytes exactly */
+	osmo_plmn_to_bcd(lcls->gcr.net, &trans->net->plmn);
+
+	osmo_store32be(trans->callref, lcls->gcr.cr);
+	osmo_store16be(use_lac ? trans->msc_a->via_cell.lai.lac : trans->msc_a->via_cell.cell_identity, lcls->gcr.cr + 3);
+
+	LOGP(DCC, LOGL_INFO, "LCLS: allocated %s-based CR-ID %s\n", use_lac ? "LAC" : "CI",
+	     osmo_hexdump(lcls->gcr.cr, 5));
+
+	lcls->config = GSM0808_LCLS_CFG_BOTH_WAY;
+	lcls->control = GSM0808_LCLS_CSC_CONNECT;
+	lcls->corr_needed = true;
+	lcls->gcr_available = true;
+
+	LOGP(DCC, LOGL_DEBUG, "Filled %s\n", osmo_lcls_dump(lcls));
+	LOGP(DCC, LOGL_DEBUG, "Filled %s\n", osmo_gcr_dump(lcls));
+
+	return lcls;
+}
+
 static const char *trans_vsub_use(enum trans_type type)
 {
 	return get_value_string_or_null(trans_type_names, type) ? : "trans-type-unknown";

@@ -260,6 +260,10 @@ struct gsm_network {
 
 	/* Whether to use call waiting on the network */
 	bool call_waiting;
+
+	/* Whether to use lcls on the network */
+	bool lcls_permitted;
+
 	char *sms_db_file_path;
 };
 

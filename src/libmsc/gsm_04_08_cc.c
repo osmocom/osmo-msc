@@ -318,6 +318,16 @@ static void cc_paging_cb(struct msc_a *msc_a, struct gsm_trans *trans)
 		msc_a_get(msc_a, MSC_A_USE_CC);
 		trans->msc_a = msc_a;
 		trans->paging_request = NULL;
+
+		/* Get the GCR from the MO call leg (if any). */
+		if (!trans->cc.lcls) {
+			trans->cc.lcls = trans_lcls_compose(trans, true);
+			if (trans->cc.lcls) {
+				trans->cc.lcls->gcr = trans->cc.msg.gcr;
+				trans->cc.lcls->gcr_available = true;
+			}
+		}
+
 		osmo_fsm_inst_dispatch(msc_a->c.fi, MSC_A_EV_TRANSACTION_ACCEPTED, trans);
 		/* send SETUP request to called party */
 		gsm48_cc_tx_setup(trans, &trans->cc.msg);
@@ -501,6 +511,14 @@ static int gsm48_cc_rx_setup(struct gsm_trans *trans, struct msgb *msg)
 
 	memset(&setup, 0, sizeof(struct gsm_mncc));
 	setup.callref = trans->callref;
+
+	/* New Global Call Reference */
+	if (!trans->cc.lcls)
+		trans->cc.lcls = trans_lcls_compose(trans, true);
+
+	/* Pass the LCLS GCR on to the MT call leg via MNCC */
+	if (trans->cc.lcls)
+		setup.gcr = trans->cc.lcls->gcr;
 
 	tlv_parse(&tp, &gsm48_att_tlvdef, gh->data, payload_len, 0, 0);
 	/* emergency setup is identified by msg_type */
