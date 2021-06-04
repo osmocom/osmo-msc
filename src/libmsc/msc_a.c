@@ -112,19 +112,13 @@ static void update_counters(struct osmo_fsm_inst *fi, bool conn_accepted)
 	struct gsm_network *net = msc_a_net(msc_a);
 	switch (msc_a->complete_layer3_type) {
 	case COMPLETE_LAYER3_LU:
-		rate_ctr_inc(&net->msc_ctrs->ctr[
-				conn_accepted ? MSC_CTR_LOC_UPDATE_COMPLETED
-					      : MSC_CTR_LOC_UPDATE_FAILED]);
+		rate_ctr_inc(rate_ctr_group_get_ctr(net->msc_ctrs, conn_accepted ? MSC_CTR_LOC_UPDATE_COMPLETED : MSC_CTR_LOC_UPDATE_FAILED));
 		break;
 	case COMPLETE_LAYER3_CM_SERVICE_REQ:
-		rate_ctr_inc(&net->msc_ctrs->ctr[
-				conn_accepted ? MSC_CTR_CM_SERVICE_REQUEST_ACCEPTED
-					      : MSC_CTR_CM_SERVICE_REQUEST_REJECTED]);
+		rate_ctr_inc(rate_ctr_group_get_ctr(net->msc_ctrs, conn_accepted ? MSC_CTR_CM_SERVICE_REQUEST_ACCEPTED : MSC_CTR_CM_SERVICE_REQUEST_REJECTED));
 		break;
 	case COMPLETE_LAYER3_PAGING_RESP:
-		rate_ctr_inc(&net->msc_ctrs->ctr[
-				conn_accepted ? MSC_CTR_PAGING_RESP_ACCEPTED
-					      : MSC_CTR_PAGING_RESP_REJECTED]);
+		rate_ctr_inc(rate_ctr_group_get_ctr(net->msc_ctrs, conn_accepted ? MSC_CTR_PAGING_RESP_ACCEPTED : MSC_CTR_PAGING_RESP_REJECTED));
 		break;
 	default:
 		break;

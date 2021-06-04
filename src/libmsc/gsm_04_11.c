@@ -432,7 +432,7 @@ static int sms_route_mt_sms(struct gsm_trans *trans, struct gsm_sms *gsms)
 			LOG_TRANS(trans, LOGL_ERROR, "SMS delivery error: %d\n", rc);
 	 		rc = GSM411_RP_CAUSE_MO_TEMP_FAIL;
 			/* rc will be logged by gsm411_send_rp_error() */
-			rate_ctr_inc(&net->msc_ctrs->ctr[MSC_CTR_SMS_DELIVER_UNKNOWN_ERROR]);
+			rate_ctr_inc(rate_ctr_group_get_ctr(net->msc_ctrs, MSC_CTR_SMS_DELIVER_UNKNOWN_ERROR));
 		}
 		return rc;
 	}
@@ -448,22 +448,22 @@ try_local:
 #ifdef BUILD_SMPP
 	/* Avoid a second look-up */
 	if (smpp_route_smpp_first()) {
-		rate_ctr_inc(&net->msc_ctrs->ctr[MSC_CTR_SMS_NO_RECEIVER]);
+		rate_ctr_inc(rate_ctr_group_get_ctr(net->msc_ctrs, MSC_CTR_SMS_NO_RECEIVER));
 		return GSM411_RP_CAUSE_MO_NUM_UNASSIGNED;
 	}
 
 	rc = smpp_try_deliver(gsms, msc_a);
 	if (rc == GSM411_RP_CAUSE_MO_NUM_UNASSIGNED) {
-		rate_ctr_inc(&net->msc_ctrs->ctr[MSC_CTR_SMS_NO_RECEIVER]);
+		rate_ctr_inc(rate_ctr_group_get_ctr(net->msc_ctrs, MSC_CTR_SMS_NO_RECEIVER));
 	} else if (rc < 0) {
 		LOG_TRANS(trans, LOGL_ERROR, "SMS delivery error: %d\n", rc);
 		rc = GSM411_RP_CAUSE_MO_TEMP_FAIL;
 		/* rc will be logged by gsm411_send_rp_error() */
-		rate_ctr_inc(&net->msc_ctrs->ctr[MSC_CTR_SMS_DELIVER_UNKNOWN_ERROR]);
+		rate_ctr_inc(rate_ctr_group_get_ctr(net->msc_ctrs, MSC_CTR_SMS_DELIVER_UNKNOWN_ERROR));
 	}
 #else
 	rc = GSM411_RP_CAUSE_MO_NUM_UNASSIGNED;
-	rate_ctr_inc(&net->msc_ctrs->ctr[MSC_CTR_SMS_NO_RECEIVER]);
+	rate_ctr_inc(rate_ctr_group_get_ctr(net->msc_ctrs, MSC_CTR_SMS_NO_RECEIVER));
 #endif
 
 	return rc;
@@ -501,7 +501,7 @@ static int gsm340_rx_tpdu(struct gsm_trans *trans, struct msgb *msg,
 	}
 
 	/* FIXME: should we do this on success, after all checks? */
-	rate_ctr_inc(&net->msc_ctrs->ctr[MSC_CTR_SMS_SUBMITTED]);
+	rate_ctr_inc(rate_ctr_group_get_ctr(net->msc_ctrs, MSC_CTR_SMS_SUBMITTED));
 
 	gsms = sms_alloc();
 	if (!gsms)
@@ -903,10 +903,10 @@ static int gsm411_rx_rp_error(struct gsm_trans *trans,
 		 * to store this in our database and wait for a SMMA message */
 		/* FIXME */
 		send_signal(S_SMS_MEM_EXCEEDED, trans, sms, 0);
-		rate_ctr_inc(&net->msc_ctrs->ctr[MSC_CTR_SMS_RP_ERR_MEM]);
+		rate_ctr_inc(rate_ctr_group_get_ctr(net->msc_ctrs, MSC_CTR_SMS_RP_ERR_MEM));
 	} else {
 		send_signal(S_SMS_UNKNOWN_ERROR, trans, sms, 0);
-		rate_ctr_inc(&net->msc_ctrs->ctr[MSC_CTR_SMS_RP_ERR_OTHER]);
+		rate_ctr_inc(rate_ctr_group_get_ctr(net->msc_ctrs, MSC_CTR_SMS_RP_ERR_OTHER));
 	}
 
 	sms_free(sms);
@@ -1211,7 +1211,7 @@ int gsm411_send_sms(struct gsm_network *net,
 	/* Store a pointer to abstract SMS representation */
 	trans->sms.sms = sms;
 
-	rate_ctr_inc(&net->msc_ctrs->ctr[MSC_CTR_SMS_DELIVERED]);
+	rate_ctr_inc(rate_ctr_group_get_ctr(net->msc_ctrs, MSC_CTR_SMS_DELIVERED));
 	db_sms_inc_deliver_attempts(trans->sms.sms);
 
 	return gsm411_rp_sendmsg(&trans->sms.smr_inst, msg,
@@ -1254,7 +1254,7 @@ int gsm411_send_rp_data(struct gsm_network *net, struct vlr_subscr *vsub,
 	/* Encode RP-UD itself (SM TPDU) */
 	msgb_lv_put(msg, sm_rp_ud_len, sm_rp_ud);
 
-	rate_ctr_inc(&net->msc_ctrs->ctr[MSC_CTR_SMS_DELIVERED]);
+	rate_ctr_inc(rate_ctr_group_get_ctr(net->msc_ctrs, MSC_CTR_SMS_DELIVERED));
 
 	return gsm411_rp_sendmsg(&trans->sms.smr_inst, msg,
 		GSM411_MT_RP_DATA_MT, trans->sms.sm_rp_mr,

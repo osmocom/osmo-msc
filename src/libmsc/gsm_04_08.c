@@ -366,15 +366,15 @@ static int mm_rx_loc_upd_req(struct msc_a *msc_a, struct msgb *msg)
 
 	switch (lu->type) {
 	case GSM48_LUPD_NORMAL:
-		rate_ctr_inc(&net->msc_ctrs->ctr[MSC_CTR_LOC_UPDATE_TYPE_NORMAL]);
+		rate_ctr_inc(rate_ctr_group_get_ctr(net->msc_ctrs, MSC_CTR_LOC_UPDATE_TYPE_NORMAL));
 		vlr_lu_type = VLR_LU_TYPE_REGULAR;
 		break;
 	case GSM48_LUPD_IMSI_ATT:
-		rate_ctr_inc(&net->msc_ctrs->ctr[MSC_CTR_LOC_UPDATE_TYPE_ATTACH]);
+		rate_ctr_inc(rate_ctr_group_get_ctr(net->msc_ctrs, MSC_CTR_LOC_UPDATE_TYPE_ATTACH));
 		vlr_lu_type = VLR_LU_TYPE_IMSI_ATTACH;
 		break;
 	case GSM48_LUPD_PERIODIC:
-		rate_ctr_inc(&net->msc_ctrs->ctr[MSC_CTR_LOC_UPDATE_TYPE_PERIODIC]);
+		rate_ctr_inc(rate_ctr_group_get_ctr(net->msc_ctrs, MSC_CTR_LOC_UPDATE_TYPE_PERIODIC));
 		vlr_lu_type = VLR_LU_TYPE_PERIODIC;
 		break;
 	}
@@ -854,7 +854,7 @@ static int gsm48_rx_mm_imsi_detach_ind(struct msc_a *msc_a, struct msgb *msg)
 
 	DEBUGP(DMM, "IMSI DETACH INDICATION: %s\n", osmo_mobile_identity_to_str_c(OTC_SELECT, &mi));
 
-	rate_ctr_inc(&net->msc_ctrs->ctr[MSC_CTR_LOC_UPDATE_TYPE_DETACH]);
+	rate_ctr_inc(rate_ctr_group_get_ctr(net->msc_ctrs, MSC_CTR_LOC_UPDATE_TYPE_DETACH));
 
 	switch (mi.type) {
 	case GSM_MI_TYPE_TMSI:

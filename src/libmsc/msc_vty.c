@@ -1814,45 +1814,45 @@ DEFUN(show_stats,
 	SHOW_STR "Display network statistics\n")
 {
 	vty_out(vty, "Location Update         : %" PRIu64 " attach, %" PRIu64 " normal, %" PRIu64 " periodic%s",
-		gsmnet->msc_ctrs->ctr[MSC_CTR_LOC_UPDATE_TYPE_ATTACH].current,
-		gsmnet->msc_ctrs->ctr[MSC_CTR_LOC_UPDATE_TYPE_NORMAL].current,
-		gsmnet->msc_ctrs->ctr[MSC_CTR_LOC_UPDATE_TYPE_PERIODIC].current,
+		rate_ctr_group_get_ctr(gsmnet->msc_ctrs, MSC_CTR_LOC_UPDATE_TYPE_ATTACH)->current,
+		rate_ctr_group_get_ctr(gsmnet->msc_ctrs, MSC_CTR_LOC_UPDATE_TYPE_NORMAL)->current,
+		rate_ctr_group_get_ctr(gsmnet->msc_ctrs, MSC_CTR_LOC_UPDATE_TYPE_PERIODIC)->current,
 		VTY_NEWLINE);
 	vty_out(vty, "IMSI Detach Indications : %" PRIu64 "%s",
-		gsmnet->msc_ctrs->ctr[MSC_CTR_LOC_UPDATE_TYPE_DETACH].current,
+		rate_ctr_group_get_ctr(gsmnet->msc_ctrs, MSC_CTR_LOC_UPDATE_TYPE_DETACH)->current,
 		VTY_NEWLINE);
 	vty_out(vty, "Location Updating Results: %" PRIu64 " completed, %" PRIu64 " failed%s",
-		gsmnet->msc_ctrs->ctr[MSC_CTR_LOC_UPDATE_COMPLETED].current,
-		gsmnet->msc_ctrs->ctr[MSC_CTR_LOC_UPDATE_FAILED].current,
+		rate_ctr_group_get_ctr(gsmnet->msc_ctrs, MSC_CTR_LOC_UPDATE_COMPLETED)->current,
+		rate_ctr_group_get_ctr(gsmnet->msc_ctrs, MSC_CTR_LOC_UPDATE_FAILED)->current,
 		VTY_NEWLINE);
 	vty_out(vty, "SMS MO                  : %" PRIu64 " submitted, %" PRIu64 " no receiver%s",
-		gsmnet->msc_ctrs->ctr[MSC_CTR_SMS_SUBMITTED].current,
-		gsmnet->msc_ctrs->ctr[MSC_CTR_SMS_NO_RECEIVER].current,
+		rate_ctr_group_get_ctr(gsmnet->msc_ctrs, MSC_CTR_SMS_SUBMITTED)->current,
+		rate_ctr_group_get_ctr(gsmnet->msc_ctrs, MSC_CTR_SMS_NO_RECEIVER)->current,
 		VTY_NEWLINE);
 	vty_out(vty, "SMS MT                  : %" PRIu64 " delivered, %" PRIu64 " no memory, %" PRIu64 " other error%s",
-		gsmnet->msc_ctrs->ctr[MSC_CTR_SMS_DELIVERED].current,
-		gsmnet->msc_ctrs->ctr[MSC_CTR_SMS_RP_ERR_MEM].current,
-		gsmnet->msc_ctrs->ctr[MSC_CTR_SMS_RP_ERR_OTHER].current,
+		rate_ctr_group_get_ctr(gsmnet->msc_ctrs, MSC_CTR_SMS_DELIVERED)->current,
+		rate_ctr_group_get_ctr(gsmnet->msc_ctrs, MSC_CTR_SMS_RP_ERR_MEM)->current,
+		rate_ctr_group_get_ctr(gsmnet->msc_ctrs, MSC_CTR_SMS_RP_ERR_OTHER)->current,
 		VTY_NEWLINE);
 	vty_out(vty, "MO Calls                : %" PRIu64 " setup, %" PRIu64 " connect ack%s",
-		gsmnet->msc_ctrs->ctr[MSC_CTR_CALL_MO_SETUP].current,
-		gsmnet->msc_ctrs->ctr[MSC_CTR_CALL_MO_CONNECT_ACK].current,
+		rate_ctr_group_get_ctr(gsmnet->msc_ctrs, MSC_CTR_CALL_MO_SETUP)->current,
+		rate_ctr_group_get_ctr(gsmnet->msc_ctrs, MSC_CTR_CALL_MO_CONNECT_ACK)->current,
 		VTY_NEWLINE);
 	vty_out(vty, "MT Calls                : %" PRIu64 " setup, %" PRIu64 " connect%s",
-		gsmnet->msc_ctrs->ctr[MSC_CTR_CALL_MT_SETUP].current,
-		gsmnet->msc_ctrs->ctr[MSC_CTR_CALL_MT_CONNECT].current,
+		rate_ctr_group_get_ctr(gsmnet->msc_ctrs, MSC_CTR_CALL_MT_SETUP)->current,
+		rate_ctr_group_get_ctr(gsmnet->msc_ctrs, MSC_CTR_CALL_MT_CONNECT)->current,
 		VTY_NEWLINE);
 	vty_out(vty, "MO NC SS/USSD           : %" PRIu64 " requests, %" PRIu64 " established, %" PRIu64 " rejected%s",
-		gsmnet->msc_ctrs->ctr[MSC_CTR_NC_SS_MO_REQUESTS].current,
-		gsmnet->msc_ctrs->ctr[MSC_CTR_NC_SS_MO_ESTABLISHED].current,
-		gsmnet->msc_ctrs->ctr[MSC_CTR_NC_SS_MO_REQUESTS].current
-			- gsmnet->msc_ctrs->ctr[MSC_CTR_NC_SS_MO_ESTABLISHED].current,
+		rate_ctr_group_get_ctr(gsmnet->msc_ctrs, MSC_CTR_NC_SS_MO_REQUESTS)->current,
+		rate_ctr_group_get_ctr(gsmnet->msc_ctrs, MSC_CTR_NC_SS_MO_ESTABLISHED)->current,
+		rate_ctr_group_get_ctr(gsmnet->msc_ctrs, MSC_CTR_NC_SS_MO_REQUESTS)->current
+			- rate_ctr_group_get_ctr(gsmnet->msc_ctrs, MSC_CTR_NC_SS_MO_ESTABLISHED)->current,
 		VTY_NEWLINE);
 	vty_out(vty, "MT NC SS/USSD           : %" PRIu64 " requests, %" PRIu64 " established, %" PRIu64 " rejected%s",
-		gsmnet->msc_ctrs->ctr[MSC_CTR_NC_SS_MT_REQUESTS].current,
-		gsmnet->msc_ctrs->ctr[MSC_CTR_NC_SS_MT_ESTABLISHED].current,
-		gsmnet->msc_ctrs->ctr[MSC_CTR_NC_SS_MT_REQUESTS].current
-			- gsmnet->msc_ctrs->ctr[MSC_CTR_NC_SS_MT_ESTABLISHED].current,
+		rate_ctr_group_get_ctr(gsmnet->msc_ctrs, MSC_CTR_NC_SS_MT_REQUESTS)->current,
+		rate_ctr_group_get_ctr(gsmnet->msc_ctrs, MSC_CTR_NC_SS_MT_ESTABLISHED)->current,
+		rate_ctr_group_get_ctr(gsmnet->msc_ctrs, MSC_CTR_NC_SS_MT_REQUESTS)->current
+			- rate_ctr_group_get_ctr(gsmnet->msc_ctrs, MSC_CTR_NC_SS_MT_ESTABLISHED)->current,
 		VTY_NEWLINE);
 	return CMD_SUCCESS;
 }

@@ -163,20 +163,22 @@ static void count_statistics(struct gsm_trans *trans, int new_state)
 	/* state incoming */
 	switch (new_state) {
 	case GSM_CSTATE_ACTIVE:
-		osmo_stat_item_inc(trans->net->statg->items[MSC_STAT_ACTIVE_CALLS], 1);
-		rate_ctr_inc(&msc->ctr[MSC_CTR_CALL_ACTIVE]);
+		osmo_stat_item_inc(osmo_stat_item_group_get_item(trans->net->statg, MSC_STAT_ACTIVE_CALLS),
+				   1);
+		rate_ctr_inc(rate_ctr_group_get_ctr(msc, MSC_CTR_CALL_ACTIVE));
 		break;
 	}
 
 	/* state outgoing */
 	switch (old_state) {
 	case GSM_CSTATE_ACTIVE:
-		osmo_stat_item_dec(trans->net->statg->items[MSC_STAT_ACTIVE_CALLS], 1);
+		osmo_stat_item_dec(osmo_stat_item_group_get_item(trans->net->statg, MSC_STAT_ACTIVE_CALLS),
+				   1);
 		if (new_state == GSM_CSTATE_DISCONNECT_REQ ||
 				new_state == GSM_CSTATE_DISCONNECT_IND)
-			rate_ctr_inc(&msc->ctr[MSC_CTR_CALL_COMPLETE]);
+			rate_ctr_inc(rate_ctr_group_get_ctr(msc, MSC_CTR_CALL_COMPLETE));
 		else
-			rate_ctr_inc(&msc->ctr[MSC_CTR_CALL_INCOMPLETE]);
+			rate_ctr_inc(rate_ctr_group_get_ctr(msc, MSC_CTR_CALL_INCOMPLETE));
 		break;
 	}
 }
@@ -574,7 +576,7 @@ static int gsm48_cc_rx_setup(struct gsm_trans *trans, struct msgb *msg)
 	LOG_TRANS(trans, setup.emergency ? LOGL_NOTICE : LOGL_INFO, "%sSETUP to %s\n",
 		  setup.emergency ? "EMERGENCY_" : "", setup.called.number);
 
-	rate_ctr_inc(&trans->net->msc_ctrs->ctr[MSC_CTR_CALL_MO_SETUP]);
+	rate_ctr_inc(rate_ctr_group_get_ctr(trans->net->msc_ctrs, MSC_CTR_CALL_MO_SETUP));
 
 	/* indicate setup to MNCC */
 	mncc_recvmsg(trans->net, trans, MNCC_SETUP_IND, &setup);
@@ -657,7 +659,7 @@ static int gsm48_cc_tx_setup(struct gsm_trans *trans, void *arg)
 
 	new_cc_state(trans, GSM_CSTATE_CALL_PRESENT);
 
-	rate_ctr_inc(&trans->net->msc_ctrs->ctr[MSC_CTR_CALL_MT_SETUP]);
+	rate_ctr_inc(rate_ctr_group_get_ctr(trans->net->msc_ctrs, MSC_CTR_CALL_MT_SETUP));
 
 	return trans_tx_gsm48(trans, msg);
 }
@@ -902,7 +904,7 @@ static int gsm48_cc_rx_connect(struct gsm_trans *trans, struct msgb *msg)
 	}
 
 	new_cc_state(trans, GSM_CSTATE_CONNECT_REQUEST);
-	rate_ctr_inc(&trans->net->msc_ctrs->ctr[MSC_CTR_CALL_MT_CONNECT]);
+	rate_ctr_inc(rate_ctr_group_get_ctr(trans->net->msc_ctrs, MSC_CTR_CALL_MT_CONNECT));
 
 	return mncc_recvmsg(trans->net, trans, MNCC_SETUP_CNF, &connect);
 }
@@ -915,7 +917,7 @@ static int gsm48_cc_rx_connect_ack(struct gsm_trans *trans, struct msgb *msg)
 	gsm48_stop_cc_timer(trans);
 
 	new_cc_state(trans, GSM_CSTATE_ACTIVE);
-	rate_ctr_inc(&trans->net->msc_ctrs->ctr[MSC_CTR_CALL_MO_CONNECT_ACK]);
+	rate_ctr_inc(rate_ctr_group_get_ctr(trans->net->msc_ctrs, MSC_CTR_CALL_MO_CONNECT_ACK));
 
 	memset(&connect_ack, 0, sizeof(struct gsm_mncc));
 	connect_ack.callref = trans->callref;

@@ -224,7 +224,7 @@ static void mncc_call_tx_setup_ind(struct mncc_call *mncc_call)
 	mncc_call->local_msisdn_present = true;
 	mncc_call->local_msisdn = mncc_msg.signal.calling;
 
-	rate_ctr_inc(&gsmnet->msc_ctrs->ctr[MSC_CTR_CALL_MO_SETUP]);
+	rate_ctr_inc(rate_ctr_group_get_ctr(gsmnet->msc_ctrs, MSC_CTR_CALL_MO_SETUP));
 
 	mncc_call_tx(mncc_call, &mncc_msg);
 }

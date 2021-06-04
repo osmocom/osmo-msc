@@ -125,7 +125,7 @@ int gsm0911_rcv_nc_ss(struct msc_a *msc_a, struct msgb *msg)
 	trans = trans_find_by_id(msc_a, TRANS_USSD, tid);
 	if (!trans) {
 		/* Count MS-initiated attempts to establish a NC SS/USSD session */
-		rate_ctr_inc(&net->msc_ctrs->ctr[MSC_CTR_NC_SS_MO_REQUESTS]);
+		rate_ctr_inc(rate_ctr_group_get_ctr(net->msc_ctrs, MSC_CTR_NC_SS_MO_REQUESTS));
 
 		/**
 		 * According to GSM TS 04.80, section 2.4.2 "Register
@@ -159,7 +159,7 @@ int gsm0911_rcv_nc_ss(struct msc_a *msc_a, struct msgb *msg)
 			ncss_session_timeout_handler, trans);
 
 		/* Count active NC SS/USSD sessions */
-		osmo_stat_item_inc(net->statg->items[MSC_STAT_ACTIVE_NC_SS], 1);
+		osmo_stat_item_inc(osmo_stat_item_group_get_item(net->statg, MSC_STAT_ACTIVE_NC_SS), 1);
 
 		trans->dlci = OMSC_LINKID_CB(msg);
 		trans->msc_a = msc_a;
@@ -241,7 +241,7 @@ int gsm0911_rcv_nc_ss(struct msc_a *msc_a, struct msgb *msg)
 
 	/* Count established MS-initiated NC SS/USSD sessions */
 	if (msg_type == GSM0480_MTYPE_REGISTER)
-		rate_ctr_inc(&net->msc_ctrs->ctr[MSC_CTR_NC_SS_MO_ESTABLISHED]);
+		rate_ctr_inc(rate_ctr_group_get_ctr(net->msc_ctrs, MSC_CTR_NC_SS_MO_ESTABLISHED));
 
 	return rc;
 
@@ -297,7 +297,7 @@ static void ss_paging_cb(struct msc_a *msc_a, struct gsm_trans *trans)
 		trans->ss.msg = NULL;
 
 		/* Count established network-initiated NC SS/USSD sessions */
-		rate_ctr_inc(&net->msc_ctrs->ctr[MSC_CTR_NC_SS_MT_ESTABLISHED]);
+		rate_ctr_inc(rate_ctr_group_get_ctr(net->msc_ctrs, MSC_CTR_NC_SS_MT_ESTABLISHED));
 	} else {
 		struct osmo_gsup_message gsup_msg;
 
@@ -363,7 +363,7 @@ static struct gsm_trans *establish_nc_ss_trans(struct gsm_network *net,
 	}
 
 	/* Count active NC SS/USSD sessions */
-	osmo_stat_item_inc(net->statg->items[MSC_STAT_ACTIVE_NC_SS], 1);
+	osmo_stat_item_inc(osmo_stat_item_group_get_item(net->statg, MSC_STAT_ACTIVE_NC_SS), 1);
 
 	/* Init inactivity timer */
 	osmo_timer_setup(&trans->ss.timer_guard,
@@ -415,7 +415,8 @@ void _gsm911_nc_ss_trans_free(struct gsm_trans *trans)
 	osmo_timer_del(&trans->ss.timer_guard);
 
 	/* One session less */
-	osmo_stat_item_dec(trans->net->statg->items[MSC_STAT_ACTIVE_NC_SS], 1);
+	osmo_stat_item_dec(osmo_stat_item_group_get_item(trans->net->statg, MSC_STAT_ACTIVE_NC_SS),
+			   1);
 }
 
 int gsm0911_gsup_rx(struct gsup_client_mux *gcm, void *data, const struct osmo_gsup_message *gsup_msg)
@@ -474,7 +475,7 @@ int gsm0911_gsup_rx(struct gsup_client_mux *gcm, void *data, const struct osmo_g
 
 	if (!trans) {
 		/* Count network-initiated attempts to establish a NC SS/USSD session */
-		rate_ctr_inc(&net->msc_ctrs->ctr[MSC_CTR_NC_SS_MT_REQUESTS]);
+		rate_ctr_inc(rate_ctr_group_get_ctr(net->msc_ctrs, MSC_CTR_NC_SS_MT_REQUESTS));
 
 		/* Attempt to establish a new transaction */
 		trans = establish_nc_ss_trans(net, vsub, gsup_msg);
@@ -578,7 +579,7 @@ int gsm0911_gsup_rx(struct gsup_client_mux *gcm, void *data, const struct osmo_g
 
 	/* Count established network-initiated NC SS/USSD sessions */
 	if (gsup_msg->session_state == OSMO_GSUP_SESSION_STATE_BEGIN)
-		rate_ctr_inc(&net->msc_ctrs->ctr[MSC_CTR_NC_SS_MT_ESTABLISHED]);
+		rate_ctr_inc(rate_ctr_group_get_ctr(net->msc_ctrs, MSC_CTR_NC_SS_MT_ESTABLISHED));
 
 	return 0;
 }
