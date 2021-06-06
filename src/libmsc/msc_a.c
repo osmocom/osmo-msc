@@ -1638,6 +1638,8 @@ struct msc_a *msc_a_for_vsub(const struct vlr_subscr *vsub, bool valid_conn_only
 int msc_tx_common_id(struct msc_a *msc_a, enum msc_role to_role)
 {
 	struct vlr_subscr *vsub = msc_a_vsub(msc_a);
+	if (vsub == NULL)
+		return -ENODEV;
 	struct ran_msg msg = {
 		.msg_type = RAN_MSG_COMMON_ID,
 		.common_id = {
