@@ -151,9 +151,10 @@ DEFUN(cfg_net_name_long,
 
 DEFUN(cfg_net_encryption,
       cfg_net_encryption_cmd,
-      "encryption a5 <0-3> [<0-3>] [<0-3>] [<0-3>]",
+      "encryption a5 <0-4> [<0-4>] [<0-4>] [<0-4>] [<0-4>]",
 	ENCRYPTION_STR
 	"GSM A5 Air Interface Encryption.\n"
+	"A5/n Algorithm Number\n"
 	"A5/n Algorithm Number\n"
 	"A5/n Algorithm Number\n"
 	"A5/n Algorithm Number\n"
