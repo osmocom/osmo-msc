@@ -292,6 +292,14 @@ int msc_a_vlr_set_cipher_mode(void *_msc_a, bool umts_aka, bool retrieve_imeisv)
 	return msc_a_ran_enc_ciphering(msc_a, umts_aka, retrieve_imeisv);
 }
 
+static uint8_t filter_a5(uint8_t a5_mask, bool umts_aka)
+{
+	/* With GSM AKA: allow A5/0, 1, 3 = 0b00001011 = 0xb.
+	 * UMTS aka: allow A5/0, 1, 3, 4 = 0b00011011 = 0x1b.
+	 */
+	return a5_mask & (umts_aka ? 0x1b : 0x0b);
+}
+
 static int msc_a_ran_enc_ciphering(struct msc_a *msc_a, bool umts_aka, bool retrieve_imeisv)
 {
 	struct gsm_network *net;
@@ -321,7 +329,7 @@ static int msc_a_ran_enc_ciphering(struct msc_a *msc_a, bool umts_aka, bool retr
 			.geran = {
 				.umts_aka = umts_aka,
 				.retrieve_imeisv = retrieve_imeisv,
-				.a5_encryption_mask = net->a5_encryption_mask,
+				.a5_encryption_mask = filter_a5(net->a5_encryption_mask, umts_aka),
 
 				/* for ran_a.c to store the GERAN key that is actually used */
 				.chosen_key = &msc_a->geran_encr,

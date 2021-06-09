@@ -25,6 +25,7 @@
 #include <osmocom/core/byteswap.h>
 
 #include <osmocom/crypt/auth.h>
+#include <osmocom/crypt/kdf.h>
 
 #include <osmocom/gsm/tlv.h>
 #include <osmocom/gsm/gsm0808.h>
@@ -1019,6 +1020,9 @@ static int a5_n_to_gsm0808_chosen_enc_alg(uint8_t *dst, int a5_n)
 	case 3:
 		*dst = GSM0808_ALG_ID_A5_3;
 		return 0;
+	case 4:
+		*dst = GSM0808_ALG_ID_A5_4;
+		return 0;
 	default:
 		return -ENOTSUP;
 	}
@@ -1078,21 +1082,39 @@ static struct msgb *ran_a_make_cipher_mode_command(struct osmo_fsm_inst *fi, con
 	/* In case of UMTS AKA, the Kc for ciphering must be derived from the 3G auth
 	 * tokens.  vec->kc was calculated from the GSM algorithm and is not
 	 * necessarily a match for the UMTS AKA tokens. */
-	if (cm->geran.umts_aka)
+	if (cm->geran.umts_aka) {
+		int i;
 		osmo_auth_c3(ei->key, cm->vec->ck, cm->vec->ik);
-	else
+
+		for (i = 0; i < ei->perm_algo_len; i++) {
+			if (ei->perm_algo[i] != GSM0808_ALG_ID_A5_4)
+				continue;
+			/* A5/4 is included, so need to generate Kc128 */
+			osmo_kdf_kc128(cm->vec->ck, cm->vec->ik, cmc.kc128);
+			cmc.kc128_present = true;
+			break;
+		}
+	} else {
 		memcpy(ei->key, cm->vec->kc, sizeof(cm->vec->kc));
+	}
 	ei->key_len = sizeof(cm->vec->kc);
 
 	/* Store chosen GERAN key where the caller asked it to be stored.
 	 * alg_id remains unknown until we receive a Cipher Mode Complete from the BSC */
 	if (cm->geran.chosen_key) {
+		*cm->geran.chosen_key = (struct geran_encr){0};
+
 		if (ei->key_len > sizeof(cm->geran.chosen_key->key)) {
 			LOG_RAN_A_ENC(fi, LOGL_ERROR, "Chosen key is larger than I can store\n");
 			return NULL;
 		}
 		memcpy(cm->geran.chosen_key->key, ei->key, ei->key_len);
 		cm->geran.chosen_key->key_len = ei->key_len;
+
+		if (cmc.kc128_present) {
+			memcpy(cm->geran.chosen_key->kc128, cmc.kc128, 16);
+			cm->geran.chosen_key->kc128_present = true;
+		}
 	}
 
 	LOG_RAN_A_ENC(fi, LOGL_DEBUG, "Tx BSSMAP CIPHER MODE COMMAND to BSC, %u ciphers (%s) key %s\n",

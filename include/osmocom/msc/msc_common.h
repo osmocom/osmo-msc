@@ -32,6 +32,8 @@ struct geran_encr {
 	uint8_t alg_id;
 	uint8_t key_len;
 	uint8_t key[MAX_A5_KEY_LEN];
+	bool kc128_present;
+	uint8_t kc128[MAX_A5_KEY_LEN];
 };
 
 enum complete_layer3_type {
