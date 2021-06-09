@@ -483,6 +483,7 @@ static int ran_a_decode_handover_request(struct ran_dec *ran_dec, const struct m
 	const struct tlv_p_entry *ie_aoip_transp_addr = TLVP_GET(tp, GSM0808_IE_AOIP_TRASP_ADDR);
 	const struct tlv_p_entry *ie_codec_list_msc_preferred = TLVP_GET(tp, GSM0808_IE_SPEECH_CODEC_LIST);
 	const struct tlv_p_entry *ie_call_id = TLVP_GET(tp, GSM0808_IE_CALL_ID);
+	const struct tlv_p_entry *ie_kc128 = TLVP_GET(tp, GSM0808_IE_KC_128);
 	const struct tlv_p_entry *ie_global_call_ref = TLVP_GET(tp, GSM0808_IE_GLOBAL_CALL_REF);
 
 	struct gsm0808_channel_type channel_type;
@@ -523,6 +524,11 @@ static int ran_a_decode_handover_request(struct ran_dec *ran_dec, const struct m
 		if (encr_info.key_len) {
 			memcpy(geran_encr.key, encr_info.key, encr_info.key_len);
 			geran_encr.key_len = encr_info.key_len;
+		}
+
+		if (ie_kc128) {
+			memcpy(geran_encr.kc128, ie_kc128->val, 16);
+			geran_encr.kc128_present = true;
 		}
 
 		r->geran.chosen_encryption = &geran_encr;
@@ -1166,6 +1172,12 @@ struct msgb *ran_a_make_handover_request(struct osmo_fsm_inst *log_fi, const str
 		       n->geran.chosen_encryption->key, n->geran.chosen_encryption->key_len);
 		r.encryption_information.key_len = n->geran.chosen_encryption->key_len;
 		r.chosen_encryption_algorithm_serving = n->geran.chosen_encryption->alg_id;
+
+		if (n->geran.chosen_encryption->kc128_present) {
+			r.more_items = true;
+			memcpy(r.kc128, n->geran.chosen_encryption->kc128, sizeof(r.kc128));
+			r.kc128_present = true;
+		}
 	}
 
 	if (n->classmark)
