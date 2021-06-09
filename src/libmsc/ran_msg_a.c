@@ -1058,14 +1058,17 @@ osmo_static_assert(sizeof(((struct gsm0808_encrypt_info*)0)->key) >= sizeof(((st
 		   gsm0808_encrypt_info_key_fits_osmo_auth_vec_kc);
 static struct msgb *ran_a_make_cipher_mode_command(struct osmo_fsm_inst *fi, const struct ran_cipher_mode_command *cm)
 {
-	struct gsm0808_encrypt_info ei = {};
+	struct gsm0808_cipher_mode_command cmc = {
+		.cipher_response_mode_present = true,
+		.cipher_response_mode = 1, /* 1: include IMEISV (3GPP TS 48.008 3.2.2.34) */
+	};
+	struct gsm0808_encrypt_info *ei = &cmc.ei;
 	char buf[16 * 2 + 1];
-	const uint8_t cipher_response_mode = 1;
 
-	if (make_encrypt_info_perm_algo(fi, &ei, cm->geran.a5_encryption_mask, cm->classmark))
+	if (make_encrypt_info_perm_algo(fi, ei, cm->geran.a5_encryption_mask, cm->classmark))
 		return NULL;
 
-	if (ei.perm_algo_len == 0) {
+	if (ei->perm_algo_len == 0) {
 		LOG_RAN_A_ENC(fi, LOGL_ERROR, "cannot start ciphering, no intersection between MSC-configured"
 			       " and MS-supported A5 algorithms. MSC: 0x%02x  MS: %s\n",
 			       cm->geran.a5_encryption_mask, osmo_gsm48_classmark_a5_name(cm->classmark));
@@ -1076,26 +1079,26 @@ static struct msgb *ran_a_make_cipher_mode_command(struct osmo_fsm_inst *fi, con
 	 * tokens.  vec->kc was calculated from the GSM algorithm and is not
 	 * necessarily a match for the UMTS AKA tokens. */
 	if (cm->geran.umts_aka)
-		osmo_auth_c3(ei.key, cm->vec->ck, cm->vec->ik);
+		osmo_auth_c3(ei->key, cm->vec->ck, cm->vec->ik);
 	else
-		memcpy(ei.key, cm->vec->kc, sizeof(cm->vec->kc));
-	ei.key_len = sizeof(cm->vec->kc);
+		memcpy(ei->key, cm->vec->kc, sizeof(cm->vec->kc));
+	ei->key_len = sizeof(cm->vec->kc);
 
 	/* Store chosen GERAN key where the caller asked it to be stored.
 	 * alg_id remains unknown until we receive a Cipher Mode Complete from the BSC */
 	if (cm->geran.chosen_key) {
-		if (ei.key_len > sizeof(cm->geran.chosen_key->key)) {
+		if (ei->key_len > sizeof(cm->geran.chosen_key->key)) {
 			LOG_RAN_A_ENC(fi, LOGL_ERROR, "Chosen key is larger than I can store\n");
 			return NULL;
 		}
-		memcpy(cm->geran.chosen_key->key, ei.key, ei.key_len);
-		cm->geran.chosen_key->key_len = ei.key_len;
+		memcpy(cm->geran.chosen_key->key, ei->key, ei->key_len);
+		cm->geran.chosen_key->key_len = ei->key_len;
 	}
 
 	LOG_RAN_A_ENC(fi, LOGL_DEBUG, "Tx BSSMAP CIPHER MODE COMMAND to BSC, %u ciphers (%s) key %s\n",
-		       ei.perm_algo_len, osmo_hexdump_nospc(ei.perm_algo, ei.perm_algo_len),
-		       osmo_hexdump_buf(buf, sizeof(buf), ei.key, ei.key_len, NULL, false));
-	return gsm0808_create_cipher(&ei, cm->geran.retrieve_imeisv ? &cipher_response_mode : NULL);
+		       ei->perm_algo_len, osmo_hexdump_nospc(ei->perm_algo, ei->perm_algo_len),
+		       osmo_hexdump_buf(buf, sizeof(buf), ei->key, ei->key_len, NULL, false));
+	return gsm0808_create_cipher2(&cmc);
 }
 
 struct msgb *ran_a_make_handover_request(struct osmo_fsm_inst *log_fi, const struct ran_handover_request *n)
