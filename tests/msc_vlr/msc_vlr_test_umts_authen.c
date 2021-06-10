@@ -23,6 +23,8 @@
 
 #include "msc_vlr_tests.h"
 
+static struct osmo_gsm48_classmark classmark = {0};
+
 static void _test_umts_authen(enum osmo_rat_type via_ran)
 {
 	struct vlr_subscr *vsub;
@@ -126,8 +128,28 @@ static void _test_umts_authen(enum osmo_rat_type via_ran)
 
 	if (encryption) {
 		if (via_ran == OSMO_RAT_GERAN_A) {
-			btw("Test code not implemented");
-			OSMO_ASSERT(false);
+			/* On GERAN */
+			btw("MS sends Authen Response, VLR accepts and wants to send Ciphering Mode Command to MS"
+			    " -- but needs Classmark 2 to determine whether A5/4 is supported");
+
+			cipher_mode_cmd_sent = false;
+			ms_sends_msg("0554" "e229c19e" "2104" "791f2e41");
+			OSMO_ASSERT(!cipher_mode_cmd_sent);
+			VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
+
+			btw("BSC sends back a BSSMAP Classmark Update, that triggers the Ciphering Mode Command");
+			expect_cipher_mode_cmd("059a4f668f6fbe39");
+			/* enable A5/4 in MS classmark */
+			classmark.classmark3_len = 1;
+			classmark.classmark3[0] = 1; /* 0b0001 == A5/4 supported */
+			ms_sends_classmark_update(&classmark);
+			OSMO_ASSERT(cipher_mode_cmd_sent);
+			VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
+
+			btw("MS sends Ciphering Mode Complete, VLR accepts and sends GSUP LU Req to HLR");
+			gsup_expect_tx("04010809710000000156f0" CN_DOMAIN VLR_TO_HLR);
+			ms_sends_ciphering_mode_complete2(NULL, 5);
+			VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 		} else {
 			/* On UTRAN */
 			btw("Encryption enabled. MS sends Authen Response, VLR accepts and sends SecurityModeControl");
@@ -335,6 +357,14 @@ static void test_umts_authen_utran()
 	comment_start();
 	net->uea_encryption = false;
 	_test_umts_authen(OSMO_RAT_UTRAN_IU);
+	comment_end();
+}
+
+static void test_umts_auth_ciph_geran()
+{
+	comment_start();
+	net->uea_encryption = true;
+	_test_umts_authen(OSMO_RAT_GERAN_A);
 	comment_end();
 }
 
@@ -906,10 +936,20 @@ static void test_umts_authen_only_sres_utran()
 	comment_end();
 }
 
+static void test_umts_auth_ciph_geran_a5_4()
+{
+	comment_start();
+	net->uea_encryption = true;
+	/* enable A5/4 in config */
+	net->a5_encryption_mask |= (1 << 4);
+	_test_umts_authen(OSMO_RAT_GERAN_A);
+	comment_end();
+}
 
 msc_vlr_test_func_t msc_vlr_tests[] = {
 	test_umts_authen_geran,
 	test_umts_authen_utran,
+	test_umts_auth_ciph_geran,
 	test_umts_auth_ciph_utran,
 	test_umts_authen_resync_geran,
 	test_umts_authen_resync_utran,
@@ -920,5 +960,6 @@ msc_vlr_test_func_t msc_vlr_tests[] = {
 	test_umts_authen_too_long_res_utran,
 	test_umts_authen_only_sres_geran,
 	test_umts_authen_only_sres_utran,
+	test_umts_auth_ciph_geran_a5_4,
 	NULL
 };
