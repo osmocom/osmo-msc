@@ -83,7 +83,7 @@ static void test_ciph()
 
 	btw("MS sends Ciphering Mode Complete, VLR accepts and sends GSUP LU Req to HLR");
 	gsup_expect_tx("04010809710000004026f0" CN_DOMAIN VLR_TO_HLR);
-	ms_sends_ciphering_mode_complete(NULL);
+	ms_sends_ciphering_mode_complete(NULL, 1);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("HLR sends _INSERT_DATA_REQUEST, VLR responds with _INSERT_DATA_RESULT");
@@ -124,7 +124,7 @@ static void test_ciph()
 	thwart_rx_non_initial_requests();
 
 	btw("MS sends Ciphering Mode Complete, VLR accepts; above Ciphering is an implicit CM Service Accept");
-	ms_sends_ciphering_mode_complete(NULL);
+	ms_sends_ciphering_mode_complete(NULL, 1);
 	VERBOSE_ASSERT(cm_service_result_sent, == RES_NONE, "%d");
 
 	/* Release connection */
@@ -198,7 +198,7 @@ static void test_ciph()
 		       "5079da1e1ee7416937485e9ea7c965373d1d6683c270383b3d0e"
 		       "d3d36ff71c949e83c22072799e9687c5ec32a81d96afcbf4b4fb"
 		       "0c7ac3e9e9b7db05");
-	ms_sends_ciphering_mode_complete(NULL);
+	ms_sends_ciphering_mode_complete(NULL, 1);
 	VERBOSE_ASSERT(dtap_tx_confirmed, == true, "%d");
 
 	btw("SMS was delivered, no requests pending for subscr");
@@ -293,7 +293,7 @@ static void test_ciph_tmsi()
 
 	btw("MS sends Ciphering Mode Complete, VLR accepts and sends GSUP LU Req to HLR");
 	gsup_expect_tx("04010809710000004026f0" CN_DOMAIN VLR_TO_HLR);
-	ms_sends_ciphering_mode_complete(NULL);
+	ms_sends_ciphering_mode_complete(NULL, 1);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("HLR sends _INSERT_DATA_REQUEST, VLR responds with _INSERT_DATA_RESULT");
@@ -359,7 +359,7 @@ static void test_ciph_tmsi()
 	thwart_rx_non_initial_requests();
 
 	btw("MS sends Ciphering Mode Complete, VLR accepts; above Ciphering is an implicit CM Service Accept");
-	ms_sends_ciphering_mode_complete(NULL);
+	ms_sends_ciphering_mode_complete(NULL, 1);
 	VERBOSE_ASSERT(cm_service_result_sent, == RES_NONE, "%d");
 
 	/* Release connection */
@@ -433,7 +433,7 @@ static void test_ciph_tmsi()
 		       "5079da1e1ee7416937485e9ea7c965373d1d6683c270383b3d0e"
 		       "d3d36ff71c949e83c22072799e9687c5ec32a81d96afcbf4b4fb"
 		       "0c7ac3e9e9b7db05");
-	ms_sends_ciphering_mode_complete(NULL);
+	ms_sends_ciphering_mode_complete(NULL, 1);
 	VERBOSE_ASSERT(dtap_tx_confirmed, == true, "%d");
 
 	btw("SMS was delivered, no requests pending for subscr");
@@ -527,7 +527,7 @@ static void test_ciph_imei()
 
 	btw("MS sends Ciphering Mode Complete, VLR accepts and sends GSUP LU Req to HLR");
 	gsup_expect_tx("04010809710000004026f0" CN_DOMAIN VLR_TO_HLR);
-	ms_sends_ciphering_mode_complete(NULL);
+	ms_sends_ciphering_mode_complete(NULL, 1);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("HLR sends _INSERT_DATA_REQUEST, VLR responds with _INSERT_DATA_RESULT");
@@ -643,7 +643,7 @@ static void test_ciph_imeisv()
 
 	btw("MS sends Ciphering Mode Complete with IMEISV, VLR accepts and sends GSUP LU Req to HLR");
 	gsup_expect_tx("04010809710000004026f0" CN_DOMAIN VLR_TO_HLR);
-	ms_sends_ciphering_mode_complete("063217094332244332244372f5");
+	ms_sends_ciphering_mode_complete("063217094332244332244372f5", 1);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("Subscriber has the IMEISV");
@@ -738,7 +738,7 @@ static void test_ciph_tmsi_imei()
 
 	btw("MS sends Ciphering Mode Complete, VLR accepts and sends GSUP LU Req to HLR");
 	gsup_expect_tx("04010809710000004026f0" CN_DOMAIN VLR_TO_HLR);
-	ms_sends_ciphering_mode_complete(NULL);
+	ms_sends_ciphering_mode_complete(NULL, 1);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("HLR sends _INSERT_DATA_REQUEST, VLR responds with _INSERT_DATA_RESULT");
@@ -923,7 +923,7 @@ static void test_gsm_ciph_in_umts_env()
 
 	btw("MS sends Ciphering Mode Complete, VLR accepts and sends GSUP LU Req to HLR");
 	gsup_expect_tx("04010809710000000156f0" CN_DOMAIN VLR_TO_HLR);
-	ms_sends_ciphering_mode_complete(NULL);
+	ms_sends_ciphering_mode_complete(NULL, 1);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("HLR sends _INSERT_DATA_REQUEST, VLR responds with _INSERT_DATA_RESULT");
@@ -963,7 +963,7 @@ static void test_gsm_ciph_in_umts_env()
 	VERBOSE_ASSERT(cipher_mode_cmd_sent, == true, "%d");
 
 	btw("MS sends Ciphering Mode Complete, VLR accepts; above Ciphering is an implicit CM Service Accept");
-	ms_sends_ciphering_mode_complete(NULL);
+	ms_sends_ciphering_mode_complete(NULL, 1);
 	VERBOSE_ASSERT(cm_service_result_sent, == RES_NONE, "%d");
 
 	/* Release connection */
@@ -1016,7 +1016,7 @@ static void test_gsm_ciph_in_umts_env()
 
 	btw("MS sends Ciphering Mode Complete, VLR accepts and sends pending SMS");
 	dtap_expect_tx(sms);
-	ms_sends_ciphering_mode_complete(NULL);
+	ms_sends_ciphering_mode_complete(NULL, 1);
 	VERBOSE_ASSERT(dtap_tx_confirmed, == true, "%d");
 
 	btw("SMS was delivered, no requests pending for subscr");
@@ -1112,7 +1112,7 @@ static void test_a5_3_supported()
 
 	btw("MS sends Ciphering Mode Complete, VLR accepts and sends GSUP LU Req to HLR");
 	gsup_expect_tx("04010809710000004026f0" CN_DOMAIN VLR_TO_HLR);
-	ms_sends_ciphering_mode_complete(NULL);
+	ms_sends_ciphering_mode_complete(NULL, 3);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("HLR sends _INSERT_DATA_REQUEST, VLR responds with _INSERT_DATA_RESULT");
@@ -1154,7 +1154,7 @@ static void test_a5_3_supported()
 	thwart_rx_non_initial_requests();
 
 	btw("MS sends Ciphering Mode Complete, VLR accepts; above Ciphering is an implicit CM Service Accept");
-	ms_sends_ciphering_mode_complete(NULL);
+	ms_sends_ciphering_mode_complete(NULL, 3);
 	VERBOSE_ASSERT(cm_service_result_sent, == RES_NONE, "%d");
 
 	/* Release connection */
@@ -1228,7 +1228,7 @@ static void test_a5_3_supported()
 		       "5079da1e1ee7416937485e9ea7c965373d1d6683c270383b3d0e"
 		       "d3d36ff71c949e83c22072799e9687c5ec32a81d96afcbf4b4fb"
 		       "0c7ac3e9e9b7db05");
-	ms_sends_ciphering_mode_complete(NULL);
+	ms_sends_ciphering_mode_complete(NULL, 3);
 	VERBOSE_ASSERT(dtap_tx_confirmed, == true, "%d");
 
 	btw("SMS was delivered, no requests pending for subscr");
@@ -1328,7 +1328,7 @@ static void test_cm_service_needs_classmark_update()
 
 	btw("MS sends Ciphering Mode Complete, VLR accepts and sends GSUP LU Req to HLR");
 	gsup_expect_tx("04010809710000004026f0" CN_DOMAIN VLR_TO_HLR);
-	ms_sends_ciphering_mode_complete(NULL);
+	ms_sends_ciphering_mode_complete(NULL, 3);
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("HLR sends _INSERT_DATA_REQUEST, VLR responds with _INSERT_DATA_RESULT");
@@ -1371,7 +1371,7 @@ static void test_cm_service_needs_classmark_update()
 	thwart_rx_non_initial_requests();
 
 	btw("MS sends Ciphering Mode Complete, VLR accepts; above Ciphering is an implicit CM Service Accept");
-	ms_sends_ciphering_mode_complete(NULL);
+	ms_sends_ciphering_mode_complete(NULL, 3);
 	VERBOSE_ASSERT(cm_service_result_sent, == RES_NONE, "%d");
 
 	/* Release connection */
@@ -1453,7 +1453,7 @@ static void test_cm_service_needs_classmark_update()
 		       "5079da1e1ee7416937485e9ea7c965373d1d6683c270383b3d0e"
 		       "d3d36ff71c949e83c22072799e9687c5ec32a81d96afcbf4b4fb"
 		       "0c7ac3e9e9b7db05");
-	ms_sends_ciphering_mode_complete(NULL);
+	ms_sends_ciphering_mode_complete(NULL, 3);
 	VERBOSE_ASSERT(dtap_tx_confirmed, == true, "%d");
 
 	btw("SMS was delivered, no requests pending for subscr");

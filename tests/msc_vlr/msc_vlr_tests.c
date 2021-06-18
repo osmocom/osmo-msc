@@ -957,7 +957,7 @@ static int fake_vlr_tx_auth_rej(void *msc_conn_ref)
 	return 0;
 }
 
-void ms_sends_ciphering_mode_complete(const char *inner_ran_msg)
+void ms_sends_ciphering_mode_complete(const char *inner_ran_msg, uint8_t chosen_encr_alg_nr)
 {
 	struct ran_msg ran_dec;
 
@@ -965,6 +965,9 @@ void ms_sends_ciphering_mode_complete(const char *inner_ran_msg)
 
 	ran_dec = (struct ran_msg){
 		.msg_type = RAN_MSG_CIPHER_MODE_COMPLETE,
+			.cipher_mode_complete = {
+				.alg_id = chosen_encr_alg_nr + 1,
+			},
 	};
 	fake_msc_a_ran_dec(&ran_dec);
 
