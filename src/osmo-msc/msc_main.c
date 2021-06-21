@@ -776,14 +776,24 @@ TODO: we probably want some of the _net_ ctrl commands from bsc_base_ctrl_cmds_i
 		}
 	}
 
-	while (!quit) {
+	do {
 		log_reset_context();
 		osmo_select_main_ctx(0);
-	}
 
-	msc_network_shutdown(msc_network);
-	osmo_signal_dispatch(SS_L_GLOBAL, S_L_GLOBAL_SHUTDOWN, NULL);
-	sleep(3);
+		/* If the user hits Ctrl-C the third time, just terminate immediately. */
+		if (quit >= 3)
+			break;
+
+		/* Has SIGTERM been received (and not yet been handled)? */
+		if (quit && !osmo_select_shutdown_requested()) {
+			msc_network_shutdown(msc_network);
+			osmo_signal_dispatch(SS_L_GLOBAL, S_L_GLOBAL_SHUTDOWN, NULL);
+
+			/* Request write-only mode in osmo_select_main_ctx() */
+			osmo_select_shutdown_request();
+			/* continue the main select loop until all write queues are serviced. */
+		}
+	} while (!osmo_select_shutdown_done());
 
 	log_fini();
 
