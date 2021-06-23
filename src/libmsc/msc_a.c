@@ -345,8 +345,12 @@ static int msc_a_ran_enc_ciphering(struct msc_a *msc_a, bool umts_aka, bool retr
 	}
 
 	if (msc_a->geran_encr.key_len)
-		LOG_MSC_A(msc_a, LOGL_DEBUG, "RAN encoding chose ciphering key %s\n",
-			  osmo_hexdump_nospc(msc_a->geran_encr.key, msc_a->geran_encr.key_len));
+		LOG_MSC_A(msc_a, LOGL_DEBUG, "RAN encoding chose ciphering: A5/%d kc %s kc128 %s\n",
+			  msc_a->geran_encr.alg_id - 1,
+			  osmo_hexdump_nospc_c(OTC_SELECT, msc_a->geran_encr.key, msc_a->geran_encr.key_len),
+			  msc_a->geran_encr.kc128_present ?
+			    osmo_hexdump_nospc_c(OTC_SELECT, msc_a->geran_encr.kc128, sizeof(msc_a->geran_encr.kc128))
+			    : "-");
 	return 0;
 }
 

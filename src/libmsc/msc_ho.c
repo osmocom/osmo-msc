@@ -408,6 +408,14 @@ static void msc_ho_send_handover_request(struct msc_a *msc_a)
 		},
 	};
 
+	if (msc_a->geran_encr.key_len)
+		LOG_MSC_A(msc_a, LOGL_DEBUG, "HO Request with ciphering: A5/%d kc %s kc128 %s\n",
+			  msc_a->geran_encr.alg_id - 1,
+			  osmo_hexdump_nospc_c(OTC_SELECT, msc_a->geran_encr.key, msc_a->geran_encr.key_len),
+			  msc_a->geran_encr.kc128_present ?
+			    osmo_hexdump_nospc_c(OTC_SELECT, msc_a->geran_encr.kc128, sizeof(msc_a->geran_encr.kc128))
+			    : "-");
+
 	if (msc_a->cc.active_trans) {
 		if (mncc_bearer_cap_to_channel_type(&channel_type, &msc_a->cc.active_trans->bearer_cap)) {
 			msc_ho_failed(msc_a, GSM0808_CAUSE_EQUIPMENT_FAILURE,
