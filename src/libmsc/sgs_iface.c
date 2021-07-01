@@ -915,6 +915,8 @@ static int sgs_rx_ul_ud(struct sgs_connection *sgc, struct msgb *msg, const stru
 static int sgs_rx_csfb_ind(struct sgs_connection *sgc, struct msgb *msg, const struct tlv_parsed *tp, char *imsi)
 {
 	struct vlr_subscr *vsub;
+	struct osmo_plmn_id last_eutran_plmn_buf;
+	const struct osmo_plmn_id *last_eutran_plmn = &last_eutran_plmn_buf;
 
 	/* The MME informs us with this message that the UE has initiated a
 	 * service request for MO CS fallback. There is not much we can do with
@@ -928,22 +930,22 @@ static int sgs_rx_csfb_ind(struct sgs_connection *sgc, struct msgb *msg, const s
 	/* 3GPP TS 23.272 sec 4.3.3 (CSFB):
 	 * "During the SGs location update procedure, obtaining the last used LTE PLMN ID via TAI"
 	 */
-	vsub->sgs.last_eutran_plmn_present = TLVP_PRES_LEN(tp, SGSAP_IE_EUTRAN_CGI, 3);
 	if (TLVP_PRES_LEN(tp, SGSAP_IE_TAI, 3)) {
-		vsub->sgs.last_eutran_plmn_present = true;
-		osmo_plmn_from_bcd(TLVP_VAL(tp, SGSAP_IE_TAI), &vsub->sgs.last_eutran_plmn);
+		osmo_plmn_from_bcd(TLVP_VAL(tp, SGSAP_IE_TAI), &last_eutran_plmn_buf);
 		/* TODO: we could also gather the TAC from here, but we don't need it yet */
 	} else if (TLVP_PRES_LEN(tp, SGSAP_IE_EUTRAN_CGI, 3)) {
 		/* Since TAI is optional, let's try harder getting Last Used
 		 * E-UTRAN PLMN ID by fetching it from E-UTRAN CGI */
-		vsub->sgs.last_eutran_plmn_present = true;
-		osmo_plmn_from_bcd(TLVP_VAL(tp, SGSAP_IE_EUTRAN_CGI), &vsub->sgs.last_eutran_plmn);
+		osmo_plmn_from_bcd(TLVP_VAL(tp, SGSAP_IE_EUTRAN_CGI), &last_eutran_plmn_buf);
 		/* TODO: we could also gather the ECI from here, but we don't need it yet */
-	} else if (!vsub->sgs.last_eutran_plmn_present) {
+	} else {
 		LOGSGC(sgc, LOGL_INFO, "Receiving SGsAP-MO-CSFB-INDICATION without TAI nor "
 		       "E-CGI IEs, and they are not known from previous SGsAP-LOCATION-UPDATE-REQUEST. "
 		       "Fast fallback GERAN->EUTRAN won't be possible!\n");
+		last_eutran_plmn = NULL;
 	}
+
+	vlr_subscr_set_last_used_eutran_plmn_id(vsub, last_eutran_plmn);
 
 	/* Check for lingering connections */
 	subscr_conn_toss(vsub);
