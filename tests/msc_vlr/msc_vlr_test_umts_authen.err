@@ -27,6 +27,7 @@ DREF VLR subscr IMSI-901700000010650 + active-conn: now used by 2 (_lu_fsm_assoc
 DMSC msc_a(IMSI-901700000010650:GERAN-A:LU){MSC_A_ST_VALIDATE_L3}: Received Event MSC_A_EV_COMPLETE_LAYER_3_OK
 DMSC msc_a(IMSI-901700000010650:GERAN-A:LU){MSC_A_ST_VALIDATE_L3}: state_chg to MSC_A_ST_AUTH_CIPH
 DREF VLR subscr IMSI-901700000010650 - _lu_fsm_associate_vsub: now used by 1 (active-conn)
+DVLR set Last E-UTRAN PLMN ID on subscriber: (none)
 DVLR vlr_lu_fsm(IMSI-901700000010650:GERAN-A:LU){VLR_ULA_S_IDLE}: vlr_loc_upd_node1_pre()
 DVLR vlr_lu_fsm(IMSI-901700000010650:GERAN-A:LU){VLR_ULA_S_IDLE}: vlr_loc_upd_node1()
 DVLR vlr_lu_fsm(IMSI-901700000010650:GERAN-A:LU){VLR_ULA_S_IDLE}: state_chg to VLR_ULA_S_WAIT_AUTH
@@ -565,6 +566,7 @@ DMM IMSI DETACH for IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100
 DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + active-conn: now used by 3 (attached,gsm48_rx_mm_imsi_detach_ind,active-conn)
 DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + vlr_subscr_cancel_attach_fsm: now used by 4 (attached,gsm48_rx_mm_imsi_detach_ind,active-conn,vlr_subscr_cancel_attach_fsm)
 DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - vlr_subscr_cancel_attach_fsm: now used by 3 (attached,gsm48_rx_mm_imsi_detach_ind,active-conn)
+DVLR set Last E-UTRAN PLMN ID on subscriber: (none)
 DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - attached: now used by 2 (gsm48_rx_mm_imsi_detach_ind,active-conn)
 DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - gsm48_rx_mm_imsi_detach_ind: now used by 1 (active-conn)
 DMSC msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:GERAN-A:NONE){MSC_A_ST_VALIDATE_L3}: Received Event MSC_A_EV_CN_CLOSE
@@ -632,6 +634,7 @@ DREF VLR subscr IMSI-901700000010650 + active-conn: now used by 2 (_lu_fsm_assoc
 DMSC msc_a(IMSI-901700000010650:UTRAN-Iu:LU){MSC_A_ST_VALIDATE_L3}: Received Event MSC_A_EV_COMPLETE_LAYER_3_OK
 DMSC msc_a(IMSI-901700000010650:UTRAN-Iu:LU){MSC_A_ST_VALIDATE_L3}: state_chg to MSC_A_ST_AUTH_CIPH
 DREF VLR subscr IMSI-901700000010650 - _lu_fsm_associate_vsub: now used by 1 (active-conn)
+DVLR set Last E-UTRAN PLMN ID on subscriber: (none)
 DVLR vlr_lu_fsm(IMSI-901700000010650:UTRAN-Iu:LU){VLR_ULA_S_IDLE}: vlr_loc_upd_node1_pre()
 DVLR vlr_lu_fsm(IMSI-901700000010650:UTRAN-Iu:LU){VLR_ULA_S_IDLE}: vlr_loc_upd_node1()
 DVLR vlr_lu_fsm(IMSI-901700000010650:UTRAN-Iu:LU){VLR_ULA_S_IDLE}: state_chg to VLR_ULA_S_WAIT_AUTH
@@ -1170,6 +1173,7 @@ DMM IMSI DETACH for IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100
 DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + active-conn: now used by 3 (attached,gsm48_rx_mm_imsi_detach_ind,active-conn)
 DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + vlr_subscr_cancel_attach_fsm: now used by 4 (attached,gsm48_rx_mm_imsi_detach_ind,active-conn,vlr_subscr_cancel_attach_fsm)
 DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - vlr_subscr_cancel_attach_fsm: now used by 3 (attached,gsm48_rx_mm_imsi_detach_ind,active-conn)
+DVLR set Last E-UTRAN PLMN ID on subscriber: (none)
 DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - attached: now used by 2 (gsm48_rx_mm_imsi_detach_ind,active-conn)
 DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - gsm48_rx_mm_imsi_detach_ind: now used by 1 (active-conn)
 DMSC msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:NONE){MSC_A_ST_VALIDATE_L3}: Received Event MSC_A_EV_CN_CLOSE
@@ -1237,6 +1241,7 @@ DREF VLR subscr IMSI-901700000010650 + active-conn: now used by 2 (_lu_fsm_assoc
 DMSC msc_a(IMSI-901700000010650:UTRAN-Iu:LU){MSC_A_ST_VALIDATE_L3}: Received Event MSC_A_EV_COMPLETE_LAYER_3_OK
 DMSC msc_a(IMSI-901700000010650:UTRAN-Iu:LU){MSC_A_ST_VALIDATE_L3}: state_chg to MSC_A_ST_AUTH_CIPH
 DREF VLR subscr IMSI-901700000010650 - _lu_fsm_associate_vsub: now used by 1 (active-conn)
+DVLR set Last E-UTRAN PLMN ID on subscriber: (none)
 DVLR vlr_lu_fsm(IMSI-901700000010650:UTRAN-Iu:LU){VLR_ULA_S_IDLE}: vlr_loc_upd_node1_pre()
 DVLR vlr_lu_fsm(IMSI-901700000010650:UTRAN-Iu:LU){VLR_ULA_S_IDLE}: vlr_loc_upd_node1()
 DVLR vlr_lu_fsm(IMSI-901700000010650:UTRAN-Iu:LU){VLR_ULA_S_IDLE}: state_chg to VLR_ULA_S_WAIT_AUTH
@@ -1799,6 +1804,7 @@ DMM IMSI DETACH for IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100
 DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + active-conn: now used by 3 (attached,gsm48_rx_mm_imsi_detach_ind,active-conn)
 DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + vlr_subscr_cancel_attach_fsm: now used by 4 (attached,gsm48_rx_mm_imsi_detach_ind,active-conn,vlr_subscr_cancel_attach_fsm)
 DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - vlr_subscr_cancel_attach_fsm: now used by 3 (attached,gsm48_rx_mm_imsi_detach_ind,active-conn)
+DVLR set Last E-UTRAN PLMN ID on subscriber: (none)
 DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - attached: now used by 2 (gsm48_rx_mm_imsi_detach_ind,active-conn)
 DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - gsm48_rx_mm_imsi_detach_ind: now used by 1 (active-conn)
 DMSC msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:NONE){MSC_A_ST_VALIDATE_L3}: Received Event MSC_A_EV_CN_CLOSE
@@ -1866,6 +1872,7 @@ DREF VLR subscr IMSI-901700000010650 + active-conn: now used by 2 (_lu_fsm_assoc
 DMSC msc_a(IMSI-901700000010650:GERAN-A:LU){MSC_A_ST_VALIDATE_L3}: Received Event MSC_A_EV_COMPLETE_LAYER_3_OK
 DMSC msc_a(IMSI-901700000010650:GERAN-A:LU){MSC_A_ST_VALIDATE_L3}: state_chg to MSC_A_ST_AUTH_CIPH
 DREF VLR subscr IMSI-901700000010650 - _lu_fsm_associate_vsub: now used by 1 (active-conn)
+DVLR set Last E-UTRAN PLMN ID on subscriber: (none)
 DVLR vlr_lu_fsm(IMSI-901700000010650:GERAN-A:LU){VLR_ULA_S_IDLE}: vlr_loc_upd_node1_pre()
 DVLR vlr_lu_fsm(IMSI-901700000010650:GERAN-A:LU){VLR_ULA_S_IDLE}: vlr_loc_upd_node1()
 DVLR vlr_lu_fsm(IMSI-901700000010650:GERAN-A:LU){VLR_ULA_S_IDLE}: state_chg to VLR_ULA_S_WAIT_AUTH
@@ -2097,6 +2104,7 @@ DREF VLR subscr IMSI-901700000010650 + active-conn: now used by 2 (_lu_fsm_assoc
 DMSC msc_a(IMSI-901700000010650:UTRAN-Iu:LU){MSC_A_ST_VALIDATE_L3}: Received Event MSC_A_EV_COMPLETE_LAYER_3_OK
 DMSC msc_a(IMSI-901700000010650:UTRAN-Iu:LU){MSC_A_ST_VALIDATE_L3}: state_chg to MSC_A_ST_AUTH_CIPH
 DREF VLR subscr IMSI-901700000010650 - _lu_fsm_associate_vsub: now used by 1 (active-conn)
+DVLR set Last E-UTRAN PLMN ID on subscriber: (none)
 DVLR vlr_lu_fsm(IMSI-901700000010650:UTRAN-Iu:LU){VLR_ULA_S_IDLE}: vlr_loc_upd_node1_pre()
 DVLR vlr_lu_fsm(IMSI-901700000010650:UTRAN-Iu:LU){VLR_ULA_S_IDLE}: vlr_loc_upd_node1()
 DVLR vlr_lu_fsm(IMSI-901700000010650:UTRAN-Iu:LU){VLR_ULA_S_IDLE}: state_chg to VLR_ULA_S_WAIT_AUTH
@@ -2328,6 +2336,7 @@ DREF VLR subscr IMSI-901700000010650 + active-conn: now used by 2 (_lu_fsm_assoc
 DMSC msc_a(IMSI-901700000010650:UTRAN-Iu:LU){MSC_A_ST_VALIDATE_L3}: Received Event MSC_A_EV_COMPLETE_LAYER_3_OK
 DMSC msc_a(IMSI-901700000010650:UTRAN-Iu:LU){MSC_A_ST_VALIDATE_L3}: state_chg to MSC_A_ST_AUTH_CIPH
 DREF VLR subscr IMSI-901700000010650 - _lu_fsm_associate_vsub: now used by 1 (active-conn)
+DVLR set Last E-UTRAN PLMN ID on subscriber: (none)
 DVLR vlr_lu_fsm(IMSI-901700000010650:UTRAN-Iu:LU){VLR_ULA_S_IDLE}: vlr_loc_upd_node1_pre()
 DVLR vlr_lu_fsm(IMSI-901700000010650:UTRAN-Iu:LU){VLR_ULA_S_IDLE}: vlr_loc_upd_node1()
 DVLR vlr_lu_fsm(IMSI-901700000010650:UTRAN-Iu:LU){VLR_ULA_S_IDLE}: state_chg to VLR_ULA_S_WAIT_AUTH
@@ -2569,6 +2578,7 @@ DREF VLR subscr IMSI-901700000010650 + active-conn: now used by 2 (_lu_fsm_assoc
 DMSC msc_a(IMSI-901700000010650:GERAN-A:LU){MSC_A_ST_VALIDATE_L3}: Received Event MSC_A_EV_COMPLETE_LAYER_3_OK
 DMSC msc_a(IMSI-901700000010650:GERAN-A:LU){MSC_A_ST_VALIDATE_L3}: state_chg to MSC_A_ST_AUTH_CIPH
 DREF VLR subscr IMSI-901700000010650 - _lu_fsm_associate_vsub: now used by 1 (active-conn)
+DVLR set Last E-UTRAN PLMN ID on subscriber: (none)
 DVLR vlr_lu_fsm(IMSI-901700000010650:GERAN-A:LU){VLR_ULA_S_IDLE}: vlr_loc_upd_node1_pre()
 DVLR vlr_lu_fsm(IMSI-901700000010650:GERAN-A:LU){VLR_ULA_S_IDLE}: vlr_loc_upd_node1()
 DVLR vlr_lu_fsm(IMSI-901700000010650:GERAN-A:LU){VLR_ULA_S_IDLE}: state_chg to VLR_ULA_S_WAIT_AUTH
@@ -2684,6 +2694,7 @@ DREF VLR subscr IMSI-901700000010650 + active-conn: now used by 2 (_lu_fsm_assoc
 DMSC msc_a(IMSI-901700000010650:UTRAN-Iu:LU){MSC_A_ST_VALIDATE_L3}: Received Event MSC_A_EV_COMPLETE_LAYER_3_OK
 DMSC msc_a(IMSI-901700000010650:UTRAN-Iu:LU){MSC_A_ST_VALIDATE_L3}: state_chg to MSC_A_ST_AUTH_CIPH
 DREF VLR subscr IMSI-901700000010650 - _lu_fsm_associate_vsub: now used by 1 (active-conn)
+DVLR set Last E-UTRAN PLMN ID on subscriber: (none)
 DVLR vlr_lu_fsm(IMSI-901700000010650:UTRAN-Iu:LU){VLR_ULA_S_IDLE}: vlr_loc_upd_node1_pre()
 DVLR vlr_lu_fsm(IMSI-901700000010650:UTRAN-Iu:LU){VLR_ULA_S_IDLE}: vlr_loc_upd_node1()
 DVLR vlr_lu_fsm(IMSI-901700000010650:UTRAN-Iu:LU){VLR_ULA_S_IDLE}: state_chg to VLR_ULA_S_WAIT_AUTH
@@ -2799,6 +2810,7 @@ DREF VLR subscr IMSI-901700000010650 + active-conn: now used by 2 (_lu_fsm_assoc
 DMSC msc_a(IMSI-901700000010650:GERAN-A:LU){MSC_A_ST_VALIDATE_L3}: Received Event MSC_A_EV_COMPLETE_LAYER_3_OK
 DMSC msc_a(IMSI-901700000010650:GERAN-A:LU){MSC_A_ST_VALIDATE_L3}: state_chg to MSC_A_ST_AUTH_CIPH
 DREF VLR subscr IMSI-901700000010650 - _lu_fsm_associate_vsub: now used by 1 (active-conn)
+DVLR set Last E-UTRAN PLMN ID on subscriber: (none)
 DVLR vlr_lu_fsm(IMSI-901700000010650:GERAN-A:LU){VLR_ULA_S_IDLE}: vlr_loc_upd_node1_pre()
 DVLR vlr_lu_fsm(IMSI-901700000010650:GERAN-A:LU){VLR_ULA_S_IDLE}: vlr_loc_upd_node1()
 DVLR vlr_lu_fsm(IMSI-901700000010650:GERAN-A:LU){VLR_ULA_S_IDLE}: state_chg to VLR_ULA_S_WAIT_AUTH
@@ -2914,6 +2926,7 @@ DREF VLR subscr IMSI-901700000010650 + active-conn: now used by 2 (_lu_fsm_assoc
 DMSC msc_a(IMSI-901700000010650:UTRAN-Iu:LU){MSC_A_ST_VALIDATE_L3}: Received Event MSC_A_EV_COMPLETE_LAYER_3_OK
 DMSC msc_a(IMSI-901700000010650:UTRAN-Iu:LU){MSC_A_ST_VALIDATE_L3}: state_chg to MSC_A_ST_AUTH_CIPH
 DREF VLR subscr IMSI-901700000010650 - _lu_fsm_associate_vsub: now used by 1 (active-conn)
+DVLR set Last E-UTRAN PLMN ID on subscriber: (none)
 DVLR vlr_lu_fsm(IMSI-901700000010650:UTRAN-Iu:LU){VLR_ULA_S_IDLE}: vlr_loc_upd_node1_pre()
 DVLR vlr_lu_fsm(IMSI-901700000010650:UTRAN-Iu:LU){VLR_ULA_S_IDLE}: vlr_loc_upd_node1()
 DVLR vlr_lu_fsm(IMSI-901700000010650:UTRAN-Iu:LU){VLR_ULA_S_IDLE}: state_chg to VLR_ULA_S_WAIT_AUTH
@@ -3029,6 +3042,7 @@ DREF VLR subscr IMSI-901700000010650 + active-conn: now used by 2 (_lu_fsm_assoc
 DMSC msc_a(IMSI-901700000010650:GERAN-A:LU){MSC_A_ST_VALIDATE_L3}: Received Event MSC_A_EV_COMPLETE_LAYER_3_OK
 DMSC msc_a(IMSI-901700000010650:GERAN-A:LU){MSC_A_ST_VALIDATE_L3}: state_chg to MSC_A_ST_AUTH_CIPH
 DREF VLR subscr IMSI-901700000010650 - _lu_fsm_associate_vsub: now used by 1 (active-conn)
+DVLR set Last E-UTRAN PLMN ID on subscriber: (none)
 DVLR vlr_lu_fsm(IMSI-901700000010650:GERAN-A:LU){VLR_ULA_S_IDLE}: vlr_loc_upd_node1_pre()
 DVLR vlr_lu_fsm(IMSI-901700000010650:GERAN-A:LU){VLR_ULA_S_IDLE}: vlr_loc_upd_node1()
 DVLR vlr_lu_fsm(IMSI-901700000010650:GERAN-A:LU){VLR_ULA_S_IDLE}: state_chg to VLR_ULA_S_WAIT_AUTH
@@ -3144,6 +3158,7 @@ DREF VLR subscr IMSI-901700000010650 + active-conn: now used by 2 (_lu_fsm_assoc
 DMSC msc_a(IMSI-901700000010650:UTRAN-Iu:LU){MSC_A_ST_VALIDATE_L3}: Received Event MSC_A_EV_COMPLETE_LAYER_3_OK
 DMSC msc_a(IMSI-901700000010650:UTRAN-Iu:LU){MSC_A_ST_VALIDATE_L3}: state_chg to MSC_A_ST_AUTH_CIPH
 DREF VLR subscr IMSI-901700000010650 - _lu_fsm_associate_vsub: now used by 1 (active-conn)
+DVLR set Last E-UTRAN PLMN ID on subscriber: (none)
 DVLR vlr_lu_fsm(IMSI-901700000010650:UTRAN-Iu:LU){VLR_ULA_S_IDLE}: vlr_loc_upd_node1_pre()
 DVLR vlr_lu_fsm(IMSI-901700000010650:UTRAN-Iu:LU){VLR_ULA_S_IDLE}: vlr_loc_upd_node1()
 DVLR vlr_lu_fsm(IMSI-901700000010650:UTRAN-Iu:LU){VLR_ULA_S_IDLE}: state_chg to VLR_ULA_S_WAIT_AUTH

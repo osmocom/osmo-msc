@@ -59,6 +59,10 @@ static void to_null(struct osmo_fsm_inst *fi)
 	 * put us to NULL state, we have to free the pending TMSI */
 	vsub->tmsi_new = GSM_RESERVED_TMSI;
 
+	/* Make sure we remove recorded Last EUTRAN PLMN Id when UE ceases to be
+	 * available over SGs */
+	vlr_subscr_set_last_used_eutran_plmn_id(vsub, NULL);
+
 	/* Make sure any ongoing paging is aborted. */
 	if (vsub->cs.is_paging)
 		paging_expired(vsub);
