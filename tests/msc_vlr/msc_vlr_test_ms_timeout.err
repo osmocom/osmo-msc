@@ -85,7 +85,6 @@ DREF VLR subscr IMSI-901700000004620 + vlr_subscr_cancel_attach_fsm: now used by
 - sending LU Reject for IMSI-901700000004620:GERAN-A:LU, cause 22
 DVLR vlr_lu_fsm(IMSI-901700000004620:GERAN-A:LU){VLR_ULA_S_WAIT_AUTH}: state_chg to VLR_ULA_S_DONE
 DMSC msc_a(IMSI-901700000004620:GERAN-A:LU){MSC_A_ST_RELEASING}: Received Event MSC_A_EV_CN_CLOSE
-DMSC msc_a(IMSI-901700000004620:GERAN-A:LU){MSC_A_ST_RELEASING}: Event MSC_A_EV_CN_CLOSE not permitted
 DREF VLR subscr IMSI-901700000004620 - vlr_subscr_cancel_attach_fsm: now used by 2 (active-conn,msc_a_fsm_releasing_onenter)
 DREF msc_a(IMSI-901700000004620:GERAN-A:LU){MSC_A_ST_RELEASING}: + wait-Clear-Complete: now used by 1 (wait-Clear-Complete)
 DMSC msc_a(IMSI-901700000004620:GERAN-A:LU){MSC_A_ST_RELEASING}: RAN encode: CLEAR_COMMAND on GERAN-A
@@ -356,7 +355,6 @@ DVLR Process_Access_Request_VLR(IMSI-901700000004620:MSISDN-46071:GERAN-A:CM_SER
 DVLR Process_Access_Request_VLR(IMSI-901700000004620:MSISDN-46071:GERAN-A:CM_SERVICE_REQ){PR_ARQ_S_DONE}: Process Access Request result: CONGESTION
 - sending CM Service Reject (Short-Messaging-Service) for IMSI-901700000004620:MSISDN-46071:GERAN-A:CM_SERVICE_REQ, cause: CONGESTION
 DMSC msc_a(IMSI-901700000004620:MSISDN-46071:GERAN-A:CM_SERVICE_REQ){MSC_A_ST_RELEASING}: Received Event MSC_A_EV_CN_CLOSE
-DMSC msc_a(IMSI-901700000004620:MSISDN-46071:GERAN-A:CM_SERVICE_REQ){MSC_A_ST_RELEASING}: Event MSC_A_EV_CN_CLOSE not permitted
 DREF VLR subscr IMSI-901700000004620:MSISDN-46071 - vlr_subscr_cancel_attach_fsm: now used by 3 (attached,active-conn,msc_a_fsm_releasing_onenter)
 DBSSAP msc_a(IMSI-901700000004620:MSISDN-46071:GERAN-A:CM_SERVICE_REQ){MSC_A_ST_RELEASING}: Releasing: canceling still pending use: cm_service_sms (1)
 DREF msc_a(IMSI-901700000004620:MSISDN-46071:GERAN-A:CM_SERVICE_REQ){MSC_A_ST_RELEASING}: - cm_service_sms: now used by 0 (-)
@@ -821,7 +819,6 @@ DREF VLR subscr IMSI-901700000004620 + vlr_subscr_cancel_attach_fsm: now used by
 - sending LU Reject for IMSI-901700000004620:GERAN-A:LU, cause 22
 DVLR vlr_lu_fsm(IMSI-901700000004620:GERAN-A:LU){VLR_ULA_S_WAIT_CIPH}: state_chg to VLR_ULA_S_DONE
 DMSC msc_a(IMSI-901700000004620:GERAN-A:LU){MSC_A_ST_RELEASING}: Received Event MSC_A_EV_CN_CLOSE
-DMSC msc_a(IMSI-901700000004620:GERAN-A:LU){MSC_A_ST_RELEASING}: Event MSC_A_EV_CN_CLOSE not permitted
 DREF VLR subscr IMSI-901700000004620 - vlr_subscr_cancel_attach_fsm: now used by 2 (active-conn,msc_a_fsm_releasing_onenter)
 DREF msc_a(IMSI-901700000004620:GERAN-A:LU){MSC_A_ST_RELEASING}: + wait-Clear-Complete: now used by 1 (wait-Clear-Complete)
 DMSC msc_a(IMSI-901700000004620:GERAN-A:LU){MSC_A_ST_RELEASING}: RAN encode: CLEAR_COMMAND on GERAN-A

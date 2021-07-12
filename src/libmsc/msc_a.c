@@ -1002,6 +1002,7 @@ static const struct osmo_fsm_state msc_a_fsm_states[] = {
 			| S(MSC_EV_CALL_LEG_TERM)
 			| S(MSC_MNCC_EV_CALL_ENDED)
 			| S(MSC_A_EV_HANDOVER_END)
+			| S(MSC_A_EV_CN_CLOSE)
 			,
 		.out_state_mask = 0
 			| S(MSC_A_ST_RELEASED)
