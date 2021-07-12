@@ -476,9 +476,6 @@ int sgs_iface_tx_paging(struct vlr_subscr *vsub, enum sgsap_service_ind serv_ind
 	struct gsm29118_paging_req paging_params;
 	struct sgs_mme_ctx *mme;
 
-	LOGP(DMSC, LOGL_NOTICE, "XXXXXXXXXX state == %d  conf_by_radio_contact_ind == %d\n",
-	     vsub->sgs_fsm->state, vsub->conf_by_radio_contact_ind);
-
 	/* See also: 3GPP TS 29.118, chapter 5.1.2.2 Paging Initiation */
 	if (vsub->sgs_fsm->state == SGS_UE_ST_NULL && vsub->conf_by_radio_contact_ind == true) {
 		LOGPFSMSL(vsub->sgs_fsm, DPAG, LOGL_ERROR, "Will not Page (conf_by_radio_contact_ind == true)\n");
@@ -495,6 +492,9 @@ int sgs_iface_tx_paging(struct vlr_subscr *vsub, enum sgsap_service_ind serv_ind
 	 * if yes, don't initiate another paging request. */
 	if (vlr_sgs_pag_pend(vsub))
 		return 0;
+
+	LOGMME(mme, LOGL_INFO, "Paging on SGs: %s for %s (conf_by_radio_contact_ind=%d)\n",
+	       vlr_subscr_name(vsub), sgsap_service_ind_name(serv_ind), vsub->conf_by_radio_contact_ind);
 
 	memset(&paging_params, 0, sizeof(paging_params));
 	osmo_strlcpy(paging_params.imsi, vsub->imsi, sizeof(paging_params.imsi));
