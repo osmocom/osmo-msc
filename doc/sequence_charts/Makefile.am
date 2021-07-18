@@ -21,6 +21,7 @@ msc: \
 	$(builddir)/inter_bsc_ho.png \
 	$(builddir)/inter_msc_ho.png \
 	$(builddir)/voice_call_full.png \
+	$(builddir)/call_reestablishment.png \
 	$(NULL)
 
 dot: \
