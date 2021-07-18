@@ -1,0 +1,36 @@
+{hscale=2}
+ms = MS
+cell1 = Cell 1 (BTS+BSC)
+cell0 = Cell 0 (BTS+BSC)
+msc = MSC
+
+ms () msc	Call Re-Establishment
+ms [] msc	Ongoing voice call: MM is established
+
+...
+
+ms ->< cell0	radio link fails
+ms ><- cell0
+
+msc <> .	Keep MM until timeout
+
+ms -> cell1	Channel Required
+ms <- cell1	Immediate Assignment
+ms -> cell1	Complete Layer3
+cell1 -> msc	Complete Layer3:
+		CM Re-Establishment Request
+
+cell0 <- msc	Clear Command
+cell0 -> msc	Clear Complete
+
+cell1 <- msc	Authentication Request
+cell1 -> msc	Authentication Response
+
+cell1 <- msc	Cipher Mode Commad
+cell1 -> msc	Cipher Mode Complete
+
+cell1 <- msc	Assignment Request
+		this Assignment ACKs the CM Re-Establishment
+ms <- cell1	RR Assignment Command
+ms -> cell1	RR Assignment Complete
+cell1 -> msc	Assignment Complete

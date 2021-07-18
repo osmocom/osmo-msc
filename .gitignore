@@ -75,3 +75,5 @@ doc/manuals/common
 doc/manuals/build
 
 contrib/osmo-msc.spec
+
+doc/sequence_charts/call_reestablishment.msc
