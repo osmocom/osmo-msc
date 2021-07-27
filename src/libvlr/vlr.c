@@ -188,6 +188,21 @@ struct vlr_subscr *_vlr_subscr_find_by_msisdn(struct vlr_instance *vlr,
 	return NULL;
 }
 
+struct vlr_subscr *_vlr_subscr_find_by_mi(struct vlr_instance *vlr,
+					  const struct osmo_mobile_identity *mi,
+					  const char *use,
+					  const char *file, int line)
+{
+	switch (mi->type) {
+	case GSM_MI_TYPE_IMSI:
+		return _vlr_subscr_find_by_imsi(vlr, mi->imsi, use, file, line);
+	case GSM_MI_TYPE_TMSI:
+		return _vlr_subscr_find_by_tmsi(vlr, mi->tmsi, use, file, line);
+	default:
+		return NULL;
+	}
+}
+
 /* Transmit GSUP message for subscriber to HLR, using IMSI from subscriber */
 static int vlr_subscr_tx_gsup_message(const struct vlr_subscr *vsub,
 				      struct osmo_gsup_message *gsup_msg)

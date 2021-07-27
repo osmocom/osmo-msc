@@ -358,6 +358,9 @@ const char *vlr_subscr_msisdn_or_name(const struct vlr_subscr *vsub);
 #define vlr_subscr_find_by_msisdn(vlr, msisdn, USE) \
 	_vlr_subscr_find_by_msisdn(vlr, msisdn, USE, __FILE__, __LINE__)
 
+#define vlr_subscr_find_by_mi(vlr, mi, USE) \
+	_vlr_subscr_find_by_mi(vlr, mi, USE, __FILE__, __LINE__)
+
 struct vlr_subscr *_vlr_subscr_find_by_imsi(struct vlr_instance *vlr,
 					    const char *imsi,
 					    const char *use,
@@ -384,6 +387,11 @@ struct vlr_subscr *_vlr_subscr_find_by_msisdn(struct vlr_instance *vlr,
 					      const char *msisdn,
 					      const char *use,
 					      const char *file, int line);
+
+struct vlr_subscr *_vlr_subscr_find_by_mi(struct vlr_instance *vlr,
+					  const struct osmo_mobile_identity *mi,
+					  const char *use,
+					  const char *file, int line);
 
 #define vlr_subscr_get(VSUB, USE) vlr_subscr_get_src(VSUB, USE, __FILE__, __LINE__)
 #define vlr_subscr_put(VSUB, USE) vlr_subscr_put_src(VSUB, USE, __FILE__, __LINE__)
