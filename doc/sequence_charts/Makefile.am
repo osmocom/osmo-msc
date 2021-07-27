@@ -7,6 +7,7 @@ EXTRA_DIST = \
 	inter_bsc_ho.msc \
 	inter_msc_ho.msc \
 	mncc_call_fsm.msc \
+	call_reestablishment.msc \
 	$(NULL)
 
 CLEANFILES = \
@@ -21,6 +22,7 @@ msc: \
 	$(builddir)/inter_bsc_ho.png \
 	$(builddir)/inter_msc_ho.png \
 	$(builddir)/voice_call_full.png \
+	$(builddir)/call_reestablishment.png \
 	$(NULL)
 
 dot: \

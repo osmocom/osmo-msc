@@ -1,0 +1,33 @@
+msc {
+  hscale="2";
+  ms[label="MS"],cell1[label="Cell 1 (BTS+BSC)"],cell0[label="Cell 0 (BTS+BSC)"],__msc[label="MSC"];
+
+  ms rbox __msc [label="Call Re-Establishment"];
+  ms note __msc [label="Ongoing voice call: MM is established"];
+
+  ...;
+
+  ms -x cell0 [label="radio link fails"];
+  ms x- cell0;
+
+  __msc abox __msc [label="Keep MM until timeout"];
+
+  ms => cell1 [label="Channel Required"];
+  ms <= cell1 [label="Immediate Assignment"];
+  ms => cell1 [label="Complete Layer3"];
+  cell1 => __msc [label="Complete Layer3:\nCM Re-Establishment Request"];
+
+  cell0 <= __msc [label="Clear Command"];
+  cell0 => __msc [label="Clear Complete"];
+
+  cell1 <= __msc [label="Authentication Request"];
+  cell1 => __msc [label="Authentication Response"];
+
+  cell1 <= __msc [label="Cipher Mode Commad"];
+  cell1 => __msc [label="Cipher Mode Complete"];
+
+  cell1 <= __msc [label="Assignment Request\nthis Assignment ACKs the CM Re-Establishment"];
+  ms <= cell1 [label="RR Assignment Command"];
+  ms => cell1 [label="RR Assignment Complete"];
+  cell1 => __msc [label="Assignment Complete"];
+}
