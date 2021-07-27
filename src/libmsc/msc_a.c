@@ -120,6 +120,11 @@ static void update_counters(struct osmo_fsm_inst *fi, bool conn_accepted)
 	case COMPLETE_LAYER3_PAGING_RESP:
 		rate_ctr_inc(rate_ctr_group_get_ctr(net->msc_ctrs, conn_accepted ? MSC_CTR_PAGING_RESP_ACCEPTED : MSC_CTR_PAGING_RESP_REJECTED));
 		break;
+	case COMPLETE_LAYER3_CM_RE_ESTABLISH_REQ:
+		rate_ctr_inc(rate_ctr_group_get_ctr(net->msc_ctrs,
+						    conn_accepted ? MSC_CTR_CM_RE_ESTABLISH_REQ_ACCEPTED
+								  : MSC_CTR_CM_RE_ESTABLISH_REQ_REJECTED));
+		break;
 	default:
 		break;
 	}
@@ -151,6 +156,15 @@ static void evaluate_acceptance_outcome(struct osmo_fsm_inst *fi, bool conn_acce
 
 	if (msc_a->complete_layer3_type == COMPLETE_LAYER3_LU)
 		msc_a_put(msc_a, MSC_A_USE_LOCATION_UPDATING);
+
+	if (msc_a->complete_layer3_type == COMPLETE_LAYER3_CM_RE_ESTABLISH_REQ) {
+		/* Trigger new Assignment to recommence the voice call. A little dance here because normally we verify
+		 * that no CC trans is already active. */
+		struct gsm_trans *cc_trans = msc_a->cc.active_trans;
+		msc_a->cc.active_trans = NULL;
+		osmo_fsm_inst_dispatch(msc_a->c.fi, MSC_A_EV_TRANSACTION_ACCEPTED, cc_trans);
+		msc_a_try_call_assignment(cc_trans);
+	}
 }
 
 bool msc_a_is_accepted(const struct msc_a *msc_a)
@@ -1092,6 +1106,7 @@ const struct value_string complete_layer3_type_names[] = {
 	{ COMPLETE_LAYER3_LU, "LU" },
 	{ COMPLETE_LAYER3_CM_SERVICE_REQ, "CM_SERVICE_REQ" },
 	{ COMPLETE_LAYER3_PAGING_RESP, "PAGING_RESP" },
+	{ COMPLETE_LAYER3_CM_RE_ESTABLISH_REQ, "CM_RE_ESTABLISH_REQ" },
 	{ 0, NULL }
 };
 

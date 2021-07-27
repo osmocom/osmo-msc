@@ -41,6 +41,7 @@ enum complete_layer3_type {
 	COMPLETE_LAYER3_LU,
 	COMPLETE_LAYER3_CM_SERVICE_REQ,
 	COMPLETE_LAYER3_PAGING_RESP,
+	COMPLETE_LAYER3_CM_RE_ESTABLISH_REQ,
 };
 
 extern const struct value_string complete_layer3_type_names[];

@@ -48,11 +48,13 @@
 #include <osmocom/core/talloc.h>
 #include <osmocom/core/utils.h>
 #include <osmocom/core/byteswap.h>
+#include <osmocom/core/fsm.h>
 #include <osmocom/gsm/tlv.h>
 #include <osmocom/crypt/auth.h>
 
 #include <osmocom/msc/msub.h>
 #include <osmocom/msc/msc_roles.h>
+#include <osmocom/msc/call_leg.h>
 
 #include <assert.h>
 
@@ -824,17 +826,128 @@ int gsm48_rx_mm_serv_req(struct msc_a *msc_a, struct msgb *msg)
 /* Receive a CM Re-establish Request */
 static int gsm48_rx_cm_reest_req(struct msc_a *msc_a, struct msgb *msg)
 {
+	struct gsm_network *net = msc_a_net(msc_a);
+	struct gsm48_hdr *gh;
+	struct gsm48_service_request *req;
+	struct gsm48_classmark2 *cm2;
+	uint8_t *cm2_buf, cm2_len;
+	bool is_utran;
+	struct vlr_subscr *vsub;
 	struct osmo_mobile_identity mi;
+	struct msub *prev_msub;
+	struct msc_a *prev_msc_a;
+
 	int rc = osmo_mobile_identity_decode_from_l3(&mi, msg, false);
 	if (rc) {
 		LOGP(DMM, LOGL_ERROR, "CM RE-ESTABLISH REQUEST: cannot decode Mobile Identity\n");
 		return -EINVAL;
 	}
 
+	msc_a->complete_layer3_type = COMPLETE_LAYER3_CM_RE_ESTABLISH_REQ;
+	msub_update_id_from_mi(msc_a->c.msub, &mi);
+
 	DEBUGP(DMM, "<- CM RE-ESTABLISH REQUEST %s\n", osmo_mobile_identity_to_str_c(OTC_SELECT, &mi));
 
-	/* we don't support CM call re-establishment */
-	return msc_gsm48_tx_mm_serv_rej(msc_a, GSM48_REJECT_SRV_OPT_NOT_SUPPORTED);
+	gh = (struct gsm48_hdr *) msgb_l3(msg);
+	req = (struct gsm48_service_request *) gh->data;
+
+	/* Unfortunately in Phase1 the Classmark2 length is variable, so we cannot
+	 * just use gsm48_service_request struct, and need to parse it manually. */
+	cm2_len = gh->data[1];
+	cm2_buf = gh->data + 2;
+	cm2 = (struct gsm48_classmark2 *) cm2_buf;
+
+	/* Prevent buffer overrun: check the length of Classmark2 */
+	if (cm2_buf + cm2_len > msg->tail) {
+		LOG_MSC_A(msc_a, LOGL_ERROR, "Rx CM SERVICE REQUEST: Classmark2 "
+					     "length=%u is too big\n", cm2_len);
+		return msc_gsm48_tx_mm_serv_rej(msc_a, GSM48_REJECT_INCORRECT_MESSAGE);
+	}
+
+	/* Look up the other, previously active connection for this subscriber */
+	vsub = vlr_subscr_find_by_mi(net->vlr, &mi, __func__);
+	prev_msub = msub_for_vsub(vsub);
+	prev_msc_a = msub_msc_a(prev_msub);
+	if (!vsub || !prev_msub || !prev_msc_a) {
+		LOG_MSC_A(msc_a, LOGL_ERROR, "CM Re-Establish Request for unknown subscriber: %s\n",
+			  osmo_mobile_identity_to_str_c(OTC_SELECT, &mi));
+		if (vsub)
+			vlr_subscr_put(vsub, __func__);
+		return msc_gsm48_tx_mm_serv_rej(msc_a, GSM48_REJECT_CALL_CAN_NOT_BE_IDENTIFIED);
+	}
+
+	LOG_MSC_A(msc_a, LOGL_NOTICE, "New conn requesting Re-Establishment\n");
+	LOG_MSC_A(prev_msc_a, LOGL_NOTICE, "Old conn matching Re-Establishment request (%s)\n",
+		  osmo_use_count_to_str_c(OTC_SELECT, &prev_msc_a->use_count));
+
+	if (!prev_msc_a->cc.call_leg || !prev_msc_a->cc.active_trans) {
+		LOG_MSC_A(msc_a, LOGL_ERROR, "CM Re-Establish Request only supported for voice calls\n");
+		if (vsub)
+			vlr_subscr_put(vsub, __func__);
+		return msc_gsm48_tx_mm_serv_rej(msc_a, GSM48_REJECT_CALL_CAN_NOT_BE_IDENTIFIED);
+	}
+
+	msc_a_get(prev_msc_a, __func__);
+
+	/* Move the call_leg and active CC trans over to the new msc_a */
+	call_leg_reparent(prev_msc_a->cc.call_leg,
+			  msc_a->c.fi,
+			  MSC_EV_CALL_LEG_TERM,
+			  MSC_EV_CALL_LEG_RTP_LOCAL_ADDR_AVAILABLE,
+			  MSC_EV_CALL_LEG_RTP_COMPLETE);
+	msc_a->cc.call_leg = prev_msc_a->cc.call_leg;
+	prev_msc_a->cc.call_leg = NULL;
+
+	msc_a->cc.active_trans = prev_msc_a->cc.active_trans;
+	msc_a->cc.active_trans->msc_a = msc_a;
+	msc_a_get(msc_a, MSC_A_USE_CC);
+	prev_msc_a->cc.active_trans = NULL;
+	msc_a_put(prev_msc_a, MSC_A_USE_CC);
+
+	/* Dis-associate the VLR subscriber from the previous msc_a, so that we can start a new Process Access Request
+	 * on the new msc_a. */
+	if (vsub->proc_arq_fsm) {
+		osmo_fsm_inst_term(vsub->proc_arq_fsm, OSMO_FSM_TERM_REGULAR, NULL);
+		vsub->proc_arq_fsm = NULL;
+	}
+	if (prev_msub->vsub) {
+		vlr_subscr_put(prev_msub->vsub, VSUB_USE_MSUB);
+		prev_msub->vsub = NULL;
+	}
+
+	/* Clear the previous conn.
+	 * FIXME: we are clearing the previous conn before having authenticated the new conn. That means anyone can send
+	 * CM Re-Establishing requests with arbitrary mobile identities without having to authenticate, and can freely
+	 * Clear any connections at will. */
+	msc_a_release_cn(prev_msc_a);
+	msc_a_put(prev_msc_a, __func__);
+	prev_msc_a = NULL;
+
+	/* Kick off Authentication and Ciphering for the new conn. */
+	is_utran = (msc_a->c.ran->type == OSMO_RAT_UTRAN_IU);
+	vlr_proc_acc_req(msc_a->c.fi,
+			 MSC_A_EV_AUTHENTICATED, MSC_A_EV_CN_CLOSE, NULL,
+			 net->vlr, msc_a,
+			 VLR_PR_ARQ_T_CM_RE_ESTABLISH_REQ, 0,
+			 &mi, &msc_a->via_cell.lai,
+			 is_utran || net->authentication_required,
+			 is_utran ? net->uea_encryption : net->a5_encryption_mask > 0x01,
+			 req->cipher_key_seq,
+			 osmo_gsm48_classmark2_is_r99(cm2, cm2_len),
+			 is_utran);
+	vlr_subscr_put(vsub, __func__);
+
+	/* From vlr_proc_acc_req() we expect an implicit dispatch of PR_ARQ_E_START, and we expect
+	 * msc_vlr_subscr_assoc() to already have been called and completed. Has an error occurred? */
+	vsub = msc_a_vsub(msc_a);
+	if (!vsub) {
+		LOG_MSC_A(msc_a, LOGL_ERROR, "subscriber not allowed to do a CM Service Request\n");
+		return -EIO;
+	}
+
+	vsub->classmark.classmark2 = *cm2;
+	vsub->classmark.classmark2_len = cm2_len;
+	return 0;
 }
 
 static int gsm48_rx_mm_imsi_detach_ind(struct msc_a *msc_a, struct msgb *msg)
