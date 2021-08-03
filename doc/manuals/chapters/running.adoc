@@ -149,3 +149,21 @@ hlr
  ! default port is 4222, optionally configurable by:
  remote-port 1234
 ----
+
+==== Configure MGCP to connect to an MGW
+
+OsmoMSC uses a media gateway (typically OsmoMGW) to direct RTP streams. By
+default, an MGW is expected to receive MGCP requests on the IANA-registered
+default port for MGCP (2427) on local host (127.0.0.1).
+
+Here is an example configuration for a remote MGW:
+
+----
+msc
+ mgw remote-ip 10.9.8.7
+ mgw remote-port 2427
+ mgw reset-endpoint rtpbridge/* <1>
+----
+<1> The 'reset-endpoint' setting instructs the OsmoMGW to send a wildcarded
+DLCX to the media gateway. This helps to clear lingering calls from the
+media gateway when the OsmoMSC is restarted.
