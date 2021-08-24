@@ -438,7 +438,9 @@ static void auth_fsm_wait_ai_resync(struct osmo_fsm_inst *fi,
 	switch (event) {
 	case VLR_AUTH_E_HLR_SAI_ACK:
 		vlr_subscr_update_tuples(vsub, gsup);
-		goto pass;
+		osmo_fsm_inst_state_chg(fi, VLR_SUB_AS_WAIT_RESP_RESYNC,
+					vlr_timer(vsub->vlr, 3260), 3260);
+		_vlr_subscr_authenticate(fi);
 		break;
 	case VLR_AUTH_E_HLR_SAI_NACK:
 		auth_fsm_term(fi,
@@ -447,12 +449,6 @@ static void auth_fsm_wait_ai_resync(struct osmo_fsm_inst *fi,
 				      : GSM48_REJECT_NETWORK_FAILURE);
 		break;
 	}
-
-	return;
-pass:
-	osmo_fsm_inst_state_chg(fi, VLR_SUB_AS_WAIT_RESP_RESYNC,
-				vlr_timer(vsub->vlr, 3260), 3260);
-	_vlr_subscr_authenticate(fi);
 }
 
 /* Waiting for AUTH RESP from MS (re-sync case) */
