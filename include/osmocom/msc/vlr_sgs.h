@@ -32,8 +32,8 @@ struct vlr_instance;
 /* See also 3GPP TS 29.118, chapter 4.2.2 States at the VLR */
 enum sgs_ue_fsm_state {
 	SGS_UE_ST_NULL,
-	SGS_UE_ST_ASSOCIATED,
 	SGS_UE_ST_LA_UPD_PRES,
+	SGS_UE_ST_ASSOCIATED,
 };
 
 enum vlr_sgs_state_tmr {
