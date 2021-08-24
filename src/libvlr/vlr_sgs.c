@@ -83,7 +83,7 @@ int vlr_sgs_loc_update(struct vlr_instance *vlr, struct vlr_sgs_cfg *cfg,
 	OSMO_ASSERT(cfg);
 	OSMO_ASSERT(imsi);
 
-	vsub = vlr_subscr_find_or_create_by_imsi(vlr, imsi, VSUB_USE_SGS, NULL);
+	vsub = vlr_subscr_find_or_create_by_imsi(vlr, imsi, VSUB_USE_SGS_LU, NULL);
 	if (!vsub) {
 		LOGP(DSGS, LOGL_ERROR, "VLR subscriber allocation failed\n");
 		return -EINVAL;
@@ -119,6 +119,9 @@ void vlr_sgs_loc_update_acc_sent(struct vlr_subscr *vsub)
 {
 	osmo_fsm_inst_dispatch(vsub->sgs_fsm, SGS_UE_E_TX_LU_ACCEPT, NULL);
 
+	/* Balance vlr_subscr_find_or_create_by_imsi() in vlr_sgs_loc_update() */
+	vlr_subscr_put(vsub, VSUB_USE_SGS_LU);
+
 	/* FIXME: At this point we need to check the status of Ts5 and if
 	 * it is still running this means the LU has interrupted the paging,
 	 * and we need to start paging again. 3GPP TS 29.118,
@@ -130,6 +133,8 @@ void vlr_sgs_loc_update_acc_sent(struct vlr_subscr *vsub)
 void vlr_sgs_loc_update_rej_sent(struct vlr_subscr *vsub)
 {
 	osmo_fsm_inst_dispatch(vsub->sgs_fsm, SGS_UE_E_TX_LU_REJECT, NULL);
+	/* Balance vlr_subscr_find_or_create_by_imsi() in vlr_sgs_loc_update() */
+	vlr_subscr_put(vsub, VSUB_USE_SGS_LU);
 }
 
 /*! Perform an SGs IMSI detach.
