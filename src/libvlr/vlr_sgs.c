@@ -148,8 +148,10 @@ void vlr_sgs_imsi_detach(struct vlr_instance *vlr, const char *imsi, enum sgsap_
 	/* See also: 3GPP TS 29.118, 5.6.3 Procedures in the VLR: In case of
 	 * an implicit detach, we are supposed to check if the state of the
 	 * SGs-association, and only when it is not SGs-NULL, we may proceed. */
-	if (vsub->sgs_fsm->state == SGS_UE_ST_NULL && type == SGSAP_ID_NONEPS_T_IMPLICIT_UE_EPS_NONEPS)
+	if (vsub->sgs_fsm->state == SGS_UE_ST_NULL && type == SGSAP_ID_NONEPS_T_IMPLICIT_UE_EPS_NONEPS) {
+		vlr_subscr_put(vsub, __func__);
 		return;
+	}
 
 	switch (type) {
 	case SGSAP_ID_NONEPS_T_EXPLICIT_UE_NONEPS:
