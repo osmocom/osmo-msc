@@ -364,7 +364,7 @@ static int sgs_tx_status(struct sgs_connection *sgc, const char *imsi, enum sgsa
 	return 0;
 }
 
-/* Called by VLR via callback, transmits the the location update response or
+/* Called by VLR via callback, transmits the location update response or
  * reject, depending on the outcome of the location update. */
 static void sgs_tx_loc_upd_resp_cb(struct sgs_lu_response *response)
 {
@@ -1022,8 +1022,8 @@ int sgs_iface_rx(struct sgs_connection *sgc, struct msgb *msg)
 		OSMO_STRLCPY_ARRAY(imsi, mi.imsi);
 	}
 
-	/* Some messages contain an MME-NAME as mandatore IE, parse it right here. The
-	 * MME-NAME is als immediately registered with the sgc, so it will be implicitly
+	/* Some messages contain an MME-NAME as mandatory IE, parse it right here. The
+	 * MME-NAME is also immediately registered with the sgc, so it will be implicitly
 	 * known to all functions that have access to the sgc context. */
 	if (!TLVP_PRESENT(&tp, SGSAP_IE_MME_NAME)
 	    && (msg_type == SGSAP_MSGT_RESET_IND || msg_type == SGSAP_MSGT_RESET_ACK
