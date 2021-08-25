@@ -226,7 +226,7 @@ static void sgs_ue_fsm_associated(struct osmo_fsm_inst *fi, uint32_t event, void
 
 		/* Note: We are already in SGS_UE_ST_ASSOCIATED but the
 		 * transition that lead us here had is guarded with Ts6-1,
-		 * wo we change the state now once more without timeout
+		 * so we change the state now once more without timeout
 		 * to ensure the timer is stopped */
 		osmo_fsm_inst_state_chg(fi, SGS_UE_ST_ASSOCIATED, 0, 0);
 		break;
