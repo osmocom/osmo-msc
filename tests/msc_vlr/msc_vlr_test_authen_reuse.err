@@ -1,4 +1,3 @@
-DLMGCP MGCP client: using endpoint domain '@mgw'
 ===== test_auth_use_twice_geran
 - Location Update request causes a GSUP Send Auth Info request to HLR
   MSC <--GERAN-A-- MS: GSM48_MT_MM_LOC_UPD_REQUEST
