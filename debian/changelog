@@ -1,3 +1,13 @@
+osmo-msc (1.6.4) unstable; urgency=medium
+
+  [ Philipp Maier ]
+  * msc_vlr_test: remove DLMGCP log messages from unit test output
+
+  [ Oliver Smith ]
+  * tests/test_nodes.vty: skip mgw ip lines
+
+ -- Oliver Smith <osmith@sysmocom.de>  Thu, 16 Sep 2021 12:11:31 +0200
+
 osmo-msc (1.6.3) unstable; urgency=medium
 
   [ Neels Hofmeyr ]
