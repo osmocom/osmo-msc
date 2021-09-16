@@ -52,7 +52,7 @@ BuildRequires:  lksctp-tools-devel
 %{?systemd_requires}
 %if %{with_iu}
 BuildRequires:  pkgconfig(libasn1c) >= 0.9.30
-BuildRequires:  pkgconfig(libosmo-ranap) >= 0.3.0
+BuildRequires:  pkgconfig(libosmo-ranap) >= 0.7.0
 %endif
 
 %description

@@ -1,3 +1,10 @@
+osmo-msc (1.7.1) unstable; urgency=medium
+
+  [ Philipp Maier ]
+  * msc_vlr_test: remove DLMGCP log messages from unit test output
+
+ -- Oliver Smith <osmith@sysmocom.de>  Thu, 16 Sep 2021 10:51:07 +0200
+
 osmo-msc (1.7.0) unstable; urgency=medium
 
   [ Keith Whyte ]
