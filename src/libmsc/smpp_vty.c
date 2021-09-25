@@ -501,7 +501,7 @@ DEFUN(cfg_esme_no_dcs_transp, cfg_esme_no_dcs_transp_cmd,
 
 DEFUN(cfg_esme_alert_notif, cfg_esme_alert_notif_cmd,
 	"alert-notifications",
-	"Disable sending of SMPP Alert Notifications for this ESME")
+	"Enable sending of SMPP Alert Notifications for this ESME")
 {
 	struct osmo_smpp_acl *acl = vty->index;
 
