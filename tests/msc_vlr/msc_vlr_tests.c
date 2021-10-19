@@ -986,12 +986,13 @@ void ms_sends_ciphering_mode_complete(const char *inner_ran_msg)
 		g_msub = NULL;
 }
 
-void ms_sends_security_mode_complete()
+void ms_sends_security_mode_complete(uint8_t utran_encryption)
 {
 	struct ran_msg ran_dec;
 
 	ran_dec = (struct ran_msg){
 		.msg_type = RAN_MSG_CIPHER_MODE_COMPLETE,
+		.cipher_mode_complete.utran_encryption = utran_encryption,
 	};
 	fake_msc_a_ran_dec(&ran_dec);
 

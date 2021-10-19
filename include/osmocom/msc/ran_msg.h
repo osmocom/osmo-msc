@@ -216,6 +216,12 @@ struct ran_msg {
 			 * alg_id == 1 means A5/0 i.e. no encryption, alg_id == 4 means A5/3.
 			 * alg_id == 0 means no such IE was present. */
 			uint8_t alg_id;
+			/*! utran integrity protection. 0..15 */
+			int16_t utran_integrity;
+			/*! utran_integrity is in encoded format:
+			 *  utran_integrity == -1 means no such IE was present
+			 *  utran_integrity == 0 means no encryption. */
+			int16_t utran_encryption;
 			const char *imeisv;
 			const struct tlv_p_entry *l3_msg;
 		} cipher_mode_complete;

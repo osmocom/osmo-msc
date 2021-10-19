@@ -211,12 +211,20 @@ success:
 		ranap_free_rab_setupormodifieditemies(&setup_ies);
 }
 
-static void ran_iu_decode_security_mode_complete(struct ran_dec *ran_iu_decode)
+static void ran_iu_decode_security_mode_complete(struct ran_dec *ran_iu_decode,  const RANAP_SecurityModeCompleteIEs_t *ies)
 {
 	struct ran_msg ran_dec_msg = {
 		.msg_type = RAN_MSG_CIPHER_MODE_COMPLETE,
 		.msg_name = "RANAP SecurityModeControl successfulOutcome",
+		.cipher_mode_complete = {
+			.utran_integrity = ies->chosenIntegrityProtectionAlgorithm,
+			.utran_encryption = -1,
+		},
 	};
+
+	if (ies->presenceMask & SECURITYMODECOMPLETEIES_RANAP_CHOSENENCRYPTIONALGORITHM_PRESENT)
+		ran_dec_msg.cipher_mode_complete.utran_encryption = ies->chosenEncryptionAlgorithm;
+
 	ran_decoded(ran_iu_decode, &ran_dec_msg);
 }
 
@@ -272,7 +280,7 @@ static void ran_iu_decode_ranap_msg(void *_ran_dec, ranap_message *message)
 	case RANAP_ProcedureCode_id_SecurityModeControl:
 		switch (message->direction) {
 		case RANAP_RANAP_PDU_PR_successfulOutcome:
-			ran_iu_decode_security_mode_complete(ran_iu_decode);
+			ran_iu_decode_security_mode_complete(ran_iu_decode, &message->msg.securityModeCompleteIEs);
 			return;
 		case RANAP_RANAP_PDU_PR_unsuccessfulOutcome:
 			ran_iu_decode_security_mode_reject(ran_iu_decode);

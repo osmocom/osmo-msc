@@ -128,7 +128,7 @@ static void lu_utran_tmsi()
 
 	btw("MS sends SecurityModeControl acceptance, VLR accepts and sends GSUP LU Req to HLR");
 	gsup_expect_tx("04010809710000000156f0" CN_DOMAIN VLR_TO_HLR);
-	ms_sends_security_mode_complete();
+	ms_sends_security_mode_complete(1);
 	VERBOSE_ASSERT(gsup_tx_confirmed, == true, "%d");
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
@@ -197,7 +197,7 @@ static void test_call_mo()
 	VERBOSE_ASSERT(cm_service_result_sent, == RES_NONE, "%d");
 
 	btw("MS sends SecurityModeControl acceptance, VLR accepts; above Ciphering is an implicit CM Service Accept");
-	ms_sends_security_mode_complete();
+	ms_sends_security_mode_complete(1);
 	VERBOSE_ASSERT(cm_service_result_sent, == RES_NONE, "%d");
 
 	BTW("a call is initiated");
@@ -317,7 +317,7 @@ static void test_call_mt()
 
 	btw("MS sends SecurityModeControl acceptance, VLR accepts, sends CC Setup");
 	dtap_expect_tx("0305" /* CC: Setup */);
-	ms_sends_security_mode_complete();
+	ms_sends_security_mode_complete(1);
 
 	btw("MS confirms call, we create a RAN-side RTP and forward MNCC_CALL_CONF_IND");
 	expect_crcx(RTP_TO_RAN);
@@ -420,7 +420,7 @@ static void test_call_mt2()
 
 	btw("MS sends SecurityModeControl acceptance, VLR accepts, sends CC Setup");
 	dtap_expect_tx("0305" /* CC: Setup */);
-	ms_sends_security_mode_complete();
+	ms_sends_security_mode_complete(1);
 
 	btw("MS confirms call, we create a RAN-side RTP and forward MNCC_CALL_CONF_IND");
 	expect_crcx(RTP_TO_RAN);
@@ -509,7 +509,7 @@ static void test_call_mo_to_unknown()
 	VERBOSE_ASSERT(cm_service_result_sent, == RES_NONE, "%d");
 
 	btw("MS sends SecurityModeControl acceptance, VLR accepts; above Ciphering is an implicit CM Service Accept");
-	ms_sends_security_mode_complete();
+	ms_sends_security_mode_complete(1);
 	VERBOSE_ASSERT(cm_service_result_sent, == RES_NONE, "%d");
 
 	BTW("a call is initiated");
@@ -605,7 +605,7 @@ static void test_call_mo_to_unknown_timeout()
 	VERBOSE_ASSERT(cm_service_result_sent, == RES_NONE, "%d");
 
 	btw("MS sends SecurityModeControl acceptance, VLR accepts; above Ciphering is an implicit CM Service Accept");
-	ms_sends_security_mode_complete();
+	ms_sends_security_mode_complete(1);
 	VERBOSE_ASSERT(cm_service_result_sent, == RES_NONE, "%d");
 
 	BTW("a call is initiated");

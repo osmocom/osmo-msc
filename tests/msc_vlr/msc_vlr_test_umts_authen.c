@@ -138,7 +138,7 @@ static void _test_umts_authen(enum osmo_rat_type via_ran)
 
 			btw("MS sends SecurityModeControl acceptance, VLR accepts and sends GSUP LU Req to HLR");
 			gsup_expect_tx("04010809710000000156f0" CN_DOMAIN VLR_TO_HLR);
-			ms_sends_security_mode_complete();
+			ms_sends_security_mode_complete(1);
 			VERBOSE_ASSERT(gsup_tx_confirmed, == true, "%d");
 			VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 		}
@@ -211,7 +211,7 @@ static void _test_umts_authen(enum osmo_rat_type via_ran)
 			VERBOSE_ASSERT(cm_service_result_sent, == RES_NONE, "%d");
 
 			btw("MS sends SecurityModeControl acceptance, VLR accepts; above Ciphering is an implicit CM Service Accept");
-			ms_sends_security_mode_complete();
+			ms_sends_security_mode_complete(1);
 			VERBOSE_ASSERT(cm_service_result_sent, == RES_NONE, "%d");
 		}
 	} else {
@@ -278,7 +278,7 @@ static void _test_umts_authen(enum osmo_rat_type via_ran)
 
 			btw("MS sends SecurityModeControl acceptance, VLR accepts and sends SMS");
 			dtap_expect_tx(sms);
-			ms_sends_security_mode_complete();
+			ms_sends_security_mode_complete(1);
 		}
 	} else {
 		/* Encryption disabled */
@@ -530,7 +530,7 @@ static void _test_umts_authen_resync(enum osmo_rat_type via_ran)
 
 			btw("MS sends SecurityModeControl acceptance, VLR accepts and sends GSUP LU Req to HLR");
 			gsup_expect_tx("04010809710000000156f0" CN_DOMAIN VLR_TO_HLR);
-			ms_sends_security_mode_complete();
+			ms_sends_security_mode_complete(1);
 			VERBOSE_ASSERT(gsup_tx_confirmed, == true, "%d");
 			VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 		}

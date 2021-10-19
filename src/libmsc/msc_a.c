@@ -1404,6 +1404,7 @@ static int msc_a_up_ho(struct msc_a *msc_a, const struct msc_a_ran_dec_data *d, 
 int msc_a_ran_dec_from_msc_i(struct msc_a *msc_a, struct msc_a_ran_dec_data *d)
 {
 	struct vlr_subscr *vsub = msc_a_vsub(msc_a);
+	struct gsm_network *net = msc_a_net(msc_a);
 	const struct ran_msg *msg = d->ran_dec;
 	int rc = -99;
 
@@ -1459,7 +1460,25 @@ int msc_a_ran_dec_from_msc_i(struct msc_a *msc_a, struct msc_a_ran_dec_data *d)
 			msc_a->geran_encr.alg_id = msg->cipher_mode_complete.alg_id;
 			LOG_MSC_A(msc_a, LOGL_DEBUG, "Cipher Mode Complete: chosen encryption algorithm: A5/%u\n",
 				  msc_a->geran_encr.alg_id - 1);
-		};
+		}
+
+		if (msc_a->c.ran->type == OSMO_RAT_UTRAN_IU) {
+			int16_t utran_encryption;
+
+			/* utran: ensure chosen ciphering mode is allowed
+			 * If the IE is missing (utran_encryption == -1), parse it as no encryption */
+			utran_encryption = msg->cipher_mode_complete.utran_encryption;
+			if (utran_encryption == -1)
+				utran_encryption = 0;
+			if ((net->uea_encryption_mask & (1 << utran_encryption)) == 0) {
+				/* cipher disallowed */
+				LOG_MSC_A(msc_a, LOGL_ERROR, "Cipher Mode Complete: RNC chosen forbidden ciphering UEA%d\n",
+					  msg->cipher_mode_complete.utran_encryption);
+				vlr_subscr_rx_ciph_res(vsub, VLR_CIPH_REJECT);
+				rc = 0;
+				break;
+			}
+		}
 		vlr_subscr_rx_ciph_res(vsub, VLR_CIPH_COMPL);
 		rc = 0;
 
