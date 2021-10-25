@@ -246,6 +246,10 @@ static int esme_read_cb(struct osmo_fd *ofd)
 			esme->read_idx += rc;
 		if (esme->read_idx >= sizeof(uint32_t)) {
 			esme->read_len = ntohl(len);
+			if (esme->read_len > 65535) {
+				/* unrealistic */
+				goto dead_socket;
+			}
 			msg = msgb_alloc(esme->read_len, "SMPP Rx");
 			if (!msg)
 				return -ENOMEM;
@@ -283,6 +287,7 @@ dead_socket:
 	osmo_fd_unregister(&esme->wqueue.bfd);
 	close(esme->wqueue.bfd.fd);
 	esme->wqueue.bfd.fd = -1;
+	esme_read_state_reset(esme);
 	exit(2342);
 
 	return 0;
