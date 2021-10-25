@@ -214,6 +214,14 @@ static int smpp_pdu_rx(struct esme *esme, struct msgb *msg)
 	return rc;
 }
 
+static void esme_read_state_reset(struct esme *esme)
+{
+	esme->read_msg = NULL;
+	esme->read_idx = 0;
+	esme->read_len = 0;
+	esme->read_state = READ_ST_IN_LEN;
+}
+
 /* FIXME: merge with smpp_smsc.c */
 static int esme_read_cb(struct osmo_fd *ofd)
 {
@@ -264,10 +272,7 @@ static int esme_read_cb(struct osmo_fd *ofd)
 
 		if (esme->read_idx >= esme->read_len) {
 			rc = smpp_pdu_rx(esme, esme->read_msg);
-			esme->read_msg = NULL;
-			esme->read_idx = 0;
-			esme->read_len = 0;
-			esme->read_state = READ_ST_IN_LEN;
+			esme_read_state_reset(esme);
 		}
 		break;
 	}
