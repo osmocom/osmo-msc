@@ -110,7 +110,7 @@ struct smsc {
 	struct llist_head esme_list;
 	struct llist_head acl_list;
 	struct llist_head route_list;
-	const char *bind_addr;
+	char *bind_addr;
 	uint16_t listen_port;
 	char system_id[SMPP_SYS_ID_LEN+1];
 	int accept_all;
