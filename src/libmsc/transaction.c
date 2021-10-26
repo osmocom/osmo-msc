@@ -112,17 +112,17 @@ struct gsm_trans *trans_find_by_sm_rp_mr(const struct gsm_network *net,
 
 struct osmo_lcls *trans_lcls_compose(const struct gsm_trans *trans, bool use_lac)
 {
+	if (!trans) {
+		LOGP(DCC, LOGL_ERROR, "LCLS: unable to fill parameters for unallocated transaction\n");
+		return NULL;
+	}
+
 	if (!trans->net->a.sri->sccp)
 		return NULL;
 
 	struct osmo_ss7_instance *ss7 = osmo_sccp_get_ss7(trans->net->a.sri->sccp);
 	struct osmo_lcls *lcls;
 	uint8_t w = osmo_ss7_pc_width(&ss7->cfg.pc_fmt);
-
-	if (!trans) {
-		LOGP(DCC, LOGL_ERROR, "LCLS: unable to fill parameters for unallocated transaction\n");
-		return NULL;
-	}
 
 	if (!trans->net->lcls_permitted) {
 		LOGP(DCC, LOGL_NOTICE, "LCLS disabled globally\n");
