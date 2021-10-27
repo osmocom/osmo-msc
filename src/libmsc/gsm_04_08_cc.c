@@ -320,12 +320,16 @@ static void cc_paging_cb(struct msc_a *msc_a, struct gsm_trans *trans)
 		trans->paging_request = NULL;
 
 		/* Get the GCR from the MO call leg (if any). */
-		if (!trans->cc.lcls) {
+		if (!trans->cc.lcls)
 			trans->cc.lcls = trans_lcls_compose(trans, true);
-			if (trans->cc.lcls) {
-				trans->cc.lcls->gcr = trans->cc.msg.gcr;
+		if (trans->cc.lcls && trans->cc.msg.fields & MNCC_F_GCR) {
+			int rc = osmo_dec_gcr(&trans->cc.lcls->gcr,
+					      &trans->cc.msg.gcr[0],
+					      sizeof(trans->cc.msg.gcr));
+			if (rc < 0)
+				LOG_TRANS(trans, LOGL_ERROR, "Failed to parse GCR\n");
+			else
 				trans->cc.lcls->gcr_available = true;
-			}
 		}
 
 		osmo_fsm_inst_dispatch(msc_a->c.fi, MSC_A_EV_TRANSACTION_ACCEPTED, trans);
@@ -517,8 +521,18 @@ static int gsm48_cc_rx_setup(struct gsm_trans *trans, struct msgb *msg)
 		trans->cc.lcls = trans_lcls_compose(trans, true);
 
 	/* Pass the LCLS GCR on to the MT call leg via MNCC */
-	if (trans->cc.lcls)
-		setup.gcr = trans->cc.lcls->gcr;
+	if (trans->cc.lcls) {
+		struct msgb *gcr_msg = msgb_alloc(sizeof(setup.gcr), "MNCC GCR");
+		const struct osmo_gcr_parsed *gcr = &trans->cc.lcls->gcr;
+		int rc;
+
+		if (gcr_msg != NULL && (rc = osmo_enc_gcr(gcr_msg, gcr)) > 0) {
+			memcpy(&setup.gcr[0], gcr_msg->data, rc);
+			setup.fields |= MNCC_F_GCR;
+		} else
+			LOG_TRANS(trans, LOGL_ERROR, "Failed to encode GCR\n");
+		msgb_free(gcr_msg);
+	}
 
 	tlv_parse(&tp, &gsm48_att_tlvdef, gh->data, payload_len, 0, 0);
 	/* emergency setup is identified by msg_type */
