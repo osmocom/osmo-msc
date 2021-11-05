@@ -106,6 +106,16 @@ struct msc_a *msc_a_fi_priv(struct osmo_fsm_inst *fi)
 	return fi->priv;
 }
 
+bool msc_a_require_ciphering(const struct msc_a *msc_a)
+{
+	struct gsm_network *net = msc_a_net(msc_a);
+	bool is_utran = (msc_a->c.ran->type == OSMO_RAT_UTRAN_IU);
+	if (is_utran)
+		return net->uea_encryption_mask > (1 << OSMO_UTRAN_UEA0);
+	else
+		return net->a5_encryption_mask > 0x1;
+}
+
 static void update_counters(struct osmo_fsm_inst *fi, bool conn_accepted)
 {
 	struct msc_a *msc_a = fi->priv;

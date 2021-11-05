@@ -13,6 +13,7 @@
 #include <osmocom/core/stat_item.h>
 #include <osmocom/gsm/gsm48.h>
 #include <osmocom/crypt/auth.h>
+#include <osmocom/crypt/utran_cipher.h>
 
 #include <osmocom/mgcp_client/mgcp_client.h>
 
