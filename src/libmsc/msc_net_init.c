@@ -24,6 +24,7 @@
 #include "config.h"
 
 #include <osmocom/core/tdef.h>
+#include <osmocom/crypt/utran_cipher.h>
 
 #include <osmocom/msc/gsm_data.h>
 #include <osmocom/msc/vlr.h>
@@ -68,7 +69,7 @@ struct gsm_network *gsm_network_init(void *ctx, mncc_recv_cb_t mncc_recv)
 	/* Permit a compile-time default of A5/3 and A5/1 */
 	net->a5_encryption_mask = (1 << 3) | (1 << 1);
 	/* Permit a compile-time default of UEA2 and UEA1 */
-	net->uea_encryption_mask = (1 << 2) | (1 << 1);
+	net->uea_encryption_mask = (1 << OSMO_UTRAN_UEA2) | (1 << OSMO_UTRAN_UEA1);
 
 	net->mncc_guard_timeout = 180;
 	net->ncss_guard_timeout = 30;

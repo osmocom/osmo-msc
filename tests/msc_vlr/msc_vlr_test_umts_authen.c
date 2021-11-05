@@ -50,7 +50,7 @@ static void _test_umts_authen(enum osmo_rat_type via_ran)
 		"d3d36ff71c949e83c22072799e9687c5ec32a81d96afcbf4b4fb"
 		"0c7ac3e9e9b7db05";
 	bool encryption = (via_ran == OSMO_RAT_GERAN_A && net->a5_encryption_mask > 0x1)
-		|| (via_ran == OSMO_RAT_UTRAN_IU && net->uea_encryption_mask > 0x1);
+		|| (via_ran == OSMO_RAT_UTRAN_IU && net->uea_encryption_mask > (1 << OSMO_UTRAN_UEA0));
 
 	net->authentication_required = true;
 	net->vlr->cfg.assign_tmsi = true;
@@ -333,7 +333,7 @@ static void test_umts_authen_geran()
 static void test_umts_authen_utran()
 {
 	comment_start();
-	net->uea_encryption_mask = 0x01;
+	net->uea_encryption_mask = (1 << OSMO_UTRAN_UEA0);
 	_test_umts_authen(OSMO_RAT_UTRAN_IU);
 	comment_end();
 }
@@ -341,7 +341,7 @@ static void test_umts_authen_utran()
 static void test_umts_auth_ciph_utran()
 {
 	comment_start();
-	net->uea_encryption_mask = 0x06;
+	net->uea_encryption_mask = (1 << OSMO_UTRAN_UEA1) | (1 << OSMO_UTRAN_UEA2);
 	_test_umts_authen(OSMO_RAT_UTRAN_IU);
 	comment_end();
 }
@@ -361,7 +361,7 @@ static void _test_umts_authen_resync(enum osmo_rat_type via_ran)
 	struct vlr_subscr *vsub;
 	const char *imsi = "901700000010650";
 	bool encryption = (via_ran == OSMO_RAT_GERAN_A && net->a5_encryption_mask > 0x1)
-		|| (via_ran == OSMO_RAT_UTRAN_IU && net->uea_encryption_mask > 0x1);
+		|| (via_ran == OSMO_RAT_UTRAN_IU && net->uea_encryption_mask > (1 << OSMO_UTRAN_UEA0));
 
 	net->authentication_required = true;
 	net->vlr->cfg.assign_tmsi = true;
@@ -588,7 +588,7 @@ static void test_umts_authen_resync_geran()
 static void test_umts_authen_resync_utran()
 {
 	comment_start();
-	net->uea_encryption_mask = 0x01;
+	net->uea_encryption_mask = (1 << OSMO_UTRAN_UEA0);
 	_test_umts_authen_resync(OSMO_RAT_UTRAN_IU);
 	comment_end();
 }
@@ -596,7 +596,7 @@ static void test_umts_authen_resync_utran()
 static void test_umts_auth_ciph_resync_utran()
 {
 	comment_start();
-	net->uea_encryption_mask = 0x06;
+	net->uea_encryption_mask = (1 << OSMO_UTRAN_UEA1) | (1 << OSMO_UTRAN_UEA2);
 	_test_umts_authen_resync(OSMO_RAT_UTRAN_IU);
 	comment_end();
 }

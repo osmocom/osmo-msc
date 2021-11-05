@@ -26,6 +26,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 
+#include <osmocom/crypt/utran_cipher.h>
 #include <osmocom/msc/gsm_data.h>
 #include <osmocom/msc/vlr.h>
 #include <osmocom/msc/msub.h>
