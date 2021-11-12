@@ -131,7 +131,6 @@ static void print_help()
 	printf("  -T --timestamp             Prefix every log line with a timestamp.\n");
 	printf("  -V --version               Print the version of OsmoMSC.\n");
 	printf("  -e --log-level number      Set a global loglevel.\n");
-	printf("  -M --mncc-sock-path PATH   Disable built-in MNCC handler and offer socket.\n");
 
 	printf("\nVTY reference generation:\n");
 	printf("     --vty-ref-mode MODE     VTY reference generation mode (e.g. 'expert').\n");
@@ -178,7 +177,7 @@ static void handle_options(int argc, char **argv)
 			{"timestamp", 0, 0, 'T'},
 			{"version", 0, 0, 'V' },
 			{"log-level", 1, 0, 'e'},
-			{"mncc-sock-path", 1, 0, 'M'},
+			{"mncc-sock-path", 1, 0, 'M'}, /* deprecated */
 			{"no-dbcounter", 0, 0, 'C'}, /* deprecated */
 			{"vty-ref-mode", 1, &long_option, 1},
 			{"vty-ref-xml", 0, &long_option, 2},
@@ -221,6 +220,8 @@ static void handle_options(int argc, char **argv)
 			break;
 		case 'M':
 			msc_cmdline_config.mncc_sock_path = optarg;
+			fprintf(stderr, "Command line argument '-%c' is deprecated, use VTY "
+				"parameter 'msc' / 'mncc external %s' instead.\n", c, optarg);
 			break;
 		case 'C':
 			fprintf(stderr, "-C is deprecated and does nothing.");

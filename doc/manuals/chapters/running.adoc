@@ -5,7 +5,7 @@ arguments:
 
 === SYNOPSIS
 
-*osmo-msc* [-h|-V] [-d 'DBGMASK'] [-D] [-c 'CONFIGFILE'] [-s] [-T] [-e 'LOGLEVEL'] [-l 'DATABASE'] [-M 'SOCKETPATH']
+*osmo-msc* [-h|-V] [-d 'DBGMASK'] [-D] [-c 'CONFIGFILE'] [-s] [-T] [-e 'LOGLEVEL'] [-l 'DATABASE']
 
 === OPTIONS
 
@@ -37,11 +37,6 @@ arguments:
 	<<logging>> for more information.
 *-l, --database 'DATABASE'*::
 	Specify the file name of the SQLite3 database to use as SMS storage
-*-M, --mncc-sock-path*::
-	Enable the MNCC socket for an external MNCC handler. See
-	<<mncc>> for further information.
-*-m, --mncc-sock*::
-	Same as option -M (deprecated).
 
 
 === Multiple instances
