@@ -5,7 +5,7 @@ arguments:
 
 === SYNOPSIS
 
-*osmo-msc* [-h|-V] [-d 'DBGMASK'] [-D] [-c 'CONFIGFILE'] [-s] [-T] [-e 'LOGLEVEL'] [-l 'DATABASE']
+*osmo-msc* [-h|-V] [-d 'DBGMASK'] [-D] [-c 'CONFIGFILE'] [-s] [-T] [-e 'LOGLEVEL']
 
 === OPTIONS
 
@@ -35,8 +35,6 @@ arguments:
 	Set the global log level for logging to stderr. This has mostly
 	been deprecated by VTY based logging configuration, see
 	<<logging>> for more information.
-*-l, --database 'DATABASE'*::
-	Specify the file name of the SQLite3 database to use as SMS storage
 
 
 === Multiple instances

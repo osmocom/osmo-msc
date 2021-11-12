@@ -127,7 +127,6 @@ static void print_help()
 	printf("  -D --daemonize             Fork the process into a background daemon.\n");
 	printf("  -c --config-file filename  The config file to use.\n");
 	printf("  -s --disable-color\n");
-	printf("  -l --database db-name      The database to use.\n");
 	printf("  -T --timestamp             Prefix every log line with a timestamp.\n");
 	printf("  -V --version               Print the version of OsmoMSC.\n");
 	printf("  -e --log-level number      Set a global loglevel.\n");
@@ -173,7 +172,7 @@ static void handle_options(int argc, char **argv)
 			{"daemonize", 0, 0, 'D'},
 			{"config-file", 1, 0, 'c'},
 			{"disable-color", 0, 0, 's'},
-			{"database", 1, 0, 'l'},
+			{"database", 1, 0, 'l'}, /* deprecated */
 			{"timestamp", 0, 0, 'T'},
 			{"version", 0, 0, 'V' },
 			{"log-level", 1, 0, 'e'},
@@ -208,6 +207,8 @@ static void handle_options(int argc, char **argv)
 			break;
 		case 'l':
 			msc_cmdline_config.database_name = optarg;
+			fprintf(stderr, "Command line argument '-%c' is deprecated, use VTY "
+				"parameter 'msc' / 'sms-database %s' instead.\n", c, optarg);
 			break;
 		case 'c':
 			msc_cmdline_config.config_file = optarg;
