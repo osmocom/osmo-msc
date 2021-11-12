@@ -5,7 +5,7 @@ arguments:
 
 === SYNOPSIS
 
-*osmo-msc* [-h|-V] [-d 'DBGMASK'] [-D] [-c 'CONFIGFILE'] [-s] [-T] [-e 'LOGLEVEL'] [-l 'DATABASE'] [-M 'SOCKETPATH'] [-C]
+*osmo-msc* [-h|-V] [-d 'DBGMASK'] [-D] [-c 'CONFIGFILE'] [-s] [-T] [-e 'LOGLEVEL'] [-l 'DATABASE'] [-M 'SOCKETPATH']
 
 === OPTIONS
 
@@ -42,9 +42,6 @@ arguments:
 	<<mncc>> for further information.
 *-m, --mncc-sock*::
 	Same as option -M (deprecated).
-*-C, --no-dbcounter*::
-	Deprecated. DB statistics and counter has been removed.
-	This option is only valid for compatibility and does nothing.
 
 
 === Multiple instances
