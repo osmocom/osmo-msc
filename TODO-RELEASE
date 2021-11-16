@@ -7,4 +7,3 @@
 # If any interfaces have been added since the last public release: c:r:a + 1.
 # If any interfaces have been removed or changed since the last public release: c:r:0.
 #library	what		description / commit summary line
-libosmocore	>1.5.1		A5/4 support requires new API gsm0808_create_cipher2(), and gsm0808_handover_request.kc128

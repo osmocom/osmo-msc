@@ -36,16 +36,16 @@ if test "x$PKG_CONFIG_INSTALLED" = "xno"; then
 fi
 PKG_PROG_PKG_CONFIG([0.20])
 
-PKG_CHECK_MODULES(LIBOSMOCORE, libosmocore >= 1.5.0)
-PKG_CHECK_MODULES(LIBOSMOVTY, libosmovty >= 1.5.0)
-PKG_CHECK_MODULES(LIBOSMOCTRL, libosmoctrl >= 1.5.0)
-PKG_CHECK_MODULES(LIBOSMOGSM, libosmogsm >= 1.5.0)
-PKG_CHECK_MODULES(LIBOSMOABIS, libosmoabis >= 1.1.0)
+PKG_CHECK_MODULES(LIBOSMOCORE, libosmocore >= 1.6.0)
+PKG_CHECK_MODULES(LIBOSMOVTY, libosmovty >= 1.6.0)
+PKG_CHECK_MODULES(LIBOSMOCTRL, libosmoctrl >= 1.6.0)
+PKG_CHECK_MODULES(LIBOSMOGSM, libosmogsm >= 1.6.0)
+PKG_CHECK_MODULES(LIBOSMOABIS, libosmoabis >= 1.2.0)
 PKG_CHECK_MODULES(LIBOSMONETIF, libosmo-netif >= 1.1.0)
-PKG_CHECK_MODULES(LIBOSMOSIGTRAN, libosmo-sigtran >= 1.4.0)
-PKG_CHECK_MODULES(LIBOSMOSCCP, libosmo-sccp >= 1.4.0)
-PKG_CHECK_MODULES(LIBOSMOMGCPCLIENT, libosmo-mgcp-client >= 1.8.0)
-PKG_CHECK_MODULES(LIBOSMOGSUPCLIENT, libosmo-gsup-client >= 1.3.0)
+PKG_CHECK_MODULES(LIBOSMOSIGTRAN, libosmo-sigtran >= 1.5.0)
+PKG_CHECK_MODULES(LIBOSMOSCCP, libosmo-sccp >= 1.5.0)
+PKG_CHECK_MODULES(LIBOSMOMGCPCLIENT, libosmo-mgcp-client >= 1.9.0)
+PKG_CHECK_MODULES(LIBOSMOGSUPCLIENT, libosmo-gsup-client >= 1.4.0)
 
 old_LIBS=$LIBS
 AC_SEARCH_LIBS([sctp_send], [sctp], [
@@ -103,7 +103,7 @@ AC_ARG_ENABLE([iu], [AS_HELP_STRING([--enable-iu], [Build 3G support, aka IuPS a
     [osmo_ac_iu="$enableval"],[osmo_ac_iu="no"])
 if test "x$osmo_ac_iu" = "xyes" ; then
     PKG_CHECK_MODULES(LIBASN1C, libasn1c >= 0.9.30)
-    PKG_CHECK_MODULES(LIBOSMORANAP, libosmo-ranap >= 0.7.0)
+    PKG_CHECK_MODULES(LIBOSMORANAP, libosmo-ranap >= 0.8.0)
     AC_DEFINE(BUILD_IU, 1, [Define if we want to build IuPS and IuCS interfaces support])
 fi
 AM_CONDITIONAL(BUILD_IU, test "x$osmo_ac_iu" = "xyes")

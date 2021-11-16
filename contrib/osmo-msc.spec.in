@@ -35,16 +35,16 @@ BuildRequires:  systemd-rpm-macros
 BuildRequires:  pkgconfig >= 0.20
 BuildRequires:  pkgconfig(dbi)
 BuildRequires:  pkgconfig(libcrypto) >= 0.9.5
-BuildRequires:  pkgconfig(libosmo-gsup-client) >= 1.3.0
-BuildRequires:  pkgconfig(libosmo-mgcp-client) >= 1.8.0
+BuildRequires:  pkgconfig(libosmo-gsup-client) >= 1.4.0
+BuildRequires:  pkgconfig(libosmo-mgcp-client) >= 1.9.0
 BuildRequires:  pkgconfig(libosmo-netif) >= 1.1.0
-BuildRequires:  pkgconfig(libosmo-sccp) >= 1.4.0
-BuildRequires:  pkgconfig(libosmo-sigtran) >= 1.4.0
-BuildRequires:  pkgconfig(libosmoabis) >= 1.1.0
-BuildRequires:  pkgconfig(libosmocore) >= 1.5.0
-BuildRequires:  pkgconfig(libosmoctrl) >= 1.5.0
-BuildRequires:  pkgconfig(libosmogsm) >= 1.5.0
-BuildRequires:  pkgconfig(libosmovty) >= 1.5.0
+BuildRequires:  pkgconfig(libosmo-sccp) >= 1.5.0
+BuildRequires:  pkgconfig(libosmo-sigtran) >= 1.5.0
+BuildRequires:  pkgconfig(libosmoabis) >= 1.2.0
+BuildRequires:  pkgconfig(libosmocore) >= 1.6.0
+BuildRequires:  pkgconfig(libosmoctrl) >= 1.6.0
+BuildRequires:  pkgconfig(libosmogsm) >= 1.6.0
+BuildRequires:  pkgconfig(libosmovty) >= 1.6.0
 BuildRequires:  pkgconfig(libsmpp34) >= 1.14.0
 ####
 BuildRequires:  lksctp-tools-devel
@@ -52,7 +52,7 @@ BuildRequires:  lksctp-tools-devel
 %{?systemd_requires}
 %if %{with_iu}
 BuildRequires:  pkgconfig(libasn1c) >= 0.9.30
-BuildRequires:  pkgconfig(libosmo-ranap) >= 0.7.0
+BuildRequires:  pkgconfig(libosmo-ranap) >= 0.8.0
 %endif
 %if 0%{?suse_version}
 Requires:       libdbi-drivers-dbd-sqlite3

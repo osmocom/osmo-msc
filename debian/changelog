@@ -1,3 +1,68 @@
+osmo-msc (1.8.0) unstable; urgency=medium
+
+  [ Pau Espin Pedrol ]
+  * configure.ac: Depend on newer libosmo-ranap
+  * Fill Last Used E-UTRAN PLMN Id when in CSFB
+  * Use new osmo stat items/ctr APIs
+  * sgs: Use available API to set vlr subscr LastUsedEutranPLMNId
+  * vlr_sgs: Drop recorded LastEutranPlmnId when UE no longer associated
+  * sgs_iface.c: Improve logging when paging over SGs
+  * msc_a.c: Allow MSC_A_EV_CN_CLOSE in state MSC_A_ST_RELEASING
+  * cosmetic: fix typos in comments
+  * vlr_sgs.h: Set proper logic order of items in enum sgs_ue_fsm_state
+  * vlr_auth_fsm.c: Simplify function auth_fsm_wait_ai_resync
+  * vlr_sgs.c: Fix missing use_count decrease in vlr_sgs_imsi_detach
+  * vlr_sgs: Balance use_count incremented in vlr_sgs_loc_update
+  * cosmetic: Fix typo in comment
+
+  [ Oliver Smith ]
+  * contrib/osmo-msc.spec.in: depend on dbd-sqlite3
+  * contrib/osmo-msc.spec.in: require libosmo-ranap >= 0.7.0
+  * Revert "Turn some compiler warnings into errors"
+
+  [ Vadim Yanitskiy ]
+  * SMS-over-GSUP: notify sender if no transaction found
+  * msc_tx_common_id(): fix potential NULL pointer dereference
+  * libmsc: fix NULL pointer dereference in trans_lcls_compose()
+  * libmsc: struct smsc: drop 'const' qualifier from bind_addr
+  * smpp_smsc: use osmo_talloc_replace_string() in smpp_smsc_conf()
+  * mncc: rework passing GCR over the MNCC interface
+  * manuals: remove deprecated -C / --no-dbcounter options
+  * Do not mention deprecated -M / --mncc-sock-path options
+  * Do not mention deprecated -l / --database options
+
+  [ Neels Hofmeyr ]
+  * osmo-msc main: use osmo_select_shutdown()
+  * ran_msg_a.c: use gsm0808_create_cipher2()
+  * support A5/4 in Cipher Mode Command
+  * support A5/4 in inter-BSC handover
+  * improve logging on encryption, for Ciphering and HO
+  * add sequence_charts/call_reestablishment.msc
+  * add vlr_subscr_find_by_mi
+  * implement CM Re-Establish for voice calls
+
+  [ Eric Wild ]
+  * vty: allow A5/4 encryption in config
+
+  [ Philipp Maier ]
+  * running.adoc: add section about MGCP configuration
+  * msc_vlr_test: remove DLMGCP log messages from unit test output
+
+  [ Harald Welte ]
+  * smpp: Fix help string in vty for "alert-notifications"
+  * smpp_mirror: Factor-out reset of SMPP read state
+  * smpp_mirror: Don't allocate msgb's for unrealistic amounts of memory
+  * Fix enabling of UMTS UEA encryption
+  * Make UTRAN encryption algorithms configurable
+
+  [ Keith Whyte ]
+  * Add support for LCLS to the MSC
+
+  [ Alexander Couzens ]
+  * Validate the choosen UTRAN encryption algorithm
+
+ -- Pau Espin Pedrol <pespin@sysmocom.de>  Tue, 16 Nov 2021 17:44:54 +0100
+
 osmo-msc (1.7.0) unstable; urgency=medium
 
   [ Keith Whyte ]
