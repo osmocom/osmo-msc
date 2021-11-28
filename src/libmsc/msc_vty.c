@@ -297,8 +297,8 @@ DEFUN_DEPRECATED(cfg_net_per_loc_upd, cfg_net_per_loc_upd_cmd,
 	int minutes = atoi(argv[0]);
 	int rc;
 
-	vty_out(vty, "%% 'periodic location update' is now deprecated: "
-		     "use 'timer T3212' to change subscriber expiration "
+	vty_out(vty, "%% 'periodic location update' is now deprecated. "
+		     "Use 'msc' / 'timer vlr T3212' to change subscriber expiration "
 		     "timeout.%s", VTY_NEWLINE);
 
 	/* We used to double this value and add a minute when scheduling the
