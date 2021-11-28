@@ -124,31 +124,38 @@ static void _test_umts_authen(enum osmo_rat_type via_ran)
 	VERBOSE_ASSERT(auth_request_sent, == true, "%d");
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
-	if (encryption) {
-		if (via_ran == OSMO_RAT_GERAN_A) {
+	switch (via_ran) {
+	case OSMO_RAT_GERAN_A:
+		if (encryption) {
 			btw("Test code not implemented");
 			OSMO_ASSERT(false);
-		} else {
-			/* On UTRAN */
-			btw("Encryption enabled. MS sends Authen Response, VLR accepts and sends SecurityModeControl");
-			expect_security_mode_ctrl(NULL, "27497388b6cb044648f396aa155b95ef");
-			ms_sends_msg("0554" "e229c19e" "2104" "791f2e41");
-			VERBOSE_ASSERT(security_mode_ctrl_sent, == true, "%d");
-			VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
-
-			btw("MS sends SecurityModeControl acceptance, VLR accepts and sends GSUP LU Req to HLR");
-			gsup_expect_tx("04010809710000000156f0" CN_DOMAIN VLR_TO_HLR);
-			ms_sends_security_mode_complete(1);
-			VERBOSE_ASSERT(gsup_tx_confirmed, == true, "%d");
-			VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 		}
-	} else {
-		/* Encryption disabled */
+
 		btw("Encryption disabled. MS sends Authen Response, VLR accepts and sends GSUP LU Req to HLR");
 		gsup_expect_tx("04010809710000000156f0" CN_DOMAIN VLR_TO_HLR);
 		ms_sends_msg("0554" "e229c19e" "2104" "791f2e41");
 		VERBOSE_ASSERT(gsup_tx_confirmed, == true, "%d");
 		VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
+		break;
+	case OSMO_RAT_UTRAN_IU:
+		/* Even if encryption is disabled (UEA0), we still expect a SecurityModeControl
+		 * message indicating UIA, because integrity protection is mandatory in UTRAN. */
+		btw("Encryption %sabled. MS sends Authen Response, VLR accepts and sends SecurityModeControl",
+		    encryption ? "en" : "dis");
+		expect_security_mode_ctrl(NULL, "27497388b6cb044648f396aa155b95ef");
+		ms_sends_msg("0554" "e229c19e" "2104" "791f2e41");
+		VERBOSE_ASSERT(security_mode_ctrl_sent, == true, "%d");
+		VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
+
+		btw("MS sends SecurityModeControl acceptance, VLR accepts and sends GSUP LU Req to HLR");
+		gsup_expect_tx("04010809710000000156f0" CN_DOMAIN VLR_TO_HLR);
+		ms_sends_security_mode_complete(encryption ? 0x01 : 0x00);
+		VERBOSE_ASSERT(gsup_tx_confirmed, == true, "%d");
+		VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
+		break;
+	default:
+		btw("Unhandled RAT %s", osmo_rat_type_name(via_ran));
+		OSMO_ASSERT(false);
 	}
 
 	btw("HLR sends _INSERT_DATA_REQUEST, VLR responds with _INSERT_DATA_RESULT");
@@ -198,28 +205,35 @@ static void _test_umts_authen(enum osmo_rat_type via_ran)
 	EXPECT_ACCEPTED(false);
 	thwart_rx_non_initial_requests();
 
-	if (encryption) {
-		if (via_ran == OSMO_RAT_GERAN_A) {
+	switch (via_ran) {
+	case OSMO_RAT_GERAN_A:
+		if (encryption) {
 			btw("Test code not implemented");
 			OSMO_ASSERT(false);
-		} else {
-			/* On UTRAN */
-			btw("Encryption enabled. MS sends Authen Response, VLR accepts and sends SecurityModeControl");
-			expect_security_mode_ctrl(NULL, "1159ec926a50e98c034a6b7d7c9f418d");
-			ms_sends_msg("0554" "7db47cf7" "2104" "f81e4dc7"); /* 2nd vector's res, s.a. */
-			VERBOSE_ASSERT(security_mode_ctrl_sent, == true, "%d");
-			VERBOSE_ASSERT(cm_service_result_sent, == RES_NONE, "%d");
-
-			btw("MS sends SecurityModeControl acceptance, VLR accepts; above Ciphering is an implicit CM Service Accept");
-			ms_sends_security_mode_complete(1);
-			VERBOSE_ASSERT(cm_service_result_sent, == RES_NONE, "%d");
 		}
-	} else {
-		/* Encryption disabled */
+
 		btw("Encryption disabled. MS sends Authen Response, VLR accepts with a CM Service Accept");
 		gsup_expect_tx(NULL);
 		ms_sends_msg("0554" "7db47cf7" "2104" "f81e4dc7"); /* 2nd vector's res, s.a. */
 		VERBOSE_ASSERT(cm_service_result_sent, == RES_ACCEPT, "%d");
+		break;
+	case OSMO_RAT_UTRAN_IU:
+		/* Even if encryption is disabled (UEA0), we still expect a SecurityModeControl
+		 * message indicating UIA, because integrity protection is mandatory in UTRAN. */
+		btw("Encryption %sabled. MS sends Authen Response, VLR accepts and sends SecurityModeControl",
+		    encryption ? "en" : "dis");
+		expect_security_mode_ctrl(NULL, "1159ec926a50e98c034a6b7d7c9f418d");
+		ms_sends_msg("0554" "7db47cf7" "2104" "f81e4dc7"); /* 2nd vector's res, s.a. */
+		VERBOSE_ASSERT(security_mode_ctrl_sent, == true, "%d");
+		VERBOSE_ASSERT(cm_service_result_sent, == RES_NONE, "%d");
+
+		btw("MS sends SecurityModeControl acceptance, VLR accepts; above Ciphering is an implicit CM Service Accept");
+		ms_sends_security_mode_complete(encryption ? 0x01 : 0x00);
+		VERBOSE_ASSERT(cm_service_result_sent, == RES_NONE, "%d");
+		break;
+	default:
+		btw("Unhandled RAT %s", osmo_rat_type_name(via_ran));
+		OSMO_ASSERT(false);
 	}
 
 	/* Release connection */
@@ -265,27 +279,34 @@ static void _test_umts_authen(enum osmo_rat_type via_ran)
 	EXPECT_ACCEPTED(false);
 	thwart_rx_non_initial_requests();
 
-	if (encryption) {
-		if (via_ran == OSMO_RAT_GERAN_A) {
+	switch (via_ran) {
+	case OSMO_RAT_GERAN_A:
+		if (encryption) {
 			btw("Test code not implemented");
 			OSMO_ASSERT(false);
-		} else {
-			/* On UTRAN */
-			btw("Encryption enabled. MS sends Authen Response, VLR accepts and sends SecurityModeControl");
-			expect_security_mode_ctrl(NULL, "eb50e770ddcc3060101d2f43b6c2b884");
-			ms_sends_msg("0554" "706f9967" "2104" "19ba609c"); /* 3nd vector's res, s.a. */
-			VERBOSE_ASSERT(security_mode_ctrl_sent, == true, "%d");
-
-			btw("MS sends SecurityModeControl acceptance, VLR accepts and sends SMS");
-			dtap_expect_tx(sms);
-			ms_sends_security_mode_complete(1);
 		}
-	} else {
-		/* Encryption disabled */
+
 		btw("Encryption disabled. MS sends Authen Response, VLR accepts and sends pending SMS");
 		dtap_expect_tx(sms);
 		ms_sends_msg("0554" "706f9967" "2104" "19ba609c"); /* 3nd vector's res, s.a. */
 		VERBOSE_ASSERT(dtap_tx_confirmed, == true, "%d");
+		break;
+	case OSMO_RAT_UTRAN_IU:
+		/* Even if encryption is disabled (UEA0), we still expect a SecurityModeControl
+		 * message indicating UIA, because integrity protection is mandatory in UTRAN. */
+		btw("Encryption %sabled. MS sends Authen Response, VLR accepts and sends SecurityModeControl",
+		    encryption ? "en" : "dis");
+		expect_security_mode_ctrl(NULL, "eb50e770ddcc3060101d2f43b6c2b884");
+		ms_sends_msg("0554" "706f9967" "2104" "19ba609c"); /* 3nd vector's res, s.a. */
+		VERBOSE_ASSERT(security_mode_ctrl_sent, == true, "%d");
+
+		btw("MS sends SecurityModeControl acceptance, VLR accepts and sends SMS");
+		dtap_expect_tx(sms);
+		ms_sends_security_mode_complete(encryption ? 0x01 : 0x00);
+		break;
+	default:
+		btw("Unhandled RAT %s", osmo_rat_type_name(via_ran));
+		OSMO_ASSERT(false);
 	}
 
 	btw("SMS was delivered, no requests pending for subscr");
@@ -516,31 +537,38 @@ static void _test_umts_authen_resync(enum osmo_rat_type via_ran)
 	VERBOSE_ASSERT(auth_request_sent, == true, "%d");
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
-	if (encryption) {
-		if (via_ran == OSMO_RAT_GERAN_A) {
+	switch (via_ran) {
+	case OSMO_RAT_GERAN_A:
+		if (encryption) {
 			btw("Test code not implemented");
 			OSMO_ASSERT(false);
-		} else {
-			/* On UTRAN */
-			btw("Encryption enabled. MS sends Authen Response, VLR accepts and sends SecurityModeControl");
-			expect_security_mode_ctrl(NULL, "8a90c769b7272f3bb7a1c1fbb1ea9349");
-			ms_sends_msg("0554" "1df5f0b4" "2104" "f22b696e");
-			VERBOSE_ASSERT(security_mode_ctrl_sent, == true, "%d");
-			VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
-
-			btw("MS sends SecurityModeControl acceptance, VLR accepts and sends GSUP LU Req to HLR");
-			gsup_expect_tx("04010809710000000156f0" CN_DOMAIN VLR_TO_HLR);
-			ms_sends_security_mode_complete(1);
-			VERBOSE_ASSERT(gsup_tx_confirmed, == true, "%d");
-			VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 		}
-	} else {
-		/* Encryption disabled */
+
 		btw("Encryption disabled. MS sends Authen Response, VLR accepts and sends GSUP LU Req to HLR");
 		gsup_expect_tx("04010809710000000156f0" CN_DOMAIN VLR_TO_HLR);
 		ms_sends_msg("0554" "1df5f0b4" "2104" "f22b696e");
 		VERBOSE_ASSERT(gsup_tx_confirmed, == true, "%d");
 		VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
+		break;
+	case OSMO_RAT_UTRAN_IU:
+		/* Even if encryption is disabled (UEA0), we still expect a SecurityModeControl
+		 * message indicating UIA, because integrity protection is mandatory in UTRAN. */
+		btw("Encryption %sabled. MS sends Authen Response, VLR accepts and sends SecurityModeControl",
+		    encryption ? "en" : "dis");
+		expect_security_mode_ctrl(NULL, "8a90c769b7272f3bb7a1c1fbb1ea9349");
+		ms_sends_msg("0554" "1df5f0b4" "2104" "f22b696e");
+		VERBOSE_ASSERT(security_mode_ctrl_sent, == true, "%d");
+		VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
+
+		btw("MS sends SecurityModeControl acceptance, VLR accepts and sends GSUP LU Req to HLR");
+		gsup_expect_tx("04010809710000000156f0" CN_DOMAIN VLR_TO_HLR);
+		ms_sends_security_mode_complete(encryption ? 0x01 : 0x00);
+		VERBOSE_ASSERT(gsup_tx_confirmed, == true, "%d");
+		VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
+		break;
+	default:
+		btw("Unhandled RAT %s", osmo_rat_type_name(via_ran));
+		OSMO_ASSERT(false);
 	}
 
 	btw("HLR sends _INSERT_DATA_REQUEST, VLR responds with _INSERT_DATA_RESULT");

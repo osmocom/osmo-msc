@@ -267,9 +267,12 @@ static void _proc_arq_vlr_node2_post_ciph(struct osmo_fsm_inst *fi)
 	_proc_arq_vlr_node2_post_vlr(fi);
 }
 
-static bool is_ciph_required(struct proc_arq_priv *par)
+/* Determine if sending of CMC/SMC is required */
+static bool is_cmc_smc_required(struct proc_arq_priv *par)
 {
-	return par->ciphering_required;
+	/* UTRAN: always send SecModeCmd, even if ciphering is not required.
+	 * GERAN: avoid sending CiphModeCmd if ciphering is not required. */
+	return par->is_utran || par->ciphering_required;
 }
 
 static void _proc_arq_vlr_node2(struct osmo_fsm_inst *fi)
@@ -280,7 +283,7 @@ static void _proc_arq_vlr_node2(struct osmo_fsm_inst *fi)
 
 	LOGPFSM(fi, "%s()\n", __func__);
 
-	if (!is_ciph_required(par)) {
+	if (!is_cmc_smc_required(par)) {
 		_proc_arq_vlr_node2_post_ciph(fi);
 		return;
 	}

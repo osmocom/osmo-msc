@@ -702,10 +702,12 @@ static bool is_auth_required(struct lu_fsm_priv *lfp)
 		(lfp->ciphering_required && !auth_try_reuse_tuple(lfp->vsub, lfp->key_seq));
 }
 
-/* Determine if ciphering is required */
-static bool is_ciph_required(struct lu_fsm_priv *lfp)
+/* Determine if sending of CMC/SMC is required */
+static bool is_cmc_smc_required(struct lu_fsm_priv *lfp)
 {
-	return lfp->ciphering_required;
+	/* UTRAN: always send SecModeCmd, even if ciphering is not required.
+	 * GERAN: avoid sending CiphModeCmd if ciphering is not required. */
+	return lfp->is_utran || lfp->ciphering_required;
 }
 
 /* Determine if a HLR Update is required */
@@ -853,7 +855,7 @@ static void vlr_loc_upd_post_auth(struct osmo_fsm_inst *fi)
 
 	OSMO_ASSERT(vsub);
 
-	if (!is_ciph_required(lfp)) {
+	if (!is_cmc_smc_required(lfp)) {
 		vlr_loc_upd_post_ciph(fi);
 		return;
 	}
