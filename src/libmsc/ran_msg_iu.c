@@ -375,6 +375,8 @@ static struct msgb *ran_iu_make_rab_assignment(struct osmo_fsm_inst *caller_fi, 
 static struct msgb *ran_iu_make_security_mode_command(struct osmo_fsm_inst *caller_fi,
 						      const struct ran_cipher_mode_command *cm)
 {
+	/* TODO: make the choice of available UIA algorithms configurable */
+	const uint8_t uia_mask = (1 << OSMO_UTRAN_UIA1) | (1 << OSMO_UTRAN_UIA2);
 	bool use_encryption = cm->utran.uea_encryption_mask > (1 << OSMO_UTRAN_UEA0);
 
 	LOG_RAN_IU_ENC(caller_fi, LOGL_DEBUG, "Tx RANAP SECURITY MODE COMMAND to RNC, IK=%s, CK=%s\n",
@@ -384,7 +386,9 @@ static struct msgb *ran_iu_make_security_mode_command(struct osmo_fsm_inst *call
 	 * in the case of A5? */
 	return ranap_new_msg_sec_mod_cmd2(cm->vec->ik,
 					  use_encryption ? cm->vec->ck : NULL,
-					  RANAP_KeyStatus_new, 0x06, cm->utran.uea_encryption_mask);
+					  RANAP_KeyStatus_new,
+					  (uia_mask << 1), /* API treats LSB as UIA0 */
+					  cm->utran.uea_encryption_mask);
 }
 
 
