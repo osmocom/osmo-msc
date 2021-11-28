@@ -1382,13 +1382,9 @@ void vlr_subscr_rx_ciph_res(struct vlr_subscr *vsub, enum vlr_ciph_result_cause 
 int vlr_set_ciph_mode(struct vlr_instance *vlr,
 		      struct osmo_fsm_inst *fi,
 		      void *msc_conn_ref,
-		      bool ciph_required,
 		      bool umts_aka,
 		      bool retrieve_imeisv)
 {
-	if (!ciph_required)
-		return 0;
-
 	LOGPFSML(fi, LOGL_DEBUG, "Set Ciphering Mode\n");
 	return vlr->ops.set_ciph_mode(msc_conn_ref, umts_aka, retrieve_imeisv);
 }

@@ -299,7 +299,6 @@ static void _proc_arq_vlr_node2(struct osmo_fsm_inst *fi)
 	}
 
 	if (vlr_set_ciph_mode(vsub->vlr, fi, par->msc_conn_ref,
-			      par->ciphering_required,
 			      umts_aka,
 			      vsub->vlr->cfg.retrieve_imeisv_ciphered)) {
 		LOGPFSML(fi, LOGL_ERROR,

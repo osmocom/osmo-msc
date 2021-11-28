@@ -472,7 +472,6 @@ void vlr_parq_fsm_init(void);
 int vlr_set_ciph_mode(struct vlr_instance *vlr,
 		      struct osmo_fsm_inst *fi,
 		      void *msc_conn_ref,
-		      bool ciph_required,
 		      bool umts_aka,
 		      bool retrieve_imeisv);
 

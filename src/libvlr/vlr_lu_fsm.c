@@ -878,7 +878,6 @@ static void vlr_loc_upd_post_auth(struct osmo_fsm_inst *fi)
 	}
 
 	if (vlr_set_ciph_mode(vsub->vlr, fi, lfp->msc_conn_ref,
-			      lfp->ciphering_required,
 			      umts_aka,
 			      vsub->vlr->cfg.retrieve_imeisv_ciphered)) {
 		LOGPFSML(fi, LOGL_ERROR,
