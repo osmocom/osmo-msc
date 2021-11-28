@@ -631,7 +631,8 @@ static int gsm340_rx_tpdu(struct gsm_trans *trans, struct msgb *msg,
 
 	/* This SMS got routed through SMPP and we are waiting on the response. */
 	if (gsms->smpp.esme) {
-		return -EINPROGRESS;
+		rc = -EINPROGRESS;
+		goto out;
 	}
 
 	/* This SMS got routed through SMPP, but the configured ESME was
