@@ -642,7 +642,7 @@ static int gsm340_rx_tpdu(struct gsm_trans *trans, struct msgb *msg,
 	 * attempt re-submission to the ESME)
 	 */
 	if (rc == GSM411_RP_CAUSE_MO_NET_OUT_OF_ORDER)
-		return rc;
+		goto out; /* free() the message */
 
 	/*
 	 * This SMS got routed through SMPP or no receiver exists.
