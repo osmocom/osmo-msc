@@ -145,7 +145,6 @@ static void msc_t_send_handover_failure(struct msc_t *msc_t, enum gsm0808_cause 
 		return;
 
 	msub_role_dispatch(msc_t->c.msub, MSC_ROLE_A, MSC_A_EV_FROM_T_PREPARE_HANDOVER_FAILURE, &an_apdu);
-	msgb_free(an_apdu.msg);
 }
 
 static int msc_t_ho_request_decode_and_store_cb(struct osmo_fsm_inst *msc_t_fi, void *data,
@@ -238,7 +237,6 @@ static int msc_t_find_ran_peer_from_ho_request(struct msc_t *msc_t)
 static int msc_t_send_stored_ho_request__decode_cb(struct osmo_fsm_inst *msc_t_fi, void *data,
 						  const struct ran_msg *ran_dec)
 {
-	int rc;
 	struct an_apdu an_apdu;
 	struct msc_t *msc_t = msc_t_priv(msc_t_fi);
 	struct osmo_sockaddr_str *rtp_ran_local = data;
@@ -263,9 +261,7 @@ static int msc_t_send_stored_ho_request__decode_cb(struct osmo_fsm_inst *msc_t_f
 	};
 	if (!an_apdu.msg)
 		return -EIO;
-	rc = msc_t_down_l2_co(msc_t, &an_apdu, true);
-	msgb_free(an_apdu.msg);
-	return rc;
+	return msc_t_down_l2_co(msc_t, &an_apdu, true);
 }
 
 /* The MGW endpoint is created, we know our AoIP Transport Layer Address and can send the Handover Request to the RAN
@@ -472,9 +468,7 @@ static int msc_t_patch_and_send_ho_request_ack(struct msc_t *msc_t, const struct
 	if (!an_apdu.msg)
 		return -EIO;
 	/* Send to remote MSC via msc_a_remote role */
-	rc = msub_role_dispatch(msc_t->c.msub, MSC_ROLE_A, MSC_A_EV_FROM_T_PREPARE_HANDOVER_RESPONSE, &an_apdu);
-	msgb_free(an_apdu.msg);
-	return rc;
+	return msub_role_dispatch(msc_t->c.msub, MSC_ROLE_A, MSC_A_EV_FROM_T_PREPARE_HANDOVER_RESPONSE, &an_apdu);
 }
 
 static int msc_t_wait_ho_request_ack_decode_cb(struct osmo_fsm_inst *msc_t_fi, void *data,

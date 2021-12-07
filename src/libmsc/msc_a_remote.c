@@ -179,8 +179,6 @@ static void msc_a_remote_send_handover_failure(struct msc_a *msc_a, enum gsm0808
 		return;
 
 	msc_a_remote_msg_up_to_remote_msc(msc_a, MSC_ROLE_T, OSMO_GSUP_MSGT_E_PREPARE_HANDOVER_ERROR, &an_apdu);
-	msgb_free(an_apdu.msg);
-	return;
 }
 
 /*     [MSC-A---------------------]            [MSC-B---------------------]

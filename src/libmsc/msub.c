@@ -544,6 +544,8 @@ void msc_role_forget_conn(struct osmo_fsm_inst *role, struct ran_conn *conn)
 	*conn_p = NULL;
 }
 
+/* NOTE: the resulting message buffer will be attached to OTC_SELECT, so its lifetime
+ * is limited by the current select() loop iteration.  Use talloc_steal() to avoid this. */
 struct msgb *msc_role_ran_encode(struct osmo_fsm_inst *fi, const struct ran_msg *ran_msg)
 {
 	struct msc_role_common *c = fi->priv;
@@ -556,6 +558,8 @@ struct msgb *msc_role_ran_encode(struct osmo_fsm_inst *fi, const struct ran_msg 
 	msg = c->ran->ran_encode(fi, ran_msg);
 	if (!msg)
 		LOGPFSML(fi, LOGL_ERROR, "Failed to encode %s\n", ran_msg_type_name(ran_msg->msg_type));
+	else
+		talloc_steal(OTC_SELECT, msg);
 	return msg;
 }
 

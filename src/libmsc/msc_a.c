@@ -1659,12 +1659,9 @@ int _msc_a_msg_down(struct msc_a *msc_a, enum msc_role to_role, uint32_t to_role
 		.an_proto = msc_a->c.ran->an_proto,
 		.msg = msc_role_ran_encode(msc_a->c.fi, ran_msg),
 	};
-	int rc;
 	if (!an_apdu.msg)
 		return -EIO;
-	rc = _msub_role_dispatch(msc_a->c.msub, to_role, to_role_event, &an_apdu, file, line);
-	msgb_free(an_apdu.msg);
-	return rc;
+	return _msub_role_dispatch(msc_a->c.msub, to_role, to_role_event, &an_apdu, file, line);
 }
 
 int msc_a_tx_dtap_to_i(struct msc_a *msc_a, struct msgb *dtap)
