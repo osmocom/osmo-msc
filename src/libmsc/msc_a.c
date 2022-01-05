@@ -1725,6 +1725,7 @@ static int msc_a_start_assignment(struct msc_a *msc_a, struct gsm_trans *cc_tran
 	struct call_leg *cl = msc_a->cc.call_leg;
 	struct msc_i *msc_i = msc_a_msc_i(msc_a);
 	struct gsm_network *net = msc_a_net(msc_a);
+	enum mgcp_codecs codec, *codec_ptr;
 
 	OSMO_ASSERT(!msc_a->cc.active_trans);
 	msc_a->cc.active_trans = cc_trans;
@@ -1759,8 +1760,14 @@ static int msc_a_start_assignment(struct msc_a *msc_a, struct gsm_trans *cc_tran
 	 * If the local address is already known, then immediately trigger. */
 	if (call_leg_local_ip(cl, RTP_TO_RAN))
 		return osmo_fsm_inst_dispatch(msc_a->c.fi, MSC_EV_CALL_LEG_RTP_LOCAL_ADDR_AVAILABLE, cl->rtp[RTP_TO_RAN]);
-	else
-		return call_leg_ensure_ci(msc_a->cc.call_leg, RTP_TO_RAN, cc_trans->callref, cc_trans, NULL, NULL);
+
+	if (msc_a->c.ran->type == OSMO_RAT_UTRAN_IU) {
+		codec = CODEC_IUFP;
+		codec_ptr = &codec;
+	} else {
+		codec_ptr = NULL;
+	}
+	return call_leg_ensure_ci(msc_a->cc.call_leg, RTP_TO_RAN, cc_trans->callref, cc_trans, codec_ptr, NULL);
 }
 
 int msc_a_try_call_assignment(struct gsm_trans *cc_trans)
