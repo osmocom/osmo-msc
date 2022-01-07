@@ -1311,6 +1311,8 @@ static void msc_a_up_call_assignment_complete(struct msc_a *msc_a, const struct 
 {
 	struct gsm_trans *cc_trans = msc_a->cc.active_trans;
 	struct rtp_stream *rtps_to_ran = msc_a->cc.call_leg ? msc_a->cc.call_leg->rtp[RTP_TO_RAN] : NULL;
+	const enum mgcp_codecs *codec_if_known = ac->assignment_complete.codec_present ?
+							&ac->assignment_complete.codec : NULL;
 
 	if (!rtps_to_ran) {
 		LOG_MSC_A(msc_a, LOGL_ERROR, "Rx Assignment Complete, but no RTP stream is set up\n");
@@ -1329,7 +1331,8 @@ static void msc_a_up_call_assignment_complete(struct msc_a *msc_a, const struct 
 	}
 
 	/* Update RAN-side endpoint CI: */
-	rtp_stream_set_codec(rtps_to_ran, ac->assignment_complete.codec);
+	if (codec_if_known)
+		rtp_stream_set_codec(rtps_to_ran, *codec_if_known);
 	rtp_stream_set_remote_addr(rtps_to_ran, &ac->assignment_complete.remote_rtp);
 	if (rtps_to_ran->use_osmux)
 		rtp_stream_set_remote_osmux_cid(rtps_to_ran,
@@ -1344,7 +1347,7 @@ static void msc_a_up_call_assignment_complete(struct msc_a *msc_a, const struct 
 	 * - the Assignment has chosen a speech codec
 	 * go on to create the CN side RTP stream's CI. */
 	if (call_leg_ensure_ci(msc_a->cc.call_leg, RTP_TO_CN, cc_trans->callref, cc_trans,
-			       &ac->assignment_complete.codec, NULL)) {
+			       codec_if_known, NULL)) {
 		LOG_MSC_A_CAT(msc_a, DCC, LOGL_ERROR, "Error creating MGW CI towards CN\n");
 		call_leg_release(msc_a->cc.call_leg);
 		return;

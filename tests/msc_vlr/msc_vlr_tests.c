@@ -1007,6 +1007,7 @@ void ms_sends_assignment_complete(enum mgcp_codecs assigned_codec)
 	ran_dec = (struct ran_msg){
 		.msg_type = RAN_MSG_ASSIGNMENT_COMPLETE,
 		.assignment_complete = {
+			.codec_present = true,
 			.codec = assigned_codec,
 		},
 	};
