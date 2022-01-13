@@ -23,25 +23,25 @@ sdp input: a=rtpmap:101 telephone-event/8000\r\n
 sdp input: a=fmtp:101 0-15\r\n
 sdp input: a=ptime:20\r\n
 sdp input: a=sendrecv\r\n
-sdp_msg_to_str: v=0\r\n
-sdp_msg_to_str: o=OsmoMSC 0 0 IN IP4 192.168.11.121\r\n
-sdp_msg_to_str: s=GSM Call\r\n
-sdp_msg_to_str: c=IN IP4 192.168.11.121\r\n
-sdp_msg_to_str: t=0 0\r\n
-sdp_msg_to_str: m=audio 10020 RTP/AVP 18 0 2 4 8 96 97 98 100 101\r\n
-sdp_msg_to_str: a=rtpmap:18 G729/8000\r\n
-sdp_msg_to_str: a=rtpmap:0 PCMU/8000\r\n
-sdp_msg_to_str: a=rtpmap:2 G726-32/8000\r\n
-sdp_msg_to_str: a=rtpmap:4 G723/8000\r\n
-sdp_msg_to_str: a=rtpmap:8 PCMA/8000\r\n
-sdp_msg_to_str: a=rtpmap:96 G726-40/8000\r\n
-sdp_msg_to_str: a=rtpmap:97 G726-24/8000\r\n
-sdp_msg_to_str: a=rtpmap:98 G726-16/8000\r\n
-sdp_msg_to_str: a=rtpmap:100 NSE/8000\r\n
-sdp_msg_to_str: a=fmtp:100 192-193\r\n
-sdp_msg_to_str: a=rtpmap:101 telephone-event/8000\r\n
-sdp_msg_to_str: a=fmtp:101 0-15\r\n
-sdp_msg_to_str: a=ptime:20\r\n
+sdp_msg_to_sdp_str_buf: v=0\r\n
+sdp_msg_to_sdp_str_buf: o=OsmoMSC 0 0 IN IP4 192.168.11.121\r\n
+sdp_msg_to_sdp_str_buf: s=GSM Call\r\n
+sdp_msg_to_sdp_str_buf: c=IN IP4 192.168.11.121\r\n
+sdp_msg_to_sdp_str_buf: t=0 0\r\n
+sdp_msg_to_sdp_str_buf: m=audio 10020 RTP/AVP 18 0 2 4 8 96 97 98 100 101\r\n
+sdp_msg_to_sdp_str_buf: a=rtpmap:18 G729/8000\r\n
+sdp_msg_to_sdp_str_buf: a=rtpmap:0 PCMU/8000\r\n
+sdp_msg_to_sdp_str_buf: a=rtpmap:2 G726-32/8000\r\n
+sdp_msg_to_sdp_str_buf: a=rtpmap:4 G723/8000\r\n
+sdp_msg_to_sdp_str_buf: a=rtpmap:8 PCMA/8000\r\n
+sdp_msg_to_sdp_str_buf: a=rtpmap:96 G726-40/8000\r\n
+sdp_msg_to_sdp_str_buf: a=rtpmap:97 G726-24/8000\r\n
+sdp_msg_to_sdp_str_buf: a=rtpmap:98 G726-16/8000\r\n
+sdp_msg_to_sdp_str_buf: a=rtpmap:100 NSE/8000\r\n
+sdp_msg_to_sdp_str_buf: a=fmtp:100 192-193\r\n
+sdp_msg_to_sdp_str_buf: a=rtpmap:101 telephone-event/8000\r\n
+sdp_msg_to_sdp_str_buf: a=fmtp:101 0-15\r\n
+sdp_msg_to_sdp_str_buf: a=ptime:20\r\n
 [0] ok
 
 [1]
@@ -55,15 +55,15 @@ sdp input: a=rtpmap:98 AMR/8000\r\n
 sdp input: a=fmtp:98 octet-align=1; mode-set=4\r\n
 sdp input: a=ptime:20\r\n
 sdp input: a=rtcp:16399 IN IP4 192.168.11.151\r\n
-sdp_msg_to_str: v=0\r\n
-sdp_msg_to_str: o=OsmoMSC 0 0 IN IP4 192.168.11.151\r\n
-sdp_msg_to_str: s=GSM Call\r\n
-sdp_msg_to_str: c=IN IP4 192.168.11.151\r\n
-sdp_msg_to_str: t=0 0\r\n
-sdp_msg_to_str: m=audio 16398 RTP/AVP 98\r\n
-sdp_msg_to_str: a=rtpmap:98 AMR/8000\r\n
-sdp_msg_to_str: a=fmtp:98 octet-align=1; mode-set=4\r\n
-sdp_msg_to_str: a=ptime:20\r\n
+sdp_msg_to_sdp_str_buf: v=0\r\n
+sdp_msg_to_sdp_str_buf: o=OsmoMSC 0 0 IN IP4 192.168.11.151\r\n
+sdp_msg_to_sdp_str_buf: s=GSM Call\r\n
+sdp_msg_to_sdp_str_buf: c=IN IP4 192.168.11.151\r\n
+sdp_msg_to_sdp_str_buf: t=0 0\r\n
+sdp_msg_to_sdp_str_buf: m=audio 16398 RTP/AVP 98\r\n
+sdp_msg_to_sdp_str_buf: a=rtpmap:98 AMR/8000\r\n
+sdp_msg_to_sdp_str_buf: a=fmtp:98 octet-align=1; mode-set=4\r\n
+sdp_msg_to_sdp_str_buf: a=ptime:20\r\n
 [1] ok
 
 [2]
@@ -82,19 +82,19 @@ sdp input: a=fmtp:101 0-15\r\n
 sdp input: a=sendrecv\r\n
 sdp input: a=rtcp:30437\r\n
 sdp input: a=ptime:20\r\n
-sdp_msg_to_str: v=0\r\n
-sdp_msg_to_str: o=OsmoMSC 0 0 IN IP4 192.168.11.140\r\n
-sdp_msg_to_str: s=GSM Call\r\n
-sdp_msg_to_str: c=IN IP4 192.168.11.140\r\n
-sdp_msg_to_str: t=0 0\r\n
-sdp_msg_to_str: m=audio 30436 RTP/AVP 18 0 4 8 101\r\n
-sdp_msg_to_str: a=rtpmap:18 G729/8000\r\n
-sdp_msg_to_str: a=rtpmap:0 PCMU/8000\r\n
-sdp_msg_to_str: a=rtpmap:4 G723/8000\r\n
-sdp_msg_to_str: a=rtpmap:8 PCMA/8000\r\n
-sdp_msg_to_str: a=rtpmap:101 telephone-event/8000\r\n
-sdp_msg_to_str: a=fmtp:101 0-15\r\n
-sdp_msg_to_str: a=ptime:20\r\n
+sdp_msg_to_sdp_str_buf: v=0\r\n
+sdp_msg_to_sdp_str_buf: o=OsmoMSC 0 0 IN IP4 192.168.11.140\r\n
+sdp_msg_to_sdp_str_buf: s=GSM Call\r\n
+sdp_msg_to_sdp_str_buf: c=IN IP4 192.168.11.140\r\n
+sdp_msg_to_sdp_str_buf: t=0 0\r\n
+sdp_msg_to_sdp_str_buf: m=audio 30436 RTP/AVP 18 0 4 8 101\r\n
+sdp_msg_to_sdp_str_buf: a=rtpmap:18 G729/8000\r\n
+sdp_msg_to_sdp_str_buf: a=rtpmap:0 PCMU/8000\r\n
+sdp_msg_to_sdp_str_buf: a=rtpmap:4 G723/8000\r\n
+sdp_msg_to_sdp_str_buf: a=rtpmap:8 PCMA/8000\r\n
+sdp_msg_to_sdp_str_buf: a=rtpmap:101 telephone-event/8000\r\n
+sdp_msg_to_sdp_str_buf: a=fmtp:101 0-15\r\n
+sdp_msg_to_sdp_str_buf: a=ptime:20\r\n
 [2] ok
 
 

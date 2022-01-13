@@ -163,7 +163,7 @@ int sdp_audio_codec_remove(struct sdp_audio_codecs *ac, const struct sdp_audio_c
 }
 
 /* Convert struct sdp_msg to the actual SDP protocol representation */
-int sdp_msg_to_str(char *dst, size_t dst_size, const struct sdp_msg *sdp)
+int sdp_msg_to_sdp_str_buf(char *dst, size_t dst_size, const struct sdp_msg *sdp)
 {
 	const struct sdp_audio_codec *codec;
 	struct osmo_strbuf sb = { .buf = dst, .len = dst_size };
@@ -383,7 +383,7 @@ static int sdp_parse_connection_info(struct sdp_msg *sdp, const char *src)
 }
 
 /* Parse SDP string into struct sdp_msg. Return 0 on success, negative on error. */
-int sdp_msg_from_str(struct sdp_msg *sdp, const char *src)
+int sdp_msg_from_sdp_str(struct sdp_msg *sdp, const char *src)
 {
 	const char *pos;
 	*sdp = (struct sdp_msg){};
@@ -505,7 +505,7 @@ void sdp_audio_codecs_select(struct sdp_audio_codecs *ac, struct sdp_audio_codec
 
 /* Short single-line representation of an SDP audio codec, convenient for logging.
  * Like "AMR/8000:octet-align=1#122" */
-int sdp_audio_codec_name_buf(char *buf, size_t buflen, const struct sdp_audio_codec *codec)
+int sdp_audio_codec_to_str_buf(char *buf, size_t buflen, const struct sdp_audio_codec *codec)
 {
 	struct osmo_strbuf sb = { .buf = buf, .len = buflen };
 	OSMO_STRBUF_PRINTF(sb, "%s", codec->subtype_name);
@@ -514,18 +514,18 @@ int sdp_audio_codec_name_buf(char *buf, size_t buflen, const struct sdp_audio_co
 	return sb.chars_needed;
 }
 
-char *sdp_audio_codec_name_c(void *ctx, const struct sdp_audio_codec *codec)
+char *sdp_audio_codec_to_str_c(void *ctx, const struct sdp_audio_codec *codec)
 {
-	OSMO_NAME_C_IMPL(ctx, 32, "sdp_audio_codec_name_c-ERROR", sdp_audio_codec_name_buf, codec)
+	OSMO_NAME_C_IMPL(ctx, 32, "sdp_audio_codec_to_str_c-ERROR", sdp_audio_codec_to_str_buf, codec)
 }
 
-const char *sdp_audio_codec_name(const struct sdp_audio_codec *codec)
+const char *sdp_audio_codec_to_str(const struct sdp_audio_codec *codec)
 {
-	return sdp_audio_codec_name_c(OTC_SELECT, codec);
+	return sdp_audio_codec_to_str_c(OTC_SELECT, codec);
 }
 
 /* Short single-line representation of a list of SDP audio codecs, convenient for logging */
-int sdp_audio_codecs_name_buf(char *buf, size_t buflen, const struct sdp_audio_codecs *ac)
+int sdp_audio_codecs_to_str_buf(char *buf, size_t buflen, const struct sdp_audio_codecs *ac)
 {
 	struct osmo_strbuf sb = { .buf = buf, .len = buflen };
 	const struct sdp_audio_codec *codec;
@@ -535,23 +535,23 @@ int sdp_audio_codecs_name_buf(char *buf, size_t buflen, const struct sdp_audio_c
 		bool first = (codec == ac->codec);
 		if (!first)
 			OSMO_STRBUF_PRINTF(sb, ",");
-		OSMO_STRBUF_APPEND(sb, sdp_audio_codec_name_buf, codec);
+		OSMO_STRBUF_APPEND(sb, sdp_audio_codec_to_str_buf, codec);
 	}
 	return sb.chars_needed;
 }
 
-char *sdp_audio_codecs_name_c(void *ctx, const struct sdp_audio_codecs *ac)
+char *sdp_audio_codecs_to_str_c(void *ctx, const struct sdp_audio_codecs *ac)
 {
-	OSMO_NAME_C_IMPL(ctx, 128, "sdp_audio_codecs_name_c-ERROR", sdp_audio_codecs_name_buf, ac)
+	OSMO_NAME_C_IMPL(ctx, 128, "sdp_audio_codecs_to_str_c-ERROR", sdp_audio_codecs_to_str_buf, ac)
 }
 
-const char *sdp_audio_codecs_name(const struct sdp_audio_codecs *ac)
+const char *sdp_audio_codecs_to_str(const struct sdp_audio_codecs *ac)
 {
-	return sdp_audio_codecs_name_c(OTC_SELECT, ac);
+	return sdp_audio_codecs_to_str_c(OTC_SELECT, ac);
 }
 
 /* Short single-line representation of an SDP message, convenient for logging */
-int sdp_msg_name_buf(char *buf, size_t buflen, const struct sdp_msg *sdp)
+int sdp_msg_to_str_buf(char *buf, size_t buflen, const struct sdp_msg *sdp)
 {
 	struct osmo_strbuf sb = { .buf = buf, .len = buflen };
 	if (!sdp) {
@@ -561,17 +561,17 @@ int sdp_msg_name_buf(char *buf, size_t buflen, const struct sdp_msg *sdp)
 
 	OSMO_STRBUF_PRINTF(sb, OSMO_SOCKADDR_STR_FMT, OSMO_SOCKADDR_STR_FMT_ARGS(&sdp->rtp));
 	OSMO_STRBUF_PRINTF(sb, "{");
-	OSMO_STRBUF_APPEND(sb, sdp_audio_codecs_name_buf, &sdp->audio_codecs);
+	OSMO_STRBUF_APPEND(sb, sdp_audio_codecs_to_str_buf, &sdp->audio_codecs);
 	OSMO_STRBUF_PRINTF(sb, "}");
 	return sb.chars_needed;
 }
 
-char *sdp_msg_name_c(void *ctx, const struct sdp_msg *sdp)
+char *sdp_msg_to_str_c(void *ctx, const struct sdp_msg *sdp)
 {
-	OSMO_NAME_C_IMPL(ctx, 128, "sdp_msg_name_c-ERROR", sdp_msg_name_buf, sdp)
+	OSMO_NAME_C_IMPL(ctx, 128, "sdp_msg_to_str_c-ERROR", sdp_msg_to_str_buf, sdp)
 }
 
-const char *sdp_msg_name(const struct sdp_msg *sdp)
+const char *sdp_msg_to_str(const struct sdp_msg *sdp)
 {
-	return sdp_msg_name_c(OTC_SELECT, sdp);
+	return sdp_msg_to_str_c(OTC_SELECT, sdp);
 }

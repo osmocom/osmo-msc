@@ -52,17 +52,17 @@ void sdp_audio_codecs_intersection(struct sdp_audio_codecs *ac_dest, const struc
 				   bool translate_payload_type_numbers);
 void sdp_audio_codecs_select(struct sdp_audio_codecs *ac, struct sdp_audio_codec *codec);
 
-int sdp_msg_to_str(char *dst, size_t dst_size, const struct sdp_msg *sdp);
-int sdp_msg_from_str(struct sdp_msg *sdp, const char *src);
+int sdp_msg_to_sdp_str_buf(char *dst, size_t dst_size, const struct sdp_msg *sdp);
+int sdp_msg_from_sdp_str(struct sdp_msg *sdp, const char *src);
 
-int sdp_audio_codec_name_buf(char *buf, size_t buflen, const struct sdp_audio_codec *codec);
-char *sdp_audio_codec_name_c(void *ctx, const struct sdp_audio_codec *codec);
-const char *sdp_audio_codec_name(const struct sdp_audio_codec *codec);
+int sdp_audio_codec_to_str_buf(char *buf, size_t buflen, const struct sdp_audio_codec *codec);
+char *sdp_audio_codec_to_str_c(void *ctx, const struct sdp_audio_codec *codec);
+const char *sdp_audio_codec_to_str(const struct sdp_audio_codec *codec);
 
-int sdp_audio_codecs_name_buf(char *buf, size_t buflen, const struct sdp_audio_codecs *ac);
-char *sdp_audio_codecs_name_c(void *ctx, const struct sdp_audio_codecs *ac);
-const char *sdp_audio_codecs_name(const struct sdp_audio_codecs *ac);
+int sdp_audio_codecs_to_str_buf(char *buf, size_t buflen, const struct sdp_audio_codecs *ac);
+char *sdp_audio_codecs_to_str_c(void *ctx, const struct sdp_audio_codecs *ac);
+const char *sdp_audio_codecs_to_str(const struct sdp_audio_codecs *ac);
 
-int sdp_msg_name_buf(char *buf, size_t buflen, const struct sdp_msg *sdp);
-char *sdp_msg_name_c(void *ctx, const struct sdp_msg *sdp);
-const char *sdp_msg_name(const struct sdp_msg *sdp);
+int sdp_msg_to_str_buf(char *buf, size_t buflen, const struct sdp_msg *sdp);
+char *sdp_msg_to_str_c(void *ctx, const struct sdp_msg *sdp);
+const char *sdp_msg_to_str(const struct sdp_msg *sdp);

@@ -134,10 +134,10 @@ void test_parse_and_compose()
 		printf("\n[%d]\n", i);
 		dump_sdp(t->sdp_input, "sdp input: ");
 
-		sdp_msg_from_str(&sdp, t->sdp_input);
-		sdp_msg_to_str(str, sizeof(str), &sdp);
+		sdp_msg_from_sdp_str(&sdp, t->sdp_input);
+		sdp_msg_to_sdp_str_buf(str, sizeof(str), &sdp);
 
-		dump_sdp(str, "sdp_msg_to_str: ");
+		dump_sdp(str, "sdp_msg_to_sdp_str_buf: ");
 		if (strcmp(str, t->expect_sdp_str)) {
 			int j;
 			ok = false;
@@ -344,7 +344,7 @@ struct sdp_intersect_test_data sdp_intersect_tests[] = {
 const char *sdp_msg_logstr(const struct sdp_msg *sdp)
 {
 	static char buf[1024];
-	sdp_msg_to_str(buf, sizeof(buf), sdp);
+	sdp_msg_to_sdp_str_buf(buf, sizeof(buf), sdp);
 	return buf;
 }
 
@@ -365,20 +365,20 @@ static void test_intersect()
 		dump_sdp(t->sdp_a, "SDP A: ");
 		dump_sdp(t->sdp_b, " SDP B: ");
 
-		rc = sdp_msg_from_str(&sdp_a, t->sdp_a);
+		rc = sdp_msg_from_sdp_str(&sdp_a, t->sdp_a);
 		if (rc) {
 			printf("ERROR parsing SDP A: %d\n", rc);
 			break;
 		}
 		dump_sdp(sdp_msg_logstr(&sdp_a), "parsed SDP A: ");
-		rc = sdp_msg_from_str(&sdp_b, t->sdp_b);
+		rc = sdp_msg_from_sdp_str(&sdp_b, t->sdp_b);
 		if (rc) {
 			printf("ERROR parsing SDP A: %d\n", rc);
 			break;
 		}
 		dump_sdp(sdp_msg_logstr(&sdp_b), "parsed SDP B: ");
 		sdp_audio_codecs_intersection(&sdp_a.audio_codecs, &sdp_b.audio_codecs, false);
-		sdp_msg_to_str(str, sizeof(str), &sdp_a);
+		sdp_msg_to_sdp_str_buf(str, sizeof(str), &sdp_a);
 
 		dump_sdp(str, "sdp_msg_intersection(a,b): ");
 		if (strcmp(str, t->expect_intersection)) {
@@ -525,20 +525,20 @@ static void test_select()
 		struct sdp_audio_codec *codec;
 		char buf[1024];
 		printf("\n[%d]\n", i);
-		rc = sdp_msg_from_str(&sdp, t->sdp);
+		rc = sdp_msg_from_sdp_str(&sdp, t->sdp);
 		if (rc) {
 			printf("ERROR parsing SDP: %d\n", rc);
 			break;
 		}
-		printf("SDP: %s\n", sdp_audio_codecs_name(&sdp.audio_codecs));
+		printf("SDP: %s\n", sdp_audio_codecs_to_str(&sdp.audio_codecs));
 		codec = sdp_audio_codec_by_payload_type(&sdp.audio_codecs, t->select_payload_type, false);
 		OSMO_ASSERT(codec);
-		printf("Select: %s\n", sdp_audio_codec_name(codec));
+		printf("Select: %s\n", sdp_audio_codec_to_str(codec));
 
 		sdp_audio_codecs_select(&sdp.audio_codecs, codec);
 
-		printf("SDP: %s\n", sdp_audio_codecs_name(&sdp.audio_codecs));
-		sdp_msg_to_str(buf, sizeof(buf), &sdp);
+		printf("SDP: %s\n", sdp_audio_codecs_to_str(&sdp.audio_codecs));
+		sdp_msg_to_sdp_str_buf(buf, sizeof(buf), &sdp);
 
 		if (strcmp(buf, t->expect_sdp ? : t->sdp)) {
 			int j;
