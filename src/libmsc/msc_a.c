@@ -47,6 +47,7 @@
 #include <osmocom/msc/rtp_stream.h>
 #include <osmocom/msc/msc_ho.h>
 #include <osmocom/msc/codec_sdp_cc_t9n.h>
+#include <osmocom/msc/codec_filter.h>
 
 #define MSC_A_USE_WAIT_CLEAR_COMPLETE "wait-Clear-Complete"
 
@@ -1352,6 +1353,10 @@ static void msc_a_up_call_assignment_complete(struct msc_a *msc_a, const struct 
 						ac->assignment_complete.osmux_cid);
 
 	rtp_stream_commit(rtps_to_ran);
+
+	/* Remember the Codec List (BSS Supported) */
+	if (ac->assignment_complete.codec_list_bss_supported)
+		codec_filter_set_bss(&cc_trans->cc.codecs, ac->assignment_complete.codec_list_bss_supported);
 
 	/* Setup CN side endpoint CI:
 	 * Now that
