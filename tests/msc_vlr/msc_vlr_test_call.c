@@ -285,6 +285,30 @@ static void test_call_mt()
 	struct gsm_mncc mncc = {
 		.imsi = IMSI,
 		.callref = 0x423,
+		.fields = MNCC_F_BEARER_CAP,
+		.bearer_cap = {
+			.speech_ver = {
+				GSM48_BCAP_SV_AMR_F,
+				GSM48_BCAP_SV_EFR,
+				GSM48_BCAP_SV_FR,
+				GSM48_BCAP_SV_AMR_H,
+				GSM48_BCAP_SV_HR,
+				-1 },
+		},
+		/* NOTE: below SDP includes only AMR, above bearer_cap includes more codecs. Ideally, these would match,
+		 * but in reality the bearer cap in MNCC was never implemented properly. This test shows that above
+		 * bearer_cap is ignored when SDP is present: In the CC Setup below, the Bearer Capability is only
+		 * "04 04 60 04 05 8b" with speech versions '04' == GSM48_BCAP_SV_AMR_F and '05' == GSM48_BCAP_SV_AMR_H.
+		 */
+		.sdp = "v=0\r\n"
+		       "o=OsmoMSC 0 0 IN IP4 10.23.23.1\r\n"
+		       "s=GSM Call\r\n"
+		       "c=IN IP4 10.23.23.1\r\n"
+		       "t=0 0\r\n"
+		       "m=audio 23 RTP/AVP 112\r\n"
+		       "a=rtpmap:112 AMR/8000\r\n"
+		       "a=fmtp:112 octet-align=1\r\n"
+		       "a=ptime:20\r\n",
 	};
 
 	comment_start();
@@ -298,6 +322,7 @@ static void test_call_mt()
 	paging_expect_imsi(IMSI);
 	paging_sent = false;
 	mncc_sends_to_cc(MNCC_SETUP_REQ, &mncc);
+	mncc.sdp[0] = '\0';
 
 	VERBOSE_ASSERT(paging_sent, == true, "%d");
 
@@ -316,7 +341,7 @@ static void test_call_mt()
 	VERBOSE_ASSERT(security_mode_ctrl_sent, == true, "%d");
 
 	btw("MS sends SecurityModeControl acceptance, VLR accepts, sends CC Setup");
-	dtap_expect_tx("0305" /* CC: Setup */ "04 07 60 04 05 0b 06 08 87" /* Bearer Cap */);
+	dtap_expect_tx("0305" /* CC: Setup */ "04 04 60 04 05 8b" /* Bearer Cap, speech ver of AMR-FR and AMR-HR */);
 	ms_sends_security_mode_complete(1);
 
 	btw("MS confirms call, we create a RAN-side RTP and forward MNCC_CALL_CONF_IND");
@@ -388,6 +413,24 @@ static void test_call_mt2()
 	struct gsm_mncc mncc = {
 		.imsi = IMSI,
 		.callref = 0x423,
+		.fields = MNCC_F_BEARER_CAP,
+		.bearer_cap = {
+			.speech_ver = { GSM48_BCAP_SV_FR, -1, },
+		},
+		/* NOTE: below SDP includes only AMR, above bearer_cap includes only GSM-FR. Ideally, these would match,
+		 * but in reality the bearer cap in MNCC was never implemented properly. This test shows that above
+		 * bearer_cap is ignored when SDP is present: In the CC Setup below, the Bearer Capability is only
+		 * "04 04 60 04 05 8b" with speech versions '04' == GSM48_BCAP_SV_AMR_F and '05' == GSM48_BCAP_SV_AMR_H.
+		 */
+		.sdp = "v=0\r\n"
+		       "o=OsmoMSC 0 0 IN IP4 10.23.23.1\r\n"
+		       "s=GSM Call\r\n"
+		       "c=IN IP4 10.23.23.1\r\n"
+		       "t=0 0\r\n"
+		       "m=audio 23 RTP/AVP 112\r\n"
+		       "a=rtpmap:112 AMR/8000\r\n"
+		       "a=fmtp:112 octet-align=1\r\n"
+		       "a=ptime:20\r\n",
 	};
 
 	comment_start();
@@ -419,7 +462,7 @@ static void test_call_mt2()
 	VERBOSE_ASSERT(security_mode_ctrl_sent, == true, "%d");
 
 	btw("MS sends SecurityModeControl acceptance, VLR accepts, sends CC Setup");
-	dtap_expect_tx("0305" /* CC: Setup */ "04 07 60 04 05 0b 06 08 87" /* Bearer Cap */);
+	dtap_expect_tx("0305" /* CC: Setup */ "04 04 60 04 05 8b" /* Bearer Cap, speech ver of AMR-FR and AMR-HR */);
 	ms_sends_security_mode_complete(1);
 
 	btw("MS confirms call, we create a RAN-side RTP and forward MNCC_CALL_CONF_IND");

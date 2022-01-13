@@ -708,6 +708,9 @@ static void msc_a_fsm_communicating(struct osmo_fsm_inst *fi, uint32_t event, vo
 			msc_a_call_leg_ran_local_addr_available(msc_a);
 			return;
 		case RTP_TO_CN:
+			/* The rtp_stream has gotten the new RTP address and port from the MGW. Also update the codecs
+			 * filter result to convey this RTP address and port towards the remote call leg. */
+			codec_filter_set_local_rtp(&msc_a->cc.active_trans->cc.codecs, &rtps->local);
 			msc_a_call_leg_cn_local_addr_available(msc_a, rtps->for_trans);
 			return;
 		default:
