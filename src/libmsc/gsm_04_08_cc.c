@@ -1773,7 +1773,7 @@ static int tch_rtp_connect(struct gsm_network *net, const struct gsm_mncc_rtp *r
 		return -EIO;
 	}
 
-	LOG_TRANS_CAT(trans, DMNCC, LOGL_DEBUG, "rx %s %s:%u\n", get_mncc_name(MNCC_RTP_CONNECT),
+	LOG_TRANS_CAT(trans, DMNCC, LOGL_DEBUG, "rx %s %s:%u\n", get_mncc_name(rtp->msg_type),
 		      osmo_sockaddr_ntop((const struct sockaddr*)&rtp->addr, ipbuf),
 		      osmo_sockaddr_port((const struct sockaddr*)&rtp->addr));
 
