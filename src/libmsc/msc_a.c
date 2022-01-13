@@ -1442,6 +1442,8 @@ int msc_a_ran_dec_from_msc_i(struct msc_a *msc_a, struct msc_a_ran_dec_data *d)
 			.lai.plmn = msc_a_net(msc_a)->plmn,
 		};
 		gsm0808_cell_id_to_cgi(&msc_a->via_cell, msg->compl_l3.cell_id);
+
+		/* Submit the Complete Layer 3 Information DTAP */
 		rc = msc_a_up_l3(msc_a, msg->compl_l3.msg);
 		if (!rc) {
 			struct ran_conn *conn = msub_ran_conn(msc_a->c.msub);
