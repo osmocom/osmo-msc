@@ -621,7 +621,7 @@ static int gsm48_cc_rx_setup(struct gsm_trans *trans, struct msgb *msg)
 
 static int gsm48_cc_tx_setup(struct gsm_trans *trans, void *arg)
 {
-	struct msgb *msg = gsm48_msgb_alloc_name("GSM 04.08 CC STUP");
+	struct msgb *msg = gsm48_msgb_alloc_name("GSM 04.08 CC SETUP");
 	struct gsm48_hdr *gh;
 	struct gsm_mncc *setup = arg;
 	int rc, trans_id;
