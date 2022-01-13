@@ -41,6 +41,7 @@
 #include <osmocom/msc/msc_t.h>
 #include <osmocom/msc/call_leg.h>
 #include <osmocom/msc/rtp_stream.h>
+#include <osmocom/msc/codec_sdp_cc_t9n.h>
 
 #include "msc_vlr_tests.h"
 
@@ -842,9 +843,11 @@ void expect_crcx(enum rtp_direction towards)
 
 /* override, requires '-Wl,--wrap=call_leg_ensure_ci' */
 int __real_call_leg_ensure_ci(struct call_leg *cl, enum rtp_direction dir, uint32_t call_id, struct gsm_trans *for_trans,
-			      const enum mgcp_codecs *codec_if_known, const struct osmo_sockaddr_str *remote_addr_if_known);
+			      const struct sdp_audio_codecs *codecs_if_known,
+			      const struct osmo_sockaddr_str *remote_addr_if_known);
 int __wrap_call_leg_ensure_ci(struct call_leg *cl, enum rtp_direction dir, uint32_t call_id, struct gsm_trans *for_trans,
-			      const enum mgcp_codecs *codec_if_known, const struct osmo_sockaddr_str *remote_addr_if_known)
+			      const struct sdp_audio_codecs *codecs_if_known,
+			      const struct osmo_sockaddr_str *remote_addr_if_known)
 {
 	if (!cl->rtp[dir]) {
 		log("MGW <--CRCX to %s-- MSC: callref=0x%x", rtp_direction_name(dir), call_id);
@@ -854,8 +857,8 @@ int __wrap_call_leg_ensure_ci(struct call_leg *cl, enum rtp_direction dir, uint3
 		got_crcx = true;
 
 		call_leg_ensure_rtp_alloc(cl, dir, call_id, for_trans);
-		if (codec_if_known)
-			rtp_stream_set_codec(cl->rtp[dir], *codec_if_known);
+		if (codecs_if_known)
+			rtp_stream_set_codec(cl->rtp[dir], codecs_if_known);
 		if (remote_addr_if_known && osmo_sockaddr_str_is_nonzero(remote_addr_if_known))
 			rtp_stream_set_remote_addr(cl->rtp[dir], remote_addr_if_known);
 	}

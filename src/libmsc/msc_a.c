@@ -1327,6 +1327,8 @@ static void msc_a_up_call_assignment_complete(struct msc_a *msc_a, const struct 
 	struct rtp_stream *rtps_to_ran = msc_a->cc.call_leg ? msc_a->cc.call_leg->rtp[RTP_TO_RAN] : NULL;
 	const enum mgcp_codecs *codec_if_known = ac->assignment_complete.codec_present ?
 							&ac->assignment_complete.codec : NULL;
+	struct sdp_audio_codecs *codecs;
+	const struct codec_mapping *m;
 
 	if (!rtps_to_ran) {
 		LOG_MSC_A(msc_a, LOGL_ERROR, "Rx Assignment Complete, but no RTP stream is set up\n");
@@ -1344,10 +1346,20 @@ static void msc_a_up_call_assignment_complete(struct msc_a *msc_a, const struct 
 		return;
 	}
 
-	/* Update RAN-side endpoint CI: */
-	if (codec_if_known)
-		rtp_stream_set_codec(rtps_to_ran, *codec_if_known);
+	if (codec_if_known) {
+		m = codec_mapping_by_mgcp_codec(*codec_if_known);
+		if (!m) {
+			LOG_TRANS(cc_trans, LOGL_ERROR, "Unknown codec in Assignment Complete: %s\n",
+				  osmo_mgcpc_codec_name(ac->assignment_complete.codec));
+			call_leg_release(msc_a->cc.call_leg);
+			return;
+		}
+
+		/* Update RAN-side endpoint CI: */
+		rtp_stream_set_one_codec(rtps_to_ran, &m->sdp);
+	}
 	rtp_stream_set_remote_addr(rtps_to_ran, &ac->assignment_complete.remote_rtp);
+
 	if (rtps_to_ran->use_osmux)
 		rtp_stream_set_remote_osmux_cid(rtps_to_ran,
 						ac->assignment_complete.osmux_cid);
@@ -1364,8 +1376,9 @@ static void msc_a_up_call_assignment_complete(struct msc_a *msc_a, const struct 
 	 *   endpoint,
 	 * - the Assignment has chosen a speech codec
 	 * go on to create the CN side RTP stream's CI. */
+	codecs = cc_trans->cc.codecs.result.audio_codecs.count ? &cc_trans->cc.codecs.result.audio_codecs : NULL;
 	if (call_leg_ensure_ci(msc_a->cc.call_leg, RTP_TO_CN, cc_trans->callref, cc_trans,
-			       codec_if_known, NULL)) {
+			       codecs, NULL)) {
 		LOG_MSC_A_CAT(msc_a, DCC, LOGL_ERROR, "Error creating MGW CI towards CN\n");
 		call_leg_release(msc_a->cc.call_leg);
 		return;
@@ -1757,7 +1770,8 @@ static int msc_a_start_assignment(struct msc_a *msc_a, struct gsm_trans *cc_tran
 	struct call_leg *cl = msc_a->cc.call_leg;
 	struct msc_i *msc_i = msc_a_msc_i(msc_a);
 	struct gsm_network *net = msc_a_net(msc_a);
-	enum mgcp_codecs codec, *codec_ptr;
+	struct sdp_audio_codecs *codecs;
+	struct sdp_audio_codecs _codecs;
 
 	OSMO_ASSERT(!msc_a->cc.active_trans);
 	msc_a->cc.active_trans = cc_trans;
@@ -1794,12 +1808,14 @@ static int msc_a_start_assignment(struct msc_a *msc_a, struct gsm_trans *cc_tran
 		return osmo_fsm_inst_dispatch(msc_a->c.fi, MSC_EV_CALL_LEG_RTP_LOCAL_ADDR_AVAILABLE, cl->rtp[RTP_TO_RAN]);
 
 	if (msc_a->c.ran->type == OSMO_RAT_UTRAN_IU) {
-		codec = CODEC_IUFP;
-		codec_ptr = &codec;
+		/* The hNodeB facing side of RTP talks IuUP. Hard code the RAN facing codec to "IUFP". */
+		_codecs = (struct sdp_audio_codecs){0};
+		sdp_audio_codecs_add_mgcp_codec(&_codecs, CODEC_IUFP);
+		codecs = &_codecs;
 	} else {
-		codec_ptr = NULL;
+		codecs = cc_trans->cc.codecs.result.audio_codecs.count ? &cc_trans->cc.codecs.result.audio_codecs : NULL;
 	}
-	return call_leg_ensure_ci(msc_a->cc.call_leg, RTP_TO_RAN, cc_trans->callref, cc_trans, codec_ptr, NULL);
+	return call_leg_ensure_ci(msc_a->cc.call_leg, RTP_TO_RAN, cc_trans->callref, cc_trans, codecs, NULL);
 }
 
 int msc_a_try_call_assignment(struct gsm_trans *cc_trans)
