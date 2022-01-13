@@ -28,6 +28,7 @@
 #include <osmocom/msc/transaction.h>
 #include <osmocom/msc/call_leg.h>
 #include <osmocom/msc/rtp_stream.h>
+#include <osmocom/msc/codec_sdp_cc_t9n.h>
 
 #define LOG_RTPS(rtps, level, fmt, args...) \
 	LOGPFSML(rtps->fi, level, fmt, ##args)
@@ -311,8 +312,23 @@ static int rtp_stream_do_mgcp_verb(struct rtp_stream *rtps, enum mgcp_verb verb,
 		verb_info.conn_mode = rtps->crcx_conn_mode;
 
 	if (rtps->codec_known) {
-		verb_info.codecs[0] = rtps->codec;
-		verb_info.codecs_len = 1;
+		/* Send the list of codecs to the MGW. Ideally we would just feed the SDP directly, but for legacy
+		 * reasons we still need to translate to a struct mgcp_conn_peer representation to send it. */
+		struct sdp_audio_codec *codec;
+		int i = 0;
+		foreach_sdp_audio_codec(codec, &rtps->codec) {
+			const struct codec_mapping *m = codec_mapping_by_subtype_name(codec->subtype_name);
+			if (!m)
+				continue;
+			verb_info.codecs[i] = m->mgcp;
+			verb_info.ptmap[i] = (struct ptmap){
+				.codec = m->mgcp,
+				.pt = codec->payload_type,
+			};
+			i++;
+			verb_info.codecs_len = i;
+			verb_info.ptmap_len = i;
+		}
 		rtps->codec_sent_to_mgw = true;
 	}
 	if (osmo_sockaddr_str_is_nonzero(&rtps->remote)) {
@@ -361,10 +377,6 @@ void rtp_stream_release(struct rtp_stream *rtps)
  * least one of them has not yet been sent to the MGW in a previous CRCX or MDCX. */
 int rtp_stream_commit(struct rtp_stream *rtps)
 {
-	if (!rtps->ci) {
-		LOG_RTPS(rtps, LOGL_DEBUG, "Not committing: no MGW endpoint CI set up\n");
-		return -1;
-	}
 	if (!osmo_sockaddr_str_is_nonzero(&rtps->remote)) {
 		LOG_RTPS(rtps, LOGL_DEBUG, "Not committing: no remote RTP address known\n");
 		return -1;
@@ -377,6 +389,10 @@ int rtp_stream_commit(struct rtp_stream *rtps)
 		LOG_RTPS(rtps, LOGL_DEBUG, "Not committing: both remote RTP address and codec already set up at MGW\n");
 		return 0;
 	}
+	if (!rtps->ci) {
+		LOG_RTPS(rtps, LOGL_DEBUG, "Not committing: no MGW endpoint CI set up\n");
+		return -1;
+	}
 
 	LOG_RTPS(rtps, LOGL_DEBUG, "Committing: Tx MDCX to update the MGW: updating%s%s%s\n",
 		 rtps->remote_sent_to_mgw ? "" : " remote-RTP-IP-port",
@@ -385,19 +401,49 @@ int rtp_stream_commit(struct rtp_stream *rtps)
 	return rtp_stream_do_mdcx(rtps);
 }
 
-void rtp_stream_set_codec(struct rtp_stream *rtps, enum mgcp_codecs codec)
+void rtp_stream_set_codec(struct rtp_stream *rtps, const struct sdp_audio_codecs *codec)
 {
+	if (!codec || !codec->count)
+		return;
+	if (sdp_audio_codecs_cmp(&rtps->codec, codec, false, true) == 0) {
+		LOG_RTPS(rtps, LOGL_DEBUG, "no change: codecs already set to %s\n",
+			 sdp_audio_codecs_to_str(&rtps->codec));
+		return;
+	}
 	if (rtps->fi->state == RTP_STREAM_ST_ESTABLISHED)
 		rtp_stream_state_chg(rtps, RTP_STREAM_ST_ESTABLISHING);
-	LOG_RTPS(rtps, LOGL_DEBUG, "setting codec to %s\n", osmo_mgcpc_codec_name(codec));
-	rtps->codec = codec;
+	LOG_RTPS(rtps, LOGL_DEBUG, "setting codec to %s\n", sdp_audio_codecs_to_str(codec));
+	rtps->codec = *codec;
 	rtps->codec_known = true;
 	rtps->codec_sent_to_mgw = false;
 	rtp_stream_update_id(rtps);
 }
 
+/* Convenience shortcut to call rtp_stream_set_codecs() with a list of only one sdp_audio_codec record. */
+void rtp_stream_set_one_codec(struct rtp_stream *rtps, const struct sdp_audio_codec *codec)
+{
+	struct sdp_audio_codecs codecs = {};
+	sdp_audio_codecs_add_copy(&codecs, codec);
+	rtp_stream_set_codec(rtps, &codecs);
+}
+
+/* For legacy, rather use rtp_stream_set_codecs() with a full codecs list. */
+bool rtp_stream_set_codecs_from_mgcp_codec(struct rtp_stream *rtps, enum mgcp_codecs codec)
+{
+	struct sdp_audio_codecs codecs = {};
+	if (!sdp_audio_codecs_add_mgcp_codec(&codecs, codec))
+		return false;
+	rtp_stream_set_codec(rtps, &codecs);
+	return true;
+}
+
 void rtp_stream_set_remote_addr(struct rtp_stream *rtps, const struct osmo_sockaddr_str *r)
 {
+	if (osmo_sockaddr_str_cmp(&rtps->remote, r) == 0) {
+		LOG_RTPS(rtps, LOGL_DEBUG, "remote addr already " OSMO_SOCKADDR_STR_FMT ", no change\n",
+			 OSMO_SOCKADDR_STR_FMT_ARGS(r));
+		return;
+	}
 	if (rtps->fi->state == RTP_STREAM_ST_ESTABLISHED)
 		rtp_stream_state_chg(rtps, RTP_STREAM_ST_ESTABLISHING);
 	LOG_RTPS(rtps, LOGL_DEBUG, "setting remote addr to " OSMO_SOCKADDR_STR_FMT "\n", OSMO_SOCKADDR_STR_FMT_ARGS(r));

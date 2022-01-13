@@ -1750,30 +1750,32 @@ int gsm48_tch_rtp_create(struct gsm_trans *trans)
 	struct call_leg *cl = msc_a->cc.call_leg;
 	struct osmo_sockaddr_str *rtp_cn_local;
 	struct rtp_stream *rtp_cn = cl ? cl->rtp[RTP_TO_CN] : NULL;
-	uint32_t payload_type;
-	int payload_msg_type;
-	const struct mgcp_conn_peer *mgcp_info;
+	int mncc_payload_msg_type;
+	struct sdp_audio_codec *codec;
+	const struct codec_mapping *m;
 
 	if (!rtp_cn) {
 		LOG_TRANS_CAT(trans, DMNCC, LOGL_ERROR, "Cannot RTP CREATE to MNCC, no RTP set up for the CN side\n");
 		return -EINVAL;
 	}
 
-	if (!rtp_cn->codec_known) {
+	codec_filter_run(&trans->cc.codecs);
+	LOG_TRANS(trans, LOGL_DEBUG, "codecs: %s\n", codec_filter_to_str(&trans->cc.codecs));
+
+	if (!trans->cc.codecs.result.audio_codecs.count) {
 		LOG_TRANS_CAT(trans, DMNCC, LOGL_ERROR,
-			      "Cannot RTP CREATE to MNCC, no codec set up for the RTP CN side\n");
+			      "Cannot RTP CREATE to MNCC, there is no codec available\n");
 		return -EINVAL;
 	}
 
-	/* Codec */
-	payload_msg_type = mgcp_codec_to_mncc_payload_msg_type(rtp_cn->codec);
+	/* Modify the MGW endpoint if necessary, usually this should already match and not cause MGCP. */
+	rtp_stream_set_codec(rtp_cn, &trans->cc.codecs.result.audio_codecs);
+	rtp_stream_commit(rtp_cn);
 
-	/* Payload Type number */
-	mgcp_info = osmo_mgcpc_ep_ci_get_rtp_info(rtp_cn->ci);
-	if (mgcp_info && mgcp_info->ptmap_len)
-		payload_type = map_codec_to_pt(mgcp_info->ptmap, mgcp_info->ptmap_len, rtp_cn->codec);
-	else
-		payload_type = rtp_cn->codec;
+	/* Populate the legacy MNCC codec elements: payload_type and payload_msg_type */
+	codec = &rtp_cn->codec.codec[0];
+	m = codec_mapping_by_subtype_name(codec->subtype_name);
+	mncc_payload_msg_type = m ? m->mncc_payload_msg_type : 0;
 
 	rtp_cn_local = call_leg_local_ip(cl, RTP_TO_CN);
 	if (!rtp_cn_local) {
@@ -1781,7 +1783,8 @@ int gsm48_tch_rtp_create(struct gsm_trans *trans)
 		return -EINVAL;
 	}
 
-	return mncc_recv_rtp(net, trans, trans->callref, MNCC_RTP_CREATE, rtp_cn_local, payload_type, payload_msg_type);
+	return mncc_recv_rtp(net, trans, trans->callref, MNCC_RTP_CREATE, rtp_cn_local,
+			     codec->payload_type, mncc_payload_msg_type);
 }
 
 static int tch_rtp_connect(struct gsm_network *net, const struct gsm_mncc_rtp *rtp)

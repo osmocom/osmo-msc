@@ -312,7 +312,8 @@ struct osmo_sockaddr_str *call_leg_local_ip(struct call_leg *cl, enum rtp_direct
  * MDCX.
  */
 int call_leg_ensure_ci(struct call_leg *cl, enum rtp_direction dir, uint32_t call_id, struct gsm_trans *for_trans,
-		       const enum mgcp_codecs *codec_if_known, const struct osmo_sockaddr_str *remote_addr_if_known)
+		       const struct sdp_audio_codecs *codec_if_known,
+		       const struct osmo_sockaddr_str *remote_addr_if_known)
 {
 	if (call_leg_ensure_rtp_alloc(cl, dir, call_id, for_trans))
 		return -EIO;
@@ -322,7 +323,7 @@ int call_leg_ensure_ci(struct call_leg *cl, enum rtp_direction dir, uint32_t cal
 		cl->rtp[dir]->remote_osmux_cid = -1; /* wildcard */
 	}
 	if (codec_if_known)
-		rtp_stream_set_codec(cl->rtp[dir], *codec_if_known);
+		rtp_stream_set_codec(cl->rtp[dir], codec_if_known);
 	if (remote_addr_if_known && osmo_sockaddr_str_is_nonzero(remote_addr_if_known))
 		rtp_stream_set_remote_addr(cl->rtp[dir], remote_addr_if_known);
 	return rtp_stream_ensure_ci(cl->rtp[dir], cl->mgw_endpoint);
@@ -331,7 +332,7 @@ int call_leg_ensure_ci(struct call_leg *cl, enum rtp_direction dir, uint32_t cal
 int call_leg_local_bridge(struct call_leg *cl1, uint32_t call_id1, struct gsm_trans *trans1,
 			  struct call_leg *cl2, uint32_t call_id2, struct gsm_trans *trans2)
 {
-	enum mgcp_codecs codec;
+	struct sdp_audio_codecs *codec;
 
 	cl1->local_bridge = cl2;
 	cl2->local_bridge = cl1;
@@ -342,14 +343,14 @@ int call_leg_local_bridge(struct call_leg *cl1, uint32_t call_id1, struct gsm_tr
 		LOG_CALL_LEG(cl1, LOGL_ERROR, "RAN-side RTP stream codec is not known, not ready for bridging\n");
 		return -EINVAL;
 	}
-	codec = cl1->rtp[RTP_TO_RAN]->codec;
+	codec = &cl1->rtp[RTP_TO_RAN]->codec;
 
 	if (!cl1->rtp[RTP_TO_CN] || !cl2->rtp[RTP_TO_CN])
 		return -ENOTCONN;
 
 	call_leg_ensure_ci(cl1, RTP_TO_CN, call_id1, trans1,
-			   &codec, &cl2->rtp[RTP_TO_CN]->local);
+			   codec, &cl2->rtp[RTP_TO_CN]->local);
 	call_leg_ensure_ci(cl2, RTP_TO_CN, call_id2, trans2,
-			   &codec, &cl1->rtp[RTP_TO_CN]->local);
+			   codec, &cl1->rtp[RTP_TO_CN]->local);
 	return 0;
 }

@@ -31,7 +31,7 @@
 #include <osmocom/msc/neighbor_ident.h>
 #include <osmocom/msc/ran_msg.h>
 #include <osmocom/msc/mncc_call.h>
-
+#include <osmocom/msc/sdp_msg.h>
 
 struct gsm0808_handover_required;
 
@@ -92,7 +92,7 @@ struct msc_ho_state {
 	struct {
 		/* Saved RTP IP:port and codec in case we need to roll back */
 		struct osmo_sockaddr_str ran_remote_rtp;
-		enum mgcp_codecs codec;
+		struct sdp_audio_codecs codec;
 	} old_cell;
 };
 
