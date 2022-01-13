@@ -1,6 +1,7 @@
 noinst_HEADERS = \
 	call_leg.h \
 	cell_id_list.h \
+	codec_filter.h \
 	codec_mapping.h \
 	db.h \
 	debug.h \
