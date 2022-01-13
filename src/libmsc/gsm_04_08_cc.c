@@ -727,9 +727,10 @@ static int gsm48_cc_rx_call_conf(struct gsm_trans *trans, struct msgb *msg)
 		/* Create a copy of the bearer capability
 		 * in the transaction struct, so we can use
 		 * this information later */
-		memcpy(&trans->bearer_cap,&call_conf.bearer_cap,
+		memcpy(&trans->bearer_cap, &call_conf.bearer_cap,
 		       sizeof(trans->bearer_cap));
 	}
+
 	/* cause */
 	if (TLVP_PRESENT(&tp, GSM48_IE_CAUSE)) {
 		call_conf.fields |= MNCC_F_CAUSE;
