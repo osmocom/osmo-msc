@@ -41,15 +41,15 @@ int sdp_audio_codec_cmp(const struct sdp_audio_codec *a, const struct sdp_audio_
 int sdp_audio_codecs_cmp(const struct sdp_audio_codecs *a, const struct sdp_audio_codecs *b,
 			 bool cmp_fmtp, bool cmp_payload_type);
 
-struct sdp_audio_codec *sdp_audio_codec_add(struct sdp_audio_codecs *ac, unsigned int payload_type,
-					    const char *subtype_name, unsigned int rate, const char *fmtp);
-struct sdp_audio_codec *sdp_audio_codec_add_copy(struct sdp_audio_codecs *ac,
-						 const struct sdp_audio_codec *codec);
-int sdp_audio_codec_remove(struct sdp_audio_codecs *ac, const struct sdp_audio_codec *codec);
-struct sdp_audio_codec *sdp_audio_codec_by_payload_type(struct sdp_audio_codecs *ac,
-							unsigned int payload_type, bool create);
-struct sdp_audio_codec *sdp_audio_codec_by_descr(struct sdp_audio_codecs *ac,
-						 const struct sdp_audio_codec *codec);
+struct sdp_audio_codec *sdp_audio_codecs_add(struct sdp_audio_codecs *ac, unsigned int payload_type,
+					     const char *subtype_name, unsigned int rate, const char *fmtp);
+struct sdp_audio_codec *sdp_audio_codecs_add_copy(struct sdp_audio_codecs *ac,
+						  const struct sdp_audio_codec *codec);
+int sdp_audio_codecs_remove(struct sdp_audio_codecs *ac, const struct sdp_audio_codec *codec);
+struct sdp_audio_codec *sdp_audio_codecs_by_payload_type(struct sdp_audio_codecs *ac,
+							 unsigned int payload_type, bool create);
+struct sdp_audio_codec *sdp_audio_codecs_by_descr(struct sdp_audio_codecs *ac,
+						  const struct sdp_audio_codec *codec);
 
 void sdp_audio_codecs_intersection(struct sdp_audio_codecs *ac_dest, const struct sdp_audio_codecs *ac_other,
 				   bool translate_payload_type_numbers);

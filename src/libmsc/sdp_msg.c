@@ -116,13 +116,13 @@ int sdp_audio_codecs_cmp(const struct sdp_audio_codecs *a, const struct sdp_audi
  * The payload_type must exist in sdp_msg_payload_type_names.
  * Return the audio codec created or already existing for this payload type number.
  */
-struct sdp_audio_codec *sdp_audio_codec_add(struct sdp_audio_codecs *ac, unsigned int payload_type,
-					    const char *subtype_name, unsigned int rate, const char *fmtp)
+struct sdp_audio_codec *sdp_audio_codecs_add(struct sdp_audio_codecs *ac, unsigned int payload_type,
+					     const char *subtype_name, unsigned int rate, const char *fmtp)
 {
 	struct sdp_audio_codec *codec;
 
 	/* Does an entry already exist? */
-	codec = sdp_audio_codec_by_payload_type(ac, payload_type, false);
+	codec = sdp_audio_codecs_by_payload_type(ac, payload_type, false);
 	if (codec) {
 		/* Already exists, sanity check */
 		if (!codec->subtype_name[0])
@@ -141,7 +141,7 @@ struct sdp_audio_codec *sdp_audio_codec_add(struct sdp_audio_codecs *ac, unsigne
 	}
 
 	/* None exists, create codec entry for this payload type number */
-	codec = sdp_audio_codec_by_payload_type(ac, payload_type, true);
+	codec = sdp_audio_codecs_by_payload_type(ac, payload_type, true);
 	/* NULL means unable to add an entry */
 	if (!codec)
 		return NULL;
@@ -152,14 +152,14 @@ struct sdp_audio_codec *sdp_audio_codec_add(struct sdp_audio_codecs *ac, unsigne
 	return codec;
 }
 
-struct sdp_audio_codec *sdp_audio_codec_add_copy(struct sdp_audio_codecs *ac, const struct sdp_audio_codec *codec)
+struct sdp_audio_codec *sdp_audio_codecs_add_copy(struct sdp_audio_codecs *ac, const struct sdp_audio_codec *codec)
 {
-	return sdp_audio_codec_add(ac, codec->payload_type, codec->subtype_name, codec->rate,
-				   codec->fmtp[0] ? codec->fmtp : NULL);
+	return sdp_audio_codecs_add(ac, codec->payload_type, codec->subtype_name, codec->rate,
+				    codec->fmtp[0] ? codec->fmtp : NULL);
 }
 
-struct sdp_audio_codec *sdp_audio_codec_by_payload_type(struct sdp_audio_codecs *ac, unsigned int payload_type,
-							bool create)
+struct sdp_audio_codec *sdp_audio_codecs_by_payload_type(struct sdp_audio_codecs *ac, unsigned int payload_type,
+							 bool create)
 {
 	struct sdp_audio_codec *codec;
 	foreach_sdp_audio_codec(codec, ac) {
@@ -185,7 +185,7 @@ struct sdp_audio_codec *sdp_audio_codec_by_payload_type(struct sdp_audio_codecs 
 
 /* Return a given sdp_msg's codec entry that matches the subtype_name and rate of the given codec, or NULL if no
  * match is found. Comparison is made by sdp_audio_codec_cmp(cmp_payload_type=false). */
-struct sdp_audio_codec *sdp_audio_codec_by_descr(struct sdp_audio_codecs *ac, const struct sdp_audio_codec *codec)
+struct sdp_audio_codec *sdp_audio_codecs_by_descr(struct sdp_audio_codecs *ac, const struct sdp_audio_codec *codec)
 {
 	struct sdp_audio_codec *i;
 	foreach_sdp_audio_codec(i, ac) {
@@ -196,9 +196,9 @@ struct sdp_audio_codec *sdp_audio_codec_by_descr(struct sdp_audio_codecs *ac, co
 }
 
 /* Remove the codec entry pointed at by 'codec'. 'codec' must point at an entry of 'sdp' (to use an external codec
- * instance, use sdp_audio_codec_by_descr()).
+ * instance, use sdp_audio_codecs_by_descr()).
  * Return 0 on success, -ENOENT if codec does not point at the sdp->codec array. */
-int sdp_audio_codec_remove(struct sdp_audio_codecs *ac, const struct sdp_audio_codec *codec)
+int sdp_audio_codecs_remove(struct sdp_audio_codecs *ac, const struct sdp_audio_codec *codec)
 {
 	struct sdp_audio_codec *i;
 	if ((codec < ac->codec)
@@ -290,7 +290,7 @@ int sdp_parse_attrib(struct sdp_msg *sdp, const char *src)
 		if (!audio_name || audio_name >= sdp_msg_line_end(src))
 			return -EINVAL;
 
-		codec = sdp_audio_codec_by_payload_type(&sdp->audio_codecs, payload_type, true);
+		codec = sdp_audio_codecs_by_payload_type(&sdp->audio_codecs, payload_type, true);
 		if (!codec)
 			return -ENOSPC;
 
@@ -314,7 +314,7 @@ int sdp_parse_attrib(struct sdp_msg *sdp, const char *src)
 		if (fmtp_str >= line_end)
 			return -EINVAL;
 
-		codec = sdp_audio_codec_by_payload_type(&sdp->audio_codecs, payload_type, true);
+		codec = sdp_audio_codecs_by_payload_type(&sdp->audio_codecs, payload_type, true);
 		if (!codec)
 			return -ENOSPC;
 
@@ -400,7 +400,7 @@ static int sdp_parse_media_description(struct sdp_msg *sdp, const char *src)
 		if (sscanf(payload_type_str, "%u", &payload_type) < 1)
 			return -EINVAL;
 
-		codec = sdp_audio_codec_by_payload_type(&sdp->audio_codecs, payload_type, true);
+		codec = sdp_audio_codecs_by_payload_type(&sdp->audio_codecs, payload_type, true);
 		if (!codec)
 			return -ENOSPC;
 
@@ -519,10 +519,10 @@ void sdp_audio_codecs_intersection(struct sdp_audio_codecs *ac_dest, const struc
 		struct sdp_audio_codec *other;
 		OSMO_ASSERT(i < ARRAY_SIZE(ac_dest->codec));
 
-		other = sdp_audio_codec_by_descr((struct sdp_audio_codecs*)ac_other, codec);
+		other = sdp_audio_codecs_by_descr((struct sdp_audio_codecs *)ac_other, codec);
 
 		if (!other) {
-			OSMO_ASSERT(sdp_audio_codec_remove(ac_dest, codec) == 0);
+			OSMO_ASSERT(sdp_audio_codecs_remove(ac_dest, codec) == 0);
 			i--;
 			continue;
 		}

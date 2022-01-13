@@ -531,7 +531,7 @@ static void test_select()
 			break;
 		}
 		printf("SDP: %s\n", sdp_audio_codecs_to_str(&sdp.audio_codecs));
-		codec = sdp_audio_codec_by_payload_type(&sdp.audio_codecs, t->select_payload_type, false);
+		codec = sdp_audio_codecs_by_payload_type(&sdp.audio_codecs, t->select_payload_type, false);
 		OSMO_ASSERT(codec);
 		printf("Select: %s\n", sdp_audio_codec_to_str(codec));
 
