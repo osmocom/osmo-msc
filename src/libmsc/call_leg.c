@@ -344,6 +344,9 @@ int call_leg_local_bridge(struct call_leg *cl1, uint32_t call_id1, struct gsm_tr
 	}
 	codec = cl1->rtp[RTP_TO_RAN]->codec;
 
+	if (!cl1->rtp[RTP_TO_CN] || !cl2->rtp[RTP_TO_CN])
+		return -ENOTCONN;
+
 	call_leg_ensure_ci(cl1, RTP_TO_CN, call_id1, trans1,
 			   &codec, &cl2->rtp[RTP_TO_CN]->local);
 	call_leg_ensure_ci(cl2, RTP_TO_CN, call_id2, trans2,
