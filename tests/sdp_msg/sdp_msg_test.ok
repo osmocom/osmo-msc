@@ -566,25 +566,25 @@ sdp_msg_intersection(a,b): a=ptime:20\r\n
 test_select
 
 [0]
-SDP: AMR:octet-align=1,GSM,GSM-HR-08,GSM-EFR
-Select: AMR:octet-align=1
-SDP: AMR:octet-align=1,GSM,GSM-HR-08,GSM-EFR
+SDP: AMR:octet-align=1#112,GSM#3,GSM-HR-08#111,GSM-EFR#110
+Select: AMR:octet-align=1#112
+SDP: AMR:octet-align=1#112,GSM#3,GSM-HR-08#111,GSM-EFR#110
 [0] ok
 
 [1]
-SDP: AMR:octet-align=1,GSM,GSM-HR-08,GSM-EFR
-Select: GSM
-SDP: GSM,AMR:octet-align=1,GSM-HR-08,GSM-EFR
+SDP: AMR:octet-align=1#112,GSM#3,GSM-HR-08#111,GSM-EFR#110
+Select: GSM#3
+SDP: GSM#3,AMR:octet-align=1#112,GSM-HR-08#111,GSM-EFR#110
 [1] ok
 
 [2]
-SDP: AMR:octet-align=1,GSM,GSM-HR-08,GSM-EFR
-Select: GSM-HR-08
-SDP: GSM-HR-08,AMR:octet-align=1,GSM,GSM-EFR
+SDP: AMR:octet-align=1#112,GSM#3,GSM-HR-08#111,GSM-EFR#110
+Select: GSM-HR-08#111
+SDP: GSM-HR-08#111,AMR:octet-align=1#112,GSM#3,GSM-EFR#110
 [2] ok
 
 [3]
-SDP: AMR:octet-align=1,GSM,GSM-HR-08,GSM-EFR
-Select: GSM-EFR
-SDP: GSM-EFR,AMR:octet-align=1,GSM,GSM-HR-08
+SDP: AMR:octet-align=1#112,GSM#3,GSM-HR-08#111,GSM-EFR#110
+Select: GSM-EFR#110
+SDP: GSM-EFR#110,AMR:octet-align=1#112,GSM#3,GSM-HR-08#111
 [3] ok

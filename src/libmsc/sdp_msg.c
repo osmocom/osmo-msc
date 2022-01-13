@@ -509,8 +509,11 @@ int sdp_audio_codec_to_str_buf(char *buf, size_t buflen, const struct sdp_audio_
 {
 	struct osmo_strbuf sb = { .buf = buf, .len = buflen };
 	OSMO_STRBUF_PRINTF(sb, "%s", codec->subtype_name);
+	if (codec->rate != 8000)
+		OSMO_STRBUF_PRINTF(sb, "/%u", codec->rate);
 	if (codec->fmtp[0])
 		OSMO_STRBUF_PRINTF(sb, ":%s", codec->fmtp);
+	OSMO_STRBUF_PRINTF(sb, "#%d", codec->payload_type);
 	return sb.chars_needed;
 }
 
