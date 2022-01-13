@@ -104,7 +104,7 @@ static int ran_a_decode_l3_compl(struct ran_dec *ran_dec, struct msgb *msg, stru
 		.id = cil.id_list[0],
 	};
 
-	/* Parse Layer 3 Information element */
+	/* Parse Layer 3 Information element; point ran_dec_msg->compl_l3.msg to the L3 Info data */
 	msg->l3h = (uint8_t*)ie_l3_info->val;
 	msgb_l3trim(msg, ie_l3_info->len);
 

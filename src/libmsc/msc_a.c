@@ -1532,6 +1532,7 @@ int msc_a_ran_dec_from_msc_i(struct msc_a *msc_a, struct msc_a_ran_dec_data *d)
 					  sdp_audio_codecs_to_str(&ac));
 			}
 		}
+		/* Submit the Complete Layer 3 Information DTAP */
 		rc = msc_a_up_l3(msc_a, msg->compl_l3.msg);
 		if (!rc) {
 			struct ran_conn *conn = msub_ran_conn(msc_a->c.msub);
