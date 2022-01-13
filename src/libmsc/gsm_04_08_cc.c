@@ -830,6 +830,10 @@ static int gsm48_cc_rx_call_conf(struct gsm_trans *trans, struct msgb *msg)
 		 * this information later */
 		memcpy(&trans->bearer_cap, &call_conf.bearer_cap,
 		       sizeof(trans->bearer_cap));
+
+		/* This is the MT call leg's Call Conf, containing the MS Bearer Capabilities of the MT MS.
+		 * Store in codecs filter. */
+		codec_filter_set_ms_from_bc(&trans->cc.codecs, &call_conf.bearer_cap);
 	}
 
 	/* cause */
