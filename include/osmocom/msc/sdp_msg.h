@@ -36,7 +36,10 @@ struct sdp_msg {
 
 const char *sdp_msg_line_end(const char *src);
 
-int sdp_audio_codec_cmp(const struct sdp_audio_codec *a, const struct sdp_audio_codec *b);
+int sdp_audio_codec_cmp(const struct sdp_audio_codec *a, const struct sdp_audio_codec *b,
+			bool cmp_fmtp, bool cmp_payload_type);
+int sdp_audio_codecs_cmp(const struct sdp_audio_codecs *a, const struct sdp_audio_codecs *b,
+			 bool cmp_fmtp, bool cmp_payload_type);
 
 struct sdp_audio_codec *sdp_audio_codec_add(struct sdp_audio_codecs *ac, unsigned int payload_type,
 					    const char *subtype_name, unsigned int rate, const char *fmtp);

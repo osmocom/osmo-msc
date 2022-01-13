@@ -31,30 +31,83 @@
 #include <osmocom/msc/sdp_msg.h>
 
 /* Compare name, rate and fmtp, returning typical cmp result: 0 on match, and -1 / 1 on mismatch.
- * Do *not* compare the payload_type number.
+ * If cmp_fmtp is false, do *not* compare the fmtp string; if true, compare fmtp 1:1 as strings.
+ * If cmp_payload_type is false, do *not* compare the payload_type number.
  * The fmtp is only string-compared -- e.g. if AMR parameters appear in a different order, it amounts to a mismatch even
  * though all parameters are the same. */
-int sdp_audio_codec_cmp(const struct sdp_audio_codec *a, const struct sdp_audio_codec *b)
+int sdp_audio_codec_cmp(const struct sdp_audio_codec *a, const struct sdp_audio_codec *b,
+			bool cmp_fmtp, bool cmp_payload_type)
 {
-	int rc;
+	int cmp;
 	if (a == b)
 		return 0;
 	if (!a)
 		return -1;
 	if (!b)
 		return 1;
-	rc = strncmp(a->subtype_name, b->subtype_name, sizeof(a->subtype_name));
-	if (rc)
-		return rc;
+	cmp = strncmp(a->subtype_name, b->subtype_name, sizeof(a->subtype_name));
+	if (cmp)
+		return cmp;
+	cmp = OSMO_CMP(a->rate, b->rate);
+	if (cmp)
+		return cmp;
+	if (cmp_fmtp) {
+		cmp = strncmp(a->fmtp, b->fmtp, sizeof(a->fmtp));
+		if (cmp)
+			return cmp;
+	}
+	if (cmp_payload_type) {
+		cmp = OSMO_CMP(a->payload_type, b->payload_type);
+		if (cmp)
+			return cmp;
+	}
+	return 0;
+}
 
-	if (a->rate < b->rate)
+/* Compare two lists of audio codecs, returning typical cmp result: 0 on match, and -1 / 1 on mismatch.
+ * The ordering in the two lists may differ, except that the first codec in 'a' must also be the first codec in 'b'.
+ * This is because the first codec typically expresses the preferred codec to use.
+ * If cmp_fmtp is false, do *not* compare the fmtp strings; if true, compare fmtp 1:1 as strings.
+ * If cmp_payload_type is false, do *not* compare the payload_type numbers.
+ * The fmtp is only string-compared -- e.g. if AMR parameters appear in a different order, it amounts to a mismatch even
+ * though all parameters are the same. */
+int sdp_audio_codecs_cmp(const struct sdp_audio_codecs *a, const struct sdp_audio_codecs *b,
+			 bool cmp_fmtp, bool cmp_payload_type)
+{
+	const struct sdp_audio_codec *codec_a;
+	const struct sdp_audio_codec *codec_b;
+	int cmp;
+	if (a == b)
+		return 0;
+	if (!a)
 		return -1;
-	if (a->rate > b->rate)
+	if (!b)
 		return 1;
 
-	rc = strncmp(a->fmtp, b->fmtp, sizeof(a->fmtp));
-	if (rc)
-		return rc;
+	cmp = OSMO_CMP(a->count, b->count);
+	if (cmp)
+		return cmp;
+
+	if (!a->count)
+		return 0;
+
+	/* The first codec is the "chosen" codec and should match. The others may appear in different order. */
+	cmp = sdp_audio_codec_cmp(&a->codec[0], &b->codec[0], cmp_fmtp, cmp_payload_type);
+	if (cmp)
+		return cmp;
+
+	/* See if each codec in a is also present in b */
+	foreach_sdp_audio_codec(codec_a, a) {
+		bool match_found = false;
+		foreach_sdp_audio_codec(codec_b, b) {
+			if (!sdp_audio_codec_cmp(codec_a, codec_b, cmp_fmtp, cmp_payload_type)) {
+				match_found = true;
+				break;
+			}
+		}
+		if (!match_found)
+			return -1;
+	}
 
 	return 0;
 }
@@ -130,13 +183,13 @@ struct sdp_audio_codec *sdp_audio_codec_by_payload_type(struct sdp_audio_codecs 
 	return codec;
 }
 
-/* Return a given sdp_msg's codec entry that matches the subtype_name, rate and fmtp of the given codec, or NULL if no
- * match is found. Comparison is made by sdp_audio_codec_cmp(). */
+/* Return a given sdp_msg's codec entry that matches the subtype_name and rate of the given codec, or NULL if no
+ * match is found. Comparison is made by sdp_audio_codec_cmp(cmp_payload_type=false). */
 struct sdp_audio_codec *sdp_audio_codec_by_descr(struct sdp_audio_codecs *ac, const struct sdp_audio_codec *codec)
 {
 	struct sdp_audio_codec *i;
 	foreach_sdp_audio_codec(i, ac) {
-		if (!sdp_audio_codec_cmp(i, codec))
+		if (!sdp_audio_codec_cmp(i, codec, false, false))
 			return i;
 	}
 	return NULL;
@@ -452,8 +505,8 @@ next_line:
 }
 
 /* Leave only those codecs in 'ac_dest' that are also present in 'ac_other'.
- * The matching is made by sdp_audio_codec_cmp(), i.e. payload_type numbers are not compared and fmtp parameters are
- * compared 1:1 as plain strings.
+ * The matching is made by sdp_audio_codec_cmp(cmp_payload_type=false), i.e. payload_type numbers are not compared and
+ * fmtp parameters are compared 1:1 as plain strings.
  * If translate_payload_type_numbers has an effect if ac_dest and ac_other have mismatching payload_type numbers for the
  * same SDP codec descriptions. If translate_payload_type_numbers is true, take the payload_type numbers from ac_other.
  * If false, keep payload_type numbers in ac_dest unchanged. */
