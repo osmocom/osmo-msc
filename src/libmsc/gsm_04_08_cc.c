@@ -1694,7 +1694,7 @@ static int gsm48_cc_rx_userinfo(struct gsm_trans *trans, struct msgb *msg)
 
 static int mncc_recv_rtp(struct gsm_network *net, struct gsm_trans *trans, uint32_t callref,
 			 int cmd, struct osmo_sockaddr_str *rtp_addr, uint32_t payload_type,
-			 uint32_t payload_msg_type)
+			 uint32_t payload_msg_type, const struct sdp_msg *sdp)
 {
 	uint8_t data[sizeof(struct gsm_mncc)];
 	struct gsm_mncc_rtp *rtp;
@@ -1710,12 +1710,16 @@ static int mncc_recv_rtp(struct gsm_network *net, struct gsm_trans *trans, uint3
 	}
 	rtp->payload_type = payload_type;
 	rtp->payload_msg_type = payload_msg_type;
+	if (sdp) {
+		LOG_TRANS(trans, LOGL_DEBUG, "%s SDP: %s\n", get_mncc_name(rtp->msg_type), sdp_msg_to_str(sdp));
+		sdp_msg_to_sdp_str_buf(rtp->sdp, sizeof(rtp->sdp), sdp);
+	}
 	return mncc_recvmsg(net, trans, cmd, (struct gsm_mncc *)data);
 }
 
 static void mncc_recv_rtp_err(struct gsm_network *net, struct gsm_trans *trans, uint32_t callref, int cmd)
 {
-	mncc_recv_rtp(net, trans, callref, cmd, NULL, 0, 0);
+	mncc_recv_rtp(net, trans, callref, cmd, NULL, 0, 0, NULL);
 }
 
 static int tch_rtp_create(struct gsm_network *net, uint32_t callref)
@@ -1786,7 +1790,7 @@ int gsm48_tch_rtp_create(struct gsm_trans *trans)
 	}
 
 	return mncc_recv_rtp(net, trans, trans->callref, MNCC_RTP_CREATE, rtp_cn_local,
-			     codec->payload_type, mncc_payload_msg_type);
+			     codec->payload_type, mncc_payload_msg_type, NULL);
 }
 
 static int tch_rtp_connect(struct gsm_network *net, const struct gsm_mncc_rtp *rtp)
