@@ -45,6 +45,11 @@ int gsm48_send_rr_app_info(struct msc_a *msc_a, uint8_t apdu_id, uint8_t apdu_le
 int gsm48_send_rr_ass_cmd(struct gsm_lchan *dest_lchan, struct gsm_lchan *lchan, uint8_t power_class);
 int gsm48_send_ho_cmd(struct gsm_lchan *old_lchan, struct gsm_lchan *new_lchan, uint8_t power_command, uint8_t ho_ref);
 
+void gsm48_cc_rx_setup_cn_local_rtp_port_known(struct gsm_trans *trans);
+void gsm48_cc_rx_call_conf_cn_local_rtp_port_known(struct gsm_trans *trans);
+int cc_on_cn_local_rtp_port_known(struct gsm_trans *trans);
+int cc_on_assignment_done(struct gsm_trans *trans);
+
 int mncc_tx_to_cc(struct gsm_network *net, void *arg);
 
 /* convert a ASCII phone number to call-control BCD */
