@@ -121,6 +121,9 @@ struct msc_a {
 	 *                   \-------RTP--> (ISUP) <--RTP--> <--RTP-->
 	 */
 	struct {
+		/* Codec List (BSS Supported) as received during Complete Layer 3 Information */
+		struct gsm0808_speech_codec_list compl_l3_codec_list_bss_supported;
+
 		/* All of the RTP stream handling */
 		struct call_leg *call_leg;
 		struct mncc_call *mncc_forwarding_to_remote_ran;
