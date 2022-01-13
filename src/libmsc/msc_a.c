@@ -46,6 +46,7 @@
 #include <osmocom/msc/call_leg.h>
 #include <osmocom/msc/rtp_stream.h>
 #include <osmocom/msc/msc_ho.h>
+#include <osmocom/msc/codec_sdp_cc_t9n.h>
 
 #define MSC_A_USE_WAIT_CLEAR_COMPLETE "wait-Clear-Complete"
 
@@ -1430,6 +1431,17 @@ int msc_a_ran_dec_from_msc_i(struct msc_a *msc_a, struct msc_a_ran_dec_data *d)
 			.lai.plmn = msc_a_net(msc_a)->plmn,
 		};
 		gsm0808_cell_id_to_cgi(&msc_a->via_cell, msg->compl_l3.cell_id);
+		/* If a codec list was sent along in the RAN_MSG_COMPL_L3, remember it for any upcoming codec
+		 * resolution. */
+		if (msg->compl_l3.codec_list_bss_supported) {
+			msc_a->cc.compl_l3_codec_list_bss_supported = *msg->compl_l3.codec_list_bss_supported;
+			if (log_check_level(msc_a->c.ran->log_subsys, LOGL_DEBUG)) {
+				struct sdp_audio_codecs ac = {};
+				sdp_audio_codecs_from_speech_codec_list(&ac, &msc_a->cc.compl_l3_codec_list_bss_supported);
+				LOG_MSC_A(msc_a, LOGL_DEBUG, "Complete Layer 3: Codec List (BSS Supported): %s\n",
+					  sdp_audio_codecs_to_str(&ac));
+			}
+		}
 		rc = msc_a_up_l3(msc_a, msg->compl_l3.msg);
 		if (!rc) {
 			struct ran_conn *conn = msub_ran_conn(msc_a->c.msub);
