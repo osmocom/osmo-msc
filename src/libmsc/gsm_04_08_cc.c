@@ -730,6 +730,18 @@ static int gsm48_cc_tx_setup(struct gsm_trans *trans, void *arg)
 
 	gsm48_start_cc_timer(trans, 0x303, GSM48_T303);
 
+	/* MT call leg is starting. Gather all codecs information so far known.
+	 * (Usually) paging has succeeded, and now we're processing the MNCC Setup from the remote MO call leg.
+	 * Initialize the codecs filter with this side's BSS' codec list, received at Complete Layer 3.
+	 * We must not pass bearer_cap to codec_filter_init(), because we haven't received the MT MS's Bearer
+	 * Capabilities yet; the Bearer Capabilities handled here are actually the remote call leg's Bearer
+	 * Capabilities. */
+	codec_filter_init(&trans->cc.codecs);
+	codec_filter_set_ran(&trans->cc.codecs, trans->msc_a->c.ran->type);
+	codec_filter_set_bss(&trans->cc.codecs, &trans->msc_a->cc.compl_l3_codec_list_bss_supported);
+	codec_filter_run(&trans->cc.codecs);
+	LOG_TRANS(trans, LOGL_DEBUG, "codecs: %s\n", codec_filter_to_str(&trans->cc.codecs));
+
 	/* bearer capability */
 	if (setup->fields & MNCC_F_BEARER_CAP) {
 		/* Create a copy of the bearer capability in the transaction struct, so we
