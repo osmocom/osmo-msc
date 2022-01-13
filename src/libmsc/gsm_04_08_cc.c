@@ -672,6 +672,33 @@ static int gsm48_cc_tx_setup(struct gsm_trans *trans, void *arg)
 
 	gsm48_start_cc_timer(trans, 0x303, GSM48_T303);
 
+	/* MT call leg is starting. Gather all codecs information so far known.
+	 * (Usually) paging has succeeded, and now we're processing the MNCC Setup from the remote MO call leg.
+	 * Initialize the codecs filter with this side's BSS' codec list, received at Complete Layer 3.
+	 * We must not pass bearer_cap to codec_filter_init(), because we haven't received the MT MS's Bearer
+	 * Capabilities yet; the Bearer Capabilities handled here are actually the remote call leg's Bearer
+	 * Capabilities. */
+	codec_filter_init(&trans->cc.codecs);
+	codec_filter_set_ran(&trans->cc.codecs, trans->msc_a->c.ran->type);
+	codec_filter_set_bss(&trans->cc.codecs, &trans->msc_a->cc.compl_l3_codec_list_bss_supported);
+	/* sdp.remote: if SDP is included in the MNCC, take that as definitive list of remote audio codecs. */
+	if (setup->sdp[0]) {
+		rc = sdp_msg_from_sdp_str(&trans->cc.codecs.remote, setup->sdp);
+		if (rc)
+			LOG_TRANS(trans, LOGL_ERROR, "Failed to parse remote call leg SDP: %d\n", rc);
+	}
+	/* sdp.remote: if there is no SDP information or we failed to parse it, try using the Bearer Capability from
+	 * MNCC, if any. */
+	if (!trans->cc.codecs.remote.audio_codecs.count && (setup->fields & MNCC_F_BEARER_CAP)) {
+		trans->cc.codecs.remote = (struct sdp_msg){};
+		sdp_audio_codecs_from_bearer_cap(&trans->cc.codecs.remote.audio_codecs,
+						 &setup->bearer_cap);
+	}
+	LOG_TRANS(trans, LOGL_DEBUG, "codecs: %s\n", codec_filter_to_str(&trans->cc.codecs));
+	if (!trans->cc.codecs.remote.audio_codecs.count)
+		LOG_TRANS(trans, LOGL_ERROR,
+			  "Got no information of remote audio codecs: neither SDP nor Bearer Capability. Trying anyway.\n");
+
 	/* bearer capability */
 	if (setup->fields & MNCC_F_BEARER_CAP) {
 		/* Create a copy of the bearer capability in the transaction struct, so we
