@@ -1319,7 +1319,7 @@ static void msc_a_up_call_assignment_complete(struct msc_a *msc_a, const struct 
 		return;
 	}
 	if (!cc_trans) {
-		LOG_MSC_A(msc_a, LOGL_ERROR, "Rx Assignment Complete, but CC transaction is active\n");
+		LOG_MSC_A(msc_a, LOGL_ERROR, "Rx Assignment Complete, but no CC transaction is active\n");
 		return;
 	}
 
