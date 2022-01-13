@@ -208,6 +208,7 @@ void msc_a_up_ciph_res(struct msc_a *msc_a, bool success, const char *imeisv);
 bool msc_a_is_accepted(const struct msc_a *msc_a);
 bool msc_a_is_establishing_auth_ciph(const struct msc_a *msc_a);
 
+int msc_a_ensure_cn_local_rtp(struct msc_a *msc_a, struct gsm_trans *cc_trans);
 int msc_a_try_call_assignment(struct gsm_trans *cc_trans);
 
 const char *msc_a_cm_service_type_to_use(enum osmo_cm_service_type cm_service_type);
