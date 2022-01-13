@@ -666,8 +666,17 @@ static int gsm48_cc_rx_setup(struct gsm_trans *trans, struct msgb *msg)
 
 	new_cc_state(trans, GSM_CSTATE_INITIATED);
 
+	/* MO call leg starting, gather all codec information so far known: */
+	codec_filter_init(&trans->cc.codecs);
+	codec_filter_set_ran(&trans->cc.codecs, trans->msc_a->c.ran->type);
+	codec_filter_set_bss(&trans->cc.codecs, &trans->msc_a->cc.compl_l3_codec_list_bss_supported);
+	if (setup.fields & MNCC_F_BEARER_CAP)
+		codec_filter_set_ms_from_bc(&trans->cc.codecs, &trans->bearer_cap);
+	codec_filter_run(&trans->cc.codecs);
+
 	LOG_TRANS(trans, setup.emergency ? LOGL_NOTICE : LOGL_INFO, "%sSETUP to %s\n",
 		  setup.emergency ? "EMERGENCY_" : "", setup.called.number);
+	LOG_TRANS(trans, LOGL_DEBUG, "codecs: %s\n", codec_filter_to_str(&trans->cc.codecs));
 
 	rate_ctr_inc(rate_ctr_group_get_ctr(trans->net->msc_ctrs, MSC_CTR_CALL_MO_SETUP));
 
