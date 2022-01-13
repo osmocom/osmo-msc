@@ -8,6 +8,7 @@
 #include <osmocom/msc/mncc.h>
 #include <osmocom/msc/msc_a.h>
 #include <osmocom/msc/debug.h>
+#include <osmocom/msc/codec_filter.h>
 #include <osmocom/gsm/gsm0411_smc.h>
 #include <osmocom/gsm/gsm0411_smr.h>
 
@@ -101,6 +102,8 @@ struct gsm_trans {
 			struct gsm_mncc msg;	/* stores setup/disconnect/release message */
 			bool mncc_initiated;	/* Whether an MNCC Release is necessary on failure */
 			struct osmo_lcls *lcls;
+			/* Track codec choices from BSS and remote call leg */
+			struct codec_filter codecs;
 		} cc;
 		struct {
 			struct gsm411_smc_inst smc_inst;
