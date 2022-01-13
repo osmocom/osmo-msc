@@ -170,6 +170,14 @@ const struct codec_mapping codec_map[] = {
 		.perm_speech = GSM0808_PERM_HR4,
 		.frhr = CODEC_FRHR_HR,
 	},
+	{
+		.sdp = {
+			.payload_type = 96,
+			.subtype_name = "VND.3GPP.IUFP",
+			.rate = 16000,
+		},
+		.mgcp = CODEC_IUFP,
+	},
 };
 
 const struct gsm_mncc_bearer_cap bearer_cap_empty = {
