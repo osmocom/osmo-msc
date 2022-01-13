@@ -316,7 +316,7 @@ static void test_call_mt()
 	VERBOSE_ASSERT(security_mode_ctrl_sent, == true, "%d");
 
 	btw("MS sends SecurityModeControl acceptance, VLR accepts, sends CC Setup");
-	dtap_expect_tx("0305" /* CC: Setup */);
+	dtap_expect_tx("0305" /* CC: Setup */ "04 07 60 04 05 0b 06 08 87" /* Bearer Cap */);
 	ms_sends_security_mode_complete(1);
 
 	btw("MS confirms call, we create a RAN-side RTP and forward MNCC_CALL_CONF_IND");
@@ -419,7 +419,7 @@ static void test_call_mt2()
 	VERBOSE_ASSERT(security_mode_ctrl_sent, == true, "%d");
 
 	btw("MS sends SecurityModeControl acceptance, VLR accepts, sends CC Setup");
-	dtap_expect_tx("0305" /* CC: Setup */);
+	dtap_expect_tx("0305" /* CC: Setup */ "04 07 60 04 05 0b 06 08 87" /* Bearer Cap */);
 	ms_sends_security_mode_complete(1);
 
 	btw("MS confirms call, we create a RAN-side RTP and forward MNCC_CALL_CONF_IND");

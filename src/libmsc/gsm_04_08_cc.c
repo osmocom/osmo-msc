@@ -695,6 +695,7 @@ static int gsm48_cc_tx_setup(struct gsm_trans *trans, void *arg)
 	struct gsm48_hdr *gh;
 	struct gsm_mncc *setup = arg;
 	int rc, trans_id;
+	struct gsm_mncc_bearer_cap bearer_cap;
 
 	gh = (struct gsm48_hdr *) msgb_put(msg, sizeof(*gh));
 
@@ -759,15 +760,42 @@ static int gsm48_cc_tx_setup(struct gsm_trans *trans, void *arg)
 	codec_filter_run(&trans->cc.codecs);
 	LOG_TRANS(trans, LOGL_DEBUG, "codecs: %s\n", codec_filter_to_str(&trans->cc.codecs));
 
-	/* NEAR FUTURE: upcoming patch will use the codecs filter to determine the Bearer Cap to send to the MS.
-	 * So far just gathering information in the new codecs filter. */
-	/* bearer capability */
-	if (setup->fields & MNCC_F_BEARER_CAP) {
-		/* Create a copy of the bearer capability in the transaction struct, so we
-		 * can use this information later */
-		memcpy(&trans->bearer_cap, &setup->bearer_cap, sizeof(trans->bearer_cap));
-		gsm48_encode_bearer_cap(msg, 0, &setup->bearer_cap);
+	/* Compose Bearer Capability information that reflects only the codecs (Speech Versions) remaining after
+	 * intersecting MS, BSS and remote call leg restrictions. To store in trans for later use, and to include in
+	 * the outgoing CC Setup message. */
+	bearer_cap = (struct gsm_mncc_bearer_cap){
+		.speech_ver = { -1 },
+	};
+	sdp_audio_codecs_to_bearer_cap(&bearer_cap, &trans->cc.codecs.result.audio_codecs);
+	rc = bearer_cap_set_radio(&bearer_cap);
+	if (rc) {
+		LOG_TRANS(trans, LOGL_ERROR, "Error composing Bearer Capability for CC Setup\n");
+		trans_free(trans);
+		msgb_free(msg);
+		return rc;
 	}
+	/* Create a copy of the bearer capability in the transaction struct, so we can use this information later */
+	/* TODO: we should be able to drop trans->bearer_cap, replaced by the codecs filter. Verify this.
+	 * So far let's just store it there like previous code did. */
+	trans->bearer_cap = bearer_cap;
+	/* If no resulting codecs remain, error out. We cannot find a codec that matches both call legs. If the MGW were
+	 * able to transcode, we could use non-identical codecs on each conn of the MGW endpoint, but we are aiming for
+	 * finding a matching codec. */
+	if (bearer_cap.speech_ver[0] == -1) {
+		LOG_TRANS(trans, LOGL_ERROR, "%s: no codec match possible: %s\n",
+			  get_mncc_name(setup->msg_type), codec_filter_to_str(&trans->cc.codecs));
+
+		/* incompatible codecs */
+		rc = mncc_release_ind(trans->net, trans, trans->callref,
+				      GSM48_CAUSE_LOC_PRN_S_LU,
+				      GSM48_CC_CAUSE_INCOMPAT_DEST /* TODO: correct cause code? */);
+		trans->callref = 0;
+		trans_free(trans);
+		msgb_free(msg);
+		return rc;
+	}
+	gsm48_encode_bearer_cap(msg, 0, &bearer_cap);
+
 	/* facility */
 	if (setup->fields & MNCC_F_FACILITY)
 		gsm48_encode_facility(msg, 0, &setup->facility);
