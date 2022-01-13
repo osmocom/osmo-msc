@@ -513,10 +513,6 @@ static int gsm48_cc_rx_setup(struct gsm_trans *trans, struct msgb *msg)
 	unsigned int payload_len = msgb_l3len(msg) - sizeof(*gh);
 	struct tlv_parsed tp;
 	struct gsm_mncc setup;
-	struct osmo_sockaddr_str *rtp_cn_local;
-	struct sdp_msg *sdp;
-	struct msc_a *msc_a = trans->msc_a;
-	int rc;
 
 	gsm48_start_guard_timer(trans);
 
@@ -540,6 +536,8 @@ static int gsm48_cc_rx_setup(struct gsm_trans *trans, struct msgb *msg)
 			LOG_TRANS(trans, LOGL_ERROR, "Failed to encode GCR\n");
 		msgb_free(gcr_msg);
 	}
+
+	OSMO_ASSERT(trans->msc_a);
 
 	tlv_parse(&tp, &gsm48_att_tlvdef, gh->data, payload_len, 0, 0);
 	/* emergency setup is identified by msg_type */
@@ -610,8 +608,6 @@ static int gsm48_cc_rx_setup(struct gsm_trans *trans, struct msgb *msg)
 			     TLVP_VAL(&tp, GSM48_IE_CC_CAP)-1);
 	}
 
-	new_cc_state(trans, GSM_CSTATE_INITIATED);
-
 	/* MO call leg starting, gather all codec information so far known: */
 	codec_filter_init(&trans->cc.codecs);
 	codec_filter_set_ran(&trans->cc.codecs, trans->msc_a->c.ran->type);
@@ -626,15 +622,53 @@ static int gsm48_cc_rx_setup(struct gsm_trans *trans, struct msgb *msg)
 
 	rate_ctr_inc(rate_ctr_group_get_ctr(trans->net->msc_ctrs, MSC_CTR_CALL_MO_SETUP));
 
+	new_cc_state(trans, GSM_CSTATE_INITIATED);
+
+	/* To complete the MNCC_SETUP_IND, we need to provide an RTP address and port. First instruct the MGW to create
+	 * a CN-side RTP conn, and continue with MNCC_SETUP_IND once that is done. Leave trans.cc in GSM_CSTATE_NULL and
+	 * note down the msg_type to indicate that we indeed composed an MNCC_SETUP_IND for later. */
+	setup.msg_type = MNCC_SETUP_IND;
+	trans->cc.msg = setup;
+	return msc_a_try_call_assignment(trans);
+	/* continue in gsm48_cc_rx_setup_cn_local_rtp_port_known() */
+}
+
+/* Callback for MNCC_SETUP_IND waiting for the core network RTP port to be established by the MGW (via msc_a) */
+void gsm48_cc_rx_setup_cn_local_rtp_port_known(struct gsm_trans *trans)
+{
+	struct msc_a *msc_a = trans->msc_a;
+	struct gsm_mncc setup = trans->cc.msg;
+	struct osmo_sockaddr_str *rtp_cn_local;
+	struct sdp_msg *sdp;
+	int rc;
+
+	if (trans->cc.state != GSM_CSTATE_INITIATED
+	    || setup.msg_type != MNCC_SETUP_IND) {
+		LOG_TRANS(trans, LOGL_ERROR,
+			  "Unexpected CC state. Expected GSM_CSTATE_NULL and a buffered MNCC_SETUP_IND message,"
+			  " found CC state %d and msg_type %s\n",
+			  trans->cc.state, get_mncc_name(setup.msg_type));
+		trans->callref = 0;
+		trans_free(trans);
+		return;
+	}
+
+	if (!msc_a) {
+		LOG_TRANS(trans, LOGL_ERROR, "No connection for CC trans\n");
+		trans->callref = 0;
+		trans_free(trans);
+		return;
+	}
+
+	/* 'setup' above has taken the value of trans->cc.msg, we can now clear that. */
+	trans->cc.msg = (struct gsm_mncc){};
+
 	/* Insert the CN side RTP port now available into SDP and compose SDP string */
 	rtp_cn_local = call_leg_local_ip(msc_a->cc.call_leg, RTP_TO_CN);
 	if (!osmo_sockaddr_str_is_nonzero(rtp_cn_local)) {
 		LOG_TRANS(trans, LOGL_ERROR, "Cannot compose SDP for MNCC_SETUP_IND: no RTP set up for the CN side\n");
-		/* FIXME: re-add below two lines as soon as CN CRCX is done first
-		 * (see Change-Id Ie433db1ba0c46d4b97538a969233c155cefac21c).
-		 * keeping it non-fatal for the moment, for tests to continue succeeding. */
-		//trans_free(trans);
-		//return -EINVAL;
+		trans_free(trans);
+		return;
 	}
 
 	codec_filter_set_local_rtp(&trans->cc.codecs, rtp_cn_local);
@@ -644,16 +678,11 @@ static int gsm48_cc_rx_setup(struct gsm_trans *trans, struct msgb *msg)
 	if (rc >= sizeof(setup.sdp)) {
 		LOG_TRANS(trans, LOGL_ERROR, "MNCC_SETUP_IND: SDP too long (%d > %zu bytes)\n", rc, sizeof(setup.sdp));
 		trans_free(trans);
-		return -EINVAL;
+		return;
 	}
 
 	/* indicate setup to MNCC */
 	mncc_recvmsg(trans->net, trans, MNCC_SETUP_IND, &setup);
-
-	/* MNCC code will modify the channel asynchronously, we should
-	 * ipaccess-bind only after the modification has been made to the
-	 * lchan->tch_mode */
-	return 0;
 }
 
 static int gsm48_cc_tx_setup(struct gsm_trans *trans, void *arg)
@@ -695,8 +724,6 @@ static int gsm48_cc_tx_setup(struct gsm_trans *trans, void *arg)
 	trans->transaction_id = trans_id;
 
 	gh->msg_type = GSM48_MT_CC_SETUP;
-
-	gsm48_start_cc_timer(trans, 0x303, GSM48_T303);
 
 	/* MT call leg is starting. Gather all codecs information so far known.
 	 * (Usually) paging has succeeded, and now we're processing the MNCC Setup from the remote MO call leg.
@@ -786,6 +813,8 @@ static int gsm48_cc_tx_setup(struct gsm_trans *trans, void *arg)
 
 	rate_ctr_inc(rate_ctr_group_get_ctr(trans->net->msc_ctrs, MSC_CTR_CALL_MT_SETUP));
 
+	gsm48_start_cc_timer(trans, 0x303, GSM48_T303);
+
 	return trans_tx_gsm48(trans, msg);
 }
 
@@ -844,8 +873,6 @@ static int gsm48_cc_rx_call_conf(struct gsm_trans *trans, struct msgb *msg)
 	/* IMSI of called subscriber */
 	OSMO_STRLCPY_ARRAY(call_conf.imsi, trans->vsub->imsi);
 
-	new_cc_state(trans, GSM_CSTATE_MO_TERM_CALL_CONF);
-
 	/* Assign call (if not done yet) */
 	rc = msc_a_try_call_assignment(trans);
 
@@ -854,8 +881,45 @@ static int gsm48_cc_rx_call_conf(struct gsm_trans *trans, struct msgb *msg)
 	if (rc)
 		return rc;
 
-	return mncc_recvmsg(trans->net, trans, MNCC_CALL_CONF_IND,
-			    &call_conf);
+	/* Directly ack with MNCC_CALL_CONF_IND, not yet containing SDP or RTP IP:port information. */
+	new_cc_state(trans, GSM_CSTATE_MO_TERM_CALL_CONF);
+	return mncc_recvmsg(trans->net, trans, MNCC_CALL_CONF_IND, &call_conf);
+}
+
+static int mncc_recv_rtp(struct gsm_network *net, struct gsm_trans *trans, uint32_t callref,
+			 int cmd, struct osmo_sockaddr_str *rtp_addr, uint32_t payload_type,
+			 uint32_t payload_msg_type, const struct sdp_msg *sdp);
+
+int gsm48_cc_mt_rtp_port_and_codec_known(struct gsm_trans *trans)
+{
+	struct msc_a *msc_a = trans->msc_a;
+	struct osmo_sockaddr_str *rtp_cn_local;
+	struct gsm_mncc_rtp;
+
+	if (!msc_a) {
+		LOG_TRANS(trans, LOGL_ERROR, "No connection for CC trans\n");
+		trans->callref = 0;
+		trans_free(trans);
+		return -EINVAL;
+	}
+
+	/* Insert the CN side RTP port now available into SDP */
+	rtp_cn_local = call_leg_local_ip(msc_a->cc.call_leg, RTP_TO_CN);
+	if (!rtp_cn_local) {
+		LOG_TRANS(trans, LOGL_ERROR, "Cannot compose SDP for MNCC_RTP_CREATE: no RTP set up for the CN side\n");
+		trans_free(trans);
+		return -EINVAL;
+	}
+	codec_filter_set_local_rtp(&trans->cc.codecs, rtp_cn_local);
+
+	codec_filter_run(&trans->cc.codecs);
+	LOG_TRANS(trans, LOGL_DEBUG, "codecs: %s\n", codec_filter_to_str(&trans->cc.codecs));
+
+	if (!sdp_audio_codec_is_set(&trans->cc.codecs.assignment))
+		return 0;
+
+	return mncc_recv_rtp(msc_a_net(msc_a), trans, trans->callref, MNCC_RTP_CREATE, rtp_cn_local, 0, 0,
+			     &trans->cc.codecs.result);
 }
 
 static int gsm48_cc_tx_call_proc_and_assign(struct gsm_trans *trans, void *arg)
@@ -1835,6 +1899,61 @@ static int tch_rtp_create(struct gsm_network *net, uint32_t callref)
 
 	/* Assign call (if not done yet) */
 	return msc_a_try_call_assignment(trans);
+}
+
+int cc_cn_local_rtp_port_known(struct gsm_trans *cc_trans)
+{
+	switch(cc_trans->cc.state) {
+	case GSM_CSTATE_INITIATED:
+		if (cc_trans->cc.msg.msg_type != MNCC_SETUP_IND) {
+			LOG_TRANS(cc_trans, LOGL_ERROR, "Assuming MO call, expected MNCC_SETUP_IND to be prepared\n");
+			return -EINVAL;
+		}
+		/* This is the MO call leg, waiting for a CN RTP be able to send initial MNCC_SETUP_IND. */
+		gsm48_cc_rx_setup_cn_local_rtp_port_known(cc_trans);
+		return 0;
+
+	case GSM_CSTATE_MO_TERM_CALL_CONF:
+		/* This is the MT call leg, waiting for a CN RTP to be able to send MNCC_CALL_CONF_IND. */
+		return gsm48_cc_mt_rtp_port_and_codec_known(cc_trans);
+
+	default:
+		LOG_TRANS(cc_trans, LOGL_ERROR, "CN RTP address available, but in unexpected state %d\n",
+			  cc_trans->cc.state);
+		return -EINVAL;
+	}
+}
+
+int cc_assignment_done(struct gsm_trans *trans)
+{
+	struct msc_a *msc_a = trans->msc_a;
+
+	switch (trans->cc.state) {
+	case GSM_CSTATE_INITIATED:
+	case GSM_CSTATE_MO_CALL_PROC:
+		/* MO call */
+		break;
+
+	case GSM_CSTATE_CALL_RECEIVED:
+	case GSM_CSTATE_MO_TERM_CALL_CONF:
+		/* MT call */
+		break;
+
+	case GSM_CSTATE_ACTIVE:
+		/* already active. MNCC finished before Abis completed the Assignment. */
+		break;
+
+	default:
+		LOG_TRANS(trans, LOGL_ERROR, "Assignment done in unexpected CC state: %d\n", trans->cc.state);
+		return -EINVAL;
+	}
+
+	if (!call_leg_local_ip(msc_a->cc.call_leg, RTP_TO_CN)) {
+		LOG_TRANS(trans, LOGL_DEBUG,
+			  "Assignment complete, but still waiting for the CRCX OK on the CN side RTP\n");
+		return 0;
+	}
+	return gsm48_tch_rtp_create(trans);
 }
 
 /* Trigger TCH_RTP_CREATE acknowledgement */

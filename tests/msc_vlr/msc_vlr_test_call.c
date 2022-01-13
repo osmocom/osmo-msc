@@ -202,8 +202,9 @@ static void test_call_mo()
 
 	BTW("a call is initiated");
 
-	btw("SETUP gets forwarded to MNCC");
-	cc_to_mncc_expect_tx(IMSI, MNCC_SETUP_IND);
+	btw("CC SETUP causes CRCX towards CN");
+	expect_crcx(RTP_TO_CN);
+	expect_crcx(RTP_TO_RAN);
 	ms_sends_msg("0385" /* CC, seq = 2 -> 0x80 | CC Setup = 0x5 */
 		     "0406600402000581" /* Bearer Capability */
 		     "5e038121f3" /* Called Number BCD */
@@ -212,27 +213,27 @@ static void test_call_mo()
 		       "04026000" /* UMTS: AMR 2 | AMR */
 		       "00021f00" /* GSM: HR AMR | FR AMR | GSM EFR | GSM HR | GSM FR */
 		    );
+	OSMO_ASSERT(crcx_scheduled(RTP_TO_CN));
+	OSMO_ASSERT(crcx_scheduled(RTP_TO_RAN));
+
+	btw("As soon as the MGW port towards CN is created, MNCC_SETUP_IND is triggered");
+	cc_to_mncc_expect_tx(IMSI, MNCC_SETUP_IND);
+	crcx_ok(RTP_TO_CN);
 	OSMO_ASSERT(cc_to_mncc_tx_confirmed);
 	mncc.callref = cc_to_mncc_tx_got_callref;
 
 	btw("MNCC replies with MNCC_RTP_CREATE, causing MGW endpoint CRCX to RAN");
-	expect_crcx(RTP_TO_RAN);
 	mncc_sends_to_cc(MNCC_RTP_CREATE, &mncc);
-	OSMO_ASSERT(crcx_scheduled(RTP_TO_RAN));
 
 	btw("MGW acknowledges the CRCX, triggering Assignment");
 	expect_iu_rab_assignment();
 	crcx_ok(RTP_TO_RAN);
 	OSMO_ASSERT(iu_rab_assignment_sent);
 
-	btw("Assignment succeeds, triggering CRCX to CN");
-	expect_crcx(RTP_TO_CN);
-	ms_sends_assignment_complete(CODEC_AMR_8000_1);
-	OSMO_ASSERT(crcx_scheduled(RTP_TO_CN));
-
-	btw("CN RTP address is available, trigger MNCC_RTP_CREATE");
+	btw("Assignment succeeds, triggering MNCC_RTP_CREATE ack to MNCC");
 	cc_to_mncc_expect_tx("", MNCC_RTP_CREATE);
-	crcx_ok(RTP_TO_CN);
+	ms_sends_assignment_complete(CODEC_AMR_8000_1);
+	OSMO_ASSERT(cc_to_mncc_tx_confirmed);
 
 	btw("MNCC says that's fine");
 	dtap_expect_tx("8302" /* CC: Call Proceeding */);
@@ -285,6 +286,25 @@ static void test_call_mt()
 	struct gsm_mncc mncc = {
 		.imsi = IMSI,
 		.callref = 0x423,
+		.fields = MNCC_F_BEARER_CAP,
+		.bearer_cap = {
+			.speech_ver = {
+				GSM48_BCAP_SV_AMR_F,
+				GSM48_BCAP_SV_EFR,
+				GSM48_BCAP_SV_FR,
+				GSM48_BCAP_SV_AMR_H,
+				GSM48_BCAP_SV_HR,
+				-1 },
+		},
+		.sdp =  "v=0\r\n"
+			"o=OsmoMSC 0 0 IN IP4 10.23.23.1\r\n"
+			"s=GSM Call\r\n"
+			"c=IN IP4 10.23.23.1\r\n"
+			"t=0 0\r\n"
+			"m=audio 23 RTP/AVP 112\r\n"
+			"a=rtpmap:112 AMR/8000\r\n"
+			"a=fmtp:112 octet-align=1\r\n"
+			"a=ptime:20\r\n",
 	};
 
 	comment_start();
@@ -298,6 +318,7 @@ static void test_call_mt()
 	paging_expect_imsi(IMSI);
 	paging_sent = false;
 	mncc_sends_to_cc(MNCC_SETUP_REQ, &mncc);
+	mncc.sdp[0] = '\0';
 
 	VERBOSE_ASSERT(paging_sent, == true, "%d");
 
@@ -316,21 +337,20 @@ static void test_call_mt()
 	VERBOSE_ASSERT(security_mode_ctrl_sent, == true, "%d");
 
 	btw("MS sends SecurityModeControl acceptance, VLR accepts, sends CC Setup");
-	dtap_expect_tx("0305" /* CC: Setup */ "04 07 60 04 05 0b 06 08 87" /* Bearer Cap */);
+	dtap_expect_tx("0305" /* CC: Setup */ "04 04 60 04 05 8b" /* Bearer Cap */);
 	ms_sends_security_mode_complete(1);
 
 	btw("MS confirms call, we create a RAN-side RTP and forward MNCC_CALL_CONF_IND");
+	expect_crcx(RTP_TO_CN);
 	expect_crcx(RTP_TO_RAN);
 	cc_to_mncc_expect_tx(IMSI, MNCC_CALL_CONF_IND);
 	ms_sends_msg("8348" /* CC: Call Confirmed */
 		     "0406600402000581" /* Bearer Capability */
 		     "15020100" /* Call Control Capabilities */
 		     "40080402600400021f00" /* Supported Codec List */);
+	OSMO_ASSERT(crcx_scheduled(RTP_TO_CN));
 	OSMO_ASSERT(crcx_scheduled(RTP_TO_RAN));
 	OSMO_ASSERT(cc_to_mncc_tx_confirmed);
-
-	btw("MNCC sends MNCC_RTP_CREATE");
-	mncc_sends_to_cc(MNCC_RTP_CREATE, &mncc);
 
 	btw("MGW acknowledges the CRCX to RAN, triggering Assignment");
 	expect_iu_rab_assignment();
@@ -340,21 +360,26 @@ static void test_call_mt()
 	btw("Assignment completes, triggering CRCX to CN");
 	expect_crcx(RTP_TO_CN);
 	ms_sends_assignment_complete(CODEC_AMR_8000_1);
-	OSMO_ASSERT(crcx_scheduled(RTP_TO_CN));
 
-	btw("When the CN side RTP address is known, send MNCC_RTP_CREATE");
+	btw("MNCC sends MNCC_RTP_CREATE, which first waits for the CN side RTP");
+	mncc_sends_to_cc(MNCC_RTP_CREATE, &mncc);
+
+	btw("When the CN side RTP address is known, ack MNCC_RTP_CREATE with full SDP");
 	cc_to_mncc_expect_tx("", MNCC_RTP_CREATE);
 	crcx_ok(RTP_TO_CN);
+	OSMO_ASSERT(cc_to_mncc_tx_confirmed);
 
 	fake_time_passes(1, 23);
 
 	cc_to_mncc_expect_tx("", MNCC_ALERT_IND);
 	ms_sends_msg("8381" /* CC: Alerting */);
+	OSMO_ASSERT(cc_to_mncc_tx_confirmed);
 
 	fake_time_passes(1, 23);
 
 	cc_to_mncc_expect_tx(IMSI, MNCC_SETUP_CNF);
 	ms_sends_msg("83c7" /* CC: Connect */);
+	OSMO_ASSERT(cc_to_mncc_tx_confirmed);
 
 	dtap_expect_tx("030f" /* CC: Connect Acknowledge */);
 	mncc_sends_to_cc(MNCC_SETUP_COMPL_REQ, &mncc);
@@ -388,6 +413,19 @@ static void test_call_mt2()
 	struct gsm_mncc mncc = {
 		.imsi = IMSI,
 		.callref = 0x423,
+		.fields = MNCC_F_BEARER_CAP,
+		.bearer_cap = {
+			.speech_ver = { GSM48_BCAP_SV_FR, -1, },
+		},
+		.sdp =  "v=0\r\n"
+			"o=OsmoMSC 0 0 IN IP4 10.23.23.1\r\n"
+			"s=GSM Call\r\n"
+			"c=IN IP4 10.23.23.1\r\n"
+			"t=0 0\r\n"
+			"m=audio 23 RTP/AVP 112\r\n"
+			"a=rtpmap:112 AMR/8000\r\n"
+			"a=fmtp:112 octet-align=1\r\n"
+			"a=ptime:20\r\n",
 	};
 
 	comment_start();
@@ -419,20 +457,22 @@ static void test_call_mt2()
 	VERBOSE_ASSERT(security_mode_ctrl_sent, == true, "%d");
 
 	btw("MS sends SecurityModeControl acceptance, VLR accepts, sends CC Setup");
-	dtap_expect_tx("0305" /* CC: Setup */ "04 07 60 04 05 0b 06 08 87" /* Bearer Cap */);
+	dtap_expect_tx("0305" /* CC: Setup */ "04 04 60 04 05 8b" /* Bearer Cap */);
 	ms_sends_security_mode_complete(1);
 
 	btw("MS confirms call, we create a RAN-side RTP and forward MNCC_CALL_CONF_IND");
+	expect_crcx(RTP_TO_CN);
 	expect_crcx(RTP_TO_RAN);
 	cc_to_mncc_expect_tx(IMSI, MNCC_CALL_CONF_IND);
 	ms_sends_msg("8348" /* CC: Call Confirmed */
 		     "0406600402000581" /* Bearer Capability */
 		     "15020100" /* Call Control Capabilities */
 		     "40080402600400021f00" /* Supported Codec List */);
+	OSMO_ASSERT(crcx_scheduled(RTP_TO_CN));
 	OSMO_ASSERT(crcx_scheduled(RTP_TO_RAN));
 	OSMO_ASSERT(cc_to_mncc_tx_confirmed);
 
-	btw("MNCC sends MNCC_RTP_CREATE");
+	btw("MNCC sends MNCC_RTP_CREATE, which first waits for the CN side RTP");
 	mncc_sends_to_cc(MNCC_RTP_CREATE, &mncc);
 
 	btw("MGW acknowledges the CRCX to RAN, triggering Assignment");
@@ -441,13 +481,13 @@ static void test_call_mt2()
 	OSMO_ASSERT(iu_rab_assignment_sent);
 
 	btw("Assignment completes, triggering CRCX to CN");
-	expect_crcx(RTP_TO_CN);
 	ms_sends_assignment_complete(CODEC_AMR_8000_1);
-	OSMO_ASSERT(crcx_scheduled(RTP_TO_CN));
 
-	btw("When the CN side RTP address is known, send MNCC_RTP_CREATE");
+	btw("When the CN side RTP address is known, ack MNCC_RTP_CREATE with full SDP");
 	cc_to_mncc_expect_tx("", MNCC_RTP_CREATE);
 	crcx_ok(RTP_TO_CN);
+	OSMO_ASSERT(cc_to_mncc_tx_confirmed);
+
 	fake_time_passes(1, 23);
 
 	cc_to_mncc_expect_tx("", MNCC_ALERT_IND);
@@ -514,8 +554,9 @@ static void test_call_mo_to_unknown()
 
 	BTW("a call is initiated");
 
-	btw("SETUP gets forwarded to MNCC");
-	cc_to_mncc_expect_tx(IMSI, MNCC_SETUP_IND);
+	btw("CC SETUP causes CRCX towards CN");
+	expect_crcx(RTP_TO_CN);
+	expect_crcx(RTP_TO_RAN);
 	ms_sends_msg("0385" /* CC, seq = 2 -> 0x80 | CC Setup = 0x5 */
 		     "0406600402000581" /* Bearer Capability */
 		     "5e038121f3" /* Called Number BCD */
@@ -524,27 +565,27 @@ static void test_call_mo_to_unknown()
 		       "04026000" /* UMTS: AMR 2 | AMR */
 		       "00021f00" /* GSM: HR AMR | FR AMR | GSM EFR | GSM HR | GSM FR */
 		    );
+	OSMO_ASSERT(crcx_scheduled(RTP_TO_CN));
+	OSMO_ASSERT(crcx_scheduled(RTP_TO_RAN));
+
+	btw("As soon as the MGW port towards CN is created, MNCC_SETUP_IND is triggered");
+	cc_to_mncc_expect_tx(IMSI, MNCC_SETUP_IND);
+	crcx_ok(RTP_TO_CN);
 	OSMO_ASSERT(cc_to_mncc_tx_confirmed);
 	mncc.callref = cc_to_mncc_tx_got_callref;
 
 	btw("MNCC replies with MNCC_RTP_CREATE, causing MGW endpoint CRCX to RAN");
-	expect_crcx(RTP_TO_RAN);
 	mncc_sends_to_cc(MNCC_RTP_CREATE, &mncc);
-	OSMO_ASSERT(crcx_scheduled(RTP_TO_RAN));
 
 	btw("MGW acknowledges the CRCX, triggering Assignment");
 	expect_iu_rab_assignment();
 	crcx_ok(RTP_TO_RAN);
 	OSMO_ASSERT(iu_rab_assignment_sent);
 
-	btw("Assignment succeeds, triggering CRCX to CN");
-	expect_crcx(RTP_TO_CN);
-	ms_sends_assignment_complete(CODEC_AMR_8000_1);
-	OSMO_ASSERT(crcx_scheduled(RTP_TO_CN));
-
-	btw("CN RTP address is available, trigger MNCC_RTP_CREATE");
+	btw("Assignment succeeds, triggering MNCC_RTP_CREATE ack to MNCC");
 	cc_to_mncc_expect_tx("", MNCC_RTP_CREATE);
-	crcx_ok(RTP_TO_CN);
+	ms_sends_assignment_complete(CODEC_AMR_8000_1);
+	OSMO_ASSERT(cc_to_mncc_tx_confirmed);
 
 	btw("MNCC says that's fine");
 	dtap_expect_tx("8302" /* CC: Call Proceeding */);
@@ -561,7 +602,6 @@ static void test_call_mo_to_unknown()
 	expect_iu_release();
 	cc_to_mncc_expect_tx("", MNCC_REL_CNF);
 	ms_sends_msg("036a" /* CC: Release Complete */);
-	OSMO_ASSERT(cc_to_mncc_tx_confirmed);
 	OSMO_ASSERT(iu_release_sent);
 	OSMO_ASSERT(cc_to_mncc_tx_confirmed);
 
@@ -610,8 +650,9 @@ static void test_call_mo_to_unknown_timeout()
 
 	BTW("a call is initiated");
 
-	btw("SETUP gets forwarded to MNCC");
-	cc_to_mncc_expect_tx(IMSI, MNCC_SETUP_IND);
+	btw("CC SETUP causes CRCX towards CN");
+	expect_crcx(RTP_TO_CN);
+	expect_crcx(RTP_TO_RAN);
 	ms_sends_msg("0385" /* CC, seq = 2 -> 0x80 | CC Setup = 0x5 */
 		     "0406600402000581" /* Bearer Capability */
 		     "5e038121f3" /* Called Number BCD */
@@ -620,27 +661,27 @@ static void test_call_mo_to_unknown_timeout()
 		       "04026000" /* UMTS: AMR 2 | AMR */
 		       "00021f00" /* GSM: HR AMR | FR AMR | GSM EFR | GSM HR | GSM FR */
 		    );
+	OSMO_ASSERT(crcx_scheduled(RTP_TO_CN));
+	OSMO_ASSERT(crcx_scheduled(RTP_TO_RAN));
+
+	btw("As soon as the MGW port towards CN is created, MNCC_SETUP_IND is triggered");
+	cc_to_mncc_expect_tx(IMSI, MNCC_SETUP_IND);
+	crcx_ok(RTP_TO_CN);
 	OSMO_ASSERT(cc_to_mncc_tx_confirmed);
 	mncc.callref = cc_to_mncc_tx_got_callref;
 
 	btw("MNCC replies with MNCC_RTP_CREATE, causing MGW endpoint CRCX to RAN");
-	expect_crcx(RTP_TO_RAN);
 	mncc_sends_to_cc(MNCC_RTP_CREATE, &mncc);
-	OSMO_ASSERT(crcx_scheduled(RTP_TO_RAN));
 
 	btw("MGW acknowledges the CRCX, triggering Assignment");
 	expect_iu_rab_assignment();
 	crcx_ok(RTP_TO_RAN);
 	OSMO_ASSERT(iu_rab_assignment_sent);
 
-	btw("Assignment succeeds, triggering CRCX to CN");
-	expect_crcx(RTP_TO_CN);
-	ms_sends_assignment_complete(CODEC_AMR_8000_1);
-	OSMO_ASSERT(crcx_scheduled(RTP_TO_CN));
-
-	btw("CN RTP address is available, trigger MNCC_RTP_CREATE");
+	btw("Assignment succeeds, triggering MNCC_RTP_CREATE ack to MNCC");
 	cc_to_mncc_expect_tx("", MNCC_RTP_CREATE);
-	crcx_ok(RTP_TO_CN);
+	ms_sends_assignment_complete(CODEC_AMR_8000_1);
+	OSMO_ASSERT(cc_to_mncc_tx_confirmed);
 
 	btw("MNCC says that's fine");
 	dtap_expect_tx("8302" /* CC: Call Proceeding */);
