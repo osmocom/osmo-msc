@@ -455,6 +455,13 @@ void rtp_stream_set_remote_addr(struct rtp_stream *rtps, const struct osmo_socka
 	rtp_stream_update_id(rtps);
 }
 
+void rtp_stream_set_remote_addr_and_codecs(struct rtp_stream *rtps, const struct sdp_msg *sdp)
+{
+	rtp_stream_set_codecs(rtps, &sdp->audio_codecs);
+	if (osmo_sockaddr_str_is_nonzero(&sdp->rtp))
+		rtp_stream_set_remote_addr(rtps, &sdp->rtp);
+}
+
 void rtp_stream_set_remote_osmux_cid(struct rtp_stream *rtps, uint8_t osmux_cid)
 {
 	if (rtps->fi->state == RTP_STREAM_ST_ESTABLISHED)

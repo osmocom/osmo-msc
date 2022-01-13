@@ -69,6 +69,7 @@ bool rtp_stream_set_codecs_from_mgcp_codec(struct rtp_stream *rtps, enum mgcp_co
 void rtp_stream_set_one_codec(struct rtp_stream *rtps, const struct sdp_audio_codec *codec);
 void rtp_stream_set_codecs(struct rtp_stream *rtps, const struct sdp_audio_codecs *codecs);
 void rtp_stream_set_remote_addr(struct rtp_stream *rtps, const struct osmo_sockaddr_str *r);
+void rtp_stream_set_remote_addr_and_codecs(struct rtp_stream *rtps, const struct sdp_msg *sdp);
 void rtp_stream_set_remote_osmux_cid(struct rtp_stream *rtps, uint8_t osmux_cid);
 int rtp_stream_commit(struct rtp_stream *rtps);
 
