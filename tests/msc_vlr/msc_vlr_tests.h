@@ -275,5 +275,5 @@ extern const struct timeval fake_time_start_time;
 #define EUSE_TO_MSC_USSD "0a0103"
 #define MSC_USSD_TO_EUSE "0a0103"
 
-extern bool got_crcx;
 void expect_crcx(enum rtp_direction towards);
+bool crcx_scheduled(enum rtp_direction towards);
