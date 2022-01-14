@@ -218,7 +218,7 @@ static void test_call_mo()
 	btw("MNCC replies with MNCC_RTP_CREATE, causing MGW endpoint CRCX to RAN");
 	expect_crcx(RTP_TO_RAN);
 	mncc_sends_to_cc(MNCC_RTP_CREATE, &mncc);
-	OSMO_ASSERT(got_crcx);
+	OSMO_ASSERT(crcx_scheduled(RTP_TO_RAN));
 
 	btw("MGW acknowledges the CRCX, triggering Assignment");
 	expect_iu_rab_assignment();
@@ -228,7 +228,7 @@ static void test_call_mo()
 	btw("Assignment succeeds, triggering CRCX to CN");
 	expect_crcx(RTP_TO_CN);
 	ms_sends_assignment_complete(CODEC_AMR_8000_1);
-	OSMO_ASSERT(got_crcx);
+	OSMO_ASSERT(crcx_scheduled(RTP_TO_CN));
 
 	btw("CN RTP address is available, trigger MNCC_RTP_CREATE");
 	cc_to_mncc_expect_tx("", MNCC_RTP_CREATE);
@@ -326,7 +326,7 @@ static void test_call_mt()
 		     "0406600402000581" /* Bearer Capability */
 		     "15020100" /* Call Control Capabilities */
 		     "40080402600400021f00" /* Supported Codec List */);
-	OSMO_ASSERT(got_crcx);
+	OSMO_ASSERT(crcx_scheduled(RTP_TO_RAN));
 	OSMO_ASSERT(cc_to_mncc_tx_confirmed);
 
 	btw("MNCC sends MNCC_RTP_CREATE");
@@ -340,7 +340,7 @@ static void test_call_mt()
 	btw("Assignment completes, triggering CRCX to CN");
 	expect_crcx(RTP_TO_CN);
 	ms_sends_assignment_complete(CODEC_AMR_8000_1);
-	OSMO_ASSERT(got_crcx);
+	OSMO_ASSERT(crcx_scheduled(RTP_TO_CN));
 
 	btw("When the CN side RTP address is known, send MNCC_RTP_CREATE");
 	cc_to_mncc_expect_tx("", MNCC_RTP_CREATE);
@@ -429,7 +429,7 @@ static void test_call_mt2()
 		     "0406600402000581" /* Bearer Capability */
 		     "15020100" /* Call Control Capabilities */
 		     "40080402600400021f00" /* Supported Codec List */);
-	OSMO_ASSERT(got_crcx);
+	OSMO_ASSERT(crcx_scheduled(RTP_TO_RAN));
 	OSMO_ASSERT(cc_to_mncc_tx_confirmed);
 
 	btw("MNCC sends MNCC_RTP_CREATE");
@@ -443,7 +443,7 @@ static void test_call_mt2()
 	btw("Assignment completes, triggering CRCX to CN");
 	expect_crcx(RTP_TO_CN);
 	ms_sends_assignment_complete(CODEC_AMR_8000_1);
-	OSMO_ASSERT(got_crcx);
+	OSMO_ASSERT(crcx_scheduled(RTP_TO_CN));
 
 	btw("When the CN side RTP address is known, send MNCC_RTP_CREATE");
 	cc_to_mncc_expect_tx("", MNCC_RTP_CREATE);
@@ -530,7 +530,7 @@ static void test_call_mo_to_unknown()
 	btw("MNCC replies with MNCC_RTP_CREATE, causing MGW endpoint CRCX to RAN");
 	expect_crcx(RTP_TO_RAN);
 	mncc_sends_to_cc(MNCC_RTP_CREATE, &mncc);
-	OSMO_ASSERT(got_crcx);
+	OSMO_ASSERT(crcx_scheduled(RTP_TO_RAN));
 
 	btw("MGW acknowledges the CRCX, triggering Assignment");
 	expect_iu_rab_assignment();
@@ -540,7 +540,7 @@ static void test_call_mo_to_unknown()
 	btw("Assignment succeeds, triggering CRCX to CN");
 	expect_crcx(RTP_TO_CN);
 	ms_sends_assignment_complete(CODEC_AMR_8000_1);
-	OSMO_ASSERT(got_crcx);
+	OSMO_ASSERT(crcx_scheduled(RTP_TO_CN));
 
 	btw("CN RTP address is available, trigger MNCC_RTP_CREATE");
 	cc_to_mncc_expect_tx("", MNCC_RTP_CREATE);
@@ -626,7 +626,7 @@ static void test_call_mo_to_unknown_timeout()
 	btw("MNCC replies with MNCC_RTP_CREATE, causing MGW endpoint CRCX to RAN");
 	expect_crcx(RTP_TO_RAN);
 	mncc_sends_to_cc(MNCC_RTP_CREATE, &mncc);
-	OSMO_ASSERT(got_crcx);
+	OSMO_ASSERT(crcx_scheduled(RTP_TO_RAN));
 
 	btw("MGW acknowledges the CRCX, triggering Assignment");
 	expect_iu_rab_assignment();
@@ -636,7 +636,7 @@ static void test_call_mo_to_unknown_timeout()
 	btw("Assignment succeeds, triggering CRCX to CN");
 	expect_crcx(RTP_TO_CN);
 	ms_sends_assignment_complete(CODEC_AMR_8000_1);
-	OSMO_ASSERT(got_crcx);
+	OSMO_ASSERT(crcx_scheduled(RTP_TO_CN));
 
 	btw("CN RTP address is available, trigger MNCC_RTP_CREATE");
 	cc_to_mncc_expect_tx("", MNCC_RTP_CREATE);
