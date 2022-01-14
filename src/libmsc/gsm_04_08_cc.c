@@ -664,6 +664,7 @@ static int gsm48_cc_tx_setup(struct gsm_trans *trans, void *arg)
 	struct gsm48_hdr *gh;
 	struct gsm_mncc *setup = arg;
 	int rc, trans_id;
+	struct gsm_mncc_bearer_cap bearer_cap;
 
 	gh = (struct gsm48_hdr *) msgb_put(msg, sizeof(*gh));
 
@@ -726,13 +727,41 @@ static int gsm48_cc_tx_setup(struct gsm_trans *trans, void *arg)
 		LOG_TRANS(trans, LOGL_ERROR,
 			  "Got no information of remote audio codecs: neither SDP nor Bearer Capability. Trying anyway.\n");
 
-	/* bearer capability */
-	if (setup->fields & MNCC_F_BEARER_CAP) {
+	/* Compose outgoing Bearer Capabilities: translate SDP to bearer capability Speech Version entries.
+	 * Send only codecs that remain according to the codec filter. */
 		/* Create a copy of the bearer capability in the transaction struct, so we
 		 * can use this information later */
-		memcpy(&trans->bearer_cap, &setup->bearer_cap, sizeof(trans->bearer_cap));
-		gsm48_encode_bearer_cap(msg, 0, &setup->bearer_cap);
+	codec_filter_run(&trans->cc.codecs);
+	LOG_TRANS(trans, LOGL_DEBUG, "codecs: %s\n", codec_filter_to_str(&trans->cc.codecs));
+	bearer_cap = (struct gsm_mncc_bearer_cap){
+		.speech_ver = { -1 },
+	};
+	sdp_audio_codecs_to_bearer_cap(&bearer_cap, &trans->cc.codecs.result.audio_codecs);
+	rc = bearer_cap_set_radio(&bearer_cap);
+	if (rc) {
+		LOG_TRANS(trans, LOGL_ERROR, "Error composing Bearer Capability for CC Setup\n");
+		trans_free(trans);
+		msgb_free(msg);
+		return rc;
 	}
+	/* (As earlier code did, keep a copy in trans->bearer_cap) */
+	trans->bearer_cap = bearer_cap;
+	/* If no resulting codecs remain, error out. If the MGW were able to transcode, we would just use unidentical
+	 * codecs on each conn of the MGW endpoint. */
+	if (bearer_cap.speech_ver[0] == -1) {
+		LOG_TRANS(trans, LOGL_ERROR, "%s: no codec match possible: %s\n",
+			  get_mncc_name(setup->msg_type), codec_filter_to_str(&trans->cc.codecs));
+
+		/* incompatible codecs */
+		rc = mncc_release_ind(trans->net, trans, trans->callref,
+				      GSM48_CAUSE_LOC_PRN_S_LU,
+				      GSM48_CC_CAUSE_INCOMPAT_DEST /* TODO: correct cause code? */);
+		trans_free(trans);
+		msgb_free(msg);
+		return rc;
+	}
+	gsm48_encode_bearer_cap(msg, 0, &bearer_cap);
+
 	/* facility */
 	if (setup->fields & MNCC_F_FACILITY)
 		gsm48_encode_facility(msg, 0, &setup->facility);
