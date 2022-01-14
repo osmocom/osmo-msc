@@ -85,8 +85,8 @@ const char *cc_to_mncc_tx_expected_imsi = NULL;
 bool cc_to_mncc_tx_confirmed = false;
 uint32_t cc_to_mncc_tx_got_callref = 0;
 
-enum rtp_direction expecting_crcx = -1;
-bool got_crcx = false;
+bool expecting_crcx[2] = {};
+bool got_crcx[2] = {};
 
 extern int ran_dec_dtap_undup_pdisc_ctr_bin(uint8_t pdisc);
 
@@ -641,8 +641,8 @@ void clear_vlr()
 
 	osmo_gettimeofday_override = false;
 
-	expecting_crcx = -1;
-	got_crcx = false;
+	memset(expecting_crcx, 0, sizeof(expecting_crcx));
+	memset(got_crcx, 0, sizeof(got_crcx));
 
 	bssap_assignment_expected = false;
 	bssap_assignment_sent = false;
@@ -836,9 +836,14 @@ struct rtp_stream fake_rtp[2] = {
 
 void expect_crcx(enum rtp_direction towards)
 {
-	OSMO_ASSERT(expecting_crcx == -1);
-	expecting_crcx = towards;
-	got_crcx = false;
+	OSMO_ASSERT(!expecting_crcx[towards]);
+	expecting_crcx[towards] = true;
+	got_crcx[towards] = false;
+}
+
+bool crcx_scheduled(enum rtp_direction towards)
+{
+	return got_crcx[towards];
 }
 
 /* override, requires '-Wl,--wrap=call_leg_ensure_ci' */
@@ -853,9 +858,9 @@ int __wrap_call_leg_ensure_ci(struct call_leg *cl, enum rtp_direction dir, uint3
 		log("MGW <--CRCX to %s-- MSC: callref=0x%x codecs=%s", rtp_direction_name(dir), call_id,
 		    codecs_if_known ? sdp_audio_codecs_to_str(codecs_if_known) : "unset");
 
-		OSMO_ASSERT(expecting_crcx == dir);
-		expecting_crcx = -1;
-		got_crcx = true;
+		OSMO_ASSERT(expecting_crcx[dir]);
+		expecting_crcx[dir] = false;
+		got_crcx[dir] = true;
 
 		call_leg_ensure_rtp_alloc(cl, dir, call_id, for_trans);
 		if (codecs_if_known)
