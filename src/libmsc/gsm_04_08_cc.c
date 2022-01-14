@@ -237,6 +237,22 @@ static int _mncc_recvmsg(const char *file, int line, struct gsm_network *net, st
 	struct msgb *msg;
 	unsigned char *data;
 
+	switch (msg_type) {
+	case MNCC_DISC_IND:
+	case MNCC_REL_IND:
+		if (trans) {
+			if (trans->cc.mncc_release_sent) {
+				LOG_TRANS_CAT_SRC(trans, DMNCC, file, line, LOGL_DEBUG,
+						  "Already released, skipping tx %s\n", get_mncc_name(msg_type));
+				return 0;
+			}
+			trans->cc.mncc_release_sent = true;
+		}
+		break;
+	default:
+		break;
+	}
+
 	LOG_TRANS_CAT_SRC(trans, DMNCC, file, line, LOGL_DEBUG, "tx %s\n", get_mncc_name(msg_type));
 
 	mncc->msg_type = msg_type;

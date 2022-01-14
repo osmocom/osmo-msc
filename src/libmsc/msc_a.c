@@ -1847,6 +1847,8 @@ static int msc_a_start_assignment(struct msc_a *msc_a, struct gsm_trans *cc_tran
 	OSMO_ASSERT(!msc_a->cc.active_trans);
 	msc_a->cc.active_trans = cc_trans;
 
+	cc_trans->cc.mncc_release_sent = false;
+
 	OSMO_ASSERT(cc_trans && cc_trans->type == TRANS_CC);
 	cl = msc_a_ensure_call_leg(msc_a, cc_trans);
 	if (!cl)

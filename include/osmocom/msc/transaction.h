@@ -107,6 +107,7 @@ struct gsm_trans {
 			struct osmo_lcls *lcls;
 			/* Track codec choices from BSS and remote call leg */
 			struct codec_filter codecs;
+			bool mncc_release_sent; /* Mark when special error handling already did MNCC rel */
 		} cc;
 		struct {
 			struct gsm411_smc_inst smc_inst;
