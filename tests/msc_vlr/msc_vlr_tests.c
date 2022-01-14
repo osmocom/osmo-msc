@@ -77,6 +77,7 @@ bool bssap_clear_sent = false;
 
 bool bssap_assignment_expected = false;
 bool bssap_assignment_sent = false;
+struct gsm0808_channel_type bssap_assignment_command_last_channel_type;
 bool iu_rab_assignment_expected = false;
 bool iu_rab_assignment_sent = false;
 
@@ -84,6 +85,7 @@ uint32_t cc_to_mncc_tx_expected_msg_type = 0;
 const char *cc_to_mncc_tx_expected_imsi = NULL;
 bool cc_to_mncc_tx_confirmed = false;
 uint32_t cc_to_mncc_tx_got_callref = 0;
+char cc_to_mncc_tx_last_sdp[1024] = {};
 
 bool expecting_crcx[2] = {};
 bool got_crcx[2] = {};
@@ -308,14 +310,18 @@ static int bssap_validate_cipher_mode_cmd(const struct ran_cipher_mode_command *
 	return 0;
 }
 
-static void bssap_validate_assignment_cmd()
+static void bssap_validate_assignment_cmd(const struct ran_assignment_command *assignment_command)
 {
 	OSMO_ASSERT(bssap_assignment_expected);
 	bssap_assignment_expected = false;
 	bssap_assignment_sent = true;
+	if (assignment_command->channel_type)
+		bssap_assignment_command_last_channel_type = *assignment_command->channel_type;
+	else
+		bssap_assignment_command_last_channel_type = (struct gsm0808_channel_type){};
 }
 
-static void iucs_validate_assignment_cmd()
+static void iucs_validate_assignment_cmd(const struct ran_assignment_command *assignment_command)
 {
 	OSMO_ASSERT(iu_rab_assignment_expected);
 	iu_rab_assignment_expected = false;
@@ -375,10 +381,10 @@ struct msgb *dont_ran_encode(struct osmo_fsm_inst *caller_fi, const struct ran_m
 	case RAN_MSG_ASSIGNMENT_COMMAND:
 		switch (ran_type) {
 		case OSMO_RAT_GERAN_A:
-			bssap_validate_assignment_cmd();
+			bssap_validate_assignment_cmd(&ran_enc_msg->assignment_command);
 			break;
 		case OSMO_RAT_UTRAN_IU:
-			iucs_validate_assignment_cmd();
+			iucs_validate_assignment_cmd(&ran_enc_msg->assignment_command);
 			break;
 		default:
 			OSMO_ASSERT(false);
@@ -430,7 +436,7 @@ static int fake_msc_a_ran_dec(const struct ran_msg *ran_dec_msg)
 	return msc_a_ran_decode_cb(g_msub->role[MSC_ROLE_A], &d, ran_dec_msg);
 }
 
-void rx_from_ms(struct msgb *msg)
+void rx_from_ms(struct msgb *msg, const struct gsm0808_speech_codec_list *codec_list_bss_supported)
 {
 	struct gsm48_hdr *gh = msgb_l3(msg);
 	struct ran_msg ran_dec_msg;
@@ -463,6 +469,7 @@ void rx_from_ms(struct msgb *msg)
 			.compl_l3 = {
 				.cell_id = &cell_id,
 				.msg = msg,
+				.codec_list_bss_supported = codec_list_bss_supported,
 			},
 		};
 	} else {
@@ -490,7 +497,30 @@ void ms_sends_msg(const char *hex)
 
 	msg = msgb_from_hex("ms_sends_msg", 1024, hex);
 	msg->l1h = msg->l2h = msg->l3h = msg->data;
-	rx_from_ms(msg);
+	rx_from_ms(msg, NULL);
+	msgb_free(msg);
+}
+
+void ms_sends_msgf(const char *fmt, ...)
+{
+	va_list ap;
+	char *hex;
+
+	va_start(ap, fmt);
+	hex = talloc_vasprintf(msc_vlr_tests_ctx, fmt, ap);
+	va_end(ap);
+
+	ms_sends_msg(hex);
+	talloc_free(hex);
+}
+
+void ms_sends_compl_l3(const char *hex, const struct gsm0808_speech_codec_list *codec_list_bss_supported)
+{
+	struct msgb *msg;
+
+	msg = msgb_from_hex("ms_sends_msg", 1024, hex);
+	msg->l1h = msg->l2h = msg->l3h = msg->data;
+	rx_from_ms(msg, codec_list_bss_supported);
 	msgb_free(msg);
 }
 
@@ -733,8 +763,18 @@ struct gsm_mncc *on_call_release_mncc_sends_to_cc_data = NULL;
 int mncc_recv(struct gsm_network *net, struct msgb *msg)
 {
 	struct gsm_mncc *mncc = (void*)msg->data;
-	log("MSC --> MNCC: callref 0x%x: %s", mncc->callref,
-	    get_mncc_name(mncc->msg_type));
+	if (mncc->msg_type == MNCC_RTP_CREATE) {
+		struct gsm_mncc_rtp *rtp = (void*)msg->data;
+		log("MSC --> MNCC: callref 0x%x: %s\n%s", rtp->callref,
+		    get_mncc_name(rtp->msg_type),
+		    rtp->sdp);
+		OSMO_STRLCPY_ARRAY(cc_to_mncc_tx_last_sdp, rtp->sdp);
+	} else {
+		log("MSC --> MNCC: callref 0x%x: %s\n%s", mncc->callref,
+		    get_mncc_name(mncc->msg_type),
+		    mncc->sdp);
+		OSMO_STRLCPY_ARRAY(cc_to_mncc_tx_last_sdp, mncc->sdp);
+	}
 
 	if (mncc->msg_type == MNCC_REL_IND && on_call_release_mncc_sends_to_cc_data) {
 
