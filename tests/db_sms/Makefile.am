@@ -24,7 +24,7 @@ EXTRA_DIST = \
 	db_sms_test.err \
 	$(NULL)
 
-noinst_PROGRAMS = \
+check_PROGRAMS = \
 	db_sms_test \
 	$(NULL)
 

@@ -76,7 +76,7 @@ EXTRA_DIST = \
 	msc_vlr_test_ss.err \
 	$(NULL)
 
-noinst_PROGRAMS = \
+check_PROGRAMS = \
 	msc_vlr_test_no_authen \
 	msc_vlr_test_gsm_authen \
 	msc_vlr_test_gsm_ciph \

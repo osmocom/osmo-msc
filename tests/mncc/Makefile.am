@@ -19,7 +19,7 @@ EXTRA_DIST = \
 	mncc_test.err \
 	$(NULL)
 
-noinst_PROGRAMS = \
+check_PROGRAMS = \
 	mncc_test \
 	$(NULL)
 

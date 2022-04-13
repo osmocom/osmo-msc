@@ -22,7 +22,7 @@ EXTRA_DIST = \
 	sms_queue_test.err \
 	$(NULL)
 
-noinst_PROGRAMS = \
+check_PROGRAMS = \
 	sms_queue_test \
 	$(NULL)
 

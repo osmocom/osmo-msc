@@ -19,7 +19,7 @@ EXTRA_DIST = \
 	sdp_msg_test.err \
 	$(NULL)
 
-noinst_PROGRAMS = \
+check_PROGRAMS = \
 	sdp_msg_test \
 	$(NULL)
 

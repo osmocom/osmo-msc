@@ -24,7 +24,7 @@ EXTRA_DIST = \
 	smpp_test.err \
 	$(NULL)
 
-noinst_PROGRAMS = \
+check_PROGRAMS = \
 	smpp_test \
 	$(NULL)
 
