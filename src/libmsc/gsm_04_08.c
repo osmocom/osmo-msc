@@ -246,7 +246,9 @@ static int msc_gsm48_tx_mm_serv_ack(struct msc_a *msc_a)
 	return msc_a_tx_dtap_to_i(msc_a, msg);
 }
 
-/* 9.2.6 CM service reject */
+/* 9.2.6 CM service reject.
+ * For an active and valid CM Service Request, instead use msc_vlr_tx_cm_serv_rej(), which also takes care of
+ * decrementing the use token for that service type. */
 static int msc_gsm48_tx_mm_serv_rej(struct msc_a *msc_a,
 				    enum gsm48_reject_value value)
 {
@@ -701,7 +703,6 @@ static int cm_serv_reuse_conn(struct msc_a *msc_a, const struct osmo_mobile_iden
 accept_reuse:
 	LOG_MSC_A_CAT(msc_a, DMM, LOGL_DEBUG, "re-using already accepted connection\n");
 
-	msc_a_get(msc_a, msc_a_cm_service_type_to_use(cm_serv_type));
 	msub_update_id(msc_a->c.msub);
 	return net->vlr->ops.tx_cm_serv_acc(msc_a, cm_serv_type);
 }
@@ -728,6 +729,14 @@ int gsm48_rx_mm_serv_req(struct msc_a *msc_a, struct msgb *msg)
 	struct vlr_subscr *vsub;
 	struct osmo_mobile_identity mi;
 	int rc;
+
+	/* There are two ways to respond with a CM Service Reject:
+	 * Directly and only send the CM Service Reject with msc_gsm48_tx_mm_serv_rej().
+	 * Decrement the CM Service use count token and send the message with msc_vlr_tx_cm_serv_rej().
+	 *
+	 * Until we accept the CM Service Request message as such, there is no use count placed for the service type.
+	 * So in here use msc_gsm48_tx_mm_serv_rej() to respond.
+	 */
 
 	/* Make sure that both header and CM Service Request fit into the buffer */
 	if (msgb_l3len(msg) < sizeof(*gh) + sizeof(*req)) {
@@ -791,12 +800,15 @@ int gsm48_rx_mm_serv_req(struct msc_a *msc_a, struct msgb *msg)
 	if (!msc_a_cm_service_type_to_use(req->cm_service_type))
 		return msc_gsm48_tx_mm_serv_rej(msc_a, GSM48_REJECT_SRV_OPT_NOT_SUPPORTED);
 
+	/* At this point, the CM Service Request message is being accepted.
+	 * Increment the matching use token, and from here on use msc_vlr_tx_cm_serv_rej() to respond in case of
+	 * failure. */
+	msc_a_get(msc_a, msc_a_cm_service_type_to_use(req->cm_service_type));
+
 	if (msc_a_is_accepted(msc_a))
 		return cm_serv_reuse_conn(msc_a, &mi, req->cm_service_type);
 
 	osmo_signal_dispatch(SS_SUBSCR, S_SUBSCR_IDENTITY, &mi);
-
-	msc_a_get(msc_a, msc_a_cm_service_type_to_use(req->cm_service_type));
 
 	is_utran = (msc_a->c.ran->type == OSMO_RAT_UTRAN_IU);
 	vlr_proc_acc_req(msc_a->c.fi,
@@ -1508,7 +1520,8 @@ static int msc_vlr_tx_mm_info(void *msc_conn_ref)
 	return gsm48_tx_mm_info(msc_a);
 }
 
-/* VLR asks us to transmit a CM Service Reject */
+/* VLR asks us to transmit a CM Service Reject.
+ * Decrement the CM Service type's use token and send the CM Service Reject message. */
 static int msc_vlr_tx_cm_serv_rej(void *msc_conn_ref, enum osmo_cm_service_type cm_service_type,
 				  enum gsm48_reject_value cause)
 {

@@ -1792,6 +1792,10 @@ int msc_a_try_call_assignment(struct gsm_trans *cc_trans)
 	return msc_a_start_assignment(msc_a, cc_trans);
 }
 
+/* Map CM Service type to use token.
+ * Given a CM Service type, return a matching token intended for osmo_use_count.
+ * For unknown service type, return NULL.
+ */
 const char *msc_a_cm_service_type_to_use(enum osmo_cm_service_type cm_service_type)
 {
 	switch (cm_service_type) {
