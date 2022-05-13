@@ -28,6 +28,7 @@
 #include <string.h>
 #include <errno.h>
 #include <time.h>
+#include <sqlite3.h>
 #include <dbi/dbi.h>
 
 #include <osmocom/msc/gsm_data.h>
@@ -637,6 +638,8 @@ static int db_configure(void)
 
 int db_init(const char *name)
 {
+	sqlite3_config(SQLITE_CONFIG_SINGLETHREAD);
+
 	dbi_initialize_r(NULL, &inst);
 
 	LOGP(DDB, LOGL_NOTICE, "Init database connection to '%s' using %s\n",

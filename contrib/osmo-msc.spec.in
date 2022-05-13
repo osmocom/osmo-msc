@@ -34,6 +34,7 @@ BuildRequires:  systemd-rpm-macros
 %endif
 BuildRequires:  pkgconfig >= 0.20
 BuildRequires:  pkgconfig(dbi)
+BuildRequires:  pkgconfig(sqlite3)
 BuildRequires:  pkgconfig(libcrypto) >= 0.9.5
 BuildRequires:  pkgconfig(libosmo-gsup-client) >= 1.4.0
 BuildRequires:  pkgconfig(libosmo-mgcp-client) >= 1.9.0
