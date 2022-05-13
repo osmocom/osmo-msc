@@ -576,6 +576,7 @@ int main(int argc, char **argv)
 	osmo_fsm_log_addr(true);
 
 	osmo_stats_init(tall_msc_ctx);
+	rate_ctr_init(tall_msc_ctx);
 
 	/* For --version, vty_init() must be called before handling options */
 	vty_init(&msc_vty_info);
