@@ -541,10 +541,10 @@ rollback:
  * database query results! */
 #define SEL_COLUMNS \
 	"id," \
-	"unixepoch(created)," \
+	"strftime('%s',created)," \
 	"sent," \
 	"deliver_attempts," \
-	"unixepoch(valid_until)," \
+	"strftime('%s',valid_until)," \
 	"reply_path_req," \
 	"status_rep_req," \
 	"is_report," \
@@ -631,9 +631,9 @@ static const char *stmt_sql[] = {
 	[DB_STMT_SMS_DEL_EXPIRED] =
 		"DELETE FROM SMS WHERE id = $id",
 	[DB_STMT_SMS_GET_VALID_UNTIL_BY_ID] =
-		"SELECT unixepoch(valid_until) FROM SMS WHERE id = $id",
+		"SELECT strftime('%s',valid_until) FROM SMS WHERE id = $id",
 	[DB_STMT_SMS_GET_OLDEST_EXPIRED] =
-		"SELECT id, unixepoch(valid_until) FROM SMS ORDER BY valid_until LIMIT 1",
+		"SELECT id, strftime('%s',valid_until) FROM SMS ORDER BY valid_until LIMIT 1",
 };
 
 /***********************************************************************
