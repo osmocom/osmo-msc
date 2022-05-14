@@ -43,35 +43,39 @@
 
 #include <osmocom/vty/vty.h>
 
-/*
- * One pending SMS that we wait for.
- */
+/* One in-RAM record of a "pending SMS".  This is not the SMS itself, but merely
+ * a pointer to the database record.  It holds a reference on the vlr_subscriber
+ * and some counters.  While this object exists in RAM, we are regularly attempting
+ * to deliver the related SMS. */
 struct gsm_sms_pending {
-	struct llist_head entry;
+	struct llist_head entry;	/* gsm_sms_queue.pending_sms */
 
-	struct vlr_subscr *vsub;
-	struct msc_a *msc_a;
-	unsigned long long sms_id;
-	int failed_attempts;
-	int resend;
+	struct vlr_subscr *vsub;	/* destination subscriber for this SMS */
+	struct msc_a *msc_a;		/* MSC_A associated with this SMS */
+	unsigned long long sms_id;	/* unique ID (in SQL database) of this SMS */
+	int failed_attempts;		/* count of failed deliver attempts so far */
+	int resend;			/* should we try re-sending it (now) ? */
 };
 
+/* (global) state of the SMS queue. */
 struct gsm_sms_queue {
-	struct osmo_timer_list resend_pending;
-	struct osmo_timer_list push_queue;
+	struct osmo_timer_list resend_pending;	/* timer triggering sms_resend_pending() */
+	struct osmo_timer_list push_queue;	/* timer triggering sms_submit_pending() */
 	struct gsm_network *network;
-	int max_fail;
-	int max_pending;
-	int pending;
+	int max_fail;				/* maximum number of delivery failures */
+	int max_pending;			/* maximum number of gsm_sms_pending in RAM */
+	int pending;				/* current number of gsm_sms_pending in RAM */
 
-	struct llist_head pending_sms;
+	struct llist_head pending_sms;		/* list of gsm_sms_pending */
 
+	/* last MSISDN for which we read SMS from the database and created gsm_sms_pending records */
 	char last_msisdn[GSM23003_MSISDN_MAX_DIGITS+1];
 };
 
 static int sms_subscr_cb(unsigned int, unsigned int, void *, void *);
 static int sms_sms_cb(unsigned int, unsigned int, void *, void *);
 
+/* look-up a 'gsm_sms_pending' for the given sms_id; return NULL if none */
 static struct gsm_sms_pending *sms_find_pending(struct gsm_sms_queue *smsq,
 						unsigned long long sms_id)
 {
@@ -85,11 +89,13 @@ static struct gsm_sms_pending *sms_find_pending(struct gsm_sms_queue *smsq,
 	return NULL;
 }
 
+/* do we currently have a gsm_sms_pending object for the given SMS id? */
 int sms_queue_sms_is_pending(struct gsm_sms_queue *smsq, unsigned long long sms_id)
 {
 	return sms_find_pending(smsq, sms_id) != NULL;
 }
 
+/* find the first pending SMS (in RAM) for the given subscriber */
 static struct gsm_sms_pending *sms_subscriber_find_pending(
 					struct gsm_sms_queue *smsq,
 					struct vlr_subscr *vsub)
@@ -104,12 +110,14 @@ static struct gsm_sms_pending *sms_subscriber_find_pending(
 	return NULL;
 }
 
+/* do we have any pending SMS (in RAM) for the given subscriber? */
 static int sms_subscriber_is_pending(struct gsm_sms_queue *smsq,
 				     struct vlr_subscr *vsub)
 {
 	return sms_subscriber_find_pending(smsq, vsub) != NULL;
 }
 
+/* allocate a new gsm_sms_pending record and fill it with information from 'sms' */
 static struct gsm_sms_pending *sms_pending_from(struct gsm_sms_queue *smsq,
 						struct gsm_sms *sms)
 {
@@ -125,6 +133,7 @@ static struct gsm_sms_pending *sms_pending_from(struct gsm_sms_queue *smsq,
 	return pending;
 }
 
+/* release a gsm_sms_pending object */
 static void sms_pending_free(struct gsm_sms_pending *pending)
 {
 	vlr_subscr_put(pending->vsub, VSUB_USE_SMS_PENDING);
@@ -132,6 +141,8 @@ static void sms_pending_free(struct gsm_sms_pending *pending)
 	talloc_free(pending);
 }
 
+/* this sets the 'resend' flag of the gsm_sms_pending and schedules
+ * the timer for re-sending */
 static void sms_pending_resend(struct gsm_sms_pending *pending)
 {
 	struct gsm_network *net = pending->vsub->vlr->user_ctx;
@@ -148,6 +159,8 @@ static void sms_pending_resend(struct gsm_sms_pending *pending)
 	osmo_timer_schedule(&smsq->resend_pending, 1, 0);
 }
 
+/* call-back when a pending SMS has failed; try another re-send if number of
+ * attempts is < smsq->max_fail */
 static void sms_pending_failed(struct gsm_sms_pending *pending, int paging_error)
 {
 	struct gsm_network *net = pending->vsub->vlr->user_ctx;
@@ -165,10 +178,10 @@ static void sms_pending_failed(struct gsm_sms_pending *pending, int paging_error
 	smsq->pending -= 1;
 }
 
-/*
- * Resend all SMS that are scheduled for a resend. This is done to
- * avoid an immediate failure.
- */
+/* Resend all SMS that are scheduled for a resend. This is done to
+ * avoid an immediate failure.  This iterates over all the (in RAM)
+ * pending_sms records, checks for resend == true, reads them from the
+ * DB and attempts to send them via gsm411_send_sms() */
 static void sms_resend_pending(void *_data)
 {
 	struct gsm_sms_pending *pending, *tmp;
@@ -244,10 +257,10 @@ struct gsm_sms *smsq_take_next_sms(struct gsm_network *net,
 	return NULL;
 }
 
-/**
- * I will submit up to max_pending - pending SMS to the
- * subsystem.
- */
+/* read up to 'max_pending' pending SMS from the database and add them to the in-memory
+ * sms_queue; trigger the first delivery attempt. 'submit' in this context means
+ * "read from the database and add to the in-memory gsm_sms_queue" and is not to be
+ * confused with the SMS SUBMIT operation a MS performs when sending a MO-SMS. */
 static void sms_submit_pending(void *_data)
 {
 	struct gsm_sms_queue *smsq = _data;
@@ -309,6 +322,7 @@ static void sms_submit_pending(void *_data)
 			continue;
 		}
 
+		/* allocate a new gsm_sms_pending object in RAM */
 		pending = sms_pending_from(smsq, sms);
 		if (!pending) {
 			LOGP(DLSMS, LOGL_ERROR,
@@ -326,9 +340,10 @@ static void sms_submit_pending(void *_data)
 	LOGP(DLSMS, LOGL_DEBUG, "SMSqueue added %d messages in %d rounds\n", attempted, rounds);
 }
 
-/**
- * Send the next SMS or trigger the queue
- */
+/* obtain the next pending SMS for given subscriber from database,
+ * create gsm_sms_pending object and attempt first delivery. If there
+ * are no SMS pending for the given subscriber, call sms_submit_pending()
+ * to read more SMS (for any subscriber) into the in-RAM pending queue */
 static void sms_send_next(struct vlr_subscr *vsub)
 {
 	struct gsm_network *net = vsub->vlr->user_ctx;
@@ -366,9 +381,7 @@ no_pending_sms:
 	sms_submit_pending(net->sms_queue);
 }
 
-/*
- * Kick off the queue again.
- */
+/* Trigger a call to sms_submit_pending() in one second */
 int sms_queue_trigger(struct gsm_sms_queue *smsq)
 {
 	LOGP(DLSMS, LOGL_DEBUG, "Triggering SMS queue\n");
@@ -379,6 +392,8 @@ int sms_queue_trigger(struct gsm_sms_queue *smsq)
 	return 0;
 }
 
+/* initialize the sms_queue subsystem and read the first batch of SMS from
+ * the database for delivery */
 int sms_queue_start(struct gsm_network *network, int max_pending)
 {
 	struct gsm_sms_queue *sms = talloc_zero(network, struct gsm_sms_queue);
@@ -403,6 +418,7 @@ int sms_queue_start(struct gsm_network *network, int max_pending)
 	return 0;
 }
 
+/* call-back: Given subscriber is now ready for short messages. */
 static int sub_ready_for_sm(struct gsm_network *net, struct vlr_subscr *vsub)
 {
 	struct gsm_sms *sms;
@@ -440,6 +456,7 @@ static int sub_ready_for_sm(struct gsm_network *net, struct vlr_subscr *vsub)
 	return 0;
 }
 
+/* call-back for SS_SUBSCR signals */
 static int sms_subscr_cb(unsigned int subsys, unsigned int signal,
 			 void *handler_data, void *signal_data)
 {
@@ -452,6 +469,7 @@ static int sms_subscr_cb(unsigned int subsys, unsigned int signal,
 	return sub_ready_for_sm(handler_data, vsub);
 }
 
+/* call-back for SS_SMS signals */
 static int sms_sms_cb(unsigned int subsys, unsigned int signal,
 		      void *handler_data, void *signal_data)
 {
