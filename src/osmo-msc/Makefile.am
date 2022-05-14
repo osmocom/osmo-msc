@@ -50,6 +50,5 @@ osmo_msc_LDADD = \
 	$(LIBOSMOMGCPCLIENT_LIBS) \
 	$(LIBOSMOGSUPCLIENT_LIBS) \
 	$(LIBSQLITE3_LIBS) \
-	-ldbi \
 	-lsctp \
 	$(NULL)

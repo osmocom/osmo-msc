@@ -538,7 +538,7 @@ int main(int argc, char **argv)
 	 * the test output is not deterministic. Let's suppress this
 	 * message by increasing the log level to LOGL_ERROR. */
 	log_parse_category_mask(osmo_stderr_target, "DDB,7");
-	rc = db_init(":memory:");
+	rc = db_init(talloc_ctx, ":memory:", true);
 	OSMO_ASSERT(rc == 0);
 
 	/* HACK: relax log level back to LOGL_DEBUG (see note above) */

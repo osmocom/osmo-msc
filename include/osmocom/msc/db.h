@@ -1,5 +1,6 @@
 /* (C) 2008 by Jan Luebbe <jluebbe@debian.org>
  * (C) 2009 by Holger Hans Peter Freyther <zecke@selfish.org>
+ * (C) 2022 by Harald Welte <laforge@osmocom.org>
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -30,7 +31,7 @@ struct gsm_network;
 struct gsm_sms;
 
 /* one time initialisation */
-int db_init(const char *name);
+int db_init(void *ctx, const char *fname, bool enable_sqlite_logging);
 int db_prepare(void);
 int db_fini(void);
 
