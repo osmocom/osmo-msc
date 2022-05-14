@@ -1,5 +1,6 @@
 /* (C) 2008 by Jan Luebbe <jluebbe@debian.org>
  * (C) 2009 by Holger Hans Peter Freyther <zecke@selfish.org>
+ * (C) 2022 by Harald Welte <laforge@osmocom.org>
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -30,7 +31,7 @@ struct gsm_network;
 struct gsm_sms;
 
 /* one time initialisation */
-int db_init(const char *name);
+int db_init(void *ctx, const char *fname, bool enable_sqlite_logging);
 int db_prepare(void);
 int db_fini(void);
 
@@ -39,12 +40,12 @@ int db_sms_store(struct gsm_sms *sms);
 struct gsm_sms *db_sms_get(struct gsm_network *net, unsigned long long id);
 struct gsm_sms *db_sms_get_next_unsent(struct gsm_network *net,
 				       unsigned long long min_sms_id,
-				       unsigned int max_failed);
+				       int max_failed);
 struct gsm_sms *db_sms_get_next_unsent_rr_msisdn(struct gsm_network *net,
 						 const char *last_msisdn,
-						 unsigned int max_failed);
+						 int max_failed);
 struct gsm_sms *db_sms_get_unsent_for_subscr(struct vlr_subscr *vsub,
-					     unsigned int max_failed);
+					     int max_failed);
 int db_sms_mark_delivered(struct gsm_sms *sms);
 int db_sms_inc_deliver_attempts(struct gsm_sms *sms);
 int db_sms_delete_by_msisdn(const char *msisdn);

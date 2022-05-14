@@ -49,5 +49,4 @@ db_sms_test_LDADD = \
 	$(LIBOSMOGSUPCLIENT_LIBS) \
 	$(LIBSQLITE3_LIBS) \
 	$(LIBRARY_GSM) \
-	-ldbi \
 	$(NULL)

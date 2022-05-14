@@ -1,7 +1,7 @@
-/* Simple HLR/VLR database backend using dbi */
+/* Simple HLR/VLR database backend using sqlite3 */
 /* (C) 2008 by Jan Luebbe <jluebbe@debian.org>
  * (C) 2009 by Holger Hans Peter Freyther <zecke@selfish.org>
- * (C) 2009 by Harald Welte <laforge@gnumonks.org>
+ * (C) 2009,2022 by Harald Welte <laforge@gnumonks.org>
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -29,7 +29,6 @@
 #include <errno.h>
 #include <time.h>
 #include <sqlite3.h>
-#include <dbi/dbi.h>
 
 #include <osmocom/msc/gsm_data.h>
 #include <osmocom/msc/gsm_subscriber.h>
@@ -44,10 +43,34 @@
 #include <osmocom/core/rate_ctr.h>
 #include <osmocom/core/utils.h>
 
-static char *db_basename = NULL;
-static char *db_dirname = NULL;
-static dbi_conn conn;
-static dbi_inst inst;
+enum stmt_idx {
+	DB_STMT_SMS_STORE,
+	DB_STMT_SMS_GET,
+	DB_STMT_SMS_GET_NEXT_UNSENT,
+	DB_STMT_SMS_GET_UNSENT_FOR_SUBSCR,
+	DB_STMT_SMS_GET_NEXT_UNSENT_RR_MSISDN,
+	DB_STMT_SMS_MARK_DELIVERED,
+	DB_STMT_SMS_INC_DELIVER_ATTEMPTS,
+	DB_STMT_SMS_DEL_BY_MSISDN,
+	DB_STMT_SMS_DEL_BY_ID,
+	DB_STMT_SMS_DEL_EXPIRED,
+	DB_STMT_SMS_GET_VALID_UNTIL_BY_ID,
+	DB_STMT_SMS_GET_OLDEST_EXPIRED,
+	_NUM_DB_STMT
+};
+
+struct db_context {
+	char *fname;
+	sqlite3 *db;
+	sqlite3_stmt *stmt[_NUM_DB_STMT];
+};
+
+static struct db_context *g_dbc;
+
+
+/***********************************************************************
+ * DATABASE SCHEMA AND MIGRATION
+ ***********************************************************************/
 
 #define SCHEMA_REVISION "5"
 
@@ -182,51 +205,504 @@ static const char *create_stmts[] = {
 		")",
 };
 
-static inline int next_row(dbi_result result)
-{
-	if (!dbi_result_has_next_row(result))
-		return 0;
-	return dbi_result_next_row(result);
-}
+/***********************************************************************
+ * PREPARED STATEMENTS
+ ***********************************************************************/
 
-void db_error_func(dbi_conn conn, void *data)
+/* don't change this order as the code assumes this ordering when dereferencing
+ * database query results! */
+#define SEL_COLUMNS \
+	"id," \
+	"strftime('%s',created)," \
+	"sent," \
+	"deliver_attempts," \
+	"strftime('%s', valid_until)," \
+	"reply_path_req," \
+	"status_rep_req," \
+	"is_report," \
+	"msg_ref," \
+	"protocol_id," \
+	"data_coding_scheme," \
+	"ud_hdr_ind," \
+	"src_addr," \
+	"src_ton," \
+	"src_npi," \
+	"dest_addr," \
+	"dest_ton," \
+	"dest_npi," \
+	"user_data," \
+	"header," \
+	"text"
+
+enum db_sms_column_idx {
+	COL_ID,
+	COL_CREATED,
+	COL_SENT,
+	COL_DELIVER_ATTEMPTS,
+	COL_VALID_UNTIL,
+	COL_REPLY_PATH_REQ,
+	COL_STATUS_REP_REQ,
+	COL_IS_REPORT,
+	COL_MSG_REF,
+	COL_PROTOCOL_ID,
+	COL_DATA_CODING_SCHEME,
+	COL_UD_HDR_IND,
+	COL_SRC_ADDR,
+	COL_SRC_TON,
+	COL_SRC_NPI,
+	COL_DEST_ADDR,
+	COL_DEST_TON,
+	COL_DEST_NPI,
+	COL_USER_DATA,
+	COL_HEADER,
+	COL_TEXT,
+};
+
+static const char *stmt_sql[] = {
+	[DB_STMT_SMS_STORE] =
+		"INSERT INTO SMS "
+		 "(created, valid_until, reply_path_req, status_rep_req, is_report, "
+		 " msg_ref, protocol_id, data_coding_scheme, ud_hdr_ind, user_data, text, "
+		 " dest_addr, dest_ton, dest_npi, src_addr, src_ton, src_npi) "
+		"VALUES "
+		 "(datetime($created, 'unixepoch'), datetime($valid_until, 'unixepoch'), "
+		 "$reply_path_req, $status_rep_req, $is_report, "
+		 "$msg_ref, $protocol_id, $data_coding_scheme, $ud_hdr_ind, $user_data, $text, "
+		 "$dest_addr, $dest_ton, $dest_npi, $src_addr, $src_ton, $src_npi)",
+	[DB_STMT_SMS_GET] = "SELECT " SEL_COLUMNS " FROM SMS WHERE SMS.id = $id",
+	[DB_STMT_SMS_GET_NEXT_UNSENT] =
+		"SELECT " SEL_COLUMNS " FROM SMS"
+		" WHERE sent IS NULL"
+		" AND id >= $id"
+		" AND deliver_attempts <= $attempts"
+		" ORDER BY id LIMIT 1",
+	[DB_STMT_SMS_GET_UNSENT_FOR_SUBSCR] =
+		"SELECT " SEL_COLUMNS " FROM SMS"
+		" WHERE sent IS NULL"
+		" AND dest_addr = $dest_addr"
+		" AND deliver_attempts <= $attempts"
+		" ORDER BY id LIMIT 1",
+	[DB_STMT_SMS_GET_NEXT_UNSENT_RR_MSISDN] =
+		"SELECT " SEL_COLUMNS " FROM SMS"
+		" WHERE sent IS NULL"
+		" AND dest_addr > $dest_addr"
+		" AND deliver_attempts <= $attempts"
+		" ORDER BY dest_addr, id LIMIT 1",
+	[DB_STMT_SMS_MARK_DELIVERED] =
+		"UPDATE SMS "
+		" SET sent = datetime('now') "
+		" WHERE id = $id",
+	[DB_STMT_SMS_INC_DELIVER_ATTEMPTS] =
+		"UPDATE SMS "
+		" SET deliver_attempts = deliver_attempts + 1 "
+		" WHERE id = $id",
+	[DB_STMT_SMS_DEL_BY_MSISDN] =
+		"DELETE FROM SMS WHERE src_addr=$src_addr OR dest_addr=$dest_addr",
+	[DB_STMT_SMS_DEL_BY_ID] =
+		"DELETE FROM SMS WHERE id = $id AND sent is NOT NULL",
+	[DB_STMT_SMS_DEL_EXPIRED] =
+		"DELETE FROM SMS WHERE id = $id",
+	[DB_STMT_SMS_GET_VALID_UNTIL_BY_ID] =
+		"SELECT strftime('%s', valid_until) FROM SMS WHERE id = $id",
+	[DB_STMT_SMS_GET_OLDEST_EXPIRED] =
+		"SELECT id, strftime('%s', valid_until) FROM SMS ORDER BY valid_until LIMIT 1",
+};
+
+/***********************************************************************
+ * libsqlite3 helpers
+ ***********************************************************************/
+
+/* libsqlite3 call-back for error logging */
+static void sql3_error_log_cb(void *arg, int err_code, const char *msg)
 {
-	const char *msg;
-	dbi_conn_error(conn, &msg);
-	LOGP(DDB, LOGL_ERROR, "DBI: %s\n", msg);
+	LOGP(DDB, LOGL_ERROR, "SQLITE3: (%d) %s\n", err_code, msg);
 	osmo_log_backtrace(DDB, LOGL_ERROR);
 }
 
-static int update_db_revision_2(void)
+/* libsqlite3 call-back for normal logging */
+static void sql3_sql_log_cb(void *arg, sqlite3 *s3, const char *stmt, int type)
 {
-	dbi_result result;
+	switch (type) {
+	case 0:
+		LOGP(DDB, LOGL_DEBUG, "Opened database\n");
+		break;
+	case 1:
+		LOGP(DDB, LOGL_DEBUG, "%s\n", stmt);
+		break;
+	case 2:
+		LOGP(DDB, LOGL_DEBUG, "Closed database\n");
+		break;
+	default:
+		LOGP(DDB, LOGL_DEBUG, "Unknown %d\n", type);
+		break;
+	}
+}
 
-	result = dbi_conn_query(conn,
-				"ALTER TABLE Subscriber "
-				"ADD COLUMN expire_lu "
-				"TIMESTAMP DEFAULT NULL");
-	if (!result) {
-		LOGP(DDB, LOGL_ERROR,
-		     "Failed to alter table Subscriber (upgrade from rev 2).\n");
+/* remove statement bindings and reset statement to be re-executed */
+static void db_remove_reset(sqlite3_stmt *stmt)
+{
+	sqlite3_clear_bindings(stmt);
+	/* sqlite3_reset() just repeats an error code already evaluated during sqlite3_step(). */
+	/* coverity[CHECKED_RETURN] */
+	sqlite3_reset(stmt);
+}
+
+/** bind blob arg and do proper cleanup in case of failure. If param_name is
+ * NULL, bind to the first parameter (useful for SQL statements that have only
+ * one parameter). */
+static bool db_bind_blob(sqlite3_stmt *stmt, const char *param_name,
+			 const uint8_t *blob, size_t blob_len)
+{
+	int rc;
+	int idx = param_name ? sqlite3_bind_parameter_index(stmt, param_name) : 1;
+	if (idx < 1) {
+		LOGP(DDB, LOGL_ERROR, "Error composing SQL, cannot bind parameter '%s'\n",
+		     param_name);
+		return false;
+	}
+	rc = sqlite3_bind_blob(stmt, idx, blob, blob_len, SQLITE_STATIC);
+	if (rc != SQLITE_OK) {
+		LOGP(DDB, LOGL_ERROR, "Error binding blob to SQL parameter %s: %d\n",
+		     param_name ? param_name : "#1", rc);
+		db_remove_reset(stmt);
+		return false;
+	}
+	return true;
+}
+
+/** bind text arg and do proper cleanup in case of failure. If param_name is
+ * NULL, bind to the first parameter (useful for SQL statements that have only
+ * one parameter). */
+static bool db_bind_text(sqlite3_stmt *stmt, const char *param_name, const char *text)
+{
+	int rc;
+	int idx = param_name ? sqlite3_bind_parameter_index(stmt, param_name) : 1;
+	if (idx < 1) {
+		LOGP(DDB, LOGL_ERROR, "Error composing SQL, cannot bind parameter '%s'\n",
+		     param_name);
+		return false;
+	}
+	rc = sqlite3_bind_text(stmt, idx, text, -1, SQLITE_STATIC);
+	if (rc != SQLITE_OK) {
+		LOGP(DDB, LOGL_ERROR, "Error binding text to SQL parameter %s: %d\n",
+		     param_name ? param_name : "#1", rc);
+		db_remove_reset(stmt);
+		return false;
+	}
+	return true;
+}
+
+/** bind int arg and do proper cleanup in case of failure. If param_name is
+ * NULL, bind to the first parameter (useful for SQL statements that have only
+ * one parameter). */
+static bool db_bind_int(sqlite3_stmt *stmt, const char *param_name, int nr)
+{
+	int rc;
+	int idx = param_name ? sqlite3_bind_parameter_index(stmt, param_name) : 1;
+	if (idx < 1) {
+		LOGP(DDB, LOGL_ERROR, "Error composing SQL, cannot bind parameter '%s'\n",
+		     param_name);
+		return false;
+	}
+	rc = sqlite3_bind_int(stmt, idx, nr);
+	if (rc != SQLITE_OK) {
+		LOGP(DDB, LOGL_ERROR, "Error binding int64 to SQL parameter %s: %d\n",
+		     param_name ? param_name : "#1", rc);
+		db_remove_reset(stmt);
+		return false;
+	}
+	return true;
+}
+
+/** bind int64 arg and do proper cleanup in case of failure. If param_name is
+ * NULL, bind to the first parameter (useful for SQL statements that have only
+ * one parameter). */
+static bool db_bind_int64(sqlite3_stmt *stmt, const char *param_name, int64_t nr)
+{
+	int rc;
+	int idx = param_name ? sqlite3_bind_parameter_index(stmt, param_name) : 1;
+	if (idx < 1) {
+		LOGP(DDB, LOGL_ERROR, "Error composing SQL, cannot bind parameter '%s'\n",
+		     param_name);
+		return false;
+	}
+	rc = sqlite3_bind_int64(stmt, idx, nr);
+	if (rc != SQLITE_OK) {
+		LOGP(DDB, LOGL_ERROR, "Error binding int64 to SQL parameter %s: %d\n",
+		     param_name ? param_name : "#1", rc);
+		db_remove_reset(stmt);
+		return false;
+	}
+	return true;
+}
+
+/* callback for sqlite3_exec() below */
+static int db_rev_exec_cb(void *priv, int num_cols, char **vals, char **names)
+{
+	char **rev_s = priv;
+	OSMO_ASSERT(!strcmp(names[0], "value"));
+	*rev_s = talloc_strdup(NULL, vals[0]);
+	return 0;
+}
+
+static int check_db_revision(struct db_context *dbc)
+{
+	char *errstr = NULL;
+	char *rev_s;
+	int db_rev = 0;
+	int rc;
+
+	/* Make a query */
+	rc = sqlite3_exec(dbc->db, "SELECT value FROM Meta WHERE key = 'revision'",
+			  db_rev_exec_cb, &rev_s, &errstr);
+	if (rc != SQLITE_OK) {
+		LOGP(DDB, LOGL_ERROR, "Cannot execute SELECT value from META: %s\n", errstr);
+		sqlite3_free(errstr);
 		return -EINVAL;
 	}
-	dbi_result_free(result);
 
-	result = dbi_conn_query(conn,
-				"UPDATE Meta "
-				"SET value = '3' "
-				"WHERE key = 'revision'");
-	if (!result) {
-		LOGP(DDB, LOGL_ERROR,
-		     "Failed to update DB schema revision  (upgrade from rev 2).\n");
+	if (!strcmp(rev_s, SCHEMA_REVISION)) {
+		/* Everything is fine */
+		talloc_free(rev_s);
+		return 0;
+	}
+
+	LOGP(DDB, LOGL_NOTICE, "Detected DB Revision %s, expected %s\n", rev_s, SCHEMA_REVISION);
+
+	db_rev = atoi(rev_s);
+	talloc_free(rev_s);
+
+	/* Incremental migration waterfall */
+	switch (db_rev) {
+	case 2:
+	case 3:
+	case 4:
+		LOGP(DDB, LOGL_FATAL, "You must use osmo-msc 1.1.0 to 1.8.0 to upgrade database "
+		     "schema from '%u' to '5', sorry\n", db_rev);
+		break;
+#if 0
+	case 5:
+		if (update_db_revision_5())
+			goto error;
+
+		/* The end of waterfall */
+		break;
+#endif
+	default:
+		LOGP(DDB, LOGL_FATAL, "Invalid database schema revision '%d'.\n", db_rev);
 		return -EINVAL;
 	}
-	dbi_result_free(result);
+
+	return 0;
+
+//error:
+	LOGP(DDB, LOGL_FATAL, "Failed to update database from schema revision '%d'.\n", db_rev);
+	talloc_free(rev_s);
+
+	return -EINVAL;
+}
+
+/***********************************************************************
+ * USER API
+ ***********************************************************************/
+
+int db_init(void *ctx, const char *fname, bool enable_sqlite_logging)
+{
+	unsigned int i;
+	int rc;
+	bool has_sqlite_config_sqllog = false;
+
+	g_dbc = talloc_zero(ctx, struct db_context);
+	OSMO_ASSERT(g_dbc);
+
+	/* we are a single-threaded program; we want to avoid all the mutex/etc. overhead */
+	sqlite3_config(SQLITE_CONFIG_SINGLETHREAD);
+
+	LOGP(DDB, LOGL_NOTICE, "Init database connection to '%s' using SQLite3 lib version %s\n",
+	     fname, sqlite3_libversion());
+
+	g_dbc->fname = talloc_strdup(g_dbc, fname);
+
+	for (i = 0; i < 0xfffff; i++) {
+		const char *o = sqlite3_compileoption_get(i);
+		if (!o)
+			break;
+		LOGP(DDB, LOGL_DEBUG, "SQLite3 compiled with '%s'\n", o);
+		if (!strcmp(o, "ENABLE_SQLLOG"))
+			has_sqlite_config_sqllog = true;
+	}
+
+	if (enable_sqlite_logging) {
+		rc = sqlite3_config(SQLITE_CONFIG_LOG, sql3_error_log_cb, NULL);
+		if (rc != SQLITE_OK)
+			LOGP(DDB, LOGL_NOTICE, "Unable to set SQLite3 error log callback\n");
+	}
+
+	if (has_sqlite_config_sqllog) {
+		rc = sqlite3_config(SQLITE_CONFIG_SQLLOG, sql3_sql_log_cb, NULL);
+		if (rc != SQLITE_OK)
+			LOGP(DDB, LOGL_NOTICE, "Unable to set SQLite3 SQL log callback\n");
+	} else {
+		LOGP(DDB, LOGL_DEBUG, "Not setting SQL log callback:"
+		     " SQLite3 compiled without support for it\n");
+	}
+
+	rc = sqlite3_open(g_dbc->fname, &g_dbc->db);
+	if (rc != SQLITE_OK) {
+		LOGP(DDB, LOGL_ERROR, "Unable to open DB; rc =%d\n", rc);
+		talloc_free(g_dbc);
+		return -1;
+	}
+
+	/* enable extended result codes */
+	rc = sqlite3_extended_result_codes(g_dbc->db, 1);
+	if (rc != SQLITE_OK) {
+		LOGP(DDB, LOGL_ERROR, "Unable to enable SQLite3 extended result codes\n");
+		/* non-fatal */
+	}
+
+	char *err_msg;
+	rc = sqlite3_exec(g_dbc->db, "PRAGMA journal_mode=WAL; PRAGMA synchonous = NORMAL;", 0, 0, &err_msg);
+	if (rc != SQLITE_OK) {
+		LOGP(DDB, LOGL_ERROR, "Unable to set Write-Ahead Logging: %s\n", err_msg);
+		sqlite3_free(err_msg);
+		/* non-fatal */
+	}
 
 	return 0;
 }
 
-static void parse_tp_ud_from_result(struct gsm_sms *sms, dbi_result result)
+int db_fini(void)
+{
+	unsigned int i;
+	int rc;
+
+	if (!g_dbc)
+		return 0;
+
+	for (i = 0; i < ARRAY_SIZE(g_dbc->stmt); i++) {
+		/* it is ok to call finalize on NULL */
+		sqlite3_finalize(g_dbc->stmt[i]);
+	}
+
+	/* Ask sqlite3 to close DB */
+	rc = sqlite3_close(g_dbc->db);
+	if (rc != SQLITE_OK) { /* Make sure it's actually closed! */
+		LOGP(DDB, LOGL_ERROR, "Couldn't close database: (rc=%d) %s\n",
+			rc, sqlite3_errmsg(g_dbc->db));
+	}
+
+	talloc_free(g_dbc);
+	g_dbc = NULL;
+
+	return 0;
+}
+
+/* run (execute) a series of SQL statements */
+static int db_run_statements(struct db_context *dbc, const char **statements, size_t statements_count)
+{
+	int i;
+	for (i = 0; i < statements_count; i++) {
+		const char *stmt_str = statements[i];
+		char *errmsg = NULL;
+		int rc;
+
+		rc = sqlite3_exec(dbc->db, stmt_str, NULL, NULL, &errmsg);
+		if (rc != SQLITE_OK) {
+			LOGP(DDB, LOGL_ERROR, "SQL error during SQL statement '%s': %s\n", stmt_str, errmsg);
+			sqlite3_free(errmsg);
+			return -1;
+		}
+	}
+	return 0;
+}
+
+static int db_configure(struct db_context *dbc)
+{
+	const char *sync_stmts[] = { "PRAGMA synchronous = FULL" };
+
+	return db_run_statements(dbc, sync_stmts, ARRAY_SIZE(sync_stmts));
+}
+
+int db_prepare(void)
+{
+	unsigned int i;
+	int rc;
+
+	OSMO_ASSERT(g_dbc);
+	rc = db_run_statements(g_dbc, create_stmts, ARRAY_SIZE(create_stmts));
+	if (rc < 0) {
+		LOGP(DDB, LOGL_ERROR, "Failed to create some table.\n");
+		return 1;
+	}
+
+	if (check_db_revision(g_dbc) < 0) {
+		LOGP(DDB, LOGL_FATAL, "Database schema revision invalid, "
+			"please update your database schema\n");
+                return -1;
+	}
+
+	db_configure(g_dbc);
+
+	/* prepare all SQL statements */
+	for (i = 0; i < ARRAY_SIZE(g_dbc->stmt); i++) {
+		rc = sqlite3_prepare_v2(g_dbc->db, stmt_sql[i], -1,
+					&g_dbc->stmt[i], NULL);
+		if (rc != SQLITE_OK) {
+			LOGP(DDB, LOGL_ERROR, "Unable to prepare SQL statement '%s'\n", stmt_sql[i]);
+			return -1;
+		}
+	}
+
+	return 0;
+}
+
+/* store an [unsent] SMS to the database */
+int db_sms_store(struct gsm_sms *sms)
+{
+	OSMO_ASSERT(g_dbc);
+	sqlite3_stmt *stmt = g_dbc->stmt[DB_STMT_SMS_STORE];
+	time_t now, validity_timestamp;
+	int rc;
+
+	now = time(NULL);
+	validity_timestamp = now + sms->validity_minutes * 60;
+
+	db_bind_int64(stmt, "$created", (int64_t) now);
+	db_bind_int64(stmt, "$valid_until", (int64_t) validity_timestamp);
+	db_bind_int(stmt, "$reply_path_req", sms->reply_path_req);
+	db_bind_int(stmt, "$status_rep_req", sms->status_rep_req);
+	db_bind_int(stmt, "$is_report", sms->is_report);
+	db_bind_int(stmt, "$msg_ref", sms->msg_ref);
+	db_bind_int(stmt, "$protocol_id", sms->protocol_id);
+	db_bind_int(stmt, "$data_coding_scheme", sms->data_coding_scheme);
+	db_bind_int(stmt, "$ud_hdr_ind", sms->ud_hdr_ind);
+	/* FIXME: do we need to use legacy DBI compatible quoting of sms->user_data? */
+	db_bind_blob(stmt, "$user_data", sms->user_data, sms->user_data_len);
+	db_bind_text(stmt, "$text", (char *)sms->text);
+	db_bind_text(stmt, "$dest_addr", (char *)sms->dst.addr);
+	db_bind_int(stmt, "$dest_ton", sms->dst.ton);
+	db_bind_int(stmt, "$dest_npi", sms->dst.npi);
+	db_bind_text(stmt, "$src_addr", (char *)sms->src.addr);
+	db_bind_int(stmt, "$src_ton", sms->src.ton);
+	db_bind_int(stmt, "$src_npi", sms->src.npi);
+
+	/* execute statement */
+	rc = sqlite3_step(stmt);
+	db_remove_reset(stmt);
+	if (rc != SQLITE_DONE) {
+		LOGP(DDB, LOGL_ERROR, "Cannot create SMS: SQL error: (%d) %s\n", rc, sqlite3_errmsg(g_dbc->db));
+		return -EIO;
+	}
+
+	sms->id = sqlite3_last_insert_rowid(g_dbc->db);
+
+	LOGP(DLSMS, LOGL_INFO, "Stored SMS id=%llu in DB\n", sms->id);
+
+	return 0;
+}
+
+static void parse_tp_ud_from_result(struct gsm_sms *sms, sqlite3_stmt *stmt)
 {
 	const unsigned char *user_data;
 	unsigned int user_data_len;
@@ -234,7 +710,7 @@ static void parse_tp_ud_from_result(struct gsm_sms *sms, dbi_result result)
 	const char *text;
 
 	/* Retrieve TP-UDL (User-Data-Length) in octets (regardless of DCS) */
-	user_data_len = dbi_result_get_field_length(result, "user_data");
+	user_data_len = sqlite3_column_bytes(stmt, COL_USER_DATA);
 	if (user_data_len > sizeof(sms->user_data)) {
 		LOGP(DDB, LOGL_ERROR,
 		     "SMS TP-UD length %u is too big, truncating to %zu\n",
@@ -245,12 +721,12 @@ static void parse_tp_ud_from_result(struct gsm_sms *sms, dbi_result result)
 
 	/* Retrieve the TP-UD (User-Data) itself */
 	if (user_data_len > 0) {
-		user_data = dbi_result_get_binary(result, "user_data");
+		user_data = sqlite3_column_blob(stmt, COL_USER_DATA);
 		memcpy(sms->user_data, user_data, user_data_len);
 	}
 
 	/* Retrieve the text length (excluding '\0') */
-	text_len = dbi_result_get_field_length(result, "text");
+	text_len = sqlite3_column_bytes(stmt, COL_TEXT);
 	if (text_len >= sizeof(sms->text)) {
 		LOGP(DDB, LOGL_ERROR,
 		     "SMS text length %u is too big, truncating to %zu\n",
@@ -259,526 +735,12 @@ static void parse_tp_ud_from_result(struct gsm_sms *sms, dbi_result result)
 	}
 
 	/* Retrieve the text parsed from TP-UD (User-Data) */
-	text = dbi_result_get_string(result, "text");
+	text = (const char *)sqlite3_column_text(stmt, COL_TEXT);
 	if (text)
 		OSMO_STRLCPY_ARRAY(sms->text, text);
 }
 
-/**
- * Copied from the normal sms_from_result_v3 to avoid having
- * to make sure that the real routine will remain backward
- * compatible.
- */
-static struct gsm_sms *sms_from_result_v3(dbi_result result)
-{
-	struct gsm_sms *sms = sms_alloc();
-	long long unsigned int sender_id;
-	const char *daddr;
-	char buf[32];
-	char *quoted;
-	dbi_result result2;
-	const char *extension;
-
-	if (!sms)
-		return NULL;
-
-	sms->id = dbi_result_get_ulonglong(result, "id");
-
-	/* find extension by id, assuming that the subscriber still exists in
-	 * the db */
-	sender_id = dbi_result_get_ulonglong(result, "sender_id");
-	snprintf(buf, sizeof(buf), "%llu", sender_id);
-
-	dbi_conn_quote_string_copy(conn, buf, &quoted);
-	result2 = dbi_conn_queryf(conn,
-				  "SELECT extension FROM Subscriber "
-				  "WHERE id = %s ", quoted);
-	free(quoted);
-	extension = dbi_result_get_string(result2, "extension");
-	if (extension)
-		OSMO_STRLCPY_ARRAY(sms->src.addr, extension);
-	dbi_result_free(result2);
-	/* got the extension */
-
-	sms->reply_path_req = dbi_result_get_ulonglong(result, "reply_path_req");
-	sms->status_rep_req = dbi_result_get_ulonglong(result, "status_rep_req");
-	sms->ud_hdr_ind = dbi_result_get_ulonglong(result, "ud_hdr_ind");
-	sms->protocol_id = dbi_result_get_ulonglong(result, "protocol_id");
-	sms->data_coding_scheme = dbi_result_get_ulonglong(result,
-						  "data_coding_scheme");
-
-	daddr = dbi_result_get_string(result, "dest_addr");
-	if (daddr)
-		OSMO_STRLCPY_ARRAY(sms->dst.addr, daddr);
-
-	/* Parse TP-UD, TP-UDL and decoded text */
-	parse_tp_ud_from_result(sms, result);
-
-	return sms;
-}
-
-static int update_db_revision_3(void)
-{
-	dbi_result result;
-	struct gsm_sms *sms;
-
-	LOGP(DDB, LOGL_NOTICE, "Going to migrate from revision 3\n");
-
-	result = dbi_conn_query(conn, "BEGIN EXCLUSIVE TRANSACTION");
-	if (!result) {
-		LOGP(DDB, LOGL_ERROR,
-			"Failed to begin transaction (upgrade from rev 3)\n");
-		return -EINVAL;
-	}
-	dbi_result_free(result);
-
-	/* Rename old SMS table to be able create a new one */
-	result = dbi_conn_query(conn, "ALTER TABLE SMS RENAME TO SMS_3");
-	if (!result) {
-		LOGP(DDB, LOGL_ERROR,
-		     "Failed to rename the old SMS table (upgrade from rev 3).\n");
-		goto rollback;
-	}
-	dbi_result_free(result);
-
-	/* Create new SMS table with all the bells and whistles! */
-	result = dbi_conn_query(conn, create_stmts[SCHEMA_SMS]);
-	if (!result) {
-		LOGP(DDB, LOGL_ERROR,
-		     "Failed to create a new SMS table (upgrade from rev 3).\n");
-		goto rollback;
-	}
-	dbi_result_free(result);
-
-	/* Cycle through old messages and convert them to the new format */
-	result = dbi_conn_query(conn, "SELECT * FROM SMS_3");
-	if (!result) {
-		LOGP(DDB, LOGL_ERROR,
-		     "Failed fetch messages from the old SMS table (upgrade from rev 3).\n");
-		goto rollback;
-	}
-	while (next_row(result)) {
-		sms = sms_from_result_v3(result);
-		if (db_sms_store(sms) != 0) {
-			LOGP(DDB, LOGL_ERROR, "Failed to store message to the new SMS table(upgrade from rev 3).\n");
-			sms_free(sms);
-			dbi_result_free(result);
-			goto rollback;
-		}
-		sms_free(sms);
-	}
-	dbi_result_free(result);
-
-	/* Remove the temporary table */
-	result = dbi_conn_query(conn, "DROP TABLE SMS_3");
-	if (!result) {
-		LOGP(DDB, LOGL_ERROR,
-		     "Failed to drop the old SMS table (upgrade from rev 3).\n");
-		goto rollback;
-	}
-	dbi_result_free(result);
-
-	/* We're done. Bump DB Meta revision to 4 */
-	result = dbi_conn_query(conn,
-				"UPDATE Meta "
-				"SET value = '4' "
-				"WHERE key = 'revision'");
-	if (!result) {
-		LOGP(DDB, LOGL_ERROR,
-		     "Failed to update DB schema revision (upgrade from rev 3).\n");
-		goto rollback;
-	}
-	dbi_result_free(result);
-
-	result = dbi_conn_query(conn, "COMMIT TRANSACTION");
-	if (!result) {
-		LOGP(DDB, LOGL_ERROR,
-			"Failed to commit the transaction (upgrade from rev 3)\n");
-		return -EINVAL;
-	} else {
-		dbi_result_free(result);
-	}
-
-	/* Shrink DB file size by actually wiping out SMS_3 table data */
-	result = dbi_conn_query(conn, "VACUUM");
-	if (!result)
-		LOGP(DDB, LOGL_ERROR,
-			"VACUUM failed. Ignoring it (upgrade from rev 3).\n");
-	else
-		dbi_result_free(result);
-
-	return 0;
-
-rollback:
-	result = dbi_conn_query(conn, "ROLLBACK TRANSACTION");
-	if (!result)
-		LOGP(DDB, LOGL_ERROR,
-			"Rollback failed (upgrade from rev 3).\n");
-	else
-		dbi_result_free(result);
-	return -EINVAL;
-}
-
-/* Just like v3, but there is a new message reference field for status reports,
- * that is set to zero for existing entries since there is no way we can infer
- * this.
- */
-static struct gsm_sms *sms_from_result_v4(dbi_result result)
-{
-	struct gsm_sms *sms = sms_alloc();
-	const char *addr;
-
-	if (!sms)
-		return NULL;
-
-	sms->id = dbi_result_get_ulonglong(result, "id");
-
-	sms->reply_path_req = dbi_result_get_ulonglong(result, "reply_path_req");
-	sms->status_rep_req = dbi_result_get_ulonglong(result, "status_rep_req");
-	sms->ud_hdr_ind = dbi_result_get_ulonglong(result, "ud_hdr_ind");
-	sms->protocol_id = dbi_result_get_ulonglong(result, "protocol_id");
-	sms->data_coding_scheme = dbi_result_get_ulonglong(result,
-						  "data_coding_scheme");
-
-	addr = dbi_result_get_string(result, "src_addr");
-	OSMO_STRLCPY_ARRAY(sms->src.addr, addr);
-	sms->src.ton = dbi_result_get_ulonglong(result, "src_ton");
-	sms->src.npi = dbi_result_get_ulonglong(result, "src_npi");
-
-	addr = dbi_result_get_string(result, "dest_addr");
-	OSMO_STRLCPY_ARRAY(sms->dst.addr, addr);
-	sms->dst.ton = dbi_result_get_ulonglong(result, "dest_ton");
-	sms->dst.npi = dbi_result_get_ulonglong(result, "dest_npi");
-
-	/* Parse TP-UD, TP-UDL and decoded text */
-	parse_tp_ud_from_result(sms, result);
-
-	return sms;
-}
-
-static int update_db_revision_4(void)
-{
-	dbi_result result;
-	struct gsm_sms *sms;
-
-	LOGP(DDB, LOGL_NOTICE, "Going to migrate from revision 4\n");
-
-	result = dbi_conn_query(conn, "BEGIN EXCLUSIVE TRANSACTION");
-	if (!result) {
-		LOGP(DDB, LOGL_ERROR,
-			"Failed to begin transaction (upgrade from rev 4)\n");
-		return -EINVAL;
-	}
-	dbi_result_free(result);
-
-	/* Rename old SMS table to be able create a new one */
-	result = dbi_conn_query(conn, "ALTER TABLE SMS RENAME TO SMS_4");
-	if (!result) {
-		LOGP(DDB, LOGL_ERROR,
-		     "Failed to rename the old SMS table (upgrade from rev 4).\n");
-		goto rollback;
-	}
-	dbi_result_free(result);
-
-	/* Create new SMS table with all the bells and whistles! */
-	result = dbi_conn_query(conn, create_stmts[SCHEMA_SMS]);
-	if (!result) {
-		LOGP(DDB, LOGL_ERROR,
-		     "Failed to create a new SMS table (upgrade from rev 4).\n");
-		goto rollback;
-	}
-	dbi_result_free(result);
-
-	/* Cycle through old messages and convert them to the new format */
-	result = dbi_conn_query(conn, "SELECT * FROM SMS_4");
-	if (!result) {
-		LOGP(DDB, LOGL_ERROR,
-		     "Failed fetch messages from the old SMS table (upgrade from rev 4).\n");
-		goto rollback;
-	}
-	while (next_row(result)) {
-		sms = sms_from_result_v4(result);
-		if (db_sms_store(sms) != 0) {
-			LOGP(DDB, LOGL_ERROR, "Failed to store message to the new SMS table(upgrade from rev 4).\n");
-			sms_free(sms);
-			dbi_result_free(result);
-			goto rollback;
-		}
-		sms_free(sms);
-	}
-	dbi_result_free(result);
-
-	/* Remove the temporary table */
-	result = dbi_conn_query(conn, "DROP TABLE SMS_4");
-	if (!result) {
-		LOGP(DDB, LOGL_ERROR,
-		     "Failed to drop the old SMS table (upgrade from rev 4).\n");
-		goto rollback;
-	}
-	dbi_result_free(result);
-
-	/* We're done. Bump DB Meta revision to 4 */
-	result = dbi_conn_query(conn,
-				"UPDATE Meta "
-				"SET value = '5' "
-				"WHERE key = 'revision'");
-	if (!result) {
-		LOGP(DDB, LOGL_ERROR,
-		     "Failed to update DB schema revision (upgrade from rev 4).\n");
-		goto rollback;
-	}
-	dbi_result_free(result);
-
-	result = dbi_conn_query(conn, "COMMIT TRANSACTION");
-	if (!result) {
-		LOGP(DDB, LOGL_ERROR,
-			"Failed to commit the transaction (upgrade from rev 4)\n");
-		return -EINVAL;
-	} else {
-		dbi_result_free(result);
-	}
-
-	/* Shrink DB file size by actually wiping out SMS_4 table data */
-	result = dbi_conn_query(conn, "VACUUM");
-	if (!result)
-		LOGP(DDB, LOGL_ERROR,
-			"VACUUM failed. Ignoring it (upgrade from rev 4).\n");
-	else
-		dbi_result_free(result);
-
-	return 0;
-
-rollback:
-	result = dbi_conn_query(conn, "ROLLBACK TRANSACTION");
-	if (!result)
-		LOGP(DDB, LOGL_ERROR,
-			"Rollback failed (upgrade from rev 4).\n");
-	else
-		dbi_result_free(result);
-	return -EINVAL;
-}
-
-static int check_db_revision(void)
-{
-	dbi_result result;
-	const char *rev_s;
-	int db_rev = 0;
-
-	/* Make a query */
-	result = dbi_conn_query(conn,
-		"SELECT value FROM Meta "
-		"WHERE key = 'revision'");
-
-	if (!result)
-		return -EINVAL;
-
-	if (!next_row(result)) {
-		dbi_result_free(result);
-		return -EINVAL;
-	}
-
-	/* Fetch the DB schema revision */
-	rev_s = dbi_result_get_string(result, "value");
-	if (!rev_s) {
-		dbi_result_free(result);
-		return -EINVAL;
-	}
-
-	if (!strcmp(rev_s, SCHEMA_REVISION)) {
-		/* Everything is fine */
-		dbi_result_free(result);
-		return 0;
-	}
-
-	db_rev = atoi(rev_s);
-	dbi_result_free(result);
-
-	/* Incremental migration waterfall */
-	switch (db_rev) {
-	case 2:
-		if (update_db_revision_2())
-			goto error;
-	/* fall through */
-	case 3:
-		if (update_db_revision_3())
-			goto error;
-	/* fall through */
-	case 4:
-		if (update_db_revision_4())
-			goto error;
-
-	/* The end of waterfall */
-	break;
-	default:
-		LOGP(DDB, LOGL_FATAL,
-			"Invalid database schema revision '%d'.\n", db_rev);
-		return -EINVAL;
-	}
-
-	return 0;
-
-error:
-	LOGP(DDB, LOGL_FATAL, "Failed to update database "
-		"from schema revision '%d'.\n", db_rev);
-	return -EINVAL;
-}
-
-static int db_configure(void)
-{
-	dbi_result result;
-
-	result = dbi_conn_query(conn,
-				"PRAGMA synchronous = FULL");
-	if (!result)
-		return -EINVAL;
-
-	dbi_result_free(result);
-	return 0;
-}
-
-int db_init(const char *name)
-{
-	sqlite3_config(SQLITE_CONFIG_SINGLETHREAD);
-
-	dbi_initialize_r(NULL, &inst);
-
-	LOGP(DDB, LOGL_NOTICE, "Init database connection to '%s' using %s\n",
-	     name, dbi_version());
-
-	conn = dbi_conn_new_r("sqlite3", inst);
-	if (conn == NULL) {
-		LOGP(DDB, LOGL_FATAL, "Failed to create database connection to sqlite3 db '%s'; "
-		    "Is the sqlite3 database driver for libdbi installed on this system?\n", name);
-		return 1;
-	}
-
-	dbi_conn_error_handler( conn, db_error_func, NULL );
-
-	/* MySQL
-	dbi_conn_set_option(conn, "host", "localhost");
-	dbi_conn_set_option(conn, "username", "your_name");
-	dbi_conn_set_option(conn, "password", "your_password");
-	dbi_conn_set_option(conn, "dbname", "your_dbname");
-	dbi_conn_set_option(conn, "encoding", "UTF-8");
-	*/
-
-	/* SqLite 3 */
-	db_basename = strdup(name);
-	db_dirname = strdup(name);
-	dbi_conn_set_option(conn, "sqlite3_dbdir", dirname(db_dirname));
-	dbi_conn_set_option(conn, "dbname", basename(db_basename));
-
-	if (dbi_conn_connect(conn) < 0)
-		goto out_err;
-
-	return 0;
-
-out_err:
-	free(db_dirname);
-	free(db_basename);
-	db_dirname = db_basename = NULL;
-	return -1;
-}
-
-
-int db_prepare(void)
-{
-	dbi_result result;
-	int i;
-
-	for (i = 0; i < ARRAY_SIZE(create_stmts); i++) {
-		result = dbi_conn_query(conn, create_stmts[i]);
-		if (!result) {
-			LOGP(DDB, LOGL_ERROR,
-			     "Failed to create some table.\n");
-			return 1;
-		}
-		dbi_result_free(result);
-	}
-
-	if (check_db_revision() < 0) {
-		LOGP(DDB, LOGL_FATAL, "Database schema revision invalid, "
-			"please update your database schema\n");
-                return -1;
-	}
-
-	db_configure();
-
-	return 0;
-}
-
-int db_fini(void)
-{
-	dbi_conn_close(conn);
-	dbi_shutdown_r(inst);
-
-	free(db_dirname);
-	free(db_basename);
-	return 0;
-}
-
-/* store an [unsent] SMS to the database */
-int db_sms_store(struct gsm_sms *sms)
-{
-	dbi_result result;
-	char *q_text, *q_daddr, *q_saddr;
-	unsigned char *q_udata = NULL;
-	time_t now, validity_timestamp;
-
-	dbi_conn_quote_string_copy(conn, (char *)sms->text, &q_text);
-	dbi_conn_quote_string_copy(conn, (char *)sms->dst.addr, &q_daddr);
-	dbi_conn_quote_string_copy(conn, (char *)sms->src.addr, &q_saddr);
-
-	/* Guard against zero-length input, as this may cause
-	 * buffer overruns in libdbi / libdbdsqlite3. */
-	if (sms->user_data_len > 0) {
-		dbi_conn_quote_binary_copy(conn, sms->user_data,
-					   sms->user_data_len,
-					   &q_udata);
-	}
-
-	now = time(NULL);
-	validity_timestamp = now + sms->validity_minutes * 60;
-
-	result = dbi_conn_queryf(conn,
-		"INSERT INTO SMS "
-		"(created, valid_until, "
-		 "reply_path_req, status_rep_req, is_report, "
-		 "msg_ref, protocol_id, data_coding_scheme, "
-		 "ud_hdr_ind, "
-		 "user_data, text, "
-		 "dest_addr, dest_ton, dest_npi, "
-		 "src_addr, src_ton, src_npi) VALUES "
-		"(datetime('%lld', 'unixepoch'), datetime('%lld', 'unixepoch'), "
-		"%u, %u, %u, "
-		"%u, %u, %u, "
-		"%u, "
-		"%s, %s, "
-		"%s, %u, %u, "
-		"%s, %u, %u)",
-		(int64_t)now, (int64_t)validity_timestamp,
-		sms->reply_path_req, sms->status_rep_req, sms->is_report,
-		sms->msg_ref, sms->protocol_id, sms->data_coding_scheme,
-		sms->ud_hdr_ind,
-		q_udata, q_text,
-		q_daddr, sms->dst.ton, sms->dst.npi,
-		q_saddr, sms->src.ton, sms->src.npi);
-	free(q_text);
-	free(q_udata);
-	free(q_daddr);
-	free(q_saddr);
-
-	if (!result)
-		return -EIO;
-
-	dbi_result_free(result);
-
-	sms->id = dbi_conn_sequence_last(conn, "id");
-	LOGP(DLSMS, LOGL_INFO, "Stored SMS id=%llu in DB\n", sms->id);
-	return 0;
-}
-
-static struct gsm_sms *sms_from_result(struct gsm_network *net, dbi_result result)
+static struct gsm_sms *sms_from_result(struct gsm_network *net, sqlite3_stmt *stmt)
 {
 	struct gsm_sms *sms = sms_alloc();
 	const char *daddr, *saddr;
@@ -787,24 +749,23 @@ static struct gsm_sms *sms_from_result(struct gsm_network *net, dbi_result resul
 	if (!sms)
 		return NULL;
 
-	sms->id = dbi_result_get_ulonglong(result, "id");
+	sms->id = sqlite3_column_int64(stmt, COL_ID);
 
-	sms->created = dbi_result_get_datetime(result, "created");
-	validity_timestamp = dbi_result_get_datetime(result, "valid_until");
+	sms->created = sqlite3_column_int64(stmt, COL_CREATED);
+	validity_timestamp = sqlite3_column_int64(stmt, COL_VALID_UNTIL);
+
 	sms->validity_minutes = (validity_timestamp - sms->created) / 60;
-	/* FIXME: those should all be get_uchar, but sqlite3 is braindead */
-	sms->reply_path_req = dbi_result_get_ulonglong(result, "reply_path_req");
-	sms->status_rep_req = dbi_result_get_ulonglong(result, "status_rep_req");
-	sms->is_report = dbi_result_get_ulonglong(result, "is_report");
-	sms->msg_ref = dbi_result_get_ulonglong(result, "msg_ref");
-	sms->ud_hdr_ind = dbi_result_get_ulonglong(result, "ud_hdr_ind");
-	sms->protocol_id = dbi_result_get_ulonglong(result, "protocol_id");
-	sms->data_coding_scheme = dbi_result_get_ulonglong(result,
-						  "data_coding_scheme");
+	sms->reply_path_req = sqlite3_column_int(stmt, COL_REPLY_PATH_REQ);
+	sms->status_rep_req = sqlite3_column_int(stmt, COL_STATUS_REP_REQ);
+	sms->is_report = sqlite3_column_int(stmt, COL_IS_REPORT);
+	sms->msg_ref = sqlite3_column_int(stmt, COL_MSG_REF);
+	sms->ud_hdr_ind = sqlite3_column_int(stmt, COL_UD_HDR_IND);
+	sms->protocol_id = sqlite3_column_int(stmt, COL_PROTOCOL_ID);
+	sms->data_coding_scheme = sqlite3_column_int(stmt, COL_DATA_CODING_SCHEME);
 
-	sms->dst.npi = dbi_result_get_ulonglong(result, "dest_npi");
-	sms->dst.ton = dbi_result_get_ulonglong(result, "dest_ton");
-	daddr = dbi_result_get_string(result, "dest_addr");
+	sms->dst.npi = sqlite3_column_int(stmt, COL_DEST_NPI);
+	sms->dst.ton = sqlite3_column_int(stmt, COL_DEST_TON);
+	daddr = (const char *)sqlite3_column_text(stmt, COL_DEST_ADDR);
 	if (daddr)
 		OSMO_STRLCPY_ARRAY(sms->dst.addr, daddr);
 
@@ -812,78 +773,72 @@ static struct gsm_sms *sms_from_result(struct gsm_network *net, dbi_result resul
 		sms->receiver = vlr_subscr_find_by_msisdn(net->vlr, sms->dst.addr,
 							  VSUB_USE_SMS_RECEIVER);
 
-	sms->src.npi = dbi_result_get_ulonglong(result, "src_npi");
-	sms->src.ton = dbi_result_get_ulonglong(result, "src_ton");
-	saddr = dbi_result_get_string(result, "src_addr");
+	sms->src.npi = sqlite3_column_int(stmt, COL_SRC_NPI);
+	sms->src.ton = sqlite3_column_int(stmt, COL_SRC_TON);
+	saddr = (const char *)sqlite3_column_text(stmt, COL_SRC_ADDR);
 	if (saddr)
 		OSMO_STRLCPY_ARRAY(sms->src.addr, saddr);
 
 	/* Parse TP-UD, TP-UDL and decoded text */
-	parse_tp_ud_from_result(sms, result);
+	parse_tp_ud_from_result(sms, stmt);
 
 	return sms;
 }
 
 struct gsm_sms *db_sms_get(struct gsm_network *net, unsigned long long id)
 {
-	dbi_result result;
+	OSMO_ASSERT(g_dbc);
+	sqlite3_stmt *stmt = g_dbc->stmt[DB_STMT_SMS_GET];
 	struct gsm_sms *sms;
+	int rc;
 
-	result = dbi_conn_queryf(conn,
-		"SELECT * FROM SMS WHERE SMS.id = %llu", id);
-	if (!result)
-		return NULL;
+	db_bind_int64(stmt, "$id", id);
 
-	if (!next_row(result)) {
-		dbi_result_free(result);
+	rc = sqlite3_step(stmt);
+	if (rc != SQLITE_ROW) {
+		db_remove_reset(stmt);
 		return NULL;
 	}
 
-	sms = sms_from_result(net, result);
+	sms = sms_from_result(net, stmt);
 
-	dbi_result_free(result);
-
+	db_remove_reset(stmt);
 	return sms;
 }
 
 struct gsm_sms *db_sms_get_next_unsent(struct gsm_network *net,
 				       unsigned long long min_sms_id,
-				       unsigned int max_failed)
+				       int max_failed)
 {
-	dbi_result result;
+	OSMO_ASSERT(g_dbc);
+	sqlite3_stmt *stmt = g_dbc->stmt[DB_STMT_SMS_GET_NEXT_UNSENT];
 	struct gsm_sms *sms;
+	int rc;
 
-	result = dbi_conn_queryf(conn,
-		"SELECT * FROM SMS"
-		" WHERE sent IS NULL"
-		" AND id >= %llu"
-		" AND deliver_attempts <= %u"
-		" ORDER BY id LIMIT 1",
-		min_sms_id, max_failed);
+	db_bind_int64(stmt, "$id", min_sms_id);
+	db_bind_int(stmt, "$attempts", max_failed);
 
-	if (!result)
-		return NULL;
-
-	if (!next_row(result)) {
-		dbi_result_free(result);
+	rc = sqlite3_step(stmt);
+	if (rc != SQLITE_ROW) {
+		db_remove_reset(stmt);
 		return NULL;
 	}
 
-	sms = sms_from_result(net, result);
+	sms = sms_from_result(net, stmt);
 
-	dbi_result_free(result);
-
+	db_remove_reset(stmt);
 	return sms;
 }
 
 /* retrieve the next unsent SMS for a given subscriber */
 struct gsm_sms *db_sms_get_unsent_for_subscr(struct vlr_subscr *vsub,
-					     unsigned int max_failed)
+					     int max_failed)
 {
+	OSMO_ASSERT(g_dbc);
+	sqlite3_stmt *stmt = g_dbc->stmt[DB_STMT_SMS_GET_UNSENT_FOR_SUBSCR];
 	struct gsm_network *net = vsub->vlr->user_ctx;
-	dbi_result result;
 	struct gsm_sms *sms;
-	char *q_msisdn;
+	int rc;
 
 	if (!vsub->lu_complete)
 		return NULL;
@@ -892,60 +847,42 @@ struct gsm_sms *db_sms_get_unsent_for_subscr(struct vlr_subscr *vsub,
 	if (*vsub->msisdn == '\0')
 		return NULL;
 
-	dbi_conn_quote_string_copy(conn, vsub->msisdn, &q_msisdn);
-	result = dbi_conn_queryf(conn,
-		"SELECT * FROM SMS"
-		" WHERE sent IS NULL"
-		" AND dest_addr = %s"
-		" AND deliver_attempts <= %u"
-		" ORDER BY id LIMIT 1",
-		q_msisdn, max_failed);
-	free(q_msisdn);
+	db_bind_text(stmt, "$dest_addr", vsub->msisdn);
+	db_bind_int(stmt, "$attempts", max_failed);
 
-	if (!result)
-		return NULL;
-
-	if (!next_row(result)) {
-		dbi_result_free(result);
+	rc = sqlite3_step(stmt);
+	if (rc != SQLITE_ROW) {
+		db_remove_reset(stmt);
 		return NULL;
 	}
 
-	sms = sms_from_result(net, result);
+	sms = sms_from_result(net, stmt);
 
-	dbi_result_free(result);
-
+	db_remove_reset(stmt);
 	return sms;
 }
 
 struct gsm_sms *db_sms_get_next_unsent_rr_msisdn(struct gsm_network *net,
 						 const char *last_msisdn,
-						 unsigned int max_failed)
+						 int max_failed)
 {
-	dbi_result result;
+	OSMO_ASSERT(g_dbc);
+	sqlite3_stmt *stmt = g_dbc->stmt[DB_STMT_SMS_GET_NEXT_UNSENT_RR_MSISDN];
 	struct gsm_sms *sms;
-	char *q_last_msisdn;
+	int rc;
 
-	dbi_conn_quote_string_copy(conn, last_msisdn, &q_last_msisdn);
-	result = dbi_conn_queryf(conn,
-		"SELECT * FROM SMS"
-		" WHERE sent IS NULL"
-		" AND dest_addr > %s"
-		" AND deliver_attempts <= %u"
-		" ORDER BY dest_addr, id LIMIT 1",
-		q_last_msisdn, max_failed);
-	free(q_last_msisdn);
+	db_bind_text(stmt, "$dest_addr", last_msisdn);
+	db_bind_int(stmt, "$attempts", max_failed);
 
-	if (!result)
-		return NULL;
-
-	if (!next_row(result)) {
-		dbi_result_free(result);
+	rc = sqlite3_step(stmt);
+	if (rc != SQLITE_ROW) {
+		db_remove_reset(stmt);
 		return NULL;
 	}
 
-	sms = sms_from_result(net, result);
+	sms = sms_from_result(net, stmt);
 
-	dbi_result_free(result);
+	db_remove_reset(stmt);
 
 	return sms;
 }
@@ -953,84 +890,100 @@ struct gsm_sms *db_sms_get_next_unsent_rr_msisdn(struct gsm_network *net,
 /* mark a given SMS as delivered */
 int db_sms_mark_delivered(struct gsm_sms *sms)
 {
-	dbi_result result;
+	sqlite3_stmt *stmt;
+	int rc;
 
-	result = dbi_conn_queryf(conn,
-		"UPDATE SMS "
-		"SET sent = datetime('now') "
-		"WHERE id = %llu", sms->id);
-	if (!result) {
+	/* this only happens in unit tests that don't db_init() */
+	if (!g_dbc)
+		return 0;
+
+	stmt = g_dbc->stmt[DB_STMT_SMS_MARK_DELIVERED];
+	db_bind_int64(stmt, "$id", sms->id);
+
+	rc = sqlite3_step(stmt);
+	if (rc != SQLITE_DONE) {
+		db_remove_reset(stmt);
 		LOGP(DDB, LOGL_ERROR, "Failed to mark SMS %llu as sent.\n", sms->id);
 		return 1;
 	}
 
-	dbi_result_free(result);
+	db_remove_reset(stmt);
 	return 0;
 }
 
 /* increase the number of attempted deliveries */
 int db_sms_inc_deliver_attempts(struct gsm_sms *sms)
 {
-	dbi_result result;
+	sqlite3_stmt *stmt;
+	int rc;
 
-	result = dbi_conn_queryf(conn,
-		"UPDATE SMS "
-		"SET deliver_attempts = deliver_attempts + 1 "
-		"WHERE id = %llu", sms->id);
-	if (!result) {
-		LOGP(DDB, LOGL_ERROR, "Failed to inc deliver attempts for "
-			"SMS %llu.\n", sms->id);
+	/* this only happens in unit tests that don't db_init() */
+	if (!g_dbc)
+		return 0;
+
+	stmt = g_dbc->stmt[DB_STMT_SMS_INC_DELIVER_ATTEMPTS];
+	db_bind_int64(stmt, "$id", sms->id);
+
+	rc = sqlite3_step(stmt);
+	if (rc != SQLITE_DONE) {
+		db_remove_reset(stmt);
+		LOGP(DDB, LOGL_ERROR, "Failed to inc deliver attempts for SMS %llu.\n", sms->id);
 		return 1;
 	}
 
-	dbi_result_free(result);
+	db_remove_reset(stmt);
 	return 0;
 }
 
 /* Drop all pending SMS to or from the given extension */
 int db_sms_delete_by_msisdn(const char *msisdn)
 {
-	dbi_result result;
-	char *q_msisdn;
+	OSMO_ASSERT(g_dbc);
+	sqlite3_stmt *stmt = g_dbc->stmt[DB_STMT_SMS_DEL_BY_MSISDN];
+	int rc;
+
 	if (!msisdn || !*msisdn)
 		return 0;
 
-	dbi_conn_quote_string_copy(conn, msisdn, &q_msisdn);
-	result = dbi_conn_queryf(conn,
-		    "DELETE FROM SMS WHERE src_addr=%s OR dest_addr=%s",
-		    q_msisdn, q_msisdn);
-	free(q_msisdn);
+	db_bind_text(stmt, "$src_addr", msisdn);
+	db_bind_text(stmt, "$dest_addr", msisdn);
 
-	if (!result) {
-		LOGP(DDB, LOGL_ERROR,
-		     "Failed to delete SMS for %s\n", msisdn);
+	rc = sqlite3_step(stmt);
+	if (rc != SQLITE_DONE) {
+		db_remove_reset(stmt);
+		LOGP(DDB, LOGL_ERROR, "Failed to delete SMS for %s\n", msisdn);
 		return -1;
 	}
-	dbi_result_free(result);
+
+	db_remove_reset(stmt);
 	return 0;
 }
 
 int db_sms_delete_sent_message_by_id(unsigned long long sms_id)
 {
-	dbi_result result;
+	OSMO_ASSERT(g_dbc);
+	sqlite3_stmt *stmt = g_dbc->stmt[DB_STMT_SMS_DEL_BY_ID];
+	int rc;
 
-	result = dbi_conn_queryf(conn,
-			"DELETE FROM SMS WHERE id = %llu AND sent is NOT NULL",
-			 sms_id);
-	if (!result) {
+	db_bind_int64(stmt, "$id", sms_id);
+
+	rc = sqlite3_step(stmt);
+	if (rc != SQLITE_DONE) {
+		db_remove_reset(stmt);
 		LOGP(DDB, LOGL_ERROR, "Failed to delete SMS %llu.\n", sms_id);
 		return 1;
 	}
 
-	dbi_result_free(result);
+	db_remove_reset(stmt);
 	return 0;
 }
 
-
 static int delete_expired_sms(unsigned long long sms_id, time_t validity_timestamp)
 {
-	dbi_result result;
+	OSMO_ASSERT(g_dbc);
+	sqlite3_stmt *stmt = g_dbc->stmt[DB_STMT_SMS_DEL_EXPIRED];
 	time_t now;
+	int rc;
 
 	now = time(NULL);
 
@@ -1038,51 +991,55 @@ static int delete_expired_sms(unsigned long long sms_id, time_t validity_timesta
 	if (validity_timestamp > now)
 		return -1;
 
-	result = dbi_conn_queryf(conn, "DELETE FROM SMS WHERE id = %llu", sms_id);
-	if (!result) {
+	db_bind_int64(stmt, "$id", sms_id);
+
+	rc = sqlite3_step(stmt);
+	if (rc != SQLITE_DONE) {
+		db_remove_reset(stmt);
 		LOGP(DDB, LOGL_ERROR, "Failed to delete SMS %llu.\n", sms_id);
 		return -1;
 	}
-	dbi_result_free(result);
+
+	db_remove_reset(stmt);
 	return 0;
 }
 
 int db_sms_delete_expired_message_by_id(unsigned long long sms_id)
 {
-	dbi_result result;
+	OSMO_ASSERT(g_dbc);
+	sqlite3_stmt *stmt = g_dbc->stmt[DB_STMT_SMS_GET_VALID_UNTIL_BY_ID];
 	time_t validity_timestamp;
+	int rc;
 
-	result = dbi_conn_queryf(conn, "SELECT valid_until FROM SMS WHERE id = %llu", sms_id);
-	if (!result)
-		return -1;
-	if (!next_row(result)) {
-		dbi_result_free(result);
+	db_bind_int64(stmt, "$id", sms_id);
+
+	rc = sqlite3_step(stmt);
+	if (rc != SQLITE_ROW) {
+		db_remove_reset(stmt);
 		return -1;
 	}
 
-	validity_timestamp = dbi_result_get_datetime(result, "valid_until");
+	validity_timestamp = sqlite3_column_int64(stmt, 0);
 
-	dbi_result_free(result);
+	db_remove_reset(stmt);
 	return delete_expired_sms(sms_id, validity_timestamp);
 }
 
 void db_sms_delete_oldest_expired_message(void)
 {
-	dbi_result result;
+	OSMO_ASSERT(g_dbc);
+	sqlite3_stmt *stmt = g_dbc->stmt[DB_STMT_SMS_GET_OLDEST_EXPIRED];
+	int rc;
 
-	result = dbi_conn_queryf(conn, "SELECT id,valid_until FROM SMS "
-				       "ORDER BY valid_until LIMIT 1");
-	if (!result)
-		return;
-
-	if (next_row(result)) {
+	rc = sqlite3_step(stmt);
+	if (rc == SQLITE_ROW) {
 		unsigned long long sms_id;
 		time_t validity_timestamp;
 
-		sms_id = dbi_result_get_ulonglong(result, "id");
-		validity_timestamp = dbi_result_get_datetime(result, "valid_until");
+		sms_id = sqlite3_column_int64(stmt, 0);
+		validity_timestamp = sqlite3_column_int64(stmt, 1);
 		delete_expired_sms(sms_id, validity_timestamp);
 	}
 
-	dbi_result_free(result);
+	db_remove_reset(stmt);
 }

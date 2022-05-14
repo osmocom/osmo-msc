@@ -27,13 +27,11 @@ URL:            https://osmocom.org/projects/osmomsc
 Source:         %{name}-%{version}.tar.xz
 BuildRequires:  autoconf
 BuildRequires:  automake
-BuildRequires:  libdbi-drivers-dbd-sqlite3
 BuildRequires:  libtool
 %if 0%{?suse_version}
 BuildRequires:  systemd-rpm-macros
 %endif
 BuildRequires:  pkgconfig >= 0.20
-BuildRequires:  pkgconfig(dbi)
 BuildRequires:  pkgconfig(sqlite3)
 BuildRequires:  pkgconfig(libcrypto) >= 0.9.5
 BuildRequires:  pkgconfig(libosmo-gsup-client) >= 1.4.0
@@ -54,11 +52,6 @@ BuildRequires:  lksctp-tools-devel
 %if %{with_iu}
 BuildRequires:  pkgconfig(libasn1c) >= 0.9.30
 BuildRequires:  pkgconfig(libosmo-ranap) >= 0.8.0
-%endif
-%if 0%{?suse_version}
-Requires:       libdbi-drivers-dbd-sqlite3
-%else
-Requires:       libdbi-dbd-sqlite
 %endif
 
 %description

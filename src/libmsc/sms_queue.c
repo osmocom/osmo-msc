@@ -431,7 +431,7 @@ static void sms_send_next(struct vlr_subscr *vsub)
 	OSMO_ASSERT(!sms_subscriber_is_pending(smsq, vsub));
 
 	/* check for more messages for this subscriber */
-	sms = db_sms_get_unsent_for_subscr(vsub, UINT_MAX);
+	sms = db_sms_get_unsent_for_subscr(vsub, INT_MAX);
 	if (!sms)
 		goto no_pending_sms;
 
@@ -537,7 +537,7 @@ static int sub_ready_for_sm(struct gsm_network *net, struct vlr_subscr *vsub)
 	}
 
 	/* Now try to deliver any pending SMS to this sub */
-	sms = db_sms_get_unsent_for_subscr(vsub, UINT_MAX);
+	sms = db_sms_get_unsent_for_subscr(vsub, INT_MAX);
 	if (!sms)
 		return -1;
 

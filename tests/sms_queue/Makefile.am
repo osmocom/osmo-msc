@@ -46,7 +46,6 @@ sms_queue_test_LDADD = \
 	$(LIBOSMOGSUPCLIENT_LIBS) \
 	$(LIBSQLITE3_LIBS) \
 	$(LIBRARY_GSM) \
-	-ldbi \
 	$(NULL)
 
 sms_queue_test_LDFLAGS = \

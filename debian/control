@@ -9,8 +9,6 @@ Build-Depends: debhelper (>=9),
                automake,
                libtool,
                pkg-config,
-               libdbi-dev,
-               libdbd-sqlite3,
                libsqlite3-dev,
                libsctp-dev,
                libtalloc-dev,
@@ -33,7 +31,7 @@ Homepage: https://osmocom.org/projects/osmomsc
 Package: osmo-msc
 Architecture: any
 Multi-Arch: foreign
-Depends: ${misc:Depends}, ${shlibs:Depends}, libdbd-sqlite3
+Depends: ${misc:Depends}, ${shlibs:Depends}
 Recommends: osmo-mgw
 Description: OsmoMSC: Osmocom's Mobile Switching Center for 2G and 3G circuit-switched mobile networks
   The Mobile Switching Center (MSC) is the heart of 2G/3G

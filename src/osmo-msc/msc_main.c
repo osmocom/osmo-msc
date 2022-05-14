@@ -685,7 +685,7 @@ TODO: we probably want some of the _net_ ctrl commands from bsc_base_ctrl_cmds_i
 
 	if (msc_cmdline_config.database_name)
 		osmo_talloc_replace_string(msc_network, &msc_network->sms_db_file_path, msc_cmdline_config.database_name);
-	if (db_init(msc_network->sms_db_file_path)) {
+	if (db_init(tall_msc_ctx, msc_network->sms_db_file_path, true)) {
 		fprintf(stderr, "DB: Failed to init database: %s\n",
 			osmo_quote_str((char*)msc_network->sms_db_file_path, -1));
 		return 4;
@@ -799,6 +799,7 @@ TODO: we probably want some of the _net_ ctrl commands from bsc_base_ctrl_cmds_i
 		}
 	} while (!osmo_select_shutdown_done());
 
+	db_fini();
 	log_fini();
 
 	/**
