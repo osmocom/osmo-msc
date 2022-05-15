@@ -203,15 +203,12 @@ static struct gsm_sms_pending *sms_pending_from(struct gsm_sms_queue *smsq,
 	vlr_subscr_get(sms->receiver, VSUB_USE_SMS_PENDING);
 	pending->vsub = sms->receiver;
 	pending->sms_id = sms->id;
-	return pending;
-}
+	llist_add_tail(&pending->entry, &smsq->pending_sms);
 
-/* add (append) a gsm_sms_pending to the queue pending_sms list */
-static void sms_pending_add(struct gsm_sms_queue *smsq, struct gsm_sms_pending *pending)
-{
 	smsq->pending += 1;
 	smsq_stat_item_inc(smsq, SMSQ_STAT_SMS_RAM_PENDING);
-	llist_add_tail(&pending->entry, &smsq->pending_sms);
+
+	return pending;
 }
 
 /* release a gsm_sms_pending object */
@@ -413,7 +410,6 @@ static void sms_submit_pending(void *_data)
 		}
 
 		attempted += 1;
-		sms_pending_add(smsq, pending);
 		_gsm411_send_sms(smsq->network, sms->receiver, sms);
 	} while (attempted < attempts && rounds < 1000);
 
@@ -451,7 +447,6 @@ static void sms_send_next(struct vlr_subscr *vsub)
 		goto no_pending_sms;
 	}
 
-	sms_pending_add(smsq, pending);
 	_gsm411_send_sms(smsq->network, sms->receiver, sms);
 	return;
 
