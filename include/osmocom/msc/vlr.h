@@ -5,6 +5,8 @@
 #include <osmocom/core/fsm.h>
 #include <osmocom/core/logging.h>
 #include <osmocom/core/use_count.h>
+#include <osmocom/core/stat_item.h>
+#include <osmocom/core/rate_ctr.h>
 #include <osmocom/gsm/protocol/gsm_23_003.h>
 #include <osmocom/gsm/protocol/gsm_04_08_gprs.h>
 #include <osmocom/gsm/gsm23003.h>
@@ -274,6 +276,8 @@ struct vlr_instance {
 		uint8_t nri_bitlen;
 		struct osmo_nri_ranges *nri_ranges;
 	} cfg;
+	struct osmo_stat_item_group *statg;
+	struct rate_ctr_group *ctrg;
 	/* A free-form pointer for use by the caller */
 	void *user_ctx;
 };

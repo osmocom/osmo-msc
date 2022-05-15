@@ -51,6 +51,133 @@
 #define SGSN_SUBSCR_MAX_RETRIES 3
 #define SGSN_SUBSCR_RETRY_INTERVAL 10
 
+enum vlr_stat_item_idx {
+	VLR_STAT_SUBSCRIBER_COUNT,
+	VLR_STAT_PDP_COUNT,
+};
+
+static const struct osmo_stat_item_desc vlr_stat_item_desc[] = {
+	[VLR_STAT_SUBSCRIBER_COUNT] =		{ "subscribers",
+		"Number of subscribers present in VLR" },
+	[VLR_STAT_PDP_COUNT] =			{ "pdp",
+		"Number of PDP records present in VLR" },
+};
+
+static const struct osmo_stat_item_group_desc vlr_statg_desc = {
+	"vlr",
+	"visitor location register",
+	OSMO_STATS_CLASS_GLOBAL,
+	ARRAY_SIZE(vlr_stat_item_desc),
+	vlr_stat_item_desc,
+};
+
+enum vlr_rate_ctr_idx {
+	VLR_CTR_GSUP_RX_UNKNOWN_IMSI,
+	VLR_CTR_GSUP_RX_PURGE_NO_SUBSCR,
+	VLR_CTR_GSUP_RX_TUPLES,
+	VLR_CTR_GSUP_RX_UL_RES,
+	VLR_CTR_GSUP_RX_UL_ERR,
+	VLR_CTR_GSUP_RX_SAI_RES,
+	VLR_CTR_GSUP_RX_SAI_ERR,
+	VLR_CTR_GSUP_RX_ISD_REQ,
+	VLR_CTR_GSUP_RX_CANCEL_REQ,
+	VLR_CTR_GSUP_RX_CHECK_IMEI_RES,
+	VLR_CTR_GSUP_RX_CHECK_IMEI_ERR,
+	VLR_CTR_GSUP_RX_PURGE_MS_RES,
+	VLR_CTR_GSUP_RX_PURGE_MS_ERR,
+	VLR_CTR_GSUP_RX_DELETE_DATA_REQ,
+	VLR_CTR_GSUP_RX_UNKNOWN,
+
+	VLR_CTR_GSUP_TX_UL_REQ,
+	VLR_CTR_GSUP_TX_ISD_RES,
+	VLR_CTR_GSUP_TX_SAI_REQ,
+	VLR_CTR_GSUP_TX_PURGE_MS_REQ,
+	VLR_CTR_GSUP_TX_CHECK_IMEI_REQ,
+	VLR_CTR_GSUP_TX_AUTH_FAIL_REP,
+	VLR_CTR_GSUP_TX_CANCEL_RES,
+
+	VLR_CTR_DETACH_BY_REQ,
+	VLR_CTR_DETACH_BY_CANCEL,
+	VLR_CTR_DETACH_BY_T3212,
+};
+
+static const struct rate_ctr_desc vlr_ctr_desc[] = {
+	[VLR_CTR_GSUP_RX_UNKNOWN_IMSI] =	{ "gsup:rx:unknown_imsi",
+		"Received GSUP messages for unknown IMSI" },
+	[VLR_CTR_GSUP_RX_PURGE_NO_SUBSCR] =	{ "gsup:rx:purge_no_subscr",
+		"Received GSUP purge for unknown subscriber" },
+	[VLR_CTR_GSUP_RX_TUPLES] =		{ "gsup:rx:auth_tuples",
+		"Received GSUP authentication tuples" },
+	[VLR_CTR_GSUP_RX_UL_RES] =		{ "gsup:rx:upd_loc:res",
+		"Received GSUP Update Location Result messages" },
+	[VLR_CTR_GSUP_RX_UL_ERR] =		{ "gsup:rx:upd_loc:err",
+		"Received GSUP Update Location Error messages" },
+	[VLR_CTR_GSUP_RX_SAI_RES] =		{ "gsup:rx:send_auth_info:res",
+		"Received GSUP Send Auth Info Result messages" },
+	[VLR_CTR_GSUP_RX_SAI_ERR] =		{ "gsup:rx:send_auth_info:err",
+		"Received GSUP Send Auth Info Error messages" },
+	[VLR_CTR_GSUP_RX_ISD_REQ] =		{ "gsup:rx:ins_sub_data:req",
+		"Received GSUP Insert Subscriber Data Request messages" },
+	[VLR_CTR_GSUP_RX_CANCEL_REQ] =		{ "gsup:rx:cancel:req",
+		"Received GSUP Cancel Subscriber messages" },
+	[VLR_CTR_GSUP_RX_CHECK_IMEI_RES] =	{ "gsup:rx:check_imei:res",
+		"Received GSUP Check IMEI Result messages" },
+	[VLR_CTR_GSUP_RX_CHECK_IMEI_ERR] =	{ "gsup:rx:check_imei:err",
+		"Received GSUP Check IMEI Error messages" },
+	[VLR_CTR_GSUP_RX_PURGE_MS_RES] =	{ "gsup:rx:purge_ms:res",
+		"Received GSUP Purge MS Result messages" },
+	[VLR_CTR_GSUP_RX_PURGE_MS_ERR] =	{ "gsup:rx:purge_ms:err",
+		"Received GSUP Purge MS Error messages" },
+	[VLR_CTR_GSUP_RX_DELETE_DATA_REQ] =	{ "gsup:rx:del_sub_data:req",
+		"Received GSUP Delete Subscriber Data Request messages" },
+	[VLR_CTR_GSUP_RX_UNKNOWN] =		{ "gsup:rx:unknown_msgtype",
+		"Received GSUP message of unknown type" },
+
+	[VLR_CTR_GSUP_TX_UL_REQ] =		{ "gsup:tx:upd_loc:req",
+		"Transmitted GSUP Update Location Request messages" },
+	[VLR_CTR_GSUP_TX_ISD_RES] =		{ "gsup:tx:ins_sub_data:res",
+		"Transmitted GSUP Insert Subscriber Data Result messages" },
+	[VLR_CTR_GSUP_TX_SAI_REQ] =		{ "gsup:tx:send_auth_info:res",
+		"Transmitted GSUP Send Auth Info Request messages" },
+	[VLR_CTR_GSUP_TX_PURGE_MS_REQ] =	{ "gsup:tx:purge_ms:req",
+		"Transmitted GSUP Purge MS Request messages" },
+	[VLR_CTR_GSUP_TX_CHECK_IMEI_REQ] =	{ "gsup:tx:check_imei:req",
+		"Transmitted GSUP Check IMEI Request messages" },
+	[VLR_CTR_GSUP_TX_AUTH_FAIL_REP] =	{ "gsup:tx:auth_fail:rep",
+		"Transmitted GSUP Auth Fail Report messages" },
+	[VLR_CTR_GSUP_TX_CANCEL_RES] =		{ "gsup:tx:cancel:res",
+		"Transmitted GSUP Cancel Result messages" },
+
+	[VLR_CTR_DETACH_BY_REQ] =		{ "detach:imsi_det_req",
+		"VLR Subscriber Detach by IMSI DETACH REQ" },
+	[VLR_CTR_DETACH_BY_CANCEL] =		{ "detach:gsup_cancel_req",
+		"VLR Subscriber Detach by GSUP CANCEL REQ" },
+	[VLR_CTR_DETACH_BY_T3212] =		{ "detach:t3212_timeout",
+		"VLR Subscriber Detach by T3212 timeout" },
+};
+
+static const struct rate_ctr_group_desc vlr_ctrg_desc = {
+	"vlr",
+	"visitor location register",
+	OSMO_STATS_CLASS_GLOBAL,
+	ARRAY_SIZE(vlr_ctr_desc),
+	vlr_ctr_desc,
+};
+
+
+#define vlr_rate_ctr_inc(vlr, idx) \
+	rate_ctr_inc(rate_ctr_group_get_ctr((vlr)->ctrg, idx))
+#define vlr_rate_ctr_add(vlr, idx, val) \
+	rate_ctr_add(rate_ctr_group_get_ctr((vlr)->ctrg, idx), val)
+
+#define vlr_stat_item_inc(vlr, idx) \
+	osmo_stat_item_inc(osmo_stat_item_group_get_item((vlr)->statg, idx), 1)
+#define vlr_stat_item_dec(vlr, idx) \
+	osmo_stat_item_dec(osmo_stat_item_group_get_item((vlr)->statg, idx), 1)
+#define vlr_stat_item_set(vlr, idx, val) \
+	osmo_stat_item_set(osmo_stat_item_group_get_item((vlr)->statg, idx), val)
+
+
 /***********************************************************************
  * Convenience functions
  ***********************************************************************/
@@ -282,6 +409,7 @@ static struct vlr_subscr *_vlr_subscr_alloc(struct vlr_instance *vlr)
 	vlr_sgs_fsm_create(vsub);
 
 	llist_add_tail(&vsub->list, &vlr->subscribers);
+	vlr_stat_item_inc(vlr, VLR_STAT_SUBSCRIBER_COUNT);
 	return vsub;
 }
 
@@ -291,6 +419,8 @@ static struct vlr_subscr *_vlr_subscr_alloc(struct vlr_instance *vlr)
 int vlr_subscr_purge(struct vlr_subscr *vsub)
 {
 	struct osmo_gsup_message gsup_msg = {0};
+
+	vlr_rate_ctr_inc(vsub->vlr, VLR_CTR_GSUP_TX_PURGE_MS_REQ);
 
 	gsup_msg.message_type = OSMO_GSUP_MSGT_PURGE_MS_REQUEST;
 
@@ -320,6 +450,7 @@ void vlr_subscr_cancel_attach_fsm(struct vlr_subscr *vsub,
 void vlr_subscr_free(struct vlr_subscr *vsub)
 {
 	llist_del(&vsub->list);
+	vlr_stat_item_dec(vsub->vlr, VLR_STAT_SUBSCRIBER_COUNT);
 	DEBUGP(DVLR, "freeing VLR subscr %s (max total use count was %d)\n", vlr_subscr_name(vsub),
 	       vsub->max_total_use_count);
 
@@ -580,6 +711,7 @@ void vlr_subscr_expire_lu(void *data)
 			continue;
 
 		LOGP(DVLR, LOGL_DEBUG, "%s: Location Update expired\n", vlr_subscr_name(vsub));
+		vlr_rate_ctr_inc(vlr, VLR_CTR_DETACH_BY_T3212);
 		vlr_subscr_detach(vsub);
 	}
 
@@ -613,6 +745,7 @@ vlr_subscr_pdp_data_alloc(struct vlr_subscr *vsub)
 	pdata = talloc_zero(vsub, struct sgsn_subscriber_pdp_data);
 
 	llist_add_tail(&pdata->list, &vsub->ps.pdp_list);
+	vlr_stat_item_inc(vsub->vlr, VLR_STAT_PDP_COUNT);
 
 	return pdata;
 }
@@ -624,6 +757,7 @@ static int vlr_subscr_pdp_data_clear(struct vlr_subscr *vsub)
 
 	llist_for_each_entry_safe(pdp, pdp2, &vsub->ps.pdp_list, list) {
 		llist_del(&pdp->list);
+		vlr_stat_item_dec(vsub->vlr, VLR_STAT_PDP_COUNT);
 		talloc_free(pdp);
 		count += 1;
 	}
@@ -694,6 +828,8 @@ int vlr_subscr_req_lu(struct vlr_subscr *vsub)
 	struct osmo_gsup_message gsup_msg = {0};
 	int rc;
 
+	vlr_rate_ctr_inc(vsub->vlr, VLR_CTR_GSUP_TX_UL_REQ);
+
 	gsup_msg.message_type = OSMO_GSUP_MSGT_UPDATE_LOCATION_REQUEST;
 	gsup_msg.cn_domain = vsub->vlr->cfg.is_ps ? OSMO_GSUP_CN_DOMAIN_PS : OSMO_GSUP_CN_DOMAIN_CS;
 	rc = vlr_subscr_tx_gsup_message(vsub, &gsup_msg);
@@ -706,6 +842,8 @@ int vlr_subscr_req_sai(struct vlr_subscr *vsub,
 		       const uint8_t *auts, const uint8_t *auts_rand)
 {
 	struct osmo_gsup_message gsup_msg = {0};
+
+	vlr_rate_ctr_inc(vsub->vlr, VLR_CTR_GSUP_TX_SAI_REQ);
 
 	gsup_msg.message_type = OSMO_GSUP_MSGT_SEND_AUTH_INFO_REQUEST;
 	gsup_msg.auts = auts;
@@ -734,6 +872,8 @@ int vlr_subscr_tx_req_check_imei(const struct vlr_subscr *vsub)
 	gsup_msg.imei_enc = imei_enc;
 	gsup_msg.imei_enc_len = len;
 
+	vlr_rate_ctr_inc(vsub->vlr, VLR_CTR_GSUP_TX_CHECK_IMEI_REQ);
+
 	/* Send CHECK_IMEI_REQUEST */
 	OSMO_STRLCPY_ARRAY(gsup_msg.imsi, vsub->imsi);
 	return gsup_client_mux_tx(vsub->vlr->gcm, &gsup_msg);
@@ -746,6 +886,8 @@ int vlr_subscr_tx_auth_fail_rep(const struct vlr_subscr *vsub)
 		.message_class = OSMO_GSUP_MESSAGE_CLASS_SUBSCRIBER_MANAGEMENT,
 		.message_type = OSMO_GSUP_MSGT_AUTH_FAIL_REPORT,
 	};
+
+	vlr_rate_ctr_inc(vsub->vlr, VLR_CTR_GSUP_TX_AUTH_FAIL_REP);
 
 	OSMO_STRLCPY_ARRAY(gsup_msg.imsi, vsub->imsi);
 	return gsup_client_mux_tx(vsub->vlr->gcm, &gsup_msg);
@@ -780,6 +922,7 @@ void vlr_subscr_update_tuples(struct vlr_subscr *vsub,
 	}
 
 	LOGVSUBP(LOGL_DEBUG, vsub, "Received %u auth tuples\n", got_tuples);
+	vlr_rate_ctr_add(vsub->vlr, VLR_CTR_GSUP_RX_TUPLES, got_tuples);
 
 	if (!got_tuples) {
 		/* FIXME what now? */
@@ -895,6 +1038,8 @@ static int vlr_subscr_handle_isd_req(struct vlr_subscr *vsub,
 				     const struct osmo_gsup_message *gsup)
 {
 	struct osmo_gsup_message gsup_reply = {0};
+
+	vlr_rate_ctr_inc(vsub->vlr, VLR_CTR_GSUP_TX_ISD_RES);
 
 	vlr_subscr_gsup_insert_data(vsub, gsup);
 	vsub->vlr->ops.subscr_update(vsub);
@@ -1062,6 +1207,8 @@ static int vlr_subscr_handle_cancel_req(struct vlr_subscr *vsub,
 	int rc, is_update_procedure = !gsup_msg->cancel_type ||
 		gsup_msg->cancel_type == OSMO_GSUP_CANCEL_TYPE_UPDATE;
 
+	vlr_rate_ctr_inc(vsub->vlr, VLR_CTR_GSUP_TX_CANCEL_RES);
+
 	LOGVSUBP(LOGL_INFO, vsub, "Cancelling MS subscriber (%s)\n",
 		 is_update_procedure ?
 		 "update procedure" : "subscription withdraw");
@@ -1072,6 +1219,7 @@ static int vlr_subscr_handle_cancel_req(struct vlr_subscr *vsub,
 	vlr_gmm_cause_to_mm_cause(gsup_msg->cause, &gsm48_rej);
 	vlr_subscr_cancel_attach_fsm(vsub, fsm_cause, gsm48_rej);
 
+	vlr_rate_ctr_inc(vsub->vlr, VLR_CTR_DETACH_BY_CANCEL);
 	vlr_subscr_detach(vsub);
 
 	return rc;
@@ -1115,42 +1263,58 @@ int vlr_gsup_rx(struct gsup_client_mux *gcm, void *data, const struct osmo_gsup_
 		switch (gsup->message_type) {
 		case OSMO_GSUP_MSGT_PURGE_MS_RESULT:
 		case OSMO_GSUP_MSGT_PURGE_MS_ERROR:
+			vlr_rate_ctr_inc(vlr, VLR_CTR_GSUP_RX_PURGE_NO_SUBSCR);
 			return vlr_rx_gsup_purge_no_subscr(vlr, gsup);
 		default:
+			vlr_rate_ctr_inc(vlr, VLR_CTR_GSUP_RX_UNKNOWN_IMSI);
 			return vlr_rx_gsup_unknown_imsi(vlr, gsup);
 		}
 	}
 
 	switch (gsup->message_type) {
 	case OSMO_GSUP_MSGT_SEND_AUTH_INFO_RESULT:
+		vlr_rate_ctr_inc(vlr, VLR_CTR_GSUP_RX_SAI_RES);
+		rc = vlr_subscr_handle_sai_res(vsub, gsup);
+		break;
 	case OSMO_GSUP_MSGT_SEND_AUTH_INFO_ERROR:
+		vlr_rate_ctr_inc(vlr, VLR_CTR_GSUP_RX_SAI_ERR);
 		rc = vlr_subscr_handle_sai_res(vsub, gsup);
 		break;
 	case OSMO_GSUP_MSGT_INSERT_DATA_REQUEST:
+		vlr_rate_ctr_inc(vlr, VLR_CTR_GSUP_RX_ISD_REQ);
 		rc = vlr_subscr_handle_isd_req(vsub, gsup);
 		break;
 	case OSMO_GSUP_MSGT_LOCATION_CANCEL_REQUEST:
+		vlr_rate_ctr_inc(vlr, VLR_CTR_GSUP_RX_CANCEL_REQ);
 		rc = vlr_subscr_handle_cancel_req(vsub, gsup);
 		break;
 	case OSMO_GSUP_MSGT_UPDATE_LOCATION_RESULT:
+		vlr_rate_ctr_inc(vlr, VLR_CTR_GSUP_RX_UL_RES);
 		rc = vlr_subscr_handle_lu_res(vsub, gsup);
 		break;
 	case OSMO_GSUP_MSGT_UPDATE_LOCATION_ERROR:
+		vlr_rate_ctr_inc(vlr, VLR_CTR_GSUP_RX_UL_ERR);
 		rc = vlr_subscr_handle_lu_err(vsub, gsup);
 		break;
 	case OSMO_GSUP_MSGT_PURGE_MS_ERROR:
+		vlr_rate_ctr_inc(vlr, VLR_CTR_GSUP_RX_PURGE_MS_ERR);
+		goto out_unimpl;
 	case OSMO_GSUP_MSGT_PURGE_MS_RESULT:
+		vlr_rate_ctr_inc(vlr, VLR_CTR_GSUP_RX_PURGE_MS_RES);
+		goto out_unimpl;
 	case OSMO_GSUP_MSGT_DELETE_DATA_REQUEST:
-		LOGVSUBP(LOGL_ERROR, vsub,
-			"Rx GSUP msg_type=%d not yet implemented\n",
-			gsup->message_type);
-		rc = -GMM_CAUSE_MSGT_NOTEXIST_NOTIMPL;
-		break;
+		vlr_rate_ctr_inc(vlr, VLR_CTR_GSUP_RX_DELETE_DATA_REQ);
+		goto out_unimpl;
 	case OSMO_GSUP_MSGT_CHECK_IMEI_ERROR:
+		vlr_rate_ctr_inc(vlr, VLR_CTR_GSUP_RX_CHECK_IMEI_ERR);
+		rc = vlr_subscr_handle_check_imei(vsub, gsup);
+		break;
 	case OSMO_GSUP_MSGT_CHECK_IMEI_RESULT:
+		vlr_rate_ctr_inc(vlr, VLR_CTR_GSUP_RX_CHECK_IMEI_RES);
 		rc = vlr_subscr_handle_check_imei(vsub, gsup);
 		break;
 	default:
+		vlr_rate_ctr_inc(vlr, VLR_CTR_GSUP_RX_UNKNOWN);
 		LOGP(DLGSUP, LOGL_ERROR, "GSUP Message type not handled by VLR: %d\n", gsup->message_type);
 		rc = -EINVAL;
 		break;
@@ -1158,6 +1322,11 @@ int vlr_gsup_rx(struct gsup_client_mux *gcm, void *data, const struct osmo_gsup_
 
 	vlr_subscr_put(vsub, __func__);
 	return rc;
+
+out_unimpl:
+	LOGVSUBP(LOGL_ERROR, vsub, "Rx GSUP msg_type=%d not yet implemented\n", gsup->message_type);
+	vlr_subscr_put(vsub, __func__);
+	return -GMM_CAUSE_MSGT_NOTEXIST_NOTIMPL;
 }
 
 /* MSC->VLR: Subscriber has provided IDENTITY RESPONSE */
@@ -1257,6 +1426,7 @@ static int vlr_subscr_detach(struct vlr_subscr *vsub)
 /* See TS 23.012 version 9.10.0 4.3.2.1 "Process Detach_IMSI_VLR" */
 int vlr_subscr_rx_imsi_detach(struct vlr_subscr *vsub)
 {
+	vlr_rate_ctr_inc(vsub->vlr, VLR_CTR_DETACH_BY_REQ);
 	return vlr_subscr_detach(vsub);
 }
 
@@ -1298,6 +1468,14 @@ struct vlr_instance *vlr_alloc(void *ctx, const struct vlr_ops *ops)
 	vlr->cfg.nri_bitlen = OSMO_NRI_BITLEN_DEFAULT;
 	vlr->cfg.nri_ranges = osmo_nri_ranges_alloc(vlr);
 
+	vlr->statg = osmo_stat_item_group_alloc(vlr, &vlr_statg_desc, 0);
+	if (!vlr->statg)
+		goto err_free;
+
+	vlr->ctrg = rate_ctr_group_alloc(vlr, &vlr_ctrg_desc, 0);
+	if (!vlr->ctrg)
+		goto err_statg;
+
 	/* reset shared timer definitions */
 	osmo_tdefs_reset(msc_tdefs_vlr);
 
@@ -1311,6 +1489,12 @@ struct vlr_instance *vlr_alloc(void *ctx, const struct vlr_ops *ops)
 	vlr_sgs_fsm_init();
 
 	return vlr;
+
+err_statg:
+	osmo_stat_item_group_free(vlr->statg);
+err_free:
+	talloc_free(vlr);
+	return NULL;
 }
 
 int vlr_start(struct vlr_instance *vlr, struct gsup_client_mux *gcm)
