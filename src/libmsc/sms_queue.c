@@ -206,9 +206,19 @@ static struct gsm_sms_pending *sms_pending_from(struct gsm_sms_queue *smsq,
 	return pending;
 }
 
-/* release a gsm_sms_pending object */
-static void sms_pending_free(struct gsm_sms_pending *pending)
+/* add (append) a gsm_sms_pending to the queue pending_sms list */
+static void sms_pending_add(struct gsm_sms_queue *smsq, struct gsm_sms_pending *pending)
 {
+	smsq->pending += 1;
+	smsq_stat_item_inc(smsq, SMSQ_STAT_SMS_RAM_PENDING);
+	llist_add_tail(&pending->entry, &smsq->pending_sms);
+}
+
+/* release a gsm_sms_pending object */
+static void sms_pending_free(struct gsm_sms_queue *smsq, struct gsm_sms_pending *pending)
+{
+	smsq->pending -= 1;
+	smsq_stat_item_dec(smsq, SMSQ_STAT_SMS_RAM_PENDING);
 	vlr_subscr_put(pending->vsub, VSUB_USE_SMS_PENDING);
 	llist_del(&pending->entry);
 	talloc_free(pending);
@@ -247,9 +257,7 @@ static void sms_pending_failed(struct gsm_sms_pending *pending, int paging_error
 	if (pending->failed_attempts < smsq->max_fail)
 		return sms_pending_resend(pending);
 
-	sms_pending_free(pending);
-	smsq->pending -= 1;
-	smsq_stat_item_dec(smsq, SMSQ_STAT_SMS_RAM_PENDING);
+	sms_pending_free(smsq, pending);
 }
 
 /* Resend all SMS that are scheduled for a resend. This is done to
@@ -270,9 +278,7 @@ static void sms_resend_pending(void *_data)
 
 		/* the sms is gone? Move to the next */
 		if (!sms) {
-			sms_pending_free(pending);
-			smsq->pending -= 1;
-			smsq_stat_item_dec(smsq, SMSQ_STAT_SMS_RAM_PENDING);
+			sms_pending_free(smsq, pending);
 			sms_queue_trigger(smsq);
 		} else {
 			pending->resend = 0;
@@ -407,9 +413,7 @@ static void sms_submit_pending(void *_data)
 		}
 
 		attempted += 1;
-		smsq->pending += 1;
-		smsq_stat_item_inc(smsq, SMSQ_STAT_SMS_RAM_PENDING);
-		llist_add_tail(&pending->entry, &smsq->pending_sms);
+		sms_pending_add(smsq, pending);
 		_gsm411_send_sms(smsq->network, sms->receiver, sms);
 	} while (attempted < attempts && rounds < 1000);
 
@@ -447,9 +451,7 @@ static void sms_send_next(struct vlr_subscr *vsub)
 		goto no_pending_sms;
 	}
 
-	smsq->pending += 1;
-	smsq_stat_item_inc(smsq, SMSQ_STAT_SMS_RAM_PENDING);
-	llist_add_tail(&pending->entry, &smsq->pending_sms);
+	sms_pending_add(smsq, pending);
 	_gsm411_send_sms(smsq->network, sms->receiver, sms);
 	return;
 
@@ -594,21 +596,17 @@ static int sms_sms_cb(unsigned int subsys, unsigned int signal,
 	case S_SMS_DELIVERED:
 		smsq_rate_ctr_inc(network->sms_queue, SMSQ_CTR_SMS_DELIVERY_ACK);
 		/* Remember the subscriber and clear the pending entry */
-		network->sms_queue->pending -= 1;
-		smsq_stat_item_dec(network->sms_queue, SMSQ_STAT_SMS_RAM_PENDING);
 		vsub = pending->vsub;
 		vlr_subscr_get(vsub, __func__);
 		db_sms_delete_sent_message_by_id(pending->sms_id);
-		sms_pending_free(pending);
+		sms_pending_free(network->sms_queue, pending);
 		/* Attempt to send another SMS to this subscriber */
 		sms_send_next(vsub);
 		vlr_subscr_put(vsub, __func__);
 		break;
 	case S_SMS_MEM_EXCEEDED:
 		smsq_rate_ctr_inc(network->sms_queue, SMSQ_CTR_SMS_DELIVERY_NOMEM);
-		network->sms_queue->pending -= 1;
-		smsq_stat_item_dec(network->sms_queue, SMSQ_STAT_SMS_RAM_PENDING);
-		sms_pending_free(pending);
+		sms_pending_free(network->sms_queue, pending);
 		sms_queue_trigger(network->sms_queue);
 		break;
 	case S_SMS_UNKNOWN_ERROR:
@@ -681,10 +679,8 @@ int sms_queue_clear(struct gsm_sms_queue *smsq)
 	llist_for_each_entry_safe(pending, tmp, &smsq->pending_sms, entry) {
 		LOGP(DLSMS, LOGL_NOTICE,
 		     "SMSqueue clearing for sub %llu\n", pending->vsub->id);
-		sms_pending_free(pending);
+		sms_pending_free(smsq, pending);
 	}
 
-	smsq->pending = 0;
-	smsq_stat_item_set(smsq, SMSQ_STAT_SMS_RAM_PENDING, 0);
 	return 0;
 }
