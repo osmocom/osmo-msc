@@ -55,6 +55,8 @@
  * Convenience functions
  ***********************************************************************/
 
+static int vlr_subscr_detach(struct vlr_subscr *vsub);
+
 const struct value_string vlr_ciph_names[] = {
 	OSMO_VALUE_STRING(VLR_CIPH_NONE),
 	OSMO_VALUE_STRING(VLR_CIPH_A5_1),
@@ -578,7 +580,7 @@ void vlr_subscr_expire_lu(void *data)
 			continue;
 
 		LOGP(DVLR, LOGL_DEBUG, "%s: Location Update expired\n", vlr_subscr_name(vsub));
-		vlr_subscr_rx_imsi_detach(vsub);
+		vlr_subscr_detach(vsub);
 	}
 
 done:
@@ -1070,7 +1072,7 @@ static int vlr_subscr_handle_cancel_req(struct vlr_subscr *vsub,
 	vlr_gmm_cause_to_mm_cause(gsup_msg->cause, &gsm48_rej);
 	vlr_subscr_cancel_attach_fsm(vsub, fsm_cause, gsm48_rej);
 
-	vlr_subscr_rx_imsi_detach(vsub);
+	vlr_subscr_detach(vsub);
 
 	return rc;
 }
@@ -1236,8 +1238,7 @@ bool vlr_subscr_expire(struct vlr_subscr *vsub)
 	return false;
 }
 
-/* See TS 23.012 version 9.10.0 4.3.2.1 "Process Detach_IMSI_VLR" */
-int vlr_subscr_rx_imsi_detach(struct vlr_subscr *vsub)
+static int vlr_subscr_detach(struct vlr_subscr *vsub)
 {
 	/* paranoia: should any LU or PARQ FSMs still be running, stop them. */
 	vlr_subscr_cancel_attach_fsm(vsub, OSMO_FSM_TERM_ERROR, GSM48_REJECT_CONGESTION);
@@ -1251,6 +1252,12 @@ int vlr_subscr_rx_imsi_detach(struct vlr_subscr *vsub)
 	vlr_subscr_expire(vsub);
 
 	return 0;
+}
+
+/* See TS 23.012 version 9.10.0 4.3.2.1 "Process Detach_IMSI_VLR" */
+int vlr_subscr_rx_imsi_detach(struct vlr_subscr *vsub)
+{
+	return vlr_subscr_detach(vsub);
 }
 
 /* Tear down any running FSMs due to MSC connection timeout.
