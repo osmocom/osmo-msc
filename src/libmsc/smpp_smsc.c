@@ -347,8 +347,15 @@ int smpp_route(const struct smsc *smsc, const struct osmo_smpp_addr *dest, struc
 #define PACK_AND_SEND(esme, ptr)	pack_and_send(esme, (ptr)->command_id, ptr)
 static int pack_and_send(struct osmo_esme *esme, uint32_t type, void *ptr)
 {
-	struct msgb *msg = msgb_alloc(4096, "SMPP_Tx");
+	struct msgb *msg;
 	int rc, rlen;
+
+	/* the socket was closed. Avoid allocating + enqueueing msgb, see
+	 * https://osmocom.org/issues/3278 */
+	if (esme->wqueue.bfd.fd == -1)
+		return -EIO;
+
+	msg = msgb_alloc(4096, "SMPP_Tx");
 	if (!msg)
 		return -ENOMEM;
 
