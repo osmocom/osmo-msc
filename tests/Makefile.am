@@ -69,7 +69,7 @@ else
 	IU=0 osmotestconfig.py -p $(abs_top_srcdir) -w $(abs_top_builddir) -v
 endif
 	$(srcdir)/vty_test_runner.py -w $(abs_top_builddir) -v
-	rm -f $(top_builddir)/sms.db
+	rm -f $(top_builddir)/sms.db*
 
 # Run a specific transcript test with: 'make vty-transcript-test VTY_TEST=osmo-msc.vty'
 VTY_TEST ?= *.vty
@@ -82,7 +82,7 @@ vty-transcript-test:
 		-n OsmoMSC -p 4254 \
 		-r "$(top_builddir)/src/osmo-msc/osmo-msc -c $(top_srcdir)/doc/examples/osmo-msc/osmo-msc.cfg" \
 		$(U) $(srcdir)/$(VTY_TEST)
-	rm -f $(builddir)/sms.db
+	rm -f $(builddir)/sms.db*
 
 # don't run multiple tests concurrently so that the ports don't conflict
 vty-test:
@@ -91,7 +91,7 @@ vty-test:
 
 ctrl-python-test: $(BUILT_SOURCES)
 	$(srcdir)/ctrl_test_runner.py -w $(abs_top_builddir) -v
-	rm -f $(top_builddir)/sms.db
+	rm -f $(top_builddir)/sms.db*
 
 # To update the CTRL script from current application behavior,
 # pass -u to ctrl_script_runner.py by doing:
@@ -106,7 +106,7 @@ ctrl-test:
 
 smpp-test:
 	$(srcdir)/smpp_test_runner.py -w $(abs_top_builddir) -v
-	rm -f $(top_builddir)/sms.db
+	rm -f $(top_builddir)/sms.db*
 
 check-local: atconfig $(TESTSUITE)
 	$(SHELL) '$(TESTSUITE)' $(TESTSUITEFLAGS)
