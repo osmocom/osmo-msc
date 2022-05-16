@@ -888,7 +888,7 @@ dead_socket:
 		esme->acl->esme = NULL;
 	smpp_esme_put(esme);
 
-	return 0;
+	return -EBADF;
 }
 
 /* call-back of write queue once it wishes to write a message to the socket */
