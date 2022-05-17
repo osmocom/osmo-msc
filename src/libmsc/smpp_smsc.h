@@ -158,6 +158,7 @@ int smpp_vty_init(void);
 
 int smpp_determine_scheme(uint8_t dcs, uint8_t *data_coding, int *mode);
 
+time_t smpp_parse_time_format(const char *vp, time_t *t_now);
 
 
 struct gsm_sms;

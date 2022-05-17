@@ -48,6 +48,8 @@ PKG_CHECK_MODULES(LIBOSMOSCCP, libosmo-sccp >= 1.5.0)
 PKG_CHECK_MODULES(LIBOSMOMGCPCLIENT, libosmo-mgcp-client >= 1.9.0)
 PKG_CHECK_MODULES(LIBOSMOGSUPCLIENT, libosmo-gsup-client >= 1.4.0)
 
+AC_CHECK_FUNC([timegm], [AC_DEFINE(HAVE_TIMEGM, 1, Define if libc implements timegm)])
+
 old_LIBS=$LIBS
 AC_SEARCH_LIBS([sctp_send], [sctp], [
 	AC_DEFINE(HAVE_LIBSCTP, 1, [Define 1 to enable SCTP support])
