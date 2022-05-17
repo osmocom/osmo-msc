@@ -183,6 +183,7 @@ smsc
  queue max-failure 1
  database delete-delivered 1
  database delete-expired 1
+ validity-period minimum 1
  validity-period default 10080
 end
 

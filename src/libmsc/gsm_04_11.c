@@ -626,6 +626,12 @@ static int gsm340_rx_tpdu(struct gsm_trans *trans, struct msgb *msg,
 		  osmo_hexdump(gsms->user_data, gsms->user_data_len));
 
 	gsms->validity_minutes = gsm340_validity_period(sms_vpf, sms_vp);
+	if (gsms->validity_minutes < net->sms_queue_cfg->minimum_validity_mins) {
+		LOG_TRANS(trans, LOGL_INFO, "Overriding user-provided validity period (%lu) "
+			  "with minimum SMSC validity period (%u) minutes\n", gsms->validity_minutes,
+			  net->sms_queue_cfg->minimum_validity_mins);
+		gsms->validity_minutes = net->sms_queue_cfg->minimum_validity_mins;
+	}
 
 	rc = sms_route_mt_sms(trans, gsms);
 

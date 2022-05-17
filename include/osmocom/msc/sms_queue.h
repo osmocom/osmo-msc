@@ -13,6 +13,7 @@ struct sms_queue_config {
 	int max_pending;			/* maximum number of gsm_sms_pending in RAM */
 	bool delete_delivered;			/* delete delivered SMS from DB? */
 	bool delete_expired;			/* delete expired SMS from DB? */
+	unsigned int minimum_validity_mins;	/* minimum validity period in minutes */
 	unsigned int default_validity_mins;	/* default validity period in minutes */
 };
 
