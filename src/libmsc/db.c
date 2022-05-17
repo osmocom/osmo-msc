@@ -562,7 +562,7 @@ int db_init(void *ctx, const char *fname, bool enable_sqlite_logging)
 	}
 
 	char *err_msg;
-	rc = sqlite3_exec(g_dbc->db, "PRAGMA journal_mode=WAL; PRAGMA synchonous = NORMAL;", 0, 0, &err_msg);
+	rc = sqlite3_exec(g_dbc->db, "PRAGMA journal_mode=WAL; PRAGMA synchronous = NORMAL;", 0, 0, &err_msg);
 	if (rc != SQLITE_OK) {
 		LOGP(DDB, LOGL_ERROR, "Unable to set Write-Ahead Logging: %s\n", err_msg);
 		sqlite3_free(err_msg);
@@ -617,13 +617,6 @@ static int db_run_statements(struct db_context *dbc, const char **statements, si
 	return 0;
 }
 
-static int db_configure(struct db_context *dbc)
-{
-	const char *sync_stmts[] = { "PRAGMA synchronous = FULL" };
-
-	return db_run_statements(dbc, sync_stmts, ARRAY_SIZE(sync_stmts));
-}
-
 int db_prepare(void)
 {
 	unsigned int i;
@@ -641,8 +634,6 @@ int db_prepare(void)
 			"please update your database schema\n");
                 return -1;
 	}
-
-	db_configure(g_dbc);
 
 	/* prepare all SQL statements */
 	for (i = 0; i < ARRAY_SIZE(g_dbc->stmt); i++) {
