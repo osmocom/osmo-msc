@@ -1,6 +1,6 @@
 /* OpenBSC SMPP 3.4 interface, SMSC-side implementation */
 
-/* (C) 2012-2013 by Harald Welte <laforge@gnumonks.org>
+/* (C) 2012-2022 by Harald Welte <laforge@gnumonks.org>
  *
  * All Rights Reserved
  *
@@ -24,6 +24,7 @@
 #include <string.h>
 #include <stdint.h>
 #include <errno.h>
+#include <time.h>
 
 #include <smpp34.h>
 #include <smpp34_structs.h>
@@ -122,6 +123,8 @@ static int smpp34_submit_tlv_msg_payload(const struct tlv_t *t,
 static int submit_to_sms(struct gsm_sms **psms, struct gsm_network *net,
 			 const struct submit_sm_t *submit)
 {
+	time_t t_now = time(NULL);
+	time_t t_validity_absolute;
 	const uint8_t *sms_msg = NULL;
 	unsigned int sms_msg_len = 0;
 	struct vlr_subscr *dest;
@@ -257,6 +260,12 @@ static int submit_to_sms(struct gsm_sms **psms, struct gsm_network *net,
 		memcpy(sms->user_data, sms_msg, sms_msg_len);
 		sms->user_data_len = sms_msg_len;
 	}
+
+	t_validity_absolute = smpp_parse_time_format((const char *) submit->validity_period, &t_now);
+	if (!t_validity_absolute)
+		sms->validity_minutes = 7 * 24 * 60;	/* default: 7 days */
+	else
+		sms->validity_minutes = (t_validity_absolute - t_now) / 60;
 
 	*psms = sms;
 	return ESME_ROK;

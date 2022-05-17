@@ -1,5 +1,6 @@
 /*
  * (C) 2013 by Holger Hans Peter Freyther
+ * (C) 2022 by Harald Welte <laforge@osmocom.org>
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -62,6 +63,41 @@ static void test_coding_scheme(void)
 	}
 }
 
+static const char *smpp_time_tests[] = {
+	"\0",
+	"220517175524000+",
+	"220517175524000-",
+	"220517175524004+",	/* 1 hour advanced compared to GMT */
+	"220517175524004-",	/* 1 hour retarded compared to GMT */
+	"000000010000000R",	/* 1 hour */
+	"000001000000000R",	/* 1 day */
+};
+
+static void test_smpp_parse_time_format(void)
+{
+	time_t t_now = 1652745600;	/* 2022-05-17 00:00:00 UTC */
+	char *orig_tz;
+
+	printf("Testing SMPP time format parser\n");
+
+	/* relative time format conversion depends on the local time */
+	orig_tz = getenv("TZ");
+	setenv("TZ", "UTC", 1);
+
+	for (unsigned int i = 0; i < ARRAY_SIZE(smpp_time_tests); i++) {
+		time_t t = smpp_parse_time_format(smpp_time_tests[i], &t_now);
+		char buf[32];
+		strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S", gmtime(&t));
+		printf("'%s': %ld == %s\n", smpp_time_tests[i], t, buf);
+	}
+
+	if (orig_tz)
+		setenv("TZ", orig_tz, 1);
+	else
+		unsetenv("TZ");
+
+}
+
 static const struct log_info_cat smpp_mirror_default_categories[] = {
 	[DSMPP] = {
 		.name = "DSMPP",
@@ -85,5 +121,7 @@ int main(int argc, char **argv)
 	log_set_print_category_hex(osmo_stderr_target, 0);
 
 	test_coding_scheme();
+	test_smpp_parse_time_format();
+
 	return EXIT_SUCCESS;
 }

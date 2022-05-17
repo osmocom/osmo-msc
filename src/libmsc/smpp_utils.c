@@ -1,5 +1,5 @@
 
-/* (C) 2012-2013 by Harald Welte <laforge@gnumonks.org>
+/* (C) 2012-2022 by Harald Welte <laforge@gnumonks.org>
  *
  * All Rights Reserved
  *
@@ -17,6 +17,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "config.h"
+
+#include <time.h>
 
 #include "smpp_smsc.h"
 #include <osmocom/core/logging.h>
@@ -58,4 +61,106 @@ unknown_mo:
 
 	return 0;
 
+}
+
+/* convert a 'struct tm' holding relative time to an absolute one by adding it to t_now */
+static void relative2absolute(struct tm *tm, time_t t_now)
+{
+	struct tm tm_now;
+
+	localtime_r(&t_now, &tm_now);
+
+	tm->tm_year += tm_now.tm_year;
+	tm->tm_mon += tm_now.tm_mon;
+	tm->tm_mday += tm_now.tm_mday;
+	tm->tm_hour += tm_now.tm_hour;
+	tm->tm_min += tm_now.tm_min;
+	tm->tm_sec += tm_now.tm_sec;
+}
+
+#ifndef HAVE_TIMEGM
+/* for systems without a timegm() function, provide a reimplementation */
+static time_t timegm(struct tm *tm)
+{
+	const char *orig_tz = getenv("TZ");
+	time_t ret;
+
+	setenv("TZ", "UTC", 1);
+
+	ret = mktime(tm);
+
+	if (orig_tz)
+		setenv("TZ", orig_tz, 1);
+	else
+		unsetenv("TZ");
+
+	return ret;
+}
+#endif
+
+
+/*! Parse a SMPP time format as defined in SMPP v3.4 7.1.1.
+ *  \param[in] vp string containing the time as encoded in SMPP v3.4
+ *  \param[in] t_now pointer to a time value for 'now'. Can be NULL, then we call time() ourselves.
+ *  \returns time_t value in seconds since the epoch of the absolute decoded time */
+time_t smpp_parse_time_format(const char *vp, time_t *t_now)
+{
+	unsigned int year, month, day, hour, minute, second, tenth, gmt_off_quarter;
+	char plus_minus_relative;
+	int gmt_off_minutes;
+	struct tm tm;
+	time_t ret;
+	int rc;
+
+	memset(&tm, 0, sizeof(tm));
+
+	if (vp[0] == '\0')
+		return 0;
+
+	/* YYMMDDhhmmsstnnp (where p can be -, + or R) */
+	rc = sscanf(vp, "%2u%2u%2u%2u%2u%2u%1u%2u%c", &year, &month, &day, &hour, &minute,
+		    &second, &tenth, &gmt_off_quarter, &plus_minus_relative);
+	if (rc != 9)
+		return (time_t) -1;
+
+	tm.tm_year = year;
+	/* month handling differs between absolute/relative below... */
+	tm.tm_mday = day;
+	tm.tm_hour = hour;
+	tm.tm_min = minute;
+	tm.tm_sec = second;
+	tm.tm_isdst = 0;
+
+	switch (plus_minus_relative) {
+	case '+':	/* time is in quarter hours advanced compared to UTC */
+		if (year < 70)
+			tm.tm_year += 100;
+		tm.tm_mon = month - 1;
+		gmt_off_minutes = 15 * gmt_off_quarter;
+		tm.tm_min -= gmt_off_minutes;
+		ret = timegm(&tm);
+		break;
+	case '-':	/* time is in quarter hours retared compared to UTC */
+		if (year < 70)
+			tm.tm_year += 100;
+		tm.tm_mon = month - 1;
+		gmt_off_minutes = 15 * gmt_off_quarter;
+		tm.tm_min += gmt_off_minutes;
+		ret = timegm(&tm);
+		break;
+	case 'R':
+		/* relative time */
+		tm.tm_mon = month;
+		if (t_now)
+			relative2absolute(&tm, *t_now);
+		else
+			relative2absolute(&tm, time(NULL));
+		/* here we do want local time, as we're passing local time in above! */
+		ret = mktime(&tm);
+		break;
+	default:
+		return (time_t) -1;
+	}
+
+	return ret;
 }
