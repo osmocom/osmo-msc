@@ -98,6 +98,17 @@ DEFUN(cfg_sms_db_del_expired, cfg_sms_db_del_expired_cmd,
 	return CMD_SUCCESS;
 }
 
+DEFUN(cfg_sms_def_val_per, cfg_sms_def_val_per_cmd,
+      "validity-period default <1-5256000>",
+      "Configure validity period for SMS\n"
+      "Default SMS validity period in minutes\n"
+      "Default SMS validity period in minutes\n")
+{
+	smqcfg->default_validity_mins = atoi(argv[0]);
+	return CMD_SUCCESS;
+}
+
+
 /***********************************************************************
  * View / Enable Node
  ***********************************************************************/
@@ -166,6 +177,8 @@ static int config_write_smsc(struct vty *vty)
 	vty_out(vty, " database delete-delivered %u%s", smqcfg->delete_delivered, VTY_NEWLINE);
 	vty_out(vty, " database delete-expired %u%s", smqcfg->delete_expired, VTY_NEWLINE);
 
+	vty_out(vty, " validity-period default %u%s", smqcfg->default_validity_mins, VTY_NEWLINE);
+
 	return 0;
 }
 
@@ -183,6 +196,7 @@ void smsc_vty_init(struct gsm_network *msc_network)
 	install_element(SMSC_NODE, &cfg_sms_queue_fail_cmd);
 	install_element(SMSC_NODE, &cfg_sms_db_del_delivered_cmd);
 	install_element(SMSC_NODE, &cfg_sms_db_del_expired_cmd);
+	install_element(SMSC_NODE, &cfg_sms_def_val_per_cmd);
 
 	/* enable node */
 	install_element(ENABLE_NODE, &smsqueue_trigger_cmd);

@@ -263,7 +263,7 @@ static int submit_to_sms(struct gsm_sms **psms, struct gsm_network *net,
 
 	t_validity_absolute = smpp_parse_time_format((const char *) submit->validity_period, &t_now);
 	if (!t_validity_absolute)
-		sms->validity_minutes = 7 * 24 * 60;	/* default: 7 days */
+		sms->validity_minutes = net->sms_queue_cfg->default_validity_mins;
 	else
 		sms->validity_minutes = (t_validity_absolute - t_now) / 60;
 
