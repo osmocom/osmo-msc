@@ -67,6 +67,7 @@ libmsc_a_SOURCES = \
 	sdp_msg.c \
 	silent_call.c \
 	sms_queue.c \
+	smsc_vty.c \
 	transaction.c \
 	msc_net_init.c \
 	ctrl_commands.c \

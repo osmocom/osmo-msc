@@ -410,7 +410,7 @@ DEFUN(cfg_msc, cfg_msc_cmd,
 #define MNCC_GUARD_TIMEOUT_STR "Set global guard timer for mncc interface activity\n"
 #define MNCC_GUARD_TIMEOUT_VALUE_STR "guard timer value (sec.)\n"
 
-DEFUN(cfg_sms_database, cfg_sms_database_cmd,
+DEFUN_DEPRECATED(cfg_sms_database, cfg_sms_database_cmd,
 	"sms-database PATH",
 	"Set the path to the MSC-SMS database file\n"
 	"Relative or absolute file system path to the database file (default is '" SMS_DEFAULT_DB_FILE_PATH "')\n")
@@ -754,8 +754,6 @@ DEFUN(show_nri, show_nri_cmd,
 static int config_write_msc(struct vty *vty)
 {
 	vty_out(vty, "msc%s", VTY_NEWLINE);
-	if (gsmnet->sms_queue_cfg->db_file_path && strcmp(gsmnet->sms_queue_cfg->db_file_path, SMS_DEFAULT_DB_FILE_PATH))
-		vty_out(vty, " sms-database %s%s", gsmnet->sms_queue_cfg->db_file_path, VTY_NEWLINE);
 	if (gsmnet->mncc_sock_path)
 		vty_out(vty, " mncc external %s%s", gsmnet->mncc_sock_path, VTY_NEWLINE);
 	vty_out(vty, " mncc guard-timeout %i%s",
@@ -1860,51 +1858,6 @@ DEFUN(show_stats,
 	return CMD_SUCCESS;
 }
 
-DEFUN(show_smsqueue,
-      show_smsqueue_cmd,
-      "show sms-queue",
-      SHOW_STR "Display SMSqueue statistics\n")
-{
-	sms_queue_stats(gsmnet->sms_queue, vty);
-	return CMD_SUCCESS;
-}
-
-DEFUN(smsqueue_trigger,
-      smsqueue_trigger_cmd,
-      "sms-queue trigger",
-      "SMS Queue\n" "Trigger sending messages\n")
-{
-	sms_queue_trigger(gsmnet->sms_queue);
-	return CMD_SUCCESS;
-}
-
-DEFUN(smsqueue_max,
-      smsqueue_max_cmd,
-      "sms-queue max-pending <1-500>",
-      "SMS Queue\n" "SMS to deliver in parallel\n" "Amount\n")
-{
-	sms_queue_set_max_pending(gsmnet->sms_queue, atoi(argv[0]));
-	return CMD_SUCCESS;
-}
-
-DEFUN(smsqueue_clear,
-      smsqueue_clear_cmd,
-      "sms-queue clear",
-      "SMS Queue\n" "Clear the queue of pending SMS\n")
-{
-	sms_queue_clear(gsmnet->sms_queue);
-	return CMD_SUCCESS;
-}
-
-DEFUN(smsqueue_fail,
-      smsqueue_fail_cmd,
-      "sms-queue max-failure <1-500>",
-      "SMS Queue\n" "Maximum amount of delivery failures\n" "Amount\n")
-{
-	sms_queue_set_max_failure(gsmnet->sms_queue, atoi(argv[0]));
-	return CMD_SUCCESS;
-}
-
 
 DEFUN(cfg_mncc_int, cfg_mncc_int_cmd,
       "mncc-int", "Configure internal MNCC handler")
@@ -2118,6 +2071,7 @@ void msc_vty_init(struct gsm_network *msc_network)
 	ranap_iu_vty_init(MSC_NODE, (enum ranap_nsap_addr_enc*)&msc_network->iu.rab_assign_addr_enc);
 #endif
 	sgs_vty_init();
+	smsc_vty_init(msc_network);
 
 	osmo_fsm_vty_add_cmds();
 
@@ -2143,14 +2097,9 @@ void msc_vty_init(struct gsm_network *msc_network)
 	install_element_ve(&subscriber_mstest_open_cmd);
 	install_element_ve(&subscriber_paging_cmd);
 	install_element_ve(&show_stats_cmd);
-	install_element_ve(&show_smsqueue_cmd);
 	install_element_ve(&logging_fltr_imsi_cmd);
 
 	install_element(ENABLE_NODE, &ena_subscr_expire_cmd);
-	install_element(ENABLE_NODE, &smsqueue_trigger_cmd);
-	install_element(ENABLE_NODE, &smsqueue_max_cmd);
-	install_element(ENABLE_NODE, &smsqueue_clear_cmd);
-	install_element(ENABLE_NODE, &smsqueue_fail_cmd);
 	install_element(ENABLE_NODE, &subscriber_send_pending_sms_cmd);
 	install_element(ENABLE_NODE, &subscriber_sms_delete_all_cmd);
 
