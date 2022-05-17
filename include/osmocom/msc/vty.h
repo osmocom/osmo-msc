@@ -24,11 +24,13 @@ enum bsc_vty_node {
 	SMPP_ESME_NODE,
 	HLR_NODE,
 	CFG_SGS_NODE,
+	SMSC_NODE,
 };
 
 int bsc_vty_init_extra(void);
 
 void msc_vty_init(struct gsm_network *msc_network);
+void smsc_vty_init(struct gsm_network *msc_network);
 
 struct gsm_network *gsmnet_from_vty(struct vty *vty);
 

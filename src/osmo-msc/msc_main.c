@@ -205,7 +205,7 @@ static void handle_options(int argc, char **argv)
 			break;
 		case 'l':
 			fprintf(stderr, "Command line argument '-%c' is deprecated, use VTY "
-				"parameter 'msc' / 'sms-database %s' instead.\n", c, optarg);
+				"parameter 'smsc' / 'database %s' instead.\n", c, optarg);
 			exit(2);
 			break;
 		case 'c':

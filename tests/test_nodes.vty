@@ -5,6 +5,7 @@ OsmoMSC(config)# list
   network
   msc
   sgs
+  smsc
   mncc-int
   hlr
 ...
@@ -46,7 +47,6 @@ OsmoMSC(config-net)# exit
 OsmoMSC(config)# msc
 OsmoMSC(config-msc)# list
 ...
-  sms-database PATH
   assign-tmsi
   lcls-permitted
   no lcls-permitted
@@ -178,6 +178,9 @@ sgs
  local-port 29118
  local-ip 0.0.0.0
  vlr-name vlr.example.net
+smsc
+ queue max-pending 20
+ queue max-failure 1
 end
 
 OsmoMSC# configure terminal
