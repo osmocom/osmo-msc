@@ -76,6 +76,28 @@ DEFUN(cfg_sms_queue_fail, cfg_sms_queue_fail_cmd,
 	return CMD_SUCCESS;
 }
 
+#define DB_STR "SMS Database Configuration\n"
+
+DEFUN(cfg_sms_db_del_delivered, cfg_sms_db_del_delivered_cmd,
+      "database delete-delivered (0|1)",
+      DB_STR "Configure if delivered SMS are deleted from DB\n"
+      "Do not delete SMS after delivery\n"
+      "Delete SMS after delivery\n")
+{
+	smqcfg->delete_delivered = atoi(argv[0]);
+	return CMD_SUCCESS;
+}
+
+DEFUN(cfg_sms_db_del_expired, cfg_sms_db_del_expired_cmd,
+      "database delete-expired (0|1)",
+      DB_STR "Configure if expired SMS are deleted from DB\n"
+      "Do not delete SMS after expiration of validity period\n"
+      "Delete SMS after expiration of validity period\n")
+{
+	smqcfg->delete_expired = atoi(argv[0]);
+	return CMD_SUCCESS;
+}
+
 /***********************************************************************
  * View / Enable Node
  ***********************************************************************/
@@ -141,6 +163,9 @@ static int config_write_smsc(struct vty *vty)
 	vty_out(vty, " queue max-pending %u%s", smqcfg->max_pending, VTY_NEWLINE);
 	vty_out(vty, " queue max-failure %u%s", smqcfg->max_fail, VTY_NEWLINE);
 
+	vty_out(vty, " database delete-delivered %u%s", smqcfg->delete_delivered, VTY_NEWLINE);
+	vty_out(vty, " database delete-expired %u%s", smqcfg->delete_expired, VTY_NEWLINE);
+
 	return 0;
 }
 
@@ -156,6 +181,8 @@ void smsc_vty_init(struct gsm_network *msc_network)
 	install_element(SMSC_NODE, &cfg_sms_database_cmd);
 	install_element(SMSC_NODE, &cfg_sms_queue_max_cmd);
 	install_element(SMSC_NODE, &cfg_sms_queue_fail_cmd);
+	install_element(SMSC_NODE, &cfg_sms_db_del_delivered_cmd);
+	install_element(SMSC_NODE, &cfg_sms_db_del_expired_cmd);
 
 	/* enable node */
 	install_element(ENABLE_NODE, &smsqueue_trigger_cmd);

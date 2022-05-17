@@ -472,6 +472,8 @@ struct sms_queue_config *sms_queue_cfg_alloc(void *ctx)
 
 	sqcfg->max_pending = 20;
 	sqcfg->max_fail = 1;
+	sqcfg->delete_delivered = true;
+	sqcfg->delete_expired = true;
 	sqcfg->db_file_path = talloc_strdup(ctx, SMS_DEFAULT_DB_FILE_PATH);
 
 	return sqcfg;
@@ -615,7 +617,8 @@ static int sms_sms_cb(unsigned int subsys, unsigned int signal,
 		/* Remember the subscriber and clear the pending entry */
 		vsub = pending->vsub;
 		vlr_subscr_get(vsub, __func__);
-		db_sms_delete_sent_message_by_id(pending->sms_id);
+		if (smq->cfg->delete_delivered)
+			db_sms_delete_sent_message_by_id(pending->sms_id);
 		sms_pending_free(smq, pending);
 		/* Attempt to send another SMS to this subscriber */
 		sms_send_next(vsub);
@@ -653,7 +656,8 @@ static int sms_sms_cb(unsigned int subsys, unsigned int signal,
 	}
 
 	/* While here, attempt to remove an expired SMS from the DB. */
-	db_sms_delete_oldest_expired_message();
+	if (smq->cfg->delete_expired)
+		db_sms_delete_oldest_expired_message();
 
 	return 0;
 }

@@ -181,6 +181,8 @@ sgs
 smsc
  queue max-pending 20
  queue max-failure 1
+ database delete-delivered 1
+ database delete-expired 1
 end
 
 OsmoMSC# configure terminal
