@@ -1,6 +1,8 @@
 #ifndef SMS_QUEUE_H
 #define SMS_QUEUE_H
 
+#include <stdbool.h>
+
 struct gsm_network;
 struct gsm_sms_queue;
 struct vty;
@@ -9,6 +11,8 @@ struct sms_queue_config {
 	char *db_file_path;			/* SMS database file path */
 	int max_fail;				/* maximum number of delivery failures */
 	int max_pending;			/* maximum number of gsm_sms_pending in RAM */
+	bool delete_delivered;			/* delete delivered SMS from DB? */
+	bool delete_expired;			/* delete expired SMS from DB? */
 };
 
 struct sms_queue_config *sms_queue_cfg_alloc(void *ctx);
