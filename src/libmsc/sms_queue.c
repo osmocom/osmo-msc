@@ -474,6 +474,7 @@ struct sms_queue_config *sms_queue_cfg_alloc(void *ctx)
 	sqcfg->max_fail = 1;
 	sqcfg->delete_delivered = true;
 	sqcfg->delete_expired = true;
+	sqcfg->default_validity_mins = 7 * 24 * 60; /* 7 days */
 	sqcfg->db_file_path = talloc_strdup(ctx, SMS_DEFAULT_DB_FILE_PATH);
 
 	return sqcfg;
