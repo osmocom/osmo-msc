@@ -584,6 +584,7 @@ static int sms_sms_cb(unsigned int subsys, unsigned int signal,
 		      void *handler_data, void *signal_data)
 {
 	struct gsm_network *network = handler_data;
+	struct gsm_sms_queue *smq = network->sms_queue;
 	struct sms_signal_data *sig_sms = signal_data;
 	struct gsm_sms_pending *pending;
 	struct vlr_subscr *vsub;
@@ -591,7 +592,7 @@ static int sms_sms_cb(unsigned int subsys, unsigned int signal,
 	/* We got a new SMS and maybe should launch the queue again. */
 	if (signal == S_SMS_SUBMITTED || signal == S_SMS_SMMA) {
 		/* TODO: For SMMA we might want to re-use the radio connection. */
-		sms_queue_trigger(network->sms_queue);
+		sms_queue_trigger(smq);
 		return 0;
 	}
 
@@ -604,26 +605,26 @@ static int sms_sms_cb(unsigned int subsys, unsigned int signal,
 	 * sms that are not in our control as we just have a channel
 	 * open anyway.
 	 */
-	pending = sms_find_pending(network->sms_queue, sig_sms->sms->id);
+	pending = sms_find_pending(smq, sig_sms->sms->id);
 	if (!pending)
 		return 0;
 
 	switch (signal) {
 	case S_SMS_DELIVERED:
-		smsq_rate_ctr_inc(network->sms_queue, SMSQ_CTR_SMS_DELIVERY_ACK);
+		smsq_rate_ctr_inc(smq, SMSQ_CTR_SMS_DELIVERY_ACK);
 		/* Remember the subscriber and clear the pending entry */
 		vsub = pending->vsub;
 		vlr_subscr_get(vsub, __func__);
 		db_sms_delete_sent_message_by_id(pending->sms_id);
-		sms_pending_free(network->sms_queue, pending);
+		sms_pending_free(smq, pending);
 		/* Attempt to send another SMS to this subscriber */
 		sms_send_next(vsub);
 		vlr_subscr_put(vsub, __func__);
 		break;
 	case S_SMS_MEM_EXCEEDED:
-		smsq_rate_ctr_inc(network->sms_queue, SMSQ_CTR_SMS_DELIVERY_NOMEM);
-		sms_pending_free(network->sms_queue, pending);
-		sms_queue_trigger(network->sms_queue);
+		smsq_rate_ctr_inc(smq, SMSQ_CTR_SMS_DELIVERY_NOMEM);
+		sms_pending_free(smq, pending);
+		sms_queue_trigger(smq);
 		break;
 	case S_SMS_UNKNOWN_ERROR:
 		/*
@@ -637,12 +638,12 @@ static int sms_sms_cb(unsigned int subsys, unsigned int signal,
 		 * should flag the SMS as bad.
 		 */
 		if (sig_sms->paging_result) {
-			smsq_rate_ctr_inc(network->sms_queue, SMSQ_CTR_SMS_DELIVERY_ERR);
+			smsq_rate_ctr_inc(smq, SMSQ_CTR_SMS_DELIVERY_ERR);
 			/* BAD SMS? */
 			db_sms_inc_deliver_attempts(sig_sms->sms);
 			sms_pending_failed(pending, 0);
 		} else {
-			smsq_rate_ctr_inc(network->sms_queue, SMSQ_CTR_SMS_DELIVERY_TIMEOUT);
+			smsq_rate_ctr_inc(smq, SMSQ_CTR_SMS_DELIVERY_TIMEOUT);
 			sms_pending_failed(pending, 1);
 		}
 		break;
