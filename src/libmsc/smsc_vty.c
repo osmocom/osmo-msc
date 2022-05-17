@@ -99,12 +99,16 @@ DEFUN(cfg_sms_db_del_expired, cfg_sms_db_del_expired_cmd,
 }
 
 DEFUN(cfg_sms_def_val_per, cfg_sms_def_val_per_cmd,
-      "validity-period default <1-5256000>",
+      "validity-period (minimum|default) <1-5256000>",
       "Configure validity period for SMS\n"
+      "Minimum SMS validity period in minutes\n"
       "Default SMS validity period in minutes\n"
-      "Default SMS validity period in minutes\n")
+      "Validity period in minutes\n")
 {
-	smqcfg->default_validity_mins = atoi(argv[0]);
+	if (!strcmp(argv[0], "minimum"))
+		smqcfg->minimum_validity_mins = atoi(argv[1]);
+	else
+		smqcfg->default_validity_mins = atoi(argv[1]);
 	return CMD_SUCCESS;
 }
 
@@ -177,6 +181,7 @@ static int config_write_smsc(struct vty *vty)
 	vty_out(vty, " database delete-delivered %u%s", smqcfg->delete_delivered, VTY_NEWLINE);
 	vty_out(vty, " database delete-expired %u%s", smqcfg->delete_expired, VTY_NEWLINE);
 
+	vty_out(vty, " validity-period minimum %u%s", smqcfg->minimum_validity_mins, VTY_NEWLINE);
 	vty_out(vty, " validity-period default %u%s", smqcfg->default_validity_mins, VTY_NEWLINE);
 
 	return 0;

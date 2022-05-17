@@ -267,6 +267,13 @@ static int submit_to_sms(struct gsm_sms **psms, struct gsm_network *net,
 	else
 		sms->validity_minutes = (t_validity_absolute - t_now) / 60;
 
+	if (sms->validity_minutes < net->sms_queue_cfg->minimum_validity_mins) {
+		LOGP(DLSMS, LOGL_INFO, "SMS to %s: Overriding ESME-provided validity period (%lu) "
+		     "with minimum SMSC validity period (%u) minutes\n", submit->destination_addr,
+		     sms->validity_minutes, net->sms_queue_cfg->minimum_validity_mins);
+		sms->validity_minutes = net->sms_queue_cfg->minimum_validity_mins;
+	}
+
 	*psms = sms;
 	return ESME_ROK;
 }
