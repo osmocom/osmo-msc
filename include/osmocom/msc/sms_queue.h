@@ -5,10 +5,18 @@ struct gsm_network;
 struct gsm_sms_queue;
 struct vty;
 
+struct sms_queue_config {
+	char *db_file_path;			/* SMS database file path */
+	int max_fail;				/* maximum number of delivery failures */
+	int max_pending;			/* maximum number of gsm_sms_pending in RAM */
+};
+
+struct sms_queue_config *sms_queue_cfg_alloc(void *ctx);
+
 #define VSUB_USE_SMS_PENDING "SMS-pending"
 #define MSC_A_USE_SMS_PENDING "SMS-pending"
 
-int sms_queue_start(struct gsm_network *, int in_flight);
+int sms_queue_start(struct gsm_network *net);
 int sms_queue_trigger(struct gsm_sms_queue *);
 
 /* vty helper functions */

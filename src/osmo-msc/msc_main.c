@@ -100,12 +100,10 @@ void *tall_map_ctx = NULL;
 /* end deps from libbsc legacy. */
 
 static struct {
-	const char *database_name;
 	const char *config_file;
 	int daemonize;
 	const char *mncc_sock_path;
 } msc_cmdline_config = {
-	.database_name = NULL,
 	.config_file = "osmo-msc.cfg",
 };
 
@@ -206,9 +204,9 @@ static void handle_options(int argc, char **argv)
 			msc_cmdline_config.daemonize = 1;
 			break;
 		case 'l':
-			msc_cmdline_config.database_name = optarg;
 			fprintf(stderr, "Command line argument '-%c' is deprecated, use VTY "
 				"parameter 'msc' / 'sms-database %s' instead.\n", c, optarg);
+			exit(2);
 			break;
 		case 'c':
 			msc_cmdline_config.config_file = optarg;
@@ -264,6 +262,7 @@ struct gsm_network *msc_network_alloc(void *ctx,
 
 	net->mgw.tdefs = g_mgw_tdefs;
 	osmo_tdefs_reset(net->mgw.tdefs);
+	net->sms_queue_cfg = sms_queue_cfg_alloc(ctx);
 
 	return net;
 }
@@ -683,14 +682,6 @@ TODO: we probably want some of the _net_ ctrl commands from bsc_base_ctrl_cmds_i
 	/* TODO: is this used for crypto?? Improve randomness, at least we
 	 * should try to use the nanoseconds part of the current time. */
 
-	if (msc_cmdline_config.database_name)
-		osmo_talloc_replace_string(msc_network, &msc_network->sms_db_file_path, msc_cmdline_config.database_name);
-	if (db_init(tall_msc_ctx, msc_network->sms_db_file_path, true)) {
-		fprintf(stderr, "DB: Failed to init database: %s\n",
-			osmo_quote_str((char*)msc_network->sms_db_file_path, -1));
-		return 4;
-	}
-
 	if (msc_gsup_client_start(msc_network)) {
 		fprintf(stderr, "Failed to start GSUP client\n");
 		exit(1);
@@ -703,11 +694,6 @@ TODO: we probably want some of the _net_ ctrl commands from bsc_base_ctrl_cmds_i
 		exit(1);
 	}
 
-	if (db_prepare()) {
-		fprintf(stderr, "DB: Failed to prepare database.\n");
-		return 5;
-	}
-
 	signal(SIGINT, &signal_handler);
 	signal(SIGTERM, &signal_handler);
 	signal(SIGABRT, &signal_handler);
@@ -716,7 +702,7 @@ TODO: we probably want some of the _net_ ctrl commands from bsc_base_ctrl_cmds_i
 	osmo_init_ignore_signals();
 
 	/* start the SMS queue */
-	if (sms_queue_start(msc_network, 20) != 0)
+	if (sms_queue_start(msc_network) != 0)
 		return -1;
 
 	msc_network->mgw.client = mgcp_client_init(

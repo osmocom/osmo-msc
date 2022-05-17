@@ -415,7 +415,7 @@ DEFUN(cfg_sms_database, cfg_sms_database_cmd,
 	"Set the path to the MSC-SMS database file\n"
 	"Relative or absolute file system path to the database file (default is '" SMS_DEFAULT_DB_FILE_PATH "')\n")
 {
-	osmo_talloc_replace_string(gsmnet, &gsmnet->sms_db_file_path, argv[0]);
+	osmo_talloc_replace_string(gsmnet, &gsmnet->sms_queue_cfg->db_file_path, argv[0]);
 	return CMD_SUCCESS;
 }
 
@@ -754,8 +754,8 @@ DEFUN(show_nri, show_nri_cmd,
 static int config_write_msc(struct vty *vty)
 {
 	vty_out(vty, "msc%s", VTY_NEWLINE);
-	if (gsmnet->sms_db_file_path && strcmp(gsmnet->sms_db_file_path, SMS_DEFAULT_DB_FILE_PATH))
-		vty_out(vty, " sms-database %s%s", gsmnet->sms_db_file_path, VTY_NEWLINE);
+	if (gsmnet->sms_queue_cfg->db_file_path && strcmp(gsmnet->sms_queue_cfg->db_file_path, SMS_DEFAULT_DB_FILE_PATH))
+		vty_out(vty, " sms-database %s%s", gsmnet->sms_queue_cfg->db_file_path, VTY_NEWLINE);
 	if (gsmnet->mncc_sock_path)
 		vty_out(vty, " mncc external %s%s", gsmnet->mncc_sock_path, VTY_NEWLINE);
 	vty_out(vty, " mncc guard-timeout %i%s",

@@ -124,11 +124,9 @@ struct gsm_sms_queue {
 	struct osmo_timer_list resend_pending;	/* timer triggering sms_resend_pending() */
 	struct osmo_timer_list push_queue;	/* timer triggering sms_submit_pending() */
 	struct gsm_network *network;
-	int max_fail;				/* maximum number of delivery failures */
-	int max_pending;			/* maximum number of gsm_sms_pending in RAM */
-	int pending;				/* current number of gsm_sms_pending in RAM */
-
 	struct llist_head pending_sms;		/* list of gsm_sms_pending */
+	struct sms_queue_config *cfg;
+	int pending;				/* current number of gsm_sms_pending in RAM */
 
 	/* last MSISDN for which we read SMS from the database and created gsm_sms_pending records */
 	char last_msisdn[GSM23003_MSISDN_MAX_DIGITS+1];
@@ -251,7 +249,7 @@ static void sms_pending_failed(struct gsm_sms_pending *pending, int paging_error
 	     pending->sms_id, pending->failed_attempts);
 
 	smsq = net->sms_queue;
-	if (pending->failed_attempts < smsq->max_fail)
+	if (pending->failed_attempts < smsq->cfg->max_fail)
 		return sms_pending_resend(pending);
 
 	sms_pending_free(smsq, pending);
@@ -342,7 +340,7 @@ struct gsm_sms *smsq_take_next_sms(struct gsm_network *net,
 static void sms_submit_pending(void *_data)
 {
 	struct gsm_sms_queue *smsq = _data;
-	int attempts = smsq->max_pending - smsq->pending;
+	int attempts = smsq->cfg->max_pending - smsq->pending;
 	int initialized = 0;
 	unsigned long long first_sub = 0;
 	int attempted = 0, rounds = 0;
@@ -466,9 +464,22 @@ int sms_queue_trigger(struct gsm_sms_queue *smsq)
 	return 0;
 }
 
+/* allocate + initialize SMS queue configuration with some default values */
+struct sms_queue_config *sms_queue_cfg_alloc(void *ctx)
+{
+	struct sms_queue_config *sqcfg = talloc_zero(ctx, struct sms_queue_config);
+	OSMO_ASSERT(sqcfg);
+
+	sqcfg->max_pending = 20;
+	sqcfg->max_fail = 1;
+	sqcfg->db_file_path = talloc_strdup(ctx, SMS_DEFAULT_DB_FILE_PATH);
+
+	return sqcfg;
+}
+
 /* initialize the sms_queue subsystem and read the first batch of SMS from
  * the database for delivery */
-int sms_queue_start(struct gsm_network *network, int max_pending)
+int sms_queue_start(struct gsm_network *network)
 {
 	struct gsm_sms_queue *sms = talloc_zero(network, struct gsm_sms_queue);
 	if (!sms) {
@@ -476,6 +487,7 @@ int sms_queue_start(struct gsm_network *network, int max_pending)
 		return -1;
 	}
 
+	sms->cfg = network->sms_queue_cfg;
 	sms->statg = osmo_stat_item_group_alloc(sms, &smsq_statg_desc, 0);
 	if (!sms->statg)
 		goto err_free;
@@ -486,14 +498,23 @@ int sms_queue_start(struct gsm_network *network, int max_pending)
 
 	network->sms_queue = sms;
 	INIT_LLIST_HEAD(&sms->pending_sms);
-	sms->max_fail = 1;
 	sms->network = network;
-	sms->max_pending = max_pending;
 	osmo_timer_setup(&sms->push_queue, sms_submit_pending, sms);
 	osmo_timer_setup(&sms->resend_pending, sms_resend_pending, sms);
 
 	osmo_signal_register_handler(SS_SUBSCR, sms_subscr_cb, network);
 	osmo_signal_register_handler(SS_SMS, sms_sms_cb, network);
+
+	if (db_init(sms, sms->cfg->db_file_path, true)) {
+		LOGP(DMSC, LOGL_FATAL, "DB: Failed to init database: %s\n",
+			osmo_quote_str(sms->cfg->db_file_path, -1));
+		return -1;
+	}
+
+	if (db_prepare()) {
+		LOGP(DMSC, LOGL_FATAL, "DB: Failed to prepare database.\n");
+		return -1;
+	}
 
 	sms_submit_pending(sms);
 
@@ -642,7 +663,7 @@ int sms_queue_stats(struct gsm_sms_queue *smsq, struct vty *vty)
 	struct gsm_sms_pending *pending;
 
 	vty_out(vty, "SMSqueue with max_pending: %d pending: %d%s",
-		smsq->max_pending, smsq->pending, VTY_NEWLINE);
+		smsq->cfg->max_pending, smsq->pending, VTY_NEWLINE);
 
 	llist_for_each_entry(pending, &smsq->pending_sms, entry)
 		vty_out(vty, " SMS Pending for Subscriber: %llu SMS: %llu Failed: %d.%s",
@@ -654,16 +675,16 @@ int sms_queue_stats(struct gsm_sms_queue *smsq, struct vty *vty)
 int sms_queue_set_max_pending(struct gsm_sms_queue *smsq, int max_pending)
 {
 	LOGP(DLSMS, LOGL_NOTICE, "SMSqueue old max: %d new: %d\n",
-	     smsq->max_pending, max_pending);
-	smsq->max_pending = max_pending;
+	     smsq->cfg->max_pending, max_pending);
+	smsq->cfg->max_pending = max_pending;
 	return 0;
 }
 
 int sms_queue_set_max_failure(struct gsm_sms_queue *smsq, int max_fail)
 {
 	LOGP(DLSMS, LOGL_NOTICE, "SMSqueue max failure old: %d new: %d\n",
-	     smsq->max_fail, max_fail);
-	smsq->max_fail = max_fail;
+	     smsq->cfg->max_fail, max_fail);
+	smsq->cfg->max_fail = max_fail;
 	return 0;
 }
 

@@ -19,6 +19,7 @@
 
 #include <osmocom/msc/msc_common.h>
 #include <osmocom/msc/neighbor_ident.h>
+#include <osmocom/msc/sms_queue.h>
 
 #include "gsm_data_shared.h"
 #include "osmux.h"
@@ -263,7 +264,8 @@ struct gsm_network {
 	/* Whether to use lcls on the network */
 	bool lcls_permitted;
 
-	char *sms_db_file_path;
+	/* SMS queue config parameters */
+	struct sms_queue_config *sms_queue_cfg;
 };
 
 struct osmo_esme;
