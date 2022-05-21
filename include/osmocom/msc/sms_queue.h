@@ -2,9 +2,26 @@
 #define SMS_QUEUE_H
 
 #include <stdbool.h>
+#include <osmocom/core/timer.h>
+#include <osmocom/msc/gsm_subscriber.h>
 
 struct gsm_network;
-struct gsm_sms_queue;
+/* (global) state of the SMS queue. */
+struct gsm_sms_queue {
+	struct osmo_timer_list resend_pending;	/* timer triggering sms_resend_pending() */
+	struct osmo_timer_list push_queue;	/* timer triggering sms_submit_pending() */
+	struct gsm_network *network;
+	struct llist_head pending_sms;		/* list of gsm_sms_pending */
+	struct sms_queue_config *cfg;
+	int pending;				/* current number of gsm_sms_pending in RAM */
+
+	/* last MSISDN for which we read SMS from the database and created gsm_sms_pending records */
+	char last_msisdn[GSM23003_MSISDN_MAX_DIGITS+1];
+
+	/* statistics / counters */
+	struct osmo_stat_item_group *statg;
+	struct rate_ctr_group *ctrg;
+};
 struct vty;
 
 struct sms_queue_config {

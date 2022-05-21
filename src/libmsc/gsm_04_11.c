@@ -56,6 +56,7 @@
 #include <osmocom/msc/msub.h>
 #include <osmocom/msc/msc_a.h>
 #include <osmocom/msc/paging.h>
+#include <osmocom/msc/sms_queue.h>
 
 #ifdef BUILD_SMPP
 #include "smpp_smsc.h"
@@ -845,6 +846,7 @@ static int gsm411_rx_rp_ack(struct gsm_trans *trans,
 			    struct gsm411_rp_hdr *rph)
 {
 	struct gsm_sms *sms = trans->sms.sms;
+	struct gsm_sms_queue *smq = trans->net->sms_queue;
 
 	/* Acnkowledgement to MT RP_DATA, i.e. the MS confirms it
 	 * successfully received a SMS.  We can now safely mark it as
@@ -861,8 +863,12 @@ static int gsm411_rx_rp_ack(struct gsm_trans *trans,
 					    GSM411_RP_CAUSE_PROTOCOL_ERR);
 	}
 
-	/* mark this SMS as sent in database */
-	db_sms_mark_delivered(sms);
+	/* It seems there's little point in marking this SMS as sent in database
+	   if the very next thing that happens to it is it will be deleted in the
+	   signal callback. Let's do that deletion here. */
+
+	if (smq->cfg->delete_delivered == 0)
+		db_sms_mark_delivered(sms);
 
 	send_signal(S_SMS_DELIVERED, trans, sms, 0);
 
