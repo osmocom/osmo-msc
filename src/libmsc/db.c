@@ -565,9 +565,15 @@ int db_init(void *ctx, const char *fname, bool enable_sqlite_logging)
 	}
 
 	char *err_msg;
-	rc = sqlite3_exec(g_dbc->db, "PRAGMA journal_mode=WAL; PRAGMA synchronous = NORMAL;", 0, 0, &err_msg);
+	rc = sqlite3_exec(g_dbc->db, "PRAGMA journal_mode=WAL; PRAGMA synchronous=NORMAL;", 0, 0, &err_msg);
 	if (rc != SQLITE_OK) {
 		LOGP(DDB, LOGL_ERROR, "Unable to set Write-Ahead Logging: %s\n", err_msg);
+		sqlite3_free(err_msg);
+		/* non-fatal */
+	}
+	rc = sqlite3_exec(g_dbc->db, "PRAGMA secure_delete=0;", 0, 0, &err_msg);
+	if (rc != SQLITE_OK) {
+		LOGP(DDB, LOGL_ERROR, "Unable to disable SECURE_DELETE: %s\n", err_msg);
 		sqlite3_free(err_msg);
 		/* non-fatal */
 	}
