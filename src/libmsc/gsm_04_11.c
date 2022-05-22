@@ -507,6 +507,22 @@ static int gsm340_rx_tpdu(struct gsm_trans *trans, struct msgb *msg,
 	if (!gsms)
 		return GSM411_RP_CAUSE_MO_NET_OUT_OF_ORDER;
 
+	/* determine the source of the SMS */
+	switch (trans->msc_a->c.ran->type) {
+	case OSMO_RAT_GERAN_A:
+		gsms->source = SMS_SOURCE_MS_GSM;
+		break;
+	case OSMO_RAT_UTRAN_IU:
+		gsms->source = SMS_SOURCE_MS_UMTS;
+		break;
+	case OSMO_RAT_EUTRAN_SGS:
+		gsms->source = SMS_SOURCE_MS_SGS;
+		break;
+	default:
+		gsms->source = SMS_SOURCE_UNKNOWN;
+		break;
+	}
+
 	/* invert those fields where 0 means active/present */
 	sms_mti = *smsp & 0x03;
 	sms_vpf = (*smsp & 0x18) >> 3;

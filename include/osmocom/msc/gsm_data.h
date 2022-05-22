@@ -272,7 +272,9 @@ struct osmo_esme;
 
 enum gsm_sms_source_id {
 	SMS_SOURCE_UNKNOWN = 0,
-	SMS_SOURCE_MS,		/* received from MS */
+	SMS_SOURCE_MS_GSM,	/* received from MS (GSM) */
+	SMS_SOURCE_MS_UMTS,	/* received from MS (UMTS) */
+	SMS_SOURCE_MS_SGS,	/* received from MS (SGs / LTE) */
 	SMS_SOURCE_VTY,		/* received from VTY */
 	SMS_SOURCE_SMPP,	/* received via SMPP */
 };
