@@ -49,6 +49,7 @@ PKG_CHECK_MODULES(LIBOSMOMGCPCLIENT, libosmo-mgcp-client >= 1.9.0)
 PKG_CHECK_MODULES(LIBOSMOGSUPCLIENT, libosmo-gsup-client >= 1.4.0)
 
 AC_CHECK_FUNC([timegm], [AC_DEFINE(HAVE_TIMEGM, 1, Define if libc implements timegm)])
+AC_CHECK_FUNC([inotify_init], [AC_DEFINE(HAVE_INOTIFY, 1, Define if OS/libc implements inotify)])
 
 old_LIBS=$LIBS
 AC_SEARCH_LIBS([sctp_send], [sctp], [

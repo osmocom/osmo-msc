@@ -288,6 +288,7 @@ struct gsm_sms_addr {
 };
 
 struct gsm_sms {
+	struct llist_head list;
 	unsigned long long id;
 	struct vlr_subscr *receiver;
 	struct gsm_sms_addr src, dst;

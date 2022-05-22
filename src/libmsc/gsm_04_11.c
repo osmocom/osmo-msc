@@ -31,6 +31,7 @@
 #include <string.h>
 #include <errno.h>
 #include <time.h>
+#include <pthread.h>
 #include <netinet/in.h>
 
 #include "config.h"
@@ -62,13 +63,24 @@
 #endif
 
 void *tall_gsms_ctx;
+static pthread_mutex_t tall_sms_mutex;
 static uint32_t new_callref = 0x40000001;
+
+static void __attribute__((constructor)) __sms_init(void)
+{
+	pthread_mutex_init(&tall_sms_mutex, NULL);
+}
 
 struct gsm_sms *sms_alloc(void)
 {
-	return talloc_zero(tall_gsms_ctx, struct gsm_sms);
+	struct gsm_sms *sms;
+	pthread_mutex_lock(&tall_sms_mutex);
+	sms = talloc_zero(tall_gsms_ctx, struct gsm_sms);
+	pthread_mutex_unlock(&tall_sms_mutex);
+	return sms;
 }
 
+/* MUST ONLY BE CALLED ON MAIN THREAD */
 void sms_free(struct gsm_sms *sms)
 {
 	/* drop references to subscriber structure */
@@ -79,7 +91,9 @@ void sms_free(struct gsm_sms *sms)
 		smpp_esme_put(sms->smpp.esme);
 #endif
 
+	pthread_mutex_lock(&tall_sms_mutex);
 	talloc_free(sms);
+	pthread_mutex_unlock(&tall_sms_mutex);
 }
 
 struct gsm_sms *sms_from_text(struct vlr_subscr *receiver,

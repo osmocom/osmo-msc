@@ -24,5 +24,6 @@ enum {
 	DBSSAP,
 	DSGS,
 	DSS,
+	DSMSS,
 	Debug_LastEntry,
 };
