@@ -1252,6 +1252,7 @@ static int _send_sms_str(struct vlr_subscr *receiver,
 	}
 
 	sms->protocol_id = tp_pid;
+	sms->source = SMS_SOURCE_VTY;
 
 	/* store in database for the queue */
 	if (db_sms_store(sms) != 0) {
