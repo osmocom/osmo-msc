@@ -21,6 +21,7 @@ struct sms_queue_config *sms_queue_cfg_alloc(void *ctx);
 
 #define VSUB_USE_SMS_PENDING "SMS-pending"
 #define MSC_A_USE_SMS_PENDING "SMS-pending"
+#define VSUB_USE_SMS_RECEIVER "SMS-receiver"
 
 int sms_queue_start(struct gsm_network *net);
 int sms_queue_trigger(struct gsm_sms_queue *);

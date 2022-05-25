@@ -39,7 +39,7 @@
 /* build switches from the configure script */
 #include "config.h"
 
-#include <osmocom/msc/db.h>
+#include <osmocom/msc/sms_storage.h>
 #include <osmocom/core/application.h>
 #include <osmocom/core/select.h>
 #include <osmocom/core/stats.h>
@@ -790,7 +790,6 @@ TODO: we probably want some of the _net_ ctrl commands from bsc_base_ctrl_cmds_i
 		}
 	} while (!osmo_select_shutdown_done());
 
-	db_fini();
 	log_fini();
 
 	/**

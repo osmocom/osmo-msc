@@ -182,6 +182,7 @@ struct gsm_network {
 	} rrlp;
 
 	struct gsm_sms_queue *sms_queue;
+	struct sms_storage_inst *sms_storage;
 
 	/* The "SMS over GSUP" kill-switch that basically breaks internal
 	 * SMS routing (i.e. SQLite DB and SMPP), and enables forwarding
@@ -317,6 +318,8 @@ struct gsm_sms {
 	uint8_t msg_ref;
 	uint8_t user_data_len;
 	uint8_t user_data[SMS_TEXT_SIZE];
+
+	int failed_attempts;
 
 	char text[SMS_TEXT_SIZE];
 };

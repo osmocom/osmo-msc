@@ -1,7 +1,6 @@
 noinst_HEADERS = \
 	call_leg.h \
 	cell_id_list.h \
-	db.h \
 	debug.h \
 	e_link.h \
 	gsm_04_08.h \
@@ -47,6 +46,7 @@ noinst_HEADERS = \
 	silent_call.h \
 	smpp.h \
 	sms_queue.h \
+	sms_storage.h \
 	transaction.h \
 	vlr.h \
 	vlr_sgs.h \

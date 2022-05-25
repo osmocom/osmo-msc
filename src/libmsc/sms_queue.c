@@ -1,6 +1,7 @@
 /* SMS queue to continuously attempt to deliver SMS */
 /*
  * (C) 2010 by Holger Hans Peter Freyther <zecke@selfish.org>
+ * (C) 2022 by Harald Welte <laforge@osmocom.org>
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -31,7 +32,7 @@
 #include <limits.h>
 
 #include <osmocom/msc/sms_queue.h>
-#include <osmocom/msc/db.h>
+#include <osmocom/msc/sms_storage.h>
 #include <osmocom/msc/debug.h>
 #include <osmocom/msc/gsm_data.h>
 #include <osmocom/msc/gsm_04_11.h>
@@ -109,6 +110,7 @@ static const struct rate_ctr_group_desc smsq_ctrg_desc = {
  * a pointer to the database record.  It holds a reference on the vlr_subscriber
  * and some counters.  While this object exists in RAM, we are regularly attempting
  * to deliver the related SMS. */
+#if 0
 struct gsm_sms_pending {
 	struct llist_head entry;	/* gsm_sms_queue.pending_sms */
 
@@ -118,6 +120,7 @@ struct gsm_sms_pending {
 	int failed_attempts;		/* count of failed deliver attempts so far */
 	int resend;			/* should we try re-sending it (now) ? */
 };
+#endif
 
 /* (global) state of the SMS queue. */
 struct gsm_sms_queue {
@@ -616,15 +619,12 @@ static int sms_sms_cb(unsigned int subsys, unsigned int signal,
 	switch (signal) {
 	case S_SMS_DELIVERED:
 		smsq_rate_ctr_inc(smq, SMSQ_CTR_SMS_DELIVERY_ACK);
-		/* Remember the subscriber and clear the pending entry */
-		vsub = pending->vsub;
-		vlr_subscr_get(vsub, __func__);
-		if (smq->cfg->delete_delivered)
-			db_sms_delete_sent_message_by_id(pending->sms_id);
-		sms_pending_free(smq, pending);
+		/* ask SMS thread to delete message from storage */
+		ms_storage_delete_from_disk_req(network->sms_storage, sms->id,
+				 		 SMSS_DELETE_CAUSE_DELIVERED);
+		sms_free(network->sms_storage, sms);
 		/* Attempt to send another SMS to this subscriber */
 		sms_send_next(vsub);
-		vlr_subscr_put(vsub, __func__);
 		break;
 	case S_SMS_MEM_EXCEEDED:
 		smsq_rate_ctr_inc(smq, SMSQ_CTR_SMS_DELIVERY_NOMEM);
@@ -656,10 +656,6 @@ static int sms_sms_cb(unsigned int subsys, unsigned int signal,
 		LOGP(DLSMS, LOGL_ERROR, "Unhandled result: %d\n",
 		     sig_sms->paging_result);
 	}
-
-	/* While here, attempt to remove an expired SMS from the DB. */
-	if (smq->cfg->delete_expired)
-		db_sms_delete_oldest_expired_message();
 
 	return 0;
 }

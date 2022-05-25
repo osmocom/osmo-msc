@@ -32,7 +32,6 @@ libmsc_a_SOURCES = \
 	cell_id_list.c \
 	sccp_ran.c \
 	msc_vty.c \
-	db.c \
 	e_link.c \
 	gsm_04_08.c \
 	gsm_04_08_cc.c \

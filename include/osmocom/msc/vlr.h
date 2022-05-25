@@ -199,6 +199,10 @@ struct vlr_subscr {
 		struct osmo_plmn_id last_eutran_plmn;
 	} sgs;
 
+	struct {
+		struct llist_head pending;
+	} sms;
+
 	struct osmo_gsm48_classmark classmark;
 };
 

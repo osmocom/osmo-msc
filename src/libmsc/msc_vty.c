@@ -54,8 +54,8 @@
 #include <osmocom/msc/msc_a.h>
 #include <osmocom/msc/vlr.h>
 #include <osmocom/msc/transaction.h>
-#include <osmocom/msc/db.h>
 #include <osmocom/msc/sms_queue.h>
+#include <osmocom/msc/sms_storage.h>
 #include <osmocom/msc/silent_call.h>
 #include <osmocom/msc/gsm_04_80.h>
 #include <osmocom/msc/gsm_04_14.h>

@@ -23,7 +23,6 @@
 #include <osmocom/core/utils.h>
 #include <osmocom/msc/gsm_data.h>
 #include <osmocom/msc/gsm_subscriber.h>
-#include <osmocom/msc/db.h>
 #include <osmocom/msc/debug.h>
 #include <osmocom/msc/vlr.h>
 

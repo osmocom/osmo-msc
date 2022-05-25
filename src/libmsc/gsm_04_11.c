@@ -47,11 +47,10 @@
 
 #include <osmocom/msc/debug.h>
 #include <osmocom/msc/gsm_data.h>
-#include <osmocom/msc/db.h>
+#include <osmocom/msc/sms_storage.h>
 #include <osmocom/msc/gsm_subscriber.h>
 #include <osmocom/msc/gsm_04_08.h>
 #include <osmocom/msc/signal.h>
-#include <osmocom/msc/db.h>
 #include <osmocom/msc/transaction.h>
 #include <osmocom/msc/vlr.h>
 #include <osmocom/msc/msub.h>
@@ -286,7 +285,7 @@ int gsm411_mn_send(struct gsm411_smr_inst *inst, int msg_type,
 
 static int gsm340_rx_sms_submit(struct gsm_trans *trans, struct gsm_sms *gsms)
 {
-	if (db_sms_store(gsms) != 0) {
+	if (sms_storage_to_disk_req(trans->net->sms_storage, gsms) != 0) {
 		LOG_TRANS(trans, LOGL_ERROR, "Failed to store SMS in Database\n");
 		return GSM411_RP_CAUSE_MO_NET_OUT_OF_ORDER;
 	}
@@ -892,7 +891,7 @@ static int gsm411_rx_rp_ack(struct gsm_trans *trans,
 	}
 
 	/* mark this SMS as sent in database */
-	db_sms_mark_delivered(sms);
+	sms_storage_delete_from_disk_req(trans->net->sms_storage, sms->id, SMSS_DELETE_CAUSE_DELIVERED);
 
 	send_signal(S_SMS_DELIVERED, trans, sms, 0);
 
@@ -1249,7 +1248,6 @@ int gsm411_send_sms(struct gsm_network *net,
 	trans->sms.sms = sms;
 
 	rate_ctr_inc(rate_ctr_group_get_ctr(net->msc_ctrs, MSC_CTR_SMS_DELIVERED));
-	db_sms_inc_deliver_attempts(trans->sms.sms);
 
 	return gsm411_rp_sendmsg(&trans->sms.smr_inst, msg,
 		GSM411_MT_RP_DATA_MT, trans->sms.sm_rp_mr,

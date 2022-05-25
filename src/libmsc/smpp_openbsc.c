@@ -40,7 +40,7 @@
 
 #include <osmocom/msc/gsm_subscriber.h>
 #include <osmocom/msc/debug.h>
-#include <osmocom/msc/db.h>
+#include <osmocom/msc/sms_storage.h>
 #include <osmocom/msc/gsm_04_11.h>
 #include <osmocom/msc/gsm_data.h>
 #include <osmocom/msc/signal.h>
@@ -300,8 +300,7 @@ int handle_smpp_submit(struct osmo_esme *esme, struct submit_sm_t *submit,
 	case 0: /* default */
 	case 1: /* datagram */
 	case 3: /* store-and-forward */
-		rc = db_sms_store(sms);
-		sms_free(sms);
+		rc = sms_storage_to_disk_req(net->sms_storage, sms);
 		sms = NULL;
 		if (rc < 0) {
 			LOGP(DLSMS, LOGL_ERROR, "SMPP SUBMIT-SM: Unable to "

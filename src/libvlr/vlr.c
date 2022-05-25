@@ -402,6 +402,7 @@ static struct vlr_subscr *_vlr_subscr_alloc(struct vlr_instance *vlr)
 
 	INIT_LLIST_HEAD(&vsub->cs.requests);
 	INIT_LLIST_HEAD(&vsub->ps.pdp_list);
+	INIT_LLIST_HEAD(&vsub->sms.pending);
 
 	/* Create an SGs FSM, which is needed to control CSFB,
 	 * in cases where CSFB/SGs is not in use, this FSM will

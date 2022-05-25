@@ -82,15 +82,7 @@
 #include <osmocom/msc/debug.h>
 #include <osmocom/msc/gsm_data.h>
 #include <osmocom/msc/gsm_04_11.h>
-
-/* configuration of SMS storage */
-struct sms_storage_cfg {
-	char storage_dir[PATH_MAX+1];
-	/* unlink messages after delivery, or just move them? */
-	bool unlink_delivered;
-	/* unlink messages after expiration, or just move them? */
-	bool unlink_expired;
-};
+#include <osmocom/msc/sms_storage.h>
 
 /* all the state of a SMS storage instance */
 struct sms_storage_inst {
@@ -165,12 +157,6 @@ enum smss_m2s_op {
 	SMSS_M2S_OP_SMS_TO_DISK_REQ,
 	/* main thread asks storage thread to delete a SMS from disk (expiration, delivered) */
 	SMSS_M2S_OP_SMS_DELETE_FROM_DISK_REQ,
-};
-
-enum smss_delete_cause {
-	SMSS_DELETE_CAUSE_UNKNOWN,
-	SMSS_DELETE_CAUSE_DELIVERED,
-	SMSS_DELETE_CAUSE_EXPIRED,
 };
 
 struct smss_m2s_evt {
@@ -770,6 +756,7 @@ static void storage2main_read_cb(struct osmo_it_q *q, struct llist_head *item)
 
 	switch (evt->op) {
 	case SMSS_S2M_OP_NULL:
+		break;
 	case SMSS_S2M_OP_SMS_FROM_DISK_IND:
 		/* SMS storage has read a SMS from disk, asks main thread to add it to queue */
 		break;
