@@ -243,6 +243,7 @@ AC_OUTPUT(
     tests/atlocal
     tests/smpp/Makefile
     tests/db_sms/Makefile
+    tests/sms_storage/Makefile
     tests/sms_queue/Makefile
     tests/msc_vlr/Makefile
     tests/sdp_msg/Makefile

@@ -83,10 +83,11 @@
 #include <osmocom/msc/gsm_data.h>
 #include <osmocom/msc/gsm_04_11.h>
 #include <osmocom/msc/sms_storage.h>
+#include <osmocom/msc/vlr.h>
 
 /* all the state of a SMS storage instance */
 struct sms_storage_inst {
-	struct sms_storage_cfg *cfg;
+	const struct sms_storage_cfg *cfg;
 	pthread_t thread;
 
 	struct {
@@ -102,6 +103,10 @@ struct sms_storage_inst {
 		int wd;
 	} inotify;
 #endif
+
+	/* global list of penidng SMSs */
+	struct llist_head pending;
+
 	/* inter-thread message queues for both directions */
 	struct {
 		struct osmo_it_q *itq;
@@ -226,7 +231,7 @@ static int _sms_gen_fq_path(struct sms_storage_inst *ssi, char *fq_path, size_t 
 	int rc;
 
 	rc = snprintf(fq_path, fq_path_len, "%s/%s/%llu.osms", ssi->cfg->storage_dir, subdir, id);
-	if (rc >= sizeof(fq_path)) {
+	if (rc >= fq_path_len) {
 		LOGP(DSMSS, LOGL_ERROR, "Overflowing buffer while composing file path\n");
 		return -EINVAL;
 	}
@@ -677,6 +682,9 @@ static void boot_read_tmr_cb(void *data)
 
 	/* skip anything that's not a normal file */
 	if (dent->d_type != DT_REG) {
+		/* suppress printing log messages about . and .. */
+		if (!strcmp(dent->d_name, ".") || !strcmp(dent->d_name, ".."))
+			goto next;
 		LOGP(DSMSS, LOGL_NOTICE, "bootstrap read: skipping '%s' (not a regular file)\n",
 		     dent->d_name);
 		goto next;
@@ -710,6 +718,8 @@ static void boot_read_tmr_cb(void *data)
 	if (rc < 0)
 		s2m_free(ssi, evt);
 
+	ssi->boot_read.count++;
+
 next:
 	/* read next message in 50ms to avoid overloading the it_q or the MSC in general */
 	osmo_timer_schedule(&ssi->boot_read.timer, 0, 50000);
@@ -719,8 +729,13 @@ next:
 static void *sms_storage_main(void *arg)
 {
 	struct sms_storage_inst *ssi = arg;
+	char current_dir[PATH_MAX+8+1];
 
-	ssi->boot_read.dir = opendir(ssi->cfg->storage_dir);
+	osmo_ctx_init("sms-storage");
+	osmo_select_init();
+
+	snprintf(current_dir, sizeof(current_dir), "%s/%s", ssi->cfg->storage_dir, SUBDIR_CURRENT);
+	ssi->boot_read.dir = opendir(current_dir);
 	if (!ssi->boot_read.dir) {
 		LOGP(DSMSS, LOGL_ERROR, "Cannot open SMS directory '%s': %s\n",
 			ssi->cfg->storage_dir, strerror(errno));
@@ -753,18 +768,34 @@ static void storage2main_read_cb(struct osmo_it_q *q, struct llist_head *item)
 {
 	struct smss_s2m_evt *evt = container_of(item, struct smss_s2m_evt, list);
 	struct sms_storage_inst *ssi = q->data;
+	struct gsm_sms *sms = NULL;
 
 	switch (evt->op) {
 	case SMSS_S2M_OP_NULL:
 		break;
 	case SMSS_S2M_OP_SMS_FROM_DISK_IND:
 		/* SMS storage has read a SMS from disk, asks main thread to add it to queue */
+		sms = evt->sms_from_disk_ind.sms;
+		sms->state = GSM_SMS_ST_DELIVERY_PENDING;
+		/* add to global list of pending SMS */
+		llist_add_tail(&sms->list, &ssi->pending);
+		/* add to per-subscriber list of pending SMS */
+		if (sms->receiver)
+			llist_add_tail(&sms->vsub_list, &sms->receiver->sms.pending);
 		break;
 	case SMSS_S2M_OP_SMS_TO_DISK_CFM:
 		/* SMS storage confirms having written SMS to disk; main thread adds it to queue */
+		sms = evt->sms_to_disk_cfm.sms;
+		sms->state = GSM_SMS_ST_DELIVERY_PENDING;
+		/* add to global list of pending SMS */
+		llist_add_tail(&sms->list, &ssi->pending);
+		/* add to per-subscriber list of pending SMS */
+		if (sms->receiver)
+			llist_add_tail(&sms->vsub_list, &sms->receiver->sms.pending);
 		break;
 	case SMSS_S2M_OP_SMS_DELETED_ON_DISK_IND:
 		/* SMS storage has detected a sms was deleted from disk; main thread must forget it */
+		sms_free(sms);
 		break;
 	default:
 		break;
@@ -778,16 +809,19 @@ static void storage2main_read_cb(struct osmo_it_q *q, struct llist_head *item)
 int sms_storage_to_disk_req(struct sms_storage_inst *ssi, struct gsm_sms *sms)
 {
 	struct smss_m2s_evt *evt = m2s_alloc(ssi, SMSS_M2S_OP_SMS_TO_DISK_REQ);
+	enum gsm_sms_state st = sms->state;
 	int rc;
 
 	if (!evt)
 		return -ENOMEM;
 
+	sms->state = GSM_SMS_ST_STORAGE_PENDING;
 	evt->sms_to_disk_req.sms = sms;
 
 	rc = osmo_it_q_enqueue(ssi->main2storage.itq, evt, list);
 	if (rc < 0) {
 		m2s_free(ssi, evt);
+		sms->state = st;
 		return rc;
 	}
 	return 0;
@@ -819,23 +853,89 @@ int sms_storage_delete_from_disk_req(struct sms_storage_inst *ssi, unsigned long
  * Initialization
  ***********************************************************************/
 
-int sms_storage_init(void *ctx, struct sms_storage_cfg *scfg)
+static int sms_storage_ensure_subdir(const struct sms_storage_cfg *scfg, const char *subdir)
+{
+	char sub_dir[PATH_MAX+8+1];
+	struct stat st;
+	int rc;
+
+	snprintf(sub_dir, sizeof(sub_dir), "%s/%s", scfg->storage_dir, subdir);
+
+	rc = stat(sub_dir, &st);
+	if (rc < 0) {
+		if (errno == ENOENT) {
+			LOGP(DSMSS, LOGL_NOTICE, "SMS storage sub-dir '%s' doesn't exist, attempting to "
+			     "create it\n", sub_dir);
+			if (mkdir(sub_dir, 0700) != 0) {
+				LOGP(DSMSS, LOGL_ERROR, "Unable to create SMS storage sub-dir '%s': %s\n",
+		     		     sub_dir, strerror(errno));
+				return -errno;
+			}
+		} else {
+			LOGP(DSMSS, LOGL_ERROR, "Unable to access SMS storage sub-dir '%s': %s\n",
+			     sub_dir, strerror(errno));
+			return -errno;
+		}
+	}
+	/* TODO: test if we can write */
+
+	return 0;
+}
+
+static int sms_storage_ensure_subdirs(const struct sms_storage_cfg *scfg)
+{
+	int rc;
+
+	rc = sms_storage_ensure_subdir(scfg, SUBDIR_CURRENT);
+	if (rc < 0)
+		return rc;
+
+	rc = sms_storage_ensure_subdir(scfg, SUBDIR_DELIVERED);
+	if (rc < 0)
+		return rc;
+
+	rc = sms_storage_ensure_subdir(scfg, SUBDIR_EXPIRED);
+	if (rc < 0)
+		return rc;
+
+	return 0;
+}
+
+
+struct sms_storage_inst *sms_storage_init(void *ctx, const struct sms_storage_cfg *scfg)
 {
 	struct sms_storage_inst *ssi = talloc_zero(ctx, struct sms_storage_inst);
 	struct stat st;
-	int rc, ret = -1;
+	int rc;
 
 	if (!ssi)
-		return -ENOMEM;
+		return NULL;
 
-	/* test if scfq->storage_dir exists */
+	ssi->cfg = scfg;
+	INIT_LLIST_HEAD(&ssi->pending);
+
+	/* test if scfg->storage_dir exists */
 	rc = stat(scfg->storage_dir, &st);
 	if (rc < 0) {
-		LOGP(DSMSS, LOGL_ERROR, "Unable to access storage path '%s': %s\n",
-		     scfg->storage_dir, strerror(errno));
-		return -errno;
+		if (errno == ENOENT) {
+			LOGP(DSMSS, LOGL_NOTICE, "SMS storage path '%s' doesn't exist, attempting to "
+			     "create it\n", scfg->storage_dir);
+			if (mkdir(scfg->storage_dir, 0700) != 0) {
+				LOGP(DSMSS, LOGL_ERROR, "Unable to create SMS storage dir '%s': %s\n",
+		     		     scfg->storage_dir, strerror(errno));
+				return NULL;
+			}
+		} else {
+			LOGP(DSMSS, LOGL_ERROR, "Unable to access storage path '%s': %s\n",
+			     scfg->storage_dir, strerror(errno));
+			return NULL;
+		}
 	}
 	/* TODO: test if we can write */
+
+	rc = sms_storage_ensure_subdirs(scfg);
+	if (rc < 0)
+		goto out_free;
 
 	ssi->main2storage.itq = osmo_it_q_alloc(ssi, "sms_main2storage", 1000, main2storage_read_cb, ssi);
 	if (!ssi->main2storage.itq)
@@ -843,7 +943,7 @@ int sms_storage_init(void *ctx, struct sms_storage_cfg *scfg)
 	pthread_mutex_init(&ssi->main2storage.ctx_mutex, NULL);
 
 	ssi->storage2main.itq = osmo_it_q_alloc(ssi, "sms_storage2main", 1000, storage2main_read_cb, ssi);
-	if (!ssi->main2storage.itq)
+	if (!ssi->storage2main.itq)
 		goto out_main2storage;
 	pthread_mutex_init(&ssi->storage2main.ctx_mutex, NULL);
 
@@ -858,7 +958,6 @@ int sms_storage_init(void *ctx, struct sms_storage_cfg *scfg)
 
 	if (inotify_fd < 0) {
 		LOGP(DSMSS, LOGL_ERROR, "Error during inotify_init(): %s\n", strerror(errno));
-		ret = inotify_fd;
 		goto out_m2s_unreg;
 	}
 	/* just setup, don't register.  We later register this in the storage thread! */
@@ -869,7 +968,6 @@ int sms_storage_init(void *ctx, struct sms_storage_cfg *scfg)
 	if (rc < 0) {
 		LOGP(DSMSS, LOGL_ERROR, "Cannot add inotify watcher for '%s': %s\n",
 			current_dir, strerror(errno));
-		ret = -errno;
 		goto out_close_inotify;
 	}
 	ssi->inotify.wd = rc;
@@ -880,7 +978,7 @@ int sms_storage_init(void *ctx, struct sms_storage_cfg *scfg)
 		goto out_all;
 	}
 
-	return 0;
+	return ssi;
 
 out_all:
 #ifdef HAVE_INOTIFY
@@ -896,5 +994,5 @@ out_main2storage:
 out_free:
 	talloc_free(ssi);
 
-	return ret;
+	return NULL;
 }

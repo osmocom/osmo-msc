@@ -1180,6 +1180,7 @@ DEFUN(show_subscr_cache, show_subscr_cache_cmd,
 	return CMD_SUCCESS;
 }
 
+#if 0
 DEFUN(sms_send_pend,
       sms_send_pend_cmd,
       "sms send pending",
@@ -1237,6 +1238,7 @@ DEFUN(sms_delete_expired,
 	vty_out(vty, "Deleted %llu expired SMS from database%s", num_deleted, VTY_NEWLINE);
 	return CMD_SUCCESS;
 }
+#endif
 
 static int _send_sms_str(struct vlr_subscr *receiver,
 			 const char *sender_msisdn,
@@ -1255,15 +1257,13 @@ static int _send_sms_str(struct vlr_subscr *receiver,
 	sms->source = SMS_SOURCE_VTY;
 
 	/* store in database for the queue */
-	if (db_sms_store(sms) != 0) {
+	if (sms_storage_to_disk_req(net->sms_storage, sms) != 0) {
 		LOGP(DLSMS, LOGL_ERROR, "Failed to store SMS in Database\n");
 		sms_free(sms);
 		return CMD_WARNING;
 	}
 	LOGP(DLSMS, LOGL_DEBUG, "SMS stored in DB\n");
 
-	sms_free(sms);
-	sms_queue_trigger(net->sms_queue);
 	return CMD_SUCCESS;
 }
 
@@ -1333,6 +1333,7 @@ DEFUN_DEPRECATED(subscriber_create, subscriber_create_cmd,
 	return CMD_WARNING;
 }
 
+#if 0
 DEFUN(subscriber_send_pending_sms,
       subscriber_send_pending_sms_cmd,
       "subscriber " SUBSCR_TYPES " ID sms pending-send",
@@ -1380,6 +1381,7 @@ DEFUN(subscriber_sms_delete_all,
 
 	return CMD_SUCCESS;
 }
+#endif
 
 DEFUN(subscriber_send_sms,
       subscriber_send_sms_cmd,
@@ -2085,8 +2087,8 @@ void msc_vty_init(struct gsm_network *msc_network)
 	install_element_ve(&show_msc_transaction_cmd);
 	install_element_ve(&show_nri_cmd);
 
-	install_element_ve(&sms_send_pend_cmd);
-	install_element_ve(&sms_delete_expired_cmd);
+	//install_element_ve(&sms_send_pend_cmd);
+	//install_element_ve(&sms_delete_expired_cmd);
 
 	install_element_ve(&subscriber_create_cmd);
 	install_element_ve(&subscriber_send_sms_cmd);
@@ -2101,8 +2103,8 @@ void msc_vty_init(struct gsm_network *msc_network)
 	install_element_ve(&logging_fltr_imsi_cmd);
 
 	install_element(ENABLE_NODE, &ena_subscr_expire_cmd);
-	install_element(ENABLE_NODE, &subscriber_send_pending_sms_cmd);
-	install_element(ENABLE_NODE, &subscriber_sms_delete_all_cmd);
+	//install_element(ENABLE_NODE, &subscriber_send_pending_sms_cmd);
+	//install_element(ENABLE_NODE, &subscriber_sms_delete_all_cmd);
 
 	install_element(CONFIG_NODE, &cfg_mncc_int_cmd);
 	install_node(&mncc_int_node, config_write_mncc_int);

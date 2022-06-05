@@ -61,6 +61,26 @@
 #include "smpp_smsc.h"
 #endif
 
+const struct value_string gsm_sms_source_name[] = {
+	{ SMS_SOURCE_UNKNOWN,		"UNKNOWN" },
+	{ SMS_SOURCE_MS_GSM,		"MS-GSM" },
+	{ SMS_SOURCE_MS_UMTS,		"MS-UMTS" },
+	{ SMS_SOURCE_MS_SGS,		"MS-SGs" },
+	{ SMS_SOURCE_VTY,		"VTY" },
+	{ SMS_SOURCE_SMPP,		"SMPP" },
+	{ 0, NULL }
+};
+
+const struct value_string gsm_sms_state_name[] = {
+	{ GSM_SMS_ST_ALLOCATED, 	"ALLOCATED" },
+	{ GSM_SMS_ST_STORAGE_PENDING,	"STORAGE_PENDING" },
+	{ GSM_SMS_ST_DELIVERY_PENDING,	"DELIVERY_PENDING" },
+	{ GSM_SMS_ST_PAGING,		"PAGING" },
+	{ GSM_SMS_ST_DELIVERING,	"DELIVERING" },
+	{ GSM_SMS_ST_DELIVERED,		"DELIVERED" },
+	{ 0, NULL }
+};
+
 void *tall_gsms_ctx;
 static pthread_mutex_t tall_sms_mutex;
 static uint32_t new_callref = 0x40000001;
@@ -76,12 +96,17 @@ struct gsm_sms *sms_alloc(void)
 	pthread_mutex_lock(&tall_sms_mutex);
 	sms = talloc_zero(tall_gsms_ctx, struct gsm_sms);
 	pthread_mutex_unlock(&tall_sms_mutex);
+	if (sms)
+		sms->state = GSM_SMS_ST_ALLOCATED;
 	return sms;
 }
 
 /* MUST ONLY BE CALLED ON MAIN THREAD */
 void sms_free(struct gsm_sms *sms)
 {
+	llist_del(&sms->list);
+	llist_del(&sms->vsub_list);
+
 	/* drop references to subscriber structure */
 	if (sms->receiver)
 		vlr_subscr_put(sms->receiver, VSUB_USE_SMS_RECEIVER);
@@ -893,6 +918,10 @@ static int gsm411_rx_rp_ack(struct gsm_trans *trans,
 	/* mark this SMS as sent in database */
 	sms_storage_delete_from_disk_req(trans->net->sms_storage, sms->id, SMSS_DELETE_CAUSE_DELIVERED);
 
+	/* delete from lists before sending signal, as the latter will attempt to send another SMS */
+	llist_del(&sms->list);
+	llist_del(&sms->vsub_list);
+
 	send_signal(S_SMS_DELIVERED, trans, sms, 0);
 
 	if (sms->status_rep_req)
@@ -1191,6 +1220,8 @@ int gsm411_send_sms(struct gsm_network *net,
 	struct gsm_trans *trans;
 	struct msgb *msg;
 	int rc;
+
+	sms->state = GSM_SMS_ST_DELIVERING;
 
 	/* Allocate a new transaction for MT SMS */
 	trans = gsm411_alloc_mt_trans(net, vsub);

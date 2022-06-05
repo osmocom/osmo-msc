@@ -280,6 +280,8 @@ enum gsm_sms_source_id {
 	SMS_SOURCE_SMPP,	/* received via SMPP */
 };
 
+extern const struct value_string gsm_sms_source_name[];
+
 #define SMS_TEXT_SIZE	256
 
 struct gsm_sms_addr {
@@ -288,8 +290,21 @@ struct gsm_sms_addr {
 	char addr[21+1];
 };
 
+enum gsm_sms_state {
+	GSM_SMS_ST_ALLOCATED,		/* memory allocated */
+	GSM_SMS_ST_STORAGE_PENDING,	/* waiting for it to be stored on disk */
+	GSM_SMS_ST_DELIVERY_PENDING,
+	GSM_SMS_ST_PAGING,		/* delivery pending, paging started */
+	GSM_SMS_ST_DELIVERING,		/* delivery ongoing (after paging succeeded) */
+	GSM_SMS_ST_DELIVERED,		/* successfully delivered */
+};
+
+extern const struct value_string gsm_sms_state_name[];
+
 struct gsm_sms {
-	struct llist_head list;
+	struct llist_head list;			/* entry in global list of pending SMS */
+	struct llist_head vsub_list;		/* entry in vlr_subscr.sms.pending */
+	enum gsm_sms_state state;
 	unsigned long long id;
 	struct vlr_subscr *receiver;
 	struct gsm_sms_addr src, dst;

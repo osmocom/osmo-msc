@@ -1,4 +1,5 @@
 SUBDIRS = \
+	sms_storage \
 	sms_queue \
 	msc_vlr \
 	db_sms \

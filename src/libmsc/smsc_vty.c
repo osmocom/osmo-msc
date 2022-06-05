@@ -117,6 +117,19 @@ DEFUN(cfg_sms_def_val_per, cfg_sms_def_val_per_cmd,
  * View / Enable Node
  ***********************************************************************/
 
+void vty_out_sms(struct vty *vty, const struct gsm_sms *sms)
+{
+	vty_out(vty, "SMS ID: %llu, State: %s, Source: %s, %s -> %s %s", sms->id,
+		get_value_string(gsm_sms_state_name, sms->state),
+		get_value_string(gsm_sms_source_name, sms->source),
+		sms->src.addr, sms->dst.addr, VTY_NEWLINE);
+	vty_out(vty, " Created: %s, Validity Minutes: %lu, Failed Attempts: %d%s",
+		ctime(&sms->created), sms->validity_minutes, sms->failed_attempts, VTY_NEWLINE);
+	vty_out(vty, " PID: 0x%02x, DCS: 0x%02x, MsgRef: 0x%02x, UDHI: %d, IsReport: %d%s",
+		sms->protocol_id, sms->data_coding_scheme, sms->msg_ref, sms->ud_hdr_ind, sms->is_report,
+		VTY_NEWLINE);
+}
+
 DEFUN(show_smsqueue,
       show_smsqueue_cmd,
       "show sms-queue",
