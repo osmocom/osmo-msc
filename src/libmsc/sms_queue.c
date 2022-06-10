@@ -301,11 +301,13 @@ struct gsm_sms *smsq_take_next_sms(struct gsm_network *net,
 	while (wrapped < 2 && (--sanity)) {
 		/* If we wrapped around and passed the first msisdn, we're
 		 * through the entire SMS DB; end it. */
-		if (wrapped && strcmp(last_msisdn, started_with_msisdn) >= 0)
+		if (wrapped && strcmp(last_msisdn, started_with_msisdn) >= 0) {
+			DEBUGP(DLSMS, "SMS queue: Reached end of DB.\n");
 			break;
-
+		}
 		sms = db_sms_get_next_unsent_rr_msisdn(net, last_msisdn, 9);
 		if (!sms) {
+			DEBUGP(DLSMS, "SMS queue: Got no next unsent SMS\n");
 			last_msisdn[0] = '\0';
 			wrapped++;
 			continue;
@@ -316,12 +318,7 @@ struct gsm_sms *smsq_take_next_sms(struct gsm_network *net,
 		osmo_strlcpy(last_msisdn, sms->dst.addr, last_msisdn_buflen);
 
 		/* Is the subscriber attached? If not, go to next SMS */
-		if (!sms->receiver || !sms->receiver->lu_complete) {
-			LOGP(DLSMS, LOGL_DEBUG,
-			     "Subscriber %s%s is not attached, skipping SMS %llu\n",
-			     sms->receiver ? "" : "MSISDN-",
-			     sms->receiver ? vlr_subscr_msisdn_or_name(sms->receiver)
-					   : sms->dst.addr, sms->id);
+		if (!sms->id) {
 			sms_free(sms);
 			continue;
 		}
@@ -329,7 +326,7 @@ struct gsm_sms *smsq_take_next_sms(struct gsm_network *net,
 		return sms;
 	}
 
-	DEBUGP(DLSMS, "SMS queue: no SMS to be sent\n");
+	DEBUGP(DLSMS, "SMS queue: no SMS to be sent, tried %d times.\n", sanity+100);
 	return NULL;
 }
 

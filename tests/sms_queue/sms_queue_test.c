@@ -122,13 +122,15 @@ struct gsm_sms *__wrap_db_sms_get_next_unsent_rr_msisdn(struct gsm_network *net,
 			continue;
 		if (fake_sms_db[i].failed_attempts > max_failed)
 			continue;
+		if (!fake_sms_db[i].vsub_attached)
+			continue;
 
 		sms = sms_alloc();
 		OSMO_ASSERT(sms);
 
 		osmo_strlcpy(sms->dst.addr, fake_sms_db[i].msisdn,
 			     sizeof(sms->dst.addr));
-		sms->receiver = fake_sms_db[i].vsub_attached? &arbitrary_vsub : NULL;
+		sms->id = 1 + i;
 		osmo_strlcpy(sms->text, fake_sms_db[i].msisdn, sizeof(sms->text));
 		if (fake_sms_db[i].vsub_attached)
 			fake_sms_db[i].nr_of_sms--;
