@@ -869,6 +869,8 @@ struct gsm_sms *db_sms_get_next_unsent_rr_msisdn(struct gsm_network *net,
 	OSMO_ASSERT(g_dbc);
 	sqlite3_stmt *stmt = g_dbc->stmt[DB_STMT_SMS_GET_NEXT_UNSENT_RR_MSISDN];
 	struct gsm_sms *sms;
+	struct vlr_subscr *receiver;
+	const char *daddr;
 	int rc;
 
 	db_bind_text(stmt, "$dest_addr", last_msisdn);
@@ -878,6 +880,21 @@ struct gsm_sms *db_sms_get_next_unsent_rr_msisdn(struct gsm_network *net,
 	if (rc != SQLITE_ROW) {
 		db_remove_reset(stmt);
 		return NULL;
+	}
+
+	daddr = (const char *)sqlite3_column_text(stmt, COL_DEST_ADDR);
+	receiver = vlr_subscr_find_by_msisdn(net->vlr, daddr, VSUB_USE_SMS_RECEIVER);
+	if (!receiver || !receiver->lu_complete) {
+		sms = sms_alloc();
+		sms->receiver = receiver;
+		if (daddr)
+			OSMO_STRLCPY_ARRAY(sms->dst.addr, daddr);
+		LOGP(DLSMS, LOGL_DEBUG,
+		     "Subscriber %s%s is not attached, skipping SMS.\n",
+		     sms->receiver ? "" : "MSISDN-",
+		     sms->receiver ? vlr_subscr_msisdn_or_name(sms->receiver) : daddr);
+		db_remove_reset(stmt);
+		return sms;
 	}
 
 	sms = sms_from_result(net, stmt);
