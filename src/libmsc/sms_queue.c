@@ -585,10 +585,48 @@ static int sms_sms_cb(unsigned int subsys, unsigned int signal,
 	struct sms_signal_data *sig_sms = signal_data;
 	struct gsm_sms_pending *pending;
 	struct vlr_subscr *vsub;
+	struct gsm_sms *sms;
 
 	/* We got a new SMS and maybe should launch the queue again. */
-	if (signal == S_SMS_SUBMITTED || signal == S_SMS_SMMA) {
-		/* TODO: For SMMA we might want to re-use the radio connection. */
+	if (signal == S_SMS_SUBMITTED) {
+		if (sig_sms->id) {
+			LOGP(DLSMS, LOGL_INFO, "Got Signal for new Sms Submitted with id [%llu]\n",
+			     sig_sms->id);
+			sms = db_sms_get(network, sig_sms->id);
+			if (!sms)
+				return -1;
+			if (!sms->receiver || !sms->receiver->lu_complete) {
+				LOGP(DLSMS, LOGL_DEBUG,
+				     "Subscriber %s%s is not attached, skipping SMS.\n",
+				     sms->receiver ? "" : "MSISDN-",
+				     sms->receiver ? vlr_subscr_msisdn_or_name(sms->receiver) : sms->dst.addr);
+				return -1;
+			}
+
+			/* Check somehow it's not already in the pending list */
+			if (sms_queue_sms_is_pending(smq, sms->id)) {
+				sms_free(sms);
+				return 0;
+			}
+			/* Or that this sub is not already pending */
+			if (sms_subscriber_is_pending(smq, sms->receiver)) {
+				sms_free(sms);
+				return 0;
+			}
+
+			/* Now add this SMS to the Queue for immediate sending. */
+			pending = sms_pending_from(smq, sms);
+			sms_free(sms);
+			/* Schedule the timer to send this SMS */
+			sms_pending_resend(pending);
+			return 0;
+		}
+	}
+
+	if (signal == S_SMS_SMMA) {
+		/* TODO: For SMMA we might want to re-use the radio connection.
+		 * Here, also, we really want to queue specifically for this MS, because
+		 * just running the queue may not pick up its messages. */
 		sms_queue_trigger(smq);
 		return 0;
 	}
