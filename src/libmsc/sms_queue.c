@@ -617,6 +617,11 @@ static int sms_sms_cb(unsigned int subsys, unsigned int signal,
 				return 0;
 			}
 
+			/* Check the Queue for SMS for the sender */
+			vsub = vlr_subscr_find_by_msisdn(network->vlr, sms->src.addr, VSUB_USE_SMS_RECEIVER);
+			if (vsub && vsub->lu_complete && !sms_subscriber_is_pending(smq, vsub))
+				sms_send_next(vsub);
+
 			/* Now add this SMS to the Queue for immediate sending. */
 			pending = sms_pending_from(smq, sms);
 			sms_free(sms);
