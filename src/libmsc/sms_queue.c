@@ -257,7 +257,7 @@ static void sms_resend_pending(void *_data)
 		/* the sms is gone? Move to the next */
 		if (!sms) {
 			sms_pending_free(smsq, pending);
-			sms_queue_trigger(smsq);
+			//sms_queue_trigger(smsq);
 		} else {
 			pending->resend = 0;
 			_gsm411_send_sms(smsq->network, sms->receiver, sms);
@@ -443,7 +443,8 @@ static void sms_send_next(struct vlr_subscr *vsub)
 
 no_pending_sms:
 	/* Try to send the SMS to avoid the queue being stuck */
-	sms_submit_pending(net->sms_queue);
+	// sms_submit_pending(net->sms_queue);
+	return;
 }
 
 /* Trigger a call to sms_submit_pending() in one second */
@@ -660,7 +661,7 @@ static int sms_sms_cb(unsigned int subsys, unsigned int signal,
 	case S_SMS_MEM_EXCEEDED:
 		smsq_rate_ctr_inc(smq, SMSQ_CTR_SMS_DELIVERY_NOMEM);
 		sms_pending_free(smq, pending);
-		sms_queue_trigger(smq);
+		//sms_queue_trigger(smq);
 		break;
 	case S_SMS_UNKNOWN_ERROR:
 		/*
