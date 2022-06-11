@@ -561,6 +561,8 @@ static int sub_ready_for_sm(struct gsm_network *net, struct vlr_subscr *vsub)
 		return -1;
 
 	_gsm411_send_sms(net, vsub, sms);
+	if (!sms_subscriber_is_pending(net->sms_queue, vsub))
+		sms_send_next(vsub);
 	return 0;
 }
 
