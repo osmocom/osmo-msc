@@ -86,4 +86,6 @@ struct sms_signal_data {
 	struct gsm_sms *sms;
 	/* true when paging was successful */
 	bool paging_result;
+	/* the id of the last inserted SMS */
+	unsigned long long id;
 };
