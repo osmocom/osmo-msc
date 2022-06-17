@@ -888,9 +888,6 @@ static int gsm411_rx_rp_ack(struct gsm_trans *trans,
 					    GSM411_RP_CAUSE_PROTOCOL_ERR);
 	}
 
-	/* mark this SMS as sent in database */
-	db_sms_mark_delivered(sms);
-
 	send_signal(S_SMS_DELIVERED, trans, sms, 0);
 
 	if (sms->status_rep_req)

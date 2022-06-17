@@ -451,21 +451,14 @@ static void test_db_sms_delete(void)
 {
 	int rc;
 
-	LOGP(DDB, LOGL_INFO, "Testing db_sms_delete_sent_message_by_id()...\n");
+	LOGP(DDB, LOGL_INFO, "Testing db_sms_delete_message_by_id()...\n");
 
-	/* Delete #1, which is marked as sent */
-	LOGP(DDB, LOGL_NOTICE, "db_sms_delete_sent_message_by_id(#1, sent): ");
-	rc = db_sms_delete_sent_message_by_id(1);
+	/* Delete #1, - (we cannot delete based on sent status) */
+	LOGP(DDB, LOGL_NOTICE, "db_sms_delete_message_by_id(#1): ");
+	rc = db_sms_delete_message_by_id(1);
 	LOGPC(DDB, LOGL_NOTICE, "rc=%d\n", rc);
 	/* Don't expect to retrieve this message anymore */
 	sms_test_set[0].exp_db_sms_get_fail = true;
-
-	/* Try to delete #3, which is not marked as sent */
-	LOGP(DDB, LOGL_NOTICE, "db_sms_delete_sent_message_by_id(#3, not sent): ");
-	rc = db_sms_delete_sent_message_by_id(3);
-	LOGPC(DDB, LOGL_NOTICE, "rc=%d\n", rc);
-	/* Do expect to retrieve this message anyway */
-	sms_test_set[2].exp_db_sms_get_fail = false;
 
 	LOGP(DDB, LOGL_INFO, "Testing db_sms_delete_by_msisdn()...\n");
 

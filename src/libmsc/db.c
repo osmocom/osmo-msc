@@ -53,7 +53,6 @@ enum stmt_idx {
 	DB_STMT_SMS_INC_DELIVER_ATTEMPTS,
 	DB_STMT_SMS_DEL_BY_MSISDN,
 	DB_STMT_SMS_DEL_BY_ID,
-	DB_STMT_SMS_DEL_EXPIRED,
 	DB_STMT_SMS_GET_VALID_UNTIL_BY_ID,
 	DB_STMT_SMS_GET_OLDEST_EXPIRED,
 	_NUM_DB_STMT
@@ -299,8 +298,6 @@ static const char *stmt_sql[] = {
 	[DB_STMT_SMS_DEL_BY_MSISDN] =
 		"DELETE FROM SMS WHERE src_addr=$src_addr OR dest_addr=$dest_addr",
 	[DB_STMT_SMS_DEL_BY_ID] =
-		"DELETE FROM SMS WHERE id = $id AND sent is NOT NULL",
-	[DB_STMT_SMS_DEL_EXPIRED] =
 		"DELETE FROM SMS WHERE id = $id",
 	[DB_STMT_SMS_GET_VALID_UNTIL_BY_ID] =
 		"SELECT strftime('%s', valid_until) FROM SMS WHERE id = $id",
@@ -966,7 +963,7 @@ int db_sms_delete_by_msisdn(const char *msisdn)
 	return 0;
 }
 
-int db_sms_delete_sent_message_by_id(unsigned long long sms_id)
+int db_sms_delete_message_by_id(unsigned long long sms_id)
 {
 	OSMO_ASSERT(g_dbc);
 	sqlite3_stmt *stmt = g_dbc->stmt[DB_STMT_SMS_DEL_BY_ID];
@@ -988,7 +985,7 @@ int db_sms_delete_sent_message_by_id(unsigned long long sms_id)
 static int delete_expired_sms(unsigned long long sms_id, time_t validity_timestamp)
 {
 	OSMO_ASSERT(g_dbc);
-	sqlite3_stmt *stmt = g_dbc->stmt[DB_STMT_SMS_DEL_EXPIRED];
+	sqlite3_stmt *stmt = g_dbc->stmt[DB_STMT_SMS_DEL_BY_ID];
 	time_t now;
 	int rc;
 

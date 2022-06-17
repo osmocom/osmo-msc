@@ -615,7 +615,9 @@ static int sms_sms_cb(unsigned int subsys, unsigned int signal,
 		vsub = pending->vsub;
 		vlr_subscr_get(vsub, __func__);
 		if (smq->cfg->delete_delivered)
-			db_sms_delete_sent_message_by_id(pending->sms_id);
+			db_sms_delete_message_by_id(pending->sms_id);
+		else
+			db_sms_mark_delivered(sig_sms->sms);
 		sms_pending_free(smq, pending);
 		/* Attempt to send another SMS to this subscriber */
 		sms_send_next(vsub);
