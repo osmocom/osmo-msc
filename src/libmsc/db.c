@@ -569,6 +569,13 @@ int db_init(void *ctx, const char *fname, bool enable_sqlite_logging)
 		/* non-fatal */
 	}
 
+	rc = sqlite3_exec(g_dbc->db, "PRAGMA secure_delete=0;", 0, 0, &err_msg);
+	if (rc != SQLITE_OK) {
+		LOGP(DDB, LOGL_ERROR, "Unable to disable SECURE_DELETE: %s\n", err_msg);
+		sqlite3_free(err_msg);
+		/* non-fatal */
+	}
+
 	return 0;
 }
 
