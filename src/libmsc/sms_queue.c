@@ -119,23 +119,6 @@ struct gsm_sms_pending {
 	int resend;			/* should we try re-sending it (now) ? */
 };
 
-/* (global) state of the SMS queue. */
-struct gsm_sms_queue {
-	struct osmo_timer_list resend_pending;	/* timer triggering sms_resend_pending() */
-	struct osmo_timer_list push_queue;	/* timer triggering sms_submit_pending() */
-	struct gsm_network *network;
-	struct llist_head pending_sms;		/* list of gsm_sms_pending */
-	struct sms_queue_config *cfg;
-	int pending;				/* current number of gsm_sms_pending in RAM */
-
-	/* last MSISDN for which we read SMS from the database and created gsm_sms_pending records */
-	char last_msisdn[GSM23003_MSISDN_MAX_DIGITS+1];
-
-	/* statistics / counters */
-	struct osmo_stat_item_group *statg;
-	struct rate_ctr_group *ctrg;
-};
-
 /* private wrapper function to make sure we count all SMS delivery attempts */
 static void _gsm411_send_sms(struct gsm_network *net, struct vlr_subscr *vsub, struct gsm_sms *sms)
 {
@@ -617,7 +600,7 @@ static int sms_sms_cb(unsigned int subsys, unsigned int signal,
 		vsub = pending->vsub;
 		vlr_subscr_get(vsub, __func__);
 		if (smq->cfg->delete_delivered)
-			db_sms_delete_sent_message_by_id(pending->sms_id);
+			db_sms_delete_message_by_id(pending->sms_id);
 		sms_pending_free(smq, pending);
 		/* Attempt to send another SMS to this subscriber */
 		sms_send_next(vsub);
