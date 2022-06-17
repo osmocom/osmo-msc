@@ -53,6 +53,7 @@ enum stmt_idx {
 	DB_STMT_SMS_INC_DELIVER_ATTEMPTS,
 	DB_STMT_SMS_DEL_BY_MSISDN,
 	DB_STMT_SMS_DEL_BY_ID,
+	DB_STMT_SMS_DEL_SENT_BY_ID,
 	DB_STMT_SMS_DEL_EXPIRED,
 	DB_STMT_SMS_GET_VALID_UNTIL_BY_ID,
 	DB_STMT_SMS_GET_OLDEST_EXPIRED,
@@ -298,8 +299,10 @@ static const char *stmt_sql[] = {
 		" WHERE id = $id",
 	[DB_STMT_SMS_DEL_BY_MSISDN] =
 		"DELETE FROM SMS WHERE src_addr=$src_addr OR dest_addr=$dest_addr",
-	[DB_STMT_SMS_DEL_BY_ID] =
+	[DB_STMT_SMS_DEL_SENT_BY_ID] =
 		"DELETE FROM SMS WHERE id = $id AND sent is NOT NULL",
+	[DB_STMT_SMS_DEL_BY_ID] =
+		"DELETE FROM SMS WHERE id = $id LIMIT 1",
 	[DB_STMT_SMS_DEL_EXPIRED] =
 		"DELETE FROM SMS WHERE id = $id",
 	[DB_STMT_SMS_GET_VALID_UNTIL_BY_ID] =
@@ -974,10 +977,29 @@ int db_sms_delete_by_msisdn(const char *msisdn)
 	return 0;
 }
 
-int db_sms_delete_sent_message_by_id(unsigned long long sms_id)
+int db_sms_delete_message_by_id(unsigned long long sms_id)
 {
 	OSMO_ASSERT(g_dbc);
 	sqlite3_stmt *stmt = g_dbc->stmt[DB_STMT_SMS_DEL_BY_ID];
+	int rc;
+
+	db_bind_int64(stmt, "$id", sms_id);
+
+	rc = sqlite3_step(stmt);
+	if (rc != SQLITE_DONE) {
+		db_remove_reset(stmt);
+		LOGP(DDB, LOGL_ERROR, "Failed to delete SMS %llu.\n", sms_id);
+		return 1;
+	}
+
+	db_remove_reset(stmt);
+	return 0;
+}
+
+int db_sms_delete_sent_message_by_id(unsigned long long sms_id)
+{
+	OSMO_ASSERT(g_dbc);
+	sqlite3_stmt *stmt = g_dbc->stmt[DB_STMT_SMS_DEL_SENT_BY_ID];
 	int rc;
 
 	db_bind_int64(stmt, "$id", sms_id);
