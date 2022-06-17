@@ -213,10 +213,10 @@ static const char *create_stmts[] = {
  * database query results! */
 #define SEL_COLUMNS \
 	"id," \
-	"strftime('%s',created)," \
+	"created," \
 	"sent," \
 	"deliver_attempts," \
-	"strftime('%s', valid_until)," \
+	"valid_until," \
 	"reply_path_req," \
 	"status_rep_req," \
 	"is_report," \
@@ -265,7 +265,7 @@ static const char *stmt_sql[] = {
 		 " msg_ref, protocol_id, data_coding_scheme, ud_hdr_ind, user_data, text, "
 		 " dest_addr, dest_ton, dest_npi, src_addr, src_ton, src_npi) "
 		"VALUES "
-		 "(datetime($created, 'unixepoch'), datetime($valid_until, 'unixepoch'), "
+		 "($created, $valid_until, "
 		 "$reply_path_req, $status_rep_req, $is_report, "
 		 "$msg_ref, $protocol_id, $data_coding_scheme, $ud_hdr_ind, $user_data, $text, "
 		 "$dest_addr, $dest_ton, $dest_npi, $src_addr, $src_ton, $src_npi)",
@@ -290,7 +290,7 @@ static const char *stmt_sql[] = {
 		" ORDER BY dest_addr, id LIMIT 1",
 	[DB_STMT_SMS_MARK_DELIVERED] =
 		"UPDATE SMS "
-		" SET sent = datetime('now') "
+		" SET sent = strftime('%s') "
 		" WHERE id = $id",
 	[DB_STMT_SMS_INC_DELIVER_ATTEMPTS] =
 		"UPDATE SMS "
@@ -303,9 +303,9 @@ static const char *stmt_sql[] = {
 	[DB_STMT_SMS_DEL_EXPIRED] =
 		"DELETE FROM SMS WHERE id = $id",
 	[DB_STMT_SMS_GET_VALID_UNTIL_BY_ID] =
-		"SELECT strftime('%s', valid_until) FROM SMS WHERE id = $id",
+		"SELECT valid_until FROM SMS WHERE id = $id",
 	[DB_STMT_SMS_GET_OLDEST_EXPIRED] =
-		"SELECT id, strftime('%s', valid_until) FROM SMS ORDER BY valid_until LIMIT 1",
+		"SELECT id, valid_until FROM SMS ORDER BY valid_until LIMIT 1",
 };
 
 /***********************************************************************
