@@ -32,6 +32,7 @@ struct sms_queue_config {
 	bool delete_expired;			/* delete expired SMS from DB? */
 	unsigned int minimum_validity_mins;	/* minimum validity period in minutes */
 	unsigned int default_validity_mins;	/* default validity period in minutes */
+	unsigned int trigger_holdoff;		/* How often can the queue be re-triggered? */
 };
 
 struct sms_queue_config *sms_queue_cfg_alloc(void *ctx);

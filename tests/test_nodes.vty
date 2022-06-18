@@ -182,6 +182,7 @@ sgs
  local-ip 0.0.0.0
  vlr-name vlr.example.net
 smsc
+ queue trigger-holdoff 1
  queue max-pending 20
  queue max-failure 1
  database delete-delivered 1
