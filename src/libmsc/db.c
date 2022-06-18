@@ -72,7 +72,7 @@ static struct db_context *g_dbc;
  * DATABASE SCHEMA AND MIGRATION
  ***********************************************************************/
 
-#define SCHEMA_REVISION "5"
+#define SCHEMA_REVISION "6"
 
 enum {
 	SCHEMA_META,
@@ -480,14 +480,14 @@ static int check_db_revision(struct db_context *dbc)
 		LOGP(DDB, LOGL_FATAL, "You must use osmo-msc 1.1.0 to 1.8.0 to upgrade database "
 		     "schema from '%u' to '5', sorry\n", db_rev);
 		break;
-#if 0
 	case 5:
-		if (update_db_revision_5())
-			goto error;
-
-		/* The end of waterfall */
+		LOGP(DDB, LOGL_FATAL, "The storage format of BINARY data in the database "
+		     "has changed. In order to deliver any pending SMS in your database, "
+		     "you must manually convert your database from "
+		     "'%u' to '6'. Alternatively you can use a fresh, blank database "
+		     "with this version of osmo-msc, sorry.\n", db_rev);
+		return -1;
 		break;
-#endif
 	default:
 		LOGP(DDB, LOGL_FATAL, "Invalid database schema revision '%d'.\n", db_rev);
 		return -EINVAL;
