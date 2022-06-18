@@ -1,6 +1,6 @@
 Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: osmo-msc
-Source: git://git.osmocom.org/osmo-msc
+Source: https://gitea.osmocom.org/cellular-infrastructure/osmo-msc
 
 Files:     *
 Copyright: 2008 Daniel Willmann <daniel@totalueberwachung.de>

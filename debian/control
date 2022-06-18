@@ -24,8 +24,8 @@ Build-Depends: debhelper (>=9),
                libosmo-ranap-dev (>= 0.8.0),
                osmo-gsm-manuals-dev (>= 1.2.0)
 Standards-Version: 3.9.8
-Vcs-Git: git://git.osmocom.org/osmo-msc.git
-Vcs-Browser: https://git.osmocom.org/osmo-msc/
+Vcs-Git: https://gitea.osmocom.org/cellular-infrastructure/osmo-msc
+Vcs-Browser: https://gitea.osmocom.org/cellular-infrastructure/osmo-msc
 Homepage: https://osmocom.org/projects/osmomsc
 
 Package: osmo-msc
