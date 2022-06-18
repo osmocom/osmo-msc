@@ -60,6 +60,14 @@ DEFUN(cfg_sms_database, cfg_sms_database_cmd,
 	return CMD_SUCCESS;
 }
 
+DEFUN(cfg_sms_trigger_holdoff, cfg_sms_trigger_holdoff_cmd,
+      "queue trigger-holdoff <1-600>",
+      "SMS Queue\n" "How often can the Queue be re-triggered.\n" "Seconds\n")
+{
+	smqcfg->trigger_holdoff = atoi(argv[0]);
+	return CMD_SUCCESS;
+}
+
 DEFUN(cfg_sms_queue_max, cfg_sms_queue_max_cmd,
       "queue max-pending <1-500>",
       "SMS Queue\n" "SMS to deliver in parallel\n" "Amount\n")
@@ -175,6 +183,7 @@ static int config_write_smsc(struct vty *vty)
 	if (smqcfg->db_file_path && strcmp(smqcfg->db_file_path, SMS_DEFAULT_DB_FILE_PATH))
 		vty_out(vty, " database %s%s", smqcfg->db_file_path, VTY_NEWLINE);
 
+	vty_out(vty, " queue trigger-holdoff %u%s", smqcfg->trigger_holdoff, VTY_NEWLINE);
 	vty_out(vty, " queue max-pending %u%s", smqcfg->max_pending, VTY_NEWLINE);
 	vty_out(vty, " queue max-failure %u%s", smqcfg->max_fail, VTY_NEWLINE);
 
@@ -197,6 +206,7 @@ void smsc_vty_init(struct gsm_network *msc_network)
 	install_element(CONFIG_NODE, &cfg_smsc_cmd);
 	install_node(&smsc_node, config_write_smsc);
 	install_element(SMSC_NODE, &cfg_sms_database_cmd);
+	install_element(SMSC_NODE, &cfg_sms_trigger_holdoff_cmd);
 	install_element(SMSC_NODE, &cfg_sms_queue_max_cmd);
 	install_element(SMSC_NODE, &cfg_sms_queue_fail_cmd);
 	install_element(SMSC_NODE, &cfg_sms_db_del_delivered_cmd);
