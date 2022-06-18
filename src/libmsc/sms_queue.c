@@ -428,14 +428,26 @@ static void sms_send_next(struct vlr_subscr *vsub)
 	_gsm411_send_sms(smsq->network, sms->receiver, sms);
 }
 
-/* Trigger a call to sms_submit_pending() in one second */
+/* Trigger a call to sms_submit_pending() in x seconds */
 int sms_queue_trigger(struct gsm_sms_queue *smsq)
 {
-	LOGP(DLSMS, LOGL_DEBUG, "Triggering SMS queue\n");
-	if (osmo_timer_pending(&smsq->push_queue))
-		return 0;
+	struct timeval tv;
 
-	osmo_timer_schedule(&smsq->push_queue, 1, 0);
+	LOGP(DLSMS, LOGL_DEBUG, "Triggering SMS queue\n");
+	if (osmo_timer_pending(&smsq->push_queue)) {
+		if (osmo_timer_remaining(&smsq->push_queue, NULL, &tv) == -1)
+			return 0;
+		if (tv.tv_sec > smsq->cfg->trigger_holdoff) {
+			/* Config has changed since last trigger, reschedule */
+			osmo_timer_schedule(&smsq->push_queue, smsq->cfg->trigger_holdoff, 0);
+			return 0;
+		}
+		LOGP(DLSMS, LOGL_INFO, "SMS queue already set to run in %lu seconds.\n",
+		     tv.tv_sec);
+		return 0;
+	}
+
+	osmo_timer_schedule(&smsq->push_queue, smsq->cfg->trigger_holdoff, 0);
 	return 0;
 }
 
@@ -451,6 +463,7 @@ struct sms_queue_config *sms_queue_cfg_alloc(void *ctx)
 	sqcfg->delete_expired = true;
 	sqcfg->default_validity_mins = 7 * 24 * 60; /* 7 days */
 	sqcfg->minimum_validity_mins = 1;
+	sqcfg->trigger_holdoff = 1;
 	sqcfg->db_file_path = talloc_strdup(ctx, SMS_DEFAULT_DB_FILE_PATH);
 
 	return sqcfg;
