@@ -104,7 +104,7 @@ make %{?_smp_mflags} check || (find . -name testsuite.log -exec cat {} +)
 
 %files
 %license COPYING
-%doc AUTHORS README
+%doc AUTHORS README.md
 %dir %{_docdir}/%{name}/examples
 %dir %{_docdir}/%{name}/examples/osmo-msc
 %{_docdir}/%{name}/examples/osmo-msc/osmo-msc.cfg
