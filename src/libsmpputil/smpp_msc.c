@@ -306,6 +306,8 @@ int handle_smpp_submit(struct smpp_esme *esme, struct submit_sm_t *submit,
 	case 1: /* datagram */
 	case 3: /* store-and-forward */
 		rc = db_sms_store(sms);
+		memset(&sig, 0, sizeof(sig));
+		sig.id = sms->id;
 		sms_free(sms);
 		sms = NULL;
 		if (rc < 0) {
@@ -317,7 +319,6 @@ int handle_smpp_submit(struct smpp_esme *esme, struct submit_sm_t *submit,
 		strcpy((char *)submit_r->message_id, "msg_id_not_implemented");
 		LOGP(DLSMS, LOGL_INFO, "SMPP SUBMIT-SM: Stored in DB\n");
 
-		memset(&sig, 0, sizeof(sig));
 		osmo_signal_dispatch(SS_SMS, S_SMS_SUBMITTED, &sig);
 		rc = 0;
 		break;

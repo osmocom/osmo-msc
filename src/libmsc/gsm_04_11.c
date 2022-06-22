@@ -119,6 +119,7 @@ static void send_signal(int sig_no,
 	struct sms_signal_data sig;
 	sig.trans = trans;
 	sig.sms = sms;
+	sig.id = sms->id;
 	sig.paging_result = paging_result;
 	osmo_signal_dispatch(SS_SMS, sig_no, &sig);
 }
