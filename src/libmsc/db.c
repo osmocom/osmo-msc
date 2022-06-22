@@ -282,7 +282,7 @@ static const char *stmt_sql[] = {
 		" WHERE sent IS NULL"
 		" AND dest_addr = $dest_addr"
 		" AND deliver_attempts <= $attempts"
-		" ORDER BY id LIMIT 1",
+		" ORDER BY deliver_attempts, id LIMIT 1",
 	[DB_STMT_SMS_GET_NEXT_UNSENT_RR_MSISDN] =
 		"SELECT " SEL_COLUMNS " FROM SMS"
 		" WHERE sent IS NULL"
