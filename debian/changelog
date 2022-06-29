@@ -1,3 +1,62 @@
+osmo-msc (1.9.0) unstable; urgency=medium
+
+  [ Alexander Couzens ]
+  * utran: use new UTRAN encryption enum
+  * libmsc/gsm_04_08: refactor require ciphering into an own function
+  * ran_msg_iu: do not pass UEA0 to ranap_new_msg_sec_mod_cmd2()
+
+  [ Vadim Yanitskiy ]
+  * VTY: clarify deprecation message for cfg_net_per_loc_upd_cmd
+  * libmsc: fix memory leak (struct gsm_sms) in gsm340_rx_tpdu()
+  * libmsc: fix another memleak (struct gsm_sms) in gsm340_rx_tpdu()
+  * libvlr: vlr_set_ciph_mode(): avoid redundant check
+  * libvlr: fix is_ciph_required(): always send SecModeCmd for UTRAN
+  * libmsc: ran_iu_make_security_mode_command(): improve readability
+  * libmsc: ran_iu_make_security_mode_command(): clarify UIA mask
+  * libmsc: fix memory leak (struct msgb) in msc_i_ran_enc()
+  * tests: use 'check_PROGRAMS' instead of 'noinst_PROGRAMS'
+
+  [ Oliver Smith ]
+  * treewide: remove FSF address
+  * tests/msc_vlr/Makefile.am: drop -ldbi
+
+  [ Pau Espin Pedrol ]
+  * Announce IuFP audio codec for UTRAN conns in CRCX towards MGW
+  * Avoid setting audio codec if not available during assignment_complete (MDCX)
+  * ran_msg_iu.c: Set proper codec in Assignment Complete
+  * Drop unneeded ax_check_compile_flag.m4
+  * call_leg: local_bridge: Avoid null pointer access if CN-side not ready
+
+  [ Neels Hofmeyr ]
+  * fix crash on CM Serv Rej: fix use count mismatch
+
+  [ Harald Welte ]
+  * call rate_ctr_init() to make rate counters work properly
+  * switch sqlite3 to single-threaded mode
+  * sms_queue: Annotate each function with some comment
+  * vlr: Split vlr_subscr_rx_imsi_detach()
+  * vlr: Add rate counters and stat items
+  * sms_queue: Introduce rate_ctr / stat_item
+  * smpp: Fix use-after-free bug when ESME disconnects but has write pending
+  * smpp: don't enqueue write messages if ESME is disconnected
+  * sms_queue: refactor sms_pending add/remove code
+  * sms_queue: merge sms_pending_add into sms_pending_from
+  * tests: Remove sms.db{-wal,-shm} files, not just sms.db
+  * switch from libdbi to lbsqlite3
+  * db: Switch from 'synchronous = FULL' to 'synchronous = NORMAL'
+  * sms: Encapsulate SMS queue related config parameters
+  * sms: Give smsc its own VTY config node
+  * sms_queue: Use local variable rather than 9x pointer de-ref in function
+  * sms_queue: Make deletion of messages from DB VTY-configurable
+  * smpp: Parse and use SMPP-provided validity period
+  * sms: Make default SMS validity period configurable via VTY
+  * sms: Introduce VTY-configurable minimum SMS validity period
+  * update git URLs (git -> https; gitea)
+  * Convert + Expand README file
+  * fix RPM build failures due to README -> README.md rename
+
+ -- Pau Espin Pedrol <pespin@sysmocom.de>  Wed, 29 Jun 2022 11:32:11 +0200
+
 osmo-msc (1.8.0) unstable; urgency=medium
 
   [ Pau Espin Pedrol ]
