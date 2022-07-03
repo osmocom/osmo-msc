@@ -278,6 +278,8 @@ void _gsm48_cc_trans_free(struct gsm_trans *trans)
 		if (trans->cc.mncc_initiated) {
 			mncc_release_ind(trans->net, trans, trans->callref,
 					 GSM48_CAUSE_LOC_PRN_S_LU,
+					 (trans->cc.state == GSM_CSTATE_CALL_RECEIVED) ?
+					 GSM48_CC_CAUSE_USER_NOTRESPOND :
 					 GSM48_CC_CAUSE_RESOURCE_UNAVAIL);
 		}
 
