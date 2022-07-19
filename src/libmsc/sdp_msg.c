@@ -163,6 +163,13 @@ struct sdp_audio_codec *sdp_audio_codecs_add_copy(struct sdp_audio_codecs *ac, c
 				    codec->fmtp[0] ? codec->fmtp : NULL);
 }
 
+/* Find or create an entry for the given payload_type number in the given list of codecs.
+ * If the given payload_type number is already present in ac, return the first matching entry.
+ * If no such payload_type number is present: a) return NULL if create == false;
+ * b) If create == true, add a mostly empty codec entry to the end of ac with the given payload_type number, and return
+ * the created entry.
+ * If create == true, a NULL return value means that there was no unused entry left in ac to add this payload_type.
+ */
 struct sdp_audio_codec *sdp_audio_codecs_by_payload_type(struct sdp_audio_codecs *ac, unsigned int payload_type,
 							 bool create)
 {
@@ -294,6 +301,7 @@ int sdp_parse_attrib(struct sdp_msg *sdp, const char *src)
 #define A_RECVONLY "recvonly"
 
 	if (osmo_str_startswith(src, A_RTPMAP)) {
+		/* "a=rtpmap:3 GSM/8000" */
 		char *audio_name;
 		unsigned int channels = 1;
 		if (sscanf(src, A_RTPMAP "%u", &payload_type) != 1)
@@ -315,6 +323,7 @@ int sdp_parse_attrib(struct sdp_msg *sdp, const char *src)
 	}
 
 	else if (osmo_str_startswith(src, A_FMTP)) {
+		/* "a=fmtp:112 octet-align=1;mode-set=0,1,2,3" */
 		char *fmtp_str;
 		const char *line_end = sdp_msg_line_end(src);
 		if (sscanf(src, A_FMTP "%u", &payload_type) != 1)
@@ -336,6 +345,7 @@ int sdp_parse_attrib(struct sdp_msg *sdp, const char *src)
 	}
 
 	else if (osmo_str_startswith(src, A_PTIME)) {
+		/* "a=ptime:20" */
 		if (sscanf(src, A_PTIME "%u", &sdp->ptime) != 1)
 			return -EINVAL;
 
@@ -346,14 +356,17 @@ int sdp_parse_attrib(struct sdp_msg *sdp, const char *src)
 	}
 
 	else if (osmo_str_startswith(src, A_SENDRECV)) {
+		/* "a=sendrecv" */
 		/* TODO? */
 	}
 
 	else if (osmo_str_startswith(src, A_SENDONLY)) {
+		/* "a=sendonly" */
 		/* TODO? */
 	}
 
 	else if (osmo_str_startswith(src, A_RECVONLY)) {
+		/* "a=recvonly" */
 		/* TODO? */
 	}
 
