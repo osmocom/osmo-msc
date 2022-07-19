@@ -9,6 +9,14 @@ static inline const char *sdp_msg_payload_type_name(unsigned int payload_type)
 { return get_value_string(sdp_msg_payload_type_names, payload_type); }
 int sdp_subtype_name_to_payload_type(const char *subtype_name);
 
+enum sdp_mode_e {
+	SDP_MODE_UNSET = 0,
+	SDP_MODE_SENDONLY = 1,
+	SDP_MODE_RECVONLY = 2,
+	SDP_MODE_SENDRECV = 3,
+	SDP_MODE_INACTIVE = 4,
+};
+
 struct sdp_audio_codec {
 	/* Payload type number, like 3 for GSM-FR. */
 	unsigned int payload_type;
@@ -26,6 +34,7 @@ struct sdp_audio_codecs {
 struct sdp_msg {
 	struct osmo_sockaddr_str rtp;
 	unsigned int ptime;
+	enum sdp_mode_e mode;
 	struct sdp_audio_codecs audio_codecs;
 };
 

@@ -42,6 +42,7 @@ sdp_msg_to_sdp_str_buf: a=fmtp:100 192-193\r\n
 sdp_msg_to_sdp_str_buf: a=rtpmap:101 telephone-event/8000\r\n
 sdp_msg_to_sdp_str_buf: a=fmtp:101 0-15\r\n
 sdp_msg_to_sdp_str_buf: a=ptime:20\r\n
+sdp_msg_to_sdp_str_buf: a=sendrecv\r\n
 [0] ok
 
 [1]
@@ -95,6 +96,7 @@ sdp_msg_to_sdp_str_buf: a=rtpmap:8 PCMA/8000\r\n
 sdp_msg_to_sdp_str_buf: a=rtpmap:101 telephone-event/8000\r\n
 sdp_msg_to_sdp_str_buf: a=fmtp:101 0-15\r\n
 sdp_msg_to_sdp_str_buf: a=ptime:20\r\n
+sdp_msg_to_sdp_str_buf: a=sendrecv\r\n
 [2] ok
 
 
