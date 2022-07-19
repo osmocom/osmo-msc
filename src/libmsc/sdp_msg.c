@@ -227,6 +227,14 @@ int sdp_audio_codecs_remove(struct sdp_audio_codecs *ac, const struct sdp_audio_
 	return 0;
 }
 
+static const char * const sdp_mode_str[] = {
+	[SDP_MODE_UNSET] = "-",
+	[SDP_MODE_SENDONLY] = "sendonly",
+	[SDP_MODE_RECVONLY] = "recvonly",
+	[SDP_MODE_SENDRECV] = "sendrecv",
+	[SDP_MODE_INACTIVE] = "inactive",
+};
+
 /* Convert struct sdp_msg to the actual SDP protocol representation */
 int sdp_msg_to_sdp_str_buf(char *dst, size_t dst_size, const struct sdp_msg *sdp)
 {
@@ -271,6 +279,9 @@ int sdp_msg_to_sdp_str_buf(char *dst, size_t dst_size, const struct sdp_msg *sdp
 
 	OSMO_STRBUF_PRINTF(sb, "a=ptime:%d\r\n", sdp->ptime > 0? sdp->ptime : 20);
 
+	if (sdp->mode != SDP_MODE_UNSET && sdp->mode < ARRAY_SIZE(sdp_mode_str))
+		OSMO_STRBUF_PRINTF(sb, "a=%s\r\n", sdp_mode_str[sdp->mode]);
+
 	return sb.chars_needed;
 }
 
@@ -296,9 +307,6 @@ int sdp_parse_attrib(struct sdp_msg *sdp, const char *src)
 #define A_FMTP "fmtp:"
 #define A_PTIME "ptime:"
 #define A_RTCP "rtcp:"
-#define A_SENDRECV "sendrecv"
-#define A_SENDONLY "sendonly"
-#define A_RECVONLY "recvonly"
 
 	if (osmo_str_startswith(src, A_RTPMAP)) {
 		/* "a=rtpmap:3 GSM/8000" */
@@ -355,19 +363,24 @@ int sdp_parse_attrib(struct sdp_msg *sdp, const char *src)
 		/* TODO? */
 	}
 
-	else if (osmo_str_startswith(src, A_SENDRECV)) {
+	else if (osmo_str_startswith(src, sdp_mode_str[SDP_MODE_SENDRECV])) {
 		/* "a=sendrecv" */
-		/* TODO? */
+		sdp->mode = SDP_MODE_SENDRECV;
 	}
 
-	else if (osmo_str_startswith(src, A_SENDONLY)) {
+	else if (osmo_str_startswith(src, sdp_mode_str[SDP_MODE_SENDONLY])) {
 		/* "a=sendonly" */
-		/* TODO? */
+		sdp->mode = SDP_MODE_SENDONLY;
 	}
 
-	else if (osmo_str_startswith(src, A_RECVONLY)) {
+	else if (osmo_str_startswith(src, sdp_mode_str[SDP_MODE_RECVONLY])) {
 		/* "a=recvonly" */
-		/* TODO? */
+		sdp->mode = SDP_MODE_RECVONLY;
+	}
+
+	else if (osmo_str_startswith(src, sdp_mode_str[SDP_MODE_INACTIVE])) {
+		/* "a=inactive" */
+		sdp->mode = SDP_MODE_INACTIVE;
 	}
 
 	return 0;

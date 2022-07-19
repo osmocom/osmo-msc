@@ -61,6 +61,7 @@ struct sdp_test_data sdp_tests[] = {
 		"a=rtpmap:101 telephone-event/8000\r\n"
 		"a=fmtp:101 0-15\r\n"
 		"a=ptime:20\r\n"
+		"a=sendrecv\r\n"
 		,
 	},
 	{
@@ -116,6 +117,7 @@ struct sdp_test_data sdp_tests[] = {
 		"a=rtpmap:101 telephone-event/8000\r\n"
 		"a=fmtp:101 0-15\r\n"
 		"a=ptime:20\r\n"
+		"a=sendrecv\r\n"
 		,
 	},
 };
