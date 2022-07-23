@@ -10,6 +10,7 @@ static inline const char *sdp_msg_payload_type_name(unsigned int payload_type)
 int sdp_subtype_name_to_payload_type(const char *subtype_name);
 
 struct sdp_audio_codec {
+	/* Payload type number, like 3 for GSM-FR. */
 	unsigned int payload_type;
 	/* Like "GSM", "AMR", "EFR", ... */
 	char subtype_name[16];
