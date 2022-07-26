@@ -127,7 +127,7 @@ int codec_filter_run(struct codec_filter *codec_filter)
 	if (sdp_audio_codec_is_set(a)) {
 		/* Assignment has completed, the chosen codec should be the first of the resulting SDP.
 		 * Make sure this is actually listed in the result SDP and move to first place. */
-		struct sdp_audio_codec *select = sdp_audio_codec_by_descr(r, a);
+		struct sdp_audio_codec *select = sdp_audio_codecs_by_descr(r, a);
 
 		if (!select) {
 			/* Not present. Add. */
@@ -142,7 +142,7 @@ int codec_filter_run(struct codec_filter *codec_filter)
 				if (a->payload_type > 127)
 					return -ENOSPC;
 			}
-			select = sdp_audio_codec_add_copy(r, a);
+			select = sdp_audio_codecs_add_copy(r, a);
 		}
 
 		sdp_audio_codecs_select(r, select);

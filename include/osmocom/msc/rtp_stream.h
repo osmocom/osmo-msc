@@ -38,9 +38,9 @@ struct rtp_stream {
 	struct osmo_sockaddr_str remote;
 	bool remote_sent_to_mgw;
 
-	bool codec_known;
-	struct sdp_audio_codecs codec;
-	bool codec_sent_to_mgw;
+	bool codecs_known;
+	struct sdp_audio_codecs codecs;
+	bool codecs_sent_to_mgw;
 
 	struct osmo_mgcpc_ep_ci *ci;
 
@@ -65,7 +65,7 @@ struct rtp_stream *rtp_stream_alloc(struct call_leg *parent_call_leg, enum rtp_d
 int rtp_stream_ensure_ci(struct rtp_stream *rtps, struct osmo_mgcpc_ep *at_endpoint);
 int rtp_stream_do_mdcx(struct rtp_stream *rtps);
 
-void rtp_stream_set_codec(struct rtp_stream *rtps, const struct sdp_audio_codecs *codecs);
+void rtp_stream_set_codecs(struct rtp_stream *rtps, const struct sdp_audio_codecs *codecs);
 void rtp_stream_set_one_codec(struct rtp_stream *rtps, const struct sdp_audio_codec *codec);
 bool rtp_stream_set_codecs_from_mgcp_codec(struct rtp_stream *rtps, enum mgcp_codecs codec);
 void rtp_stream_set_remote_addr(struct rtp_stream *rtps, const struct osmo_sockaddr_str *r);
