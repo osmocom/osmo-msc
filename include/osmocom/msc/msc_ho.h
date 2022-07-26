@@ -92,7 +92,7 @@ struct msc_ho_state {
 	struct {
 		/* Saved RTP IP:port and codec in case we need to roll back */
 		struct osmo_sockaddr_str ran_remote_rtp;
-		struct sdp_audio_codecs codec;
+		struct sdp_audio_codecs codecs;
 	} old_cell;
 };
 

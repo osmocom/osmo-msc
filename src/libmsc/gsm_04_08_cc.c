@@ -1769,11 +1769,11 @@ int gsm48_tch_rtp_create(struct gsm_trans *trans)
 	}
 
 	/* Modify the MGW endpoint if necessary, usually this should already match and not cause MGCP. */
-	rtp_stream_set_codec(rtp_cn, &trans->cc.codecs.result.audio_codecs);
+	rtp_stream_set_codecs(rtp_cn, &trans->cc.codecs.result.audio_codecs);
 	rtp_stream_commit(rtp_cn);
 
 	/* Populate the legacy MNCC codec elements: payload_type and payload_msg_type */
-	codec = &rtp_cn->codec.codec[0];
+	codec = &rtp_cn->codecs.codec[0];
 	m = codec_mapping_by_subtype_name(codec->subtype_name);
 	mncc_payload_msg_type = m ? m->mncc_payload_msg_type : 0;
 

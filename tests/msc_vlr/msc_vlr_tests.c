@@ -850,7 +850,8 @@ int __wrap_call_leg_ensure_ci(struct call_leg *cl, enum rtp_direction dir, uint3
 			      const struct osmo_sockaddr_str *remote_addr_if_known)
 {
 	if (!cl->rtp[dir]) {
-		log("MGW <--CRCX to %s-- MSC: callref=0x%x", rtp_direction_name(dir), call_id);
+		log("MGW <--CRCX to %s-- MSC: callref=0x%x codecs=%s", rtp_direction_name(dir), call_id,
+		    codecs_if_known ? sdp_audio_codecs_to_str(codecs_if_known) : "unset");
 
 		OSMO_ASSERT(expecting_crcx == dir);
 		expecting_crcx = -1;
@@ -858,7 +859,7 @@ int __wrap_call_leg_ensure_ci(struct call_leg *cl, enum rtp_direction dir, uint3
 
 		call_leg_ensure_rtp_alloc(cl, dir, call_id, for_trans);
 		if (codecs_if_known)
-			rtp_stream_set_codec(cl->rtp[dir], codecs_if_known);
+			rtp_stream_set_codecs(cl->rtp[dir], codecs_if_known);
 		if (remote_addr_if_known && osmo_sockaddr_str_is_nonzero(remote_addr_if_known))
 			rtp_stream_set_remote_addr(cl->rtp[dir], remote_addr_if_known);
 	}
