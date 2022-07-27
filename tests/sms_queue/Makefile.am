@@ -12,6 +12,7 @@ AM_CFLAGS = \
 	$(LIBOSMOABIS_CFLAGS) \
 	$(LIBOSMOSIGTRAN_CFLAGS) \
 	$(LIBOSMORANAP_CFLAGS) \
+	$(LIBOSMONETIF_CFLAGS) \
 	$(LIBASN1C_CFLAGS) \
 	$(LIBOSMOMGCPCLIENT_CFLAGS) \
 	$(LIBOSMOGSUPCLIENT_CFLAGS) \
@@ -29,6 +30,7 @@ check_PROGRAMS = \
 
 sms_queue_test_SOURCES = \
 	sms_queue_test.c \
+	$(srcdir)/../stubs.c \
 	$(NULL)
 
 sms_queue_test_LDADD = \

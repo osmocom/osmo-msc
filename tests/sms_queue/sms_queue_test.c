@@ -277,24 +277,3 @@ int main(int argc, char **argv)
 
 	return 0;
 }
-
-void osmo_stream_srv_link_set_data(struct osmo_stream_srv_link *link, void *data) {}
-struct osmo_fd *osmo_stream_srv_get_ofd(struct osmo_stream_srv *srv) { return NULL; }
-void osmo_stream_srv_destroy(struct osmo_stream_srv *conn) {}
-struct osmo_stream_srv *osmo_stream_srv_create(void *ctx, struct osmo_stream_srv_link *link,
-					       int fd, int (*cb)(struct osmo_stream_srv *conn),
-					       int (*closed_cb)(struct osmo_stream_srv *conn),
-					       void *data) { return NULL; }
-void osmo_stream_srv_send(struct osmo_stream_srv *conn, struct msgb *msg) {}
-void osmo_stream_srv_link_set_proto(struct osmo_stream_srv_link *link, uint16_t proto) {}
-struct osmo_fd *osmo_stream_srv_link_get_ofd(struct osmo_stream_srv_link *link) { return NULL; }
-struct osmo_stream_srv_link *osmo_stream_srv_link_create(void *ctx) { return NULL; }
-void *osmo_stream_srv_get_data(struct osmo_stream_srv *conn) { return NULL; }
-void osmo_stream_srv_link_set_nodelay(struct osmo_stream_srv_link *link, bool nodelay) {}
-void osmo_stream_srv_link_set_accept_cb(struct osmo_stream_srv_link *link, int (*accept_cb)
-					(struct osmo_stream_srv_link *link, int fd)) {}
-int osmo_stream_srv_link_open(struct osmo_stream_srv_link *link) { return 0; }
-void *osmo_stream_srv_link_get_data(struct osmo_stream_srv_link *link) { return NULL; }
-void osmo_stream_srv_link_set_port(struct osmo_stream_srv_link *link, uint16_t port) {}
-void osmo_stream_srv_link_set_addr(struct osmo_stream_srv_link *link, const char *addr) {}
-int sctp_recvmsg(int sd, void *msg, size_t len, void *from, void *fromlen, void *info, int *msg_flags) { return 0; }
