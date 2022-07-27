@@ -1011,8 +1011,6 @@ int smpp_smsc_start(struct smsc *smsc, const char *bind_addr, uint16_t port)
 	if (!port)
 		port = 2775;
 
-	smpp_smsc_stop(smsc);
-
 	LOGP(DSMPP, LOGL_NOTICE, "SMPP at %s %d\n",
 	     bind_addr? bind_addr : "0.0.0.0", port);
 
@@ -1034,6 +1032,8 @@ int smpp_smsc_start(struct smsc *smsc, const char *bind_addr, uint16_t port)
 int smpp_smsc_restart(struct smsc *smsc, const char *bind_addr, uint16_t port)
 {
 	int rc;
+
+	smpp_smsc_stop(smsc);
 
 	rc = smpp_smsc_start(smsc, bind_addr, port);
 	if (rc)
