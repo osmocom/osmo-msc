@@ -45,8 +45,6 @@ struct osmo_esme {
 	uint32_t own_seq_nr;
 
 	struct osmo_wqueue wqueue;
-	struct sockaddr_storage sa;
-	socklen_t sa_len;
 
 	enum esme_read_state read_state;
 	uint32_t read_len;
