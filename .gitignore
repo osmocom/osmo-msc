@@ -1,4 +1,11 @@
 debian/*.log
+debian/autoreconf.*
+debian/*.substvars
+debian/tmp
+debian/files
+debian/.debhelper
+debian/osmo-msc*/
+
 *.o
 *.lo
 *.a
@@ -73,5 +80,6 @@ doc/manuals/generated/
 doc/manuals/osmomsc-usermanual.xml
 doc/manuals/common
 doc/manuals/build
+doc/manuals/vty/msc_vty_reference.xml
 
 contrib/osmo-msc.spec
