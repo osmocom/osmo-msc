@@ -30,6 +30,7 @@
 
 #include <osmocom/core/linuxlist.h>
 #include <osmocom/core/utils.h>
+#include <osmocom/core/socket.h>
 #include <osmocom/core/talloc.h>
 
 #include <osmocom/msc/vty.h>
@@ -524,17 +525,10 @@ DEFUN(cfg_esme_no_alert_notif, cfg_esme_no_alert_notif_cmd,
 
 static void dump_one_esme(struct vty *vty, struct osmo_esme *esme)
 {
-	char host[128], serv[128];
-
-	host[0] = 0;
-	serv[0] = 0;
-	getnameinfo((const struct sockaddr *) &esme->sa, esme->sa_len,
-		    host, sizeof(host), serv, sizeof(serv), NI_NUMERICSERV);
-
 	vty_out(vty, "ESME System ID: %s, Password: %s, SMPP Version %02x%s",
 		esme->system_id, esme->acl ? esme->acl->passwd : "",
 		esme->smpp_version, VTY_NEWLINE);
-	vty_out(vty, "  Connected from: %s:%s%s", host, serv, VTY_NEWLINE);
+	vty_out(vty, "  Connection %s%s", osmo_sock_get_name(tall_vty_ctx, esme->wqueue.bfd.fd), VTY_NEWLINE);
 	if (esme->smsc->def_route == esme->acl)
 		vty_out(vty, "  Is current default route%s", VTY_NEWLINE);
 }

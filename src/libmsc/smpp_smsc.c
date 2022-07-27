@@ -947,9 +947,6 @@ static int link_accept_cb(struct smsc *smsc, int fd,
 	esme->wqueue.read_cb = esme_link_read_cb;
 	esme->wqueue.write_cb = esme_link_write_cb;
 
-	esme->sa_len = OSMO_MIN(sizeof(esme->sa), s_len);
-	memcpy(&esme->sa, s, esme->sa_len);
-
 	llist_add_tail(&esme->list, &smsc->esme_list);
 
 	return 0;
