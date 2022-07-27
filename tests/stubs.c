@@ -37,7 +37,9 @@ void osmo_stream_srv_link_set_nodelay(struct osmo_stream_srv_link *link, bool no
 void osmo_stream_srv_link_set_accept_cb(struct osmo_stream_srv_link *link, int (*accept_cb)
 					(struct osmo_stream_srv_link *link, int fd)) {}
 int osmo_stream_srv_link_open(struct osmo_stream_srv_link *link) { return 0; }
+void osmo_stream_srv_link_close(struct osmo_stream_srv_link *link) {}
 void *osmo_stream_srv_link_get_data(struct osmo_stream_srv_link *link) { return NULL; }
+char *osmo_stream_srv_link_get_sockname(const struct osmo_stream_srv_link *link) { return NULL; }
 void osmo_stream_srv_link_set_port(struct osmo_stream_srv_link *link, uint16_t port) {}
 void osmo_stream_srv_link_set_addr(struct osmo_stream_srv_link *link, const char *addr) {}
 int sctp_recvmsg(int sd, void *msg, size_t len, void *from, void *fromlen, void *info, int *msg_flags) { return 0; }
