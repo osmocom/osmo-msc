@@ -11,6 +11,8 @@ AM_CFLAGS = \
 	$(LIBOSMOGSM_CFLAGS) \
 	$(LIBOSMOSCCP_CFLAGS) \
 	$(LIBOSMOABIS_CFLAGS) \
+	$(LIBOSMOSCCP_CFLAGS) \
+	$(LIBOSMOMGCPCLIENT_CFLAGS) \
 	$(COVERAGE_CFLAGS) \
 	$(LIBSMPP34_CFLAGS) \
 	$(NULL)
@@ -30,10 +32,10 @@ check_PROGRAMS = \
 
 smpp_test_SOURCES = \
 	smpp_test.c \
-	$(top_builddir)/src/libmsc/smpp_utils.c \
 	$(NULL)
 
 smpp_test_LDADD = \
+	$(top_builddir)/src/libsmpputil/libsmpputil.a \
 	$(LIBOSMOCORE_LIBS) \
 	$(LIBOSMOGSM_LIBS) \
 	$(NULL)

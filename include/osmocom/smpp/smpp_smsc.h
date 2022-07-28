@@ -1,5 +1,4 @@
-#ifndef _SMPP_SMSC_H
-#define _SMPP_SMSC_H
+#pragma once
 
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -8,23 +7,16 @@
 #include <osmocom/core/msgb.h>
 #include <osmocom/core/write_queue.h>
 #include <osmocom/core/timer.h>
+#include <osmocom/smpp/smpp.h>
 
 #include <smpp34.h>
 #include <smpp34_structs.h>
 #include <smpp34_params.h>
 
-#define SMPP_SYS_ID_LEN	15
-#define SMPP_PASSWD_LEN	8
-
 #define MODE_7BIT	7
 #define MODE_8BIT	8
 
 struct msc_a;
-
-enum esme_read_state {
-	READ_ST_IN_LEN = 0,
-	READ_ST_IN_MSG = 1,
-};
 
 struct osmo_smpp_acl;
 
@@ -164,4 +156,3 @@ struct ran_conn;
 
 bool smpp_route_smpp_first();
 int smpp_try_deliver(struct gsm_sms *sms, struct msc_a *msc_a);
-#endif

@@ -25,8 +25,16 @@ SUBDIRS = \
 	libmsc \
 	$(NULL)
 
+if BUILD_SMPP
+
+SUBDIRS += \
+	libsmpputil \
+	utils \
+	$(NULL)
+
+endif
+
 # Programs
 SUBDIRS += \
 	osmo-msc \
-	utils \
 	$(NULL)

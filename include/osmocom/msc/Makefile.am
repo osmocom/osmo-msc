@@ -45,7 +45,6 @@ noinst_HEADERS = \
 	sgs_vty.h \
 	signal.h \
 	silent_call.h \
-	smpp.h \
 	sms_queue.h \
 	transaction.h \
 	vlr.h \

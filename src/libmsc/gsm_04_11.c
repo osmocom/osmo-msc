@@ -58,7 +58,7 @@
 #include <osmocom/msc/paging.h>
 
 #ifdef BUILD_SMPP
-#include "smpp_smsc.h"
+#include <osmocom/smpp/smpp_smsc.h>
 #endif
 
 void *tall_gsms_ctx;
@@ -1389,4 +1389,3 @@ void gsm411_sapi_n_reject(struct msc_a *msc_a)
 		trans_free(trans);
 	}
 }
-

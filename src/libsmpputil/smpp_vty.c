@@ -34,8 +34,7 @@
 #include <osmocom/core/talloc.h>
 
 #include <osmocom/msc/vty.h>
-
-#include "smpp_smsc.h"
+#include <osmocom/smpp/smpp_smsc.h>
 
 struct smsc *smsc_from_vty(struct vty *v);
 

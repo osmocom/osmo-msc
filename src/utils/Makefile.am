@@ -34,12 +34,16 @@ smpp_mirror_SOURCES = \
 
 smpp_mirror_CFLAGS = \
 	$(LIBOSMOCORE_CFLAGS) \
+	$(LIBOSMOSCCP_CFLAGS) \
+	$(LIBOSMOMGCPCLIENT_CFLAGS) \
 	$(LIBSMPP34_CFLAGS) \
 	$(NULL)
 
 smpp_mirror_LDADD = \
+	$(top_builddir)/src/libsmpputil/libsmpputil.a \
 	$(LIBOSMOCORE_LIBS) \
 	$(LIBOSMOGSM_LIBS) \
+	$(LIBOSMONETIF_LIBS) \
 	$(LIBSMPP34_LIBS) \
 	$(NULL)
 endif

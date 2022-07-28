@@ -19,18 +19,11 @@
 #include <osmocom/core/write_queue.h>
 
 #include <osmocom/msc/debug.h>
+#include <osmocom/smpp/smpp.h>
 
-/* FIXME: merge with smpp_smsc.c */
-#define SMPP_SYS_ID_LEN	16
-enum esme_read_state {
-	READ_ST_IN_LEN = 0,
-	READ_ST_IN_MSG = 1,
-};
 /* FIXME: merge with smpp_smsc.c */
 
 struct esme {
-	struct osmo_fd ofd;
-
 	uint32_t own_seq_nr;
 
 	struct osmo_wqueue wqueue;
@@ -45,22 +38,6 @@ struct esme {
 };
 
 /* FIXME: merge with smpp_smsc.c */
-#define SMPP34_UNPACK(rc, type, str, data, len)		\
-	memset(str, 0, sizeof(*str));			\
-	rc = smpp34_unpack(type, str, data, len)
-#define INIT_RESP(type, resp, req) 		{ \
-	memset((resp), 0, sizeof(*(resp)));	  \
-	(resp)->command_length	= 0;		  \
-	(resp)->command_id	= type;		  \
-	(resp)->command_status	= ESME_ROK;	  \
-	(resp)->sequence_number	= (req)->sequence_number;	\
-}
-#define PACK_AND_SEND(esme, ptr)	pack_and_send(esme, (ptr)->command_id, ptr)
-static inline uint32_t smpp_msgb_cmdid(struct msgb *msg)
-{
-	uint8_t *tmp = msgb_data(msg) + 4;
-	return ntohl(*(uint32_t *)tmp);
-}
 static uint32_t esme_inc_seq_nr(struct esme *esme)
 {
 	esme->own_seq_nr++;

@@ -234,9 +234,11 @@ AC_OUTPUT(
     include/Makefile
     include/osmocom/Makefile
     include/osmocom/msc/Makefile
+    include/osmocom/smpp/Makefile
     src/Makefile
     src/libmsc/Makefile
     src/libvlr/Makefile
+    src/libsmpputil/Makefile
     src/osmo-msc/Makefile
     src/utils/Makefile
     tests/Makefile

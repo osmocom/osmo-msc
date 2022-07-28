@@ -43,3 +43,11 @@ char *osmo_stream_srv_link_get_sockname(const struct osmo_stream_srv_link *link)
 void osmo_stream_srv_link_set_port(struct osmo_stream_srv_link *link, uint16_t port) {}
 void osmo_stream_srv_link_set_addr(struct osmo_stream_srv_link *link, const char *addr) {}
 int sctp_recvmsg(int sd, void *msg, size_t len, void *from, void *fromlen, void *info, int *msg_flags) { return 0; }
+struct gsm_sms;
+struct msc_a;
+struct gsm_trans;
+struct osmo_esme;
+bool smpp_route_smpp_first() { return false; }
+void smpp_esme_put(struct osmo_esme *esme) { return; }
+int smpp_try_deliver(struct gsm_sms *sms, struct msc_a *msc_a) { return 0; }
+int sms_route_mt_sms(struct gsm_trans *trans, struct gsm_sms *gsms) { return 0; }

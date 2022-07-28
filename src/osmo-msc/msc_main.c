@@ -60,7 +60,7 @@
 #include <osmocom/ctrl/control_if.h>
 #include <osmocom/ctrl/control_vty.h>
 #include <osmocom/ctrl/ports.h>
-#include <osmocom/msc/smpp.h>
+#include <osmocom/smpp/smpp.h>
 #include <osmocom/sigtran/osmo_ss7.h>
 #include <osmocom/mgcp_client/mgcp_client.h>
 #include <osmocom/msc/sgs_iface.h>

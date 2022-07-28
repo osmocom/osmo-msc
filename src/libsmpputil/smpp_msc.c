@@ -48,8 +48,7 @@
 #include <osmocom/msc/gsm_subscriber.h>
 #include <osmocom/msc/vlr.h>
 #include <osmocom/msc/msc_a.h>
-
-#include "smpp_smsc.h"
+#include <osmocom/smpp/smpp_smsc.h>
 
 #define VSUB_USE_SMPP "SMPP"
 #define VSUB_USE_SMPP_CMD "SMPP-cmd"
@@ -862,4 +861,3 @@ int smpp_openbsc_start(struct gsm_network *net)
 
 	return 0;
 }
-

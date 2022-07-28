@@ -36,7 +36,6 @@ sms_queue_test_SOURCES = \
 sms_queue_test_LDADD = \
 	$(top_builddir)/src/libmsc/libmsc.a \
 	$(top_builddir)/src/libvlr/libvlr.a \
-	$(LIBSMPP34_LIBS) \
 	$(LIBOSMOCORE_LIBS) \
 	$(LIBOSMOGSM_LIBS) \
 	$(LIBOSMOVTY_LIBS) \

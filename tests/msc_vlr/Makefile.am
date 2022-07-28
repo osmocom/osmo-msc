@@ -8,7 +8,6 @@ AM_CFLAGS = \
 	-ggdb3 \
 	$(LIBOSMOCORE_CFLAGS) \
 	$(LIBOSMOGSM_CFLAGS) \
-	$(LIBSMPP34_CFLAGS) \
 	$(LIBOSMOVTY_CFLAGS) \
 	$(LIBOSMOABIS_CFLAGS) \
 	$(LIBOSMOSIGTRAN_CFLAGS) \
@@ -32,7 +31,6 @@ AM_LDFLAGS = \
 LDADD = \
 	$(top_builddir)/src/libmsc/libmsc.a \
 	$(top_builddir)/src/libvlr/libvlr.a \
-	$(LIBSMPP34_LIBS) \
 	$(LIBOSMOCORE_LIBS) \
 	$(LIBOSMOGSM_LIBS) \
 	$(LIBOSMOVTY_LIBS) \

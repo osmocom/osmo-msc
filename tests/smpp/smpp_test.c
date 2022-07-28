@@ -22,11 +22,9 @@
 #include <stdio.h>
 
 #include <osmocom/msc/debug.h>
-
+#include <osmocom/smpp/smpp_smsc.h>
 #include <osmocom/core/application.h>
 #include <osmocom/core/backtrace.h>
-
-#include "smpp_smsc.h"
 
 struct coding_test {
 	uint8_t dcs;

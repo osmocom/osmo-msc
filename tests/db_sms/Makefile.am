@@ -14,7 +14,6 @@ AM_CFLAGS = \
 	$(LIBOSMOSIGTRAN_CFLAGS) \
 	$(LIBOSMORANAP_CFLAGS) \
 	$(LIBOSMONETIF_CFLAGS) \
-	$(LIBSMPP34_CFLAGS) \
 	$(LIBOSMOMGCPCLIENT_CFLAGS) \
 	$(LIBOSMOGSUPCLIENT_CFLAGS) \
 	$(LIBSQLITE3_CFLAGS) \
@@ -37,7 +36,6 @@ db_sms_test_SOURCES = \
 db_sms_test_LDADD = \
 	$(top_builddir)/src/libmsc/libmsc.a \
 	$(top_builddir)/src/libvlr/libvlr.a \
-	$(LIBSMPP34_LIBS) \
 	$(LIBOSMOCORE_LIBS) \
 	$(LIBOSMOGSM_LIBS) \
 	$(LIBOSMOVTY_LIBS) \

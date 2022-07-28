@@ -20,9 +20,6 @@ AM_CFLAGS = \
 	$(LIBOSMONETIF_CFLAGS) \
 	$(NULL)
 
-noinst_HEADERS = \
-	$(NULL)
-
 noinst_LIBRARIES = \
 	libmsc.a \
 	$(NULL)
@@ -79,18 +76,5 @@ libmsc_a_SOURCES = \
 if BUILD_IU
 libmsc_a_SOURCES += \
 	ran_msg_iu.c \
-	$(NULL)
-endif
-
-if BUILD_SMPP
-noinst_HEADERS += \
-	smpp_smsc.h \
-	$(NULL)
-
-libmsc_a_SOURCES += \
-	smpp_smsc.c \
-	smpp_openbsc.c \
-	smpp_vty.c \
-	smpp_utils.c \
 	$(NULL)
 endif

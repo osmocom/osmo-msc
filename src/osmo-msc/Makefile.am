@@ -43,7 +43,6 @@ osmo_msc_LDADD = \
 	$(LIBOSMOCTRL_LIBS) \
 	$(LIBOSMOABIS_LIBS) \
 	$(LIBOSMONETIF_LIBS) \
-	$(LIBSMPP34_LIBS) \
 	$(LIBOSMORANAP_LIBS) \
 	$(LIBASN1C_LIBS) \
 	$(LIBOSMOSIGTRAN_LIBS) \
@@ -52,3 +51,12 @@ osmo_msc_LDADD = \
 	$(LIBSQLITE3_LIBS) \
 	-lsctp \
 	$(NULL)
+
+if BUILD_SMPP
+
+osmo_msc_LDADD += \
+	$(top_builddir)/src/libsmpputil/libsmpputil.a \
+	$(LIBSMPP34_LIBS) \
+	$(NULL)
+
+endif
