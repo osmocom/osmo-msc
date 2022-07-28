@@ -55,16 +55,14 @@ static int pack_and_send(struct esme *esme, uint32_t type, void *ptr)
 
 	rc = smpp34_pack(type, msg->tail, msgb_tailroom(msg), &rlen, ptr);
 	if (rc != 0) {
-		LOGP(DSMPP, LOGL_ERROR, "[%s] Error during smpp34_pack(): %s\n",
-		     esme->system_id, smpp34_strerror);
+		LOGPESMERR(esme, "during smpp34_pack()\n");
 		msgb_free(msg);
 		return -EINVAL;
 	}
 	msgb_put(msg, rlen);
 
 	if (osmo_wqueue_enqueue(&esme->wqueue, msg) != 0) {
-		LOGP(DSMPP, LOGL_ERROR, "[%s] Write queue full. Dropping message\n",
-		     esme->system_id);
+		LOGPESME(esme, LOGL_ERROR, "Write queue full. Dropping message\n");
 		msgb_free(msg);
 		return -EAGAIN;
 	}
@@ -215,8 +213,7 @@ static int esme_read_cb(struct osmo_fd *ofd)
 		rdlen = sizeof(uint32_t) - esme->read_idx;
 		rc = read(ofd->fd, lenptr + esme->read_idx, rdlen);
 		if (rc < 0) {
-			LOGP(DSMPP, LOGL_ERROR, "[%s] read returned %d\n",
-			     esme->system_id, rc);
+			LOGPESME(esme, LOGL_ERROR, "read returned %d\n", rc);
 		} else if (rc == 0) {
 			goto dead_socket;
 		} else
@@ -242,8 +239,7 @@ static int esme_read_cb(struct osmo_fd *ofd)
 		rdlen = esme->read_len - esme->read_idx;
 		rc = read(ofd->fd, msg->tail, OSMO_MIN(rdlen, msgb_tailroom(msg)));
 		if (rc < 0) {
-			LOGP(DSMPP, LOGL_ERROR, "[%s] read returned %d\n",
-				esme->system_id, rc);
+			LOGPESME(esme, LOGL_ERROR, "read returned %d\n", rc);
 		} else if (rc == 0) {
 			goto dead_socket;
 		} else {
@@ -282,7 +278,7 @@ static int esme_write_cb(struct osmo_fd *ofd, struct msgb *msg)
 		esme->wqueue.bfd.fd = -1;
 		exit(99);
 	} else if (rc < msgb_length(msg)) {
-		LOGP(DSMPP, LOGL_ERROR, "[%s] Short write\n", esme->system_id);
+		LOGPESME(esme, LOGL_ERROR, "Short write\n");
 		return 0;
 	}
 

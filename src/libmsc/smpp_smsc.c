@@ -316,9 +316,7 @@ int smpp_route(const struct smsc *smsc, const struct osmo_smpp_addr *dest, struc
 			*pesme = esme;
 			return 0;
 		} else
-			LOGP(DSMPP, LOGL_NOTICE, "[%s] is matching route, "
-			     "but not bound for Rx, discarding MO SMS\n",
-				     esme->system_id);
+			LOGPESME(esme, LOGL_NOTICE, "is matching route, but not bound for Rx, discarding MO SMS\n");
 	}
 
 	*pesme = NULL;
@@ -345,16 +343,14 @@ static int pack_and_send(struct osmo_esme *esme, uint32_t type, void *ptr)
 
 	rc = smpp34_pack(type, msg->tail, msgb_tailroom(msg), &rlen, ptr);
 	if (rc != 0) {
-		LOGP(DSMPP, LOGL_ERROR, "[%s] Error during smpp34_pack(): %s\n",
-		     esme->system_id, smpp34_strerror);
+		LOGPESMERR(esme, "during smpp34_pack()\n");
 		msgb_free(msg);
 		return -EINVAL;
 	}
 	msgb_put(msg, rlen);
 
 	if (osmo_wqueue_enqueue(&esme->wqueue, msg) != 0) {
-		LOGP(DSMPP, LOGL_ERROR, "[%s] Write queue full. Dropping message\n",
-		     esme->system_id);
+		LOGPESME(esme, LOGL_ERROR, "Write queue full. Dropping message\n");
 		msgb_free(msg);
 		return -EAGAIN;
 	}
@@ -372,8 +368,7 @@ static int smpp_tx_gen_nack(struct osmo_esme *esme, uint32_t seq, uint32_t statu
 	nack.sequence_number = seq;
 	nack.command_status = status;
 
-	LOGP(DSMPP, LOGL_ERROR, "[%s] Tx GENERIC NACK: %s\n",
-	     esme->system_id, str_command_status(status, buf));
+	LOGPESME(esme, LOGL_ERROR, "Tx GENERIC NACK: %s\n", str_command_status(status, buf));
 
 	return PACK_AND_SEND(esme, &nack);
 }
@@ -395,13 +390,11 @@ static int smpp_handle_gen_nack(struct osmo_esme *esme, struct msgb *msg)
 	SMPP34_UNPACK(rc, GENERIC_NACK, &nack, msgb_data(msg),
 			 msgb_length(msg));
 	if (rc < 0) {
-		LOGP(DSMPP, LOGL_ERROR, "[%s] Error in smpp34_unpack():%s\n",
-			esme->system_id, smpp34_strerror);
+		LOGPESMERR(esme, "in smpp34_unpack()\n");
 		return rc;
 	}
 
-	LOGP(DSMPP, LOGL_ERROR, "[%s] Rx GENERIC NACK: %s\n",
-	     esme->system_id, str_command_status(nack.command_status, buf));
+	LOGPESME(esme, LOGL_ERROR, "Rx GENERIC NACK: %s\n", str_command_status(nack.command_status, buf));
 
 	return 0;
 }
@@ -454,8 +447,7 @@ static int smpp_handle_bind_rx(struct osmo_esme *esme, struct msgb *msg)
 	SMPP34_UNPACK(rc, BIND_RECEIVER, &bind, msgb_data(msg),
 			   msgb_length(msg));
 	if (rc < 0) {
-		LOGP(DSMPP, LOGL_ERROR, "[%s] Error in smpp34_unpack():%s\n",
-			esme->system_id, smpp34_strerror);
+		LOGPESMERR(esme, "in smpp34_unpack()\n");
 		return rc;
 	}
 
@@ -482,8 +474,7 @@ static int smpp_handle_bind_tx(struct osmo_esme *esme, struct msgb *msg)
 	SMPP34_UNPACK(rc, BIND_TRANSMITTER, &bind, msgb_data(msg),
 			   msgb_length(msg));
 	if (rc < 0) {
-		LOGP(DSMPP, LOGL_ERROR, "[%s] Error in smpp34_unpack():%s\n",
-			esme->system_id, smpp34_strerror);
+		LOGPESMERR(esme, "in smpp34_unpack()\n");
 		return rc;
 	}
 
@@ -520,8 +511,7 @@ static int smpp_handle_bind_trx(struct osmo_esme *esme, struct msgb *msg)
 	SMPP34_UNPACK(rc, BIND_TRANSCEIVER, &bind, msgb_data(msg),
 			   msgb_length(msg));
 	if (rc < 0) {
-		LOGP(DSMPP, LOGL_ERROR, "[%s] Error in smpp34_unpack():%s\n",
-			esme->system_id, smpp34_strerror);
+		LOGPESMERR(esme, "in smpp34_unpack()\n");
 		return rc;
 	}
 
@@ -547,14 +537,13 @@ static int smpp_handle_unbind(struct osmo_esme *esme, struct msgb *msg)
 	SMPP34_UNPACK(rc, UNBIND, &unbind, msgb_data(msg),
 			   msgb_length(msg));
 	if (rc < 0) {
-		LOGP(DSMPP, LOGL_ERROR, "[%s] Error in smpp34_unpack():%s\n",
-			esme->system_id, smpp34_strerror);
+		LOGPESMERR(esme, "in smpp34_unpack()\n");
 		return rc;
 	}
 
 	INIT_RESP(UNBIND_RESP, &unbind_r, &unbind);
 
-	LOGP(DSMPP, LOGL_INFO, "[%s] Rx UNBIND\n", esme->system_id);
+	LOGPESME(esme, LOGL_INFO, "Rx UNBIND\n");
 
 	if (esme->bind_flags == 0) {
 		unbind_r.command_status = ESME_RINVBNDSTS;
@@ -576,16 +565,15 @@ static int smpp_handle_enq_link(struct osmo_esme *esme, struct msgb *msg)
 	SMPP34_UNPACK(rc, ENQUIRE_LINK, &enq, msgb_data(msg),
 			   msgb_length(msg));
 	if (rc < 0) {
-		LOGP(DSMPP, LOGL_ERROR, "[%s] Error in smpp34_unpack():%s\n",
-			esme->system_id, smpp34_strerror);
+		LOGPESMERR(esme, "in smpp34_unpack()\n");
 		return rc;
 	}
 
-	LOGP(DSMPP, LOGL_DEBUG, "[%s] Rx Enquire Link\n", esme->system_id);
+	LOGPESME(esme, LOGL_DEBUG, "Rx Enquire Link\n");
 
 	INIT_RESP(ENQUIRE_LINK_RESP, &enq_r, &enq);
 
-	LOGP(DSMPP, LOGL_DEBUG, "[%s] Tx Enquire Link Response\n", esme->system_id);
+	LOGPESME(esme, LOGL_DEBUG, "Tx Enquire Link Response\n");
 
 	return PACK_AND_SEND(esme, &enq_r);
 }
@@ -635,10 +623,10 @@ int smpp_tx_alert(struct osmo_esme *esme, uint8_t ton, uint8_t npi,
 	tlv.value.val08 = avail_status;
 	build_tlv(&alert.tlv, &tlv);
 
-	LOGP(DSMPP, LOGL_DEBUG, "[%s] Tx ALERT_NOTIFICATION (%s/%u/%u): %s\n",
-		esme->system_id, alert.source_addr, alert.source_addr_ton,
-		alert.source_addr_npi,
-		get_value_string(smpp_avail_strs, avail_status));
+	LOGPESME(esme, LOGL_DEBUG, "Tx ALERT_NOTIFICATION (%s/%u/%u): %s\n",
+			 alert.source_addr, alert.source_addr_ton,
+			 alert.source_addr_npi,
+			 get_value_string(smpp_avail_strs, avail_status));
 
 	rc = PACK_AND_SEND(esme, &alert);
 	destroy_tlv(alert.tlv);
@@ -650,8 +638,7 @@ int smpp_tx_deliver(struct osmo_esme *esme, struct deliver_sm_t *deliver)
 {
 	deliver->sequence_number = esme_inc_seq_nr(esme);
 
-	LOGP(DSMPP, LOGL_DEBUG, "[%s] Tx DELIVER-SM (from %s)\n",
-		esme->system_id, deliver->source_addr);
+	LOGPESME(esme, LOGL_DEBUG, "Tx DELIVER-SM (from %s)\n", deliver->source_addr);
 
 	return PACK_AND_SEND(esme, deliver);
 }
@@ -667,16 +654,14 @@ static int smpp_handle_deliver_resp(struct osmo_esme *esme, struct msgb *msg)
 	SMPP34_UNPACK(rc, DELIVER_SM_RESP, &deliver_r, msgb_data(msg),
 			   msgb_length(msg));
 	if (rc < 0) {
-		LOGP(DSMPP, LOGL_ERROR, "[%s] Error in smpp34_unpack():%s\n",
-			esme->system_id, smpp34_strerror);
+		LOGPESMERR(esme, "in smpp34_unpack()\n");
 		return rc;
 	}
 
 	cmd = smpp_cmd_find_by_seqnum(esme, deliver_r.sequence_number);
 	if (!cmd) {
-		LOGP(DSMPP, LOGL_ERROR, "[%s] Rx DELIVER-SM RESP !? (%s)\n",
-			esme->system_id, get_value_string(smpp_status_strs,
-						  deliver_r.command_status));
+		LOGPESME(esme, LOGL_ERROR, "Rx DELIVER-SM RESP !? (%s)\n",
+				 get_value_string(smpp_status_strs, deliver_r.command_status));
 		return -1;
 	}
 
@@ -685,9 +670,8 @@ static int smpp_handle_deliver_resp(struct osmo_esme *esme, struct msgb *msg)
 	else
 		smpp_cmd_err(cmd, deliver_r.command_status);
 
-	LOGP(DSMPP, LOGL_INFO, "[%s] Rx DELIVER-SM RESP (%s)\n",
-		esme->system_id, get_value_string(smpp_status_strs,
-						  deliver_r.command_status));
+	LOGPESME(esme, LOGL_INFO, "Rx DELIVER-SM RESP (%s)\n",
+			 get_value_string(smpp_status_strs, deliver_r.command_status));
 
 	return 0;
 }
@@ -703,8 +687,7 @@ static int smpp_handle_submit(struct osmo_esme *esme, struct msgb *msg)
 	SMPP34_UNPACK(rc, SUBMIT_SM, &submit, msgb_data(msg),
 			   msgb_length(msg));
 	if (rc < 0) {
-		LOGP(DSMPP, LOGL_ERROR, "[%s] Error in smpp34_unpack():%s\n",
-			esme->system_id, smpp34_strerror);
+		LOGPESMERR(esme, "in smpp34_unpack()\n");
 		return rc;
 	}
 
@@ -715,9 +698,8 @@ static int smpp_handle_submit(struct osmo_esme *esme, struct msgb *msg)
 		return PACK_AND_SEND(esme, &submit_r);
 	}
 
-	LOGP(DSMPP, LOGL_INFO, "[%s] Rx SUBMIT-SM (%s/%u/%u)\n",
-		esme->system_id, submit.destination_addr,
-		submit.dest_addr_ton, submit.dest_addr_npi);
+	LOGPESME(esme, LOGL_INFO, "Rx SUBMIT-SM (%s/%u/%u)\n",
+			 submit.destination_addr, submit.dest_addr_ton, submit.dest_addr_npi);
 
 	INIT_RESP(SUBMIT_SM_RESP, &submit_r, &submit);
 
@@ -734,8 +716,7 @@ static int smpp_pdu_rx(struct osmo_esme *esme, struct msgb *msg __uses)
 	uint32_t cmd_id = smpp_msgb_cmdid(msg);
 	int rc = 0;
 
-	LOGP(DSMPP, LOGL_DEBUG, "[%s] smpp_pdu_rx(%s)\n", esme->system_id,
-	     msgb_hexdump(msg));
+	LOGPESME(esme, LOGL_DEBUG, "smpp_pdu_rx(%s)\n", msgb_hexdump(msg));
 
 	switch (cmd_id) {
 	case GENERIC_NACK:
@@ -770,12 +751,10 @@ static int smpp_pdu_rx(struct osmo_esme *esme, struct msgb *msg __uses)
 	case QUERY_SM:
 	case REPLACE_SM:
 	case SUBMIT_MULTI:
-		LOGP(DSMPP, LOGL_NOTICE, "[%s] Unimplemented PDU Command "
-		     "0x%08x\n", esme->system_id, cmd_id);
+		LOGPESME(esme, LOGL_NOTICE, "Unimplemented PDU Command 0x%08x\n", cmd_id);
 		break;
 	default:
-		LOGP(DSMPP, LOGL_ERROR, "[%s] Unknown PDU Command 0x%08x\n",
-		     esme->system_id, cmd_id);
+		LOGPESME(esme, LOGL_ERROR, "Unknown PDU Command 0x%08x\n", cmd_id);
 		rc = smpp_tx_gen_nack(esme, smpp_msgb_seq(msg), ESME_RINVCMDID);
 		break;
 	}
@@ -815,8 +794,7 @@ static int esme_link_read_cb(struct osmo_fd *ofd)
 		rdlen = sizeof(uint32_t) - esme->read_idx;
 		rc = read(ofd->fd, lenptr + esme->read_idx, rdlen);
 		if (rc < 0)
-			LOGP(DSMPP, LOGL_ERROR, "[%s] read returned %zd (%s)\n",
-					esme->system_id, rc, strerror(errno));
+			LOGPESME(esme, LOGL_ERROR, "read returned %zd (%s)\n", rc, strerror(errno));
 		OSMO_FD_CHECK_READ(rc, dead_socket);
 
 		esme->read_idx += rc;
@@ -824,8 +802,7 @@ static int esme_link_read_cb(struct osmo_fd *ofd)
 		if (esme->read_idx >= sizeof(uint32_t)) {
 			esme->read_len = ntohl(len);
 			if (esme->read_len < 8 || esme->read_len > UINT16_MAX) {
-				LOGP(DSMPP, LOGL_ERROR, "[%s] length invalid %u\n",
-						esme->system_id, esme->read_len);
+				LOGPESME(esme, LOGL_ERROR, "length invalid %u\n",  esme->read_len);
 				goto dead_socket;
 			}
 
@@ -844,8 +821,8 @@ static int esme_link_read_cb(struct osmo_fd *ofd)
 		rdlen = esme->read_len - esme->read_idx;
 		rc = read(ofd->fd, msg->tail, OSMO_MIN(rdlen, msgb_tailroom(msg)));
 		if (rc < 0)
-			LOGP(DSMPP, LOGL_ERROR, "[%s] read returned %zd (%s)\n",
-					esme->system_id, rc, strerror(errno));
+			LOGPESME(esme, LOGL_ERROR, "read returned %zd (%s)\n",
+					rc, strerror(errno));
 		OSMO_FD_CHECK_READ(rc, dead_socket);
 
 		esme->read_idx += rc;
@@ -890,7 +867,7 @@ static int esme_link_write_cb(struct osmo_fd *ofd, struct msgb *msg)
 			esme->acl->esme = NULL;
 		smpp_esme_put(esme);
 	} else if (rc < msgb_length(msg)) {
-		LOGP(DSMPP, LOGL_ERROR, "[%s] Short write\n", esme->system_id);
+		LOGPESME(esme, LOGL_ERROR, "Short write\n");
 		return -1;
 	}
 
