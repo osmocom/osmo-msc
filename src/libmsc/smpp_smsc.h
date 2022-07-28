@@ -8,23 +8,16 @@
 #include <osmocom/core/msgb.h>
 #include <osmocom/core/write_queue.h>
 #include <osmocom/core/timer.h>
+#include <osmocom/msc/smpp.h>
 
 #include <smpp34.h>
 #include <smpp34_structs.h>
 #include <smpp34_params.h>
 
-#define SMPP_SYS_ID_LEN	15
-#define SMPP_PASSWD_LEN	8
-
 #define MODE_7BIT	7
 #define MODE_8BIT	8
 
 struct msc_a;
-
-enum esme_read_state {
-	READ_ST_IN_LEN = 0,
-	READ_ST_IN_MSG = 1,
-};
 
 struct osmo_smpp_acl;
 

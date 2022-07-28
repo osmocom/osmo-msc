@@ -24,6 +24,13 @@
 #include "smpp_smsc.h"
 #include <osmocom/core/logging.h>
 
+/*! \brief retrieve SMPP command ID from a msgb */
+uint32_t smpp_msgb_cmdid(struct msgb *msg)
+{
+	uint8_t *tmp = msgb_data(msg) + 4;
+	return ntohl(*(uint32_t *)tmp);
+}
+
 int smpp_determine_scheme(uint8_t dcs, uint8_t *data_coding, int *mode)
 {
 	if ((dcs & 0xF0) == 0xF0) {

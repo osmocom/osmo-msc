@@ -45,11 +45,6 @@
 #include <osmocom/msc/debug.h>
 #include <osmocom/msc/gsm_data.h>
 
-/*! \brief Ugly wrapper. libsmpp34 should do this itself! */
-#define SMPP34_UNPACK(rc, type, str, data, len)		\
-	memset(str, 0, sizeof(*str));			\
-	rc = smpp34_unpack(type, str, data, len)
-
 enum emse_bind {
 	ESME_BIND_RX = 0x01,
 	ESME_BIND_TX = 0x02,
@@ -333,18 +328,7 @@ int smpp_route(const struct smsc *smsc, const struct osmo_smpp_addr *dest, struc
 		return GSM411_RP_CAUSE_MO_NUM_UNASSIGNED;
 }
 
-
-/*! \brief initialize the libsmpp34 data structure for a response */
-#define INIT_RESP(type, resp, req) 		{ \
-	memset((resp), 0, sizeof(*(resp)));	  \
-	(resp)->command_length	= 0;		  \
-	(resp)->command_id	= type;		  \
-	(resp)->command_status	= ESME_ROK;	  \
-	(resp)->sequence_number	= (req)->sequence_number;	\
-}
-
 /*! \brief pack a libsmpp34 data strcutrure and send it to the ESME */
-#define PACK_AND_SEND(esme, ptr)	pack_and_send(esme, (ptr)->command_id, ptr)
 static int pack_and_send(struct osmo_esme *esme, uint32_t type, void *ptr)
 {
 	struct msgb *msg;
@@ -392,13 +376,6 @@ static int smpp_tx_gen_nack(struct osmo_esme *esme, uint32_t seq, uint32_t statu
 	     esme->system_id, str_command_status(status, buf));
 
 	return PACK_AND_SEND(esme, &nack);
-}
-
-/*! \brief retrieve SMPP command ID from a msgb */
-static inline uint32_t smpp_msgb_cmdid(struct msgb *msg)
-{
-	uint8_t *tmp = msgb_data(msg) + 4;
-	return ntohl(*(uint32_t *)tmp);
 }
 
 /*! \brief retrieve SMPP sequence number from a msgb */

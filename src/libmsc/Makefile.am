@@ -93,4 +93,13 @@ libmsc_a_SOURCES += \
 	smpp_vty.c \
 	smpp_utils.c \
 	$(NULL)
+
+noinst_LIBRARIES += \
+	libsmpputil.a \
+	$(NULL)
+
+libsmpputil_a_SOURCES = \
+	smpp_utils.c \
+	$(NULL)
+
 endif
