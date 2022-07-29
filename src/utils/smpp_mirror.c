@@ -21,21 +21,6 @@
 #include <osmocom/msc/debug.h>
 #include <osmocom/msc/smpp.h>
 
-/* FIXME: merge with smpp_smsc.c */
-
-struct esme {
-	uint32_t own_seq_nr;
-
-	struct osmo_wqueue wqueue;
-	enum esme_read_state read_state;
-	uint32_t read_len;
-	uint32_t read_idx;
-	struct msgb *read_msg;
-
-	uint8_t smpp_version;
-	char system_id[SMPP_SYS_ID_LEN+1];
-	char password[SMPP_SYS_ID_LEN+1];
-};
 
 /* FIXME: merge with smpp_smsc.c */
 static uint32_t esme_inc_seq_nr(struct esme *esme)

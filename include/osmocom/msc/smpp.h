@@ -11,6 +11,20 @@ enum esme_read_state {
 	READ_ST_IN_MSG = 1,
 };
 
+struct esme {
+	uint32_t own_seq_nr;
+
+	struct osmo_wqueue wqueue;
+	enum esme_read_state read_state;
+	uint32_t read_len;
+	uint32_t read_idx;
+	struct msgb *read_msg;
+
+	uint8_t smpp_version;
+	char system_id[SMPP_SYS_ID_LEN + 1];
+	char password[SMPP_SYS_ID_LEN + 1];
+};
+
 #define LOGPESME(ESME, LEVEL, FMT, ARGS...)            \
 	LOGP(DSMPP, LEVEL, "[%s] " FMT, (ESME)->system_id, ##ARGS)
 

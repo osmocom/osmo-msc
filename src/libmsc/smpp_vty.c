@@ -526,9 +526,9 @@ DEFUN(cfg_esme_no_alert_notif, cfg_esme_no_alert_notif_cmd,
 static void dump_one_esme(struct vty *vty, struct osmo_esme *esme)
 {
 	vty_out(vty, "ESME System ID: %s, Password: %s, SMPP Version %02x%s",
-		esme->system_id, esme->acl ? esme->acl->passwd : "",
+		esme->esme->system_id, esme->acl ? esme->acl->passwd : "",
 		esme->smpp_version, VTY_NEWLINE);
-	vty_out(vty, "  Connection %s%s", osmo_sock_get_name(tall_vty_ctx, esme->wqueue.bfd.fd), VTY_NEWLINE);
+	vty_out(vty, "  Connection %s%s", osmo_sock_get_name(tall_vty_ctx, esme->esme->wqueue.bfd.fd), VTY_NEWLINE);
 	if (esme->smsc->def_route == esme->acl)
 		vty_out(vty, "  Is current default route%s", VTY_NEWLINE);
 }

@@ -30,23 +30,13 @@ struct osmo_smpp_addr {
 struct osmo_esme {
 	struct llist_head list;
 	struct smsc *smsc;
+	struct esme *esme;
 	struct osmo_smpp_acl *acl;
 	int use;
 
 	struct llist_head smpp_cmd_list;
 
-	uint32_t own_seq_nr;
-
-	struct osmo_wqueue wqueue;
-
-	enum esme_read_state read_state;
-	uint32_t read_len;
-	uint32_t read_idx;
-	struct msgb *read_msg;
-
 	uint8_t smpp_version;
-	char system_id[SMPP_SYS_ID_LEN+1];
-
 	uint8_t bind_flags;
 };
 
