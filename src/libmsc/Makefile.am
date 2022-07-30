@@ -109,6 +109,7 @@ libsmpputil_a_SOURCES = \
 libsmpputil_a_CFLAGS = \
 	$(LIBSMPP34_CFLAGS) \
 	$(LIBOSMOCORE_CFLAGS) \
+	$(LIBOSMONETIF_CFLAGS) \
 	$(NULL)
 
 libsmpputil_a_LIBADD = \

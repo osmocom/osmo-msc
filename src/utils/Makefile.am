@@ -48,5 +48,6 @@ smpp_mirror_LDADD = \
 	$(LIBOSMOCORE_LIBS) \
 	$(LIBOSMOGSM_LIBS) \
 	$(LIBSMPP34_LIBS) \
+	$(LIBOSMONETIF_LIBS) \
 	$(NULL)
 endif

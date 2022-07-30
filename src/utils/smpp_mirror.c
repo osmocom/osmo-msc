@@ -176,7 +176,7 @@ static int smpp_esme_init(struct esme *esme, const char *host, uint16_t port)
 	int rc;
 
 	if (port == 0)
-		port = 2775;
+		port = SMPP_DEFAULT_PORT;
 
 	esme->own_seq_nr = rand();
 	esme_inc_seq_nr(esme);

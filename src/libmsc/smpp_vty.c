@@ -27,7 +27,7 @@
 #include <osmocom/vty/command.h>
 #include <osmocom/vty/buffer.h>
 #include <osmocom/vty/vty.h>
-
+#include <osmocom/netif/stream.h>
 #include <osmocom/core/linuxlist.h>
 #include <osmocom/core/utils.h>
 #include <osmocom/core/socket.h>
@@ -81,7 +81,7 @@ static int smpp_local_tcp(struct vty *vty,
 			  const char *bind_addr, uint16_t port)
 {
 	struct smsc *smsc = smsc_from_vty(vty);
-	int is_running = smsc->listen_ofd.fd > 0;
+	bool is_running = smsc->link;
 	int same_bind_addr;
 	int rc;
 
@@ -188,7 +188,7 @@ static int config_write_smpp(struct vty *vty)
 		vty_out(vty, " local-tcp-ip %s %u%s", smsc->bind_addr,
 			smsc->listen_port, VTY_NEWLINE);
 	else
-		vty_out(vty, " local-tcp-port %u%s", smsc->listen_port,
+		vty_out(vty, " local-tcp-port %u%s", smsc->listen_port ? smsc->listen_port : SMPP_DEFAULT_PORT,
 			VTY_NEWLINE);
 	if (strlen(smsc->system_id) > 0)
 		vty_out(vty, " system-id %s%s", smsc->system_id, VTY_NEWLINE);
@@ -528,7 +528,7 @@ static void dump_one_esme(struct vty *vty, struct osmo_esme *esme)
 	vty_out(vty, "ESME System ID: %s, Password: %s, SMPP Version %02x%s",
 		esme->esme->system_id, esme->acl ? esme->acl->passwd : "",
 		esme->smpp_version, VTY_NEWLINE);
-	vty_out(vty, "  Connection %s%s", osmo_sock_get_name(tall_vty_ctx, esme->esme->wqueue.bfd.fd), VTY_NEWLINE);
+	vty_out(vty, "  Connection %s%s", osmo_stream_srv_link_get_sockname(esme->smsc->link), VTY_NEWLINE);
 	if (esme->smsc->def_route == esme->acl)
 		vty_out(vty, "  Is current default route%s", VTY_NEWLINE);
 }

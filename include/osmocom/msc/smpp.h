@@ -1,5 +1,7 @@
 #pragma once
 
+#define SMPP_DEFAULT_PORT 2775
+
 /* Length limits according to SMPP 3.4 spec including NUL-byte: */
 #define SMPP_SYS_ID_LEN	15
 #define SMPP_PASSWD_LEN	8
@@ -15,6 +17,8 @@ enum esme_read_state {
 struct esme {
 	uint32_t own_seq_nr;
 
+    /* represents the TCP connection we accept()ed for this ESME */
+	struct osmo_stream_srv *srv;
 	struct osmo_wqueue wqueue;
 	enum esme_read_state read_state;
 	uint32_t read_len;
@@ -67,7 +71,6 @@ struct esme {
 uint32_t smpp_msgb_cmdid(struct msgb *msg);
 uint32_t esme_inc_seq_nr(struct esme *esme);
 void esme_read_state_reset(struct esme *esme);
-void esme_queue_reset(struct esme *esme);
 int esme_write_callback(struct esme *esme, int fd, struct msgb *msg);
 int esme_read_callback(struct esme *esme, int fd);
 int pack_and_send(struct esme *esme, uint32_t type, void *ptr);

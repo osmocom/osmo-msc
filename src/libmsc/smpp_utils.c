@@ -28,6 +28,8 @@
 #include <osmocom/core/msgb.h>
 #include <osmocom/core/write_queue.h>
 #include <osmocom/core/logging.h>
+#include <osmocom/netif/stream.h>
+
 #include <osmocom/msc/debug.h>
 #include <osmocom/msc/smpp.h>
 
@@ -60,13 +62,6 @@ void esme_read_state_reset(struct esme *esme)
 	esme->read_idx = 0;
 	esme->read_len = 0;
 	esme->read_state = READ_ST_IN_LEN;
-}
-
-void esme_queue_reset(struct esme *esme)
-{
-	osmo_fd_unregister(&esme->wqueue.bfd);
-	close(esme->wqueue.bfd.fd);
-	esme->wqueue.bfd.fd = -1;
 }
 
 /* !\brief call-back when per-ESME TCP socket has some data to be read */
@@ -123,7 +118,6 @@ int esme_read_callback(struct esme *esme, int fd)
 
 	return 0;
 dead_socket:
-	esme_queue_reset(esme);
 	esme_read_state_reset(esme);
 	return -EBADF;
 }
@@ -132,7 +126,6 @@ int esme_write_callback(struct esme *esme, int fd, struct msgb *msg)
 {
 	int rc = write(fd, msgb_data(msg), msgb_length(msg));
 	if (rc == 0) {
-		esme_queue_reset(esme);
 		return 0;
 	} else if (rc < msgb_length(msg)) {
 		LOGPESME(esme, LOGL_ERROR, "Short write\n");
@@ -150,7 +143,7 @@ int pack_and_send(struct esme *esme, uint32_t type, void *ptr)
 
 	/* the socket was closed. Avoid allocating + enqueueing msgb, see
 	 * https://osmocom.org/issues/3278 */
-	if (esme->wqueue.bfd.fd == -1)
+	if (!esme->srv)
 		return -EIO;
 
 	msg = msgb_alloc(4096, "SMPP_Tx");
@@ -165,11 +158,8 @@ int pack_and_send(struct esme *esme, uint32_t type, void *ptr)
 	}
 	msgb_put(msg, rlen);
 
-	if (osmo_wqueue_enqueue(&esme->wqueue, msg) != 0) {
-		LOGPESME(esme, LOGL_ERROR, "Write queue full. Dropping message\n");
-		msgb_free(msg);
-		return -EAGAIN;
-	}
+	osmo_stream_srv_send(esme->srv, msg);
+
 	return 0;
 }
 

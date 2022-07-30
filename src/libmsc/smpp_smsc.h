@@ -85,7 +85,7 @@ void smpp_cmd_err(struct osmo_smpp_cmd *cmd, uint32_t status);
 void smpp_cmd_flush_pending(struct osmo_esme *esme);
 
 struct smsc {
-	struct osmo_fd listen_ofd;
+	struct osmo_stream_srv_link *link;
 	struct llist_head esme_list;
 	struct llist_head acl_list;
 	struct llist_head route_list;

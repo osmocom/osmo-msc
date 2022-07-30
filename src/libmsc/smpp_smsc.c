@@ -38,6 +38,7 @@
 #include <osmocom/core/logging.h>
 #include <osmocom/core/write_queue.h>
 #include <osmocom/core/talloc.h>
+#include <osmocom/netif/stream.h>
 #include <osmocom/gsm/protocol/gsm_04_11.h>
 
 #include "smpp_smsc.h"
@@ -160,8 +161,6 @@ void smpp_acl_delete(struct osmo_smpp_acl *acl)
 
 	/* kill any active ESMEs */
 	if (acl->esme) {
-		struct esme *esme = acl->esme->esme;
-		esme_queue_reset(esme);
 		acl->esme = NULL;
 		smpp_esme_put(acl->esme);
 	}
@@ -237,14 +236,14 @@ void smpp_esme_get(struct osmo_esme *esme)
 
 static void esme_destroy(struct osmo_esme *esme)
 {
-	osmo_wqueue_clear(&esme->esme->wqueue);
-	if (esme->esme->wqueue.bfd.fd >= 0) {
-		esme_queue_reset(esme->esme);
-	}
+	if (esme->use < 0)
+		return;
+
 	smpp_cmd_flush_pending(esme);
 	llist_del(&esme->list);
 	if (esme->acl)
 		esme->acl->esme = NULL;
+	osmo_stream_srv_destroy(esme->esme->srv);
 	talloc_free(esme);
 }
 
@@ -720,9 +719,10 @@ static int smpp_pdu_rx(struct osmo_esme *esme, struct msgb *msg __uses)
 }
 
 /* !\brief call-back when per-ESME TCP socket has some data to be read */
-static int esme_link_read_cb(struct osmo_fd *ofd)
+static int esme_link_read_cb(struct osmo_stream_srv *conn)
 {
-	struct osmo_esme *e = ofd->data;
+	struct osmo_esme *e = osmo_stream_srv_get_data(conn);
+	struct osmo_fd *ofd = osmo_stream_srv_get_ofd(conn);
 	struct esme *esme = e->esme;
 	int rc = esme_read_callback(esme, ofd->fd);
 
@@ -743,27 +743,25 @@ static int esme_link_read_cb(struct osmo_fd *ofd)
 	return 0;
 }
 
-/* call-back of write queue once it wishes to write a message to the socket */
-static int esme_link_write_cb(struct osmo_fd *ofd, struct msgb *msg)
+/* call-back when new connection is closed on ESME */
+static int esme_link_close_cb(struct osmo_stream_srv *conn)
 {
-	struct osmo_esme *esme = ofd->data;
-	int rc = esme_write_callback(esme->esme, ofd->fd, msg);
+	struct osmo_esme *esme = osmo_stream_srv_get_data(conn);
 
-	if (rc == 0) {
-		if (esme->acl)
-			esme->acl->esme = NULL;
-		smpp_esme_put(esme);
-	} else if (rc == -1) {
-		return -1;
-	}
+	LOGPESME(esme->esme, LOGL_NOTICE, "Connection lost\n");
+
+	if (esme->acl)
+		esme->acl->esme = NULL;
+
+	smpp_esme_put(esme);
 
 	return 0;
 }
 
 /* callback for already-accepted new TCP socket */
-static int link_accept_cb(struct smsc *smsc, int fd,
-			  struct sockaddr_storage *s, socklen_t s_len)
+static int link_accept_cb(struct osmo_stream_srv_link *link, int fd)
 {
+	struct smsc *smsc = osmo_stream_srv_link_get_data(link);
 	struct osmo_esme *esme = talloc_zero(smsc, struct osmo_esme);
 	if (!esme) {
 		close(fd);
@@ -780,37 +778,15 @@ static int link_accept_cb(struct smsc *smsc, int fd,
 	esme->esme->own_seq_nr = rand();
 	esme_inc_seq_nr(esme->esme);
 	esme->smsc = smsc;
-	osmo_wqueue_init(&esme->esme->wqueue, 10);
-	osmo_fd_setup(&esme->esme->wqueue.bfd, fd, OSMO_FD_READ, osmo_wqueue_bfd_cb, esme, 0);
-
-	if (osmo_fd_register(&esme->esme->wqueue.bfd) != 0) {
-		close(fd);
+	esme->esme->srv = osmo_stream_srv_create(esme, link, fd, esme_link_read_cb, esme_link_close_cb, esme);
+	if (!esme->esme->srv) {
 		talloc_free(esme);
-		return -EIO;
+		return -EINVAL;
 	}
-
-	esme->esme->wqueue.read_cb = esme_link_read_cb;
-	esme->esme->wqueue.write_cb = esme_link_write_cb;
 
 	llist_add_tail(&esme->list, &smsc->esme_list);
 
 	return 0;
-}
-
-/* callback of listening TCP socket */
-static int smsc_fd_cb(struct osmo_fd *ofd, unsigned int what)
-{
-	int rc;
-	struct sockaddr_storage sa;
-	socklen_t sa_len = sizeof(sa);
-
-	rc = accept(ofd->fd, (struct sockaddr *)&sa, &sa_len);
-	if (rc < 0) {
-		LOGP(DSMPP, LOGL_ERROR, "Accept returns %d (%s)\n",
-		     rc, strerror(errno));
-		return rc;
-	}
-	return link_accept_cb(ofd->data, rc, &sa, sa_len);
 }
 
 /*! \brief allocate and initialize an smsc struct from talloc context ctx. */
@@ -822,8 +798,14 @@ struct smsc *smpp_smsc_alloc_init(void *ctx)
 	INIT_LLIST_HEAD(&smsc->acl_list);
 	INIT_LLIST_HEAD(&smsc->route_list);
 
-	smsc->listen_ofd.data = smsc;
-	smsc->listen_ofd.cb = smsc_fd_cb;
+	smsc->link = osmo_stream_srv_link_create(smsc);
+	if (!smsc->link)
+		return NULL;
+
+	osmo_stream_srv_link_set_data(smsc->link, smsc);
+	osmo_stream_srv_link_set_accept_cb(smsc->link, link_accept_cb);
+	osmo_stream_srv_link_set_proto(smsc->link, IPPROTO_TCP);
+	osmo_stream_srv_link_set_nodelay(smsc->link, true);
 
 	return smsc;
 }
@@ -849,18 +831,16 @@ int smpp_smsc_start(struct smsc *smsc, const char *bind_addr, uint16_t port)
 {
 	int rc;
 
-	/* default port for SMPP */
-	if (!port)
-		port = 2775;
+	osmo_stream_srv_link_set_addr(smsc->link, bind_addr ? bind_addr : "0.0.0.0");
+	osmo_stream_srv_link_set_port(smsc->link, port ? port : SMPP_DEFAULT_PORT);
 
-	LOGP(DSMPP, LOGL_NOTICE, "SMPP at %s %d\n",
-	     bind_addr? bind_addr : "0.0.0.0", port);
-
-	rc = osmo_sock_init_ofd(&smsc->listen_ofd, AF_UNSPEC, SOCK_STREAM,
-				IPPROTO_TCP, bind_addr, port,
-				OSMO_SOCK_F_BIND);
-	if (rc < 0)
+	rc = osmo_stream_srv_link_open(smsc->link);
+	if (rc < 0) {
+		LOGP(DSMPP, LOGL_ERROR, "SMPP socket cannot be opened: %s\n", strerror(-rc));
 		return rc;
+	}
+
+	LOGP(DSMPP, LOGL_NOTICE, "SMPP at %s\n", osmo_stream_srv_link_get_sockname(smsc->link));
 
 	/* store new address and port */
 	rc = smpp_smsc_conf(smsc, bind_addr, port);
@@ -887,9 +867,5 @@ int smpp_smsc_restart(struct smsc *smsc, const char *bind_addr, uint16_t port)
 /*! /brief Close SMPP connection. */
 void smpp_smsc_stop(struct smsc *smsc)
 {
-	if (smsc->listen_ofd.fd > 0) {
-		close(smsc->listen_ofd.fd);
-		smsc->listen_ofd.fd = 0;
-		osmo_fd_unregister(&smsc->listen_ofd);
-	}
+	osmo_stream_srv_link_close(smsc->link);
 }
