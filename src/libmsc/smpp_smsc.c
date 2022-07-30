@@ -161,9 +161,7 @@ void smpp_acl_delete(struct osmo_smpp_acl *acl)
 	/* kill any active ESMEs */
 	if (acl->esme) {
 		struct esme *esme = acl->esme->esme;
-		osmo_fd_unregister(&esme->wqueue.bfd);
-		close(esme->wqueue.bfd.fd);
-		esme->wqueue.bfd.fd = -1;
+		esme_queue_reset(esme);
 		acl->esme = NULL;
 		smpp_esme_put(acl->esme);
 	}
@@ -241,8 +239,7 @@ static void esme_destroy(struct osmo_esme *esme)
 {
 	osmo_wqueue_clear(&esme->esme->wqueue);
 	if (esme->esme->wqueue.bfd.fd >= 0) {
-		osmo_fd_unregister(&esme->esme->wqueue.bfd);
-		close(esme->esme->wqueue.bfd.fd);
+		esme_queue_reset(esme->esme);
 	}
 	smpp_cmd_flush_pending(esme);
 	llist_del(&esme->list);
@@ -722,113 +719,41 @@ static int smpp_pdu_rx(struct osmo_esme *esme, struct msgb *msg __uses)
 	return rc;
 }
 
-/* This macro should be called after a call to read() in the read_cb of an
- * osmo_fd to properly check for errors.
- * rc is the return value of read, err_label is the label to jump to in case of
- * an error. The code there should handle closing the connection.
- * FIXME: This code should go in libosmocore utils.h so it can be used by other
- * projects as well.
- * */
-#define OSMO_FD_CHECK_READ(rc, err_label) \
-	if (rc < 0) { \
-		/* EINTR is a non-fatal error, just try again */ \
-		if (errno == EINTR) \
-			return 0; \
-		goto err_label; \
-	} else if (rc == 0) { \
-		goto err_label; \
-	}
-
 /* !\brief call-back when per-ESME TCP socket has some data to be read */
 static int esme_link_read_cb(struct osmo_fd *ofd)
 {
 	struct osmo_esme *e = ofd->data;
 	struct esme *esme = e->esme;
-	uint32_t len;
-	uint8_t *lenptr = (uint8_t *) &len;
-	uint8_t *cur;
-	struct msgb *msg;
-	ssize_t rdlen, rc;
+	int rc = esme_read_callback(esme, ofd->fd);
 
-	switch (esme->read_state) {
-	case READ_ST_IN_LEN:
-		rdlen = sizeof(uint32_t) - esme->read_idx;
-		rc = read(ofd->fd, lenptr + esme->read_idx, rdlen);
-		if (rc < 0)
-			LOGPESME(esme, LOGL_ERROR, "read returned %zd (%s)\n", rc, strerror(errno));
-		OSMO_FD_CHECK_READ(rc, dead_socket);
-
-		esme->read_idx += rc;
-
-		if (esme->read_idx >= sizeof(uint32_t)) {
-			esme->read_len = ntohl(len);
-			if (esme->read_len < 8 || esme->read_len > UINT16_MAX) {
-				LOGPESME(esme, LOGL_ERROR, "length invalid %u\n",  esme->read_len);
-				goto dead_socket;
-			}
-
-			msg = msgb_alloc(esme->read_len, "SMPP Rx");
-			if (!msg)
-				return -ENOMEM;
-			esme->read_msg = msg;
-			cur = msgb_put(msg, sizeof(uint32_t));
-			memcpy(cur, lenptr, sizeof(uint32_t));
-			esme->read_state = READ_ST_IN_MSG;
-			esme->read_idx = sizeof(uint32_t);
-		}
+	switch (rc) {
+	case 1:
+		rc = smpp_pdu_rx(e, esme->read_msg);
+		esme_read_state_reset(esme);
 		break;
-	case READ_ST_IN_MSG:
-		msg = esme->read_msg;
-		rdlen = esme->read_len - esme->read_idx;
-		rc = read(ofd->fd, msg->tail, OSMO_MIN(rdlen, msgb_tailroom(msg)));
-		if (rc < 0)
-			LOGPESME(esme, LOGL_ERROR, "read returned %zd (%s)\n",
-					rc, strerror(errno));
-		OSMO_FD_CHECK_READ(rc, dead_socket);
-
-		esme->read_idx += rc;
-		msgb_put(msg, rc);
-
-		if (esme->read_idx >= esme->read_len) {
-			rc = smpp_pdu_rx(e, esme->read_msg);
-			msgb_free(esme->read_msg);
-			esme->read_msg = NULL;
-			esme->read_idx = 0;
-			esme->read_len = 0;
-			esme->read_state = READ_ST_IN_LEN;
-		}
+	case -EBADF:
+		if (e->acl)
+			e->acl->esme = NULL;
+		smpp_esme_put(e);
 		break;
+    default:
+		return rc;
 	}
 
 	return 0;
-dead_socket:
-	msgb_free(esme->read_msg);
-	osmo_fd_unregister(&esme->wqueue.bfd);
-	close(esme->wqueue.bfd.fd);
-	esme->wqueue.bfd.fd = -1;
-	if (e->acl)
-		e->acl->esme = NULL;
-	smpp_esme_put(e);
-
-	return -EBADF;
 }
 
 /* call-back of write queue once it wishes to write a message to the socket */
 static int esme_link_write_cb(struct osmo_fd *ofd, struct msgb *msg)
 {
 	struct osmo_esme *esme = ofd->data;
-	int rc;
+	int rc = esme_write_callback(esme->esme, ofd->fd, msg);
 
-	rc = write(ofd->fd, msgb_data(msg), msgb_length(msg));
 	if (rc == 0) {
-		osmo_fd_unregister(&esme->esme->wqueue.bfd);
-		close(esme->esme->wqueue.bfd.fd);
-		esme->esme->wqueue.bfd.fd = -1;
 		if (esme->acl)
 			esme->acl->esme = NULL;
 		smpp_esme_put(esme);
-	} else if (rc < msgb_length(msg)) {
-		LOGPESME(esme->esme, LOGL_ERROR, "Short write\n");
+	} else if (rc == -1) {
 		return -1;
 	}
 

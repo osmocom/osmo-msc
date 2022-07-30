@@ -47,6 +47,27 @@ struct esme {
 		(resp)->command_status	= ESME_ROK;					\
 		(resp)->sequence_number	= (req)->sequence_number; }
 
+/* This macro should be called after a call to read() in the read_cb of an
+ * osmo_fd to properly check for errors.
+ * rc is the return value of read, err_label is the label to jump to in case of
+ * an error. The code there should handle closing the connection.
+ * FIXME: This code should go in libosmocore utils.h so it can be used by other
+ * projects as well.
+ * */
+#define OSMO_FD_CHECK_READ(rc, err_label) do {				\
+	if (rc < 0) {                                           \
+		/* EINTR is a non-fatal error, just try again */    \
+		if (errno == EINTR)                                  \
+			return 0;                                       \
+		goto err_label;                                     \
+	} else if (rc == 0) {                                    \
+		goto err_label;                                     \
+	}                                        } while (0)
+
 uint32_t smpp_msgb_cmdid(struct msgb *msg);
 uint32_t esme_inc_seq_nr(struct esme *esme);
+void esme_read_state_reset(struct esme *esme);
+void esme_queue_reset(struct esme *esme);
+int esme_write_callback(struct esme *esme, int fd, struct msgb *msg);
+int esme_read_callback(struct esme *esme, int fd);
 int pack_and_send(struct esme *esme, uint32_t type, void *ptr);

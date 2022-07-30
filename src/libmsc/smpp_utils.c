@@ -21,6 +21,7 @@
 
 #include <time.h>
 #include <errno.h>
+#include <unistd.h>
 #include <string.h>
 #include <arpa/inet.h>
 
@@ -48,6 +49,97 @@ uint32_t esme_inc_seq_nr(struct esme *esme)
 		esme->own_seq_nr = 1;
 
 	return esme->own_seq_nr;
+}
+
+void esme_read_state_reset(struct esme *esme)
+{
+	if (esme->read_msg) {
+		msgb_free(esme->read_msg);
+		esme->read_msg = NULL;
+	}
+	esme->read_idx = 0;
+	esme->read_len = 0;
+	esme->read_state = READ_ST_IN_LEN;
+}
+
+void esme_queue_reset(struct esme *esme)
+{
+	osmo_fd_unregister(&esme->wqueue.bfd);
+	close(esme->wqueue.bfd.fd);
+	esme->wqueue.bfd.fd = -1;
+}
+
+/* !\brief call-back when per-ESME TCP socket has some data to be read */
+int esme_read_callback(struct esme *esme, int fd)
+{
+	uint32_t len;
+	uint8_t *lenptr = (uint8_t *) &len;
+	uint8_t *cur;
+	struct msgb *msg;
+	ssize_t rdlen, rc;
+
+	switch (esme->read_state) {
+	case READ_ST_IN_LEN:
+		rdlen = sizeof(uint32_t) - esme->read_idx;
+		rc = read(fd, lenptr + esme->read_idx, rdlen);
+		if (rc < 0)
+			LOGPESME(esme, LOGL_ERROR, "read returned %zd (%s)\n", rc, strerror(errno));
+		OSMO_FD_CHECK_READ(rc, dead_socket);
+
+		esme->read_idx += rc;
+
+		if (esme->read_idx >= sizeof(uint32_t)) {
+			esme->read_len = ntohl(len);
+			if (esme->read_len < 8 || esme->read_len > UINT16_MAX) {
+				LOGPESME(esme, LOGL_ERROR, "length invalid %u\n",  esme->read_len);
+				goto dead_socket;
+			}
+
+			msg = msgb_alloc(esme->read_len, "SMPP Rx");
+			if (!msg)
+				return -ENOMEM;
+			esme->read_msg = msg;
+			cur = msgb_put(msg, sizeof(uint32_t));
+			memcpy(cur, lenptr, sizeof(uint32_t));
+			esme->read_state = READ_ST_IN_MSG;
+			esme->read_idx = sizeof(uint32_t);
+		}
+		break;
+	case READ_ST_IN_MSG:
+		msg = esme->read_msg;
+		rdlen = esme->read_len - esme->read_idx;
+		rc = read(fd, msg->tail, OSMO_MIN(rdlen, msgb_tailroom(msg)));
+		if (rc < 0)
+			LOGPESME(esme, LOGL_ERROR, "read returned %zd (%s)\n", rc, strerror(errno));
+		OSMO_FD_CHECK_READ(rc, dead_socket);
+
+		esme->read_idx += rc;
+		msgb_put(msg, rc);
+
+		if (esme->read_idx >= esme->read_len)
+			return 1;
+		break;
+	}
+
+	return 0;
+dead_socket:
+	esme_queue_reset(esme);
+	esme_read_state_reset(esme);
+	return -EBADF;
+}
+
+int esme_write_callback(struct esme *esme, int fd, struct msgb *msg)
+{
+	int rc = write(fd, msgb_data(msg), msgb_length(msg));
+	if (rc == 0) {
+		esme_queue_reset(esme);
+		return 0;
+	} else if (rc < msgb_length(msg)) {
+		LOGPESME(esme, LOGL_ERROR, "Short write\n");
+		return -1;
+	}
+
+	return rc;
 }
 
 /*! \brief pack a libsmpp34 data strcutrure and send it to the ESME */

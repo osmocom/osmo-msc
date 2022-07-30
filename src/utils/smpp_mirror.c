@@ -143,98 +143,30 @@ static int smpp_pdu_rx(struct esme *esme, struct msgb *msg)
 	return rc;
 }
 
-static void esme_read_state_reset(struct esme *esme)
-{
-	esme->read_msg = NULL;
-	esme->read_idx = 0;
-	esme->read_len = 0;
-	esme->read_state = READ_ST_IN_LEN;
-}
-
-/* FIXME: merge with smpp_smsc.c */
 static int esme_read_cb(struct osmo_fd *ofd)
 {
 	struct esme *esme = ofd->data;
-	uint32_t len;
-	uint8_t *lenptr = (uint8_t *) &len;
-	uint8_t *cur;
-	struct msgb *msg;
-	int rdlen;
-	int rc;
+	int rc = esme_read_callback(esme, ofd->fd);
 
-	switch (esme->read_state) {
-	case READ_ST_IN_LEN:
-		rdlen = sizeof(uint32_t) - esme->read_idx;
-		rc = read(ofd->fd, lenptr + esme->read_idx, rdlen);
-		if (rc < 0) {
-			LOGPESME(esme, LOGL_ERROR, "read returned %d\n", rc);
-		} else if (rc == 0) {
-			goto dead_socket;
-		} else
-			esme->read_idx += rc;
-		if (esme->read_idx >= sizeof(uint32_t)) {
-			esme->read_len = ntohl(len);
-			if (esme->read_len > 65535) {
-				/* unrealistic */
-				goto dead_socket;
-			}
-			msg = msgb_alloc(esme->read_len, "SMPP Rx");
-			if (!msg)
-				return -ENOMEM;
-			esme->read_msg = msg;
-			cur = msgb_put(msg, sizeof(uint32_t));
-			memcpy(cur, lenptr, sizeof(uint32_t));
-			esme->read_state = READ_ST_IN_MSG;
-			esme->read_idx = sizeof(uint32_t);
-		}
+	switch (rc) {
+	case 1:
+		rc = smpp_pdu_rx(esme, esme->read_msg);
+		esme_read_state_reset(esme);
 		break;
-	case READ_ST_IN_MSG:
-		msg = esme->read_msg;
-		rdlen = esme->read_len - esme->read_idx;
-		rc = read(ofd->fd, msg->tail, OSMO_MIN(rdlen, msgb_tailroom(msg)));
-		if (rc < 0) {
-			LOGPESME(esme, LOGL_ERROR, "read returned %d\n", rc);
-		} else if (rc == 0) {
-			goto dead_socket;
-		} else {
-			esme->read_idx += rc;
-			msgb_put(msg, rc);
-		}
-
-		if (esme->read_idx >= esme->read_len) {
-			rc = smpp_pdu_rx(esme, esme->read_msg);
-			esme_read_state_reset(esme);
-		}
+	case -EBADF:
+		exit(2342);
 		break;
+	default:
+		return rc;
 	}
-
-	return 0;
-dead_socket:
-	msgb_free(esme->read_msg);
-	osmo_fd_unregister(&esme->wqueue.bfd);
-	close(esme->wqueue.bfd.fd);
-	esme->wqueue.bfd.fd = -1;
-	esme_read_state_reset(esme);
-	exit(2342);
 
 	return 0;
 }
 
 static int esme_write_cb(struct osmo_fd *ofd, struct msgb *msg)
 {
-	struct esme *esme = ofd->data;
-	int rc;
-
-	rc = write(ofd->fd, msgb_data(msg), msgb_length(msg));
-	if (rc == 0) {
-		osmo_fd_unregister(&esme->wqueue.bfd);
-		close(esme->wqueue.bfd.fd);
-		esme->wqueue.bfd.fd = -1;
+	if (esme_write_callback(ofd->data, ofd->fd, msg) == 0)
 		exit(99);
-	} else if (rc < msgb_length(msg)) {
-		LOGPESME(esme, LOGL_ERROR, "Short write\n");
-		return 0;
-	}
 
 	return 0;
 }
