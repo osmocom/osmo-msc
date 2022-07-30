@@ -612,7 +612,7 @@ int main(int argc, char **argv)
 	}
 
 #ifdef BUILD_SMPP
-	if (smpp_openbsc_alloc_init(tall_msc_ctx) < 0)
+	if (smpp_msc_alloc_init(tall_msc_ctx) < 0)
 		return -1;
 #endif
 	sgs_iface_init(tall_msc_ctx, msc_network);
@@ -656,7 +656,7 @@ int main(int argc, char **argv)
 	 * following code until iu_init() is legacy. */
 
 #ifdef BUILD_SMPP
-	smpp_openbsc_start(msc_network);
+	smpp_msc_start(msc_network);
 #endif
 
 	/* start control interface after reading config for

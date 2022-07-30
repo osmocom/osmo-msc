@@ -139,8 +139,8 @@ int smpp_determine_scheme(uint8_t dcs, uint8_t *data_coding, int *mode);
 
 time_t smpp_parse_time_format(const char *vp, time_t *t_now);
 
-int smpp_openbsc_alloc_init(void *ctx);
-int smpp_openbsc_start(struct gsm_network *net);
+int smpp_msc_alloc_init(void *ctx);
+int smpp_msc_start(struct gsm_network *net);
 
 struct gsm_sms;
 struct ran_conn;
