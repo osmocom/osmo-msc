@@ -38,4 +38,5 @@ smpp_test_SOURCES = \
 smpp_test_LDADD = \
 	$(LIBOSMOCORE_LIBS) \
 	$(LIBOSMOGSM_LIBS) \
+	$(LIBSMPP34_LIBS) \
 	$(NULL)

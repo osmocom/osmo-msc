@@ -251,15 +251,6 @@ static void esme_destroy(struct osmo_esme *esme)
 	talloc_free(esme);
 }
 
-static uint32_t esme_inc_seq_nr(struct esme *esme)
-{
-	esme->own_seq_nr++;
-	if (esme->own_seq_nr > 0x7fffffff)
-		esme->own_seq_nr = 1;
-
-	return esme->own_seq_nr;
-}
-
 /*! \brief decrease the use/reference count, free if it is 0 */
 void smpp_esme_put(struct osmo_esme *esme)
 {
@@ -324,37 +315,6 @@ int smpp_route(const struct smsc *smsc, const struct osmo_smpp_addr *dest, struc
 		return GSM411_RP_CAUSE_MO_NET_OUT_OF_ORDER;
 	else
 		return GSM411_RP_CAUSE_MO_NUM_UNASSIGNED;
-}
-
-/*! \brief pack a libsmpp34 data strcutrure and send it to the ESME */
-static int pack_and_send(struct esme *esme, uint32_t type, void *ptr)
-{
-	struct msgb *msg;
-	int rc, rlen;
-
-	/* the socket was closed. Avoid allocating + enqueueing msgb, see
-	 * https://osmocom.org/issues/3278 */
-	if (esme->wqueue.bfd.fd == -1)
-		return -EIO;
-
-	msg = msgb_alloc(4096, "SMPP_Tx");
-	if (!msg)
-		return -ENOMEM;
-
-	rc = smpp34_pack(type, msg->tail, msgb_tailroom(msg), &rlen, ptr);
-	if (rc != 0) {
-		LOGPESMERR(esme, "during smpp34_pack()\n");
-		msgb_free(msg);
-		return -EINVAL;
-	}
-	msgb_put(msg, rlen);
-
-	if (osmo_wqueue_enqueue(&esme->wqueue, msg) != 0) {
-		LOGPESME(esme, LOGL_ERROR, "Write queue full. Dropping message\n");
-		msgb_free(msg);
-		return -EAGAIN;
-	}
-	return 0;
 }
 
 /*! \brief transmit a generic NACK to a remote ESME */

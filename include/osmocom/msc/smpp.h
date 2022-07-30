@@ -4,6 +4,9 @@
 #define SMPP_SYS_ID_LEN	15
 #define SMPP_PASSWD_LEN	8
 
+#define MODE_7BIT	7
+#define MODE_8BIT	8
+
 enum esme_read_state {
 	READ_ST_IN_LEN = 0,
 	READ_ST_IN_MSG = 1,
@@ -45,3 +48,5 @@ struct esme {
 		(resp)->sequence_number	= (req)->sequence_number; }
 
 uint32_t smpp_msgb_cmdid(struct msgb *msg);
+uint32_t esme_inc_seq_nr(struct esme *esme);
+int pack_and_send(struct esme *esme, uint32_t type, void *ptr);

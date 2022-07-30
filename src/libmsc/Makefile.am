@@ -94,12 +94,25 @@ libmsc_a_SOURCES += \
 	smpp_utils.c \
 	$(NULL)
 
+libmsc_a_LIBADD = \
+	libsmpputil.a \
+	$(NULL)
+
 noinst_LIBRARIES += \
 	libsmpputil.a \
 	$(NULL)
 
 libsmpputil_a_SOURCES = \
 	smpp_utils.c \
+	$(NULL)
+
+libsmpputil_a_CFLAGS = \
+	$(LIBSMPP34_CFLAGS) \
+	$(LIBOSMOCORE_CFLAGS) \
+	$(NULL)
+
+libsmpputil_a_LIBADD = \
+	$(LIBSMPP34_LIBS) \
 	$(NULL)
 
 endif

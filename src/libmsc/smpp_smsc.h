@@ -15,9 +15,6 @@
 #include <smpp34_structs.h>
 #include <smpp34_params.h>
 
-#define MODE_7BIT	7
-#define MODE_8BIT	8
-
 struct msc_a;
 
 struct osmo_smpp_acl;

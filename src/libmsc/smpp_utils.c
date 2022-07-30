@@ -20,15 +20,65 @@
 #include "config.h"
 
 #include <time.h>
+#include <errno.h>
+#include <string.h>
+#include <arpa/inet.h>
 
-#include "smpp_smsc.h"
+#include <osmocom/core/msgb.h>
+#include <osmocom/core/write_queue.h>
 #include <osmocom/core/logging.h>
+#include <osmocom/msc/debug.h>
+#include <osmocom/msc/smpp.h>
+
+#include <smpp34.h>
+#include <smpp34_structs.h>
+#include <smpp34_params.h>
 
 /*! \brief retrieve SMPP command ID from a msgb */
 uint32_t smpp_msgb_cmdid(struct msgb *msg)
 {
 	uint8_t *tmp = msgb_data(msg) + 4;
 	return ntohl(*(uint32_t *)tmp);
+}
+
+uint32_t esme_inc_seq_nr(struct esme *esme)
+{
+	esme->own_seq_nr++;
+	if (esme->own_seq_nr > 0x7fffffff)
+		esme->own_seq_nr = 1;
+
+	return esme->own_seq_nr;
+}
+
+/*! \brief pack a libsmpp34 data strcutrure and send it to the ESME */
+int pack_and_send(struct esme *esme, uint32_t type, void *ptr)
+{
+	struct msgb *msg;
+	int rc, rlen;
+
+	/* the socket was closed. Avoid allocating + enqueueing msgb, see
+	 * https://osmocom.org/issues/3278 */
+	if (esme->wqueue.bfd.fd == -1)
+		return -EIO;
+
+	msg = msgb_alloc(4096, "SMPP_Tx");
+	if (!msg)
+		return -ENOMEM;
+
+	rc = smpp34_pack(type, msg->tail, msgb_tailroom(msg), &rlen, ptr);
+	if (rc != 0) {
+		LOGPESMERR(esme, "during smpp34_pack()\n");
+		msgb_free(msg);
+		return -EINVAL;
+	}
+	msgb_put(msg, rlen);
+
+	if (osmo_wqueue_enqueue(&esme->wqueue, msg) != 0) {
+		LOGPESME(esme, LOGL_ERROR, "Write queue full. Dropping message\n");
+		msgb_free(msg);
+		return -EAGAIN;
+	}
+	return 0;
 }
 
 int smpp_determine_scheme(uint8_t dcs, uint8_t *data_coding, int *mode)
