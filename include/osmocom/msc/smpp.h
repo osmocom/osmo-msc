@@ -1,7 +1,5 @@
 #pragma once
 
-#include <osmocom/msc/gsm_data.h>
-
 /* Length limits according to SMPP 3.4 spec including NUL-byte: */
 #define SMPP_SYS_ID_LEN	15
 #define SMPP_PASSWD_LEN	8
@@ -47,5 +45,3 @@ struct esme {
 		(resp)->sequence_number	= (req)->sequence_number; }
 
 uint32_t smpp_msgb_cmdid(struct msgb *msg);
-int smpp_openbsc_alloc_init(void *ctx);
-int smpp_openbsc_start(struct gsm_network *net);

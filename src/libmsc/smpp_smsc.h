@@ -9,6 +9,7 @@
 #include <osmocom/core/write_queue.h>
 #include <osmocom/core/timer.h>
 #include <osmocom/msc/smpp.h>
+#include <osmocom/msc/gsm_data.h>
 
 #include <smpp34.h>
 #include <smpp34_structs.h>
@@ -141,6 +142,8 @@ int smpp_determine_scheme(uint8_t dcs, uint8_t *data_coding, int *mode);
 
 time_t smpp_parse_time_format(const char *vp, time_t *t_now);
 
+int smpp_openbsc_alloc_init(void *ctx);
+int smpp_openbsc_start(struct gsm_network *net);
 
 struct gsm_sms;
 struct ran_conn;

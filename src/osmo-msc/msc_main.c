@@ -75,6 +75,10 @@
 #include <osmocom/msc/e_link.h>
 #include <osmocom/msc/mncc_call.h>
 
+#ifdef BUILD_SMPP
+#include "../libmsc/smpp_smsc.h"
+#endif
+
 #ifdef BUILD_IU
 #include <osmocom/ranap/iu_client.h>
 #include <asn1c/asn_internal.h>
