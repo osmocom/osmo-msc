@@ -824,8 +824,8 @@ struct smsc *smsc_from_vty(struct vty *v)
 	return g_smsc;
 }
 
-/*! \brief Allocate the OpenBSC SMPP interface struct and init VTY. */
-int smpp_openbsc_alloc_init(void *ctx)
+/*! \brief Allocate the OsmoMSC SMPP interface struct and init VTY. */
+int smpp_msc_alloc_init(void *ctx)
 {
 	g_smsc = smpp_smsc_alloc_init(ctx);
 	if (!g_smsc) {
@@ -836,9 +836,9 @@ int smpp_openbsc_alloc_init(void *ctx)
 	return smpp_vty_init();
 }
 
-/*! \brief Launch the OpenBSC SMPP interface with the parameters set from VTY.
+/*! \brief Launch the OsmoMSC SMPP interface with the parameters set from VTY.
  */
-int smpp_openbsc_start(struct gsm_network *net)
+int smpp_msc_start(struct gsm_network *net)
 {
 	int rc;
 	g_smsc->priv = net;

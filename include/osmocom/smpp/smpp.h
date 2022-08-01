@@ -51,5 +51,5 @@ struct esme *esme_alloc(void *ctx);
 uint32_t smpp_msgb_cmdid(struct msgb *msg);
 uint32_t esme_inc_seq_nr(struct esme *esme);
 int pack_and_send(struct esme *esme, uint32_t type, void *ptr);
-int smpp_openbsc_alloc_init(void *ctx);
-int smpp_openbsc_start(struct gsm_network *net);
+int smpp_msc_alloc_init(void *ctx);
+int smpp_msc_start(struct gsm_network *net);
