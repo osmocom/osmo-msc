@@ -341,9 +341,7 @@ static void alert_all_esme(struct smsc *smsc, struct vlr_subscr *vsub,
 			continue;
 		}
 		if (esme->acl && !esme->acl->alert_notifications) {
-			LOGP(DSMPP, LOGL_DEBUG,
-				"[%s] is not set to receive Alert Notifications\n",
-					esme->system_id);
+			LOGPESME(esme, LOGL_DEBUG, "is not set to receive Alert Notifications\n");
 			continue;
 		}
 		if (esme->acl && esme->acl->deliver_src_imsi) {

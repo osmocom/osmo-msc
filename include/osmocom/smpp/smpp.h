@@ -11,6 +11,12 @@ enum esme_read_state {
 	READ_ST_IN_MSG = 1,
 };
 
+#define LOGPESME(ESME, LEVEL, FMT, ARGS...)            \
+	LOGP(DSMPP, LEVEL, "[%s] " FMT, (ESME)->system_id, ##ARGS)
+
+#define LOGPESMERR(ESME, FMT, ARGS...)                 \
+	LOGPESME(ESME, LOGL_ERROR, "Error (%s) " FMT, smpp34_strerror, ##ARGS)
+
 /*! \brief Ugly wrapper. libsmpp34 should do this itself! */
 #define SMPP34_UNPACK(rc, type, str, data, len) {	\
 		memset(str, 0, sizeof(*str));				\
