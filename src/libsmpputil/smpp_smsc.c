@@ -250,7 +250,7 @@ static void esme_destroy(struct smpp_esme *esme)
 	talloc_free(esme);
 }
 
-static uint32_t esme_inc_seq_nr(struct esme *esme)
+uint32_t esme_inc_seq_nr(struct esme *esme)
 {
 	esme->own_seq_nr++;
 	if (esme->own_seq_nr > 0x7fffffff)
@@ -326,7 +326,7 @@ int smpp_route(const struct smsc *smsc, const struct osmo_smpp_addr *dest, struc
 }
 
 /*! \brief pack a libsmpp34 data strcutrure and send it to the ESME */
-static int pack_and_send(struct esme *esme, uint32_t type, void *ptr)
+int pack_and_send(struct esme *esme, uint32_t type, void *ptr)
 {
 	struct msgb *msg;
 	int rc, rlen;

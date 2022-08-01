@@ -23,37 +23,6 @@
 
 
 /* FIXME: merge with smpp_smsc.c */
-static uint32_t esme_inc_seq_nr(struct esme *esme)
-{
-	esme->own_seq_nr++;
-	if (esme->own_seq_nr > 0x7fffffff)
-		esme->own_seq_nr = 1;
-
-	return esme->own_seq_nr;
-}
-static int pack_and_send(struct esme *esme, uint32_t type, void *ptr)
-{
-	struct msgb *msg = msgb_alloc(4096, "SMPP_Tx");
-	int rc, rlen;
-	if (!msg)
-		return -ENOMEM;
-
-	rc = smpp34_pack(type, msg->tail, msgb_tailroom(msg), &rlen, ptr);
-	if (rc != 0) {
-		LOGPESMERR(esme, "during smpp34_pack()\n");
-		msgb_free(msg);
-		return -EINVAL;
-	}
-	msgb_put(msg, rlen);
-
-	if (osmo_wqueue_enqueue(&esme->wqueue, msg) != 0) {
-		LOGPESME(esme, LOGL_ERROR, "Write queue full. Dropping message\n");
-		msgb_free(msg);
-		return -EAGAIN;
-	}
-	return 0;
-}
-/* FIXME: merge with smpp_smsc.c */
 
 static struct tlv_t *find_tlv(struct tlv_t *head, uint16_t tag)
 {
