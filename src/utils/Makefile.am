@@ -41,9 +41,19 @@ smpp_mirror_CFLAGS = \
 
 smpp_mirror_LDADD = \
 	$(top_builddir)/src/libsmpputil/libsmpputil.a \
+	$(top_builddir)/src/libmsc/libmsc.a \
+	$(top_builddir)/src/libvlr/libvlr.a \
 	$(LIBOSMOCORE_LIBS) \
 	$(LIBOSMOGSM_LIBS) \
+	$(LIBOSMOVTY_LIBS) \
 	$(LIBOSMONETIF_LIBS) \
 	$(LIBSMPP34_LIBS) \
+	$(LIBOSMORANAP_LIBS) \
+	$(LIBASN1C_LIBS) \
+	$(LIBOSMOSIGTRAN_LIBS) \
+	$(LIBOSMOMGCPCLIENT_LIBS) \
+	$(LIBOSMOGSUPCLIENT_LIBS) \
+	$(LIBSQLITE3_LIBS) \
+	-lsctp \
 	$(NULL)
 endif

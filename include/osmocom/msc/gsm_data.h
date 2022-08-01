@@ -268,7 +268,7 @@ struct gsm_network {
 	struct sms_queue_config *sms_queue_cfg;
 };
 
-struct osmo_esme;
+struct smpp_esme;
 
 enum gsm_sms_source_id {
 	SMS_SOURCE_UNKNOWN = 0,
@@ -297,7 +297,7 @@ struct gsm_sms {
 	} gsm411;
 
 	struct {
-		struct osmo_esme *esme;
+		struct smpp_esme *esme;
 		uint32_t sequence_nr;
 		int transaction_mode;
 		char msg_id[16];

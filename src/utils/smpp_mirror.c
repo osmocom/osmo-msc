@@ -21,21 +21,6 @@
 #include <osmocom/msc/debug.h>
 #include <osmocom/smpp/smpp.h>
 
-/* FIXME: merge with smpp_smsc.c */
-
-struct esme {
-	uint32_t own_seq_nr;
-
-	struct osmo_wqueue wqueue;
-	enum esme_read_state read_state;
-	uint32_t read_len;
-	uint32_t read_idx;
-	struct msgb *read_msg;
-
-	uint8_t smpp_version;
-	char system_id[SMPP_SYS_ID_LEN+1];
-	char password[SMPP_SYS_ID_LEN+1];
-};
 
 /* FIXME: merge with smpp_smsc.c */
 static uint32_t esme_inc_seq_nr(struct esme *esme)
@@ -292,9 +277,6 @@ static int smpp_esme_init(struct esme *esme, const char *host, uint16_t port)
 	if (port == 0)
 		port = 2775;
 
-	esme->own_seq_nr = rand();
-	esme_inc_seq_nr(esme);
-	osmo_wqueue_init(&esme->wqueue, 10);
 	esme->wqueue.bfd.data = esme;
 	esme->wqueue.read_cb = esme_read_cb;
 	esme->wqueue.write_cb = esme_write_cb;
@@ -322,7 +304,7 @@ const struct log_info log_info = {
 
 int main(int argc, char **argv)
 {
-	struct esme esme;
+	struct esme *esme;
 	char *host = "localhost";
 	int port = 0;
 	int rc;
@@ -330,20 +312,22 @@ int main(int argc, char **argv)
 
 	msgb_talloc_ctx_init(ctx, 0);
 
-	memset(&esme, 0, sizeof(esme));
-
 	osmo_init_logging2(ctx, &log_info);
 
-	snprintf((char *) esme.system_id, sizeof(esme.system_id), "mirror");
-	snprintf((char *) esme.password, sizeof(esme.password), "mirror");
-	esme.smpp_version = 0x34;
+	esme = esme_alloc(ctx);
+	if (!esme)
+		exit(2);
+
+	snprintf((char *) esme->system_id, sizeof(esme->system_id), "mirror");
+	snprintf((char *) esme->password, sizeof(esme->password), "mirror");
+	esme->smpp_version = 0x34;
 
 	if (argc >= 2)
 		host = argv[1];
 	if (argc >= 3)
 		port = atoi(argv[2]);
 
-	rc = smpp_esme_init(&esme, host, port);
+	rc = smpp_esme_init(esme, host, port);
 	if (rc < 0)
 		exit(1);
 

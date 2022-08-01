@@ -46,8 +46,8 @@ int sctp_recvmsg(int sd, void *msg, size_t len, void *from, void *fromlen, void 
 struct gsm_sms;
 struct msc_a;
 struct gsm_trans;
-struct osmo_esme;
+struct smpp_esme;
 bool smpp_route_smpp_first() { return false; }
-void smpp_esme_put(struct osmo_esme *esme) { return; }
+void smpp_esme_put(struct smpp_esme *esme) { return; }
 int smpp_try_deliver(struct gsm_sms *sms, struct msc_a *msc_a) { return 0; }
 int sms_route_mt_sms(struct gsm_trans *trans, struct gsm_sms *gsms) { return 0; }

@@ -159,12 +159,12 @@ void smpp_acl_delete(struct osmo_smpp_acl *acl)
 
 	/* kill any active ESMEs */
 	if (acl->esme) {
-		struct osmo_esme *esme = acl->esme;
+		struct esme *esme = acl->esme->esme;
 		osmo_fd_unregister(&esme->wqueue.bfd);
 		close(esme->wqueue.bfd.fd);
 		esme->wqueue.bfd.fd = -1;
-		esme->acl = NULL;
-		smpp_esme_put(esme);
+		acl->esme = NULL;
+		smpp_esme_put(acl->esme);
 	}
 
 	/* delete all routes for this ACL */
@@ -231,17 +231,17 @@ int smpp_route_pfx_del(struct osmo_smpp_acl *acl,
 
 
 /*! \brief increaes the use/reference count */
-void smpp_esme_get(struct osmo_esme *esme)
+void smpp_esme_get(struct smpp_esme *esme)
 {
 	esme->use++;
 }
 
-static void esme_destroy(struct osmo_esme *esme)
+static void esme_destroy(struct smpp_esme *esme)
 {
-	osmo_wqueue_clear(&esme->wqueue);
-	if (esme->wqueue.bfd.fd >= 0) {
-		osmo_fd_unregister(&esme->wqueue.bfd);
-		close(esme->wqueue.bfd.fd);
+	osmo_wqueue_clear(&esme->esme->wqueue);
+	if (esme->esme->wqueue.bfd.fd >= 0) {
+		osmo_fd_unregister(&esme->esme->wqueue.bfd);
+		close(esme->esme->wqueue.bfd.fd);
 	}
 	smpp_cmd_flush_pending(esme);
 	llist_del(&esme->list);
@@ -250,7 +250,7 @@ static void esme_destroy(struct osmo_esme *esme)
 	talloc_free(esme);
 }
 
-static uint32_t esme_inc_seq_nr(struct osmo_esme *esme)
+static uint32_t esme_inc_seq_nr(struct esme *esme)
 {
 	esme->own_seq_nr++;
 	if (esme->own_seq_nr > 0x7fffffff)
@@ -260,7 +260,7 @@ static uint32_t esme_inc_seq_nr(struct osmo_esme *esme)
 }
 
 /*! \brief decrease the use/reference count, free if it is 0 */
-void smpp_esme_put(struct osmo_esme *esme)
+void smpp_esme_put(struct smpp_esme *esme)
 {
 	esme->use--;
 	if (esme->use <= 0)
@@ -268,7 +268,7 @@ void smpp_esme_put(struct osmo_esme *esme)
 }
 
 /*! \brief try to find a SMPP route (ESME) for given destination */
-int smpp_route(const struct smsc *smsc, const struct osmo_smpp_addr *dest, struct osmo_esme **pesme)
+int smpp_route(const struct smsc *smsc, const struct osmo_smpp_addr *dest, struct smpp_esme **pesme)
 {
 	struct osmo_smpp_route *r;
 	struct osmo_smpp_acl *acl = NULL;
@@ -308,14 +308,14 @@ int smpp_route(const struct smsc *smsc, const struct osmo_smpp_addr *dest, struc
 	}
 
 	if (acl && acl->esme) {
-		struct osmo_esme *esme;
+		struct smpp_esme *esme;
 		DEBUGP(DSMPP, "ACL even has ESME, we can route to it!\n");
 		esme = acl->esme;
 		if (esme->bind_flags & ESME_BIND_RX) {
 			*pesme = esme;
 			return 0;
 		} else
-			LOGPESME(esme, LOGL_NOTICE, "is matching route, but not bound for Rx, discarding MO SMS\n");
+			LOGPESME(esme->esme, LOGL_NOTICE, "is matching route, but not bound for Rx, discarding MO SMS\n");
 	}
 
 	*pesme = NULL;
@@ -326,7 +326,7 @@ int smpp_route(const struct smsc *smsc, const struct osmo_smpp_addr *dest, struc
 }
 
 /*! \brief pack a libsmpp34 data strcutrure and send it to the ESME */
-static int pack_and_send(struct osmo_esme *esme, uint32_t type, void *ptr)
+static int pack_and_send(struct esme *esme, uint32_t type, void *ptr)
 {
 	struct msgb *msg;
 	int rc, rlen;
@@ -357,7 +357,7 @@ static int pack_and_send(struct osmo_esme *esme, uint32_t type, void *ptr)
 }
 
 /*! \brief transmit a generic NACK to a remote ESME */
-static int smpp_tx_gen_nack(struct osmo_esme *esme, uint32_t seq, uint32_t status)
+static int smpp_tx_gen_nack(struct esme *esme, uint32_t seq, uint32_t status)
 {
 	struct generic_nack_t nack;
 	char buf[SMALL_BUFF];
@@ -380,7 +380,7 @@ static inline uint32_t smpp_msgb_seq(struct msgb *msg)
 }
 
 /*! \brief handle an incoming SMPP generic NACK */
-static int smpp_handle_gen_nack(struct osmo_esme *esme, struct msgb *msg)
+static int smpp_handle_gen_nack(struct esme *esme, struct msgb *msg)
 {
 	struct generic_nack_t nack;
 	char buf[SMALL_BUFF];
@@ -398,7 +398,7 @@ static int smpp_handle_gen_nack(struct osmo_esme *esme, struct msgb *msg)
 	return 0;
 }
 
-static int _process_bind(struct osmo_esme *esme, uint8_t if_version,
+static int _process_bind(struct smpp_esme *esme, uint8_t if_version,
 			 uint32_t bind_flags, const char *sys_id,
 			 const char *passwd)
 {
@@ -411,9 +411,9 @@ static int _process_bind(struct osmo_esme *esme, uint8_t if_version,
 		return ESME_RALYBND;
 
 	esme->smpp_version = if_version;
-	snprintf(esme->system_id, sizeof(esme->system_id), "%s", sys_id);
+	snprintf(esme->esme->system_id, sizeof(esme->esme->system_id), "%s", sys_id);
 
-	acl = smpp_acl_by_system_id(esme->smsc, esme->system_id);
+	acl = smpp_acl_by_system_id(esme->smsc, esme->esme->system_id);
 	if (!esme->smsc->accept_all) {
 		if (!acl) {
 			/* This system is unknown */
@@ -437,7 +437,7 @@ static int _process_bind(struct osmo_esme *esme, uint8_t if_version,
 
 
 /*! \brief handle an incoming SMPP BIND RECEIVER */
-static int smpp_handle_bind_rx(struct osmo_esme *esme, struct msgb *msg)
+static int smpp_handle_bind_rx(struct smpp_esme *esme, struct msgb *msg)
 {
 	struct bind_receiver_t bind;
 	struct bind_receiver_resp_t bind_r;
@@ -446,7 +446,7 @@ static int smpp_handle_bind_rx(struct osmo_esme *esme, struct msgb *msg)
 	SMPP34_UNPACK(rc, BIND_RECEIVER, &bind, msgb_data(msg),
 			   msgb_length(msg));
 	if (rc < 0) {
-		LOGPESMERR(esme, "in smpp34_unpack()\n");
+		LOGPESMERR(esme->esme, "in smpp34_unpack()\n");
 		return rc;
 	}
 
@@ -459,11 +459,11 @@ static int smpp_handle_bind_rx(struct osmo_esme *esme, struct msgb *msg)
 			   (const char *)bind.system_id, (const char *)bind.password);
 	bind_r.command_status = rc;
 
-	return PACK_AND_SEND(esme, &bind_r);
+	return PACK_AND_SEND(esme->esme, &bind_r);
 }
 
 /*! \brief handle an incoming SMPP BIND TRANSMITTER */
-static int smpp_handle_bind_tx(struct osmo_esme *esme, struct msgb *msg)
+static int smpp_handle_bind_tx(struct smpp_esme *esme, struct msgb *msg)
 {
 	struct bind_transmitter_t bind;
 	struct bind_transmitter_resp_t bind_r;
@@ -473,7 +473,7 @@ static int smpp_handle_bind_tx(struct osmo_esme *esme, struct msgb *msg)
 	SMPP34_UNPACK(rc, BIND_TRANSMITTER, &bind, msgb_data(msg),
 			   msgb_length(msg));
 	if (rc < 0) {
-		LOGPESMERR(esme, "in smpp34_unpack()\n");
+		LOGPESMERR(esme->esme, "in smpp34_unpack()\n");
 		return rc;
 	}
 
@@ -495,13 +495,13 @@ static int smpp_handle_bind_tx(struct osmo_esme *esme, struct msgb *msg)
 	tlv.value.val16 = esme->smpp_version;
 	build_tlv(&bind_r.tlv, &tlv);
 
-	rc = PACK_AND_SEND(esme, &bind_r);
+	rc = PACK_AND_SEND(esme->esme, &bind_r);
 	destroy_tlv(bind_r.tlv);
 	return rc;
 }
 
 /*! \brief handle an incoming SMPP BIND TRANSCEIVER */
-static int smpp_handle_bind_trx(struct osmo_esme *esme, struct msgb *msg)
+static int smpp_handle_bind_trx(struct smpp_esme *esme, struct msgb *msg)
 {
 	struct bind_transceiver_t bind;
 	struct bind_transceiver_resp_t bind_r;
@@ -510,7 +510,7 @@ static int smpp_handle_bind_trx(struct osmo_esme *esme, struct msgb *msg)
 	SMPP34_UNPACK(rc, BIND_TRANSCEIVER, &bind, msgb_data(msg),
 			   msgb_length(msg));
 	if (rc < 0) {
-		LOGPESMERR(esme, "in smpp34_unpack()\n");
+		LOGPESMERR(esme->esme, "in smpp34_unpack()\n");
 		return rc;
 	}
 
@@ -523,11 +523,11 @@ static int smpp_handle_bind_trx(struct osmo_esme *esme, struct msgb *msg)
 			   (const char *)bind.system_id, (const char *)bind.password);
 	bind_r.command_status = rc;
 
-	return PACK_AND_SEND(esme, &bind_r);
+	return PACK_AND_SEND(esme->esme, &bind_r);
 }
 
 /*! \brief handle an incoming SMPP UNBIND */
-static int smpp_handle_unbind(struct osmo_esme *esme, struct msgb *msg)
+static int smpp_handle_unbind(struct smpp_esme *esme, struct msgb *msg)
 {
 	struct unbind_t unbind;
 	struct unbind_resp_t unbind_r;
@@ -536,13 +536,13 @@ static int smpp_handle_unbind(struct osmo_esme *esme, struct msgb *msg)
 	SMPP34_UNPACK(rc, UNBIND, &unbind, msgb_data(msg),
 			   msgb_length(msg));
 	if (rc < 0) {
-		LOGPESMERR(esme, "in smpp34_unpack()\n");
+		LOGPESMERR(esme->esme, "in smpp34_unpack()\n");
 		return rc;
 	}
 
 	INIT_RESP(UNBIND_RESP, &unbind_r, &unbind);
 
-	LOGPESME(esme, LOGL_INFO, "Rx UNBIND\n");
+	LOGPESME(esme->esme, LOGL_INFO, "Rx UNBIND\n");
 
 	if (esme->bind_flags == 0) {
 		unbind_r.command_status = ESME_RINVBNDSTS;
@@ -551,11 +551,11 @@ static int smpp_handle_unbind(struct osmo_esme *esme, struct msgb *msg)
 
 	esme->bind_flags = 0;
 err:
-	return PACK_AND_SEND(esme, &unbind_r);
+	return PACK_AND_SEND(esme->esme, &unbind_r);
 }
 
 /*! \brief handle an incoming SMPP ENQUIRE LINK */
-static int smpp_handle_enq_link(struct osmo_esme *esme, struct msgb *msg)
+static int smpp_handle_enq_link(struct smpp_esme *esme, struct msgb *msg)
 {
 	struct enquire_link_t enq;
 	struct enquire_link_resp_t enq_r;
@@ -564,21 +564,21 @@ static int smpp_handle_enq_link(struct osmo_esme *esme, struct msgb *msg)
 	SMPP34_UNPACK(rc, ENQUIRE_LINK, &enq, msgb_data(msg),
 			   msgb_length(msg));
 	if (rc < 0) {
-		LOGPESMERR(esme, "in smpp34_unpack()\n");
+		LOGPESMERR(esme->esme, "in smpp34_unpack()\n");
 		return rc;
 	}
 
-	LOGPESME(esme, LOGL_DEBUG, "Rx Enquire Link\n");
+	LOGPESME(esme->esme, LOGL_DEBUG, "Rx Enquire Link\n");
 
 	INIT_RESP(ENQUIRE_LINK_RESP, &enq_r, &enq);
 
-	LOGPESME(esme, LOGL_DEBUG, "Tx Enquire Link Response\n");
+	LOGPESME(esme->esme, LOGL_DEBUG, "Tx Enquire Link Response\n");
 
-	return PACK_AND_SEND(esme, &enq_r);
+	return PACK_AND_SEND(esme->esme, &enq_r);
 }
 
 /*! \brief send a SUBMIT-SM RESPONSE to a remote ESME */
-int smpp_tx_submit_r(struct osmo_esme *esme, uint32_t sequence_nr,
+int smpp_tx_submit_r(struct smpp_esme *esme, uint32_t sequence_nr,
 		     uint32_t command_status, char *msg_id)
 {
 	struct submit_sm_resp_t submit_r;
@@ -590,7 +590,7 @@ int smpp_tx_submit_r(struct osmo_esme *esme, uint32_t sequence_nr,
 	submit_r.sequence_number= sequence_nr;
 	snprintf((char *) submit_r.message_id, sizeof(submit_r.message_id), "%s", msg_id);
 
-	return PACK_AND_SEND(esme, &submit_r);
+	return PACK_AND_SEND(esme->esme, &submit_r);
 }
 
 static const struct value_string smpp_avail_strs[] = {
@@ -601,7 +601,7 @@ static const struct value_string smpp_avail_strs[] = {
 };
 
 /*! \brief send an ALERT_NOTIFICATION to a remote ESME */
-int smpp_tx_alert(struct osmo_esme *esme, uint8_t ton, uint8_t npi,
+int smpp_tx_alert(struct smpp_esme *esme, uint8_t ton, uint8_t npi,
 		  const char *addr, uint8_t avail_status)
 {
 	struct alert_notification_t alert;
@@ -612,7 +612,7 @@ int smpp_tx_alert(struct osmo_esme *esme, uint8_t ton, uint8_t npi,
 	alert.command_length	= 0;
 	alert.command_id	= ALERT_NOTIFICATION;
 	alert.command_status	= ESME_ROK;
-	alert.sequence_number	= esme_inc_seq_nr(esme);
+	alert.sequence_number	= esme_inc_seq_nr(esme->esme);
 	alert.source_addr_ton 	= ton;
 	alert.source_addr_npi	= npi;
 	snprintf((char *)alert.source_addr, sizeof(alert.source_addr), "%s", addr);
@@ -622,28 +622,28 @@ int smpp_tx_alert(struct osmo_esme *esme, uint8_t ton, uint8_t npi,
 	tlv.value.val08 = avail_status;
 	build_tlv(&alert.tlv, &tlv);
 
-	LOGPESME(esme, LOGL_DEBUG, "Tx ALERT_NOTIFICATION (%s/%u/%u): %s\n",
+	LOGPESME(esme->esme, LOGL_DEBUG, "Tx ALERT_NOTIFICATION (%s/%u/%u): %s\n",
 			 alert.source_addr, alert.source_addr_ton,
 			 alert.source_addr_npi,
 			 get_value_string(smpp_avail_strs, avail_status));
 
-	rc = PACK_AND_SEND(esme, &alert);
+	rc = PACK_AND_SEND(esme->esme, &alert);
 	destroy_tlv(alert.tlv);
 	return rc;
 }
 
 /* \brief send a DELIVER-SM message to given ESME */
-int smpp_tx_deliver(struct osmo_esme *esme, struct deliver_sm_t *deliver)
+int smpp_tx_deliver(struct smpp_esme *esme, struct deliver_sm_t *deliver)
 {
-	deliver->sequence_number = esme_inc_seq_nr(esme);
+	deliver->sequence_number = esme_inc_seq_nr(esme->esme);
 
-	LOGPESME(esme, LOGL_DEBUG, "Tx DELIVER-SM (from %s)\n", deliver->source_addr);
+	LOGPESME(esme->esme, LOGL_DEBUG, "Tx DELIVER-SM (from %s)\n", deliver->source_addr);
 
-	return PACK_AND_SEND(esme, deliver);
+	return PACK_AND_SEND(esme->esme, deliver);
 }
 
 /*! \brief handle an incoming SMPP DELIVER-SM RESPONSE */
-static int smpp_handle_deliver_resp(struct osmo_esme *esme, struct msgb *msg)
+static int smpp_handle_deliver_resp(struct smpp_esme *esme, struct msgb *msg)
 {
 	struct deliver_sm_resp_t deliver_r;
 	struct osmo_smpp_cmd *cmd;
@@ -653,13 +653,13 @@ static int smpp_handle_deliver_resp(struct osmo_esme *esme, struct msgb *msg)
 	SMPP34_UNPACK(rc, DELIVER_SM_RESP, &deliver_r, msgb_data(msg),
 			   msgb_length(msg));
 	if (rc < 0) {
-		LOGPESMERR(esme, "in smpp34_unpack()\n");
+		LOGPESMERR(esme->esme, "in smpp34_unpack()\n");
 		return rc;
 	}
 
 	cmd = smpp_cmd_find_by_seqnum(esme, deliver_r.sequence_number);
 	if (!cmd) {
-		LOGPESME(esme, LOGL_ERROR, "Rx DELIVER-SM RESP !? (%s)\n",
+		LOGPESME(esme->esme, LOGL_ERROR, "Rx DELIVER-SM RESP !? (%s)\n",
 				 get_value_string(smpp_status_strs, deliver_r.command_status));
 		return -1;
 	}
@@ -669,14 +669,14 @@ static int smpp_handle_deliver_resp(struct osmo_esme *esme, struct msgb *msg)
 	else
 		smpp_cmd_err(cmd, deliver_r.command_status);
 
-	LOGPESME(esme, LOGL_INFO, "Rx DELIVER-SM RESP (%s)\n",
+	LOGPESME(esme->esme, LOGL_INFO, "Rx DELIVER-SM RESP (%s)\n",
 			 get_value_string(smpp_status_strs, deliver_r.command_status));
 
 	return 0;
 }
 
 /*! \brief handle an incoming SMPP SUBMIT-SM */
-static int smpp_handle_submit(struct osmo_esme *esme, struct msgb *msg)
+static int smpp_handle_submit(struct smpp_esme *esme, struct msgb *msg)
 {
 	struct submit_sm_t submit;
 	struct submit_sm_resp_t submit_r;
@@ -686,7 +686,7 @@ static int smpp_handle_submit(struct osmo_esme *esme, struct msgb *msg)
 	SMPP34_UNPACK(rc, SUBMIT_SM, &submit, msgb_data(msg),
 			   msgb_length(msg));
 	if (rc < 0) {
-		LOGPESMERR(esme, "in smpp34_unpack()\n");
+		LOGPESMERR(esme->esme, "in smpp34_unpack()\n");
 		return rc;
 	}
 
@@ -694,32 +694,32 @@ static int smpp_handle_submit(struct osmo_esme *esme, struct msgb *msg)
 
 	if (!(esme->bind_flags & ESME_BIND_TX)) {
 		submit_r.command_status = ESME_RINVBNDSTS;
-		return PACK_AND_SEND(esme, &submit_r);
+		return PACK_AND_SEND(esme->esme, &submit_r);
 	}
 
-	LOGPESME(esme, LOGL_INFO, "Rx SUBMIT-SM (%s/%u/%u)\n",
+	LOGPESME(esme->esme, LOGL_INFO, "Rx SUBMIT-SM (%s/%u/%u)\n",
 			 submit.destination_addr, submit.dest_addr_ton, submit.dest_addr_npi);
 
 	INIT_RESP(SUBMIT_SM_RESP, &submit_r, &submit);
 
 	rc = handle_smpp_submit(esme, &submit, &submit_r);
 	if (rc == 0)
-		return PACK_AND_SEND(esme, &submit_r);
+		return PACK_AND_SEND(esme->esme, &submit_r);
 
 	return rc;
 }
 
 /*! \brief one complete SMPP PDU from the ESME has been received */
-static int smpp_pdu_rx(struct osmo_esme *esme, struct msgb *msg __uses)
+static int smpp_pdu_rx(struct smpp_esme *esme, struct msgb *msg __uses)
 {
 	uint32_t cmd_id = smpp_msgb_cmdid(msg);
 	int rc = 0;
 
-	LOGPESME(esme, LOGL_DEBUG, "smpp_pdu_rx(%s)\n", msgb_hexdump(msg));
+	LOGPESME(esme->esme, LOGL_DEBUG, "smpp_pdu_rx(%s)\n", msgb_hexdump(msg));
 
 	switch (cmd_id) {
 	case GENERIC_NACK:
-		rc = smpp_handle_gen_nack(esme, msg);
+		rc = smpp_handle_gen_nack(esme->esme, msg);
 		break;
 	case BIND_RECEIVER:
 		rc = smpp_handle_bind_rx(esme, msg);
@@ -750,11 +750,11 @@ static int smpp_pdu_rx(struct osmo_esme *esme, struct msgb *msg __uses)
 	case QUERY_SM:
 	case REPLACE_SM:
 	case SUBMIT_MULTI:
-		LOGPESME(esme, LOGL_NOTICE, "Unimplemented PDU Command 0x%08x\n", cmd_id);
+		LOGPESME(esme->esme, LOGL_NOTICE, "Unimplemented PDU Command 0x%08x\n", cmd_id);
 		break;
 	default:
-		LOGPESME(esme, LOGL_ERROR, "Unknown PDU Command 0x%08x\n", cmd_id);
-		rc = smpp_tx_gen_nack(esme, smpp_msgb_seq(msg), ESME_RINVCMDID);
+		LOGPESME(esme->esme, LOGL_ERROR, "Unknown PDU Command 0x%08x\n", cmd_id);
+		rc = smpp_tx_gen_nack(esme->esme, smpp_msgb_seq(msg), ESME_RINVCMDID);
 		break;
 	}
 
@@ -781,7 +781,8 @@ static int smpp_pdu_rx(struct osmo_esme *esme, struct msgb *msg __uses)
 /* !\brief call-back when per-ESME TCP socket has some data to be read */
 static int esme_link_read_cb(struct osmo_fd *ofd)
 {
-	struct osmo_esme *esme = ofd->data;
+	struct smpp_esme *e = ofd->data;
+	struct esme *esme = e->esme;
 	uint32_t len;
 	uint8_t *lenptr = (uint8_t *) &len;
 	uint8_t *cur;
@@ -828,7 +829,7 @@ static int esme_link_read_cb(struct osmo_fd *ofd)
 		msgb_put(msg, rc);
 
 		if (esme->read_idx >= esme->read_len) {
-			rc = smpp_pdu_rx(esme, esme->read_msg);
+			rc = smpp_pdu_rx(e, esme->read_msg);
 			msgb_free(esme->read_msg);
 			esme->read_msg = NULL;
 			esme->read_idx = 0;
@@ -844,9 +845,9 @@ dead_socket:
 	osmo_fd_unregister(&esme->wqueue.bfd);
 	close(esme->wqueue.bfd.fd);
 	esme->wqueue.bfd.fd = -1;
-	if (esme->acl)
-		esme->acl->esme = NULL;
-	smpp_esme_put(esme);
+	if (e->acl)
+		e->acl->esme = NULL;
+	smpp_esme_put(e);
 
 	return -EBADF;
 }
@@ -854,51 +855,67 @@ dead_socket:
 /* call-back of write queue once it wishes to write a message to the socket */
 static int esme_link_write_cb(struct osmo_fd *ofd, struct msgb *msg)
 {
-	struct osmo_esme *esme = ofd->data;
+	struct smpp_esme *esme = ofd->data;
 	int rc;
 
 	rc = write(ofd->fd, msgb_data(msg), msgb_length(msg));
 	if (rc == 0) {
-		osmo_fd_unregister(&esme->wqueue.bfd);
-		close(esme->wqueue.bfd.fd);
-		esme->wqueue.bfd.fd = -1;
+		osmo_fd_unregister(&esme->esme->wqueue.bfd);
+		close(esme->esme->wqueue.bfd.fd);
+		esme->esme->wqueue.bfd.fd = -1;
 		if (esme->acl)
 			esme->acl->esme = NULL;
 		smpp_esme_put(esme);
 	} else if (rc < msgb_length(msg)) {
-		LOGPESME(esme, LOGL_ERROR, "Short write\n");
+		LOGPESME(esme->esme, LOGL_ERROR, "Short write\n");
 		return -1;
 	}
 
 	return 0;
 }
 
+struct esme *esme_alloc(void *ctx)
+{
+	struct esme *e = talloc_zero(ctx, struct esme);
+	if (!e)
+		return NULL;
+
+	e->own_seq_nr = rand();
+	esme_inc_seq_nr(e);
+	osmo_wqueue_init(&e->wqueue, 10);
+
+	return e;
+}
+
 /* callback for already-accepted new TCP socket */
 static int link_accept_cb(struct smsc *smsc, int fd,
 			  struct sockaddr_storage *s, socklen_t s_len)
 {
-	struct osmo_esme *esme = talloc_zero(smsc, struct osmo_esme);
+	struct smpp_esme *esme = talloc_zero(smsc, struct smpp_esme);
 	if (!esme) {
+		close(fd);
+		return -ENOMEM;
+	}
+
+	esme->esme = esme_alloc(esme);
+	if (!esme->esme) {
 		close(fd);
 		return -ENOMEM;
 	}
 
 	INIT_LLIST_HEAD(&esme->smpp_cmd_list);
 	smpp_esme_get(esme);
-	esme->own_seq_nr = rand();
-	esme_inc_seq_nr(esme);
 	esme->smsc = smsc;
-	osmo_wqueue_init(&esme->wqueue, 10);
-	osmo_fd_setup(&esme->wqueue.bfd, fd, OSMO_FD_READ, osmo_wqueue_bfd_cb, esme, 0);
+	osmo_fd_setup(&esme->esme->wqueue.bfd, fd, OSMO_FD_READ, osmo_wqueue_bfd_cb, esme, 0);
 
-	if (osmo_fd_register(&esme->wqueue.bfd) != 0) {
+	if (osmo_fd_register(&esme->esme->wqueue.bfd) != 0) {
 		close(fd);
 		talloc_free(esme);
 		return -EIO;
 	}
 
-	esme->wqueue.read_cb = esme_link_read_cb;
-	esme->wqueue.write_cb = esme_link_write_cb;
+	esme->esme->wqueue.read_cb = esme_link_read_cb;
+	esme->esme->wqueue.write_cb = esme_link_write_cb;
 
 	llist_add_tail(&esme->list, &smsc->esme_list);
 

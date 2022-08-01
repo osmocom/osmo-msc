@@ -278,7 +278,7 @@ static int submit_to_sms(struct gsm_sms **psms, struct gsm_network *net,
 }
 
 /*! \brief handle incoming libsmpp34 ssubmit_sm_t from remote ESME */
-int handle_smpp_submit(struct osmo_esme *esme, struct submit_sm_t *submit,
+int handle_smpp_submit(struct smpp_esme *esme, struct submit_sm_t *submit,
 		       struct submit_sm_resp_t *submit_r)
 {
 	struct gsm_sms *sms;
@@ -329,7 +329,7 @@ int handle_smpp_submit(struct osmo_esme *esme, struct submit_sm_t *submit,
 static void alert_all_esme(struct smsc *smsc, struct vlr_subscr *vsub,
 			   uint8_t smpp_avail_status)
 {
-	struct osmo_esme *esme;
+	struct smpp_esme *esme;
 
 	llist_for_each_entry(esme, &smsc->esme_list, list) {
 		/* we currently send an alert notification to each ESME that is
@@ -341,7 +341,7 @@ static void alert_all_esme(struct smsc *smsc, struct vlr_subscr *vsub,
 			continue;
 		}
 		if (esme->acl && !esme->acl->alert_notifications) {
-			LOGPESME(esme, LOGL_DEBUG, "is not set to receive Alert Notifications\n");
+			LOGPESME(esme->esme, LOGL_DEBUG, "is not set to receive Alert Notifications\n");
 			continue;
 		}
 		if (esme->acl && esme->acl->deliver_src_imsi) {
@@ -585,7 +585,7 @@ static void smpp_cmd_free(struct osmo_smpp_cmd *cmd)
 	talloc_free(cmd);
 }
 
-void smpp_cmd_flush_pending(struct osmo_esme *esme)
+void smpp_cmd_flush_pending(struct smpp_esme *esme)
 {
 	struct osmo_smpp_cmd *cmd, *next;
 
@@ -653,7 +653,7 @@ static void smpp_deliver_sm_cb(void *data)
 	smpp_cmd_err(data, ESME_RSYSERR);
 }
 
-static int smpp_cmd_enqueue(struct osmo_esme *esme,
+static int smpp_cmd_enqueue(struct smpp_esme *esme,
 			    struct vlr_subscr *vsub, struct gsm_sms *sms,
 			    uint32_t sequence_number)
 {
@@ -682,7 +682,7 @@ static int smpp_cmd_enqueue(struct osmo_esme *esme,
 	return 0;
 }
 
-struct osmo_smpp_cmd *smpp_cmd_find_by_seqnum(struct osmo_esme *esme,
+struct osmo_smpp_cmd *smpp_cmd_find_by_seqnum(struct smpp_esme *esme,
 					      uint32_t sequence_nr)
 {
 	struct osmo_smpp_cmd *cmd;
@@ -694,7 +694,7 @@ struct osmo_smpp_cmd *smpp_cmd_find_by_seqnum(struct osmo_esme *esme,
 	return NULL;
 }
 
-static int deliver_to_esme(struct osmo_esme *esme, struct gsm_sms *sms,
+static int deliver_to_esme(struct smpp_esme *esme, struct gsm_sms *sms,
 			   struct msc_a *msc_a)
 {
 	struct deliver_sm_t deliver;
@@ -802,7 +802,7 @@ bool smpp_route_smpp_first()
 
 int smpp_try_deliver(struct gsm_sms *sms, struct msc_a *msc_a)
 {
-	struct osmo_esme *esme;
+	struct smpp_esme *esme;
 	struct osmo_smpp_addr dst;
 	int rc;
 

@@ -11,6 +11,21 @@ enum esme_read_state {
 	READ_ST_IN_MSG = 1,
 };
 
+/* struct representing SMPP's External Short Messaging Entity */
+struct esme {
+	uint32_t own_seq_nr;
+
+	struct osmo_wqueue wqueue;
+	enum esme_read_state read_state;
+	uint32_t read_len;
+	uint32_t read_idx;
+	struct msgb *read_msg;
+
+	uint8_t smpp_version;
+	char system_id[SMPP_SYS_ID_LEN + 1];
+	char password[SMPP_SYS_ID_LEN + 1];
+};
+
 #define LOGPESME(ESME, LEVEL, FMT, ARGS...)            \
 	LOGP(DSMPP, LEVEL, "[%s] " FMT, (ESME)->system_id, ##ARGS)
 
@@ -32,6 +47,7 @@ enum esme_read_state {
 		(resp)->command_status	= ESME_ROK;					\
 		(resp)->sequence_number	= (req)->sequence_number; }
 
+struct esme *esme_alloc(void *ctx);
 uint32_t smpp_msgb_cmdid(struct msgb *msg);
 int smpp_openbsc_alloc_init(void *ctx);
 int smpp_openbsc_start(struct gsm_network *net);
