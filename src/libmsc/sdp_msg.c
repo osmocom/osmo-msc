@@ -30,6 +30,11 @@
 #include <osmocom/msc/debug.h>
 #include <osmocom/msc/sdp_msg.h>
 
+bool sdp_audio_codec_is_set(const struct sdp_audio_codec *a)
+{
+	return a && a->subtype_name[0];
+}
+
 /* Compare name, rate and fmtp, returning typical cmp result: 0 on match, and -1 / 1 on mismatch.
  * If cmp_fmtp is false, do *not* compare the fmtp string; if true, compare fmtp 1:1 as strings.
  * If cmp_payload_type is false, do *not* compare the payload_type number.
