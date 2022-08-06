@@ -1011,6 +1011,7 @@ void ms_sends_assignment_complete(enum mgcp_codecs assigned_codec)
 			.codec = assigned_codec,
 		},
 	};
+	osmo_sockaddr_str_from_str(&ran_dec.assignment_complete.remote_rtp, "1.2.3.4", 1234);
 	fake_msc_a_ran_dec(&ran_dec);
 
 	if (!conn_exists(g_msub))
