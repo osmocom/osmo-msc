@@ -396,6 +396,8 @@ static void gsm48_cc_timeout(void *arg)
 	int l4_location = GSM48_CAUSE_LOC_PRN_S_LU;
 	struct gsm_mncc mo_rel, l4_rel;
 
+	LOG_TRANS(trans, LOGL_INFO, "Timeout of T%x\n", trans->cc.Tcurrent);
+
 	memset(&mo_rel, 0, sizeof(struct gsm_mncc));
 	mo_rel.callref = trans->callref;
 	memset(&l4_rel, 0, sizeof(struct gsm_mncc));
