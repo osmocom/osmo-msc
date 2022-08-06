@@ -268,11 +268,10 @@ int sdp_msg_to_sdp_str_buf(char *dst, size_t dst_size, const struct sdp_msg *sdp
 
 	/* Add details for all codecs */
 	foreach_sdp_audio_codec(codec, &sdp->audio_codecs) {
-		if (codec->subtype_name[0]) {
-			OSMO_STRBUF_PRINTF(sb, "a=rtpmap:%d %s/%d\r\n", codec->payload_type, codec->subtype_name,
-					   codec->rate > 0? codec->rate : 8000);
-		}
-
+		if (!sdp_audio_codec_is_set(codec))
+			continue;
+		OSMO_STRBUF_PRINTF(sb, "a=rtpmap:%d %s/%d\r\n", codec->payload_type, codec->subtype_name,
+				   codec->rate > 0 ? codec->rate : 8000);
 		if (codec->fmtp[0])
 			OSMO_STRBUF_PRINTF(sb, "a=fmtp:%d %s\r\n", codec->payload_type, codec->fmtp);
 	}
