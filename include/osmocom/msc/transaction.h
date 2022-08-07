@@ -17,15 +17,18 @@ struct vty;
 /* Used for late TID assignment */
 #define TRANS_ID_UNASSIGNED 0xff
 
+#define LOG_TRANS_CAT_SRC(trans, subsys, file, line, level, fmt, args...) \
+	LOGPSRC(subsys, level, file, line, \
+		"trans(%s %s callref-0x%x tid-%u%s) " fmt, \
+		(trans) ? trans_name(trans) : "NULL", \
+		(trans) ? ((trans)->msc_a ? (trans)->msc_a->c.fi->id : vlr_subscr_name((trans)->vsub)) : "NULL", \
+		(trans) ? (trans)->callref : 0, \
+		(trans) ? (trans)->transaction_id : 0, \
+		(trans) && (trans)->paging_request ? ",PAGING" : "", \
+		##args)
+
 #define LOG_TRANS_CAT(trans, subsys, level, fmt, args...) \
-	LOGP(subsys, level, \
-	     "trans(%s %s callref-0x%x tid-%u%s) " fmt, \
-	     (trans) ? trans_name(trans) : "NULL", \
-	     (trans) ? ((trans)->msc_a ? (trans)->msc_a->c.fi->id : vlr_subscr_name((trans)->vsub)) : "NULL", \
-	     (trans) ? (trans)->callref : 0, \
-	     (trans) ? (trans)->transaction_id : 0, \
-	     (trans) && (trans)->paging_request ? ",PAGING" : "", \
-	     ##args)
+	LOG_TRANS_CAT_SRC(trans, subsys, __FILE__, __LINE__, level, fmt, ##args)
 
 #define LOG_TRANS(trans, level, fmt, args...) \
 	     LOG_TRANS_CAT(trans, (trans) ? (trans)->log_subsys : DMSC, level, fmt, ##args)
