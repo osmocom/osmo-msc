@@ -165,20 +165,12 @@ int codec_filter_run(struct codec_filter *codec_filter)
 int codec_filter_to_str_buf(char *buf, size_t buflen, const struct codec_filter *codec_filter)
 {
 	struct osmo_strbuf sb = { .buf = buf, .len = buflen };
-	OSMO_STRBUF_PRINTF(sb, "RAN={");
-	OSMO_STRBUF_APPEND(sb, sdp_audio_codecs_to_str_buf, &codec_filter->ran);
-	OSMO_STRBUF_PRINTF(sb, "}");
+	OSMO_STRBUF_APPEND(sb, sdp_msg_to_str_buf, &codec_filter->result);
+	OSMO_STRBUF_PRINTF(sb, " (from:");
 
-	if (codec_filter->bss.count) {
-		OSMO_STRBUF_PRINTF(sb, " bss={");
-		OSMO_STRBUF_APPEND(sb, sdp_audio_codecs_to_str_buf, &codec_filter->bss);
-		OSMO_STRBUF_PRINTF(sb, "}");
-	}
-
-	if (codec_filter->ms.count) {
-		OSMO_STRBUF_PRINTF(sb, " MS={");
-		OSMO_STRBUF_APPEND(sb, sdp_audio_codecs_to_str_buf, &codec_filter->ms);
-		OSMO_STRBUF_PRINTF(sb, "}");
+	if (sdp_audio_codec_is_set(&codec_filter->assignment)) {
+		OSMO_STRBUF_PRINTF(sb, " assigned=");
+		OSMO_STRBUF_APPEND(sb, sdp_audio_codec_to_str_buf, &codec_filter->assignment);
 	}
 
 	if (codec_filter->remote.audio_codecs.count
@@ -187,13 +179,23 @@ int codec_filter_to_str_buf(char *buf, size_t buflen, const struct codec_filter 
 		OSMO_STRBUF_APPEND(sb, sdp_msg_to_str_buf, &codec_filter->remote);
 	}
 
-	if (sdp_audio_codec_is_set(&codec_filter->assignment)) {
-		OSMO_STRBUF_PRINTF(sb, " assigned=");
-		OSMO_STRBUF_APPEND(sb, sdp_audio_codec_to_str_buf, &codec_filter->assignment);
+	if (codec_filter->ms.count) {
+		OSMO_STRBUF_PRINTF(sb, " MS={");
+		OSMO_STRBUF_APPEND(sb, sdp_audio_codecs_to_str_buf, &codec_filter->ms);
+		OSMO_STRBUF_PRINTF(sb, "}");
 	}
 
-	OSMO_STRBUF_PRINTF(sb, " result=");
-	OSMO_STRBUF_APPEND(sb, sdp_msg_to_str_buf, &codec_filter->result);
+	if (codec_filter->bss.count) {
+		OSMO_STRBUF_PRINTF(sb, " bss={");
+		OSMO_STRBUF_APPEND(sb, sdp_audio_codecs_to_str_buf, &codec_filter->bss);
+		OSMO_STRBUF_PRINTF(sb, "}");
+	}
+
+	OSMO_STRBUF_PRINTF(sb, " RAN={");
+	OSMO_STRBUF_APPEND(sb, sdp_audio_codecs_to_str_buf, &codec_filter->ran);
+	OSMO_STRBUF_PRINTF(sb, "}");
+
+	OSMO_STRBUF_PRINTF(sb, ")");
 
 	return sb.chars_needed;
 }
