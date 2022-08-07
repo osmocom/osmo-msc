@@ -234,7 +234,9 @@ static void gsm48_stop_cc_timer(struct gsm_trans *trans)
  * Depending on msg_type, also log whether RTP information is passed on.
  * (This is particularly interesting for the doc/sequence_charts/msc_log_to_ladder.py)
  */
-static void log_mncc_rx_tx(struct gsm_trans *trans, const char *rx_tx, const union mncc_msg *mncc)
+#define log_mncc_rx_tx(ARGS...) _log_mncc_rx_tx(__FILE__, __LINE__, ##ARGS)
+static void _log_mncc_rx_tx(const char *file, int line,
+			    struct gsm_trans *trans, const char *rx_tx, const union mncc_msg *mncc)
 {
 	const char *sdp = NULL;
 	struct sdp_msg sdp_msg = {};
@@ -268,26 +270,27 @@ static void log_mncc_rx_tx(struct gsm_trans *trans, const char *rx_tx, const uni
 	}
 
 	if (sdp && sdp[0] && (sdp_msg_from_sdp_str(&sdp_msg, sdp) == 0)) {
-		LOG_TRANS_CAT(trans, DMNCC, LOGL_DEBUG, "%s %s (RTP=%s)\n",
-			      rx_tx,
-			      get_mncc_name(mncc->msg_type),
-			      sdp_msg_to_str(&sdp_msg));
+		LOG_TRANS_CAT_SRC(trans, DMNCC, LOGL_DEBUG, file, line, "%s %s (RTP=%s)\n",
+				  rx_tx,
+				  get_mncc_name(mncc->msg_type),
+				  sdp_msg_to_str(&sdp_msg));
 		return;
 	}
 
 	if (osmo_sockaddr_is_any(&addr) == 0) {
-		LOG_TRANS_CAT(trans, DMNCC, LOGL_DEBUG, "%s %s (RTP=%s)\n",
-			      rx_tx,
-			      get_mncc_name(mncc->msg_type),
-			      osmo_sockaddr_to_str_c(OTC_SELECT, &addr));
+		LOG_TRANS_CAT_SRC(trans, DMNCC, LOGL_DEBUG, file, line, "%s %s (RTP=%s)\n",
+				  rx_tx,
+				  get_mncc_name(mncc->msg_type),
+				  osmo_sockaddr_to_str_c(OTC_SELECT, &addr));
 		return;
 	}
 
-	LOG_TRANS_CAT(trans, DMNCC, LOGL_DEBUG, "%s %s\n", rx_tx, get_mncc_name(mncc->msg_type));
+	LOG_TRANS_CAT_SRC(trans, DMNCC, LOGL_DEBUG, file, line, "%s %s\n", rx_tx, get_mncc_name(mncc->msg_type));
 }
 
-static int mncc_recvmsg(struct gsm_network *net, struct gsm_trans *trans,
-			int msg_type, struct gsm_mncc *mncc)
+#define mncc_recvmsg(ARGS...) _mncc_recvmsg(__FILE__, __LINE__, ##ARGS)
+static int _mncc_recvmsg(const char *file, int line,
+			 struct gsm_network *net, struct gsm_trans *trans, int msg_type, struct gsm_mncc *mncc)
 {
 	struct msgb *msg;
 	unsigned char *data;
