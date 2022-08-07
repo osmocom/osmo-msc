@@ -229,13 +229,15 @@ static void gsm48_stop_cc_timer(struct gsm_trans *trans)
 	}
 }
 
-static int mncc_recvmsg(struct gsm_network *net, struct gsm_trans *trans,
+#define mncc_recvmsg(net, trans, msg_type, mncc) \
+	_mncc_recvmsg(__FILE__, __LINE__, net, trans, msg_type, mncc)
+static int _mncc_recvmsg(const char *file, int line, struct gsm_network *net, struct gsm_trans *trans,
 			int msg_type, struct gsm_mncc *mncc)
 {
 	struct msgb *msg;
 	unsigned char *data;
 
-	LOG_TRANS_CAT(trans, DMNCC, LOGL_DEBUG, "tx %s\n", get_mncc_name(msg_type));
+	LOG_TRANS_CAT_SRC(trans, DMNCC, file, line, LOGL_DEBUG, "tx %s\n", get_mncc_name(msg_type));
 
 	mncc->msg_type = msg_type;
 
