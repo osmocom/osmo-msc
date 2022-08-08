@@ -413,10 +413,11 @@ static void msc_ho_send_handover_request(struct msc_a *msc_a)
 			    osmo_hexdump_nospc_c(OTC_SELECT, msc_a->geran_encr.kc128, sizeof(msc_a->geran_encr.kc128))
 			    : "-");
 
-	if (msc_a->cc.active_trans) {
-		if (mncc_bearer_cap_to_channel_type(&channel_type, &msc_a->cc.active_trans->bearer_cap)) {
+	if (cc_trans) {
+		if (sdp_audio_codecs_to_gsm0808_channel_type(&channel_type,
+							     &cc_trans->cc.codecs.result.audio_codecs)) {
 			msc_ho_failed(msc_a, GSM0808_CAUSE_EQUIPMENT_FAILURE,
-				      "Failed to encode Bearer Cap to Channel Type\n");
+				      "Failed to determine Channel Type for Handover Request message\n");
 			return;
 		}
 		ran_enc_msg.handover_request.geran.channel_type = &channel_type;
