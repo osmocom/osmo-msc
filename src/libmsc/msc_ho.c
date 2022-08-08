@@ -380,6 +380,7 @@ static void msc_ho_send_handover_request(struct msc_a *msc_a)
 	struct vlr_subscr *vsub = msc_a_vsub(msc_a);
 	struct gsm_network *net = msc_a_net(msc_a);
 	struct gsm0808_channel_type channel_type;
+	struct gsm0808_speech_codec_list scl;
 	struct gsm_trans *cc_trans = msc_a->cc.active_trans;
 	struct ran_msg ran_enc_msg = {
 		.msg_type = RAN_MSG_HANDOVER_REQUEST,
@@ -421,6 +422,14 @@ static void msc_ho_send_handover_request(struct msc_a *msc_a)
 			return;
 		}
 		ran_enc_msg.handover_request.geran.channel_type = &channel_type;
+
+		sdp_audio_codecs_to_speech_codec_list(&scl, &cc_trans->cc.codecs.result.audio_codecs);
+		if (!scl.len) {
+			msc_ho_failed(msc_a, GSM0808_CAUSE_EQUIPMENT_FAILURE, "Failed to compose"
+				      " Codec List (MSC Preferred) for Handover Request message\n");
+			return;
+		}
+		ran_enc_msg.handover_request.codec_list_msc_preferred = &scl;
 	}
 
 	gsm0808_cell_id_from_cgi(&ran_enc_msg.handover_request.cell_id_serving, CELL_IDENT_WHOLE_GLOBAL, &vsub->cgi);
