@@ -48,8 +48,11 @@ const struct codec_mapping codec_map[] = {
 		.speech_ver_count = 1,
 		.speech_ver = { GSM48_BCAP_SV_FR },
 		.mncc_payload_msg_type = GSM_TCHF_FRAME,
-		.has_gsm0808_speech_codec_type = true,
-		.gsm0808_speech_codec_type = GSM0808_SCT_FR1,
+		.has_gsm0808_speech_codec = true,
+		.gsm0808_speech_codec = {
+			.fi = true,
+			.type = GSM0808_SCT_FR1,
+		},
 		.perm_speech = GSM0808_PERM_FR1,
 		.frhr = CODEC_FRHR_FR,
 	},
@@ -79,8 +82,11 @@ const struct codec_mapping codec_map[] = {
 		.speech_ver_count = 1,
 		.speech_ver = { GSM48_BCAP_SV_EFR },
 		.mncc_payload_msg_type = GSM_TCHF_FRAME_EFR,
-		.has_gsm0808_speech_codec_type = true,
-		.gsm0808_speech_codec_type = GSM0808_SCT_FR2,
+		.has_gsm0808_speech_codec = true,
+		.gsm0808_speech_codec = {
+			.fi = true,
+			.type = GSM0808_SCT_FR2,
+		},
 		.perm_speech = GSM0808_PERM_FR2,
 		.frhr = CODEC_FRHR_FR,
 	},
@@ -94,8 +100,12 @@ const struct codec_mapping codec_map[] = {
 		.speech_ver_count = 1,
 		.speech_ver = { GSM48_BCAP_SV_HR },
 		.mncc_payload_msg_type = GSM_TCHH_FRAME,
-		.has_gsm0808_speech_codec_type = true,
-		.gsm0808_speech_codec_type = GSM0808_SCT_HR1,
+		.has_gsm0808_speech_codec = true,
+		.gsm0808_speech_codec = {
+			.fi = true,
+			.type = GSM0808_SCT_HR1,
+			.cfg = GSM0808_SC_CFG_DEFAULT_HR_AMR,
+		},
 		.perm_speech = GSM0808_PERM_HR1,
 		.frhr = CODEC_FRHR_HR,
 	},
@@ -117,8 +127,12 @@ const struct codec_mapping codec_map[] = {
 		.speech_ver_count = 1,
 		.speech_ver = { GSM48_BCAP_SV_AMR_F },
 		.mncc_payload_msg_type = GSM_TCH_FRAME_AMR,
-		.has_gsm0808_speech_codec_type = true,
-		.gsm0808_speech_codec_type = GSM0808_SCT_FR3,
+		.has_gsm0808_speech_codec = true,
+		.gsm0808_speech_codec = {
+			.fi = true,
+			.type = GSM0808_SCT_FR3,
+			.cfg = GSM0808_SC_CFG_DEFAULT_FR_AMR,
+		},
 		.perm_speech = GSM0808_PERM_FR3,
 		.frhr = CODEC_FRHR_FR,
 	},
@@ -133,8 +147,12 @@ const struct codec_mapping codec_map[] = {
 		.speech_ver_count = 2,
 		.speech_ver = { GSM48_BCAP_SV_AMR_H, GSM48_BCAP_SV_AMR_OH },
 		.mncc_payload_msg_type = GSM_TCH_FRAME_AMR,
-		.has_gsm0808_speech_codec_type = true,
-		.gsm0808_speech_codec_type = GSM0808_SCT_HR3,
+		.has_gsm0808_speech_codec = true,
+		.gsm0808_speech_codec = {
+			.fi = true,
+			.type = GSM0808_SCT_HR3,
+			.cfg = GSM0808_SC_CFG_DEFAULT_HR_AMR,
+		},
 		.perm_speech = GSM0808_PERM_HR3,
 		.frhr = CODEC_FRHR_HR,
 	},
@@ -149,8 +167,12 @@ const struct codec_mapping codec_map[] = {
 		.speech_ver_count = 2,
 		.speech_ver = { GSM48_BCAP_SV_AMR_OFW, GSM48_BCAP_SV_AMR_FW },
 		.mncc_payload_msg_type = GSM_TCH_FRAME_AMR,
-		.has_gsm0808_speech_codec_type = true,
-		.gsm0808_speech_codec_type = GSM0808_SCT_FR5,
+		.has_gsm0808_speech_codec = true,
+		.gsm0808_speech_codec = {
+			.fi = true,
+			.type = GSM0808_SCT_FR5,
+			.cfg = GSM0808_SC_CFG_DEFAULT_FR_AMR_WB,
+		},
 		.perm_speech = GSM0808_PERM_FR5,
 		.frhr = CODEC_FRHR_FR,
 	},
@@ -165,8 +187,12 @@ const struct codec_mapping codec_map[] = {
 		.speech_ver_count = 1,
 		.speech_ver = { GSM48_BCAP_SV_AMR_OHW },
 		.mncc_payload_msg_type = GSM_TCH_FRAME_AMR,
-		.has_gsm0808_speech_codec_type = true,
-		.gsm0808_speech_codec_type = GSM0808_SCT_HR4,
+		.has_gsm0808_speech_codec = true,
+		.gsm0808_speech_codec = {
+			.fi = true,
+			.type = GSM0808_SCT_HR4,
+			.cfg = GSM0808_SC_CFG_DEFAULT_OHR_AMR_WB,
+		},
 		.perm_speech = GSM0808_PERM_HR4,
 		.frhr = CODEC_FRHR_HR,
 	},
@@ -201,9 +227,9 @@ const struct codec_mapping *codec_mapping_by_gsm0808_speech_codec_type(enum gsm0
 {
 	const struct codec_mapping *m;
 	foreach_codec_mapping(m) {
-		if (!m->has_gsm0808_speech_codec_type)
+		if (!m->has_gsm0808_speech_codec)
 			continue;
-		if (m->gsm0808_speech_codec_type == sct)
+		if (m->gsm0808_speech_codec.type == sct)
 			return m;
 		/* TODO: evaluate cfg bits? */
 	}

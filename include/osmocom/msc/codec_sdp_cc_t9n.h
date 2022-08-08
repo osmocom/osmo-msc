@@ -29,10 +29,9 @@ struct codec_mapping {
 	enum gsm48_bcap_speech_ver speech_ver[8];
 	/* If applicable, one of GSM_TCHF_FRAME, GSM_TCHF_FRAME_EFR, GSM_TCHH_FRAME, GSM_TCH_FRAME_AMR; or zero. */
 	uint32_t mncc_payload_msg_type;
-	/* Set to true if gsm0808_speech_codec_type below reflects a meaningful value. */
-	bool has_gsm0808_speech_codec_type;
-	/* gsm0808_speech_codec_type corresponds to gsm0808_speech_codec[_list]->type */
-	enum gsm0808_speech_codec_type gsm0808_speech_codec_type;
+	/* Set to true if gsm0808_speech_codec below reflects a meaningful value. */
+	bool has_gsm0808_speech_codec;
+	struct gsm0808_speech_codec gsm0808_speech_codec;
 	/* If applicable, entries to add to Permitted Speech lists when this codec is present; or zero. */
 	enum gsm0808_permitted_speech perm_speech;
 	/* If applicable, indicator whether this codec can work on a GERAN half-rate lchan, or whether full-rate is
