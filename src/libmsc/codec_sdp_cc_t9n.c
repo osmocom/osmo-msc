@@ -380,6 +380,25 @@ void sdp_audio_codecs_from_bearer_cap(struct sdp_audio_codecs *ac, const struct 
 	}
 }
 
+void sdp_audio_codecs_to_speech_codec_list(struct gsm0808_speech_codec_list *scl, const struct sdp_audio_codecs *ac)
+{
+	const struct sdp_audio_codec *codec;
+
+	*scl = (struct gsm0808_speech_codec_list){};
+
+	foreach_sdp_audio_codec(codec, ac) {
+		const struct codec_mapping *m = codec_mapping_by_subtype_name(codec->subtype_name);
+		if (!m)
+			continue;
+		if (!m->has_gsm0808_speech_codec)
+			continue;
+		if (scl->len >= ARRAY_SIZE(scl->codec))
+			break;
+		scl->codec[scl->len] = m->gsm0808_speech_codec;
+		scl->len++;
+	}
+}
+
 void sdp_audio_codecs_from_speech_codec_list(struct sdp_audio_codecs *ac, const struct gsm0808_speech_codec_list *cl)
 {
 	int i;
