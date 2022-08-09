@@ -1441,6 +1441,8 @@ static void msc_a_up_call_assignment_complete(struct msc_a *msc_a, const struct 
 
 		/* Update codecs filter with the codec chosen by Assignment */
 		cc_trans->cc.codecs.assignment = m->sdp;
+	} else {
+		cc_trans->cc.codecs.assignment = (struct sdp_audio_codec){};
 	}
 	rtp_stream_set_remote_addr(rtps_to_ran, &ac->assignment_complete.remote_rtp);
 
