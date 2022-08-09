@@ -1433,6 +1433,9 @@ static void msc_a_up_call_assignment_complete(struct msc_a *msc_a, const struct 
 			return;
 		}
 
+		LOG_TRANS(cc_trans, LOGL_INFO, "Assignment Complete: %s\n",
+			  osmo_mgcpc_codec_name(ac->assignment_complete.codec));
+
 		/* Update RAN-side endpoint CI: */
 		rtp_stream_set_one_codec(rtps_to_ran, &m->sdp);
 
