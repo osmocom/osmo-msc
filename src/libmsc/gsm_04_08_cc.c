@@ -908,7 +908,7 @@ static int mncc_recv_rtp(struct gsm_network *net, struct gsm_trans *trans, uint3
 			 int cmd, struct osmo_sockaddr_str *rtp_addr, uint32_t payload_type,
 			 uint32_t payload_msg_type, const struct sdp_msg *sdp);
 
-int gsm48_cc_mt_rtp_port_and_codec_known(struct gsm_trans *trans)
+static int gsm48_cc_mt_rtp_port_and_codec_known(struct gsm_trans *trans)
 {
 	struct msc_a *msc_a = trans->msc_a;
 	struct osmo_sockaddr_str *rtp_cn_local;
