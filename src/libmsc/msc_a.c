@@ -1394,7 +1394,6 @@ static void msc_a_up_call_assignment_complete(struct msc_a *msc_a, const struct 
 	struct rtp_stream *rtps_to_ran = msc_a->cc.call_leg ? msc_a->cc.call_leg->rtp[RTP_TO_RAN] : NULL;
 	const enum mgcp_codecs *codec_if_known = ac->assignment_complete.codec_present ?
 							&ac->assignment_complete.codec : NULL;
-	const struct codec_mapping *m;
 
 	if (!rtps_to_ran) {
 		LOG_MSC_A(msc_a, LOGL_ERROR, "Rx Assignment Complete, but no RTP stream is set up\n");
@@ -1413,6 +1412,7 @@ static void msc_a_up_call_assignment_complete(struct msc_a *msc_a, const struct 
 	}
 
 	if (codec_if_known) {
+		const struct codec_mapping *m;
 		m = codec_mapping_by_mgcp_codec(*codec_if_known);
 		if (!m) {
 			LOG_TRANS(cc_trans, LOGL_ERROR, "Unknown codec in Assignment Complete: %s\n",
