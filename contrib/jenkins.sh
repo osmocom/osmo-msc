@@ -35,7 +35,7 @@ export PATH="$inst/bin:$PATH"
 osmo-build-dep.sh libosmo-abis
 osmo-build-dep.sh libosmo-netif
 osmo-build-dep.sh libosmo-sccp
-PARALLEL_MAKE="" osmo-build-dep.sh libsmpp34
+osmo-build-dep.sh libsmpp34
 osmo-build-dep.sh osmo-mgw
 osmo-build-dep.sh osmo-hlr
 
