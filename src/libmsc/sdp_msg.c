@@ -240,8 +240,16 @@ int sdp_msg_to_sdp_str_buf(char *dst, size_t dst_size, const struct sdp_msg *sdp
 {
 	const struct sdp_audio_codec *codec;
 	struct osmo_strbuf sb = { .buf = dst, .len = dst_size };
-	const char *ip = sdp->rtp.ip[0] ? sdp->rtp.ip : "0.0.0.0";
-	char ipv = osmo_ip_str_type(ip) == AF_INET6 ? '6' : '4';
+	const char *ip;
+	char ipv;
+
+	if (!sdp) {
+		OSMO_STRBUF_PRINTF(sb, "%s", "");
+		return sb.chars_needed;
+	}
+
+	ip = sdp->rtp.ip[0] ? sdp->rtp.ip : "0.0.0.0";
+	ipv = (osmo_ip_str_type(ip) == AF_INET6) ? '6' : '4';
 
 	OSMO_STRBUF_PRINTF(sb,
 			   "v=0\r\n"
