@@ -395,6 +395,7 @@ void sdp_audio_codecs_to_speech_codec_list(struct gsm0808_speech_codec_list *scl
 		if (scl->len >= ARRAY_SIZE(scl->codec))
 			break;
 		scl->codec[scl->len] = m->gsm0808_speech_codec;
+		/* FIXME: apply AMR configuration according to codec->fmtp */
 		scl->len++;
 	}
 }
@@ -408,6 +409,7 @@ void sdp_audio_codecs_from_speech_codec_list(struct sdp_audio_codecs *ac, const 
 		if (!m)
 			continue;
 		sdp_audio_codecs_add_copy(ac, &m->sdp);
+		/* FIXME: for AMR, apply sc->cfg to the added codec's fmtp */
 	}
 }
 
