@@ -1428,6 +1428,17 @@ static void msc_a_up_call_assignment_complete(struct msc_a *msc_a, const struct 
 		rtp_stream_set_one_codec(rtps_to_ran, &m->sdp);
 
 		/* Update codecs filter with the codec chosen by Assignment */
+		if (*codec_if_known == CODEC_IUFP) {
+			/* For IuUP, the MGW decapsulates it to plain AMR RTP. So for the purpose of matching to the
+			 * other call leg / figuring out codecs, set to AMR instead. */
+			m = codec_mapping_by_mgcp_codec(CODEC_AMR_8000_1);
+			if (!m) {
+				/* this should never happen, CODEC_AMR_8000_1 is definitely present in codec_map[]. */
+				LOG_TRANS(cc_trans, LOGL_ERROR, "Error setting codec to AMR\n");
+				call_leg_release(msc_a->cc.call_leg);
+				return;
+			}
+		}
 		cc_trans->cc.codecs.assignment = m->sdp;
 	} else {
 		cc_trans->cc.codecs.assignment = (struct sdp_audio_codec){};
