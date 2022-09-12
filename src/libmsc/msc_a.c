@@ -1392,7 +1392,7 @@ static void msc_a_up_call_assignment_complete(struct msc_a *msc_a, const struct 
 {
 	struct gsm_trans *cc_trans = msc_a->cc.active_trans;
 	struct rtp_stream *rtps_to_ran = msc_a->cc.call_leg ? msc_a->cc.call_leg->rtp[RTP_TO_RAN] : NULL;
-	const enum mgcp_codecs *codec_if_known = ac->assignment_complete.codec_present ?
+	struct gsm0808_speech_codec *codec_if_known = ac->assignment_complete.codec_present ?
 							&ac->assignment_complete.codec : NULL;
 
 	if (!rtps_to_ran) {
