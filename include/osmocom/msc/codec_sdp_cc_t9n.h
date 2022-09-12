@@ -44,8 +44,8 @@ extern const struct codec_mapping codec_map[];
 	for ((CODEC_MAPPING) = codec_map; (CODEC_MAPPING) < codec_map + ARRAY_SIZE(codec_map); (CODEC_MAPPING)++)
 
 const struct codec_mapping *codec_mapping_by_speech_ver(enum gsm48_bcap_speech_ver speech_ver);
-const struct codec_mapping *codec_mapping_by_gsm0808_speech_codec_type(enum gsm0808_speech_codec_type sct,
-								       uint16_t cfg);
+const struct codec_mapping *codec_mapping_by_gsm0808_speech_codec_type(enum gsm0808_speech_codec_type sct);
+const struct codec_mapping *codec_mapping_by_gsm0808_speech_codec(const struct gsm0808_speech_codec *sc);
 const struct codec_mapping *codec_mapping_by_perm_speech(enum gsm0808_permitted_speech perm_speech);
 const struct codec_mapping *codec_mapping_by_subtype_name(const char *subtype_name);
 const struct codec_mapping *codec_mapping_by_mgcp_codec(enum mgcp_codecs mgcp);
