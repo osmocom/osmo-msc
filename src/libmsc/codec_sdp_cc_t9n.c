@@ -121,6 +121,10 @@ const struct codec_mapping codec_map[] = {
 			 * to match this entry, and it ends in an aborted call due to no codec match.
 			 * If the peer offers plain "AMR/8000" and we reply with "AMR/8000 fmtp:octet-align=1",
 			 * then everything works out happily, */
+			/* XXX what?? 3GPP TS 26.103 says "The bandwidth efficient mode of RFC 4867 shall be used. To
+			 * offer the bandwidth-efficient mode, the octet-align parameter should be omitted in SDP."
+			 * How can it work when we send bw-efficient AMR but said octet-aligned in the SDP??
+			 */
 			.fmtp = "octet-align=1",
 		},
 		.mgcp = CODEC_AMR_8000_1,
