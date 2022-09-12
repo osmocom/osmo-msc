@@ -50,6 +50,9 @@ const struct codec_mapping *codec_mapping_by_perm_speech(enum gsm0808_permitted_
 const struct codec_mapping *codec_mapping_by_subtype_name(const char *subtype_name);
 const struct codec_mapping *codec_mapping_by_mgcp_codec(enum mgcp_codecs mgcp);
 
+int amr_fmtp_from_gsm0808_speech_codec(char *buf, size_t buflen, const struct gsm0808_speech_codec *sc);
+int amr_fmtp_to_gsm0808_speech_codec(struct gsm0808_speech_codec *sc, const char *fmtp);
+
 int bearer_cap_add_speech_ver(struct gsm_mncc_bearer_cap *bearer_cap, enum gsm48_bcap_speech_ver speech_ver);
 int sdp_audio_codec_add_to_bearer_cap(struct gsm_mncc_bearer_cap *bearer_cap, const struct sdp_audio_codec *codec);
 int sdp_audio_codecs_to_bearer_cap(struct gsm_mncc_bearer_cap *bearer_cap, const struct sdp_audio_codecs *ac);

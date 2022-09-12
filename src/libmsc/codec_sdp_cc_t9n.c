@@ -284,6 +284,62 @@ const struct codec_mapping *codec_mapping_by_mgcp_codec(enum mgcp_codecs mgcp)
 	return NULL;
 }
 
+/* Return a bitmask of active AMR rates given the speec codec config nr, i.e. the column nr in 3GPP TS 28.062, Table
+ * 7.11.3.1.3-2, a.k.a. S0-S15. The full_rate flag is needed because config nr 1 is special: it includes 12.2k on FR but
+ * excludes it on HR. Iff full_rate == true, 12.2k is included for sc_cfg_nr == 1. */
+uint8_t amr_rates_from_speech_codec_cfg_nr(uint8_t sc_cfg_nr, bool full_rate)
+{
+#define B(BIT) (1 << (BIT))
+#define RATE_4_75 B(0)
+#define RATE_5_15 B(1)
+#define RATE_5_90 B(2)
+#define RATE_6_70 B(3)
+#define RATE_7_40 B(4)
+#define RATE_7_95 B(5)
+#define RATE_10_2 B(6)
+#define RATE_12_2 B(7)
+	static const uint8_t _amr_rates_from_speech_codec_cfg_nr[] = {
+		[0] = RATE_4_75,
+		[1] = RATE_4_75 | RATE_5_90 | RATE_7_40 | RATE_12_2,
+		[2] = RATE_5_90,
+		[3] = RATE_6_70,
+		[4] = RATE_7_40,
+		[5] = RATE_7_95,
+		[6] = RATE_10_2,
+		[7] = RATE_12_2,
+		[8] = RATE_4_75 | RATE_5_90,
+		[9] = RATE_4_75 | RATE_5_90 | RATE_6_70,
+		[10] = RATE_4_75 | RATE_5_90 | RATE_6_70 | RATE_7_40,
+		[11] = RATE_4_75 | RATE_5_90 | RATE_6_70 | RATE_7_40,
+		[12] = RATE_4_75 | RATE_5_90 | RATE_6_70 | RATE_10_2,
+		[13] = RATE_4_75 | RATE_5_90 | RATE_6_70 | RATE_10_2,
+		[14] = RATE_4_75 | RATE_5_90 | RATE_7_95 | RATE_12_2,
+		[15] = RATE_4_75 | RATE_5_90 | RATE_7_95 | RATE_12_2,
+	};
+	uint8_t ret;
+	OSMO_ASSERT(sc_cfg_nr < ARRAY_SIZE(_amr_rates_from_speech_codec_cfg_nr));
+	ret = _amr_rates_from_speech_codec_cfg_nr[sc_cfg_nr];
+	if (!full_rate && sc_cfg_nr == 1)
+		ret &= ~RATE_12_2;
+	return ret;
+}
+
+int amr_fmtp_from_gsm0808_speech_codec(char *buf, size_t buflen, const struct gsm0808_speech_codec *sc)
+{
+	struct osmo_strbuf sb = { .buf = buf, .len = buflen };
+
+	/* 3GPP TS 26.103 says "The bandwidth efficient mode of RFC 4867 shall be used. To offer the bandwidth-efficient
+	 * mode, the octet-align parameter should be omitted in SDP." So never include 'octet-align=1'.
+	 */
+
+	/* Accumulate rates that are allowed by the cfg bits */
+	uint8_t mode_sets = 0;
+}
+
+int amr_fmtp_to_gsm0808_speech_codec(struct gsm0808_speech_codec *sc, const char *fmtp)
+{
+}
+
 /* Append given Speech Version to the end of the Bearer Capabilities Speech Version array. Return 1 if added, zero
  * otherwise (as in, return the number of items added). */
 int bearer_cap_add_speech_ver(struct gsm_mncc_bearer_cap *bearer_cap, enum gsm48_bcap_speech_ver speech_ver)
