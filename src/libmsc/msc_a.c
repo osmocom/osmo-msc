@@ -1404,8 +1404,8 @@ static void msc_a_up_call_assignment_complete(struct msc_a *msc_a, const struct 
 {
 	struct gsm_trans *cc_trans = msc_a->cc.active_trans;
 	struct rtp_stream *rtps_to_ran = msc_a->cc.call_leg ? msc_a->cc.call_leg->rtp[RTP_TO_RAN] : NULL;
-	const enum mgcp_codecs *codec_if_known = ac->assignment_complete.codec_present ?
-							&ac->assignment_complete.codec : NULL;
+	const struct gsm0808_speech_codec *codec_if_known = ac->assignment_complete.codec_present ?
+							    &ac->assignment_complete.codec : NULL;
 
 	if (!rtps_to_ran) {
 		LOG_MSC_A(msc_a, LOGL_ERROR, "Rx Assignment Complete, but no RTP stream is set up\n");
@@ -1425,32 +1425,21 @@ static void msc_a_up_call_assignment_complete(struct msc_a *msc_a, const struct 
 
 	if (codec_if_known) {
 		const struct codec_mapping *m;
-		m = codec_mapping_by_mgcp_codec(*codec_if_known);
+		m = codec_mapping_by_gsm0808_speech_codec_type(codec_if_known->type);
+		/* TODO: use codec_mapping_by_gsm0808_speech_codec() to also match on codec_if_known->cfg */
 		if (!m) {
 			LOG_TRANS(cc_trans, LOGL_ERROR, "Unknown codec in Assignment Complete: %s\n",
-				  osmo_mgcpc_codec_name(ac->assignment_complete.codec));
+				  gsm0808_speech_codec_type_name(codec_if_known->type));
 			call_leg_release(msc_a->cc.call_leg);
 			return;
 		}
 
 		LOG_TRANS(cc_trans, LOGL_INFO, "Assignment Complete: %s\n",
-			  osmo_mgcpc_codec_name(ac->assignment_complete.codec));
+			  gsm0808_speech_codec_type_name(codec_if_known->type));
 
 		/* Update RAN-side endpoint CI: */
 		rtp_stream_set_one_codec(rtps_to_ran, &m->sdp);
 
-		/* Update codecs filter with the codec chosen by Assignment */
-		if (*codec_if_known == CODEC_IUFP) {
-			/* For IuUP, the MGW decapsulates it to plain AMR RTP. So for the purpose of matching to the
-			 * other call leg / figuring out codecs, set to AMR instead. */
-			m = codec_mapping_by_mgcp_codec(CODEC_AMR_8000_1);
-			if (!m) {
-				/* this should never happen, CODEC_AMR_8000_1 is definitely present in codec_map[]. */
-				LOG_TRANS(cc_trans, LOGL_ERROR, "Error setting codec to AMR\n");
-				call_leg_release(msc_a->cc.call_leg);
-				return;
-			}
-		}
 		cc_trans->cc.codecs.assignment = m->sdp;
 	} else {
 		cc_trans->cc.codecs.assignment = (struct sdp_audio_codec){};

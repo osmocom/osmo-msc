@@ -153,8 +153,14 @@ static int ran_iu_decode_rab_assignment_response_decode_setup_ies(struct ran_dec
 		.msg_type = RAN_MSG_ASSIGNMENT_COMPLETE,
 		.msg_name = "RANAP RAB Assignment Response",
 		.assignment_complete = {
+			/* For IuUP, the MGW decapsulates it to plain AMR RTP. So for the purpose of matching to the
+			 * other call leg / figuring out codecs, set to AMR. */
 			.codec_present = true,
-			.codec = CODEC_IUFP,
+			.codec = {
+				.fi = true,
+				.type = GSM0808_SCT_FR3,
+				.cfg = GSM0808_SC_CFG_DEFAULT_FR_AMR,
+			},
 		},
 	};
 	if (osmo_sockaddr_str_from_str(&ran_dec_msg->assignment_complete.remote_rtp, addr, port)) {
