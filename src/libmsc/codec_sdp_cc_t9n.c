@@ -222,21 +222,7 @@ const struct codec_mapping *codec_mapping_by_speech_ver(enum gsm48_bcap_speech_v
 	return NULL;
 }
 
-const struct codec_mapping *codec_mapping_by_gsm0808_speech_codec(const struct gsm0808_speech_codec *sc)
-{
-	const struct codec_mapping *m;
-	foreach_codec_mapping(m) {
-		if (!m->has_gsm0808_speech_codec)
-			continue;
-		if (m->gsm0808_speech_codec.type == sc->type)
-			return m;
-		/* FIXME: evaluate cfg bits? */
-	}
-	return NULL;
-}
-
-const struct codec_mapping *codec_mapping_by_gsm0808_speech_codec_type(enum gsm0808_speech_codec_type sct);
-const struct codec_mapping *codec_mapping_by_gsm0808_speech_codec_type(enum gsm0808_speech_codec_type sct, uint16_t cfg)
+const struct codec_mapping *codec_mapping_by_gsm0808_speech_codec_type(enum gsm0808_speech_codec_type sct)
 {
 	const struct codec_mapping *m;
 	foreach_codec_mapping(m) {
@@ -244,7 +230,22 @@ const struct codec_mapping *codec_mapping_by_gsm0808_speech_codec_type(enum gsm0
 			continue;
 		if (m->gsm0808_speech_codec.type == sct)
 			return m;
-		/* TODO: evaluate cfg bits? */
+	}
+	return NULL;
+}
+
+const struct codec_mapping *codec_mapping_by_gsm0808_speech_codec(const struct gsm0808_speech_codec *sc)
+{
+	const struct codec_mapping *m;
+	foreach_codec_mapping(m) {
+		if (!m->has_gsm0808_speech_codec)
+			continue;
+		if (m->gsm0808_speech_codec.type != sc->type)
+			continue;
+		/* Return only those where sc->cfg is a subset of m->gsm0808_speech_codec.cfg. */
+		if ((m->gsm0808_speech_codec.cfg & sc->cfg) != sc->cfg)
+			continue;
+		return m;
 	}
 	return NULL;
 }
