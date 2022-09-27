@@ -40,6 +40,7 @@ static const struct value_string proc_arq_vlr_event_names[] = {
 	OSMO_VALUE_STRING(PR_ARQ_E_START),
 	OSMO_VALUE_STRING(PR_ARQ_E_ID_IMSI),
 	OSMO_VALUE_STRING(PR_ARQ_E_AUTH_RES),
+	OSMO_VALUE_STRING(PR_ARQ_E_AUTH_FAILURE),
 	OSMO_VALUE_STRING(PR_ARQ_E_CIPH_RES),
 	OSMO_VALUE_STRING(PR_ARQ_E_UPD_LOC_RES),
 	OSMO_VALUE_STRING(PR_ARQ_E_TRACE_RES),
@@ -340,6 +341,7 @@ static void proc_arq_vlr_fn_post_imsi(struct osmo_fsm_inst *fi)
 					0, 0);
 		vsub->auth_fsm = auth_fsm_start(vsub, fi,
 						PR_ARQ_E_AUTH_RES,
+						PR_ARQ_E_AUTH_FAILURE,
 						par->is_r99,
 						par->is_utran);
 	} else {
@@ -434,15 +436,19 @@ static void proc_arq_vlr_fn_w_auth(struct osmo_fsm_inst *fi,
 {
 	enum gsm48_reject_value *cause = data;
 
-	OSMO_ASSERT(event == PR_ARQ_E_AUTH_RES);
+	switch (event) {
+	case PR_ARQ_E_AUTH_RES:
+		/* Node 2 */
+		_proc_arq_vlr_node2(fi);
+		return;
 
-	if (!cause || *cause) {
+	case PR_ARQ_E_AUTH_FAILURE:
 		proc_arq_fsm_done(fi, cause? *cause : GSM48_REJECT_NETWORK_FAILURE);
 		return;
-	}
 
-	/* Node 2 */
-	_proc_arq_vlr_node2(fi);
+	default:
+		OSMO_ASSERT(false);
+	}
 }
 
 static void proc_arq_vlr_fn_w_ciph(struct osmo_fsm_inst *fi,
@@ -547,7 +553,8 @@ static const struct osmo_fsm_state proc_arq_vlr_states[] = {
 	},
 	[PR_ARQ_S_WAIT_AUTH] = {
 		.name = OSMO_STRINGIFY(PR_ARQ_S_WAIT_AUTH),
-		.in_event_mask = S(PR_ARQ_E_AUTH_RES),
+		.in_event_mask = S(PR_ARQ_E_AUTH_RES) |
+				 S(PR_ARQ_E_AUTH_FAILURE),
 		.out_state_mask = S(PR_ARQ_S_DONE) |
 				  S(PR_ARQ_S_WAIT_CIPH) |
 				  S(PR_ARQ_S_WAIT_UPD_LOC_CHILD) |

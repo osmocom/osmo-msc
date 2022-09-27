@@ -643,6 +643,7 @@ static const struct value_string fsm_lu_event_names[] = {
 	OSMO_VALUE_STRING(VLR_ULA_E_SEND_ID_ACK),
 	OSMO_VALUE_STRING(VLR_ULA_E_SEND_ID_NACK),
 	OSMO_VALUE_STRING(VLR_ULA_E_AUTH_RES),
+	OSMO_VALUE_STRING(VLR_ULA_E_AUTH_FAILURE),
 	OSMO_VALUE_STRING(VLR_ULA_E_CIPH_RES),
 	OSMO_VALUE_STRING(VLR_ULA_E_ID_IMSI),
 	OSMO_VALUE_STRING(VLR_ULA_E_ID_IMEI),
@@ -906,7 +907,9 @@ static void vlr_loc_upd_node1(struct osmo_fsm_inst *fi)
 		osmo_fsm_inst_state_chg(fi, VLR_ULA_S_WAIT_AUTH,
 					LU_TIMEOUT_LONG, 0);
 		vsub->auth_fsm = auth_fsm_start(lfp->vsub,
-						fi, VLR_ULA_E_AUTH_RES,
+						fi,
+						VLR_ULA_E_AUTH_RES,
+						VLR_ULA_E_AUTH_FAILURE,
 						lfp->is_r99,
 						lfp->is_utran);
 	} else {
@@ -1139,17 +1142,21 @@ static void lu_fsm_wait_auth(struct osmo_fsm_inst *fi, uint32_t event,
 	struct lu_fsm_priv *lfp = lu_fsm_fi_priv(fi);
 	enum gsm48_reject_value *res = data;
 
-	OSMO_ASSERT(event == VLR_ULA_E_AUTH_RES);
-
 	lfp->upd_hlr_vlr_fsm = NULL;
 
-	if (!res || *res) {
+	switch (event) {
+	case VLR_ULA_E_AUTH_RES:
+		/* Result == Pass */
+		vlr_loc_upd_post_auth(fi);
+		return;
+
+	case VLR_ULA_E_AUTH_FAILURE:
 		lu_fsm_failure(fi, res? *res : GSM48_REJECT_NETWORK_FAILURE);
 		return;
-	}
 
-	/* Result == Pass */
-	vlr_loc_upd_post_auth(fi);
+	default:
+		OSMO_ASSERT(false);
+	}
 }
 
 static void lu_fsm_wait_ciph(struct osmo_fsm_inst *fi, uint32_t event,
@@ -1364,7 +1371,8 @@ static const struct osmo_fsm_state vlr_lu_fsm_states[] = {
 		.action = lu_fsm_wait_pvlr,
 	},
 	[VLR_ULA_S_WAIT_AUTH] = {
-		.in_event_mask = S(VLR_ULA_E_AUTH_RES),
+		.in_event_mask = S(VLR_ULA_E_AUTH_RES) |
+				 S(VLR_ULA_E_AUTH_FAILURE),
 		.out_state_mask = S(VLR_ULA_S_WAIT_CIPH) |
 				  S(VLR_ULA_S_WAIT_LU_COMPL) |
 				  S(VLR_ULA_S_WAIT_HLR_UPD) |

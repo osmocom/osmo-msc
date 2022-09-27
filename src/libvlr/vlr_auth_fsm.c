@@ -51,6 +51,9 @@ struct auth_fsm_priv {
 	bool auth_requested;
 
 	int auth_tuple_max_reuse_count; /* see vlr->cfg instead */
+
+	uint32_t parent_event_success;
+	uint32_t parent_event_failure;
 };
 
 /***********************************************************************
@@ -240,14 +243,21 @@ static const char *vlr_auth_fsm_result_name(enum gsm48_reject_value result)
 /* Terminate the Auth FSM Instance and notify parent */
 static void auth_fsm_term(struct osmo_fsm_inst *fi, enum gsm48_reject_value result)
 {
+	struct auth_fsm_priv *afp = fi->priv;
+
 	LOGPFSM(fi, "Authentication terminating with result %s\n",
 		vlr_auth_fsm_result_name(result));
 
-	/* Do one final state transition (mostly for logging purpose) */
-	if (!result)
+	/* Do one final state transition (mostly for logging purpose) and set the parent_term_event according to success
+	 * or failure. */
+	if (!result) {
+		/* No reject value means success */
 		osmo_fsm_inst_state_chg(fi, VLR_SUB_AS_AUTHENTICATED, 0, 0);
-	else
+		fi->proc.parent_term_event = afp->parent_event_success;
+	} else {
 		osmo_fsm_inst_state_chg(fi, VLR_SUB_AS_AUTH_FAILED, 0, 0);
+		fi->proc.parent_term_event = afp->parent_event_failure;
+	}
 
 	/* return the result to the parent FSM */
 	osmo_fsm_inst_term(fi, OSMO_FSM_TERM_REGULAR, &result);
@@ -593,23 +603,23 @@ struct osmo_fsm vlr_auth_fsm = {
 /* MSC->VLR: Start Procedure Authenticate_VLR (TS 23.012 Ch. 4.1.2.2) */
 struct osmo_fsm_inst *auth_fsm_start(struct vlr_subscr *vsub,
 				     struct osmo_fsm_inst *parent,
-				     uint32_t parent_term_event,
+				     uint32_t parent_event_success,
+				     uint32_t parent_event_failure,
 				     bool is_r99,
 				     bool is_utran)
 {
 	struct osmo_fsm_inst *fi;
 	struct auth_fsm_priv *afp;
 
-	fi = osmo_fsm_inst_alloc_child(&vlr_auth_fsm, parent,
-					parent_term_event);
+	fi = osmo_fsm_inst_alloc_child(&vlr_auth_fsm, parent, parent_event_failure);
 	if (!fi) {
-		osmo_fsm_inst_dispatch(parent, parent_term_event, 0);
+		osmo_fsm_inst_dispatch(parent, parent_event_failure, 0);
 		return NULL;
 	}
 
 	afp = talloc_zero(fi, struct auth_fsm_priv);
 	if (!afp) {
-		osmo_fsm_inst_dispatch(parent, parent_term_event, 0);
+		osmo_fsm_inst_dispatch(parent, parent_event_failure, 0);
 		return NULL;
 	}
 
@@ -618,6 +628,8 @@ struct osmo_fsm_inst *auth_fsm_start(struct vlr_subscr *vsub,
 		afp->by_imsi = true;
 	afp->is_r99 = is_r99;
 	afp->is_utran = is_utran;
+	afp->parent_event_success = parent_event_success;
+	afp->parent_event_failure = parent_event_failure;
 	fi->priv = afp;
 	vsub->auth_fsm = fi;
 

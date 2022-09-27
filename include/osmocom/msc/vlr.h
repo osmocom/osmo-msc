@@ -67,7 +67,8 @@ enum vlr_lu_event {
 	VLR_ULA_E_UPDATE_LA,	/* Initial trigger (LU from MS) */
 	VLR_ULA_E_SEND_ID_ACK,	/* Result of Send-ID from PVLR */
 	VLR_ULA_E_SEND_ID_NACK,	/* Result of Send-ID from PVLR */
-	VLR_ULA_E_AUTH_RES,	/* Result of auth procedure */
+	VLR_ULA_E_AUTH_RES,	/* Successful result of auth procedure */
+	VLR_ULA_E_AUTH_FAILURE,	/* Auth procedure failed */
 	VLR_ULA_E_CIPH_RES,	/* Result of Ciphering Mode Command */
 	VLR_ULA_E_ID_IMSI,	/* IMSI received from MS */
 	VLR_ULA_E_ID_IMEI,	/* IMEI received from MS */
@@ -437,6 +438,7 @@ enum proc_arq_vlr_event {
 	PR_ARQ_E_START,
 	PR_ARQ_E_ID_IMSI,
 	PR_ARQ_E_AUTH_RES,
+	PR_ARQ_E_AUTH_FAILURE,
 	PR_ARQ_E_CIPH_RES,
 	PR_ARQ_E_UPD_LOC_RES,
 	PR_ARQ_E_TRACE_RES,

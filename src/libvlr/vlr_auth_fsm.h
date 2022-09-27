@@ -31,7 +31,8 @@ extern struct osmo_fsm vlr_auth_fsm;
 
 struct osmo_fsm_inst *auth_fsm_start(struct vlr_subscr *vsub,
 				     struct osmo_fsm_inst *parent,
-				     uint32_t parent_term_event,
+				     uint32_t parent_event_success,
+				     uint32_t parent_event_failure,
 				     bool is_r99,
 				     bool is_utran);
 
