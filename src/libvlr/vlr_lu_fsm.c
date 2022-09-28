@@ -914,6 +914,7 @@ static void vlr_loc_upd_node1(struct osmo_fsm_inst *fi)
 						fi,
 						VLR_ULA_E_AUTH_SUCCESS,
 						VLR_ULA_E_AUTH_FAILURE,
+						VLR_ULA_E_AUTH_FAILURE,
 						lfp->is_r99,
 						lfp->is_utran);
 	} else {
