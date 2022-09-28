@@ -53,6 +53,7 @@ struct auth_fsm_priv {
 	int auth_tuple_max_reuse_count; /* see vlr->cfg instead */
 
 	uint32_t parent_event_success;
+	uint32_t parent_event_no_auth_info;
 	uint32_t parent_event_failure;
 };
 
@@ -233,34 +234,50 @@ static void auth_fsm_onenter_failed(struct osmo_fsm_inst *fi, uint32_t prev_stat
 	}
 }
 
-static const char *vlr_auth_fsm_result_name(enum gsm48_reject_value result)
-{
-	if (!result)
-		return "PASSED";
-	return get_value_string(gsm48_gmm_cause_names, result);
-}
+enum auth_fsm_result {
+	/* Authentication verified the subscriber. */
+	AUTH_FSM_PASSED = 0,
+	/* HLR does not have authentication info for this subscriber. */
+	AUTH_FSM_NO_AUTH_INFO,
+	/* Authentication was attempted but failed. */
+	AUTH_FSM_FAILURE,
+};
+
+const char *auth_fsm_result_str[] = {
+	[AUTH_FSM_PASSED] = "PASSED",
+	[AUTH_FSM_NO_AUTH_INFO] = "NO_AUTH_INFO",
+	[AUTH_FSM_FAILURE] = "FAILURE",
+};
 
 /* Terminate the Auth FSM Instance and notify parent */
-static void auth_fsm_term(struct osmo_fsm_inst *fi, enum gsm48_reject_value result)
+static void auth_fsm_term(struct osmo_fsm_inst *fi, enum auth_fsm_result result, enum gsm48_reject_value cause)
 {
 	struct auth_fsm_priv *afp = fi->priv;
 
-	LOGPFSM(fi, "Authentication terminating with result %s\n",
-		vlr_auth_fsm_result_name(result));
+	LOGPFSM(fi, "Authentication terminating with result %s%s%s\n",
+		auth_fsm_result_str[result],
+		cause ? ", cause " : "",
+		cause ? get_value_string(gsm48_gmm_cause_names, cause) : "");
 
-	/* Do one final state transition (mostly for logging purpose) and set the parent_term_event according to success
-	 * or failure. */
-	if (!result) {
-		/* No reject value means success */
+	/* Do one final state transition (mostly for logging purpose)
+	 * and set the parent_term_event according to result */
+	switch (result) {
+	case AUTH_FSM_PASSED:
 		osmo_fsm_inst_state_chg(fi, VLR_SUB_AS_AUTHENTICATED, 0, 0);
 		fi->proc.parent_term_event = afp->parent_event_success;
-	} else {
+		break;
+	case AUTH_FSM_NO_AUTH_INFO:
+		osmo_fsm_inst_state_chg(fi, VLR_SUB_AS_AUTH_FAILED, 0, 0);
+		fi->proc.parent_term_event = afp->parent_event_no_auth_info;
+		break;
+	case AUTH_FSM_FAILURE:
 		osmo_fsm_inst_state_chg(fi, VLR_SUB_AS_AUTH_FAILED, 0, 0);
 		fi->proc.parent_term_event = afp->parent_event_failure;
+		break;
 	}
 
 	/* return the result to the parent FSM */
-	osmo_fsm_inst_term(fi, OSMO_FSM_TERM_REGULAR, &result);
+	osmo_fsm_inst_term(fi, OSMO_FSM_TERM_REGULAR, &cause);
 }
 
 static void auth_fsm_cleanup(struct osmo_fsm_inst *fi, enum osmo_fsm_term_cause cause)
@@ -285,7 +302,7 @@ static int _vlr_subscr_authenticate(struct osmo_fsm_inst *fi)
 		LOGPFSML(fi, LOGL_ERROR, "A previous check ensured that an"
 			 " auth tuple was available, but now there is in fact"
 			 " none.\n");
-		auth_fsm_term(fi, GSM48_REJECT_NETWORK_FAILURE);
+		auth_fsm_term(fi, AUTH_FSM_FAILURE, GSM48_REJECT_NETWORK_FAILURE);
 		return -1;
 	}
 
@@ -366,16 +383,20 @@ static void auth_fsm_wait_ai(struct osmo_fsm_inst *fi, uint32_t event,
 	switch (event) {
 	case VLR_AUTH_E_HLR_SAI_ACK:
 		if (!gsup->num_auth_vectors) {
-			auth_fsm_term(fi, GSM48_REJECT_NETWORK_FAILURE);
+			auth_fsm_term(fi, AUTH_FSM_FAILURE, GSM48_REJECT_NETWORK_FAILURE);
 			return;
 		}
 		vlr_subscr_update_tuples(vsub, gsup);
 		goto pass;
 		break;
 	case VLR_AUTH_E_HLR_SAI_NACK:
+		/* HLR did not return Auth Info, hence cannot authenticate. (The caller may still decide to permit
+		 * attaching without authentication) */
+		auth_fsm_term(fi, AUTH_FSM_NO_AUTH_INFO, gsup->cause);
+		break;
 	case VLR_AUTH_E_HLR_SAI_ABORT:
 		vlr_gmm_cause_to_mm_cause(gsup->cause, &gsm48_rej);
-		auth_fsm_term(fi, gsm48_rej);
+		auth_fsm_term(fi, AUTH_FSM_FAILURE, gsm48_rej);
 		break;
 	}
 
@@ -408,10 +429,10 @@ static void auth_fsm_wait_auth_resp(struct osmo_fsm_inst *fi, uint32_t event,
 						VLR_SUB_AS_WAIT_ID_IMSI,
 						vlr_timer(vlr, 3270), 3270);
 			} else {
-				auth_fsm_term(fi, GSM48_REJECT_ILLEGAL_MS);
+				auth_fsm_term(fi, AUTH_FSM_FAILURE, GSM48_REJECT_ILLEGAL_MS);
 			}
 		} else {
-			auth_fsm_term(fi, 0);
+			auth_fsm_term(fi, AUTH_FSM_PASSED, 0);
 		}
 		break;
 	case VLR_AUTH_E_MS_AUTH_FAIL:
@@ -423,7 +444,7 @@ static void auth_fsm_wait_auth_resp(struct osmo_fsm_inst *fi, uint32_t event,
 					VLR_SUB_AS_NEEDS_AUTH_WAIT_SAI_RESYNC,
 					GSM_29002_TIMER_M, 0);
 		} else
-			auth_fsm_term(fi, GSM48_REJECT_ILLEGAL_MS);
+			auth_fsm_term(fi, AUTH_FSM_FAILURE, GSM48_REJECT_ILLEGAL_MS);
 		break;
 	}
 }
@@ -443,7 +464,7 @@ static void auth_fsm_wait_ai_resync(struct osmo_fsm_inst *fi,
 	     gsup->cause != GMM_CAUSE_IMSI_UNKNOWN) ||
 	    (event == VLR_AUTH_E_HLR_SAI_ABORT)) {
 		/* result = procedure error */
-		auth_fsm_term(fi, GSM48_REJECT_NETWORK_FAILURE);
+		auth_fsm_term(fi, AUTH_FSM_FAILURE, GSM48_REJECT_NETWORK_FAILURE);
 	}
 	switch (event) {
 	case VLR_AUTH_E_HLR_SAI_ACK:
@@ -454,6 +475,7 @@ static void auth_fsm_wait_ai_resync(struct osmo_fsm_inst *fi,
 		break;
 	case VLR_AUTH_E_HLR_SAI_NACK:
 		auth_fsm_term(fi,
+			      AUTH_FSM_FAILURE,
 			      gsup->cause == GMM_CAUSE_IMSI_UNKNOWN?
 				      GSM48_REJECT_IMSI_UNKNOWN_IN_HLR
 				      : GSM48_REJECT_NETWORK_FAILURE);
@@ -484,16 +506,16 @@ static void auth_fsm_wait_auth_resp_resync(struct osmo_fsm_inst *fi,
 						vlr_timer(vlr, 3270), 3270);
 			} else {
 				/* Result = Aborted */
-				auth_fsm_term(fi, GSM48_REJECT_SYNCH_FAILURE);
+				auth_fsm_term(fi, AUTH_FSM_FAILURE, GSM48_REJECT_SYNCH_FAILURE);
 			}
 		} else {
 			/* Result = Pass */
-			auth_fsm_term(fi, 0);
+			auth_fsm_term(fi, AUTH_FSM_PASSED, 0);
 		}
 		break;
 	case VLR_AUTH_E_MS_AUTH_FAIL:
 		/* Second failure: Result = Fail */
-		auth_fsm_term(fi, GSM48_REJECT_SYNCH_FAILURE);
+		auth_fsm_term(fi, AUTH_FSM_FAILURE, GSM48_REJECT_SYNCH_FAILURE);
 		break;
 	}
 }
@@ -604,6 +626,7 @@ struct osmo_fsm vlr_auth_fsm = {
 struct osmo_fsm_inst *auth_fsm_start(struct vlr_subscr *vsub,
 				     struct osmo_fsm_inst *parent,
 				     uint32_t parent_event_success,
+				     uint32_t parent_event_no_auth_info,
 				     uint32_t parent_event_failure,
 				     bool is_r99,
 				     bool is_utran)
@@ -629,6 +652,7 @@ struct osmo_fsm_inst *auth_fsm_start(struct vlr_subscr *vsub,
 	afp->is_r99 = is_r99;
 	afp->is_utran = is_utran;
 	afp->parent_event_success = parent_event_success;
+	afp->parent_event_no_auth_info = parent_event_no_auth_info;
 	afp->parent_event_failure = parent_event_failure;
 	fi->priv = afp;
 	vsub->auth_fsm = fi;

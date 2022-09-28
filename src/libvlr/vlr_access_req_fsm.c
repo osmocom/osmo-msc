@@ -342,6 +342,7 @@ static void proc_arq_vlr_fn_post_imsi(struct osmo_fsm_inst *fi)
 		vsub->auth_fsm = auth_fsm_start(vsub, fi,
 						PR_ARQ_E_AUTH_RES,
 						PR_ARQ_E_AUTH_FAILURE,
+						PR_ARQ_E_AUTH_FAILURE,
 						par->is_r99,
 						par->is_utran);
 	} else {
