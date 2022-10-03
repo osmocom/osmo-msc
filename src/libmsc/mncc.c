@@ -110,7 +110,7 @@ void mncc_set_cause(struct gsm_mncc *data, int loc, int val)
  * MNCC validation code. Move to libosmocore once headers are merged
  ************************************************************************/
 
-#define MNCC_F_ALL 0x3fff
+#define MNCC_F_ALL 0x7fff
 
 static int check_string_terminated(const char *str, unsigned int size)
 {
