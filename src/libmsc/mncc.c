@@ -155,7 +155,7 @@ static int mncc_prim_check_sign(const struct gsm_mncc *mncc_prim)
 {
 	int rc;
 
-	if (mncc_prim->fields & ~ MNCC_F_ALL) {
+	if (mncc_prim->fields & ~MNCC_F_ALL) {
 		LOGP(DMNCC, LOGL_ERROR, "Unknown MNCC field mask 0x%x\n", mncc_prim->fields);
 		return -EINVAL;
 	}
