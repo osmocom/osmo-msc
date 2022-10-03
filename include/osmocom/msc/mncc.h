@@ -126,6 +126,9 @@ struct gsm_call {
 #define MNCC_F_SIGNAL		0x2000
 #define MNCC_F_GCR		0x4000
 
+/* UPDATEME when adding new MNCC_F_* entries above */
+#define MNCC_F_ALL		0x7fff
+
 struct gsm_mncc {
 	/* context based information */
 	uint32_t	msg_type;
