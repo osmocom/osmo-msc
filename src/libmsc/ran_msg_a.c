@@ -380,6 +380,11 @@ static int ran_a_decode_sapi_n_reject(struct ran_dec *ran_dec, struct msgb *msg,
 	return ran_decoded(ran_dec, &ran_dec_msg);
 }
 
+static int ran_a_decode_lcls_connect_ctrl_ack(struct ran_dec *ran_dec, const struct msgb *msg, const struct tlv_parsed *tp)
+{
+	return 0;
+}
+
 static int ran_a_decode_lcls_notification(struct ran_dec *ran_dec, const struct msgb *msg, const struct tlv_parsed *tp)
 {
 	const struct tlv_p_entry *ie_lcls_bss_status = TLVP_GET(tp, GSM0808_IE_LCLS_BSS_STATUS);
@@ -1258,6 +1263,8 @@ static int ran_a_decode_bssmap(struct ran_dec *ran_dec, struct msgb *bssmap)
 		return ran_a_decode_uplink_release_ind(ran_dec, bssmap, tp);
 	case BSS_MAP_MSG_VGCS_VBS_ASSIGNMENT_STATUS:
 		return ran_a_decode_vgcs_vbs_assign_status(ran_dec, bssmap, tp);
+	case BSS_MAP_MSG_LCLS_CONNECT_CTRL_ACK:
+		return ran_a_decode_lcls_connect_ctrl_ack(ran_dec, bssmap, tp);
 
 	/* From current RAN peer, the Handover origin: */
 	case BSS_MAP_MSG_HANDOVER_REQUIRED:
@@ -1371,6 +1378,15 @@ static int ran_a_channel_type_to_speech_codec_list(struct gsm0808_speech_codec_l
 	}
 
 	return 0;
+}
+
+static struct msgb *ran_a_make_lcls_conn_ctrl_command(enum gsm0808_lcls_config config,
+						      enum gsm0808_lcls_control control)
+{
+	struct msgb *msg;
+
+	msg = gsm0808_create_lcls_conn_ctrl(config, control);
+	return msg;
 }
 
 /* Compose a BSSAP Assignment Command.
@@ -1770,6 +1786,10 @@ static struct msgb *_ran_a_encode(struct osmo_fsm_inst *caller_fi, const struct 
 
 	case RAN_MSG_NOTIFICATION_DATA:
 		return gsm0808_create_notification_data(&ran_enc_msg->notification_data);
+
+	case RAN_MSG_LCLS_CONNECT_CTRL:
+		return ran_a_make_lcls_conn_ctrl_command(ran_enc_msg->lcls_config_ctrl.config,
+							 ran_enc_msg->lcls_config_ctrl.control);
 
 	default:
 		LOG_RAN_A_ENC(caller_fi, LOGL_ERROR, "Unimplemented RAN-encode message type: %s\n",
