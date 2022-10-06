@@ -69,6 +69,7 @@ enum ran_msg_type {
 	RAN_MSG_HANDOVER_SUCCEEDED,
 	RAN_MSG_HANDOVER_COMPLETE,
 	RAN_MSG_HANDOVER_FAILURE,
+	RAN_MSG_LCLS_CONNECT_CTRL,
 };
 
 extern const struct value_string ran_msg_type_names[];
@@ -268,6 +269,10 @@ struct ran_msg {
 		} handover_failure;
 		struct ran_handover_request handover_request;
 		struct ran_handover_request_ack handover_request_ack;
+		struct {
+			enum gsm0808_lcls_config config;
+			enum gsm0808_lcls_control control;
+		} lcls_config_ctrl;
 	};
 };
 
