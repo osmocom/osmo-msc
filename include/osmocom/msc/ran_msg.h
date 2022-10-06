@@ -89,6 +89,7 @@ enum ran_msg_type {
 	RAN_MSG_VGCS_VBS_ASSIGN_STATUS,
 	RAN_MSG_VGCS_SMS,
 	RAN_MSG_NOTIFICATION_DATA,
+	RAN_MSG_LCLS_CONNECT_CTRL,
 };
 
 extern const struct value_string ran_msg_type_names[];
@@ -319,6 +320,10 @@ struct ran_msg {
 			struct gsm0808_sms_to_vgcs sms_to_vgcs;
 		} vgcs_sms;
 		struct gsm0808_notification_data notification_data;
+		struct {
+			enum gsm0808_lcls_config config;
+			enum gsm0808_lcls_control control;
+		} lcls_config_ctrl;
 	};
 };
 

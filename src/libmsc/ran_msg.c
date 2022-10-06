@@ -70,6 +70,7 @@ const struct value_string ran_msg_type_names[] = {
 	{ RAN_MSG_VGCS_VBS_AREA_CELL_INFO, "VGCS_VBS_AREA_CELL_INFO" },
 	{ RAN_MSG_VGCS_VBS_ASSIGN_STATUS, "VGCS_VBS_ASSIGN_STATUS" },
 	{ RAN_MSG_VGCS_SMS, "VGCS_SMS" },
+	{ RAN_MSG_LCLS_CONNECT_CTRL, "LCLS_CONNECT_CTRL" },
 	{}
 };
 
