@@ -793,8 +793,6 @@ static int deliver_to_esme(struct smpp_esme *esme, struct gsm_sms *sms,
 				deliver.sequence_number);
 }
 
-static struct smsc *g_smsc;
-
 bool smpp_route_smpp_first()
 {
 	return (bool)(g_smsc->smpp_first);
