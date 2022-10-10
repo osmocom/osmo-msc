@@ -693,8 +693,8 @@ static bool lai_in_this_vlr(struct vlr_instance *vlr,
 	return true;
 }
 
-/* Determine if authentication is required */
-static bool is_auth_required(struct lu_fsm_priv *lfp)
+/* Return true when authentication should be attempted. */
+static bool try_auth(struct lu_fsm_priv *lfp)
 {
 	/* The cases where the authentication procedure should be used
 	 * are defined in 3GPP TS 33.102 */
@@ -703,8 +703,8 @@ static bool is_auth_required(struct lu_fsm_priv *lfp)
 		(lfp->try_ciphering && !auth_try_reuse_tuple(lfp->vsub, lfp->key_seq));
 }
 
-/* Determine if sending of CMC/SMC is required */
-static bool is_cmc_smc_required(struct lu_fsm_priv *lfp)
+/* Return true when CipherModeCmd / SecurityModeCmd should be attempted. */
+static bool try_cmc_smc(struct lu_fsm_priv *lfp)
 {
 	/* UTRAN: always send SecModeCmd, even if ciphering is not required.
 	 * GERAN: avoid sending CiphModeCmd if ciphering is not required. */
@@ -856,7 +856,7 @@ static void vlr_loc_upd_post_auth(struct osmo_fsm_inst *fi)
 
 	OSMO_ASSERT(vsub);
 
-	if (!is_cmc_smc_required(lfp)) {
+	if (!try_cmc_smc(lfp)) {
 		vlr_loc_upd_post_ciph(fi);
 		return;
 	}
@@ -901,7 +901,7 @@ static void vlr_loc_upd_node1(struct osmo_fsm_inst *fi)
 
 	OSMO_ASSERT(vsub);
 
-	if (is_auth_required(lfp)) {
+	if (try_auth(lfp)) {
 		/* Authenticate_VLR */
 		osmo_fsm_inst_state_chg(fi, VLR_ULA_S_WAIT_AUTH,
 					LU_TIMEOUT_LONG, 0);
