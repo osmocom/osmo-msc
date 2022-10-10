@@ -643,6 +643,7 @@ static const struct value_string fsm_lu_event_names[] = {
 	OSMO_VALUE_STRING(VLR_ULA_E_SEND_ID_ACK),
 	OSMO_VALUE_STRING(VLR_ULA_E_SEND_ID_NACK),
 	OSMO_VALUE_STRING(VLR_ULA_E_AUTH_SUCCESS),
+	OSMO_VALUE_STRING(VLR_ULA_E_AUTH_NO_INFO),
 	OSMO_VALUE_STRING(VLR_ULA_E_AUTH_FAILURE),
 	OSMO_VALUE_STRING(VLR_ULA_E_CIPH_RES),
 	OSMO_VALUE_STRING(VLR_ULA_E_ID_IMSI),
@@ -861,7 +862,10 @@ static void vlr_loc_upd_post_auth(struct osmo_fsm_inst *fi)
 
 	OSMO_ASSERT(vsub);
 
-	if (!is_cmc_smc_to_be_attempted(lfp)) {
+	/* Continue with ciphering, if enabled.
+	 * If auth/ciph is optional and the HLR returned no auth info, continue without ciphering. */
+	if (!is_cmc_smc_to_be_attempted(lfp)
+	    || (vsub->sec_ctx == VLR_SEC_CTX_NONE && !lfp->is_ciphering_required)) {
 		vlr_loc_upd_post_ciph(fi);
 		return;
 	}
@@ -913,7 +917,7 @@ static void vlr_loc_upd_node1(struct osmo_fsm_inst *fi)
 		vsub->auth_fsm = auth_fsm_start(lfp->vsub,
 						fi,
 						VLR_ULA_E_AUTH_SUCCESS,
-						VLR_ULA_E_AUTH_FAILURE,
+						VLR_ULA_E_AUTH_NO_INFO,
 						VLR_ULA_E_AUTH_FAILURE,
 						lfp->is_r99,
 						lfp->is_utran);
@@ -1156,7 +1160,18 @@ static void lu_fsm_wait_auth(struct osmo_fsm_inst *fi, uint32_t event,
 		return;
 
 	case VLR_ULA_E_AUTH_FAILURE:
-		lu_fsm_failure(fi, res? *res : GSM48_REJECT_NETWORK_FAILURE);
+		lu_fsm_failure(fi, res ? *res : GSM48_REJECT_NETWORK_FAILURE);
+		return;
+
+	case VLR_ULA_E_AUTH_NO_INFO:
+		/* HLR returned no auth info for the subscriber. Continue only if authentication is optional. */
+		if (lfp->authentication_required || lfp->is_ciphering_required) {
+			lu_fsm_failure(fi, res ? *res : GSM48_REJECT_NETWORK_FAILURE);
+			return;
+		}
+		LOGPFSML(fi, LOGL_INFO,
+			 "Attaching subscriber without auth (auth is optional, and no auth info received from HLR)\n");
+		vlr_loc_upd_post_auth(fi);
 		return;
 
 	default:
@@ -1377,6 +1392,7 @@ static const struct osmo_fsm_state vlr_lu_fsm_states[] = {
 	},
 	[VLR_ULA_S_WAIT_AUTH] = {
 		.in_event_mask = S(VLR_ULA_E_AUTH_SUCCESS) |
+				 S(VLR_ULA_E_AUTH_NO_INFO) |
 				 S(VLR_ULA_E_AUTH_FAILURE),
 		.out_state_mask = S(VLR_ULA_S_WAIT_CIPH) |
 				  S(VLR_ULA_S_WAIT_LU_COMPL) |

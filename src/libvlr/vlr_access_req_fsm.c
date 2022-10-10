@@ -40,6 +40,7 @@ static const struct value_string proc_arq_vlr_event_names[] = {
 	OSMO_VALUE_STRING(PR_ARQ_E_START),
 	OSMO_VALUE_STRING(PR_ARQ_E_ID_IMSI),
 	OSMO_VALUE_STRING(PR_ARQ_E_AUTH_RES),
+	OSMO_VALUE_STRING(PR_ARQ_E_AUTH_NO_INFO),
 	OSMO_VALUE_STRING(PR_ARQ_E_AUTH_FAILURE),
 	OSMO_VALUE_STRING(PR_ARQ_E_CIPH_RES),
 	OSMO_VALUE_STRING(PR_ARQ_E_UPD_LOC_RES),
@@ -289,7 +290,10 @@ static void _proc_arq_vlr_node2(struct osmo_fsm_inst *fi)
 
 	LOGPFSM(fi, "%s()\n", __func__);
 
-	if (!is_cmc_smc_to_be_attempted(par)) {
+	/* Continue with ciphering, if enabled.
+	 * If auth/ciph is optional and the HLR returned no auth info, continue without ciphering. */
+	if (!is_cmc_smc_to_be_attempted(par)
+	    || (vsub->sec_ctx == VLR_SEC_CTX_NONE && !par->is_ciphering_required)) {
 		_proc_arq_vlr_node2_post_ciph(fi);
 		return;
 	}
@@ -345,7 +349,7 @@ static void proc_arq_vlr_fn_post_imsi(struct osmo_fsm_inst *fi)
 					0, 0);
 		vsub->auth_fsm = auth_fsm_start(vsub, fi,
 						PR_ARQ_E_AUTH_RES,
-						PR_ARQ_E_AUTH_FAILURE,
+						PR_ARQ_E_AUTH_NO_INFO,
 						PR_ARQ_E_AUTH_FAILURE,
 						par->is_r99,
 						par->is_utran);
@@ -439,6 +443,7 @@ static void proc_arq_vlr_fn_w_obt_imsi(struct osmo_fsm_inst *fi,
 static void proc_arq_vlr_fn_w_auth(struct osmo_fsm_inst *fi,
 				   uint32_t event, void *data)
 {
+	struct proc_arq_priv *par = fi->priv;
 	enum gsm48_reject_value *cause = data;
 
 	switch (event) {
@@ -448,7 +453,19 @@ static void proc_arq_vlr_fn_w_auth(struct osmo_fsm_inst *fi,
 		return;
 
 	case PR_ARQ_E_AUTH_FAILURE:
-		proc_arq_fsm_done(fi, cause? *cause : GSM48_REJECT_NETWORK_FAILURE);
+		proc_arq_fsm_done(fi, cause ? *cause : GSM48_REJECT_NETWORK_FAILURE);
+		return;
+
+	case PR_ARQ_E_AUTH_NO_INFO:
+		/* HLR returned no auth info for the subscriber. Continue only if authentication is optional. */
+		if (par->authentication_required) {
+			proc_arq_fsm_done(fi, cause ? *cause : GSM48_REJECT_NETWORK_FAILURE);
+			return;
+		}
+		LOGPFSML(fi, LOGL_INFO,
+			 "Attaching subscriber without auth (auth is optional, and no auth info received from HLR)\n");
+		/* Node 2 */
+		_proc_arq_vlr_node2(fi);
 		return;
 
 	default:
@@ -559,6 +576,7 @@ static const struct osmo_fsm_state proc_arq_vlr_states[] = {
 	[PR_ARQ_S_WAIT_AUTH] = {
 		.name = OSMO_STRINGIFY(PR_ARQ_S_WAIT_AUTH),
 		.in_event_mask = S(PR_ARQ_E_AUTH_RES) |
+				 S(PR_ARQ_E_AUTH_NO_INFO) |
 				 S(PR_ARQ_E_AUTH_FAILURE),
 		.out_state_mask = S(PR_ARQ_S_DONE) |
 				  S(PR_ARQ_S_WAIT_CIPH) |
