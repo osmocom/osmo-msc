@@ -181,6 +181,7 @@ void msc_a_pending_cm_service_req_add(struct msc_a *msc_a, enum osmo_cm_service_
 unsigned int msc_a_pending_cm_service_req_count(struct msc_a *msc_a, enum osmo_cm_service_type type);
 void msc_a_pending_cm_service_req_del(struct msc_a *msc_a, enum osmo_cm_service_type type);
 bool msc_a_try_ciphering(const struct msc_a *msc_a);
+bool msc_a_require_ciphering(const struct msc_a *msc_a);
 
 #define msc_a_ran_down(A,B,C) \
 	_msc_a_ran_down(A,B,C, __FILE__, __LINE__)

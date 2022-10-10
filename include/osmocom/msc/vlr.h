@@ -300,6 +300,7 @@ vlr_loc_update(struct osmo_fsm_inst *parent,
 	       const struct osmo_location_area_id *new_lai,
 	       bool authentication_required,
 	       bool try_ciphering,
+	       bool ciphering_required,
 	       uint8_t key_seq,
 	       bool is_r99, bool is_utran,
 	       bool assign_tmsi);
@@ -464,6 +465,7 @@ vlr_proc_acc_req(struct osmo_fsm_inst *parent,
 		 const struct osmo_location_area_id *lai,
 		 bool authentication_required,
 		 bool try_ciphering,
+		 bool ciphering_required,
 		 uint8_t key_seq,
 		 bool is_r99, bool is_utran);
 

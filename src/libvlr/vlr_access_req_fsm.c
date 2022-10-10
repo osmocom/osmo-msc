@@ -68,6 +68,7 @@ struct proc_arq_priv {
 	struct osmo_location_area_id lai;
 	bool authentication_required;
 	bool try_ciphering;
+	bool ciphering_required;
 	uint8_t key_seq;
 	bool is_r99;
 	bool is_utran;
@@ -635,6 +636,7 @@ vlr_proc_acc_req(struct osmo_fsm_inst *parent,
 		 const struct osmo_location_area_id *lai,
 		 bool authentication_required,
 		 bool try_ciphering,
+		 bool ciphering_required,
 		 uint8_t key_seq,
 		 bool is_r99, bool is_utran)
 {
@@ -658,6 +660,7 @@ vlr_proc_acc_req(struct osmo_fsm_inst *parent,
 	par->parent_event_data = parent_event_data;
 	par->authentication_required = authentication_required;
 	par->try_ciphering = try_ciphering;
+	par->ciphering_required = ciphering_required;
 	par->key_seq = key_seq;
 	par->is_r99 = is_r99;
 	par->is_utran = is_utran;

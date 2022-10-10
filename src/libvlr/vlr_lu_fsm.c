@@ -677,6 +677,7 @@ struct lu_fsm_priv {
 	struct osmo_location_area_id new_lai;
 	bool authentication_required;
 	bool try_ciphering;
+	bool ciphering_required;
 	uint8_t key_seq;
 	bool is_r99;
 	bool is_utran;
@@ -1476,6 +1477,7 @@ vlr_loc_update(struct osmo_fsm_inst *parent,
 	       const struct osmo_location_area_id *new_lai,
 	       bool authentication_required,
 	       bool try_ciphering,
+	       bool ciphering_required,
 	       uint8_t key_seq,
 	       bool is_r99, bool is_utran,
 	       bool assign_tmsi)
@@ -1500,6 +1502,7 @@ vlr_loc_update(struct osmo_fsm_inst *parent,
 	lfp->parent_event_data = parent_event_data;
 	lfp->authentication_required = authentication_required;
 	lfp->try_ciphering = try_ciphering;
+	lfp->ciphering_required = ciphering_required;
 	lfp->key_seq = key_seq;
 	lfp->is_r99 = is_r99;
 	lfp->is_utran = is_utran;
