@@ -272,8 +272,8 @@ static void _proc_arq_vlr_node2_post_ciph(struct osmo_fsm_inst *fi)
 	_proc_arq_vlr_node2_post_vlr(fi);
 }
 
-/* Determine if sending of CMC/SMC is required */
-static bool is_cmc_smc_required(struct proc_arq_priv *par)
+/* Return true when CipherModeCmd / SecurityModeCmd should be attempted. */
+static bool is_cmc_smc_to_be_attempted(struct proc_arq_priv *par)
 {
 	/* UTRAN: always send SecModeCmd, even if ciphering is not required.
 	 * GERAN: avoid sending CiphModeCmd if ciphering is not required. */
@@ -288,7 +288,7 @@ static void _proc_arq_vlr_node2(struct osmo_fsm_inst *fi)
 
 	LOGPFSM(fi, "%s()\n", __func__);
 
-	if (!is_cmc_smc_required(par)) {
+	if (!is_cmc_smc_to_be_attempted(par)) {
 		_proc_arq_vlr_node2_post_ciph(fi);
 		return;
 	}
@@ -319,7 +319,7 @@ static void _proc_arq_vlr_node2(struct osmo_fsm_inst *fi)
 	osmo_fsm_inst_state_chg(fi, PR_ARQ_S_WAIT_CIPH, 0, 0);
 }
 
-static bool is_auth_required(struct proc_arq_priv *par)
+static bool is_auth_to_be_attempted(struct proc_arq_priv *par)
 {
 	/* The cases where the authentication procedure should be used
 	 * are defined in 3GPP TS 33.102 */
@@ -339,7 +339,7 @@ static void proc_arq_vlr_fn_post_imsi(struct osmo_fsm_inst *fi)
 	OSMO_ASSERT(vsub);
 
 	/* TODO: Identity IMEI -> System Failure */
-	if (is_auth_required(par)) {
+	if (is_auth_to_be_attempted(par)) {
 		osmo_fsm_inst_state_chg(fi, PR_ARQ_S_WAIT_AUTH,
 					0, 0);
 		vsub->auth_fsm = auth_fsm_start(vsub, fi,
