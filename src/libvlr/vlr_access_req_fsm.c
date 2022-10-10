@@ -67,7 +67,12 @@ struct proc_arq_priv {
 	uint32_t tmsi;
 	struct osmo_location_area_id lai;
 	bool authentication_required;
+	/* is_ciphering_to_be_attempted: true when any A5/n > 0 are enabled. Ciphering is allowed, always attempt to get Auth Info from
+	 * the HLR. */
 	bool is_ciphering_to_be_attempted;
+	/* is_ciphering_required: true when A5/0 is disabled. If we cannot get Auth Info from the HLR, reject the
+	 * subscriber. */
+	bool is_ciphering_required;
 	uint8_t key_seq;
 	bool is_r99;
 	bool is_utran;
@@ -635,11 +640,15 @@ vlr_proc_acc_req(struct osmo_fsm_inst *parent,
 		 const struct osmo_location_area_id *lai,
 		 bool authentication_required,
 		 bool is_ciphering_to_be_attempted,
+		 bool is_ciphering_required,
 		 uint8_t key_seq,
 		 bool is_r99, bool is_utran)
 {
 	struct osmo_fsm_inst *fi;
 	struct proc_arq_priv *par;
+
+	if (is_ciphering_required)
+		OSMO_ASSERT(is_ciphering_to_be_attempted);
 
 	fi = osmo_fsm_inst_alloc_child(&proc_arq_vlr_fsm, parent,
 				       parent_event_failure);
@@ -658,6 +667,7 @@ vlr_proc_acc_req(struct osmo_fsm_inst *parent,
 	par->parent_event_data = parent_event_data;
 	par->authentication_required = authentication_required;
 	par->is_ciphering_to_be_attempted = is_ciphering_to_be_attempted;
+	par->is_ciphering_required = is_ciphering_required;
 	par->key_seq = key_seq;
 	par->is_r99 = is_r99;
 	par->is_utran = is_utran;
