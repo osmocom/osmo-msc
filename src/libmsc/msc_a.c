@@ -106,7 +106,7 @@ struct msc_a *msc_a_fi_priv(struct osmo_fsm_inst *fi)
 	return fi->priv;
 }
 
-bool msc_a_require_ciphering(const struct msc_a *msc_a)
+bool msc_a_is_ciphering_to_be_attempted(const struct msc_a *msc_a)
 {
 	struct gsm_network *net = msc_a_net(msc_a);
 	bool is_utran = (msc_a->c.ran->type == OSMO_RAT_UTRAN_IU);
