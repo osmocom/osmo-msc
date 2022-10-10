@@ -676,7 +676,7 @@ struct lu_fsm_priv {
 	struct osmo_location_area_id old_lai;
 	struct osmo_location_area_id new_lai;
 	bool authentication_required;
-	bool ciphering_required;
+	bool try_ciphering;
 	uint8_t key_seq;
 	bool is_r99;
 	bool is_utran;
@@ -699,7 +699,7 @@ static bool is_auth_required(struct lu_fsm_priv *lfp)
 	 * are defined in 3GPP TS 33.102 */
 	/* For now we use a default value passed in to vlr_lu_fsm(). */
 	return lfp->authentication_required ||
-		(lfp->ciphering_required && !auth_try_reuse_tuple(lfp->vsub, lfp->key_seq));
+		(lfp->try_ciphering && !auth_try_reuse_tuple(lfp->vsub, lfp->key_seq));
 }
 
 /* Determine if sending of CMC/SMC is required */
@@ -707,7 +707,7 @@ static bool is_cmc_smc_required(struct lu_fsm_priv *lfp)
 {
 	/* UTRAN: always send SecModeCmd, even if ciphering is not required.
 	 * GERAN: avoid sending CiphModeCmd if ciphering is not required. */
-	return lfp->is_utran || lfp->ciphering_required;
+	return lfp->is_utran || lfp->try_ciphering;
 }
 
 /* Determine if a HLR Update is required */
@@ -1475,7 +1475,7 @@ vlr_loc_update(struct osmo_fsm_inst *parent,
 	       const struct osmo_location_area_id *old_lai,
 	       const struct osmo_location_area_id *new_lai,
 	       bool authentication_required,
-	       bool ciphering_required,
+	       bool try_ciphering,
 	       uint8_t key_seq,
 	       bool is_r99, bool is_utran,
 	       bool assign_tmsi)
@@ -1499,7 +1499,7 @@ vlr_loc_update(struct osmo_fsm_inst *parent,
 	lfp->parent_event_failure = parent_event_failure;
 	lfp->parent_event_data = parent_event_data;
 	lfp->authentication_required = authentication_required;
-	lfp->ciphering_required = ciphering_required;
+	lfp->try_ciphering = try_ciphering;
 	lfp->key_seq = key_seq;
 	lfp->is_r99 = is_r99;
 	lfp->is_utran = is_utran;
@@ -1514,10 +1514,10 @@ vlr_loc_update(struct osmo_fsm_inst *parent,
 	LOGPFSM(fi, "rev=%s net=%s%s%s\n",
 		is_r99 ? "R99" : "GSM",
 		is_utran ? "UTRAN" : "GERAN",
-		(authentication_required || ciphering_required)?
+		(authentication_required || try_ciphering) ?
 		" Auth" : " (no Auth)",
-		(authentication_required || ciphering_required)?
-			(ciphering_required? "+Ciph" : " (no Ciph)")
+		(authentication_required || try_ciphering) ?
+			(try_ciphering ? "+Ciph" : " (no Ciph)")
 			: "");
 
 	osmo_fsm_inst_dispatch(fi, VLR_ULA_E_UPDATE_LA, NULL);

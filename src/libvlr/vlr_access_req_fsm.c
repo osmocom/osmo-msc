@@ -67,7 +67,7 @@ struct proc_arq_priv {
 	uint32_t tmsi;
 	struct osmo_location_area_id lai;
 	bool authentication_required;
-	bool ciphering_required;
+	bool try_ciphering;
 	uint8_t key_seq;
 	bool is_r99;
 	bool is_utran;
@@ -272,7 +272,7 @@ static bool is_cmc_smc_required(struct proc_arq_priv *par)
 {
 	/* UTRAN: always send SecModeCmd, even if ciphering is not required.
 	 * GERAN: avoid sending CiphModeCmd if ciphering is not required. */
-	return par->is_utran || par->ciphering_required;
+	return par->is_utran || par->try_ciphering;
 }
 
 static void _proc_arq_vlr_node2(struct osmo_fsm_inst *fi)
@@ -320,7 +320,7 @@ static bool is_auth_required(struct proc_arq_priv *par)
 	 * are defined in 3GPP TS 33.102 */
 	/* For now we use a default value passed in to vlr_lu_fsm(). */
 	return par->authentication_required ||
-		(par->ciphering_required && !auth_try_reuse_tuple(par->vsub, par->key_seq));
+		(par->try_ciphering && !auth_try_reuse_tuple(par->vsub, par->key_seq));
 }
 
 /* after the IMSI is known */
@@ -634,7 +634,7 @@ vlr_proc_acc_req(struct osmo_fsm_inst *parent,
 		 const struct osmo_mobile_identity *mi,
 		 const struct osmo_location_area_id *lai,
 		 bool authentication_required,
-		 bool ciphering_required,
+		 bool try_ciphering,
 		 uint8_t key_seq,
 		 bool is_r99, bool is_utran)
 {
@@ -657,7 +657,7 @@ vlr_proc_acc_req(struct osmo_fsm_inst *parent,
 	par->parent_event_failure = parent_event_failure;
 	par->parent_event_data = parent_event_data;
 	par->authentication_required = authentication_required;
-	par->ciphering_required = ciphering_required;
+	par->try_ciphering = try_ciphering;
 	par->key_seq = key_seq;
 	par->is_r99 = is_r99;
 	par->is_utran = is_utran;
@@ -665,10 +665,10 @@ vlr_proc_acc_req(struct osmo_fsm_inst *parent,
 	LOGPFSM(fi, "rev=%s net=%s%s%s\n",
 		is_r99 ? "R99" : "GSM",
 		is_utran ? "UTRAN" : "GERAN",
-		(authentication_required || ciphering_required)?
+		(authentication_required || try_ciphering) ?
 		" Auth" : " (no Auth)",
-		(authentication_required || ciphering_required)?
-			(ciphering_required? "+Ciph" : " (no Ciph)")
+		(authentication_required || try_ciphering) ?
+			(try_ciphering ? "+Ciph" : " (no Ciph)")
 			: "");
 
 	if (is_utran && !authentication_required)
