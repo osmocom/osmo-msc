@@ -12,6 +12,8 @@ Type=simple
 Restart=always
 StateDirectory=osmocom
 WorkingDirectory=%S/osmocom
+User=osmocom
+Group=osmocom
 ExecStart=/usr/bin/osmo-msc -c /etc/osmocom/osmo-msc.cfg
 RestartSec=2
 

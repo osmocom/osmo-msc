@@ -85,19 +85,32 @@ make %{?_smp_mflags}
 %install
 %make_install
 
-%if 0%{?suse_version}
 %preun
+%if 0%{?suse_version}
 %service_del_preun %{name}.service
+%endif
 
 %postun
+%if 0%{?suse_version}
 %service_del_postun %{name}.service
+%endif
 
 %pre
+getent group osmocom >/dev/null || groupadd --system osmocom
+getent passwd osmocom >/dev/null || useradd --system --gid osmocom --home-dir /var/lib/osmocom \
+                                            --shell /sbin/nologin --comment "Open Source Mobile Communications" osmocom
+%if 0%{?suse_version}
 %service_add_pre %{name}.service
+%endif
 
 %post
+%if 0%{?suse_version}
 %service_add_post %{name}.service
 %endif
+chown osmocom:osmocom /etc/osmocom/osmo-msc.cfg
+chmod 0660 /etc/osmocom/osmo-msc.cfg
+chown root:osmocom /etc/osmocom
+chmod 2775 /etc/osmocom
 
 %check
 make %{?_smp_mflags} check || (find . -name testsuite.log -exec cat {} +)
