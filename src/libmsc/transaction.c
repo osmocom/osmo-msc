@@ -160,7 +160,7 @@ struct osmo_lcls *trans_lcls_compose(const struct gsm_trans *trans, bool use_lac
 	     osmo_hexdump(lcls->gcr.cr, 5));
 
 	lcls->config = GSM0808_LCLS_CFG_BOTH_WAY;
-	lcls->control = GSM0808_LCLS_CSC_CONNECT;
+	lcls->control = GSM0808_LCLS_CSC_DO_NOT_CONNECT;
 	lcls->corr_needed = true;
 	lcls->gcr_available = true;
 
