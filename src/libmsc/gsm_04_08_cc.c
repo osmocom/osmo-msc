@@ -391,18 +391,6 @@ static void cc_paging_cb(struct msc_a *msc_a, struct gsm_trans *trans)
 		trans->msc_a = msc_a;
 		trans->paging_request = NULL;
 
-		/* Get the GCR from the MO call leg (if any). */
-		if (!trans->cc.lcls)
-			trans->cc.lcls = trans_lcls_compose(trans, true);
-		if (trans->cc.lcls && trans->cc.msg.fields & MNCC_F_GCR) {
-			int rc = osmo_dec_gcr(&trans->cc.lcls->gcr,
-					      &trans->cc.msg.gcr[0],
-					      sizeof(trans->cc.msg.gcr));
-			if (rc < 0)
-				LOG_TRANS(trans, LOGL_ERROR, "Failed to parse GCR\n");
-			else
-				trans->cc.lcls->gcr_available = true;
-		}
 
 		osmo_fsm_inst_dispatch(msc_a->c.fi, MSC_A_EV_TRANSACTION_ACCEPTED, trans);
 		/* send SETUP request to called party */
@@ -2436,6 +2424,24 @@ static int mncc_tx_to_gsm_cc(struct gsm_network *net, const union mncc_msg *msg)
 
 			/* store setup information until paging succeeds */
 			memcpy(&trans->cc.msg, data, sizeof(struct gsm_mncc));
+
+			/* Store the Global Call Reference in the transaction if MNCC sent it */
+			if (data->fields & MNCC_F_GCR) {
+				/* The trans has no msc_a yet so compose will return NULL
+				// trans->cc.lcls = trans_lcls_compose(trans, true); */
+				trans->cc.lcls = talloc_zero(trans, struct osmo_lcls);
+				int rc = osmo_dec_gcr(&trans->cc.lcls->gcr,
+						      &data->gcr[0],
+						      sizeof(data->gcr));
+				if (rc < 0) {
+					LOG_TRANS_CAT(trans, DCC, LOGL_ERROR, "Failed to parse GCR\n");
+				} else {
+					trans->cc.lcls->config        = GSM0808_LCLS_CFG_BOTH_WAY;
+					trans->cc.lcls->control       = GSM0808_LCLS_CSC_DO_NOT_CONNECT;
+					trans->cc.lcls->corr_needed   = true;
+					trans->cc.lcls->gcr_available = true;
+				}
+			}
 
 			/* Request a channel. If Paging already started, paging_request_start() will append the new
 			 * trans to the already ongoing Paging. */
