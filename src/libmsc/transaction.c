@@ -110,6 +110,29 @@ struct gsm_trans *trans_find_by_sm_rp_mr(const struct gsm_network *net,
 	return NULL;
 }
 
+/*! Find a transaction by global call reference
+ * \param[in] net Network in which we should search
+ * \param[in] trans Transaction containing GCR to search for
+ * \returns Matching transaction, if any
+ */
+struct gsm_trans *trans_find_by_same_gcr(const struct gsm_network *net,
+						const struct gsm_trans *trans)
+{
+	struct gsm_trans *trans_other;
+
+	llist_for_each_entry(trans_other, &net->trans_list, entry) {
+		/* don't report back the same transaction */
+		if (trans_other == trans)
+			continue;
+		/* don't consider any trans where GCR is not available */
+		if (trans_other->cc.lcls == NULL || trans_other->cc.lcls->gcr_available == false)
+			continue;
+		if (!memcmp(&trans_other->cc.lcls->gcr, &trans->cc.lcls->gcr, sizeof(trans->cc.lcls->gcr)))
+			return trans_other;
+	}
+	return NULL;
+}
+
 struct osmo_lcls *trans_lcls_compose(const struct gsm_trans *trans, bool use_lac)
 {
 	if (!trans) {
