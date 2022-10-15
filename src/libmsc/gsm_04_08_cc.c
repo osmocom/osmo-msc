@@ -184,6 +184,19 @@ static void count_statistics(struct gsm_trans *trans, int new_state)
 	}
 }
 
+void update_lcls(struct gsm_trans *trans) {
+	struct ran_msg msg;
+
+	if (!trans->cc.lcls)
+		return;
+	msg = (struct ran_msg){
+		.msg_type = RAN_MSG_LCLS_CONNECT_CTRL,
+		.lcls_config_ctrl.config  = trans->cc.lcls->config,
+		.lcls_config_ctrl.control = trans->cc.lcls->control,
+	};
+	msc_a_ran_down(trans->msc_a, MSC_ROLE_I, &msg);
+}
+
 static void new_cc_state(struct gsm_trans *trans, int state)
 {
 	if (state > 31 || state < 0)
@@ -2013,7 +2026,8 @@ int gsm48_tch_rtp_create(struct gsm_trans *trans)
 static int tch_rtp_connect(struct gsm_network *net, const struct gsm_mncc_rtp *rtp)
 {
 	struct gsm_trans *trans;
-	struct call_leg *cl;
+	struct gsm_trans *trans_other;
+	struct call_leg *cl, *ol;
 	struct rtp_stream *rtps;
 	char ipbuf[INET6_ADDRSTRLEN];
 
@@ -2054,11 +2068,32 @@ static int tch_rtp_connect(struct gsm_network *net, const struct gsm_mncc_rtp *r
 		return -EINVAL;
 	}
 
+	trans_other = trans_find_by_same_gcr(net, trans);
+
+	if (trans_other) {
+		ol = trans_other->msc_a->cc.call_leg;
+	}
+
 	if (rtp->sdp[0]) {
 		sdp_msg_from_sdp_str(&trans->cc.codecs.remote, rtp->sdp);
 		LOG_TRANS(trans, LOGL_DEBUG, "%s contained SDP %s\n",
 			  get_mncc_name(rtp->msg_type),
 			  sdp_msg_to_str(&trans->cc.codecs.remote));
+
+		if(trans_other) {
+			if (!strcmp(ol->rtp[RTP_TO_CN]->local.ip, trans->cc.codecs.remote.rtp.ip) &&
+				   ol->rtp[RTP_TO_CN]->local.port == trans->cc.codecs.remote.rtp.port)
+			{
+				LOG_TRANS_CAT(trans, DMNCC, LOGL_DEBUG, "MNCC Wants out of the Loop.\n");
+				trans->cc.lcls->control = GSM0808_LCLS_CSC_CONNECT;
+				update_lcls(trans);
+			} else {
+				LOG_TRANS_CAT(trans, DMNCC, LOGL_DEBUG, "MNCC Wants into the Loop.\n");
+				trans->cc.lcls->control = GSM0808_LCLS_CSC_RELEASE_LCLS;
+				update_lcls(trans);
+			}
+		}
+
 	}
 
 	rtp_stream_set_remote_addr_and_codecs(rtps, &trans->cc.codecs.remote);
