@@ -117,8 +117,8 @@ static int bind_transceiver(struct esme *esme)
 	memset(&bind, 0, sizeof(bind));
 	bind.command_id = BIND_TRANSCEIVER;
 	bind.sequence_number = esme_inc_seq_nr(esme);
-	snprintf((char *)bind.system_id, sizeof(bind.system_id), "%s", esme->system_id);
-	snprintf((char *)bind.password, sizeof(bind.password), "%s", esme->password);
+	snprintf((char *)bind.system_id, SMPP_SYS_ID_LEN + 1, "%s", esme->system_id);
+	snprintf((char *)bind.password, SMPP_SYS_ID_LEN + 1, "%s", esme->password);
 	snprintf((char *)bind.system_type, sizeof(bind.system_type), "mirror");
 	bind.interface_version = esme->smpp_version;
 
