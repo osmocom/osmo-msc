@@ -668,8 +668,6 @@ void gsm48_cc_rx_setup_cn_local_rtp_port_known(struct gsm_trans *trans)
 		return;
 	}
 
-	/* 'setup' above has taken the value of trans->cc.msg, we can now clear that. */
-	trans->cc.msg = (struct gsm_mncc){};
 
 	/* Insert the CN side RTP port now available into SDP and compose SDP string */
 	rtp_cn_local = call_leg_local_ip(msc_a->cc.call_leg, RTP_TO_CN);
