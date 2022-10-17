@@ -256,6 +256,7 @@ struct gsm_network *msc_network_alloc(void *ctx,
 						  MSC_HLR_REMOTE_IP_DEFAULT);
 	net->gsup_server_port = MSC_HLR_REMOTE_PORT_DEFAULT;
 
+	net->mgw.mgw_pool = mgcp_client_pool_alloc(net);
 	mgcp_client_conf_init(&net->mgw.conf);
 	net->call_waiting = true;
 	net->lcls_permitted = false;
@@ -546,6 +547,41 @@ extern void *tall_gsms_ctx;
 extern void *tall_call_ctx;
 extern void *tall_trans_ctx;
 
+static int msc_mgw_setup(void)
+{
+	struct mgcp_client *mgcp_client_single;
+	unsigned int pool_members_initalized;
+
+	/* Initialize MGW pool. This initalizes and connects all MGCP clients that are currently configured in
+	 * the pool. Adding additional MGCP clients to the pool is possible but the user has to configure and
+	 * (re)connect them manually from the VTY. */
+	pool_members_initalized = mgcp_client_pool_connect(msc_network->mgw.mgw_pool);
+	if (pool_members_initalized) {
+		LOGP(DMSC, LOGL_NOTICE,
+		     "MGW pool with %u pool members configured, (ignoring MGW configuration in VTY node 'msc').\n",
+		     pool_members_initalized);
+		return 0;
+	}
+
+	/* Initialize and connect a single MGCP client. This MGCP client will appear as the one and only pool
+	 * member if there is no MGW pool configured. */
+	LOGP(DMSC, LOGL_NOTICE, "No MGW pool configured, using MGW configuration in VTY node 'msc'\n");
+	mgcp_client_single = mgcp_client_init(msc_network, &msc_network->mgw.conf);
+	if (!mgcp_client_single) {
+		LOGP(DMSC, LOGL_ERROR, "MGW (single) client initalization failed\n");
+		return -EINVAL;
+	}
+	if (mgcp_client_connect(mgcp_client_single)) {
+		LOGP(DMSC, LOGL_ERROR, "MGW (single) connect failed at (%s:%u)\n",
+		     msc_network->mgw.conf.remote_addr,
+		     msc_network->mgw.conf.remote_port);
+		return -EINVAL;
+	}
+	mgcp_client_pool_register_single(msc_network->mgw.mgw_pool, mgcp_client_single);
+
+	return 0;
+}
+
 int main(int argc, char **argv)
 {
 	int rc;
@@ -705,13 +741,8 @@ TODO: we probably want some of the _net_ ctrl commands from bsc_base_ctrl_cmds_i
 	if (sms_queue_start(msc_network) != 0)
 		return -1;
 
-	msc_network->mgw.client = mgcp_client_init(
-			msc_network, &msc_network->mgw.conf);
-
-	if (mgcp_client_connect(msc_network->mgw.client)) {
-		fprintf(stderr, "MGCPGW connect failed\n");
+	if (msc_mgw_setup() != 0)
 		return 7;
-	}
 
 	if (ss7_setup(tall_msc_ctx, &sccp_a, &sccp_iu)) {
 		fprintf(stderr, "Setting up SCCP client failed.\n");

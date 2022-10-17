@@ -122,7 +122,13 @@ void call_leg_release(struct call_leg *cl)
 
 static void call_leg_mgw_endpoint_gone(struct call_leg *cl)
 {
+	struct mgcp_client *mgcp_client;
 	int i;
+
+	/* Put MGCP client back into MGW pool */
+	mgcp_client = osmo_mgcpc_ep_client(cl->mgw_endpoint);
+	mgcp_client_pool_put(mgcp_client);
+
 	cl->mgw_endpoint = NULL;
 	for (i = 0; i < ARRAY_SIZE(cl->rtp); i++) {
 		if (!cl->rtp[i])
@@ -275,10 +281,17 @@ int call_leg_ensure_rtp_alloc(struct call_leg *cl, enum rtp_direction dir, uint3
 	if (cl->rtp[dir])
 		return 0;
 
-	if (!cl->mgw_endpoint)
+	if (!cl->mgw_endpoint) {
+		struct mgcp_client *mgcp_client = mgcp_client_pool_get(gsmnet->mgw.mgw_pool);
+		if (!mgcp_client) {
+			LOG_CALL_LEG(cl, LOGL_ERROR,
+				     "cannot ensure MGW endpoint -- no MGW configured, check configuration!\n");
+			return -ENODEV;
+		}
 		cl->mgw_endpoint = osmo_mgcpc_ep_alloc(cl->fi, CALL_LEG_EV_MGW_ENDPOINT_GONE,
-						       gsmnet->mgw.client, gsmnet->mgw.tdefs, cl->fi->id,
-						       "%s", mgcp_client_rtpbridge_wildcard(gsmnet->mgw.client));
+						       mgcp_client, gsmnet->mgw.tdefs, cl->fi->id,
+						       "%s", mgcp_client_rtpbridge_wildcard(mgcp_client));
+	}
 	if (!cl->mgw_endpoint) {
 		LOG_CALL_LEG(cl, LOGL_ERROR, "failed to setup MGW endpoint\n");
 		return -EIO;

@@ -17,6 +17,7 @@ extern struct cmd_element cfg_no_description_cmd;
 
 enum bsc_vty_node {
 	GSMNET_NODE = _LAST_OSMOVTY_NODE + 1,
+	MGW_NODE,
 	SUBSCR_NODE,
 	MSC_NODE,
 	MNCC_INT_NODE,
