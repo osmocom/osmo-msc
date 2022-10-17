@@ -2033,6 +2033,8 @@ void msc_vty_init(struct gsm_network *msc_network)
 	install_element(GSMNET_NODE, &cfg_net_no_per_loc_upd_cmd);
 	install_element(GSMNET_NODE, &cfg_net_call_wait_cmd);
 	install_element(GSMNET_NODE, &cfg_net_no_call_wait_cmd);
+	mgcp_client_pool_vty_init(GSMNET_NODE, MGW_NODE, " ", msc_network->mgw.mgw_pool);
+
 
 	install_element(CONFIG_NODE, &cfg_msc_cmd);
 	install_node(&msc_node, config_write_msc);
@@ -2066,7 +2068,9 @@ void msc_vty_init(struct gsm_network *msc_network)
 	/* Timer configuration commands (generic osmo_tdef API) */
 	osmo_tdef_vty_groups_init(MSC_NODE, msc_tdef_group);
 
+	/* Deprecated: Old MGCP config without pooling support in MSC node: */
 	mgcp_client_vty_init(msc_network, MSC_NODE, &msc_network->mgw.conf);
+
 #ifdef BUILD_IU
 	ranap_iu_vty_init(MSC_NODE, (enum ranap_nsap_addr_enc*)&msc_network->iu.rab_assign_addr_enc);
 #endif

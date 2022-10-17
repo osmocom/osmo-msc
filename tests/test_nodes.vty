@@ -27,6 +27,8 @@ OsmoMSC(config-net)# list
   no timezone
   call-waiting
   no call-waiting
+  mgw <0-255>
+  no mgw <0-255>
 
 OsmoMSC(config-net)# encryption?
   encryption  Encryption options
@@ -152,6 +154,7 @@ network
  authentication optional
  rrlp mode none
  mm info 1
+...
 msc
  mncc guard-timeout 180
  ncss guard-timeout 30
@@ -160,7 +163,6 @@ msc
 ...
  auth-tuple-max-reuse-count 3
  auth-tuple-reuse-on-error 1
-...
 mncc-int
  default-codec tch-f fr
  default-codec tch-h hr

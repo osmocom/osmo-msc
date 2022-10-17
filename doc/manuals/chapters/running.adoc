@@ -149,11 +149,23 @@ default port for MGCP (2427) on local host (127.0.0.1).
 Here is an example configuration for a remote MGW:
 
 ----
-msc
- mgw remote-ip 10.9.8.7
- mgw remote-port 2427
- mgw reset-endpoint rtpbridge/* <1>
+network
+ mgw 0
+  mgw remote-ip 10.9.8.7
+  mgw remote-port 2427
+  mgw reset-endpoint rtpbridge/* <1>
 ----
 <1> The 'reset-endpoint' setting instructs the OsmoMGW to send a wildcarded
 DLCX to the media gateway. This helps to clear lingering calls from the
 media gateway when the OsmoMSC is restarted.
+
+[NOTE]
+====
+Previous versions of OsmoMSC (1.9.0 and below) didn't have the 'mgw' VTY node and
+hence didn't support the MGW pooling feature. Therefore, historically the MGW
+related commands where placed under the `msc` VTY node. The MGW related commands
+under the  `msc` VTY are still parsed and used but its use is deprecated and
+hence discouraged in favour of the new `mgw` node. Writing the config to a file
+from within OsmoMSC will automatically convert the config to use the new `mgw`
+node.
+====

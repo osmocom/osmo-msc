@@ -1136,6 +1136,7 @@ static void run_tests(int nr)
 struct gsm_network *test_net(void *ctx)
 {
 	struct gsm_network *net = gsm_network_init(ctx, mncc_recv);
+	struct mgcp_client *client;
 
 	net->gsup_server_addr_str = talloc_strdup(net, "no_gsup_server");
 	net->gsup_server_port = 0;
@@ -1172,8 +1173,9 @@ struct gsm_network *test_net(void *ctx)
 	net->mgw.tdefs = g_mgw_tdefs;
 	mgcp_client_conf_init(&net->mgw.conf);
 	net->mgw.tdefs = g_mgw_tdefs;
-	net->mgw.client = mgcp_client_init(net, &net->mgw.conf);
-
+	net->mgw.mgw_pool = mgcp_client_pool_alloc(net);
+	client = mgcp_client_init(net, &net->mgw.conf);
+	mgcp_client_pool_register_single(net->mgw.mgw_pool, client);
 	return net;
 }
 
