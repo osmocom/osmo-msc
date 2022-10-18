@@ -390,6 +390,8 @@ static int config_write_net(struct vty *vty)
 	if (!gsmnet->call_waiting)
 		vty_out(vty, " no call-waiting%s", VTY_NEWLINE);
 
+	mgcp_client_pool_config_write(vty, " ");
+
 	return CMD_SUCCESS;
 }
 
@@ -2033,7 +2035,7 @@ void msc_vty_init(struct gsm_network *msc_network)
 	install_element(GSMNET_NODE, &cfg_net_no_per_loc_upd_cmd);
 	install_element(GSMNET_NODE, &cfg_net_call_wait_cmd);
 	install_element(GSMNET_NODE, &cfg_net_no_call_wait_cmd);
-	mgcp_client_pool_vty_init(GSMNET_NODE, MGW_NODE, " ", msc_network->mgw.mgw_pool);
+	mgcp_client_pool_vty_init(GSMNET_NODE, MGW_NODE, NULL, msc_network->mgw.mgw_pool);
 
 
 	install_element(CONFIG_NODE, &cfg_msc_cmd);
