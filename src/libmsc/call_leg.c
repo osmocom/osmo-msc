@@ -188,6 +188,12 @@ void call_leg_fsm_established_onenter(struct osmo_fsm_inst *fi, uint32_t prev_st
 
 void call_leg_fsm_releasing_onenter(struct osmo_fsm_inst *fi, uint32_t prev_state)
 {
+	/* Trigger termination of children FSMs (rtp_stream(s)) before
+	 * terminating ourselves, otherwise we are not able to receive
+	 * CALL_LEG_EV_MGW_ENDPOINT_GONE from cl->mgw_endpoint (call_leg =>
+	 * rtp_stream => mgw_endpoint), because osmo_fsm disabled dispatching
+	 * events to an FSM in process of terminating. */
+	osmo_fsm_inst_term_children(fi, OSMO_FSM_TERM_PARENT, NULL);
 	osmo_fsm_inst_term(fi, OSMO_FSM_TERM_REGULAR, NULL);
 }
 
