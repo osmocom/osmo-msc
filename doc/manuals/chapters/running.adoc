@@ -151,9 +151,9 @@ Here is an example configuration for a remote MGW:
 ----
 network
  mgw 0
-  mgw remote-ip 10.9.8.7
-  mgw remote-port 2427
-  mgw reset-endpoint rtpbridge/* <1>
+  remote-ip 10.9.8.7
+  remote-port 2427
+  reset-endpoint rtpbridge/* <1>
 ----
 <1> The 'reset-endpoint' setting instructs the OsmoMGW to send a wildcarded
 DLCX to the media gateway. This helps to clear lingering calls from the
