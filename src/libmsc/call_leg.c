@@ -188,6 +188,12 @@ void call_leg_fsm_established_onenter(struct osmo_fsm_inst *fi, uint32_t prev_st
 
 void call_leg_fsm_releasing_onenter(struct osmo_fsm_inst *fi, uint32_t prev_state)
 {
+	/* Trigger termination of children FSMs (rtp_stream(s)) before
+	 * terminating ourselves, otherwise we are not able to receive
+	 * CALL_LEG_EV_MGW_ENDPOINT_GONE from cl->mgw_endpoint (call_leg =>
+	 * rtp_stream => mgw_endpoint), because osmo_fsm disabled dispatching
+	 * events to an FSM in process of terminating. */
+	osmo_fsm_inst_term_children(fi, OSMO_FSM_TERM_PARENT, NULL);
 	osmo_fsm_inst_term(fi, OSMO_FSM_TERM_REGULAR, NULL);
 }
 
@@ -202,29 +208,11 @@ static void call_leg_fsm_releasing(struct osmo_fsm_inst *fi, uint32_t event, voi
 		break;
 
 	case CALL_LEG_EV_MGW_ENDPOINT_GONE:
-		/* This is actually never received, because we called osmo_fsm_inst_term()
-		 * at oneneter():
-		 * "FSM instance already terminating, not dispatching event CALL_LEG_EV_MGW_ENDPOINT_GONE"
-		 * In this scenario, we end up releasing the mgw_endpoint through cleanup() cb.
-		 */
 		call_leg_mgw_endpoint_gone(cl);
 		break;
 
 	default:
 		OSMO_ASSERT(false);
-	}
-}
-
-static void call_leg_fsm_cleanup(struct osmo_fsm_inst *fi, enum osmo_fsm_term_cause cause)
-{
-	struct call_leg *cl = fi->priv;
-	struct mgcp_client *mgcp_client;
-
-	if (cl->mgw_endpoint) {
-		/* Put MGCP client back into MGW pool */
-		mgcp_client = osmo_mgcpc_ep_client(cl->mgw_endpoint);
-		mgcp_client_pool_put(mgcp_client);
-		cl->mgw_endpoint = NULL;
 	}
 }
 
@@ -286,7 +274,6 @@ static struct osmo_fsm call_leg_fsm = {
 	.log_subsys = DCC,
 	.event_names = call_leg_fsm_event_names,
 	.timer_cb = call_leg_fsm_timer_cb,
-	.cleanup = call_leg_fsm_cleanup,
 };
 
 const struct value_string rtp_direction_names[] = {
