@@ -9,13 +9,6 @@ cat $abs_srcdir/smpp/smpp_test.err > experr
 AT_CHECK([$abs_top_builddir/tests/smpp/smpp_test], [], [expout], [experr])
 AT_CLEANUP
 
-AT_SETUP([sms_queue_test])
-AT_KEYWORDS([sms_queue_test])
-cat $abs_srcdir/sms_queue/sms_queue_test.ok > expout
-cat $abs_srcdir/sms_queue/sms_queue_test.err > experr
-AT_CHECK([$abs_top_builddir/tests/sms_queue/sms_queue_test], [], [expout], [experr])
-AT_CLEANUP
-
 AT_SETUP([db_sms_test])
 AT_KEYWORDS([db_sms_test])
 cat $abs_srcdir/db_sms/db_sms_test.ok > expout
@@ -85,13 +78,6 @@ AT_KEYWORDS([msc_vlr_test_reject_concurrency])
 cat $abs_srcdir/msc_vlr/msc_vlr_test_reject_concurrency.ok > expout
 cat $abs_srcdir/msc_vlr/msc_vlr_test_reject_concurrency.err > experr
 AT_CHECK([$abs_top_builddir/tests/msc_vlr/msc_vlr_test_reject_concurrency], [], [expout], [experr])
-AT_CLEANUP
-
-AT_SETUP([msc_vlr_test_call])
-AT_KEYWORDS([msc_vlr_test_call])
-cat $abs_srcdir/msc_vlr/msc_vlr_test_call.ok > expout
-cat $abs_srcdir/msc_vlr/msc_vlr_test_call.err > experr
-AT_CHECK([$abs_top_builddir/tests/msc_vlr/msc_vlr_test_call], [], [expout], [experr])
 AT_CLEANUP
 
 AT_SETUP([msc_vlr_test_rest])

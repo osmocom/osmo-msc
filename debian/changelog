@@ -1,3 +1,9 @@
+osmo-msc (1.9.0+rhizo6b) UNRELEASED; urgency=medium
+
+  * Rhizomatica Packaging
+
+ -- rhizomatica <rhizomatica@rccnII.vm.rhizomatica.org>  Tue, 18 Oct 2022 22:55:44 +0100
+
 osmo-msc (1.9.0) unstable; urgency=medium
 
   [ Alexander Couzens ]
