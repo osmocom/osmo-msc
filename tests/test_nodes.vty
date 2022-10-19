@@ -73,10 +73,6 @@ OsmoMSC(config-msc)# list
   neighbor (a|iu) cgi <0-999> <0-999> <0-65535> <0-65535> (ran-pc|msc-ipa-name) RAN_PC_OR_MSC_IPA_NAME
   no neighbor (a|iu) (ran-pc|msc-ipa-name) RAN_PC_OR_MSC_IPA_NAME
   timer [(vlr|mgw|mncc|sccp|geran|utran|sgs)] [TNNNN] [(<0-2147483647>|default)]
-  mgw local-ip (A.B.C.D|X:X::X:X)
-  mgw local-port <0-65535>
-  mgw remote-ip (A.B.C.D|X:X::X:X)
-  mgw remote-port <0-65535>
 ...
 
 OsmoMSC(config-msc)# ncss?
