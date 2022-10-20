@@ -159,6 +159,9 @@ network
 DLCX to the media gateway. This helps to clear lingering calls from the
 media gateway when the OsmoMSC is restarted.
 
+OsmoMSC is also able to handle a pool of media gateways for load
+distribution. See also <<mgw_pooling>>.
+
 [NOTE]
 ====
 Previous versions of OsmoMSC (1.9.0 and below) didn't have the 'mgw' VTY node and
