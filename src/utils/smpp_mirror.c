@@ -244,7 +244,7 @@ static int smpp_esme_init(struct esme *esme, const char *host, uint16_t port)
 	int rc;
 
 	if (port == 0)
-		port = 2775;
+		port = SMPP_PORT;
 
 	esme->wqueue.bfd.data = esme;
 	esme->wqueue.read_cb = esme_read_cb;

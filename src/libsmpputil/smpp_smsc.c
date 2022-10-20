@@ -974,21 +974,17 @@ int smpp_smsc_start(struct smsc *smsc, const char *bind_addr, uint16_t port)
 {
 	int rc;
 
-	/* default port for SMPP */
-	if (!port)
-		port = 2775;
-
 	LOGP(DSMPP, LOGL_NOTICE, "SMPP at %s %d\n",
-	     bind_addr? bind_addr : "0.0.0.0", port);
+	     bind_addr ? bind_addr : "0.0.0.0", port ? port : SMPP_PORT);
 
 	rc = osmo_sock_init_ofd(&smsc->listen_ofd, AF_UNSPEC, SOCK_STREAM,
-				IPPROTO_TCP, bind_addr, port,
+				IPPROTO_TCP, bind_addr, port ? port : SMPP_PORT,
 				OSMO_SOCK_F_BIND);
 	if (rc < 0)
 		return rc;
 
 	/* store new address and port */
-	rc = smpp_smsc_conf(smsc, bind_addr, port);
+	rc = smpp_smsc_conf(smsc, bind_addr, port ? port : SMPP_PORT);
 	if (rc)
 		smpp_smsc_stop(smsc);
 	return rc;
