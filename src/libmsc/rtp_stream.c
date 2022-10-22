@@ -328,6 +328,15 @@ static int rtp_stream_do_mgcp_verb(struct rtp_stream *rtps, enum mgcp_verb verb,
 				.codec = m->mgcp,
 				.pt = codec->payload_type,
 			};
+
+			/* OS#5723: cannot represent each codec's octet-aligned mode separately.
+			 * If any AMR is present, set octet-align=1 by default. */
+			if (m->mgcp == CODEC_AMR_8000_1) {
+				verb_info.param.amr_octet_aligned_present = true;
+				verb_info.param.amr_octet_aligned = true;
+				verb_info.param_present = true;
+			}
+
 			i++;
 			verb_info.codecs_len = i;
 			verb_info.ptmap_len = i;
