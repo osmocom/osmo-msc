@@ -120,6 +120,9 @@ struct gsm_trans *trans_find_by_same_gcr(const struct gsm_network *net,
 {
 	struct gsm_trans *trans_other;
 
+	if (!trans->cc.lcls)
+		return NULL;
+
 	llist_for_each_entry(trans_other, &net->trans_list, entry) {
 		/* don't report back the same transaction */
 		if (trans_other == trans)

@@ -2072,6 +2072,8 @@ static int tch_rtp_connect(struct gsm_network *net, const struct gsm_mncc_rtp *r
 
 	if (trans_other) {
 		ol = trans_other->msc_a->cc.call_leg;
+		if (!ol)
+			LOG_TRANS(trans, LOGL_ERROR, "Other transaction has no call leg.");
 	}
 
 	if (rtp->sdp[0]) {
@@ -2080,7 +2082,7 @@ static int tch_rtp_connect(struct gsm_network *net, const struct gsm_mncc_rtp *r
 			  get_mncc_name(rtp->msg_type),
 			  sdp_msg_to_str(&trans->cc.codecs.remote));
 
-		if(trans_other) {
+		if(trans_other && ol) {
 			if (!strcmp(ol->rtp[RTP_TO_CN]->local.ip, trans->cc.codecs.remote.rtp.ip) &&
 				   ol->rtp[RTP_TO_CN]->local.port == trans->cc.codecs.remote.rtp.port)
 			{
