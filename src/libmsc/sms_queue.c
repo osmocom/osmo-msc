@@ -276,7 +276,7 @@ struct gsm_sms *smsq_take_next_sms(struct gsm_network *net,
 {
 	struct gsm_sms *sms;
 	int wrapped = 0;
-	int sanity = 100;
+	int sanity = 350;
 	char started_with_msisdn[last_msisdn_buflen];
 
 	OSMO_STRLCPY_ARRAY(started_with_msisdn, last_msisdn);
@@ -309,7 +309,7 @@ struct gsm_sms *smsq_take_next_sms(struct gsm_network *net,
 		return sms;
 	}
 
-	DEBUGP(DLSMS, "SMS queue: no SMS to be sent, tried %d times.\n", sanity+100);
+	DEBUGP(DLSMS, "SMS queue: no SMS to be sent, tried %d times.\n", sanity+350);
 	return NULL;
 }
 
@@ -411,7 +411,7 @@ static void sms_send_next(struct vlr_subscr *vsub)
 	/* check for more messages for this subscriber */
 	sms = db_sms_get_unsent_for_subscr(vsub, INT_MAX);
 	if (!sms)
-		goto no_pending_sms;
+		return;
 
 	/* The sms should not be scheduled right now */
 	OSMO_ASSERT(!sms_queue_sms_is_pending(smsq, sms->id));
@@ -422,15 +422,10 @@ static void sms_send_next(struct vlr_subscr *vsub)
 		LOGP(DLSMS, LOGL_ERROR,
 			"Failed to create pending SMS entry.\n");
 		sms_free(sms);
-		goto no_pending_sms;
+		return;
 	}
 
 	_gsm411_send_sms(smsq->network, sms->receiver, sms);
-	return;
-
-no_pending_sms:
-	/* Try to send the SMS to avoid the queue being stuck */
-	sms_submit_pending(net->sms_queue);
 }
 
 /* Trigger a call to sms_submit_pending() in one second */
@@ -612,9 +607,6 @@ static int sms_sms_cb(unsigned int subsys, unsigned int signal,
 	}
 
 	if (signal == S_SMS_SMMA) {
-		/* TODO: For SMMA we might want to re-use the radio connection.
-		 */
-		sms_queue_trigger(smq);
 		return 0;
 	}
 
@@ -647,7 +639,6 @@ static int sms_sms_cb(unsigned int subsys, unsigned int signal,
 	case S_SMS_MEM_EXCEEDED:
 		smsq_rate_ctr_inc(smq, SMSQ_CTR_SMS_DELIVERY_NOMEM);
 		sms_pending_free(smq, pending);
-		sms_queue_trigger(smq);
 		break;
 	case S_SMS_UNKNOWN_ERROR:
 		/*
