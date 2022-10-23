@@ -276,7 +276,7 @@ struct gsm_sms *smsq_take_next_sms(struct gsm_network *net,
 {
 	struct gsm_sms *sms;
 	int wrapped = 0;
-	int sanity = 100;
+	int sanity = 350;
 	char started_with_msisdn[last_msisdn_buflen];
 
 	OSMO_STRLCPY_ARRAY(started_with_msisdn, last_msisdn);
@@ -311,7 +311,7 @@ struct gsm_sms *smsq_take_next_sms(struct gsm_network *net,
 		return sms;
 	}
 
-	DEBUGP(DLSMS, "SMS queue: no SMS to be sent, tried %d times.\n", sanity+100);
+	DEBUGP(DLSMS, "SMS queue: no SMS to be sent, tried %d times.\n", sanity+350);
 	return NULL;
 }
 
