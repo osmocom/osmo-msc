@@ -340,6 +340,9 @@ static void sms_submit_pending(void *_data)
 			break;
 		}
 
+		if (!sms->receiver)
+			continue;
+
 		rounds += 1;
 		LOGP(DLSMS, LOGL_DEBUG, "Checking whether to send SMS %llu\n", sms->id);
 
