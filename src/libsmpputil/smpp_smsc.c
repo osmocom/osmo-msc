@@ -163,8 +163,8 @@ void smpp_acl_delete(struct osmo_smpp_acl *acl)
 		osmo_fd_unregister(&esme->wqueue.bfd);
 		close(esme->wqueue.bfd.fd);
 		esme->wqueue.bfd.fd = -1;
-		acl->esme = NULL;
 		smpp_esme_put(acl->esme);
+		acl->esme = NULL;
 	}
 
 	/* delete all routes for this ACL */
