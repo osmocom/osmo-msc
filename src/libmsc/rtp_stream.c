@@ -361,10 +361,6 @@ void rtp_stream_release(struct rtp_stream *rtps)
  * least one of them has not yet been sent to the MGW in a previous CRCX or MDCX. */
 int rtp_stream_commit(struct rtp_stream *rtps)
 {
-	if (!rtps->ci) {
-		LOG_RTPS(rtps, LOGL_DEBUG, "Not committing: no MGW endpoint CI set up\n");
-		return -1;
-	}
 	if (!osmo_sockaddr_str_is_nonzero(&rtps->remote)) {
 		LOG_RTPS(rtps, LOGL_DEBUG, "Not committing: no remote RTP address known\n");
 		return -1;
@@ -376,6 +372,10 @@ int rtp_stream_commit(struct rtp_stream *rtps)
 	if (rtps->remote_sent_to_mgw && rtps->codec_sent_to_mgw) {
 		LOG_RTPS(rtps, LOGL_DEBUG, "Not committing: both remote RTP address and codec already set up at MGW\n");
 		return 0;
+	}
+	if (!rtps->ci) {
+		LOG_RTPS(rtps, LOGL_DEBUG, "Not committing: no MGW endpoint CI set up\n");
+		return -1;
 	}
 
 	LOG_RTPS(rtps, LOGL_DEBUG, "Committing: Tx MDCX to update the MGW: updating%s%s%s\n",
