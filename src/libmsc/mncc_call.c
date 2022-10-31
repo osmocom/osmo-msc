@@ -263,14 +263,14 @@ static bool mncc_call_rx_rtp_create(struct mncc_call *mncc_call)
 		return true;
 	}
 
-	if (!mncc_call->rtps->codec_known) {
+	if (!mncc_call->rtps->codecs_known) {
 		LOG_MNCC_CALL(mncc_call, LOGL_DEBUG, "Got RTP_CREATE, but RTP stream has no codec set\n");
 		return true;
 	}
 
 	LOG_MNCC_CALL(mncc_call, LOGL_DEBUG, "Got RTP_CREATE, responding with " OSMO_SOCKADDR_STR_FMT " %s\n",
 		      OSMO_SOCKADDR_STR_FMT_ARGS(&mncc_call->rtps->local),
-		      osmo_mgcpc_codec_name(mncc_call->rtps->codec));
+		      sdp_audio_codecs_to_str(&mncc_call->rtps->codecs));
 	/* Already know what RTP IP:port to tell the MNCC. Send it. */
 	return mncc_call_tx_rtp_create(mncc_call);
 }
@@ -295,15 +295,16 @@ static bool mncc_call_tx_rtp_create(struct mncc_call *mncc_call)
 		return false;
 	}
 
-	if (mncc_call->rtps->codec_known) {
-		const struct codec_mapping *m = codec_mapping_by_mgcp_codec(mncc_call->rtps->codec);
+	if (mncc_call->rtps->codecs_known) {
+		struct sdp_audio_codec *codec = &mncc_call->rtps->codecs.codec[0];
+		const struct codec_mapping *m = codec_mapping_by_subtype_name(codec->subtype_name);
 
 		if (!m) {
 			mncc_call_error(mncc_call, "Failed to resolve audio codec '%s'\n",
-					osmo_mgcpc_codec_name(mncc_call->rtps->codec));
+					sdp_audio_codec_to_str(codec));
 			return false;
 		}
-		mncc_msg.rtp.payload_type = m->sdp.payload_type;
+		mncc_msg.rtp.payload_type = codec->payload_type;
 		mncc_msg.rtp.payload_msg_type = m->mncc_payload_msg_type;
 	}
 

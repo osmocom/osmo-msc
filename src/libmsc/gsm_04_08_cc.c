@@ -1822,18 +1822,18 @@ int gsm48_tch_rtp_create(struct gsm_trans *trans)
 		return -EINVAL;
 	}
 
-	if (!rtp_cn->codec_known) {
+	if (!rtp_cn->codecs_known) {
 		LOG_TRANS_CAT(trans, DMNCC, LOGL_ERROR,
 			      "Cannot RTP CREATE to MNCC, no codec set up for the RTP CN side\n");
 		return -EINVAL;
 	}
 
 	/* Codec */
-	m = codec_mapping_by_mgcp_codec(rtp_cn->codec);
+	m = codec_mapping_by_subtype_name(rtp_cn->codecs.codec[0].subtype_name);
 	if (!m) {
 		LOG_TRANS_CAT(trans, DMNCC, LOGL_ERROR,
 			      "Cannot RTP CREATE to MNCC, cannot resolve codec '%s'\n",
-			      osmo_mgcpc_codec_name(rtp_cn->codec));
+			      sdp_audio_codec_to_str(&rtp_cn->codecs.codec[0]));
 		return -EINVAL;
 	}
 	payload_msg_type = m->mncc_payload_msg_type;
@@ -1841,9 +1841,9 @@ int gsm48_tch_rtp_create(struct gsm_trans *trans)
 	/* Payload Type number */
 	mgcp_info = osmo_mgcpc_ep_ci_get_rtp_info(rtp_cn->ci);
 	if (mgcp_info && mgcp_info->ptmap_len)
-		payload_type = map_codec_to_pt(mgcp_info->ptmap, mgcp_info->ptmap_len, rtp_cn->codec);
+		payload_type = map_codec_to_pt(mgcp_info->ptmap, mgcp_info->ptmap_len, m->mgcp);
 	else
-		payload_type = rtp_cn->codec;
+		payload_type = m->mgcp;
 
 	rtp_cn_local = call_leg_local_ip(cl, RTP_TO_CN);
 	if (!rtp_cn_local) {

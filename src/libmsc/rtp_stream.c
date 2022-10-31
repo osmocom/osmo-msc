@@ -28,6 +28,7 @@
 #include <osmocom/msc/transaction.h>
 #include <osmocom/msc/call_leg.h>
 #include <osmocom/msc/rtp_stream.h>
+#include <osmocom/msc/codec_mapping.h>
 
 #define LOG_RTPS(rtps, level, fmt, args...) \
 	LOGPFSML(rtps->fi, level, fmt, ##args)
@@ -78,10 +79,10 @@ void rtp_stream_update_id(struct rtp_stream *rtps)
 			OSMO_STRBUF_PRINTF(sb, ":no-remote-port");
 		else if (!rtps->remote_sent_to_mgw)
 			OSMO_STRBUF_PRINTF(sb, ":remote-port-not-sent");
-		if (!rtps->codec_known)
-			OSMO_STRBUF_PRINTF(sb, ":no-codec");
-		else if (!rtps->codec_sent_to_mgw)
-			OSMO_STRBUF_PRINTF(sb, ":codec-not-sent");
+		if (!rtps->codecs_known)
+			OSMO_STRBUF_PRINTF(sb, ":no-codecs");
+		else if (!rtps->codecs_sent_to_mgw)
+			OSMO_STRBUF_PRINTF(sb, ":codecs-not-sent");
 		if (rtps->use_osmux) {
 			if (rtps->remote_osmux_cid < 0)
 				OSMO_STRBUF_PRINTF(sb, ":no-remote-osmux-cid");
@@ -141,7 +142,7 @@ static void check_established(struct rtp_stream *rtps)
 	    && osmo_sockaddr_str_is_nonzero(&rtps->remote)
 	    && rtps->remote_sent_to_mgw
 	    && (!rtps->use_osmux || rtps->remote_osmux_cid_sent_to_mgw)
-	    && rtps->codec_known)
+	    && rtps->codecs_known)
 		rtp_stream_state_chg(rtps, RTP_STREAM_ST_ESTABLISHED);
 }
 
@@ -171,14 +172,14 @@ static void rtp_stream_fsm_establishing_established(struct osmo_fsm_inst *fi, ui
 		osmo_fsm_inst_dispatch(fi->proc.parent, CALL_LEG_EV_RTP_STREAM_ADDR_AVAILABLE, rtps);
 		check_established(rtps);
 
-		if ((!rtps->remote_sent_to_mgw || !rtps->codec_sent_to_mgw)
+		if ((!rtps->remote_sent_to_mgw || !rtps->codecs_sent_to_mgw)
 		    && osmo_sockaddr_str_is_nonzero(&rtps->remote)
 		    && (!rtps->use_osmux || rtps->remote_osmux_cid_sent_to_mgw)
-		    && rtps->codec_known) {
+		    && rtps->codecs_known) {
 			LOG_RTPS(rtps, LOGL_DEBUG,
 				 "local ip:port set;%s%s%s triggering MDCX to send the new settings\n",
-				 (!rtps->remote_sent_to_mgw)? " remote ip:port not yet sent," : "",
-				 (!rtps->codec_sent_to_mgw)? " codec not yet sent," : "",
+				 (!rtps->remote_sent_to_mgw) ? " remote ip:port not yet sent," : "",
+				 (!rtps->codecs_sent_to_mgw) ? " codecs not yet sent," : "",
 				 (rtps->use_osmux && !rtps->remote_osmux_cid_sent_to_mgw) ? "Osmux CID not yet sent,": "");
 			rtp_stream_do_mdcx(rtps);
 		}
@@ -192,7 +193,7 @@ static void rtp_stream_fsm_establishing_established(struct osmo_fsm_inst *fi, ui
 	case RTP_STREAM_EV_CRCX_FAIL:
 	case RTP_STREAM_EV_MDCX_FAIL:
 		rtps->remote_sent_to_mgw = false;
-		rtps->codec_sent_to_mgw = false;
+		rtps->codecs_sent_to_mgw = false;
 		rtps->remote_osmux_cid_sent_to_mgw = false;
 		rtp_stream_update_id(rtps);
 		rtp_stream_state_chg(rtps, RTP_STREAM_ST_DISCARDING);
@@ -310,10 +311,28 @@ static int rtp_stream_do_mgcp_verb(struct rtp_stream *rtps, enum mgcp_verb verb,
 	if (verb == MGCP_VERB_CRCX)
 		verb_info.conn_mode = rtps->crcx_conn_mode;
 
-	if (rtps->codec_known) {
-		verb_info.codecs[0] = rtps->codec;
-		verb_info.codecs_len = 1;
-		rtps->codec_sent_to_mgw = true;
+	if (rtps->codecs_known) {
+		/* Send the list of codecs to the MGW. Ideally we would just feed the SDP directly, but for legacy
+		 * reasons we still need to translate to a struct mgcp_conn_peer representation to send it. */
+		struct sdp_audio_codec *codec;
+		int i = 0;
+		foreach_sdp_audio_codec(codec, &rtps->codecs) {
+			const struct codec_mapping *m = codec_mapping_by_subtype_name(codec->subtype_name);
+			if (!m) {
+				LOG_RTPS(rtps, LOGL_ERROR, "Cannot map codec '%s' to MGCP: codec is unknown\n",
+					 codec->subtype_name);
+				continue;
+			}
+			verb_info.codecs[i] = m->mgcp;
+			verb_info.ptmap[i] = (struct ptmap){
+				.codec = m->mgcp,
+				.pt = codec->payload_type,
+			};
+			i++;
+			verb_info.codecs_len = i;
+			verb_info.ptmap_len = i;
+		}
+		rtps->codecs_sent_to_mgw = true;
 	}
 	if (osmo_sockaddr_str_is_nonzero(&rtps->remote)) {
 		int rc = osmo_strlcpy(verb_info.addr, rtps->remote.ip, sizeof(verb_info.addr));
@@ -368,12 +387,12 @@ int rtp_stream_commit(struct rtp_stream *rtps)
 		LOG_RTPS(rtps, LOGL_DEBUG, "Not committing: no remote RTP address known\n");
 		return -1;
 	}
-	if (!rtps->codec_known) {
-		LOG_RTPS(rtps, LOGL_DEBUG, "Not committing: no codec known\n");
+	if (!rtps->codecs_known) {
+		LOG_RTPS(rtps, LOGL_DEBUG, "Not committing: no codecs known\n");
 		return -1;
 	}
-	if (rtps->remote_sent_to_mgw && rtps->codec_sent_to_mgw) {
-		LOG_RTPS(rtps, LOGL_DEBUG, "Not committing: both remote RTP address and codec already set up at MGW\n");
+	if (rtps->remote_sent_to_mgw && rtps->codecs_sent_to_mgw) {
+		LOG_RTPS(rtps, LOGL_DEBUG, "Not committing: both remote RTP address and codecs already set up at MGW\n");
 		return 0;
 	}
 	if (!rtps->ci) {
@@ -383,20 +402,45 @@ int rtp_stream_commit(struct rtp_stream *rtps)
 
 	LOG_RTPS(rtps, LOGL_DEBUG, "Committing: Tx MDCX to update the MGW: updating%s%s%s\n",
 		 rtps->remote_sent_to_mgw ? "" : " remote-RTP-IP-port",
-		 rtps->codec_sent_to_mgw ? "" : " codec",
+		 rtps->codecs_sent_to_mgw ? "" : " codecs",
 		 (!rtps->use_osmux || rtps->remote_osmux_cid_sent_to_mgw) ? "" : " remote-Osmux-CID");
 	return rtp_stream_do_mdcx(rtps);
 }
 
-void rtp_stream_set_codec(struct rtp_stream *rtps, enum mgcp_codecs codec)
+void rtp_stream_set_codecs(struct rtp_stream *rtps, const struct sdp_audio_codecs *codecs)
 {
+	if (!codecs || !codecs->count)
+		return;
+	if (sdp_audio_codecs_cmp(&rtps->codecs, codecs, false, true) == 0) {
+		LOG_RTPS(rtps, LOGL_DEBUG, "no change: codecs already set to %s\n",
+			 sdp_audio_codecs_to_str(&rtps->codecs));
+		return;
+	}
 	if (rtps->fi->state == RTP_STREAM_ST_ESTABLISHED)
 		rtp_stream_state_chg(rtps, RTP_STREAM_ST_ESTABLISHING);
-	LOG_RTPS(rtps, LOGL_DEBUG, "setting codec to %s\n", osmo_mgcpc_codec_name(codec));
-	rtps->codec = codec;
-	rtps->codec_known = true;
-	rtps->codec_sent_to_mgw = false;
+	LOG_RTPS(rtps, LOGL_DEBUG, "setting codecs to %s\n", sdp_audio_codecs_to_str(codecs));
+	rtps->codecs = *codecs;
+	rtps->codecs_known = true;
+	rtps->codecs_sent_to_mgw = false;
 	rtp_stream_update_id(rtps);
+}
+
+/* Convenience shortcut to call rtp_stream_set_codecs() with a list of only one sdp_audio_codec record. */
+void rtp_stream_set_one_codec(struct rtp_stream *rtps, const struct sdp_audio_codec *codec)
+{
+	struct sdp_audio_codecs codecs = {};
+	sdp_audio_codecs_add_copy(&codecs, codec);
+	rtp_stream_set_codecs(rtps, &codecs);
+}
+
+/* For legacy, rather use rtp_stream_set_codecs() with a full codecs list. */
+bool rtp_stream_set_codecs_from_mgcp_codec(struct rtp_stream *rtps, enum mgcp_codecs codec)
+{
+	struct sdp_audio_codecs codecs = {};
+	if (!sdp_audio_codecs_add_mgcp_codec(&codecs, codec))
+		return false;
+	rtp_stream_set_codecs(rtps, &codecs);
+	return true;
 }
 
 void rtp_stream_set_remote_addr(struct rtp_stream *rtps, const struct osmo_sockaddr_str *r)
@@ -433,7 +477,7 @@ bool rtp_stream_is_established(struct rtp_stream *rtps)
 	if (rtps->fi->state != RTP_STREAM_ST_ESTABLISHED)
 		return false;
 	if (!rtps->remote_sent_to_mgw
-	    || !rtps->codec_sent_to_mgw
+	    || !rtps->codecs_sent_to_mgw
 	    || (rtps->use_osmux && !rtps->remote_osmux_cid_sent_to_mgw))
 		return false;
 	return true;
