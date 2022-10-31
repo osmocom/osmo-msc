@@ -671,13 +671,12 @@ static int ran_a_decode_handover_request_ack(struct ran_dec *ran_dec, const stru
 	}
 
 	if (ie_chosen_speech_version) {
-		struct gsm0808_speech_codec sc;
 		ran_dec_msg.handover_request_ack.chosen_speech_version = ie_chosen_speech_version->val[0];
 
 		/* the codec may be extrapolated from this Speech Version or below from Speech Codec */
-		gsm0808_speech_codec_from_chan_type(&sc, ran_dec_msg.handover_request_ack.chosen_speech_version);
-		ran_dec_msg.handover_request_ack.codec_present = true;
-		ran_dec_msg.handover_request_ack.codec = ran_a_mgcp_codec_from_sc(&sc);
+		if (gsm0808_speech_codec_from_chan_type(&ran_dec_msg.handover_request_ack.codec,
+							ran_dec_msg.handover_request_ack.chosen_speech_version) == 0)
+			ran_dec_msg.handover_request_ack.codec_present = true;
 	}
 
 	if (ie_aoip_transp_addr) {
@@ -692,14 +691,12 @@ static int ran_a_decode_handover_request_ack(struct ran_dec *ran_dec, const stru
 	}
 
 	if (ie_speech_codec) {
-		struct gsm0808_speech_codec sc;
-		if (gsm0808_dec_speech_codec(&sc, ie_speech_codec->val, ie_speech_codec->len) < 0)
+		/* the codec may be extrapolated from above Speech Version or from this Speech Codec */
+		if (gsm0808_dec_speech_codec(&ran_dec_msg.handover_request_ack.codec,
+					     ie_speech_codec->val, ie_speech_codec->len) < 0)
 			LOG_RAN_A_DEC_MSG(LOGL_ERROR, "unable to decode IE Speech Codec (Chosen)\n");
-		else {
-			/* the codec may be extrapolated from above Speech Version or from this Speech Codec */
+		else
 			ran_dec_msg.handover_request_ack.codec_present = true;
-			ran_dec_msg.handover_request_ack.codec = ran_a_mgcp_codec_from_sc(&sc);
-		}
 	}
 
 	return ran_decoded(ran_dec, &ran_dec_msg);
