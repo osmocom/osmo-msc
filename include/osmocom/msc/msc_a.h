@@ -37,6 +37,7 @@
 #include <osmocom/msc/neighbor_ident.h>
 
 struct ran_infra;
+struct sdp_audio_codecs;
 
 #define MSC_A_USE_LOCATION_UPDATING	"lu"
 #define MSC_A_USE_CM_SERVICE_CC	"cm_service_cc"
@@ -220,5 +221,7 @@ int msc_a_ran_decode_cb(struct osmo_fsm_inst *msc_a_fi, void *data, const struct
 int msc_a_vlr_set_cipher_mode(void *_msc_a, bool umts_aka, bool retrieve_imeisv);
 
 struct msgb *msc_a_ran_encode(struct msc_a *msc_a, const struct ran_msg *ran_enc_msg);
+
+struct sdp_audio_codecs *msc_a_ran_codecs(struct msc_a *msc_a);
 
 void msc_a_update_id(struct msc_a *msc_a);

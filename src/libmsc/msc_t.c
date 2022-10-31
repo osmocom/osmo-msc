@@ -450,9 +450,9 @@ static int msc_t_patch_and_send_ho_request_ack(struct msc_t *msc_t, const struct
 		if (r->codec_present) {
 			LOG_MSC_T(msc_t, LOGL_DEBUG, "From Handover Request Ack, got %s\n",
 				  osmo_mgcpc_codec_name(r->codec));
-			rtp_stream_set_codec(rtp_ran, r->codec);
+			rtp_stream_set_codecs_from_mgcp_codec(rtp_ran, r->codec);
 			if (rtp_cn)
-				rtp_stream_set_codec(rtp_cn, r->codec);
+				rtp_stream_set_codecs_from_mgcp_codec(rtp_cn, r->codec);
 		} else {
 			LOG_MSC_T(msc_t, LOGL_DEBUG, "No codec in Handover Request Ack\n");
 		}

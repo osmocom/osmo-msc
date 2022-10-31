@@ -324,14 +324,15 @@ struct osmo_sockaddr_str *call_leg_local_ip(struct call_leg *cl, enum rtp_direct
 /* Make sure an MGW endpoint CI is set up for an RTP connection.
  * This is the one-stop for all to either completely set up a new endpoint connection, or to modify an existing one.
  * If not yet present, allocate the rtp_stream for the given direction.
- * Then, call rtp_stream_set_codec() if codec_if_known is non-NULL, and/or rtp_stream_set_remote_addr() if
+ * Then, call rtp_stream_set_codecs() if codecs_if_known is non-NULL, and/or rtp_stream_set_remote_addr() if
  * remote_addr_if_known is non-NULL.
  * Finally make sure that a CRCX is sent out for this direction, if this has not already happened.
  * If the CRCX has already happened but new codec / remote_addr data was passed, call rtp_stream_commit() to trigger an
  * MDCX.
  */
 int call_leg_ensure_ci(struct call_leg *cl, enum rtp_direction dir, uint32_t call_id, struct gsm_trans *for_trans,
-		       const enum mgcp_codecs *codec_if_known, const struct osmo_sockaddr_str *remote_addr_if_known)
+		       const struct sdp_audio_codecs *codecs_if_known,
+		       const struct osmo_sockaddr_str *remote_addr_if_known)
 {
 	if (call_leg_ensure_rtp_alloc(cl, dir, call_id, for_trans))
 		return -EIO;
@@ -340,8 +341,8 @@ int call_leg_ensure_ci(struct call_leg *cl, enum rtp_direction dir, uint32_t cal
 		cl->rtp[dir]->use_osmux = true;
 		cl->rtp[dir]->remote_osmux_cid = -1; /* wildcard */
 	}
-	if (codec_if_known)
-		rtp_stream_set_codec(cl->rtp[dir], *codec_if_known);
+	if (codecs_if_known)
+		rtp_stream_set_codecs(cl->rtp[dir], codecs_if_known);
 	if (remote_addr_if_known && osmo_sockaddr_str_is_nonzero(remote_addr_if_known))
 		rtp_stream_set_remote_addr(cl->rtp[dir], remote_addr_if_known);
 	return rtp_stream_ensure_ci(cl->rtp[dir], cl->mgw_endpoint);
@@ -350,25 +351,25 @@ int call_leg_ensure_ci(struct call_leg *cl, enum rtp_direction dir, uint32_t cal
 int call_leg_local_bridge(struct call_leg *cl1, uint32_t call_id1, struct gsm_trans *trans1,
 			  struct call_leg *cl2, uint32_t call_id2, struct gsm_trans *trans2)
 {
-	enum mgcp_codecs codec;
+	struct sdp_audio_codecs *codecs;
 
 	cl1->local_bridge = cl2;
 	cl2->local_bridge = cl1;
 
 	/* We may just copy the codec info we have for the RAN side of the first leg to the CN side of both legs. This
 	 * also means that if both legs use different codecs the MGW must perform transcoding on the second leg. */
-	if (!cl1->rtp[RTP_TO_RAN] || !cl1->rtp[RTP_TO_RAN]->codec_known) {
+	if (!cl1->rtp[RTP_TO_RAN] || !cl1->rtp[RTP_TO_RAN]->codecs_known) {
 		LOG_CALL_LEG(cl1, LOGL_ERROR, "RAN-side RTP stream codec is not known, not ready for bridging\n");
 		return -EINVAL;
 	}
-	codec = cl1->rtp[RTP_TO_RAN]->codec;
+	codecs = &cl1->rtp[RTP_TO_RAN]->codecs;
 
 	if (!cl1->rtp[RTP_TO_CN] || !cl2->rtp[RTP_TO_CN])
 		return -ENOTCONN;
 
 	call_leg_ensure_ci(cl1, RTP_TO_CN, call_id1, trans1,
-			   &codec, &cl2->rtp[RTP_TO_CN]->local);
+			   codecs, &cl2->rtp[RTP_TO_CN]->local);
 	call_leg_ensure_ci(cl2, RTP_TO_CN, call_id2, trans2,
-			   &codec, &cl1->rtp[RTP_TO_CN]->local);
+			   codecs, &cl1->rtp[RTP_TO_CN]->local);
 	return 0;
 }

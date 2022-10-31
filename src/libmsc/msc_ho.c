@@ -39,6 +39,7 @@
 #include <osmocom/msc/call_leg.h>
 #include <osmocom/msc/rtp_stream.h>
 #include <osmocom/msc/mncc_call.h>
+#include <osmocom/msc/codec_mapping.h>
 
 struct osmo_fsm msc_ho_fsm;
 
@@ -570,7 +571,7 @@ static int msc_ho_start_inter_msc_call_forwarding(struct msc_a *msc_a, struct ms
 
 	/* Backup old cell's RTP IP:port and codec data */
 	msc_a->ho.old_cell.ran_remote_rtp = rtp_to_ran->remote;
-	msc_a->ho.old_cell.codec = rtp_to_ran->codec;
+	msc_a->ho.old_cell.codecs = rtp_to_ran->codecs;
 
 	/* Blindly taken over from an MNCC trace of existing code: send an all-zero CCCAP: */
 	outgoing_call_req.fields |= MNCC_F_CCCAP;
@@ -707,7 +708,7 @@ static void msc_ho_rtp_switch_to_new_cell(struct msc_a *msc_a)
 
 	/* Backup old cell's RTP IP:port and codec data */
 	msc_a->ho.old_cell.ran_remote_rtp = rtp_to_ran->remote;
-	msc_a->ho.old_cell.codec = rtp_to_ran->codec;
+	msc_a->ho.old_cell.codecs = rtp_to_ran->codecs;
 
 	LOG_HO(msc_a, LOGL_DEBUG, "Switching RTP stream to new cell: from " OSMO_SOCKADDR_STR_FMT " to " OSMO_SOCKADDR_STR_FMT "\n",
 	       OSMO_SOCKADDR_STR_FMT_ARGS(&msc_a->ho.old_cell.ran_remote_rtp),
@@ -726,10 +727,17 @@ static void msc_ho_rtp_switch_to_new_cell(struct msc_a *msc_a)
 
 	/* Switch over to the new peer */
 	rtp_stream_set_remote_addr(rtp_to_ran, &msc_a->ho.new_cell.ran_remote_rtp);
-	if (msc_a->ho.new_cell.codec_present)
-		rtp_stream_set_codec(rtp_to_ran, msc_a->ho.new_cell.codec);
-	else
+	if (msc_a->ho.new_cell.codec_present) {
+		struct sdp_audio_codecs codecs = {};
+		if (!sdp_audio_codecs_add_mgcp_codec(&codecs, msc_a->ho.new_cell.codec)) {
+			LOG_HO(msc_a, LOGL_ERROR,
+			       "Cannot resolve codec: %s\n", osmo_mgcpc_codec_name(msc_a->ho.new_cell.codec));
+		} else {
+			rtp_stream_set_codecs(rtp_to_ran, &codecs);
+		}
+	} else {
 		LOG_HO(msc_a, LOGL_ERROR, "No codec is set\n");
+	}
 	rtp_stream_commit(rtp_to_ran);
 }
 
@@ -768,7 +776,7 @@ static void msc_ho_rtp_rollback_to_old_cell(struct msc_a *msc_a)
 
 	/* Switch back to the old cell */
 	rtp_stream_set_remote_addr(rtp_to_ran, &msc_a->ho.old_cell.ran_remote_rtp);
-	rtp_stream_set_codec(rtp_to_ran, msc_a->ho.old_cell.codec);
+	rtp_stream_set_codecs(rtp_to_ran, &msc_a->ho.old_cell.codecs);
 	rtp_stream_commit(rtp_to_ran);
 }
 
