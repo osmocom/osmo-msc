@@ -81,7 +81,7 @@ struct msc_ho_state {
 		struct osmo_sockaddr_str ran_remote_rtp;
 		/* The codec from Handover Request Acknowledge. */
 		bool codec_present;
-		enum mgcp_codecs codec;
+		struct gsm0808_speech_codec codec;
 
 		/* Inter-MSC voice forwarding via MNCC, to the remote MSC. The Prepare Handover Response sent us the
 		 * Handover Number the remote MSC assigned. This is a call to that Handover Number, via PBX.

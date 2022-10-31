@@ -38,6 +38,7 @@
 #include <osmocom/msc/vlr.h>
 #include <osmocom/msc/msc_i.h>
 #include <osmocom/msc/gsm_data.h>
+#include <osmocom/msc/codec_mapping.h>
 
 static struct osmo_fsm msc_t_fsm;
 
@@ -448,11 +449,20 @@ static int msc_t_patch_and_send_ho_request_ack(struct msc_t *msc_t, const struct
 			LOG_MSC_T(msc_t, LOGL_DEBUG, "No RTP IP:port in Handover Request Ack\n");
 		}
 		if (r->codec_present) {
-			LOG_MSC_T(msc_t, LOGL_DEBUG, "From Handover Request Ack, got %s\n",
-				  osmo_mgcpc_codec_name(r->codec));
-			rtp_stream_set_codecs_from_mgcp_codec(rtp_ran, r->codec);
-			if (rtp_cn)
-				rtp_stream_set_codecs_from_mgcp_codec(rtp_cn, r->codec);
+			const struct codec_mapping *m = codec_mapping_by_gsm0808_speech_codec_type(r->codec.type);
+			/* TODO: use codec_mapping_by_gsm0808_speech_codec() to also match on codec.cfg */
+			if (!m) {
+				LOG_MSC_T(msc_t, LOGL_ERROR, "Cannot resolve codec in Handover Request Ack: %s / %s\n",
+					  gsm0808_speech_codec_type_name(r->codec.type),
+					  m ? sdp_audio_codec_to_str(&m->sdp) : "(unknown)");
+			} else {
+				LOG_MSC_T(msc_t, LOGL_DEBUG, "From Handover Request Ack, got codec %s / %s\n",
+					  gsm0808_speech_codec_type_name(r->codec.type),
+					  sdp_audio_codec_to_str(&m->sdp));
+				rtp_stream_set_one_codec(rtp_ran, &m->sdp);
+				if (rtp_cn)
+					rtp_stream_set_one_codec(rtp_cn, &m->sdp);
+			}
 		} else {
 			LOG_MSC_T(msc_t, LOGL_DEBUG, "No codec in Handover Request Ack\n");
 		}

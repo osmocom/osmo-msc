@@ -681,7 +681,7 @@ static void msc_ho_rx_request_ack(struct msc_a *msc_a, struct msc_a_ran_dec_data
 	msc_a->ho.new_cell.codec = hra->ran_dec->handover_request_ack.codec;
 	if (hra->ran_dec->handover_request_ack.codec_present) {
 		LOG_HO(msc_a, LOGL_DEBUG, "Request Ack contains codec %s\n",
-		       osmo_mgcpc_codec_name(msc_a->ho.new_cell.codec));
+		       gsm0808_speech_codec_type_name(msc_a->ho.new_cell.codec.type));
 	}
 }
 
@@ -728,13 +728,14 @@ static void msc_ho_rtp_switch_to_new_cell(struct msc_a *msc_a)
 	/* Switch over to the new peer */
 	rtp_stream_set_remote_addr(rtp_to_ran, &msc_a->ho.new_cell.ran_remote_rtp);
 	if (msc_a->ho.new_cell.codec_present) {
-		struct sdp_audio_codecs codecs = {};
-		if (!sdp_audio_codecs_add_mgcp_codec(&codecs, msc_a->ho.new_cell.codec)) {
-			LOG_HO(msc_a, LOGL_ERROR,
-			       "Cannot resolve codec: %s\n", osmo_mgcpc_codec_name(msc_a->ho.new_cell.codec));
-		} else {
-			rtp_stream_set_codecs(rtp_to_ran, &codecs);
-		}
+		const struct codec_mapping *m;
+		m = codec_mapping_by_gsm0808_speech_codec_type(msc_a->ho.new_cell.codec.type);
+		/* TODO: use codec_mapping_by_gsm0808_speech_codec() to also match on codec.cfg */
+		if (!m)
+			LOG_HO(msc_a, LOGL_ERROR, "Cannot resolve codec: %s\n",
+			       gsm0808_speech_codec_type_name(msc_a->ho.new_cell.codec.type));
+		else
+			rtp_stream_set_one_codec(rtp_to_ran, &m->sdp);
 	} else {
 		LOG_HO(msc_a, LOGL_ERROR, "No codec is set\n");
 	}
