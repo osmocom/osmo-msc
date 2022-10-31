@@ -398,6 +398,11 @@ void rtp_stream_set_codec(struct rtp_stream *rtps, enum mgcp_codecs codec)
 
 void rtp_stream_set_remote_addr(struct rtp_stream *rtps, const struct osmo_sockaddr_str *r)
 {
+	if (osmo_sockaddr_str_cmp(&rtps->remote, r) == 0) {
+		LOG_RTPS(rtps, LOGL_DEBUG, "remote addr already " OSMO_SOCKADDR_STR_FMT ", no change\n",
+			 OSMO_SOCKADDR_STR_FMT_ARGS(r));
+		return;
+	}
 	if (rtps->fi->state == RTP_STREAM_ST_ESTABLISHED)
 		rtp_stream_state_chg(rtps, RTP_STREAM_ST_ESTABLISHING);
 	LOG_RTPS(rtps, LOGL_DEBUG, "setting remote addr to " OSMO_SOCKADDR_STR_FMT "\n", OSMO_SOCKADDR_STR_FMT_ARGS(r));
