@@ -55,6 +55,7 @@
 #include <osmocom/msc/rtp_stream.h>
 #include <osmocom/msc/mncc_call.h>
 #include <osmocom/msc/msc_t.h>
+#include <osmocom/msc/codec_mapping.h>
 
 #include <osmocom/gsm/gsm48.h>
 #include <osmocom/gsm/gsm0480.h>
@@ -1714,6 +1715,7 @@ int gsm48_tch_rtp_create(struct gsm_trans *trans)
 	uint32_t payload_type;
 	int payload_msg_type;
 	const struct mgcp_conn_peer *mgcp_info;
+	const struct codec_mapping *m;
 
 	if (!rtp_cn) {
 		LOG_TRANS_CAT(trans, DMNCC, LOGL_ERROR, "Cannot RTP CREATE to MNCC, no RTP set up for the CN side\n");
@@ -1727,7 +1729,14 @@ int gsm48_tch_rtp_create(struct gsm_trans *trans)
 	}
 
 	/* Codec */
-	payload_msg_type = mgcp_codec_to_mncc_payload_msg_type(rtp_cn->codec);
+	m = codec_mapping_by_mgcp_codec(rtp_cn->codec);
+	if (!m) {
+		LOG_TRANS_CAT(trans, DMNCC, LOGL_ERROR,
+			      "Cannot RTP CREATE to MNCC, cannot resolve codec '%s'\n",
+			      osmo_mgcpc_codec_name(rtp_cn->codec));
+		return -EINVAL;
+	}
+	payload_msg_type = m->mncc_payload_msg_type;
 
 	/* Payload Type number */
 	mgcp_info = osmo_mgcpc_ep_ci_get_rtp_info(rtp_cn->ci);
