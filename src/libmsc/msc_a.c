@@ -1797,6 +1797,8 @@ int msc_a_try_call_assignment(struct gsm_trans *cc_trans)
 
 	if (msc_a->cc.active_trans) {
 		LOG_MSC_A(msc_a, LOGL_INFO, "Another call is already ongoing, not assigning yet\n");
+		/* a hack to make call waiting work */
+		gsm48_tch_rtp_create(cc_trans);
 		return 0;
 	}
 
