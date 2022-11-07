@@ -1823,6 +1823,10 @@ static int msc_a_start_assignment(struct msc_a *msc_a, struct gsm_trans *cc_tran
 		}
 	}
 
+	/* Make sure an MGW endpoint towards RAN is present, and when the RTP to RAN is set up, an Assignment Request is
+	 * sent to the BSC / a RAB Assignment to the hNodeB, see msc_a_call_leg_ran_local_addr_available(). The codec
+	 * set up in the call_leg is going to be used in the Assignment Request. */
+
 	/* This will lead to either MSC_EV_CALL_LEG_LOCAL_ADDR_AVAILABLE or MSC_EV_CALL_LEG_TERM.
 	 * If the local address is already known, then immediately trigger. */
 	if (call_leg_local_ip(cl, RTP_TO_RAN))
