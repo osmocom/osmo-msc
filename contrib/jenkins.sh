@@ -39,13 +39,10 @@ osmo-build-dep.sh libsmpp34
 osmo-build-dep.sh osmo-mgw
 osmo-build-dep.sh osmo-hlr
 
-enable_werror=""
 if [ "x$IU" = "x--enable-iu" ]; then
 	osmo-build-dep.sh libasn1c
 	#osmo-build-dep.sh asn1c aper-prefix # only needed for make regen in osmo-iuh
 	osmo-build-dep.sh osmo-iuh
-else
-	enable_werror="--enable-werror"
 fi
 
 # Additional configure options and depends
@@ -64,12 +61,12 @@ set -x
 
 cd "$base"
 autoreconf --install --force
-./configure --enable-sanitize $enable_werror --enable-smpp $IU --enable-external-tests $CONFIG
+./configure --enable-sanitize --enable-werror --enable-smpp $IU --enable-external-tests $CONFIG
 $MAKE $PARALLEL_MAKE
 LD_LIBRARY_PATH="$inst/lib" $MAKE check \
   || cat-testlogs.sh
 LD_LIBRARY_PATH="$inst/lib" \
-  DISTCHECK_CONFIGURE_FLAGS="$enable_werror --enable-smpp $IU --enable-external-tests $CONFIG" \
+  DISTCHECK_CONFIGURE_FLAGS="--enable-werror --enable-smpp $IU --enable-external-tests $CONFIG" \
   $MAKE $PARALLEL_MAKE distcheck \
   || cat-testlogs.sh
 
