@@ -966,6 +966,16 @@ int smpp_smsc_conf(struct smsc *smsc, const char *bind_addr, uint16_t port)
 	return 0;
 }
 
+/*! /brief Close SMPP connection. */
+static void smpp_smsc_stop(struct smsc *smsc)
+{
+	if (smsc->listen_ofd.fd > 0) {
+		close(smsc->listen_ofd.fd);
+		smsc->listen_ofd.fd = 0;
+		osmo_fd_unregister(&smsc->listen_ofd);
+	}
+}
+
 /*! \brief Bind to given address and port and accept connections.
  * \param[in] bind_addr Local IP address, may be NULL for any.
  * \param[in] port TCP port number, may be 0 for default SMPP (2775).
@@ -1003,14 +1013,4 @@ int smpp_smsc_restart(struct smsc *smsc, const char *bind_addr, uint16_t port)
 		/* if there is an error, try to re-bind to the old port */
 		return smpp_smsc_start(smsc, smsc->bind_addr, smsc->listen_port);
 	return 0;
-}
-
-/*! /brief Close SMPP connection. */
-void smpp_smsc_stop(struct smsc *smsc)
-{
-	if (smsc->listen_ofd.fd > 0) {
-		close(smsc->listen_ofd.fd);
-		smsc->listen_ofd.fd = 0;
-		osmo_fd_unregister(&smsc->listen_ofd);
-	}
 }

@@ -107,7 +107,6 @@ struct smsc *smpp_smsc_alloc_init(void *ctx);
 int smpp_smsc_conf(struct smsc *smsc, const char *bind_addr, uint16_t port);
 int smpp_smsc_start(struct smsc *smsc, const char *bind_addr, uint16_t port);
 int smpp_smsc_restart(struct smsc *smsc, const char *bind_addr, uint16_t port);
-void smpp_smsc_stop(struct smsc *smsc);
 
 void smpp_esme_get(struct smpp_esme *esme);
 void smpp_esme_put(struct smpp_esme *esme);
