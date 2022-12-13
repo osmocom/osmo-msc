@@ -1002,6 +1002,12 @@ static struct msgb *ran_a_make_assignment_command(struct osmo_fsm_inst *log_fi,
 
 	msg = gsm0808_create_ass2(ac->channel_type, NULL, use_rtp_addr, use_scl, call_id,
 				  NULL, ac->lcls);
+	if (msg == NULL) {
+		LOG_RAN_A_ENC(log_fi, LOGL_ERROR,
+			      "Failed to encode BSSMAP Assignment Request message\n");
+		return NULL;
+	}
+
 	if (ac->osmux_present)
 		_gsm0808_assignment_extend_osmux(msg, ac->osmux_cid);
 	return msg;
