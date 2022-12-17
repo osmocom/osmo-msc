@@ -693,8 +693,7 @@ int main(int argc, char **argv)
 
 	/* start control interface after reading config for
 	 * ctrl_vty_get_bind_addr() */
-	msc_network->ctrl = ctrl_interface_setup_dynip(msc_network, ctrl_vty_get_bind_addr(),
-						       OSMO_CTRL_PORT_MSC, NULL);
+	msc_network->ctrl = ctrl_interface_setup(msc_network, OSMO_CTRL_PORT_MSC, NULL);
 	if (!msc_network->ctrl) {
 		fprintf(stderr, "Failed to initialize control interface. Exiting.\n");
 		return -1;
