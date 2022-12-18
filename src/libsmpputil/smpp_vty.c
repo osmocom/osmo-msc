@@ -80,8 +80,8 @@ static int smpp_local_tcp(struct vty *vty,
 			  const char *bind_addr, uint16_t port)
 {
 	struct smsc *smsc = smsc_from_vty(vty);
-	int is_running = smsc->listen_ofd.fd > 0;
-	int same_bind_addr;
+	bool is_running = smsc->listen_ofd.fd > 0;
+	bool same_bind_addr;
 	int rc;
 
 	/* If it is not up yet, don't rebind, just set values. */
