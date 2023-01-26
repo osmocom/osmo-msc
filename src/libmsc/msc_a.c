@@ -577,11 +577,22 @@ static void msc_a_call_leg_ran_local_addr_available(struct msc_a *msc_a)
 		return;
 	}
 
-	/* Once a CI is known, we could also CRCX the CN side of the MGW endpoint, but it makes sense to wait for the
-	 * codec to be determined by the Assignment Complete message, first. */
+	codec_filter_run(&cc_trans->cc.codecs);
+	LOG_TRANS(cc_trans, LOGL_DEBUG, "Sending Assignment Command with codecs: %s\n",
+		  codec_filter_to_str(&cc_trans->cc.codecs));
 
-	if (mncc_bearer_cap_to_channel_type(&channel_type, &cc_trans->bearer_cap)) {
-		LOG_MSC_A(msc_a, LOGL_ERROR, "Cannot compose Channel Type from bearer capabilities\n");
+	if (!cc_trans->cc.codecs.result.audio_codecs.count) {
+		LOG_TRANS(cc_trans, LOGL_ERROR, "Assignment not possible, no matching codec: %s\n",
+			  codec_filter_to_str(&cc_trans->cc.codecs));
+		call_leg_release(msc_a->cc.call_leg);
+		return;
+	}
+
+	/* Compose 48.008 Channel Type from the current set of codecs determined from both local and remote codec
+	 * capabilities. */
+	if (sdp_audio_codecs_to_gsm0808_channel_type(&channel_type, &cc_trans->cc.codecs.result.audio_codecs)) {
+		LOG_MSC_A(msc_a, LOGL_ERROR, "Cannot compose Channel Type (Permitted Speech) from codecs: %s\n",
+			  codec_filter_to_str(&cc_trans->cc.codecs));
 		trans_free(cc_trans);
 		return;
 	}
