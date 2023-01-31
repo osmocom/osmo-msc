@@ -153,11 +153,17 @@ struct osmo_lcls *trans_lcls_compose(const struct gsm_trans *trans, bool use_lac
 	/* net id from Q.1902.3 3-5 bytes, this function gives 3 bytes exactly */
 	osmo_plmn_to_bcd(lcls->gcr.net, &trans->net->plmn);
 
-	osmo_store32be(trans->callref, lcls->gcr.cr);
-	osmo_store16be(use_lac ? trans->msc_a->via_cell.lai.lac : trans->msc_a->via_cell.cell_identity, lcls->gcr.cr + 3);
 
-	LOGP(DCC, LOGL_INFO, "LCLS: allocated %s-based CR-ID %s\n", use_lac ? "LAC" : "CI",
-	     osmo_hexdump(lcls->gcr.cr, 5));
+	/* TS 29.205 Table B.2.1.9.2 Call Reference ID
+	 * 3 octets Call ID + 2 octets BSS ID
+	 */
+	lcls->gcr.cr[2] = (trans->callref >>  0) & 0xff;
+	lcls->gcr.cr[1] = (trans->callref >>  8) & 0xff;
+	lcls->gcr.cr[0] = (trans->callref >> 16) & 0xff;
+	osmo_store16be(use_lac ? trans->msc_a->via_cell.lai.lac : trans->msc_a->via_cell.cell_identity, &lcls->gcr.cr[3]);
+
+	LOGP(DCC, LOGL_INFO, "LCLS: allocated %s-based CR-ID %sfor callref 0x%04x\n", use_lac ? "LAC" : "CI",
+	     osmo_hexdump(lcls->gcr.cr, 5), trans->callref);
 
 	lcls->config = GSM0808_LCLS_CFG_BOTH_WAY;
 	lcls->control = GSM0808_LCLS_CSC_CONNECT;
