@@ -1,4 +1,4 @@
-/* OsmoMSC - Circuit-Switched Core Network (MSC+VLR+HLR+SMSC) implementation
+/* OsmoMSC - Circuit-Switched Core Network (MSC+VLR+SMSC) implementation
  */
 
 /* (C) 2016-2019 by sysmocom s.f.m.c. GmbH <info@sysmocom.de>
