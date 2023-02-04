@@ -318,6 +318,11 @@ static int msc_vty_go_parent(struct vty *vty)
 		vty->node = CONFIG_NODE;
 		vty->index = NULL;
 		break;
+	case MGW_NODE:
+		OSMO_ASSERT(msc_network != NULL);
+		vty->node = GSMNET_NODE;
+		vty->index = msc_network;
+		break;
 	case SMPP_ESME_NODE:
 		vty->node = SMPP_NODE;
 		vty->index = NULL;
