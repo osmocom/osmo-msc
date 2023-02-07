@@ -1,3 +1,77 @@
+osmo-msc (1.10.0) unstable; urgency=medium
+
+  [ Keith Whyte ]
+  * Don't let this osmo-msc operate on a libdbi database
+  * Turn off secure_delete in sqlite
+  * Update MNCC field validation mask.
+  * Change CC_CAUSE returned on unanswered MT Call
+  * LCLS: Fix Global Call Reference generation
+
+  [ Neels Hofmeyr ]
+  * fix typo in msgb name for CC SETUP
+  * missing whitespace in gsm_04_08_cc.c
+  * err log: fix reverse statement in msc_a call handling
+  * cosmetic: log actual MNCC msg in tch_rtp_connect()
+  * sdp_msg: s/_name_/_to_str_/g
+  * in sdp logging: add payload type number like 'AMR#111'
+  * sdp_msg: add sdp_audio_codecs_cmp(), add compare flags
+  * sdp_msg: s/sdp_audio_codec_/sdp_audio_codecs_
+  * msc_a,vlr: rename ciphering_required to is_ciphering_to_be_attempted
+  * msc_a,vlr: add is_ciphering_required (accurately named)
+  * vlr_lu_fsm: clarify naming of static functions
+  * vlr: auth_fsm: clarify success/failure result
+  * vlr: auth_fsm: rename AUTH_RES to AUTH_SUCCESS
+  * vlr_auth_fsm: add result no_auth_info_event
+  * vlr: implement fallback to no-auth
+  * sdp_msg: when NULL, do not crash but return empty SDP str
+  * log CC timeouts
+  * add sdp_audio_codec_is_set
+  * add some comments to sdp_msg.c,h
+  * sdp_msg.c: parse send/recv mode
+  * fix sdp_msg_to_sdp_str(), never add fmtp for unset codec
+  * rtp_stream_commit: check missing MGW ep only when ready for RTP
+  * rtp_stream: set_remote_addr: do nothing when unchanged
+
+  [ Max ]
+  * SMPP: clarify (re)start logic
+  * Ignore .deb build byproducts
+  * ESME: use osmo_sock_get_name() for logging
+  * tests: use common stubs for SMS queue test
+  * Introduce libsmpputil
+  * Add ESME-specific logging
+  * Set working directory in systemd service file
+  * Make esme struct shared
+  * Use libsmpputil functions in smpp_mirror tool
+  * cosmetic: use proper name for SMPP handlers
+  * SMPP: remove duplicate g_smsc definition
+  * smpp_mirror: fix compiler warning
+  * SMPP: use default port from libsmpp34
+  * SMPP: fix possible NULL pointer dereference
+  * SMPP: make smpp_smsc_stop() static
+  * ctrl: take both address and port from vty config
+  * SMPP: use proper type for boolean variables
+
+  [ Vadim Yanitskiy ]
+  * contrib/jenkins.sh: do not override parallel make for libsmpp34
+  * mncc: move MNCC_F_ALL from mncc.c to mncc.h
+  * mncc: cosmetic: fix coding style in mncc_prim_check_sign()
+  * libmsc: check return value of gsm0808_create_ass2()
+  * msc_main: fix wrong comment: HLR is a separate project
+  * fix msc_vty_go_parent(): add missing case for MGW_NODE
+
+  [ Pau Espin Pedrol ]
+  * tests/test_nodes.vty: Avoid listing commands provided by lib
+  * Introduce support for libosmo-mgcp-client MGW pooling
+  * vty: Make use of new mgcp_client_pool_config_write() API
+  * Use new mgcp-client VTY commands under mgw node
+  * call_leg: Fix EV_MGW_ENDPOINT_GONE not processed in RELEASE state
+  * doc: Include mgwpool.adoc from osmo-gsm-manuals
+
+  [ Oliver Smith ]
+  * contrib/jenkins.sh: use enable-werror with IU too
+
+ -- Pau Espin Pedrol <pespin@sysmocom.de>  Tue, 07 Feb 2023 17:28:16 +0100
+
 osmo-msc (1.9.0) unstable; urgency=medium
 
   [ Alexander Couzens ]
