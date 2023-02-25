@@ -683,8 +683,7 @@ int main(int argc, char **argv)
 		DEBUGP(DMNCC, "Using internal MNCC handler.\n");
 
 	/* start telnet after reading config for vty_get_bind_addr() */
-	rc = telnet_init_dynif(tall_msc_ctx, &msc_network,
-			       vty_get_bind_addr(), OSMO_VTY_PORT_MSC);
+	rc = telnet_init_default(tall_msc_ctx, &msc_network, OSMO_VTY_PORT_MSC);
 	if (rc < 0)
 		return 2;
 
