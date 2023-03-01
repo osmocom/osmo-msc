@@ -1014,15 +1014,19 @@ void ms_sends_security_mode_complete(uint8_t utran_encryption)
 		g_msub = NULL;
 }
 
-void ms_sends_assignment_complete(enum mgcp_codecs assigned_codec)
+void ms_sends_assignment_complete(const char *sdp_codec_name)
 {
 	struct ran_msg ran_dec;
+	const struct codec_mapping *m = codec_mapping_by_subtype_name(sdp_codec_name);
+	OSMO_ASSERT(m);
+	OSMO_ASSERT(m->has_gsm0808_speech_codec);
 
 	ran_dec = (struct ran_msg){
 		.msg_type = RAN_MSG_ASSIGNMENT_COMPLETE,
 		.assignment_complete = {
 			.codec_present = true,
-			.codec = assigned_codec,
+			.codec = m->gsm0808_speech_codec,
+			.codec_with_iuup = (rx_from_ran == OSMO_RAT_UTRAN_IU),
 		},
 	};
 	osmo_sockaddr_str_from_str(&ran_dec.assignment_complete.remote_rtp, "1.2.3.4", 1234);

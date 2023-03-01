@@ -240,7 +240,8 @@ struct ran_msg {
 		struct {
 			struct osmo_sockaddr_str remote_rtp;
 			bool codec_present;
-			enum mgcp_codecs codec;
+			struct gsm0808_speech_codec codec;
+			bool codec_with_iuup;
 			const struct gsm0808_speech_codec_list *codec_list_bss_supported;
 			bool osmux_present;
 			uint8_t osmux_cid;

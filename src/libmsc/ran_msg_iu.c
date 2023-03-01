@@ -153,8 +153,16 @@ static int ran_iu_decode_rab_assignment_response_decode_setup_ies(struct ran_dec
 		.msg_type = RAN_MSG_ASSIGNMENT_COMPLETE,
 		.msg_name = "RANAP RAB Assignment Response",
 		.assignment_complete = {
+			/* For codec compatibility resolution, indicate AMR-FR */
 			.codec_present = true,
-			.codec = CODEC_IUFP,
+			.codec = {
+				.fi = true,
+				.type = GSM0808_SCT_FR3,
+				.cfg = GSM0808_SC_CFG_DEFAULT_FR_AMR,
+			},
+			/* Indicate that (at least) the first MGW endpoint towards RAN needs to expect VND.3GPP.IUFP
+			 * that encapsulates the AMR-FR RTP payload. */
+			.codec_with_iuup = true,
 		},
 	};
 	if (osmo_sockaddr_str_from_str(&ran_dec_msg->assignment_complete.remote_rtp, addr, port)) {

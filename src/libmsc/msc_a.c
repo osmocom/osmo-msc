@@ -1325,8 +1325,8 @@ static void msc_a_up_call_assignment_complete(struct msc_a *msc_a, const struct 
 {
 	struct gsm_trans *cc_trans = msc_a->cc.active_trans;
 	struct rtp_stream *rtps_to_ran = msc_a->cc.call_leg ? msc_a->cc.call_leg->rtp[RTP_TO_RAN] : NULL;
-	const enum mgcp_codecs *codec_if_known = ac->assignment_complete.codec_present ?
-							&ac->assignment_complete.codec : NULL;
+	const struct gsm0808_speech_codec *codec_if_known = ac->assignment_complete.codec_present ?
+							    &ac->assignment_complete.codec : NULL;
 	const struct codec_mapping *codec_cn = NULL;
 
 	if (!rtps_to_ran) {
@@ -1346,16 +1346,33 @@ static void msc_a_up_call_assignment_complete(struct msc_a *msc_a, const struct 
 	}
 
 	if (codec_if_known) {
-		codec_cn = codec_mapping_by_mgcp_codec(*codec_if_known);
-		if (!codec_cn) {
-			LOG_TRANS(cc_trans, LOGL_ERROR, "Unknown codec in Assignment Complete: %s\n",
-				  osmo_mgcpc_codec_name(*codec_if_known));
-			call_leg_release(msc_a->cc.call_leg);
-			return;
+		if (ac->assignment_complete.codec_with_iuup) {
+			/* FUTURE: soon, we want to tell the MGW to decapsulate IuUP to plain AMR-FR/RTP. So far,
+			 * continue to forward IuUP to the CN.
+			 *
+			 * ran_msg_iu now returns AMR-FR as the assigned codec. If we use that directly, that will
+			 * instruct the MGW to decapsulate IuUP into plain RTP. Let's keep this change to an explicit
+			 * patch, while various codecs patches are still being applied.
+			 *
+			 * So instruct MGW to forward IuUP to CN:
+			 */
+			codec_cn = codec_mapping_by_subtype_name("VND.3GPP.IUFP");
+			OSMO_ASSERT(codec_cn);
+		} else {
+			codec_cn = codec_mapping_by_gsm0808_speech_codec_type(codec_if_known->type);
+			/* TODO: use codec_mapping_by_gsm0808_speech_codec() to also match on codec_if_known->cfg */
+			if (!codec_cn) {
+				LOG_TRANS(cc_trans, LOGL_ERROR, "Unknown codec in Assignment Complete: %s\n",
+					  gsm0808_speech_codec_type_name(codec_if_known->type));
+				call_leg_release(msc_a->cc.call_leg);
+				return;
+			}
 		}
 
-		/* Update RAN-side endpoint CI from Assignment result */
-		rtp_stream_set_one_codec(rtps_to_ran, &codec_cn->sdp);
+		/* Update RAN-side endpoint CI from Assignment result -- unless it is forced by the ran_infra, in which
+		 * case it remains unchanged as passed to the earlier call of call_leg_ensure_ci(). */
+		if (msc_a->c.ran->force_mgw_codecs_to_ran.count == 0)
+			rtp_stream_set_one_codec(rtps_to_ran, &codec_cn->sdp);
 
 		/* Update codec filter with Assignment result, for the CN side */
 		cc_trans->cc.codecs.assignment = codec_cn->sdp;
