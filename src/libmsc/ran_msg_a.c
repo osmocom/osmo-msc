@@ -276,7 +276,6 @@ static int ran_a_decode_assignment_complete(struct ran_dec *ran_dec, struct msgb
 	struct tlv_p_entry *ie_codec_list_bss_supported = TLVP_GET(tp, GSM0808_IE_SPEECH_CODEC_LIST);
 	struct tlv_p_entry *ie_osmux_cid = TLVP_GET(tp, GSM0808_IE_OSMO_OSMUX_CID);
 	struct sockaddr_storage rtp_addr;
-	struct gsm0808_speech_codec sc;
 	struct gsm0808_speech_codec_list codec_list_bss_supported;
 	int rc;
 	struct ran_msg ran_dec_msg = {
@@ -309,14 +308,14 @@ static int ran_a_decode_assignment_complete(struct ran_dec *ran_dec, struct msgb
 
 	if (ie_speech_codec) {
 		/* Decode Speech Codec (Chosen) element */
-		rc = gsm0808_dec_speech_codec(&sc, ie_speech_codec->val, ie_speech_codec->len);
+		rc = gsm0808_dec_speech_codec(&ran_dec_msg.assignment_complete.codec,
+					      ie_speech_codec->val, ie_speech_codec->len);
 		if (rc < 0) {
 			LOG_RAN_A_DEC_MSG(LOGL_ERROR, "Assignment Complete: unable to decode IE Speech Codec (Chosen)"
 					  " (rc=%d).\n", rc);
 			return -EINVAL;
 		}
 		ran_dec_msg.assignment_complete.codec_present = true;
-		ran_dec_msg.assignment_complete.codec = ran_a_mgcp_codec_from_sc(&sc);
 	}
 
 	if (ie_codec_list_bss_supported) {

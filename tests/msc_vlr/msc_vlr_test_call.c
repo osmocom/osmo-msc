@@ -227,7 +227,7 @@ static void test_call_mo()
 
 	btw("Assignment succeeds, triggering CRCX to CN");
 	expect_crcx(RTP_TO_CN);
-	ms_sends_assignment_complete(CODEC_AMR_8000_1);
+	ms_sends_assignment_complete("AMR");
 	OSMO_ASSERT(got_crcx);
 
 	btw("CN RTP address is available, trigger MNCC_RTP_CREATE");
@@ -339,7 +339,7 @@ static void test_call_mt()
 
 	btw("Assignment completes, triggering CRCX to CN");
 	expect_crcx(RTP_TO_CN);
-	ms_sends_assignment_complete(CODEC_AMR_8000_1);
+	ms_sends_assignment_complete("AMR");
 	OSMO_ASSERT(got_crcx);
 
 	btw("When the CN side RTP address is known, send MNCC_RTP_CREATE");
@@ -442,7 +442,7 @@ static void test_call_mt2()
 
 	btw("Assignment completes, triggering CRCX to CN");
 	expect_crcx(RTP_TO_CN);
-	ms_sends_assignment_complete(CODEC_AMR_8000_1);
+	ms_sends_assignment_complete("AMR");
 	OSMO_ASSERT(got_crcx);
 
 	btw("When the CN side RTP address is known, send MNCC_RTP_CREATE");
@@ -539,7 +539,7 @@ static void test_call_mo_to_unknown()
 
 	btw("Assignment succeeds, triggering CRCX to CN");
 	expect_crcx(RTP_TO_CN);
-	ms_sends_assignment_complete(CODEC_AMR_8000_1);
+	ms_sends_assignment_complete("AMR");
 	OSMO_ASSERT(got_crcx);
 
 	btw("CN RTP address is available, trigger MNCC_RTP_CREATE");
@@ -635,7 +635,7 @@ static void test_call_mo_to_unknown_timeout()
 
 	btw("Assignment succeeds, triggering CRCX to CN");
 	expect_crcx(RTP_TO_CN);
-	ms_sends_assignment_complete(CODEC_AMR_8000_1);
+	ms_sends_assignment_complete("AMR");
 	OSMO_ASSERT(got_crcx);
 
 	btw("CN RTP address is available, trigger MNCC_RTP_CREATE");

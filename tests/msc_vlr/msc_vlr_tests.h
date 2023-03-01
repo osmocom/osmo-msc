@@ -186,7 +186,7 @@ void ms_sends_msg(const char *hex);
 void ms_sends_classmark_update(const struct osmo_gsm48_classmark *classmark);
 void ms_sends_ciphering_mode_complete(const char *inner_nas_msg);
 void ms_sends_security_mode_complete(uint8_t utran_encryption);
-void ms_sends_assignment_complete(enum mgcp_codecs assigned_codec);
+void ms_sends_assignment_complete(const char *sdp_codec_name);
 void gsup_rx(const char *rx_hex, const char *expect_tx_hex);
 void send_sms(struct vlr_subscr *receiver,
 	      struct vlr_subscr *sender,
