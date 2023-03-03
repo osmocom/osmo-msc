@@ -4,6 +4,7 @@
 #include <osmocom/gsm/gsup.h>
 #include <osmocom/msc/sccp_ran.h>
 #include <osmocom/msc/ran_msg.h>
+#include <osmocom/msc/sdp_msg.h>
 
 struct osmo_tdef;
 
@@ -25,6 +26,10 @@ struct ran_infra {
 	const ran_dec_l2_t ran_dec_l2;
 	const ran_encode_t ran_encode;
 	struct sccp_ran_inst *sri;
+	/* To always set up the MGW endpoint facing the RAN side with specific codecs, list those here. Otherwise leave
+	 * empty (to use the result of codecs filtering). This exists for IuCS, to always set the MGW endpoint facing
+	 * RAN to IUFP, to decapsulate the IuUP headers. */
+	struct sdp_audio_codecs force_mgw_codecs_to_ran;
 };
 
 extern struct ran_infra msc_ran_infra[];

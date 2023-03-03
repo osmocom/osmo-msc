@@ -108,6 +108,16 @@ struct ran_infra msc_ran_infra[] = {
 		.ran_dec_l2 = ran_iu_decode_l2,
 		.ran_encode = ran_iu_encode,
 #endif
+		.force_mgw_codecs_to_ran = {
+			.count = 1,
+			.codec = {
+				{
+					.payload_type = 96,
+					.subtype_name = "VND.3GPP.IUFP",
+					.rate = 16000,
+				},
+			},
+		},
 	},
 	[OSMO_RAT_EUTRAN_SGS] = {
 		.type = OSMO_RAT_EUTRAN_SGS,
