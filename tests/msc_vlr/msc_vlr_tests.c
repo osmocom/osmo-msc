@@ -408,6 +408,16 @@ struct ran_infra test_ran_infra[] = {
 		.log_subsys = DIUCS,
 		.tdefs = msc_tdefs_utran,
 		.ran_encode = dont_ran_encode,
+		.force_mgw_codecs_to_ran = {
+			.count = 1,
+			.codec = {
+				{
+					.payload_type = 96,
+					.subtype_name = "VND.3GPP.IUFP",
+					.rate = 16000,
+				},
+			},
+		},
 	},
 };
 

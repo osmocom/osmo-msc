@@ -1791,6 +1791,8 @@ static int msc_a_start_assignment(struct msc_a *msc_a, struct gsm_trans *cc_tran
 		return osmo_fsm_inst_dispatch(msc_a->c.fi, MSC_EV_CALL_LEG_RTP_LOCAL_ADDR_AVAILABLE, cl->rtp[RTP_TO_RAN]);
 
 	if (msc_a->c.ran->type == OSMO_RAT_UTRAN_IU) {
+		/* FUTURE: ran_infra->force_mgw_codecs_to_ran is intended to be used here instead of the special
+		 * condition on OSMO_RAT_UTRAN_IU and the mgcp_codecs value CODEC_IUFP */
 		codec = CODEC_IUFP;
 		codec_ptr = &codec;
 	} else {
