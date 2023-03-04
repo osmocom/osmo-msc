@@ -359,8 +359,10 @@ static int rtp_stream_do_mgcp_verb(struct rtp_stream *rtps, enum mgcp_verb verb,
 
 int rtp_stream_ensure_ci(struct rtp_stream *rtps, struct osmo_mgcpc_ep *at_endpoint)
 {
-	if (rtps->ci)
-		return rtp_stream_commit(rtps);
+	if (rtps->ci) {
+		rtp_stream_commit(rtps);
+		return 0;
+	}
 
 	rtp_stream_state_chg(rtps, RTP_STREAM_ST_ESTABLISHING);
 
