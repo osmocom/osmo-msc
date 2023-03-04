@@ -23,6 +23,7 @@
 #include <osmocom/msc/debug.h>
 #include <osmocom/msc/gsm_data.h>
 #include <osmocom/msc/msc_a.h>
+#include <osmocom/msc/transaction.h>
 
 #include <osmocom/msc/call_leg.h>
 #include <osmocom/msc/rtp_stream.h>
@@ -351,25 +352,41 @@ int call_leg_ensure_ci(struct call_leg *cl, enum rtp_direction dir, uint32_t cal
 int call_leg_local_bridge(struct call_leg *cl1, uint32_t call_id1, struct gsm_trans *trans1,
 			  struct call_leg *cl2, uint32_t call_id2, struct gsm_trans *trans2)
 {
-	struct sdp_audio_codecs *codecs;
+	/* If the CN codecs for the two call legs differ, we hope that the MGW is able to transcode the difference away.
+	 * By telling the rtp[TO_CN] of both call legs to use the codec that call leg 1 resolved for CN,
+	 * the mismatch / transcoding will occur between CN and RAN side of call leg 2. */
+	struct sdp_audio_codecs *codecs1 = &trans1->cc.codecs.result.audio_codecs;
 
-	cl1->local_bridge = cl2;
-	cl2->local_bridge = cl1;
-
-	/* We may just copy the codec info we have for the RAN side of the first leg to the CN side of both legs. This
-	 * also means that if both legs use different codecs the MGW must perform transcoding on the second leg. */
-	if (!cl1->rtp[RTP_TO_RAN] || !cl1->rtp[RTP_TO_RAN]->codecs_known) {
-		LOG_CALL_LEG(cl1, LOGL_ERROR, "RAN-side RTP stream codec is not known, not ready for bridging\n");
+	/* Has call leg 1 resolved its codecs towards CN? */
+	if (!codecs1->count) {
+		LOG_CALL_LEG(cl1, LOGL_ERROR, "CN codecs not resolved, not ready for bridging\n");
 		return -EINVAL;
 	}
-	codecs = &cl1->rtp[RTP_TO_RAN]->codecs;
 
-	if (!cl1->rtp[RTP_TO_CN] || !cl2->rtp[RTP_TO_CN])
-		return -ENOTCONN;
+	/* Set each rtp[TO_CN].remote to the other call leg's rtp[TO_CN].local RTP address.
+	 * Also tell both call legs to use the CN codec that call leg 1 resolved for CN.
+	 *                                                   codecs1 for both
+	 *                                                   |         cross the streams
+	 *                                                   |         |
+	 *                                                   V         V
+	 */
+	call_leg_ensure_ci(cl1, RTP_TO_CN, call_id1, trans1, codecs1, &cl2->rtp[RTP_TO_CN]->local);
+	call_leg_ensure_ci(cl2, RTP_TO_CN, call_id2, trans2, codecs1, &cl1->rtp[RTP_TO_CN]->local);
 
-	call_leg_ensure_ci(cl1, RTP_TO_CN, call_id1, trans1,
-			   codecs, &cl2->rtp[RTP_TO_CN]->local);
-	call_leg_ensure_ci(cl2, RTP_TO_CN, call_id2, trans2,
-			   codecs, &cl1->rtp[RTP_TO_CN]->local);
+	/* Log the local bridge from the perspective of both call legs */
+	LOG_CALL_LEG(cl1, LOGL_INFO, "local bridge: RAN <--%s--> MGW <--%s--> other-MGW <--%s--> other-RAN\n",
+		     cl1->rtp[RTP_TO_RAN] && cl1->rtp[RTP_TO_RAN]->codecs_known ?
+			sdp_audio_codecs_to_str(&cl1->rtp[RTP_TO_RAN]->codecs) : "?",
+		     cl1->rtp[RTP_TO_CN] && cl1->rtp[RTP_TO_CN]->codecs_known ?
+			sdp_audio_codecs_to_str(&cl1->rtp[RTP_TO_CN]->codecs) : "?",
+		     cl2->rtp[RTP_TO_RAN] && cl2->rtp[RTP_TO_RAN]->codecs_known ?
+			sdp_audio_codecs_to_str(&cl2->rtp[RTP_TO_RAN]->codecs) : "?");
+	LOG_CALL_LEG(cl2, LOGL_INFO, "local bridge: RAN <--%s--> MGW <--%s--> other-MGW <--%s--> other-RAN\n",
+		     cl2->rtp[RTP_TO_RAN] && cl2->rtp[RTP_TO_RAN]->codecs_known ?
+			sdp_audio_codecs_to_str(&cl2->rtp[RTP_TO_RAN]->codecs) : "?",
+		     cl2->rtp[RTP_TO_CN] && cl2->rtp[RTP_TO_CN]->codecs_known ?
+			sdp_audio_codecs_to_str(&cl2->rtp[RTP_TO_CN]->codecs) : "?",
+		     cl1->rtp[RTP_TO_RAN] && cl1->rtp[RTP_TO_RAN]->codecs_known ?
+			sdp_audio_codecs_to_str(&cl1->rtp[RTP_TO_RAN]->codecs) : "?");
 	return 0;
 }
