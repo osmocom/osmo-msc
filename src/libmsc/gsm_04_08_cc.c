@@ -284,6 +284,7 @@ void _gsm48_cc_trans_free(struct gsm_trans *trans)
 					 (trans->cc.state == GSM_CSTATE_CALL_RECEIVED) ?
 					 GSM48_CC_CAUSE_USER_NOTRESPOND :
 					 GSM48_CC_CAUSE_RESOURCE_UNAVAIL);
+			trans->callref = 0;
 		}
 
 		/* FIXME: currently, a CC trans that would not yet be in state GSM_CSTATE_RELEASE_REQ fails to send a
@@ -457,6 +458,7 @@ static void gsm48_cc_timeout(void *arg)
 		/* process disconnect towards layer 4 */
 		mncc_set_cause(&l4_rel, l4_location, l4_cause);
 		mncc_recvmsg(trans->net, trans, MNCC_DISC_IND, &l4_rel);
+		trans->callref = 0;
 	}
 
 	/* process disconnect towards mobile station */
