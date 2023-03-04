@@ -154,6 +154,7 @@ struct sdp_audio_codec *sdp_audio_codecs_add(struct sdp_audio_codecs *ac, unsign
 	OSMO_STRLCPY_ARRAY(codec->subtype_name, subtype_name);
 	if (fmtp)
 		OSMO_STRLCPY_ARRAY(codec->fmtp, fmtp);
+	codec->rate = rate;
 	return codec;
 }
 
