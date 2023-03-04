@@ -71,7 +71,8 @@ void rtp_stream_set_codecs(struct rtp_stream *rtps, const struct sdp_audio_codec
 void rtp_stream_set_remote_addr(struct rtp_stream *rtps, const struct osmo_sockaddr_str *r);
 void rtp_stream_set_remote_addr_and_codecs(struct rtp_stream *rtps, const struct sdp_msg *sdp);
 void rtp_stream_set_remote_osmux_cid(struct rtp_stream *rtps, uint8_t osmux_cid);
-int rtp_stream_commit(struct rtp_stream *rtps);
+#define rtp_stream_commit(RTPS) _rtp_stream_commit(RTPS, __FILE__, __LINE__)
+int _rtp_stream_commit(struct rtp_stream *rtps, const char *file, int line);
 
 void rtp_stream_release(struct rtp_stream *rtps);
 

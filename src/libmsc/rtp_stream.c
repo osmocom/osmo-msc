@@ -389,26 +389,26 @@ void rtp_stream_release(struct rtp_stream *rtps)
 /* After setting up a remote RTP address or a new codec, call this to trigger an MDCX.
  * The MDCX will only trigger if all data needed by an endpoint is available (both RTP address and codec) and if at
  * least one of them has not yet been sent to the MGW in a previous CRCX or MDCX. */
-int rtp_stream_commit(struct rtp_stream *rtps)
+int _rtp_stream_commit(struct rtp_stream *rtps, const char *file, int line)
 {
 	if (!osmo_sockaddr_str_is_nonzero(&rtps->remote)) {
-		LOG_RTPS(rtps, LOGL_DEBUG, "Not committing: no remote RTP address known\n");
+		LOGPFSMLSRC(rtps->fi, LOGL_DEBUG, file, line, "Not committing: no remote RTP address known\n");
 		return 0;
 	}
 	if (!rtps->codecs_known) {
-		LOG_RTPS(rtps, LOGL_DEBUG, "Not committing: no codecs known\n");
+		LOGPFSMLSRC(rtps->fi, LOGL_DEBUG, file, line, "Not committing: no codecs known\n");
 		return 0;
 	}
 	if (rtps->remote_sent_to_mgw && rtps->codecs_sent_to_mgw) {
-		LOG_RTPS(rtps, LOGL_DEBUG, "Not committing: both remote RTP address and codecs already set up at MGW\n");
+		LOGPFSMLSRC(rtps->fi, LOGL_DEBUG, file, line, "Not committing: both remote RTP address and codecs already set up at MGW\n");
 		return 0;
 	}
 	if (!rtps->ci) {
-		LOG_RTPS(rtps, LOGL_DEBUG, "Not committing: no MGW endpoint CI set up\n");
+		LOGPFSMLSRC(rtps->fi, LOGL_DEBUG, file, line, "Not committing: no MGW endpoint CI set up\n");
 		return -1;
 	}
 
-	LOG_RTPS(rtps, LOGL_DEBUG, "Committing: Tx MDCX to update the MGW: updating%s%s%s\n",
+	LOGPFSMLSRC(rtps->fi, LOGL_DEBUG, file, line, "Committing: Tx MDCX to update the MGW: updating%s%s%s\n",
 		 rtps->remote_sent_to_mgw ? "" : " remote-RTP-IP-port",
 		 rtps->codecs_sent_to_mgw ? "" : " codecs",
 		 (!rtps->use_osmux || rtps->remote_osmux_cid_sent_to_mgw) ? "" : " remote-Osmux-CID");
