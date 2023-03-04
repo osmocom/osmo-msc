@@ -393,11 +393,11 @@ int rtp_stream_commit(struct rtp_stream *rtps)
 {
 	if (!osmo_sockaddr_str_is_nonzero(&rtps->remote)) {
 		LOG_RTPS(rtps, LOGL_DEBUG, "Not committing: no remote RTP address known\n");
-		return -1;
+		return 0;
 	}
 	if (!rtps->codecs_known) {
 		LOG_RTPS(rtps, LOGL_DEBUG, "Not committing: no codecs known\n");
-		return -1;
+		return 0;
 	}
 	if (rtps->remote_sent_to_mgw && rtps->codecs_sent_to_mgw) {
 		LOG_RTPS(rtps, LOGL_DEBUG, "Not committing: both remote RTP address and codecs already set up at MGW\n");
