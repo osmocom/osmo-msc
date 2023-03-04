@@ -1755,12 +1755,6 @@ static int msc_a_start_assignment(struct msc_a *msc_a, struct gsm_trans *cc_tran
 							 MSC_EV_CALL_LEG_RTP_LOCAL_ADDR_AVAILABLE,
 							 MSC_EV_CALL_LEG_RTP_COMPLETE);
 		OSMO_ASSERT(cl);
-
-		/* HACK: We put the connection in loopback mode at the beginning to
-		 * trick the hNodeB into doing the IuUP negotiation with itself.
-		 * This is a hack we need because osmo-mgw does not support IuUP yet, see OS#2459. */
-		if (msc_a->c.ran->type == OSMO_RAT_UTRAN_IU)
-			cl->crcx_conn_mode[RTP_TO_RAN] = MGCP_CONN_LOOPBACK;
 	}
 
 	if (net->use_osmux != OSMUX_USAGE_OFF) {
