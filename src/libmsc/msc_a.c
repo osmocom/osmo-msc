@@ -1877,6 +1877,9 @@ static int msc_a_start_assignment(struct msc_a *msc_a, struct gsm_trans *cc_tran
 	if (!cn_rtp_available)
 		call_leg_ensure_ci(cl, RTP_TO_CN, cc_trans->callref, cc_trans,
 				   &cc_trans->cc.codecs.result.audio_codecs, NULL);
+	if (osmo_sockaddr_str_is_nonzero(&cc_trans->cc.codecs.remote.rtp))
+		rtp_stream_set_remote_addr(cl->rtp[RTP_TO_CN], &cc_trans->cc.codecs.remote.rtp);
+
 	if (!ran_rtp_available) {
 		struct sdp_audio_codecs *codecs;
 		if (msc_a->c.ran->force_mgw_codecs_to_ran.count)

@@ -743,6 +743,8 @@ static int gsm48_cc_tx_setup(struct gsm_trans *trans, void *arg)
 		rc = sdp_msg_from_sdp_str(&trans->cc.codecs.remote, setup->sdp);
 		if (rc)
 			LOG_TRANS(trans, LOGL_ERROR, "Failed to parse remote call leg SDP: %d\n", rc);
+		LOG_TRANS(trans, LOGL_DEBUG, "rx MNCC_SETUP_REQ SDP: %s\n",
+			  sdp_msg_to_str(&trans->cc.codecs.remote));
 	}
 	/* sdp.remote: if there is no SDP information or we failed to parse it, try using the Bearer Capability from
 	 * MNCC, if any. */
@@ -1909,27 +1911,28 @@ static int tch_rtp_create(struct gsm_network *net, const struct gsm_mncc_rtp *rt
 	}
 	LOG_TRANS_CAT(trans, DMNCC, LOGL_DEBUG, "rx %s\n", get_mncc_name(MNCC_RTP_CREATE));
 
-	/* Assign call (if not done yet) */
-	msc_a_try_call_assignment(trans);
-
 	/* Update remote RTP and codec info */
 	if (rtp_msg->sdp[0]) {
 		/* SDP present */
                 codec_filter_set_remote(&trans->cc.codecs, rtp_msg->sdp);
+		LOG_TRANS_CAT(trans, DMNCC, LOGL_DEBUG, "rx %s SDP: %s\n", get_mncc_name(MNCC_RTP_CREATE),
+			      sdp_msg_to_str(&trans->cc.codecs.remote));
 	} else {
 		/* No SDP present, use legacy items */
 		rtp_addr.u.sas = rtp_msg->addr;
 		codec_filter_set_remote_rtp_osa(&trans->cc.codecs, &rtp_addr);
-		codec_filter_set_remote_codec_pt(&trans->cc.codecs, rtp_msg->payload_msg_type);
+		//if (rtp_msg->payload_msg_type)
+		//	codec_filter_set_remote_codec_pt(&trans->cc.codecs, rtp_msg->payload_msg_type);
+		LOG_TRANS_CAT(trans, DMNCC, LOGL_DEBUG, "rx %s MNCC RTP: %s\n", get_mncc_name(MNCC_RTP_CREATE),
+			      sdp_msg_to_str(&trans->cc.codecs.remote));
 	}
 	cl = trans->msc_a->cc.call_leg;
 	rtp_cn = cl ? cl->rtp[RTP_TO_CN] : NULL;
-	if (rtp_cn) {
+	if (rtp_cn)
 		rtp_stream_set_remote_addr_and_codecs(rtp_cn, &trans->cc.codecs.remote);
-		rtp_stream_commit(rtp_cn);
-	}
 
-	return 0;
+	/* Assign call (if not done yet) */
+	return msc_a_try_call_assignment(trans);
 }
 
 int cc_on_cn_local_rtp_port_known(struct gsm_trans *cc_trans)
@@ -2289,6 +2292,8 @@ static int mncc_tx_to_gsm_cc(struct gsm_network *net, const union mncc_msg *msg)
 						 GSM48_CC_CAUSE_NORMAL_UNSPEC);
 				return -EINVAL;
 			}
+			LOG_TRANS_CAT(trans, DMNCC, LOGL_DEBUG, "rx %s SDP: %s\n", get_mncc_name(msg->msg_type),
+				      sdp_msg_to_str(&trans->cc.codecs.remote));
 		}
 
 		/* If subscriber has no conn */
