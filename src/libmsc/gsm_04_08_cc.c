@@ -1886,9 +1886,13 @@ static void mncc_recv_rtp_err(struct gsm_network *net, struct gsm_trans *trans, 
 	mncc_recv_rtp(net, trans, callref, cmd, NULL, 0, 0, NULL);
 }
 
-static int tch_rtp_create(struct gsm_network *net, uint32_t callref)
+static int tch_rtp_create(struct gsm_network *net, const struct gsm_mncc_rtp *rtp_msg)
 {
 	struct gsm_trans *trans;
+	uint32_t callref = rtp_msg->callref;
+	struct osmo_sockaddr rtp_addr;
+	struct call_leg *cl;
+	struct rtp_stream *rtp_cn;
 
 	/* Find callref */
 	trans = trans_find_by_callref(net, callref);
@@ -1906,7 +1910,26 @@ static int tch_rtp_create(struct gsm_network *net, uint32_t callref)
 	LOG_TRANS_CAT(trans, DMNCC, LOGL_DEBUG, "rx %s\n", get_mncc_name(MNCC_RTP_CREATE));
 
 	/* Assign call (if not done yet) */
-	return msc_a_try_call_assignment(trans);
+	msc_a_try_call_assignment(trans);
+
+	/* Update remote RTP and codec info */
+	if (rtp_msg->sdp[0]) {
+		/* SDP present */
+                codec_filter_set_remote(&trans->cc.codecs, rtp_msg->sdp);
+	} else {
+		/* No SDP present, use legacy items */
+		rtp_addr.u.sas = rtp_msg->addr;
+		codec_filter_set_remote_rtp_osa(&trans->cc.codecs, &rtp_addr);
+		codec_filter_set_remote_codec_pt(&trans->cc.codecs, rtp_msg->payload_msg_type);
+	}
+	cl = trans->msc_a->cc.call_leg;
+	rtp_cn = cl ? cl->rtp[RTP_TO_CN] : NULL;
+	if (rtp_cn) {
+		rtp_stream_set_remote_addr_and_codecs(rtp_cn, &trans->cc.codecs.remote);
+		rtp_stream_commit(rtp_cn);
+	}
+
+	return 0;
 }
 
 int cc_on_cn_local_rtp_port_known(struct gsm_trans *cc_trans)
@@ -2152,7 +2175,7 @@ static int mncc_tx_to_gsm_cc(struct gsm_network *net, const union mncc_msg *msg)
 			disconnect_bridge(net, &msg->bridge, -rc);
 		return rc;
 	case MNCC_RTP_CREATE:
-		return tch_rtp_create(net, msg->rtp.callref);
+		return tch_rtp_create(net, &msg->rtp);
 	case MNCC_RTP_CONNECT:
 		return tch_rtp_connect(net, &msg->rtp);
 	case MNCC_RTP_FREE:

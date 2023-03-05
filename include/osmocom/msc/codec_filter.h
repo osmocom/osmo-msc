@@ -25,6 +25,7 @@
 
 #include <osmocom/msc/sdp_msg.h>
 
+struct osmo_sockaddr;
 struct gsm0808_speech_codec_list;
 
 /* Combine various codec selections to obtain a resulting set of codecs allowed by all of them.
@@ -58,6 +59,8 @@ void codec_filter_set_ms_from_bc(struct codec_filter *codec_filter, const struct
 void codec_filter_set_bss(struct codec_filter *codec_filter,
 			  const struct gsm0808_speech_codec_list *codec_list_bss_supported);
 int codec_filter_set_remote(struct codec_filter *codec_filter, const char *remote_sdp);
+int codec_filter_set_remote_rtp_osa(struct codec_filter *codec_filter, const struct osmo_sockaddr *rtp);
+int codec_filter_set_remote_codec_pt(struct codec_filter *codec_filter, enum mgcp_codecs pt);
 void codec_filter_set_local_rtp(struct codec_filter *codec_filter, const struct osmo_sockaddr_str *rtp);
 int codec_filter_run(struct codec_filter *codec_filter);
 

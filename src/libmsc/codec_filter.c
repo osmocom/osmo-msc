@@ -22,6 +22,7 @@
  */
 
 #include <osmocom/gsm/protocol/gsm_08_08.h>
+#include <osmocom/core/socket.h>
 
 #include <osmocom/msc/codec_filter.h>
 #include <osmocom/msc/codec_mapping.h>
@@ -99,6 +100,20 @@ void codec_filter_set_bss(struct codec_filter *codec_filter,
 int codec_filter_set_remote(struct codec_filter *codec_filter, const char *remote_sdp)
 {
 	return sdp_msg_from_sdp_str(&codec_filter->remote, remote_sdp);
+}
+
+int codec_filter_set_remote_rtp_osa(struct codec_filter *codec_filter, const struct osmo_sockaddr *rtp)
+{
+	return osmo_sockaddr_str_from_sockaddr(&codec_filter->remote.rtp, &rtp->u.sas);
+}
+
+int codec_filter_set_remote_codec_pt(struct codec_filter *codec_filter, enum mgcp_codecs pt)
+{
+	const struct codec_mapping *m = codec_mapping_by_mgcp_codec(pt);
+	if (!m)
+		return -EINVAL;
+	sdp_audio_codecs_add_copy(&codec_filter->remote.audio_codecs, &m->sdp);
+	return 0;
 }
 
 void codec_filter_set_local_rtp(struct codec_filter *codec_filter, const struct osmo_sockaddr_str *rtp)
