@@ -687,6 +687,20 @@ void gsm48_cc_rx_setup_cn_local_rtp_port_known(struct gsm_trans *trans)
 	mncc_recvmsg(trans->net, trans, MNCC_SETUP_IND, &setup);
 }
 
+static void rx_mncc_sdp(struct gsm_trans *trans, uint32_t mncc_msg_type, const char *sdp)
+{
+	int rc;
+	if (!sdp[0])
+		return;
+	rc = sdp_msg_from_sdp_str(&trans->cc.codecs.remote, sdp);
+	if (rc)
+		LOG_TRANS_CAT(trans, DMNCC, LOGL_ERROR, "rx %s: Failed to parse SDP: %d\n",
+			      get_mncc_name(mncc_msg_type), rc);
+	else
+		LOG_TRANS(trans, LOGL_DEBUG, "rx %s SDP: %s\n", get_mncc_name(mncc_msg_type),
+			  sdp_msg_to_str(&trans->cc.codecs.remote));
+}
+
 static int gsm48_cc_tx_setup(struct gsm_trans *trans, void *arg)
 {
 	struct msgb *msg = gsm48_msgb_alloc_name("GSM 04.08 CC SETUP");
@@ -739,13 +753,7 @@ static int gsm48_cc_tx_setup(struct gsm_trans *trans, void *arg)
 	codec_filter_set_ran(&trans->cc.codecs, trans->msc_a->c.ran->type);
 	codec_filter_set_bss(&trans->cc.codecs, &trans->msc_a->cc.compl_l3_codec_list_bss_supported);
 	/* sdp.remote: if SDP is included in the MNCC, take that as definitive list of remote audio codecs. */
-	if (setup->sdp[0]) {
-		rc = sdp_msg_from_sdp_str(&trans->cc.codecs.remote, setup->sdp);
-		if (rc)
-			LOG_TRANS(trans, LOGL_ERROR, "Failed to parse remote call leg SDP: %d\n", rc);
-		LOG_TRANS(trans, LOGL_DEBUG, "rx MNCC_SETUP_REQ SDP: %s\n",
-			  sdp_msg_to_str(&trans->cc.codecs.remote));
-	}
+	rx_mncc_sdp(trans, setup->msg_type, setup->sdp);
 	/* sdp.remote: if there is no SDP information or we failed to parse it, try using the Bearer Capability from
 	 * MNCC, if any. */
 	if (!trans->cc.codecs.remote.audio_codecs.count && (setup->fields & MNCC_F_BEARER_CAP)) {
@@ -1096,7 +1104,7 @@ static int gsm48_cc_tx_connect(struct gsm_trans *trans, void *arg)
 	if (connect->sdp[0]) {
 		struct call_leg *cl = trans->msc_a->cc.call_leg;
 		struct rtp_stream *rtp_cn = cl ? cl->rtp[RTP_TO_CN] : NULL;
-		sdp_msg_from_sdp_str(&trans->cc.codecs.remote, connect->sdp);
+		rx_mncc_sdp(trans, connect->msg_type, connect->sdp);
 		LOG_TRANS(trans, LOGL_DEBUG, "%s codecs: %s\n",
 			  get_mncc_name(connect->msg_type),
 			  codec_filter_to_str(&trans->cc.codecs));
@@ -2080,13 +2088,7 @@ static int tch_rtp_connect(struct gsm_network *net, const struct gsm_mncc_rtp *r
 		return -EINVAL;
 	}
 
-	if (rtp->sdp[0]) {
-		sdp_msg_from_sdp_str(&trans->cc.codecs.remote, rtp->sdp);
-		LOG_TRANS(trans, LOGL_DEBUG, "%s contained SDP %s\n",
-			  get_mncc_name(rtp->msg_type),
-			  sdp_msg_to_str(&trans->cc.codecs.remote));
-	}
-
+	rx_mncc_sdp(trans, rtp->msg_type, rtp->sdp);
 	rtp_stream_set_remote_addr_and_codecs(rtps, &trans->cc.codecs.remote);
 
 	if (!osmo_sockaddr_str_is_nonzero(&rtps->remote)) {
@@ -2282,19 +2284,7 @@ static int mncc_tx_to_gsm_cc(struct gsm_network *net, const union mncc_msg *msg)
 		}
 
 		/* Remember remote SDP, if any */
-		if (data->sdp[0]) {
-			if (sdp_msg_from_sdp_str(&trans->cc.codecs.remote, data->sdp)) {
-				LOG_TRANS(trans, LOGL_ERROR, "Failed to parse incoming SDP: %s\n",
-					  osmo_quote_str(data->sdp, -1));
-				vlr_subscr_put(vsub, __func__);
-				mncc_release_ind(net, NULL, data->callref,
-						 GSM48_CAUSE_LOC_PRN_S_LU,
-						 GSM48_CC_CAUSE_NORMAL_UNSPEC);
-				return -EINVAL;
-			}
-			LOG_TRANS_CAT(trans, DMNCC, LOGL_DEBUG, "rx %s SDP: %s\n", get_mncc_name(msg->msg_type),
-				      sdp_msg_to_str(&trans->cc.codecs.remote));
-		}
+		rx_mncc_sdp(trans, data->msg_type, data->sdp);
 
 		/* If subscriber has no conn */
 		if (!msc_a) {
