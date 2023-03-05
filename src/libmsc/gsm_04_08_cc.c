@@ -697,7 +697,7 @@ static void rx_mncc_sdp(struct gsm_trans *trans, uint32_t mncc_msg_type, const c
 		LOG_TRANS_CAT(trans, DMNCC, LOGL_ERROR, "rx %s: Failed to parse SDP: %d\n",
 			      get_mncc_name(mncc_msg_type), rc);
 	else
-		LOG_TRANS(trans, LOGL_DEBUG, "rx %s SDP: %s\n", get_mncc_name(mncc_msg_type),
+		LOG_TRANS(trans, LOGL_DEBUG, "rx %s SDP: remote=%s\n", get_mncc_name(mncc_msg_type),
 			  sdp_msg_to_str(&trans->cc.codecs.remote));
 }
 
@@ -760,6 +760,8 @@ static int gsm48_cc_tx_setup(struct gsm_trans *trans, void *arg)
 		trans->cc.codecs.remote = (struct sdp_msg){};
 		sdp_audio_codecs_from_bearer_cap(&trans->cc.codecs.remote.audio_codecs,
 						 &setup->bearer_cap);
+		LOG_TRANS_CAT(trans, DMNCC, LOGL_DEBUG, "rx %s Bearer Cap: remote=%s\n",
+			      get_mncc_name(setup->msg_type), sdp_msg_to_str(&trans->cc.codecs.remote));
 	}
 	if (!trans->cc.codecs.remote.audio_codecs.count)
 		LOG_TRANS(trans, LOGL_INFO,
@@ -1885,7 +1887,7 @@ static int mncc_recv_rtp(struct gsm_network *net, struct gsm_trans *trans, uint3
 	rtp->payload_type = payload_type;
 	rtp->payload_msg_type = payload_msg_type;
 	if (sdp) {
-		LOG_TRANS(trans, LOGL_DEBUG, "%s SDP: %s\n", get_mncc_name(rtp->msg_type), sdp_msg_to_str(sdp));
+		LOG_TRANS(trans, LOGL_DEBUG, "%s SDP: remote=%s\n", get_mncc_name(rtp->msg_type), sdp_msg_to_str(sdp));
 		sdp_msg_to_sdp_str_buf(rtp->sdp, sizeof(rtp->sdp), sdp);
 	}
 	return mncc_recvmsg(net, trans, cmd, (struct gsm_mncc *)data);
@@ -1923,7 +1925,7 @@ static int tch_rtp_create(struct gsm_network *net, const struct gsm_mncc_rtp *rt
 	if (rtp_msg->sdp[0]) {
 		/* SDP present */
                 codec_filter_set_remote(&trans->cc.codecs, rtp_msg->sdp);
-		LOG_TRANS_CAT(trans, DMNCC, LOGL_DEBUG, "rx %s SDP: %s\n", get_mncc_name(MNCC_RTP_CREATE),
+		LOG_TRANS_CAT(trans, DMNCC, LOGL_DEBUG, "rx %s SDP: remote=%s\n", get_mncc_name(MNCC_RTP_CREATE),
 			      sdp_msg_to_str(&trans->cc.codecs.remote));
 	} else {
 		/* No SDP present, use legacy items */
@@ -1931,7 +1933,7 @@ static int tch_rtp_create(struct gsm_network *net, const struct gsm_mncc_rtp *rt
 		codec_filter_set_remote_rtp_osa(&trans->cc.codecs, &rtp_addr);
 		//if (rtp_msg->payload_msg_type)
 		//	codec_filter_set_remote_codec_pt(&trans->cc.codecs, rtp_msg->payload_msg_type);
-		LOG_TRANS_CAT(trans, DMNCC, LOGL_DEBUG, "rx %s MNCC RTP: %s\n", get_mncc_name(MNCC_RTP_CREATE),
+		LOG_TRANS_CAT(trans, DMNCC, LOGL_DEBUG, "rx %s RTP: remote=%s\n", get_mncc_name(MNCC_RTP_CREATE),
 			      sdp_msg_to_str(&trans->cc.codecs.remote));
 	}
 	cl = trans->msc_a->cc.call_leg;
