@@ -4,17 +4,11 @@ all:
 charts: msc dot
 
 EXTRA_DIST = \
-	inter_bsc_ho.msc \
-	inter_msc_ho.msc \
-	mncc_call_fsm.msc \
-	call_reestablishment.msc \
+	$(srcdir)/*.msc \
 	$(NULL)
 
 CLEANFILES = \
-	inter_bsc_ho.png \
-	inter_msc_ho.png \
-	mncc_call_fsm.png \
-	voice_call_full.png \
+	$(builddir)/*.png \
 	$(NULL)
 
 msc: \
