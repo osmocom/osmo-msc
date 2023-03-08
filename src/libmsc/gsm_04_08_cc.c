@@ -55,6 +55,7 @@
 #include <osmocom/msc/rtp_stream.h>
 #include <osmocom/msc/mncc_call.h>
 #include <osmocom/msc/msc_t.h>
+#include <osmocom/msc/sdp_msg.h>
 
 #include <osmocom/gsm/gsm48.h>
 #include <osmocom/gsm/gsm0480.h>
@@ -228,15 +229,70 @@ static void gsm48_stop_cc_timer(struct gsm_trans *trans)
 	}
 }
 
+/* Log the MNCC tx and rx events.
+ * Depending on msg_type, also log whether RTP information is passed on.
+ * (This is particularly interesting for the doc/sequence_charts/msc_log_to_ladder.py)
+ */
+static void log_mncc_rx_tx(struct gsm_trans *trans, const char *rx_tx, const union mncc_msg *mncc)
+{
+	const char *sdp = NULL;
+	struct sdp_msg sdp_msg = {};
+	struct osmo_sockaddr addr = {};
+
+	if (!log_check_level(DMNCC, LOGL_DEBUG))
+		return;
+
+	switch (mncc->msg_type) {
+	case MNCC_RTP_CREATE:
+	case MNCC_RTP_CONNECT:
+		addr = (struct osmo_sockaddr){ .u.sas = mncc->rtp.addr };
+		sdp = mncc->rtp.sdp;
+		break;
+
+	case MNCC_SETUP_IND:
+	case MNCC_SETUP_REQ:
+	case MNCC_SETUP_COMPL_IND:
+	case MNCC_SETUP_COMPL_REQ:
+	case MNCC_SETUP_RSP:
+	case MNCC_SETUP_CNF:
+	case MNCC_CALL_CONF_IND:
+	case MNCC_CALL_PROC_REQ:
+	case MNCC_ALERT_IND:
+	case MNCC_ALERT_REQ:
+		sdp = mncc->signal.sdp;
+		break;
+
+	default:
+		break;
+	}
+
+	if (sdp && sdp[0] && (sdp_msg_from_sdp_str(&sdp_msg, sdp) == 0)) {
+		LOG_TRANS_CAT(trans, DMNCC, LOGL_DEBUG, "%s %s (RTP=%s)\n",
+			      rx_tx,
+			      get_mncc_name(mncc->msg_type),
+			      sdp_msg_to_str(&sdp_msg));
+		return;
+	}
+
+	if (osmo_sockaddr_is_any(&addr) == 0) {
+		LOG_TRANS_CAT(trans, DMNCC, LOGL_DEBUG, "%s %s (RTP=%s)\n",
+			      rx_tx,
+			      get_mncc_name(mncc->msg_type),
+			      osmo_sockaddr_to_str_c(OTC_SELECT, &addr));
+		return;
+	}
+
+	LOG_TRANS_CAT(trans, DMNCC, LOGL_DEBUG, "%s %s\n", rx_tx, get_mncc_name(mncc->msg_type));
+}
+
 static int mncc_recvmsg(struct gsm_network *net, struct gsm_trans *trans,
 			int msg_type, struct gsm_mncc *mncc)
 {
 	struct msgb *msg;
 	unsigned char *data;
 
-	LOG_TRANS_CAT(trans, DMNCC, LOGL_DEBUG, "tx %s\n", get_mncc_name(msg_type));
-
 	mncc->msg_type = msg_type;
+	log_mncc_rx_tx(trans, "tx", (union mncc_msg *)mncc);
 
 	msg = msgb_alloc(sizeof(struct gsm_mncc), "MNCC");
 	if (!msg)
@@ -1677,24 +1733,24 @@ static void mncc_recv_rtp_err(struct gsm_network *net, struct gsm_trans *trans, 
 	mncc_recv_rtp(net, trans, callref, cmd, NULL, 0, 0);
 }
 
-static int tch_rtp_create(struct gsm_network *net, uint32_t callref)
+static int tch_rtp_create(struct gsm_network *net, const struct gsm_mncc_rtp *rtp)
 {
 	struct gsm_trans *trans;
 
 	/* Find callref */
-	trans = trans_find_by_callref(net, callref);
+	trans = trans_find_by_callref(net, rtp->callref);
 	if (!trans) {
 		LOG_TRANS_CAT(trans, DMNCC, LOGL_ERROR, "RTP create for non-existing trans\n");
-		mncc_recv_rtp_err(net, trans, callref, MNCC_RTP_CREATE);
+		mncc_recv_rtp_err(net, trans, rtp->callref, MNCC_RTP_CREATE);
 		return -EIO;
 	}
 	log_set_context(LOG_CTX_VLR_SUBSCR, trans->vsub);
 	if (!trans->msc_a) {
 		LOG_TRANS_CAT(trans, DMNCC, LOGL_NOTICE, "RTP create for trans without conn\n");
-		mncc_recv_rtp_err(net, trans, callref, MNCC_RTP_CREATE);
+		mncc_recv_rtp_err(net, trans, rtp->callref, MNCC_RTP_CREATE);
 		return 0;
 	}
-	LOG_TRANS_CAT(trans, DMNCC, LOGL_DEBUG, "rx %s\n", get_mncc_name(MNCC_RTP_CREATE));
+	log_mncc_rx_tx(trans, "rx", (const union mncc_msg *)rtp);
 
 	/* Assign call (if not done yet) */
 	return msc_a_try_call_assignment(trans);
@@ -1751,7 +1807,6 @@ static int tch_rtp_connect(struct gsm_network *net, const struct gsm_mncc_rtp *r
 	struct call_leg *cl;
 	struct rtp_stream *rtps;
 	struct osmo_sockaddr_str rtp_addr;
-	char ipbuf[INET6_ADDRSTRLEN];
 
 	/* FIXME: in *rtp we should get the codec information of the remote
 	 * leg. We will have to populate trans->conn->rtp.codec_cn with a
@@ -1777,9 +1832,7 @@ static int tch_rtp_connect(struct gsm_network *net, const struct gsm_mncc_rtp *r
 		return -EIO;
 	}
 
-	LOG_TRANS_CAT(trans, DMNCC, LOGL_DEBUG, "rx %s %s:%u\n", get_mncc_name(rtp->msg_type),
-		      osmo_sockaddr_ntop((const struct sockaddr*)&rtp->addr, ipbuf),
-		      osmo_sockaddr_port((const struct sockaddr*)&rtp->addr));
+	log_mncc_rx_tx(trans, "rx", (const union mncc_msg *)rtp);
 
 	cl = trans->msc_a->cc.call_leg;
 	rtps = cl ? cl->rtp[RTP_TO_CN] : NULL;
@@ -1874,7 +1927,7 @@ static int mncc_tx_to_gsm_cc(struct gsm_network *net, const union mncc_msg *msg)
 			disconnect_bridge(net, &msg->bridge, -rc);
 		return rc;
 	case MNCC_RTP_CREATE:
-		return tch_rtp_create(net, msg->rtp.callref);
+		return tch_rtp_create(net, &msg->rtp);
 	case MNCC_RTP_CONNECT:
 		return tch_rtp_connect(net, &msg->rtp);
 	case MNCC_RTP_FREE:
@@ -1981,7 +2034,7 @@ static int mncc_tx_to_gsm_cc(struct gsm_network *net, const union mncc_msg *msg)
 		if (!msc_a) {
 			/* This condition will return before the common logging of the received MNCC message below, so
 			 * log it now. */
-			LOG_TRANS_CAT(trans, DMNCC, LOGL_DEBUG, "rx %s\n", get_mncc_name(msg->msg_type));
+			log_mncc_rx_tx(trans, "rx", msg);
 
 			/* store setup information until paging succeeds */
 			memcpy(&trans->cc.msg, data, sizeof(struct gsm_mncc));
@@ -2008,7 +2061,7 @@ static int mncc_tx_to_gsm_cc(struct gsm_network *net, const union mncc_msg *msg)
 		log_set_context(LOG_CTX_VLR_SUBSCR, trans->vsub);
 	}
 
-	LOG_TRANS_CAT(trans, DMNCC, LOGL_DEBUG, "rx %s\n", get_mncc_name(msg->msg_type));
+	log_mncc_rx_tx(trans, "rx", msg);
 
 	gsm48_start_guard_timer(trans);
 	trans->cc.mncc_initiated = true;
@@ -2021,7 +2074,7 @@ static int mncc_tx_to_gsm_cc(struct gsm_network *net, const union mncc_msg *msg)
 		struct gsm_mncc rel = {
 			.callref = data->callref,
 		};
-		LOG_TRANS(trans, LOGL_DEBUG, "rx %s in paging state\n", get_mncc_name(msg->msg_type));
+		LOG_TRANS(trans, LOGL_DEBUG, "still paging\n");
 		mncc_set_cause(&rel, GSM48_CAUSE_LOC_PRN_S_LU,
 				GSM48_CC_CAUSE_NORM_CALL_CLEAR);
 		if (msg->msg_type == MNCC_REL_REQ)
@@ -2031,9 +2084,6 @@ static int mncc_tx_to_gsm_cc(struct gsm_network *net, const union mncc_msg *msg)
 		trans->callref = 0;
 		trans_free(trans);
 		return rc;
-	} else {
-		LOG_TRANS(trans, LOGL_DEBUG, "rx %s in state %s\n",
-			      get_mncc_name(msg->msg_type), gsm48_cc_state_name(trans->cc.state));
 	}
 
 	/* Find function for current state and message */
