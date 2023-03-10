@@ -19,6 +19,7 @@ AM_CFLAGS = \
 
 AM_LDFLAGS = \
 	$(COVERAGE_LDFLAGS) \
+	-no-install \
 	$(NULL)
 
 EXTRA_DIST = \

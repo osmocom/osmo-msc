@@ -19,6 +19,11 @@ AM_CFLAGS = \
 	$(LIBSQLITE3_CFLAGS) \
 	$(NULL)
 
+AM_LDFLAGS = \
+	$(COVERAGE_LDFLAGS) \
+	-no-install \
+	$(NULL)
+
 EXTRA_DIST = \
 	db_sms_test.ok \
 	db_sms_test.err \

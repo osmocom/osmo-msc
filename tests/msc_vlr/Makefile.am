@@ -26,6 +26,8 @@ AM_LDFLAGS = \
 	-Wl,--wrap=osmo_get_rand_id \
 	-Wl,--wrap=ran_peers_down_paging \
 	-Wl,--wrap=call_leg_ensure_ci \
+	$(COVERAGE_LDFLAGS) \
+	-no-install \
 	$(NULL)
 
 LDADD = \

@@ -9,6 +9,11 @@ AM_CFLAGS = \
 	$(LIBOSMOCORE_CFLAGS) \
 	$(NULL)
 
+AM_LDFLAGS = \
+	$(COVERAGE_LDFLAGS) \
+	-no-install \
+	$(NULL)
+
 LDADD = \
 	$(top_builddir)/src/libmsc/libmsc.a \
 	$(LIBOSMOCORE_LIBS) \

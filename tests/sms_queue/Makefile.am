@@ -19,6 +19,11 @@ AM_CFLAGS = \
 	$(LIBSQLITE3_CFLAGS) \
 	$(NULL)
 
+AM_LDFLAGS = \
+	$(COVERAGE_LDFLAGS) \
+	-no-install \
+	$(NULL)
+
 EXTRA_DIST = \
 	sms_queue_test.ok \
 	sms_queue_test.err \
@@ -51,4 +56,5 @@ sms_queue_test_LDADD = \
 
 sms_queue_test_LDFLAGS = \
 	-Wl,--wrap=db_sms_get_next_unsent_rr_msisdn \
+	$(AM_LDFLAGS) \
 	$(NULL)
