@@ -136,7 +136,7 @@ void test_parse_and_compose()
 		printf("\n[%d]\n", i);
 		dump_sdp(t->sdp_input, "sdp input: ");
 
-		sdp_msg_from_sdp_str(&sdp, t->sdp_input);
+		OSMO_ASSERT(sdp_msg_from_sdp_str(&sdp, t->sdp_input) == 0);
 		sdp_msg_to_sdp_str_buf(str, sizeof(str), &sdp);
 
 		dump_sdp(str, "sdp_msg_to_sdp_str_buf: ");
