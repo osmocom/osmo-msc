@@ -324,6 +324,7 @@ static int rtp_stream_do_mgcp_verb(struct rtp_stream *rtps, enum mgcp_verb verb,
 		verb_info.port = rtps->remote.port;
 		rtps->remote_sent_to_mgw = true;
 	}
+	rtp_stream_update_id(rtps);
 
 	osmo_mgcpc_ep_ci_request(rtps->ci, verb, &verb_info, rtps->fi, ok_event, fail_event, NULL);
 	return 0;
