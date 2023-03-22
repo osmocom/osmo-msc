@@ -230,25 +230,44 @@ static void gsm48_stop_cc_timer(struct gsm_trans *trans)
 	}
 }
 
-/* Log the MNCC tx and rx events.
- * Depending on msg_type, also log whether RTP information is passed on.
- * (This is particularly interesting for the doc/sequence_charts/msc_log_to_ladder.py)
- */
-#define log_mncc_rx_tx(ARGS...) _log_mncc_rx_tx(__FILE__, __LINE__, ##ARGS)
-static void _log_mncc_rx_tx(const char *file, int line,
-			    struct gsm_trans *trans, const char *rx_tx, const union mncc_msg *mncc)
+static int mncc_msg_to_str_buf(char *buf, size_t buflen, const union mncc_msg *mncc)
 {
+	struct osmo_strbuf sb = { .buf = buf, .len = buflen };
 	const char *sdp = NULL;
 	struct sdp_msg sdp_msg = {};
 	struct osmo_sockaddr addr = {};
+	const struct codec_mapping *m;
 
-	if (!log_check_level(DMNCC, LOGL_DEBUG))
-		return;
+	OSMO_STRBUF_PRINTF(sb, "%s", get_mncc_name(mncc->msg_type));
 
 	switch (mncc->msg_type) {
 	case MNCC_RTP_CREATE:
 	case MNCC_RTP_CONNECT:
 		addr = (struct osmo_sockaddr){ .u.sas = mncc->rtp.addr };
+		OSMO_STRBUF_PRINTF(sb, " (mncc_rtp");
+		if (osmo_sockaddr_is_any(&addr) == 0) {
+			OSMO_STRBUF_PRINTF(sb, " addr=");
+			OSMO_STRBUF_APPEND(sb, osmo_sockaddr_to_str_buf2, &addr);
+		}
+		OSMO_STRBUF_PRINTF(sb, " pt=%u", mncc->rtp.payload_type);
+		if (mncc->rtp.payload_msg_type) {
+			OSMO_STRBUF_PRINTF(sb, " pmt=0x%x", mncc->rtp.payload_msg_type);
+			if ((m = codec_mapping_by_mncc_pmt(mncc->rtp.payload_msg_type))) {
+				OSMO_STRBUF_PRINTF(sb, "=%s", m->sdp.subtype_name);
+				switch (m->frhr) {
+				case CODEC_FRHR_FR:
+					OSMO_STRBUF_PRINTF(sb, ":fr");
+					break;
+				case CODEC_FRHR_HR:
+					OSMO_STRBUF_PRINTF(sb, ":hr");
+					break;
+				default:
+					break;
+				}
+			}
+		}
+		OSMO_STRBUF_PRINTF(sb, ")");
+
 		sdp = mncc->rtp.sdp;
 		break;
 
@@ -262,6 +281,33 @@ static void _log_mncc_rx_tx(const char *file, int line,
 	case MNCC_CALL_PROC_REQ:
 	case MNCC_ALERT_IND:
 	case MNCC_ALERT_REQ:
+		if (mncc->signal.fields & MNCC_F_BEARER_CAP) {
+			int i;
+			const struct gsm_mncc_bearer_cap *bc = &mncc->signal.bearer_cap;
+			OSMO_STRBUF_PRINTF(sb, " (bcap");
+			OSMO_STRBUF_PRINTF(sb, " sv=");
+			for (i = 0; i < ARRAY_SIZE(bc->speech_ver) && bc->speech_ver[i] != -1; i++) {
+				if (i)
+					OSMO_STRBUF_PRINTF(sb, ",");
+				OSMO_STRBUF_PRINTF(sb, "%d", bc->speech_ver[i]);
+				m = codec_mapping_by_speech_ver(bc->speech_ver[i]);
+				if (m) {
+					OSMO_STRBUF_PRINTF(sb, ":%s", m->sdp.subtype_name);
+					switch (m->frhr) {
+					case CODEC_FRHR_FR:
+						OSMO_STRBUF_PRINTF(sb, ":fr");
+						break;
+					case CODEC_FRHR_HR:
+						OSMO_STRBUF_PRINTF(sb, ":hr");
+						break;
+					default:
+						break;
+					}
+				}
+			}
+			OSMO_STRBUF_PRINTF(sb, ")");
+		}
+
 		sdp = mncc->signal.sdp;
 		break;
 
@@ -270,27 +316,28 @@ static void _log_mncc_rx_tx(const char *file, int line,
 	}
 
 	if (sdp && sdp[0] && (sdp_msg_from_sdp_str(&sdp_msg, sdp) == 0)) {
-		LOG_TRANS_CAT_SRC(trans, DMNCC, LOGL_DEBUG, file, line, "%s %s (RTP=%s)\n",
-				  rx_tx,
-				  get_mncc_name(mncc->msg_type),
-				  sdp_msg_to_str(&sdp_msg));
-		return;
+		OSMO_STRBUF_PRINTF(sb, " (SDP=");
+		OSMO_STRBUF_APPEND(sb, sdp_msg_to_str_buf, &sdp_msg);
+		OSMO_STRBUF_PRINTF(sb, ")");
 	}
 
-	if (osmo_sockaddr_is_any(&addr) == 0) {
-		LOG_TRANS_CAT_SRC(trans, DMNCC, LOGL_DEBUG, file, line, "%s %s (RTP=%s)\n",
-				  rx_tx,
-				  get_mncc_name(mncc->msg_type),
-				  osmo_sockaddr_to_str_c(OTC_SELECT, &addr));
-		return;
-	}
-
-	LOG_TRANS_CAT_SRC(trans, DMNCC, LOGL_DEBUG, file, line, "%s %s\n", rx_tx, get_mncc_name(mncc->msg_type));
+	return sb.chars_needed;
 }
 
-#define mncc_recvmsg(ARGS...) _mncc_recvmsg(__FILE__, __LINE__, ##ARGS)
-static int _mncc_recvmsg(const char *file, int line,
-			 struct gsm_network *net, struct gsm_trans *trans, int msg_type, struct gsm_mncc *mncc)
+static char *mncc_msg_to_str_c(void *ctx, const union mncc_msg *mncc)
+{
+	OSMO_NAME_C_IMPL(ctx, 128, "ERROR", mncc_msg_to_str_buf, mncc)
+}
+
+/* Log the MNCC tx and rx events.
+ * Depending on msg_type, also log whether RTP information is passed on.
+ * (This is particularly interesting for the doc/sequence_charts/msc_log_to_ladder.py)
+ */
+#define log_mncc_rx_tx(TRANS, RX_TX, MNCC) \
+	LOG_TRANS_CAT(TRANS, DMNCC, LOGL_DEBUG, "%s %s\n", RX_TX, mncc_msg_to_str_c(OTC_SELECT, MNCC));
+
+static int mncc_recvmsg(struct gsm_network *net, struct gsm_trans *trans,
+			int msg_type, struct gsm_mncc *mncc)
 {
 	struct msgb *msg;
 	unsigned char *data;

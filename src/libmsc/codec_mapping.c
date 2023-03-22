@@ -282,6 +282,16 @@ const struct codec_mapping *codec_mapping_by_mgcp_codec(enum mgcp_codecs mgcp)
 	return NULL;
 }
 
+const struct codec_mapping *codec_mapping_by_mncc_pmt(uint32_t pmt)
+{
+	const struct codec_mapping *m;
+	foreach_codec_mapping(m) {
+		if (m->mncc_payload_msg_type == pmt)
+			return m;
+	}
+	return NULL;
+}
+
 /* Append given Speech Version to the end of the Bearer Capabilities Speech Version array. Return 1 if added, zero
  * otherwise (as in, return the number of items added). */
 int bearer_cap_add_speech_ver(struct gsm_mncc_bearer_cap *bearer_cap, enum gsm48_bcap_speech_ver speech_ver)

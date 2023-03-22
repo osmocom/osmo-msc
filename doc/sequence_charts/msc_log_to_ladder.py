@@ -591,9 +591,11 @@ class Parse:
 		self.diagram.add_line(Arrow(e, MSC, '<>', '.', 'CC state:\\n%s' % to_state))
 		return True
 
-	def rule_log_mncc_no_rtp(self, m):
-		r'.*trans\(CC[^) ]* [^ )]+:([^:)]+) callref-([^ ]+) [^)]+\) (tx|rx) (MNCC_[^ ]*)$'
-		l3type, callref_hex, tx_rx, mncc_msg = m.groups()
+	RE_LOG_MNCC_RTP_ADDR = re.compile('addr=([^ )]+)')
+	RE_LOG_MNCC_SDP_ADDR = re.compile('\(SDP ([^ ){]+)')
+	def rule_log_mncc(self, m):
+		r'.*trans\(CC[^) ]* [^ )]+:([^:)]+) callref-([^ ]+) [^)]+\) (tx|rx) (MNCC_[^ ]*)(.*)$'
+		l3type, callref_hex, tx_rx, mncc_msg, infos = m.groups()
 
 		if self.seen_udtrace_mncc:
 			# If no udtrace is present, take the MNCC logging.
@@ -607,27 +609,17 @@ class Parse:
 		except:
 			e = MT
 
-		self.diagram.add_line(Arrow(e, MSC, '>' if tx else '<', 'mncc', mncc_msg))
-		return True
+		for m in Parse.RE_LOG_MNCC_RTP_ADDR.finditer(infos):
+			addr = m.group(1)
+			masked_addr = self.mask_value('IP:port', addr);
+			infos = infos.replace(addr, masked_addr)
 
-	def rule_log_mncc_with_rtp(self, m):
-		r'.*trans\(CC[^) ]* [^ )]+:([^:)]+) callref-([^ ]+) [^)]+\) (tx|rx) (MNCC_[^ ]*) \(RTP=([^){]+)(|{.*})\)$'
-		l3type, callref_hex, tx_rx, mncc_msg, rtp, codec = m.groups()
+		for m in Parse.RE_LOG_MNCC_SDP_ADDR.finditer(infos):
+			addr = m.group(1)
+			masked_addr = self.mask_value('IP:port', addr);
+			infos = infos.replace(addr, masked_addr)
 
-		if self.seen_udtrace_mncc:
-			# If no udtrace is present, take the MNCC logging.
-			# But if there is udtrace logging available, we should not duplicate those MNCC lines.
-			return True
-
-		tx = (tx_rx == 'tx')
-
-		try:
-			e = self.callrefs_mo_mt.get(callref_hex, MT)
-		except:
-			e = MT
-
-		rtp = self.mask_value('IP:port', rtp)
-		self.diagram.add_line(Arrow(e, MSC, '>' if tx else '<', 'mncc', f'{mncc_msg}\\n{rtp}'))
+		self.diagram.add_line(Arrow(e, MSC, '>' if tx else '<', 'mncc', f'{mncc_msg}\\n{infos}'))
 		return True
 
 	RE_MNCC_RTP = re.compile(' ip := ([^, ]+), rtp_port := ([0-9]+),')
