@@ -207,6 +207,7 @@ static void test_call_mo()
 	struct gsm_mncc mncc = {
 		.imsi = IMSI,
 	};
+	struct gsm_mncc_rtp mncc_rtp = {};
 
 	comment_start();
 
@@ -259,10 +260,10 @@ static void test_call_mo()
 	cc_to_mncc_expect_tx(IMSI, MNCC_SETUP_IND);
 	crcx_ok(RTP_TO_CN);
 	OSMO_ASSERT(cc_to_mncc_tx_confirmed);
-	mncc.callref = cc_to_mncc_tx_got_callref;
+	mncc.callref = mncc_rtp.callref = cc_to_mncc_tx_got_callref;
 
 	btw("MNCC replies with MNCC_RTP_CREATE, causing MGW endpoint CRCX to RAN");
-	mncc_sends_to_cc(MNCC_RTP_CREATE, &mncc);
+	mncc_sends_to_cc(MNCC_RTP_CREATE, &mncc_rtp);
 
 	btw("MGW acknowledges the CRCX, triggering Assignment");
 	expect_iu_rab_assignment();
@@ -351,6 +352,10 @@ static void test_call_mt()
 		       "a=ptime:20\r\n",
 	};
 
+	struct gsm_mncc_rtp mncc_rtp = {
+		.callref = 0x423,
+	};
+
 	comment_start();
 
 	fake_time_start();
@@ -406,7 +411,7 @@ static void test_call_mt()
 	ms_sends_assignment_complete("AMR");
 
 	btw("MNCC sends MNCC_RTP_CREATE, which first waits for the CN side RTP");
-	mncc_sends_to_cc(MNCC_RTP_CREATE, &mncc);
+	mncc_sends_to_cc(MNCC_RTP_CREATE, &mncc_rtp);
 
 	btw("When the CN side RTP address is known, ack MNCC_RTP_CREATE with full SDP");
 	cc_to_mncc_expect_tx("", MNCC_RTP_CREATE);
@@ -477,6 +482,19 @@ static void test_call_mt2()
 		       "a=ptime:20\r\n",
 	};
 
+	struct gsm_mncc_rtp mncc_rtp = {
+		.callref = 0x423,
+		.sdp = "v=0\r\n"
+		       "o=OsmoMSC 0 0 IN IP4 10.23.23.1\r\n"
+		       "s=GSM Call\r\n"
+		       "c=IN IP4 10.23.23.1\r\n"
+		       "t=0 0\r\n"
+		       "m=audio 23 RTP/AVP 112\r\n"
+		       "a=rtpmap:112 AMR/8000\r\n"
+		       "a=fmtp:112 octet-align=1\r\n"
+		       "a=ptime:20\r\n",
+	};
+
 	comment_start();
 
 	fake_time_start();
@@ -522,7 +540,7 @@ static void test_call_mt2()
 	OSMO_ASSERT(cc_to_mncc_tx_confirmed);
 
 	btw("MNCC sends MNCC_RTP_CREATE, which first waits for the CN side RTP");
-	mncc_sends_to_cc(MNCC_RTP_CREATE, &mncc);
+	mncc_sends_to_cc(MNCC_RTP_CREATE, &mncc_rtp);
 
 	btw("MGW acknowledges the CRCX to RAN, triggering Assignment");
 	expect_iu_rab_assignment();
@@ -570,6 +588,8 @@ static void test_call_mo_to_unknown()
 		.imsi = IMSI,
 	};
 
+	struct gsm_mncc_rtp mncc_rtp = {};
+
 	comment_start();
 
 	fake_time_start();
@@ -621,10 +641,10 @@ static void test_call_mo_to_unknown()
 	cc_to_mncc_expect_tx(IMSI, MNCC_SETUP_IND);
 	crcx_ok(RTP_TO_CN);
 	OSMO_ASSERT(cc_to_mncc_tx_confirmed);
-	mncc.callref = cc_to_mncc_tx_got_callref;
+	mncc.callref = mncc_rtp.callref = cc_to_mncc_tx_got_callref;
 
 	btw("MNCC replies with MNCC_RTP_CREATE, causing MGW endpoint CRCX to RAN");
-	mncc_sends_to_cc(MNCC_RTP_CREATE, &mncc);
+	mncc_sends_to_cc(MNCC_RTP_CREATE, &mncc_rtp);
 
 	btw("MGW acknowledges the CRCX, triggering Assignment");
 	expect_iu_rab_assignment();
@@ -665,6 +685,7 @@ static void test_call_mo_to_unknown_timeout()
 	struct gsm_mncc mncc = {
 		.imsi = IMSI,
 	};
+	struct gsm_mncc_rtp mncc_rtp = {};
 
 	comment_start();
 
@@ -717,10 +738,10 @@ static void test_call_mo_to_unknown_timeout()
 	cc_to_mncc_expect_tx(IMSI, MNCC_SETUP_IND);
 	crcx_ok(RTP_TO_CN);
 	OSMO_ASSERT(cc_to_mncc_tx_confirmed);
-	mncc.callref = cc_to_mncc_tx_got_callref;
+	mncc.callref = mncc_rtp.callref = cc_to_mncc_tx_got_callref;
 
 	btw("MNCC replies with MNCC_RTP_CREATE, causing MGW endpoint CRCX to RAN");
-	mncc_sends_to_cc(MNCC_RTP_CREATE, &mncc);
+	mncc_sends_to_cc(MNCC_RTP_CREATE, &mncc_rtp);
 
 	btw("MGW acknowledges the CRCX, triggering Assignment");
 	expect_iu_rab_assignment();
@@ -1171,7 +1192,7 @@ static void test_codecs_mo(const struct codec_test *t)
 		.imsi = IMSI,
 	};
 
-	struct gsm_mncc_rtp *mncc_rtp = (void *)&mncc;
+	struct gsm_mncc_rtp mncc_rtp = {};
 
 	BTW("======================== MO call: %s", t->desc);
 	btw("CM Service Request with Codec List (BSS Supported) =%s",
@@ -1205,12 +1226,12 @@ static void test_codecs_mo(const struct codec_test *t)
 	cc_to_mncc_expect_tx(IMSI, MNCC_SETUP_IND);
 	crcx_ok(RTP_TO_CN);
 	OSMO_ASSERT(cc_to_mncc_tx_confirmed);
-	mncc.callref = cc_to_mncc_tx_got_callref;
+	mncc.callref = mncc_rtp.callref = cc_to_mncc_tx_got_callref;
 	VALIDATE_SDP(cc_to_mncc_tx_last_sdp, t->mo_tx_sdp_mncc_setup_ind);
 
 	btw("MNCC replies with MNCC_RTP_CREATE, causing MGW endpoint CRCX to RAN");
-	sdp_str_from_subtype_names(mncc_rtp->sdp, sizeof(mncc_rtp->sdp), t->mo_rx_sdp_mncc_rtp_create);
-	mncc_sends_to_cc(MNCC_RTP_CREATE, &mncc);
+	sdp_str_from_subtype_names(mncc_rtp.sdp, sizeof(mncc_rtp.sdp), t->mo_rx_sdp_mncc_rtp_create);
+	mncc_sends_to_cc(MNCC_RTP_CREATE, &mncc_rtp);
 
 	btw("MGW acknowledges the CRCX, triggering Assignment with%s", perm_speech_name(t->mo_tx_assignment_perm_speech));
 	expect_bssap_assignment();
@@ -1283,7 +1304,9 @@ static void test_codecs_mt(const struct codec_test *t)
 			.speech_ver = { GSM48_BCAP_SV_FR, -1, },
 		},
 	};
-	struct gsm_mncc_rtp *mncc_rtp = (void *)&mncc;
+	struct gsm_mncc_rtp mncc_rtp = {
+		.callref = 0x423,
+	};
 
 	BTW("======================== MT call: %s", t->desc);
 
@@ -1373,8 +1396,8 @@ static void test_codecs_mt(const struct codec_test *t)
 	ms_sends_assignment_complete(t->mt_rx_assigned_codec);
 
 	btw("MNCC sends MNCC_RTP_CREATE, which first waits for the CN side RTP");
-	sdp_str_from_subtype_names(mncc_rtp->sdp, sizeof(mncc_rtp->sdp), t->mt_rx_sdp_mncc_rtp_create);
-	mncc_sends_to_cc(MNCC_RTP_CREATE, &mncc);
+	sdp_str_from_subtype_names(mncc_rtp.sdp, sizeof(mncc_rtp.sdp), t->mt_rx_sdp_mncc_rtp_create);
+	mncc_sends_to_cc(MNCC_RTP_CREATE, &mncc_rtp);
 
 	btw("When the CN side RTP address is known, ack MNCC_RTP_CREATE");
 	cc_to_mncc_expect_tx("", MNCC_RTP_CREATE);
