@@ -594,6 +594,7 @@ static int msc_mgw_setup(void)
 int main(int argc, char **argv)
 {
 	int rc;
+	int ret = 0;
 
 	struct osmo_sccp_instance *sccp_a;
 	struct osmo_sccp_instance *sccp_iu;
@@ -745,20 +746,26 @@ TODO: we probably want some of the _net_ ctrl commands from bsc_base_ctrl_cmds_i
 	osmo_init_ignore_signals();
 
 	/* start the SMS queue */
-	if (sms_queue_start(msc_network) != 0)
-		return -1;
+	if (sms_queue_start(msc_network) != 0) {
+		ret = -1;
+		goto error;
+	}
 
-	if (msc_mgw_setup() != 0)
-		return 7;
+	if (msc_mgw_setup() != 0) {
+		ret = 7;
+		goto error;
+	}
 
 	if (ss7_setup(tall_msc_ctx, &sccp_a, &sccp_iu)) {
 		fprintf(stderr, "Setting up SCCP client failed.\n");
-		return 8;
+		ret = 8;
+		goto error;
 	}
 
 	if (sgs_server_open(g_sgs)) {
 		fprintf(stderr, "Starting SGs server failed\n");
-		return 9;
+		ret = 9;
+		goto error;
 	}
 
 	msc_network->a.sri = sccp_ran_init(msc_network, sccp_a, OSMO_SCCP_SSN_BSSAP,
@@ -766,7 +773,8 @@ TODO: we probably want some of the _net_ ctrl commands from bsc_base_ctrl_cmds_i
 					   msc_network);
 	if (!msc_network->a.sri) {
 		fprintf(stderr, "Setting up A receiver failed\n");
-		return 10;
+		ret = 10;
+		goto error;
 	}
 	LOGP(DMSC, LOGL_NOTICE, "A-interface: SCCP user %s, cs7-instance %u (%s)\n",
 	     osmo_sccp_user_name(msc_network->a.sri->scu),
@@ -781,7 +789,8 @@ TODO: we probably want some of the _net_ ctrl commands from bsc_base_ctrl_cmds_i
 					   msc_network);
 	if (!msc_network->iu.sri) {
 		fprintf(stderr, "Setting up IuCS receiver failed\n");
-		return 11;
+		ret = 11;
+		goto error;
 	}
 
 	/* Compatibility with legacy osmo-hnbgw that was unable to properly handle RESET messages. */
@@ -800,7 +809,8 @@ TODO: we probably want some of the _net_ ctrl commands from bsc_base_ctrl_cmds_i
 		rc = osmo_daemonize();
 		if (rc < 0) {
 			perror("Error during daemonize");
-			return 6;
+			ret = 6;
+			goto error;
 		}
 	}
 
@@ -823,6 +833,7 @@ TODO: we probably want some of the _net_ ctrl commands from bsc_base_ctrl_cmds_i
 		}
 	} while (!osmo_select_shutdown_done());
 
+error:
 	db_fini();
 	log_fini();
 
@@ -842,5 +853,5 @@ TODO: we probably want some of the _net_ ctrl commands from bsc_base_ctrl_cmds_i
 	 */
 	talloc_report_full(NULL, stderr);
 	talloc_disable_null_tracking();
-	return 0;
+	return ret;
 }
