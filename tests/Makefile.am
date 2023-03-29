@@ -48,7 +48,7 @@ DISTCLEANFILES = \
 
 if ENABLE_EXT_TESTS
 # don't run multiple tests concurrently so that the ports don't conflict
-python-tests: $(BUILT_SOURCES)
+python-tests:
 	$(MAKE) vty-test
 	$(MAKE) ctrl-test
 if BUILD_SMPP
@@ -56,11 +56,11 @@ if BUILD_SMPP
 endif
 
 else
-python-tests: $(BUILT_SOURCES)
+python-tests:
 	echo "Not running python-based tests (determined at configure-time)"
 endif
 
-vty-python-test: $(BUILT_SOURCES)
+vty-python-test: $(top_builddir)/src/osmo-msc/osmo-msc
 if BUILD_IU
 	IU=1 osmotestvty.py -p $(abs_top_srcdir) -w $(abs_top_builddir) -v
 	IU=1 osmotestconfig.py -p $(abs_top_srcdir) -w $(abs_top_builddir) -v
@@ -77,7 +77,7 @@ VTY_TEST ?= *.vty
 # To update the VTY script from current application behavior,
 # pass -u to vty_script_runner.py by doing:
 #   make vty-transcript-test U=-u
-vty-transcript-test:
+vty-transcript-test: $(top_builddir)/src/osmo-msc/osmo-msc
 	osmo_verify_transcript_vty.py -v \
 		-n OsmoMSC -p 4254 \
 		-r "$(top_builddir)/src/osmo-msc/osmo-msc -c $(top_srcdir)/doc/examples/osmo-msc/osmo-msc.cfg" \
@@ -89,7 +89,7 @@ vty-test:
 	$(MAKE) vty-python-test
 	$(MAKE) vty-transcript-test
 
-ctrl-python-test: $(BUILT_SOURCES)
+ctrl-python-test: $(top_builddir)/src/osmo-msc/osmo-msc
 	$(srcdir)/ctrl_test_runner.py -w $(abs_top_builddir) -v
 	rm -f $(top_builddir)/sms.db*
 
@@ -104,7 +104,7 @@ ctrl-test:
 	$(MAKE) ctrl-python-test
 	$(MAKE) ctrl-transcript-test
 
-smpp-test:
+smpp-test:$(top_builddir)/src/osmo-msc/osmo-msc
 	$(srcdir)/smpp_test_runner.py -w $(abs_top_builddir) -v
 	rm -f $(top_builddir)/sms.db*
 
