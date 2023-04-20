@@ -69,6 +69,9 @@ enum ran_msg_type {
 	RAN_MSG_HANDOVER_SUCCEEDED,
 	RAN_MSG_HANDOVER_COMPLETE,
 	RAN_MSG_HANDOVER_FAILURE,
+	RAN_MSG_VGCS_SETUP,
+	RAN_MSG_VGCS_SETUP_ACK,
+	...
 };
 
 extern const struct value_string ran_msg_type_names[];

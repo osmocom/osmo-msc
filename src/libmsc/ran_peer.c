@@ -399,12 +399,17 @@ void ran_peer_st_ready(struct osmo_fsm_inst *fi, uint32_t event, void *data)
 			return;
 		}
 
-		an_apdu = (struct an_apdu){
-			.an_proto = rp->sri->ran->an_proto,
-			.msg = ctx->msg,
-		};
-
-		osmo_fsm_inst_dispatch(ctx->conn->msc_role, MSC_EV_FROM_RAN_UP_L2, &an_apdu);
+		if (ctx->conn->msc_role) {
+			/* "normal" A connection, dispatch to MSC-I or MSC-T */
+			an_apdu = (struct an_apdu){
+				.an_proto = rp->sri->ran->an_proto,
+					.msg = ctx->msg,
+			};
+			osmo_fsm_inst_dispatch(ctx->conn->msc_role, MSC_EV_FROM_RAN_UP_L2, &an_apdu);
+		} else if (ctx->conn->vgcs->calling_subscriber) {
+			/* VGCS related */
+			msc_a_rx_vgcs(ctx->conn->vgcs->calling_subscriber, ctx->conn, ctx->msg);
+		}
 		return;
 
 	case RAN_PEER_EV_MSG_DOWN_CO_INITIAL:

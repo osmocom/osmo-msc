@@ -1373,6 +1373,9 @@ int msc_a_up_l3(struct msc_a *msc_a, struct msgb *msg)
 	case GSM48_PDISC_TEST:
 		rc = gsm0414_rcv_test(msc_a, msg);
 		break;
+	case GSM48_PDISC_BCC:
+		rc = rcv_bcc(msc_a, msg);
+		break;
 	default:
 		LOG_MSC_A_CAT(msc_a, DRLL, LOGL_NOTICE, "Unknown "
 			"GSM 04.08 discriminator 0x%02x\n", pdisc);
@@ -1680,6 +1683,35 @@ int msc_a_ran_dec_from_msc_i(struct msc_a *msc_a, struct msc_a_ran_dec_data *d)
 		break;
 	}
 	return rc;
+}
+
+int msc_a_rx_vgcs_decoded(struct osmo_fsm_inst *caller_fi, void *caller_data, const struct ran_msg *msg)
+{
+	struct msc_a *msc_a = caller_fi;
+	struct ran_conn *from_ran_conn = caller_data;
+
+	switch (msg->msg_type) {
+	case RAN_MSG_VGCS_SETUP_ACK:
+		handle setup ack from peer from_ran_conn->ran_peer
+	}
+}
+
+int msc_a_rx_vgcs(struct msc_a *msc_a, struct ran_conn *from_conn, struct msgb *msg)
+{
+	/* Feed through the decoding mechanism ran_msg. The decoded message arrives in msc_a_rx_vgcs_decoded() */
+	ran_dec = (struct ran_dec) {
+		.caller_fi = fi,
+		.caller_data = from_conn,
+		.decode_cb = msc_a_rx_vgcs_decoded,
+	};
+	struct ran_peer *ran_peer = from_conn->ran_peer;
+	struct ran_inra *ran = ran_peer->sri->ran;
+	if (!ran->ran_dec_l2) {
+		LOGPFSML(fi, LOGL_ERROR, "No ran_dec_l2() defined for RAN type %s\n",
+			 osmo_rat_type_name(ran->type));
+		return -ENOTSUP;
+	}
+	return ran->ran_dec_l2(&ran_dec, msg);
 }
 
 static int msc_a_ran_dec_from_msc_t(struct msc_a *msc_a, struct msc_a_ran_dec_data *d)

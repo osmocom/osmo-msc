@@ -742,6 +742,33 @@ static int ran_a_decode_handover_failure(struct ran_dec *ran_dec, const struct m
 	return ran_decoded(ran_dec, &ran_dec_msg);
 }
 
+/* es braucht decode nur für die empfangenen msgs; encode nur für die gesendeten msgs. */
+static int ran_a_decode_vgcs_setup_ack(struct ran_dec *ran_dec, const struct msgb *msg, const struct tlv_parsed *tp)
+{
+	// lese die TLV von tp und fülle die struct, wie z.b. in ran_a_decode_handover_request()
+
+	struct ran_msg ran_dec_msg = {
+		.msg_type = RAN_MSG_VGCS_SETUP_ACK,
+		.msg_name = "BSSMAP VGCS SETUP ACK",
+
+		.vgcs_setup = {
+			.members = from TLV in tp
+		},
+	};
+
+	// return decoded struct to caller
+	return ran_decoded(ran_dec, &ran_dec_msg);
+}
+
+struct msgb *ran_a_make_vgcs_setup(struct osmo_fsm_inst *log_fi, const struct ran_msg *msg)
+{
+	// lies das dekodierte struct 'msg' und schreibe es encoded in einen neuen msgb
+
+	// implement gsm0808_create_vgcs_setup in libosmocore/src/gsm/gsm0808.c
+	struct msgb *new_msg = gsm0808_create_vgcs_setup(msg->vgcs_setup.foo, msg->vgcs_setup.bar);
+	return new_msg;
+}
+
 static int ran_a_decode_bssmap(struct ran_dec *ran_dec, struct msgb *bssmap)
 {
 	struct tlv_parsed tp[2];
@@ -835,6 +862,9 @@ static int ran_a_decode_bssmap(struct ran_dec *ran_dec, struct msgb *bssmap)
 	/* From any Handover peer: */
 	case BSS_MAP_MSG_HANDOVER_FAILURE:
 		return ran_a_decode_handover_failure(ran_dec, bssmap, tp);
+
+	case BSS_MAP_MSG_VGCS_SETUP_ACK: <-- add in osmocom/gsm/protocol/gsm_08_08.h
+		return ran_a_decode_vgcs_setup_ack(...); <-- to be implemented here
 
 	default:
 		LOG_RAN_A_DEC(ran_dec, LOGL_ERROR, "Unimplemented msg type: %s\n", gsm0808_bssmap_name(msg_type));
@@ -1280,6 +1310,9 @@ static struct msgb *_ran_a_encode(struct osmo_fsm_inst *caller_fi, const struct 
 
 	case RAN_MSG_HANDOVER_FAILURE:
 		return ran_a_make_handover_failure(caller_fi, ran_enc_msg);
+
+	case RAN_MSG_VGCS_SETUP:
+		return ran_a_make_vgcs_setup(caller_fi, ran_enc_msg); <-- to be implemented
 
 	default:
 		LOG_RAN_A_ENC(caller_fi, LOGL_ERROR, "Unimplemented RAN-encode message type: %s\n",
