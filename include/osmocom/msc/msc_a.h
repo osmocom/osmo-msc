@@ -37,6 +37,8 @@
 #include <osmocom/msc/neighbor_ident.h>
 
 struct ran_infra;
+struct vgcs_bss;
+struct vgcs_bss_cell;
 
 #define MSC_A_USE_LOCATION_UPDATING	"lu"
 #define MSC_A_USE_CM_SERVICE_CC	"cm_service_cc"
@@ -219,6 +221,9 @@ const char *msc_a_cm_service_type_to_use(enum osmo_cm_service_type cm_service_ty
 
 void msc_a_release_cn(struct msc_a *msc_a);
 void msc_a_release_mo(struct msc_a *msc_a, enum gsm48_gsm_cause gsm_cause);
+
+int msc_a_rx_vgcs_bss(struct vgcs_bss *bss, struct ran_conn *from_conn, struct msgb *msg);
+int msc_a_rx_vgcs_cell(struct vgcs_bss_cell *cell, struct ran_conn *from_conn, struct msgb *msg);
 
 int msc_a_ran_decode_cb(struct osmo_fsm_inst *msc_a_fi, void *data, const struct ran_msg *msg);
 

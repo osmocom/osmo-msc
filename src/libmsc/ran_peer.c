@@ -33,6 +33,7 @@
 #include <osmocom/msc/vlr.h>
 #include <osmocom/msc/ran_conn.h>
 #include <osmocom/msc/cell_id_list.h>
+#include <osmocom/msc/msc_vgcs.h>
 
 static struct osmo_fsm ran_peer_fsm;
 
@@ -393,18 +394,22 @@ void ran_peer_st_ready(struct osmo_fsm_inst *fi, uint32_t event, void *data)
 		OSMO_ASSERT(ctx->conn);
 		OSMO_ASSERT(ctx->msg);
 
-		if (!ctx->conn->msc_role) {
+		if (ctx->conn->msc_role) {
+			/* "normal" A connection, dispatch to MSC-I or MSC-T */
+			an_apdu = (struct an_apdu){
+				.an_proto = rp->sri->ran->an_proto,
+				.msg = ctx->msg,
+			};
+			osmo_fsm_inst_dispatch(ctx->conn->msc_role, MSC_EV_FROM_RAN_UP_L2, &an_apdu);
+		} else if (ctx->conn->vgcs.bss) {
+			/* VGCS call related */
+			msc_a_rx_vgcs_bss(ctx->conn->vgcs.bss, ctx->conn, ctx->msg);
+		} else if (ctx->conn->vgcs.cell) {
+			/* VGCS channel related */
+			msc_a_rx_vgcs_cell(ctx->conn->vgcs.cell, ctx->conn, ctx->msg);
+		} else
 			LOG_RAN_PEER(rp, LOGL_ERROR,
 				     "Rx CO message on conn that is not associated with any MSC role\n");
-			return;
-		}
-
-		an_apdu = (struct an_apdu){
-			.an_proto = rp->sri->ran->an_proto,
-			.msg = ctx->msg,
-		};
-
-		osmo_fsm_inst_dispatch(ctx->conn->msc_role, MSC_EV_FROM_RAN_UP_L2, &an_apdu);
 		return;
 
 	case RAN_PEER_EV_MSG_DOWN_CO_INITIAL:
