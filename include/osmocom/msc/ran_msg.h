@@ -69,6 +69,26 @@ enum ran_msg_type {
 	RAN_MSG_HANDOVER_SUCCEEDED,
 	RAN_MSG_HANDOVER_COMPLETE,
 	RAN_MSG_HANDOVER_FAILURE,
+	RAN_MSG_VGCS_VBS_SETUP,
+	RAN_MSG_VGCS_VBS_SETUP_ACK,
+	RAN_MSG_VGCS_VBS_SETUP_REFUSE,
+	RAN_MSG_VGCS_VBS_ASSIGN_REQ,
+	RAN_MSG_VGCS_VBS_ASSIGN_RES,
+	RAN_MSG_VGCS_VBS_ASSIGN_FAIL,
+	RAN_MSG_VGCS_VBS_QUEUING_IND,
+	RAN_MSG_UPLINK_REQUEST,
+	RAN_MSG_UPLINK_REQUEST_ACK,
+	RAN_MSG_UPLINK_REQUEST_CNF,
+	RAN_MSG_UPLINK_APPLICATION_DATA,
+	RAN_MSG_UPLINK_RELEASE_IND,
+	RAN_MSG_UPLINK_REJECT_CMD,
+	RAN_MSG_UPLINK_RELEASE_CMD,
+	RAN_MSG_UPLINK_SEIZED_CMD,
+	RAN_MSG_VGCS_ADDITIONAL_INFO,
+	RAN_MSG_VGCS_VBS_AREA_CELL_INFO,
+	RAN_MSG_VGCS_VBS_ASSIGN_STATUS,
+	RAN_MSG_VGCS_SMS,
+	RAN_MSG_NOTIFICATION_DATA,
 };
 
 extern const struct value_string ran_msg_type_names[];
@@ -270,6 +290,33 @@ struct ran_msg {
 		} handover_failure;
 		struct ran_handover_request handover_request;
 		struct ran_handover_request_ack handover_request_ack;
+		struct gsm0808_vgcs_vbs_setup vgcs_vbs_setup;
+		struct gsm0808_vgcs_vbs_setup_ack vgcs_vbs_setup_ack;
+		struct {
+			enum gsm0808_cause cause;
+		} vgcs_vbs_setup_refuse;
+		struct gsm0808_vgcs_vbs_assign_req vgcs_vbs_assign_req;
+		struct gsm0808_vgcs_vbs_assign_res vgcs_vbs_assign_res;
+		struct gsm0808_vgcs_vbs_assign_fail vgcs_vbs_assign_fail;
+		struct gsm0808_uplink_request uplink_request;
+		struct gsm0808_uplink_request_ack uplink_request_ack;
+		struct gsm0808_uplink_request_cnf uplink_request_cnf;
+		struct gsm0808_uplink_app_data uplink_app_data;
+		struct gsm0808_uplink_release_ind uplink_release_ind;
+		struct gsm0808_uplink_seized_cmd uplink_seized_cmd;
+		struct gsm0808_uplink_reject_cmd uplink_reject_cmd;
+		struct {
+			enum gsm0808_cause cause;
+		} uplink_release_cmd;
+		struct {
+			struct gsm0808_talker_identity talker_identity;
+		} vgcs_additional_info;
+		struct gsm0808_vgcs_vbs_area_cell_info vgcs_vbs_area_cell_info;
+		struct gsm0808_vgcs_vbs_assign_stat vgcs_vbs_assign_stat;
+		struct {
+			struct gsm0808_sms_to_vgcs sms_to_vgcs;
+		} vgcs_sms;
+		struct gsm0808_notification_data notification_data;
 	};
 };
 

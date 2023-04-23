@@ -742,6 +742,438 @@ static int ran_a_decode_handover_failure(struct ran_dec *ran_dec, const struct m
 	return ran_decoded(ran_dec, &ran_dec_msg);
 }
 
+static int ran_a_decode_vgcs_vbs_setup_ack(struct ran_dec *ran_dec, const struct msgb *msg, const struct tlv_parsed *tp)
+{
+	struct ran_msg ran_dec_msg = {
+		.msg_type = RAN_MSG_VGCS_VBS_SETUP_ACK,
+		.msg_name = "BSSMAP VGCS/VBS SETUP ACKNOWLEDGE",
+	};
+	struct gsm0808_vgcs_vbs_setup_ack *r = &ran_dec_msg.vgcs_vbs_setup_ack;
+	int rc;
+
+	const struct tlv_p_entry *ie_flags = TLVP_GET(tp, GSM0808_IE_VGCS_FEATURE_FLAGS);
+
+	/* VGCS Feature Flags, 3.2.2.88 */
+	if (ie_flags) {
+		rc = gsm0808_dec_vgcs_feature_flags(&r->flags, ie_flags->val, ie_flags->len);
+		if (rc < 0) {
+			LOG_RAN_A_DEC_MSG(LOGL_ERROR, "Unable to decode VGCS/VBS Feature Flags\n");
+			return -EINVAL;
+		}
+		r->vgcs_feature_flags_present = true;
+	}
+
+	return ran_decoded(ran_dec, &ran_dec_msg);
+}
+
+static int ran_a_decode_vgcs_vbs_setup_refuse(struct ran_dec *ran_dec, const struct msgb *msg,
+					      const struct tlv_parsed *tp)
+{
+	struct ran_msg ran_dec_msg = {
+		.msg_type = RAN_MSG_VGCS_VBS_SETUP_REFUSE,
+		.msg_name = "BSSMAP VGCS/VBS SETUP REFUSE",
+	};
+
+	const struct tlv_p_entry *ie_cause = TLVP_GET(tp, GSM0808_IE_CAUSE);
+
+	/* Cause, 3.2.2.5 */
+	if (!ie_cause || ie_cause->len < 1) {
+		LOG_RAN_A_DEC_MSG(LOGL_ERROR, "Mandatory IE missing: Cause\n");
+		return -EINVAL;
+	}
+	ran_dec_msg.vgcs_vbs_setup_refuse.cause = ie_cause->val[0];
+
+	return ran_decoded(ran_dec, &ran_dec_msg);
+}
+
+static int ran_a_decode_vgcs_vbs_assign_res(struct ran_dec *ran_dec, const struct msgb *msg,
+					    const struct tlv_parsed *tp)
+{
+	struct ran_msg ran_dec_msg = {
+		.msg_type = RAN_MSG_VGCS_VBS_ASSIGN_RES,
+		.msg_name = "BSSMAP VGCS/VBS ASSIGNMENT RESULT",
+	};
+	struct gsm0808_vgcs_vbs_assign_res *r = &ran_dec_msg.vgcs_vbs_assign_res;
+	int rc;
+
+	const struct tlv_p_entry *ie_channel_type = TLVP_GET(tp, GSM0808_IE_CHANNEL_TYPE);
+	const struct tlv_p_entry *ie_cell_id = TLVP_GET(tp, GSM0808_IE_CELL_IDENTIFIER);
+	const struct tlv_p_entry *ie_chosen_channel = TLVP_GET(tp, GSM0808_IE_CHOSEN_CHANNEL);
+	const struct tlv_p_entry *ie_cic = TLVP_GET(tp, GSM0808_IE_CIRCUIT_IDENTITY_CODE);
+	const struct tlv_p_entry *ie_circuit_pool = TLVP_GET(tp, GSM0808_IE_CIRCUIT_POOL);
+	const struct tlv_p_entry *ie_aoip = TLVP_GET(tp, GSM0808_IE_AOIP_TRASP_ADDR);
+	const struct tlv_p_entry *ie_call_id = TLVP_GET(tp, GSM0808_IE_CALL_ID);
+
+	/* Channel Type, 3.2.2.11 */
+	if (!ie_channel_type) {
+		LOG_RAN_A_DEC_MSG(LOGL_ERROR, "Mandatory IE missing: Channel Type\n");
+		return -EINVAL;
+	}
+	if (gsm0808_dec_channel_type(&r->channel_type, ie_channel_type->val, ie_channel_type->len) <= 0) {
+		LOG_RAN_A_DEC_MSG(LOGL_ERROR, "Failed to decode Channel Type IE\n");
+		return -EINVAL;
+	}
+
+	/* Cell Identifier, 3.2.2.17 */
+	if (!ie_cell_id) {
+		LOG_RAN_A_DEC_MSG(LOGL_ERROR, "Mandatory IE missing: Cell Identifier\n");
+		return -EINVAL;
+	}
+	rc = gsm0808_dec_cell_id(&r->cell_identifier, ie_cell_id->val, ie_cell_id->len);
+	if (rc < 0) {
+		LOG_RAN_A_DEC_MSG(LOGL_ERROR, "Decoding Cell Identifier gave rc=%d\n", rc);
+		return -EINVAL;
+	}
+
+	/* Chosen Channel, 3.2.2.33 */
+	if (ie_chosen_channel) {
+		r->chosen_channel = ie_chosen_channel->val[0];
+		r->chosen_channel_present = true;
+	}
+
+	/* Circuit Identity Code, 3.2.2.2 */
+	if (ie_cic) {
+		if (ie_cic->len != 2) {
+			LOG_RAN_A_DEC_MSG(LOGL_ERROR, "Circuit Identity Code has invalid length.\n");
+			return -EINVAL;
+		}
+		r->cic = *(uint16_t *)ie_cic->val;
+		r->cic_present = true;
+	}
+
+	/* Circuit Pool, 3.2.2.45 */
+	if (ie_circuit_pool) {
+		r->circuit_pool = ie_circuit_pool->val[0];
+		r->circuit_pool_present = true;
+	}
+
+	/* AoIP Transport Layer Address (BSS), 3.2.2.102 */
+	if (ie_aoip) {
+		if (gsm0808_dec_aoip_trasp_addr(&r->aoip_transport_layer, ie_aoip->val, ie_aoip->len) < 0) {
+			LOG_RAN_A_DEC_MSG(LOGL_ERROR, "unable to decode AoIP transport address\n");
+			return -EINVAL;
+		}
+		r->aoip_transport_layer_present = true;
+	}
+
+	if (ie_call_id) {
+		if (ie_call_id->len != 4) {
+			LOG_RAN_A_DEC_MSG(LOGL_ERROR, "Call Identifier has invalid length.\n");
+			return -EINVAL;
+		}
+		r->call_id = osmo_load32le(ie_call_id->val);
+		r->call_id_present = true;
+	}
+
+	return ran_decoded(ran_dec, &ran_dec_msg);
+}
+
+static int ran_a_decode_vgcs_vbs_assign_fail(struct ran_dec *ran_dec, const struct msgb *msg,
+					     const struct tlv_parsed *tp)
+{
+	struct ran_msg ran_dec_msg = {
+		.msg_type = RAN_MSG_VGCS_VBS_ASSIGN_FAIL,
+		.msg_name = "BSSMAP VGCS/VBS ASSIGNMENT FAILURE",
+	};
+	struct gsm0808_vgcs_vbs_assign_fail *r = &ran_dec_msg.vgcs_vbs_assign_fail;
+	int rc;
+
+	const struct tlv_p_entry *ie_cause = TLVP_GET(tp, GSM0808_IE_CAUSE);
+	const struct tlv_p_entry *ie_circuit_pool = TLVP_GET(tp, GSM0808_IE_CIRCUIT_POOL);
+	const struct tlv_p_entry *ie_circuit_pool_list = TLVP_GET(tp, GSM0808_IE_CIRCUIT_POOL_LIST);
+	const struct tlv_p_entry *ie_codec_list_bss_supported = TLVP_GET(tp, GSM0808_IE_SPEECH_CODEC_LIST);
+
+	/* Cause, 3.2.2.5 */
+	if (!ie_cause || ie_cause->len < 1) {
+		LOG_RAN_A_DEC_MSG(LOGL_ERROR, "Mandatory IE missing: Cause\n");
+		return -EINVAL;
+	}
+	r->cause = ie_cause->val[0];
+
+	/* Circuit Pool, 3.2.2.45 */
+	if (ie_circuit_pool) {
+		r->circuit_pool = ie_circuit_pool->val[0];
+		r->circuit_pool_present = true;
+	}
+
+	/* Circuit Pool List, 3.2.2.46 */
+	if (ie_circuit_pool_list && ie_circuit_pool_list->len) {
+		if (ie_circuit_pool_list->len > CIRCUIT_POOL_LIST_MAXLEN) {
+			LOG_RAN_A_DEC_MSG(LOGL_ERROR, "Circuit Pool List has invalid length.\n");
+			return -EINVAL;
+		}
+		memcpy(r->cpl.pool, ie_circuit_pool_list->val, ie_circuit_pool_list->len);
+		r->cpl.list_len = ie_circuit_pool_list->len;
+		r->cpl_present = true;
+	}
+
+	/* Codec List (BSS Supported) 3.2.2.103 */
+	if (ie_codec_list_bss_supported) {
+		rc = gsm0808_dec_speech_codec_list(&r->codec_list_bss_supported,
+						   ie_codec_list_bss_supported->val, ie_codec_list_bss_supported->len);
+		if (rc < 0) {
+			LOG_RAN_A_DEC_MSG(LOGL_ERROR,
+					  "Complete Layer 3 Information: unable to decode IE Codec List (BSS Supported)"
+					  " (rc=%d), continuing anyway\n", rc);
+			/* This IE is not critical, do not abort with error. */
+		} else
+			r->codec_list_present = true;
+	}
+
+	return ran_decoded(ran_dec, &ran_dec_msg);
+}
+
+static int ran_a_decode_vgcs_vbs_queuing_ind(struct ran_dec *ran_dec, const struct msgb *msg,
+					     const struct tlv_parsed *tp)
+{
+	struct ran_msg ran_dec_msg = {
+		.msg_type = RAN_MSG_VGCS_VBS_QUEUING_IND,
+		.msg_name = "BSSMAP VGCS/VBS QUEUING INDICATION",
+	};
+
+	return ran_decoded(ran_dec, &ran_dec_msg);
+}
+
+static int ran_a_decode_uplink_request(struct ran_dec *ran_dec, const struct msgb *msg, const struct tlv_parsed *tp)
+{
+	struct ran_msg ran_dec_msg = {
+		.msg_type = RAN_MSG_UPLINK_REQUEST,
+		.msg_name = "BSSMAP UPLINK REQUEST",
+	};
+	struct gsm0808_uplink_request *r = &ran_dec_msg.uplink_request;
+	int rc;
+
+	const struct tlv_p_entry *ie_talker_priority = TLVP_GET(tp, GSM0808_IE_TALKER_PRIORITY);
+	const struct tlv_p_entry *ie_cell_id = TLVP_GET(tp, GSM0808_IE_CELL_IDENTIFIER);
+	const struct tlv_p_entry *ie_l3_info = TLVP_GET(tp, GSM0808_IE_LAYER_3_INFORMATION);
+	const struct tlv_p_entry *ie_mi = TLVP_GET(tp, GSM0808_IE_MOBILE_IDENTITY);
+
+	/* Talker Priority, 3.2.2.89 */
+	if (ie_talker_priority) {
+		r->talker_priority = ie_talker_priority->val[0] & 0x03;
+		r->talker_priority_present = true;
+	}
+
+	/* Cell Identifier, 3.2.2.17 */
+	if (ie_cell_id) {
+		rc = gsm0808_dec_cell_id(&r->cell_identifier, ie_cell_id->val, ie_cell_id->len);
+		if (rc < 0) {
+			LOG_RAN_A_DEC_MSG(LOGL_ERROR, "Decoding Cell Identifier gave rc=%d\n", rc);
+			return -EINVAL;
+		}
+	}
+
+	/* Layer 3 Information, 3.2.2.24 */
+	if (ie_l3_info && ie_l3_info->len) {
+		if (ie_l3_info->len > LAYER_3_INFORMATION_MAXLEN) {
+			LOG_RAN_A_DEC_MSG(LOGL_ERROR, "Call Identifier has invalid length.\n");
+			return -EINVAL;
+		}
+		memcpy(r->l3.l3, ie_l3_info->val, ie_l3_info->len);
+		r->l3.l3_len = ie_l3_info->len;
+		r->l3_present = true;
+	}
+
+	/* Mobile Identity,  3.2.2.41 */
+	if (ie_mi) {
+		if (osmo_mobile_identity_decode(&r->mi, ie_mi->val, ie_mi->len, false)) {
+			LOG_RAN_A_DEC_MSG(LOGL_ERROR, "Decoding Mobile Identity gave rc=%d\n", rc);
+			return -EINVAL;
+		}
+		r->mi_present = true;
+	}
+
+	return ran_decoded(ran_dec, &ran_dec_msg);
+}
+
+static int ran_a_decode_uplink_request_cnf(struct ran_dec *ran_dec, const struct msgb *msg, const struct tlv_parsed *tp)
+{
+	struct ran_msg ran_dec_msg = {
+		.msg_type = RAN_MSG_UPLINK_REQUEST_CNF,
+		.msg_name = "BSSMAP UPLINK REQUEST CONFIRM",
+	};
+	struct gsm0808_uplink_request_cnf *r = &ran_dec_msg.uplink_request_cnf;
+	int rc;
+
+	const struct tlv_p_entry *ie_cell_id = TLVP_GET(tp, GSM0808_IE_CELL_IDENTIFIER);
+	const struct tlv_p_entry *ie_talker_identity = TLVP_GET(tp, GSM0808_IE_TALKER_IDENTITY);
+	const struct tlv_p_entry *ie_l3_info = TLVP_GET(tp, GSM0808_IE_LAYER_3_INFORMATION);
+
+	/* Cell Identifier, 3.2.2.17 */
+	if (!ie_cell_id) {
+		LOG_RAN_A_DEC_MSG(LOGL_ERROR, "Mandatory IE missing: Cell Identifier\n");
+		return -EINVAL;
+	}
+	rc = gsm0808_dec_cell_id(&r->cell_identifier, ie_cell_id->val, ie_cell_id->len);
+	if (rc < 0) {
+		LOG_RAN_A_DEC_MSG(LOGL_ERROR, "Decoding Cell Identifier gave rc=%d\n", rc);
+		return -EINVAL;
+	}
+
+	/* Talker Identity, 3.2.2.91 */
+	if (ie_talker_identity) {
+		rc = gsm0808_dec_talker_identity(&r->talker_identity, ie_talker_identity->val, ie_talker_identity->len);
+		if (rc < 0) {
+			LOG_RAN_A_DEC_MSG(LOGL_ERROR, "Decoding Talker Identity gave rc=%d\n", rc);
+			return -EINVAL;
+		}
+		r->talker_identity_present = true;
+	}
+
+	/* Layer 3 Information, 3.2.2.24 */
+	if (!ie_l3_info) {
+		LOG_RAN_A_DEC_MSG(LOGL_ERROR, "Mandatory IE missing: Layer 3 Information\n");
+		return -EINVAL;
+	}
+	if (ie_l3_info->len > LAYER_3_INFORMATION_MAXLEN) {
+		LOG_RAN_A_DEC_MSG(LOGL_ERROR, "Call Identifier has invalid length.\n");
+		return -EINVAL;
+	}
+	memcpy(r->l3.l3, ie_l3_info->val, ie_l3_info->len);
+	r->l3.l3_len = ie_l3_info->len;
+
+	return ran_decoded(ran_dec, &ran_dec_msg);
+}
+
+static int ran_a_decode_uplink_application_data(struct ran_dec *ran_dec, const struct msgb *msg,
+						const struct tlv_parsed *tp)
+{
+	struct ran_msg ran_dec_msg = {
+		.msg_type = RAN_MSG_UPLINK_APPLICATION_DATA,
+		.msg_name = "BSSMAP UPLINK APPLICATION DATA",
+	};
+	struct gsm0808_uplink_app_data *r = &ran_dec_msg.uplink_app_data;
+	int rc;
+
+	const struct tlv_p_entry *ie_cell_id = TLVP_GET(tp, GSM0808_IE_CELL_IDENTIFIER);
+	const struct tlv_p_entry *ie_l3_info = TLVP_GET(tp, GSM0808_IE_LAYER_3_INFORMATION);
+	const struct tlv_p_entry *ie_app_data = TLVP_GET(tp, GSM0808_IE_APP_DATA);
+
+	/* Cell Identifier, 3.2.2.17 */
+	if (!ie_cell_id) {
+		LOG_RAN_A_DEC_MSG(LOGL_ERROR, "Mandatory IE missing: Cell Identifier\n");
+		return -EINVAL;
+	}
+	rc = gsm0808_dec_cell_id(&r->cell_identifier, ie_cell_id->val, ie_cell_id->len);
+	if (rc < 0) {
+		LOG_RAN_A_DEC_MSG(LOGL_ERROR, "Decoding Cell Identifier gave rc=%d\n", rc);
+		return -EINVAL;
+	}
+
+	/* Layer 3 Information, 3.2.2.24 */
+	if (!ie_l3_info) {
+		LOG_RAN_A_DEC_MSG(LOGL_ERROR, "Mandatory IE missing: Layer 3 Information\n");
+		return -EINVAL;
+	}
+	if (ie_l3_info->len > LAYER_3_INFORMATION_MAXLEN) {
+		LOG_RAN_A_DEC_MSG(LOGL_ERROR, "Call Identifier has invalid length.\n");
+		return -EINVAL;
+	}
+	memcpy(r->l3.l3, ie_l3_info->val, ie_l3_info->len);
+	r->l3.l3_len = ie_l3_info->len;
+
+	/* Application Data Information, 3.2.2.100 */
+	if (!ie_app_data || ie_app_data->len < 1) {
+		LOG_RAN_A_DEC_MSG(LOGL_ERROR, "Mandatory IE missing: Application Data Information\n");
+		return -EINVAL;
+	}
+	r->bt_ind = ie_app_data->val[0] & 0x01;
+
+	return ran_decoded(ran_dec, &ran_dec_msg);
+}
+
+static int ran_a_decode_uplink_release_ind(struct ran_dec *ran_dec, const struct msgb *msg, const struct tlv_parsed *tp)
+{
+	struct ran_msg ran_dec_msg = {
+		.msg_type = RAN_MSG_UPLINK_RELEASE_IND,
+		.msg_name = "BSSMAP UPLINK RELEASE INDICATION",
+	};
+	struct gsm0808_uplink_release_ind *r = &ran_dec_msg.uplink_release_ind;
+
+	const struct tlv_p_entry *ie_cause = TLVP_GET(tp, GSM0808_IE_CAUSE);
+	const struct tlv_p_entry *ie_talker_priority = TLVP_GET(tp, GSM0808_IE_TALKER_PRIORITY);
+
+	/* Cause, 3.2.2.5 */
+	if (!ie_cause || ie_cause->len < 1) {
+		LOG_RAN_A_DEC_MSG(LOGL_ERROR, "Mandatory IE missing: Cause\n");
+		return -EINVAL;
+	}
+	r->cause = ie_cause->val[0];
+
+	/* Talker Priority, 3.2.2.89 */
+	if (ie_talker_priority) {
+		r->talker_priority = ie_talker_priority->val[0] & 0x03;
+		r->talker_priority_present = true;
+	}
+
+	return ran_decoded(ran_dec, &ran_dec_msg);
+}
+
+static int ran_a_decode_vgcs_vbs_assign_status(struct ran_dec *ran_dec, const struct msgb *msg,
+					       const struct tlv_parsed *tp)
+{
+	struct ran_msg ran_dec_msg = {
+		.msg_type = RAN_MSG_VGCS_VBS_ASSIGN_STATUS,
+		.msg_name = "BSSMAP VGCS/VBS ASSIGNMENT STATUS",
+	};
+	struct gsm0808_vgcs_vbs_assign_stat *r = &ran_dec_msg.vgcs_vbs_assign_stat;
+	int rc;
+
+	const struct tlv_p_entry *ie_cils_est = TLVP_GET(tp, GSM0808_IE_CELL_ID_LIST_SEG_EST_CELLS);
+	const struct tlv_p_entry *ie_cils_tbe = TLVP_GET(tp, GSM0808_IE_CELL_ID_LIST_SEG_CELLS_TBE);
+	const struct tlv_p_entry *ie_cils_rel = TLVP_GET(tp, GSM0808_IE_CELL_ID_LIST_SEG_REL_CELLS);
+	const struct tlv_p_entry *ie_cils_ne = TLVP_GET(tp, GSM0808_IE_CELL_ID_LIST_SEG_NE_CELLS);
+	const struct tlv_p_entry *ie_cell_status = TLVP_GET(tp, GSM0808_IE_VGCS_VBS_CELL_STATUS);
+
+	/* Cell Identifier List Segment, 3.2.2.27b */
+	if (ie_cils_est) {
+		rc = gsm0808_dec_cell_id_list_segment(&r->cils_est, ie_cils_est->val, ie_cils_est->len);
+		if (rc < 0) {
+			LOG_RAN_A_DEC_MSG(LOGL_ERROR, "Decoding Cell Identifier gave rc=%d\n", rc);
+			return -EINVAL;
+		}
+		r->cils_est_present = true;
+	}
+
+	/* Cell Identifier List Segment, 3.2.2.27c */
+	if (ie_cils_tbe) {
+		rc = gsm0808_dec_cell_id_list_segment(&r->cils_tbe, ie_cils_tbe->val, ie_cils_tbe->len);
+		if (rc < 0) {
+			LOG_RAN_A_DEC_MSG(LOGL_ERROR, "Decoding Cell Identifier gave rc=%d\n", rc);
+			return -EINVAL;
+		}
+		r->cils_tbe_present = true;
+	}
+
+	/* Cell Identifier List Segment, 3.2.2.27e */
+	if (ie_cils_rel) {
+		rc = gsm0808_dec_cell_id_list_segment(&r->cils_rel, ie_cils_rel->val, ie_cils_rel->len);
+		if (rc < 0) {
+			LOG_RAN_A_DEC_MSG(LOGL_ERROR, "Decoding Cell Identifier gave rc=%d\n", rc);
+			return -EINVAL;
+		}
+		r->cils_rel_present = true;
+	}
+
+	/* Cell Identifier List Segment, 3.2.2.27f */
+	if (ie_cils_ne) {
+		rc = gsm0808_dec_cell_id_list_segment(&r->cils_ne, ie_cils_ne->val, ie_cils_ne->len);
+		if (rc < 0) {
+			LOG_RAN_A_DEC_MSG(LOGL_ERROR, "Decoding Cell Identifier gave rc=%d\n", rc);
+			return -EINVAL;
+		}
+		r->cils_ne_present = true;
+	}
+
+	/* VGCS/VBS Cell Status, 3.2.2.94 */
+	if (ie_cell_status && ie_cell_status->len) {
+		r->cell_status = ie_cell_status->val[0] & 0x73;
+		r->cell_status_present = true;
+	}
+
+	return ran_decoded(ran_dec, &ran_dec_msg);
+}
+
 static int ran_a_decode_bssmap(struct ran_dec *ran_dec, struct msgb *bssmap)
 {
 	struct tlv_parsed tp[2];
@@ -813,6 +1245,26 @@ static int ran_a_decode_bssmap(struct ran_dec *ran_dec, struct msgb *bssmap)
 		return ran_a_decode_sapi_n_reject(ran_dec, bssmap, tp);
 	case BSS_MAP_MSG_LCLS_NOTIFICATION:
 		return ran_a_decode_lcls_notification(ran_dec, bssmap, tp);
+	case BSS_MAP_MSG_VGCS_VBS_SETUP_ACK:
+		return ran_a_decode_vgcs_vbs_setup_ack(ran_dec, bssmap, tp);
+	case BSS_MAP_MSG_VGCS_VBS_SETUP_REFUSE:
+		return ran_a_decode_vgcs_vbs_setup_refuse(ran_dec, bssmap, tp);
+	case BSS_MAP_MSG_VGCS_VBS_ASSIGNMENT_RESULT:
+		return ran_a_decode_vgcs_vbs_assign_res(ran_dec, bssmap, tp);
+	case BSS_MAP_MSG_VGCS_VBS_ASSIGNMENT_FAILURE:
+		return ran_a_decode_vgcs_vbs_assign_fail(ran_dec, bssmap, tp);
+	case BSS_MAP_MSG_VGCS_VBS_QUEUING_INDICATION:
+		return ran_a_decode_vgcs_vbs_queuing_ind(ran_dec, bssmap, tp);
+	case BSS_MAP_MSG_UPLINK_RQST:
+		return ran_a_decode_uplink_request(ran_dec, bssmap, tp);
+	case BSS_MAP_MSG_UPLINK_RQST_CONFIRMATION:
+		return ran_a_decode_uplink_request_cnf(ran_dec, bssmap, tp);
+	case BSS_MAP_MSG_UPLINK_APP_DATA:
+		return ran_a_decode_uplink_application_data(ran_dec, bssmap, tp);
+	case BSS_MAP_MSG_UPLINK_RELEASE_INDICATION:
+		return ran_a_decode_uplink_release_ind(ran_dec, bssmap, tp);
+	case BSS_MAP_MSG_VGCS_VBS_ASSIGNMENT_STATUS:
+		return ran_a_decode_vgcs_vbs_assign_status(ran_dec, bssmap, tp);
 
 	/* From current RAN peer, the Handover origin: */
 	case BSS_MAP_MSG_HANDOVER_REQUIRED:
@@ -1292,6 +1744,36 @@ static struct msgb *_ran_a_encode(struct osmo_fsm_inst *caller_fi, const struct 
 
 	case RAN_MSG_HANDOVER_FAILURE:
 		return ran_a_make_handover_failure(caller_fi, ran_enc_msg);
+
+	case RAN_MSG_VGCS_VBS_SETUP:
+		return gsm0808_create_vgcs_vbs_setup(&ran_enc_msg->vgcs_vbs_setup);
+
+	case RAN_MSG_VGCS_VBS_ASSIGN_REQ:
+		return gsm0808_create_vgcs_vbs_assign_req(&ran_enc_msg->vgcs_vbs_assign_req);
+
+	case RAN_MSG_UPLINK_REQUEST_ACK:
+		return gsm0808_create_uplink_request_ack(&ran_enc_msg->uplink_request_ack);
+
+	case RAN_MSG_UPLINK_REJECT_CMD:
+		return gsm0808_create_uplink_reject_cmd(&ran_enc_msg->uplink_reject_cmd);
+
+	case RAN_MSG_UPLINK_RELEASE_CMD:
+		return gsm0808_create_uplink_release_cmd(ran_enc_msg->uplink_release_cmd.cause);
+
+	case RAN_MSG_UPLINK_SEIZED_CMD:
+		return gsm0808_create_uplink_seized_cmd(&ran_enc_msg->uplink_seized_cmd);
+
+	case RAN_MSG_VGCS_ADDITIONAL_INFO:
+		return gsm0808_create_vgcs_additional_info(&ran_enc_msg->vgcs_additional_info.talker_identity);
+
+	case RAN_MSG_VGCS_VBS_AREA_CELL_INFO:
+		return gsm0808_create_vgcs_vbs_area_cell_info(&ran_enc_msg->vgcs_vbs_area_cell_info);
+
+	case RAN_MSG_VGCS_SMS:
+		return gsm0808_create_vgcs_sms(&ran_enc_msg->vgcs_sms.sms_to_vgcs);
+
+	case RAN_MSG_NOTIFICATION_DATA:
+		return gsm0808_create_notification_data(&ran_enc_msg->notification_data);
 
 	default:
 		LOG_RAN_A_ENC(caller_fi, LOGL_ERROR, "Unimplemented RAN-encode message type: %s\n",
