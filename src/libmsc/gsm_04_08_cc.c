@@ -414,8 +414,8 @@ static void cc_paging_cb(struct msc_a *msc_a, struct gsm_trans *trans)
 /* bridge channels of two transactions */
 static int tch_bridge(struct gsm_network *net, const struct gsm_mncc_bridge *bridge)
 {
-	struct gsm_trans *trans1 = trans_find_by_callref(net, bridge->callref[0]);
-	struct gsm_trans *trans2 = trans_find_by_callref(net, bridge->callref[1]);
+	struct gsm_trans *trans1 = trans_find_by_callref(net, TRANS_CC, bridge->callref[0]);
+	struct gsm_trans *trans2 = trans_find_by_callref(net, TRANS_CC, bridge->callref[1]);
 	struct call_leg *cl1;
 	struct call_leg *cl2;
 
@@ -537,8 +537,8 @@ static void gsm48_cc_timeout(void *arg)
 static inline void disconnect_bridge(struct gsm_network *net,
 				     const struct gsm_mncc_bridge *bridge, int err)
 {
-	struct gsm_trans *trans0 = trans_find_by_callref(net, bridge->callref[0]);
-	struct gsm_trans *trans1 = trans_find_by_callref(net, bridge->callref[1]);
+	struct gsm_trans *trans0 = trans_find_by_callref(net, TRANS_CC, bridge->callref[0]);
+	struct gsm_trans *trans1 = trans_find_by_callref(net, TRANS_CC, bridge->callref[1]);
 	struct gsm_mncc mx_rel;
 	if (!trans0 || !trans1)
 		return;
@@ -1995,7 +1995,7 @@ static int tch_rtp_create(struct gsm_network *net, const struct gsm_mncc_rtp *rt
 	struct gsm_trans *trans;
 
 	/* Find callref */
-	trans = trans_find_by_callref(net, rtp->callref);
+	trans = trans_find_by_callref(net, TRANS_CC, rtp->callref);
 	if (!trans) {
 		LOG_TRANS_CAT(trans, DMNCC, LOGL_ERROR, "RTP create for non-existing trans\n");
 		mncc_recv_rtp_err(net, trans, rtp->callref, MNCC_RTP_CREATE);
@@ -2120,7 +2120,7 @@ static int tch_rtp_connect(struct gsm_network *net, const struct gsm_mncc_rtp *r
 	struct rtp_stream *rtps;
 
 	/* Find callref */
-	trans = trans_find_by_callref(net, rtp->callref);
+	trans = trans_find_by_callref(net, TRANS_CC, rtp->callref);
 	if (!trans) {
 		LOG_TRANS_CAT(trans, DMNCC, LOGL_ERROR, "RTP connect for non-existing trans\n");
 		mncc_recv_rtp_err(net, trans, rtp->callref, MNCC_RTP_CONNECT);
@@ -2257,7 +2257,7 @@ static int mncc_tx_to_gsm_cc(struct gsm_network *net, const union mncc_msg *msg)
 	data = &msg->signal;
 
 	/* Find callref */
-	trans = trans_find_by_callref(net, data->callref);
+	trans = trans_find_by_callref(net, TRANS_CC, data->callref);
 
 	/* Callref unknown */
 	if (!trans) {

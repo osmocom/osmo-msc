@@ -441,7 +441,7 @@ int gsm0911_gsup_rx(struct gsup_client_mux *gcm, void *data, const struct osmo_g
 	log_set_context(LOG_CTX_VLR_SUBSCR, vsub);
 
 	/* Attempt to find DTAP-transaction */
-	trans = trans_find_by_callref(net, gsup_msg->session_id);
+	trans = trans_find_by_callref(net, TRANS_USSD, gsup_msg->session_id);
 
 	/* Handle errors */
 	if (OSMO_GSUP_IS_MSGT_ERROR(gsup_msg->message_type)) {

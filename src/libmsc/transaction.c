@@ -73,16 +73,17 @@ struct gsm_trans *trans_find_by_id(const struct msc_a *msc_a,
 
 /*! Find a transaction by call reference
  * \param[in] net Network in which we should search
+ * \param[in] type Transaction type (e.g. TRANS_CC)
  * \param[in] callref Call Reference of transaction
  * \returns Matching transaction, if any
  */
-struct gsm_trans *trans_find_by_callref(const struct gsm_network *net,
+struct gsm_trans *trans_find_by_callref(const struct gsm_network *net, enum trans_type type,
 					uint32_t callref)
 {
 	struct gsm_trans *trans;
 
 	llist_for_each_entry(trans, &net->trans_list, entry) {
-		if (trans->callref == callref)
+		if (trans->callref == callref && trans->type == type)
 			return trans;
 	}
 	return NULL;

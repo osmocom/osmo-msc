@@ -156,7 +156,7 @@ struct gsm_trans {
 struct gsm_trans *trans_find_by_type(const struct msc_a *msc_a, enum trans_type type);
 struct gsm_trans *trans_find_by_id(const struct msc_a *msc_a,
 				   enum trans_type type, uint8_t trans_id);
-struct gsm_trans *trans_find_by_callref(const struct gsm_network *net,
+struct gsm_trans *trans_find_by_callref(const struct gsm_network *net, enum trans_type type,
 					uint32_t callref);
 struct gsm_trans *trans_find_by_sm_rp_mr(const struct gsm_network *net,
 					 const struct vlr_subscr *vsub,
