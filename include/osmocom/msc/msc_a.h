@@ -40,9 +40,13 @@ struct ran_infra;
 
 #define MSC_A_USE_LOCATION_UPDATING	"lu"
 #define MSC_A_USE_CM_SERVICE_CC	"cm_service_cc"
+#define MSC_A_USE_CM_SERVICE_GCC	"cm_service_gcc"
+#define MSC_A_USE_CM_SERVICE_BCC	"cm_service_bcc"
 #define MSC_A_USE_CM_SERVICE_SMS	"cm_service_sms"
 #define MSC_A_USE_CM_SERVICE_SS	"cm_service_ss"
 #define MSC_A_USE_PAGING_RESPONSE	"paging-response"
+#define MSC_A_USE_GCC		"gcc"
+#define MSC_A_USE_BCC		"bcc"
 #define MSC_A_USE_CC		"cc"
 #define MSC_A_USE_SMS		"sms"
 #define MSC_A_USE_SMS_MMTS	"sms_mmts"

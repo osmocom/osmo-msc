@@ -351,6 +351,8 @@ void trans_conn_closed(const struct msc_a *msc_a)
 }
 
 const struct value_string trans_type_names[] = {
+	{ TRANS_GCC, "GCC" },
+	{ TRANS_BCC, "BCC" },
 	{ TRANS_CC, "CC" },
 	{ TRANS_SMS, "SMS" },
 	{ TRANS_USSD, "NCSS" },
@@ -361,6 +363,10 @@ const struct value_string trans_type_names[] = {
 uint8_t trans_type_to_gsm48_proto(enum trans_type type)
 {
 	switch (type) {
+	case TRANS_GCC:
+		return GSM48_PDISC_GROUP_CC;
+	case TRANS_BCC:
+		return GSM48_PDISC_BCAST_CC;
 	case TRANS_CC:
 	case TRANS_SILENT_CALL:
 		return GSM48_PDISC_CC;

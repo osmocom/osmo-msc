@@ -488,6 +488,16 @@ static bool msc_a_fsm_has_active_transactions(struct osmo_fsm_inst *fi)
 			 __func__);
 		return true;
 	}
+	if (osmo_use_count_by(&msc_a->use_count, MSC_A_USE_CM_SERVICE_GCC)) {
+		LOG_MSC_A(msc_a, LOGL_DEBUG, "%s: still awaiting MO GCC request after a CM Service Request\n",
+			 __func__);
+		return true;
+	}
+	if (osmo_use_count_by(&msc_a->use_count, MSC_A_USE_CM_SERVICE_BCC)) {
+		LOG_MSC_A(msc_a, LOGL_DEBUG, "%s: still awaiting MO BCC request after a CM Service Request\n",
+			 __func__);
+		return true;
+	}
 	if (osmo_use_count_by(&msc_a->use_count, MSC_A_USE_CM_SERVICE_SMS)) {
 		LOG_MSC_A(msc_a, LOGL_DEBUG, "%s: still awaiting MO SMS after a CM Service Request\n",
 			 __func__);
@@ -873,6 +883,8 @@ static void msc_a_fsm_releasing_onenter(struct osmo_fsm_inst *fi, uint32_t prev_
 		MSC_A_USE_CM_SERVICE_CC,
 		MSC_A_USE_CM_SERVICE_SMS,
 		MSC_A_USE_CM_SERVICE_SS,
+		MSC_A_USE_CM_SERVICE_GCC,
+		MSC_A_USE_CM_SERVICE_BCC,
 		MSC_A_USE_PAGING_RESPONSE,
 	};
 
@@ -1954,6 +1966,12 @@ const char *msc_a_cm_service_type_to_use(enum osmo_cm_service_type cm_service_ty
 
 	case GSM48_CMSERV_SUP_SERV:
 		return MSC_A_USE_CM_SERVICE_SS;
+
+	case GSM48_CMSERV_VGCS:
+		return MSC_A_USE_CM_SERVICE_GCC;
+
+	case GSM48_CMSERV_VBS:
+		return MSC_A_USE_CM_SERVICE_BCC;
 
 	default:
 		return NULL;

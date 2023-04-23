@@ -43,6 +43,8 @@ enum bridge_state {
 };
 
 enum trans_type {
+	TRANS_GCC = GSM48_PDISC_GROUP_CC,
+	TRANS_BCC = GSM48_PDISC_BCAST_CC,
 	TRANS_CC = GSM48_PDISC_CC,
 	TRANS_SMS = GSM48_PDISC_SMS,
 	TRANS_USSD = GSM48_PDISC_NC_SS,
@@ -178,6 +180,10 @@ void trans_conn_closed(const struct msc_a *msc_a);
 static inline int trans_log_subsys(enum trans_type type)
 {
 	switch (type) {
+	case TRANS_GCC:
+		return DGCC;
+	case TRANS_BCC:
+		return DBCC;
 	case TRANS_CC:
 	case TRANS_SILENT_CALL:
 		return DCC;
