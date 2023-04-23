@@ -18,8 +18,16 @@ struct ran_conn {
 	uint32_t sccp_conn_id;
 
 	/* MSC role that this RAN connection belongs to. This will be either an msc_i (currently active
-	 * connection) or an msc_t (transitory new connection during Handover). */
+	 * connection) or an msc_t (transitory new connection during Handover).
+	 * Used for usual L3 ran_conn to a subscriber. */
 	struct osmo_fsm_inst *msc_role;
+
+	/* For VGCS/VBS, we have additional N connections to BSS. When receiving messages for a group call peer,
+	 * dispatch to the VGCS management. */
+	struct {
+		void *bss;
+		void *cell;
+	} vgcs;
 
 	bool closing;
 };

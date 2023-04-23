@@ -55,6 +55,7 @@ libmsc_a_SOURCES = \
 	msc_t.c \
 	msc_t_remote.c \
 	msc_ho.c \
+	msc_vgcs.c \
 	neighbor_ident.c \
 	neighbor_ident_vty.c \
 	paging.c \

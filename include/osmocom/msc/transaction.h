@@ -99,6 +99,25 @@ struct gsm_trans {
 
 	union {
 		struct {
+			/* State machine of setup process towards BSS */
+			struct osmo_fsm_inst *fi;
+			/* BSS list with all VGCS/VBS calls */
+			struct llist_head bss_list;
+			/* Inactivity timeout and timer */
+			int inactivity_to;
+			struct osmo_timer_list timer_inactivity;
+			/* If talker's downlink shall be muted */
+			bool mute_talker;
+			/* Indicator, if Uplink is used in one cell */
+			bool uplink_busy;
+			/* BSS that uses the uplink */
+			struct vgcs_bss *uplink_bss;
+			/* Cell that uses the uplink */
+			struct vgcs_bss_cell *uplink_cell;
+			/* If uplink is used by the originator */
+			bool uplink_originator;
+		} gcc;
+		struct {
 
 			/* current call state */
 			int state;

@@ -25,6 +25,7 @@ noinst_HEADERS = \
 	msc_a_remote.h \
 	msc_common.h \
 	msc_ho.h \
+	msc_vgcs.h \
 	msc_i.h \
 	msc_i_remote.h \
 	msc_roles.h \

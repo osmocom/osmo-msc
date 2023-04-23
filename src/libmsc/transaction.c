@@ -29,6 +29,7 @@
 #include <osmocom/msc/msub.h>
 #include <osmocom/msc/paging.h>
 #include <osmocom/msc/silent_call.h>
+#include <osmocom/msc/msc_vgcs.h>
 
 void *tall_trans_ctx;
 
@@ -241,6 +242,14 @@ void trans_free(struct gsm_trans *trans)
 	LOG_TRANS(trans, LOGL_DEBUG, "Freeing transaction\n");
 
 	switch (trans->type) {
+	case TRANS_GCC:
+		gsm44068_bcc_gcc_trans_free(trans);
+		usage_token = MSC_A_USE_GCC;
+		break;
+	case TRANS_BCC:
+		gsm44068_bcc_gcc_trans_free(trans);
+		usage_token = MSC_A_USE_BCC;
+		break;
 	case TRANS_CC:
 		_gsm48_cc_trans_free(trans);
 		usage_token = MSC_A_USE_CC;
@@ -390,6 +399,12 @@ const char *trans_name(const struct gsm_trans *trans)
 	case TRANS_CC:
 		snprintf(namebuf, sizeof(namebuf), "%s:%s",
 			 trans_type_name(trans->type), gsm48_cc_state_name(trans->cc.state));
+		return namebuf;
+
+	case TRANS_GCC:
+	case TRANS_BCC:
+		snprintf(namebuf, sizeof(namebuf), "%s:%s",
+			 trans_type_name(trans->type), gsm44068_group_id_string(trans->callref));
 		return namebuf;
 
 	default:
