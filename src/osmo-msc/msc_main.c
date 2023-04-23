@@ -439,6 +439,18 @@ static const struct log_info_cat msc_default_categories[] = {
 		.color = "\033[1;32m",
 		.enabled = 1, .loglevel = LOGL_NOTICE,
 	},
+	[DBCC] = {
+		.name = "DBCC",
+		.description = "Layer3 Broadcast Call Control (BCC)",
+		.color = "\033[1;32m",
+		.enabled = 1, .loglevel = LOGL_NOTICE,
+	},
+	[DGCC] = {
+		.name = "DGCC",
+		.description = "Layer3 Group Call Control (GCC)",
+		.color = "\033[1;32m",
+		.enabled = 1, .loglevel = LOGL_NOTICE,
+	},
 	[DMM] = {
 		.name = "DMM",
 		.description = "Layer3 Mobility Management (MM)",

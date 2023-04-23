@@ -6,6 +6,8 @@
 enum {
 	DRLL,
 	DCC,
+	DBCC,
+	DGCC,
 	DMM,
 	DRR,
 	DLCLS,
