@@ -330,7 +330,17 @@ static int msc_vty_go_parent(struct vty *vty)
 	case SMPP_NODE:
 	case MSC_NODE:
 	case MNCC_INT_NODE:
+	case ASCI_NODE:
 		vty->node = CONFIG_NODE;
+		vty->index = NULL;
+		break;
+	case GCR_NODE:
+		vty->node = ASCI_NODE;
+		vty->index = NULL;
+		break;
+	case VGC_NODE:
+	case VBC_NODE:
+		vty->node = GCR_NODE;
 		vty->index = NULL;
 		break;
 	case SUBSCR_NODE:

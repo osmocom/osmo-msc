@@ -26,6 +26,10 @@ enum bsc_vty_node {
 	HLR_NODE,
 	CFG_SGS_NODE,
 	SMSC_NODE,
+	ASCI_NODE,
+	GCR_NODE,
+	VGC_NODE,
+	VBC_NODE,
 };
 
 int bsc_vty_init_extra(void);

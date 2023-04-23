@@ -68,6 +68,7 @@
 #include <osmocom/msc/sccp_ran.h>
 #include <osmocom/msc/ran_peer.h>
 #include <osmocom/msc/ran_infra.h>
+#include <osmocom/msc/asci_vty.h>
 
 static struct gsm_network *gsmnet = NULL;
 
@@ -2078,6 +2079,7 @@ void msc_vty_init(struct gsm_network *msc_network)
 #endif
 	sgs_vty_init();
 	smsc_vty_init(msc_network);
+	asci_vty_init(msc_network);
 
 	osmo_fsm_vty_add_cmds();
 
