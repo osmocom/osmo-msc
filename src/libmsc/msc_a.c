@@ -48,6 +48,7 @@
 #include <osmocom/msc/rtp_stream.h>
 #include <osmocom/msc/msc_ho.h>
 #include <osmocom/msc/codec_mapping.h>
+#include <osmocom/msc/msc_vgcs.h>
 
 #define MSC_A_USE_WAIT_CLEAR_COMPLETE "wait-Clear-Complete"
 
@@ -1716,6 +1717,136 @@ int msc_a_ran_dec_from_msc_i(struct msc_a *msc_a, struct msc_a_ran_dec_data *d)
 		break;
 	}
 	return rc;
+}
+
+static int msc_a_rx_vgcs_bss_decoded(struct osmo_fsm_inst *caller_fi, void *caller_data, const struct ran_msg *msg)
+{
+	struct vgcs_bss *bss = caller_data;
+	struct msc_a *msc_a = (bss->trans) ? bss->trans->msc_a : NULL;
+	int rc = 0;
+
+	switch (msg->msg_type) {
+	case RAN_MSG_VGCS_VBS_SETUP_ACK:
+		/* The BSS accepts VGCS/VBS and sends us supported features. */
+		vgcs_vbs_setup_ack(bss, msg);
+		break;
+	case RAN_MSG_VGCS_VBS_SETUP_REFUSE:
+		/* The BSS refuses VGCS/VBS. */
+		vgcs_vbs_setup_refuse(bss, msg);
+		break;
+	case RAN_MSG_UPLINK_REQUEST:
+		/* A mobile station requests the uplink on a VGCS channel. */
+		vgcs_uplink_request(bss, msg);
+		break;
+	case RAN_MSG_UPLINK_REQUEST_CNF:
+		/* The uplink on a VGCS channel has been established. */
+		vgcs_uplink_request_cnf(bss, msg);
+		break;
+	case RAN_MSG_UPLINK_APPLICATION_DATA:
+		/* Application data received on the uplink of a VGCS channel. */
+		vgcs_app_data(bss, msg);
+		break;
+	case RAN_MSG_DTAP:
+		/* BSS confirms the release of the channel. */
+		vgcs_bss_dtap(bss, msg);
+		break;
+	case RAN_MSG_UPLINK_RELEASE_IND:
+		/* A mobile station releases the uplink on a VGCS channel. */
+		vgcs_uplink_release_ind(bss, msg);
+		break;
+	case RAN_MSG_CLEAR_REQUEST:
+		/* BSS indicated that the channel has been released. */
+		vgcs_vbs_clear_req(bss, msg);
+		break;
+	case RAN_MSG_CLEAR_COMPLETE:
+		/* BSS confirms the release of the channel. */
+		vgcs_vbs_clear_cpl(bss, msg);
+		break;
+	default:
+		LOG_MSC_A(msc_a, LOGL_ERROR, "VGCS message from BSS not implemented: %s\n",
+			  ran_msg_type_name(msg->msg_type));
+		rc = -ENOTSUP;
+		break;
+	}
+	return rc;
+}
+
+int msc_a_rx_vgcs_bss(struct vgcs_bss *bss, struct ran_conn *from_conn, struct msgb *msg)
+{
+	struct ran_dec ran_dec;
+
+	/* Feed through the decoding mechanism ran_msg. The decoded message arrives in msc_a_rx_vgcs_decoded() */
+	ran_dec = (struct ran_dec) {
+		.caller_data = bss,
+		.decode_cb = msc_a_rx_vgcs_bss_decoded,
+	};
+	struct ran_peer *ran_peer = from_conn->ran_peer;
+	struct ran_infra *ran = ran_peer->sri->ran;
+	if (!ran->ran_dec_l2) {
+		LOGP(DMSC, LOGL_ERROR, "No ran_dec_l2() defined for RAN type %s\n",
+		     osmo_rat_type_name(ran->type));
+		return -ENOTSUP;
+	}
+	return ran->ran_dec_l2(&ran_dec, msg);
+}
+
+static int msc_a_rx_vgcs_cell_decoded(struct osmo_fsm_inst *caller_fi, void *caller_data, const struct ran_msg *msg)
+{
+	struct vgcs_bss_cell *cell = caller_data;
+	struct msc_a *msc_a = (cell->bss && cell->bss->trans) ? cell->bss->trans->msc_a : NULL;
+	int rc = 0;
+
+	switch (msg->msg_type) {
+	case RAN_MSG_VGCS_VBS_ASSIGN_RES:
+		/* The BSS accepts VGCS/VBS channel assignment. */
+		vgcs_vbs_assign_result(cell, msg);
+		break;
+	case RAN_MSG_VGCS_VBS_ASSIGN_FAIL:
+		/* The BSS refuses VGCS/VBS channel assignment. */
+		vgcs_vbs_assign_fail(cell, msg);
+		break;
+	case RAN_MSG_VGCS_VBS_QUEUING_IND:
+		/* The BSS needs more time for VGCS/VBS channel assignment. */
+		vgcs_vbs_queuing_ind(cell);
+		break;
+	case RAN_MSG_VGCS_VBS_ASSIGN_STATUS:
+		/* The BSS gives cell status about VGCS/VBS channel. */
+		vgcs_vbs_assign_status(cell, msg);
+		break;
+	case RAN_MSG_CLEAR_REQUEST:
+		/* BSS indicated that the channel has been released. */
+		vgcs_vbs_clear_req_channel(cell, msg);
+		break;
+	case RAN_MSG_CLEAR_COMPLETE:
+		/* BSS confirms the release of the channel. */
+		vgcs_vbs_clear_cpl_channel(cell, msg);
+		break;
+	default:
+		LOG_MSC_A(msc_a, LOGL_ERROR, "Message from BSS leg not implemented: %s\n",
+			  ran_msg_type_name(msg->msg_type));
+		rc = -ENOTSUP;
+		break;
+	}
+	return rc;
+}
+
+int msc_a_rx_vgcs_cell(struct vgcs_bss_cell *cell, struct ran_conn *from_conn, struct msgb *msg)
+{
+	struct ran_dec ran_dec;
+
+	/* Feed through the decoding mechanism ran_msg. The decoded message arrives in msc_a_rx_vgcs_decoded() */
+	ran_dec = (struct ran_dec) {
+		.caller_data = cell,
+		.decode_cb = msc_a_rx_vgcs_cell_decoded,
+	};
+	struct ran_peer *ran_peer = from_conn->ran_peer;
+	struct ran_infra *ran = ran_peer->sri->ran;
+	if (!ran->ran_dec_l2) {
+		LOGP(DMSC, LOGL_ERROR, "No ran_dec_l2() defined for RAN type %s\n",
+		     osmo_rat_type_name(ran->type));
+		return -ENOTSUP;
+	}
+	return ran->ran_dec_l2(&ran_dec, msg);
 }
 
 static int msc_a_ran_dec_from_msc_t(struct msc_a *msc_a, struct msc_a_ran_dec_data *d)
