@@ -541,6 +541,11 @@ static const struct log_info_cat msc_default_categories[] = {
 		.description = "Supplementary Services",
 		.enabled = 1, .loglevel = LOGL_NOTICE,
 	},
+	[DASCI] = {
+		.name = "DASCI",
+		.description = "Advanced Speech Call Items",
+		.enabled = 1, .loglevel = LOGL_NOTICE,
+	},
 };
 
 static int filter_fn(const struct log_context *ctx, struct log_target *tar)
