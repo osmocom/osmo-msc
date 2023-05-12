@@ -29,6 +29,8 @@ libmsc_a_SOURCES = \
 	cell_id_list.c \
 	codec_filter.c \
 	codec_mapping.c \
+	csd_bs.c \
+	csd_filter.c \
 	sccp_ran.c \
 	msc_vty.c \
 	db.c \

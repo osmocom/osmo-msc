@@ -9,6 +9,7 @@
 #include <osmocom/msc/msc_a.h>
 #include <osmocom/msc/debug.h>
 #include <osmocom/msc/codec_filter.h>
+#include <osmocom/msc/csd_filter.h>
 #include <osmocom/gsm/gsm0411_smc.h>
 #include <osmocom/gsm/gsm0411_smr.h>
 
@@ -107,8 +108,9 @@ struct gsm_trans {
 			struct osmo_lcls *lcls;
 			/* SDP as last received from the remote call leg. */
 			struct sdp_msg remote;
-			/* Track codec choices from BSS and remote call leg */
+			/* Track codec/CSD choices from BSS and remote call leg */
 			struct codec_filter codecs;
+			struct csd_filter csd;
 			/* Resulting choice from codecs/bearer services and the
 			 * local RTP address to be sent to the remote call leg. */
 			struct sdp_msg local;

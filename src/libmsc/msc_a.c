@@ -640,23 +640,48 @@ static void msc_a_call_leg_ran_local_addr_available(struct msc_a *msc_a)
 	trans_cc_filter_run(cc_trans);
 	LOG_TRANS(cc_trans, LOGL_DEBUG, "Sending Assignment Command\n");
 
-	if (!cc_trans->cc.local.audio_codecs.count) {
-		LOG_TRANS(cc_trans, LOGL_ERROR, "Assignment not possible, no matching codec: %s\n",
-			  codec_filter_to_str(&cc_trans->cc.codecs, &cc_trans->cc.local, &cc_trans->cc.remote));
+	switch (cc_trans->bearer_cap.transfer) {
+	case GSM48_BCAP_ITCAP_SPEECH:
+		if (!cc_trans->cc.local.audio_codecs.count) {
+			LOG_TRANS(cc_trans, LOGL_ERROR, "Assignment not possible, no matching codec: %s\n",
+				  codec_filter_to_str(&cc_trans->cc.codecs, &cc_trans->cc.local, &cc_trans->cc.remote));
+			call_leg_release(msc_a->cc.call_leg);
+			return;
+		}
+
+		/* Compose 48.008 Channel Type from the current set of codecs
+		 * determined from both local and remote codec capabilities. */
+		if (sdp_audio_codecs_to_gsm0808_channel_type(&channel_type, &cc_trans->cc.local.audio_codecs)) {
+			LOG_MSC_A(msc_a, LOGL_ERROR, "Cannot compose Channel Type (Permitted Speech) from codecs: %s\n",
+				  codec_filter_to_str(&cc_trans->cc.codecs, &cc_trans->cc.local, &cc_trans->cc.remote));
+			trans_free(cc_trans);
+			return;
+		}
+		break;
+	case GSM48_BCAP_ITCAP_UNR_DIG_INF:
+		if (!cc_trans->cc.local.bearer_services.count) {
+			LOG_TRANS(cc_trans, LOGL_ERROR, "Assignment not possible, no matching bearer service: %s\n",
+				  csd_filter_to_str(&cc_trans->cc.csd, &cc_trans->cc.local, &cc_trans->cc.remote));
+			call_leg_release(msc_a->cc.call_leg);
+			return;
+		}
+
+		/* Compose 48.008 Channel Type from the current set of bearer
+		 * services determined from local and remote capabilities. */
+		if (csd_bs_list_to_gsm0808_channel_type(&channel_type, &cc_trans->cc.local.bearer_services)) {
+			LOG_MSC_A(msc_a, LOGL_ERROR, "Cannot compose channel type from: %s\n",
+				  csd_filter_to_str(&cc_trans->cc.csd, &cc_trans->cc.local, &cc_trans->cc.remote));
+			return;
+		}
+		break;
+	default:
+		LOG_TRANS(cc_trans, LOGL_ERROR, "Assignment not possible for information transfer capability %d\n",
+			  cc_trans->bearer_cap.transfer);
 		call_leg_release(msc_a->cc.call_leg);
 		return;
 	}
 
-	/* Compose 48.008 Channel Type from the current set of codecs determined from both local and remote codec
-	 * capabilities. */
-	if (sdp_audio_codecs_to_gsm0808_channel_type(&channel_type, &cc_trans->cc.local.audio_codecs)) {
-		LOG_MSC_A(msc_a, LOGL_ERROR, "Cannot compose Channel Type (Permitted Speech) from codecs: %s\n",
-			  codec_filter_to_str(&cc_trans->cc.codecs, &cc_trans->cc.local, &cc_trans->cc.remote));
-		trans_free(cc_trans);
-		return;
-	}
-
-	/* The RAN side RTP address is known, so the voice Assignment can commence. */
+	/* The RAN side RTP address is known, so the voice/CSD Assignment can commence. */
 	msg = (struct ran_msg){
 		.msg_type = RAN_MSG_ASSIGNMENT_COMMAND,
 		.assignment_command = {

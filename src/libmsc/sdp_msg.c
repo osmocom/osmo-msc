@@ -657,6 +657,10 @@ int sdp_msg_to_str_buf(char *buf, size_t buflen, const struct sdp_msg *sdp)
 	OSMO_STRBUF_PRINTF(sb, OSMO_SOCKADDR_STR_FMT, OSMO_SOCKADDR_STR_FMT_ARGS(&sdp->rtp));
 	OSMO_STRBUF_PRINTF(sb, "{");
 	OSMO_STRBUF_APPEND(sb, sdp_audio_codecs_to_str_buf, &sdp->audio_codecs);
+	if (sdp->bearer_services.count) {
+		OSMO_STRBUF_PRINTF(sb, ",");
+		OSMO_STRBUF_APPEND(sb, csd_bs_list_to_str_buf, &sdp->bearer_services);
+	}
 	OSMO_STRBUF_PRINTF(sb, "}");
 	return sb.chars_needed;
 }
@@ -669,4 +673,16 @@ char *sdp_msg_to_str_c(void *ctx, const struct sdp_msg *sdp)
 const char *sdp_msg_to_str(const struct sdp_msg *sdp)
 {
 	return sdp_msg_to_str_c(OTC_SELECT, sdp);
+}
+
+void sdp_audio_codecs_set_csd(struct sdp_audio_codecs *ac)
+{
+	*ac = (struct sdp_audio_codecs){
+		.count = 1,
+		.codec = {{
+			.payload_type = 120,
+			.subtype_name = "CLEARMODE",
+			.rate = 8000,
+		}},
+	};
 }

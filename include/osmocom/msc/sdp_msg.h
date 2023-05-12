@@ -4,6 +4,8 @@
 #include <osmocom/core/utils.h>
 #include <osmocom/core/sockaddr_str.h>
 
+#include <osmocom/msc/csd_bs.h>
+
 extern const struct value_string sdp_msg_payload_type_names[];
 static inline const char *sdp_msg_payload_type_name(unsigned int payload_type)
 { return get_value_string(sdp_msg_payload_type_names, payload_type); }
@@ -36,6 +38,7 @@ struct sdp_msg {
 	unsigned int ptime;
 	enum sdp_mode_e mode;
 	struct sdp_audio_codecs audio_codecs;
+	struct csd_bs_list bearer_services;
 };
 
 #define foreach_sdp_audio_codec(/* struct sdp_audio_codec* */ CODEC, \
@@ -80,3 +83,5 @@ const char *sdp_audio_codecs_to_str(const struct sdp_audio_codecs *ac);
 int sdp_msg_to_str_buf(char *buf, size_t buflen, const struct sdp_msg *sdp);
 char *sdp_msg_to_str_c(void *ctx, const struct sdp_msg *sdp);
 const char *sdp_msg_to_str(const struct sdp_msg *sdp);
+
+void sdp_audio_codecs_set_csd(struct sdp_audio_codecs *ac);

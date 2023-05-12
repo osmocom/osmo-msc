@@ -3,6 +3,8 @@ noinst_HEADERS = \
 	cell_id_list.h \
 	codec_filter.h \
 	codec_mapping.h \
+	csd_bs.h \
+	csd_filter.h \
 	db.h \
 	debug.h \
 	e_link.h \
