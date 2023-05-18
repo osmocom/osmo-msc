@@ -1,6 +1,6 @@
 /* Directing individual GSUP messages to their respective handlers. */
 /*
- * (C) 2019 by sysmocom - s.m.f.c. GmbH <info@sysmocom.de>
+ * (C) 2019 by sysmocom - s.f.m.c. GmbH <info@sysmocom.de>
  * All Rights Reserved
  *
  * Author: Neels Hofmeyr

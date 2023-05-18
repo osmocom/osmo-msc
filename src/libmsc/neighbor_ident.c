@@ -1,6 +1,6 @@
 /* Manage identity of neighboring BSS cells for inter-MSC handover. */
 /*
- * (C) 2018-2019 by sysmocom - s.m.f.c. GmbH <info@sysmocom.de>
+ * (C) 2018-2019 by sysmocom - s.f.m.c. GmbH <info@sysmocom.de>
  * All Rights Reserved
  *
  * SPDX-License-Identifier: AGPL-3.0+
