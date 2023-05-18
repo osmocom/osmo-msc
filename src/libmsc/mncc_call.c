@@ -2,7 +2,7 @@
 /* At the time of writing, this is only used for inter-MSC handover: forward a voice stream to a remote MSC.
  * Maybe it makes sense to also use it for all "normal" external call management at some point. */
 /*
- * (C) 2019 by sysmocom - s.m.f.c. GmbH <info@sysmocom.de>
+ * (C) 2019 by sysmocom - s.f.m.c. GmbH <info@sysmocom.de>
  * All Rights Reserved
  *
  * SPDX-License-Identifier: AGPL-3.0+

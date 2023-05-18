@@ -1,5 +1,5 @@
 /* SMSC interface to VTY */
-/* (C) 2016-2018 by sysmocom s.m.f.c. GmbH <info@sysmocom.de>
+/* (C) 2016-2018 by sysmocom s.f.m.c. GmbH <info@sysmocom.de>
  * Based on OpenBSC interface to quagga VTY (libmsc/vty_interface_layer3.c)
  * (C) 2009-2022 by Harald Welte <laforge@gnumonks.org>
  * (C) 2009-2011 by Holger Hans Peter Freyther

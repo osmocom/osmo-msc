@@ -1,6 +1,6 @@
 /* Filter/overlay codec selections for a voice call, across MS, RAN and CN limitations */
 /*
- * (C) 2019-2023 by sysmocom - s.m.f.c. GmbH <info@sysmocom.de>
+ * (C) 2019-2023 by sysmocom - s.f.m.c. GmbH <info@sysmocom.de>
  * All Rights Reserved
  *
  * Author: Neels Hofmeyr
