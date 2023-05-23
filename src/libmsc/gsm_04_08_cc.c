@@ -673,7 +673,7 @@ static int gsm48_cc_rx_setup(struct gsm_trans *trans, struct msgb *msg)
 	/* MO call leg starting, gather all codec information so far known: */
 	trans_cc_filter_init(trans);
 	trans_cc_filter_set_ran(trans, trans->msc_a->c.ran->type);
-	codec_filter_set_bss(&trans->cc.codecs, &trans->msc_a->cc.compl_l3_codec_list_bss_supported);
+	trans_cc_filter_set_bss(trans, trans->msc_a);
 	if (setup.fields & MNCC_F_BEARER_CAP)
 		trans_cc_filter_set_ms_from_bc(trans, &trans->bearer_cap);
 	codec_filter_run(&trans->cc.codecs);
@@ -806,7 +806,7 @@ static int gsm48_cc_tx_setup(struct gsm_trans *trans, void *arg)
 	 * actually the remote call leg's Bearer Capabilities. */
 	trans_cc_filter_init(trans);
 	trans_cc_filter_set_ran(trans, trans->msc_a->c.ran->type);
-	codec_filter_set_bss(&trans->cc.codecs, &trans->msc_a->cc.compl_l3_codec_list_bss_supported);
+	trans_cc_filter_set_bss(trans, trans->msc_a);
 	/* sdp.remote: if SDP is included in the MNCC, take that as definitive list of remote audio codecs. */
 	rx_mncc_sdp(trans, setup->msg_type, setup->sdp);
 	/* sdp.remote: if there is no SDP information or we failed to parse it, try using the Bearer Capability from
