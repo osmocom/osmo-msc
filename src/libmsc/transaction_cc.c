@@ -24,6 +24,11 @@
 
 #include <osmocom/msc/transaction_cc.h>
 
+void trans_cc_filter_init(struct gsm_trans *trans)
+{
+	trans->cc.codecs = (struct codec_filter){};
+}
+
 void trans_cc_filter_set_ms_from_bc(struct gsm_trans *trans, const struct gsm_mncc_bearer_cap *bcap)
 {
 	trans->cc.codecs.ms = (struct sdp_audio_codecs){0};

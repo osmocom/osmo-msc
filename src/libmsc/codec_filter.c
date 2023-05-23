@@ -60,11 +60,6 @@ static void sdp_add_all_utran_codecs(struct sdp_audio_codecs *ac)
 		sdp_audio_codecs_add_speech_ver(ac, utran_codecs[i]);
 }
 
-void codec_filter_init(struct codec_filter *codec_filter)
-{
-	*codec_filter = (struct codec_filter){};
-}
-
 void codec_filter_set_ran(struct codec_filter *codec_filter, enum osmo_rat_type ran_type)
 {
 	codec_filter->ran = (struct sdp_audio_codecs){};
