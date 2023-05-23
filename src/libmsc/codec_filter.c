@@ -81,13 +81,6 @@ void codec_filter_set_ran(struct codec_filter *codec_filter, enum osmo_rat_type 
 	}
 }
 
-void codec_filter_set_ms_from_bc(struct codec_filter *codec_filter, const struct gsm_mncc_bearer_cap *ms_bearer_cap)
-{
-	codec_filter->ms = (struct sdp_audio_codecs){0};
-	if (ms_bearer_cap)
-		sdp_audio_codecs_from_bearer_cap(&codec_filter->ms, ms_bearer_cap);
-}
-
 void codec_filter_set_bss(struct codec_filter *codec_filter,
 			  const struct gsm0808_speech_codec_list *codec_list_bss_supported)
 {

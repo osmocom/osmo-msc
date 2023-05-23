@@ -49,6 +49,7 @@ noinst_HEADERS = \
 	silent_call.h \
 	sms_queue.h \
 	transaction.h \
+	transaction_cc.h \
 	vlr.h \
 	vlr_sgs.h \
 	vty.h \
