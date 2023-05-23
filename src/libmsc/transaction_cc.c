@@ -23,10 +23,16 @@
  */
 
 #include <osmocom/msc/transaction_cc.h>
+#include <osmocom/msc/codec_filter.h>
 
 void trans_cc_filter_init(struct gsm_trans *trans)
 {
 	trans->cc.codecs = (struct codec_filter){};
+}
+
+void trans_cc_filter_set_ran(struct gsm_trans *trans, enum osmo_rat_type ran_type)
+{
+	codec_filter_set_ran(&trans->cc.codecs, ran_type);
 }
 
 void trans_cc_filter_set_ms_from_bc(struct gsm_trans *trans, const struct gsm_mncc_bearer_cap *bcap)
