@@ -5,6 +5,7 @@
 # * IU: configure 3G support (values: "--enable-iu", "--disable-iu")
 # * WITH_MANUALS: build manual PDFs if set to "1"
 # * PUBLISH: upload manuals after building if set to "1" (ignored without WITH_MANUALS = "1")
+# * IS_MASTER_BUILD: set to 1 when running from master-builds (not gerrit-verifications)
 #
 
 if ! [ -x "$(command -v osmo-build-dep.sh)" ]; then
@@ -12,6 +13,16 @@ if ! [ -x "$(command -v osmo-build-dep.sh)" ]; then
 	exit 2
 fi
 
+exit_tar_workspace() {
+	cat-testlogs.sh
+
+	if [ "$IS_MASTER_BUILD" = "1" ]; then
+		tar -cJf "/tmp/workspace.tar.xz" "$base"
+		mv /tmp/workspace.tar.xz "$base"
+	fi
+
+	exit 1
+}
 
 set -ex
 
@@ -64,11 +75,11 @@ autoreconf --install --force
 ./configure --enable-sanitize --enable-werror --enable-smpp $IU --enable-external-tests $CONFIG
 $MAKE $PARALLEL_MAKE
 LD_LIBRARY_PATH="$inst/lib" $MAKE check \
-  || cat-testlogs.sh
+  || exit_tar_workspace
 LD_LIBRARY_PATH="$inst/lib" \
   DISTCHECK_CONFIGURE_FLAGS="--enable-werror --enable-smpp $IU --enable-external-tests $CONFIG" \
   $MAKE $PARALLEL_MAKE distcheck \
-  || cat-testlogs.sh
+  || exit_tar_workspace
 
 if [ "$WITH_MANUALS" = "1" ] && [ "$PUBLISH" = "1" ]; then
 	make -C "$base/doc/manuals" publish
