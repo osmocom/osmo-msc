@@ -68,6 +68,7 @@ libmsc_a_SOURCES = \
 	sms_queue.c \
 	smsc_vty.c \
 	transaction.c \
+	transaction_cc.c \
 	msc_net_init.c \
 	ctrl_commands.c \
 	sgs_iface.c \

@@ -43,6 +43,7 @@
 #include <osmocom/msc/gsm_09_11.h>
 #include <osmocom/msc/signal.h>
 #include <osmocom/msc/transaction.h>
+#include <osmocom/msc/transaction_cc.h>
 #include <osmocom/msc/silent_call.h>
 #include <osmocom/msc/mncc_int.h>
 #include <osmocom/abis/e1_input.h>
@@ -674,7 +675,7 @@ static int gsm48_cc_rx_setup(struct gsm_trans *trans, struct msgb *msg)
 	codec_filter_set_ran(&trans->cc.codecs, trans->msc_a->c.ran->type);
 	codec_filter_set_bss(&trans->cc.codecs, &trans->msc_a->cc.compl_l3_codec_list_bss_supported);
 	if (setup.fields & MNCC_F_BEARER_CAP)
-		codec_filter_set_ms_from_bc(&trans->cc.codecs, &trans->bearer_cap);
+		trans_cc_filter_set_ms_from_bc(trans, &trans->bearer_cap);
 	codec_filter_run(&trans->cc.codecs);
 
 	LOG_TRANS(trans, setup.emergency ? LOGL_NOTICE : LOGL_INFO, "%sSETUP to %s\n",
@@ -926,7 +927,7 @@ static int gsm48_cc_rx_call_conf(struct gsm_trans *trans, struct msgb *msg)
 
 		/* This is the MT call leg's Call Conf, containing the MS Bearer Capabilities of the MT MS.
 		 * Store in codecs filter. */
-		codec_filter_set_ms_from_bc(&trans->cc.codecs, &call_conf.bearer_cap);
+		trans_cc_filter_set_ms_from_bc(trans, &call_conf.bearer_cap);
 	}
 
 	/* cause */
