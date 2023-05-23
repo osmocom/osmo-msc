@@ -35,6 +35,11 @@ void trans_cc_filter_set_ran(struct gsm_trans *trans, enum osmo_rat_type ran_typ
 	codec_filter_set_ran(&trans->cc.codecs, ran_type);
 }
 
+void trans_cc_filter_set_bss(struct gsm_trans *trans, struct msc_a *msc_a)
+{
+	codec_filter_set_bss(&trans->cc.codecs, &msc_a->cc.compl_l3_codec_list_bss_supported);
+}
+
 void trans_cc_filter_set_ms_from_bc(struct gsm_trans *trans, const struct gsm_mncc_bearer_cap *bcap)
 {
 	trans->cc.codecs.ms = (struct sdp_audio_codecs){0};
