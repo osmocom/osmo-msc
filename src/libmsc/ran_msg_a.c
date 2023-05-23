@@ -901,12 +901,24 @@ static int ran_a_channel_type_to_speech_codec_list(struct gsm0808_speech_codec_l
 	int rc;
 
 	memset(scl, 0, sizeof(*scl));
-	for (i = 0; i < ct->perm_spch_len; i++) {
-		rc = gsm0808_speech_codec_from_chan_type(&scl->codec[i], ct->perm_spch[i]);
-		if (rc != 0)
-			return -EINVAL;
+
+	switch (ct->ch_indctr) {
+	case GSM0808_CHAN_DATA:
+		scl->codec[0].type = GSM0808_SCT_CSD;
+		scl->len = 1;
+		break;
+	case GSM0808_CHAN_SPEECH:
+		for (i = 0; i < ct->perm_spch_len; i++) {
+			rc = gsm0808_speech_codec_from_chan_type(&scl->codec[i], ct->perm_spch[i]);
+			if (rc != 0)
+				return -EINVAL;
+		}
+		scl->len = i;
+		break;
+	default:
+		OSMO_ASSERT(0);
+		break;
 	}
-	scl->len = i;
 
 	return 0;
 }
@@ -937,7 +949,7 @@ static struct msgb *ran_a_make_assignment_command(struct osmo_fsm_inst *log_fi,
 		return NULL;
 	}
 
-	if (ac->channel_type->ch_indctr == GSM0808_CHAN_SPEECH) {
+	if (ac->channel_type->ch_indctr == GSM0808_CHAN_SPEECH || ac->channel_type->ch_indctr == GSM0808_CHAN_DATA) {
 		rc = ran_a_channel_type_to_speech_codec_list(&scl, ac->channel_type);
 		if (rc < 0) {
 			LOG_RAN_A_ENC(log_fi, LOGL_ERROR, "Assignment Command: Cannot translate Channel Type to Speech Codec List\n");
