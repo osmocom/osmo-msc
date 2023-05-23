@@ -52,7 +52,6 @@ struct codec_filter {
 	struct sdp_msg result;
 };
 
-void codec_filter_init(struct codec_filter *codec_filter);
 void codec_filter_set_ran(struct codec_filter *codec_filter, enum osmo_rat_type ran_type);
 void codec_filter_set_bss(struct codec_filter *codec_filter,
 			  const struct gsm0808_speech_codec_list *codec_list_bss_supported);
