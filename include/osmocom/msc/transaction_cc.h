@@ -31,4 +31,5 @@
 #include <osmocom/msc/vlr.h>
 
 void trans_cc_filter_init(struct gsm_trans *trans);
+void trans_cc_filter_set_ran(struct gsm_trans *trans, enum osmo_rat_type ran_type);
 void trans_cc_filter_set_ms_from_bc(struct gsm_trans *trans, const struct gsm_mncc_bearer_cap *bcap);
