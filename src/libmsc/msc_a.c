@@ -640,18 +640,18 @@ static void msc_a_call_leg_ran_local_addr_available(struct msc_a *msc_a)
 	trans_cc_filter_run(cc_trans);
 	LOG_TRANS(cc_trans, LOGL_DEBUG, "Sending Assignment Command\n");
 
-	if (!cc_trans->cc.codecs.result.audio_codecs.count) {
+	if (!cc_trans->cc.local.audio_codecs.count) {
 		LOG_TRANS(cc_trans, LOGL_ERROR, "Assignment not possible, no matching codec: %s\n",
-			  codec_filter_to_str(&cc_trans->cc.codecs, &cc_trans->cc.remote));
+			  codec_filter_to_str(&cc_trans->cc.codecs, &cc_trans->cc.local, &cc_trans->cc.remote));
 		call_leg_release(msc_a->cc.call_leg);
 		return;
 	}
 
 	/* Compose 48.008 Channel Type from the current set of codecs determined from both local and remote codec
 	 * capabilities. */
-	if (sdp_audio_codecs_to_gsm0808_channel_type(&channel_type, &cc_trans->cc.codecs.result.audio_codecs)) {
+	if (sdp_audio_codecs_to_gsm0808_channel_type(&channel_type, &cc_trans->cc.local.audio_codecs)) {
 		LOG_MSC_A(msc_a, LOGL_ERROR, "Cannot compose Channel Type (Permitted Speech) from codecs: %s\n",
-			  codec_filter_to_str(&cc_trans->cc.codecs, &cc_trans->cc.remote));
+			  codec_filter_to_str(&cc_trans->cc.codecs, &cc_trans->cc.local, &cc_trans->cc.remote));
 		trans_free(cc_trans);
 		return;
 	}
@@ -1455,7 +1455,7 @@ static void msc_a_up_call_assignment_complete(struct msc_a *msc_a, const struct 
 	trans_cc_filter_run(cc_trans);
 	LOG_TRANS(cc_trans, LOGL_INFO, "Assignment Complete: RAN: %s, CN: %s\n",
 		  sdp_audio_codecs_to_str(&rtps_to_ran->codecs),
-		  sdp_audio_codecs_to_str(&cc_trans->cc.codecs.result.audio_codecs));
+		  sdp_audio_codecs_to_str(&cc_trans->cc.local.audio_codecs));
 
 	if (cc_on_assignment_done(cc_trans)) {
 		/* If an error occurred, it was logged in cc_assignment_done() */
@@ -1874,13 +1874,13 @@ static int msc_a_start_assignment(struct msc_a *msc_a, struct gsm_trans *cc_tran
 	 * issued first here will also be the first CRCX sent to the MGW. Usually both still need to be set up. */
 	if (!cn_rtp_available)
 		call_leg_ensure_ci(cl, RTP_TO_CN, cc_trans->callref, cc_trans,
-				   &cc_trans->cc.codecs.result.audio_codecs, NULL);
+				   &cc_trans->cc.local.audio_codecs, NULL);
 	if (!ran_rtp_available) {
 		struct sdp_audio_codecs *codecs;
 		if (msc_a->c.ran->force_mgw_codecs_to_ran.count)
 			codecs = &msc_a->c.ran->force_mgw_codecs_to_ran;
 		else
-			codecs = &cc_trans->cc.codecs.result.audio_codecs;
+			codecs = &cc_trans->cc.local.audio_codecs;
 		return call_leg_ensure_ci(cl, RTP_TO_RAN, cc_trans->callref, cc_trans, codecs, NULL);
 	}
 

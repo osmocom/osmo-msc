@@ -42,20 +42,16 @@ struct codec_filter {
 
 	/* After a channel was assigned, this reflects the chosen codec. */
 	struct sdp_audio_codec assignment;
-
-	/* Resulting choice of supported codecs, usually the intersection of the above,
-	 * and the local RTP address to be sent to the remote call leg.
-	 * The RTP address:port in result.rtp is not modified by codec_filter_run() -- set it once. */
-	struct sdp_msg result;
 };
 
 void codec_filter_set_ran(struct codec_filter *codec_filter, enum osmo_rat_type ran_type);
 void codec_filter_set_bss(struct codec_filter *codec_filter,
 			  const struct gsm0808_speech_codec_list *codec_list_bss_supported);
-void codec_filter_set_local_rtp(struct codec_filter *codec_filter, const struct osmo_sockaddr_str *rtp);
-int codec_filter_run(struct codec_filter *codec_filter, const struct sdp_msg *remote);
+int codec_filter_run(struct codec_filter *codec_filter, struct sdp_msg *result, const struct sdp_msg *remote);
 
 int codec_filter_to_str_buf(char *buf, size_t buflen, const struct codec_filter *codec_filter,
+			    const struct sdp_msg *result, const struct sdp_msg *remote);
+char *codec_filter_to_str_c(void *ctx, const struct codec_filter *codec_filter, const struct sdp_msg *result,
 			    const struct sdp_msg *remote);
-char *codec_filter_to_str_c(void *ctx, const struct codec_filter *codec_filter, const struct sdp_msg *remote);
-const char *codec_filter_to_str(const struct codec_filter *codec_filter, const struct sdp_msg *remote);
+const char *codec_filter_to_str(const struct codec_filter *codec_filter, const struct sdp_msg *result,
+				const struct sdp_msg *remote);

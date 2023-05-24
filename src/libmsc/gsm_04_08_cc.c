@@ -731,9 +731,9 @@ void gsm48_cc_rx_setup_cn_local_rtp_port_known(struct gsm_trans *trans)
 		trans_free(trans);
 		return;
 	}
-	codec_filter_set_local_rtp(&trans->cc.codecs, rtp_cn_local);
+	trans->cc.local.rtp = *rtp_cn_local;
 
-	sdp = trans->cc.codecs.result.audio_codecs.count ? &trans->cc.codecs.result : NULL;
+	sdp = trans->cc.local.audio_codecs.count ? &trans->cc.local : NULL;
 	rc = sdp_msg_to_sdp_str_buf(setup.sdp, sizeof(setup.sdp), sdp);
 	if (rc >= sizeof(setup.sdp)) {
 		LOG_TRANS(trans, LOGL_ERROR, "MNCC_SETUP_IND: SDP too long (%d > %zu bytes)\n", rc, sizeof(setup.sdp));
@@ -829,7 +829,7 @@ static int gsm48_cc_tx_setup(struct gsm_trans *trans, void *arg)
 	bearer_cap = (struct gsm_mncc_bearer_cap){
 		.speech_ver = { -1 },
 	};
-	sdp_audio_codecs_to_bearer_cap(&bearer_cap, &trans->cc.codecs.result.audio_codecs);
+	sdp_audio_codecs_to_bearer_cap(&bearer_cap, &trans->cc.local.audio_codecs);
 	rc = bearer_cap_set_radio(&bearer_cap);
 	if (rc) {
 		LOG_TRANS(trans, LOGL_ERROR, "Error composing Bearer Capability for CC Setup\n");
@@ -844,7 +844,8 @@ static int gsm48_cc_tx_setup(struct gsm_trans *trans, void *arg)
 	 * finding a matching codec. */
 	if (bearer_cap.speech_ver[0] == -1) {
 		LOG_TRANS(trans, LOGL_ERROR, "%s: no codec match possible: %s\n",
-			  get_mncc_name(setup->msg_type), codec_filter_to_str(&trans->cc.codecs, &trans->cc.remote));
+			  get_mncc_name(setup->msg_type),
+			  codec_filter_to_str(&trans->cc.codecs, &trans->cc.local, &trans->cc.remote));
 
 		/* incompatible codecs */
 		rc = mncc_release_ind(trans->net, trans, trans->callref,
@@ -978,7 +979,7 @@ static int gsm48_cc_mt_rtp_port_and_codec_known(struct gsm_trans *trans)
 		trans_free(trans);
 		return -EINVAL;
 	}
-	codec_filter_set_local_rtp(&trans->cc.codecs, rtp_cn_local);
+	trans->cc.local.rtp = *rtp_cn_local;
 
 	trans_cc_filter_run(trans);
 
@@ -989,7 +990,7 @@ static int gsm48_cc_mt_rtp_port_and_codec_known(struct gsm_trans *trans)
 	}
 
 	return mncc_recv_rtp(msc_a_net(msc_a), trans, trans->callref, MNCC_RTP_CREATE, rtp_cn_local, 0, 0,
-			     &trans->cc.codecs.result);
+			     &trans->cc.local);
 }
 
 static int gsm48_cc_tx_call_proc_and_assign(struct gsm_trans *trans, void *arg)
@@ -1060,7 +1061,7 @@ static int gsm48_cc_rx_alerting(struct gsm_trans *trans, struct msgb *msg)
 	new_cc_state(trans, GSM_CSTATE_CALL_RECEIVED);
 
 	trans_cc_filter_run(trans);
-	rc = sdp_msg_to_sdp_str_buf(alerting.sdp, sizeof(alerting.sdp), &trans->cc.codecs.result);
+	rc = sdp_msg_to_sdp_str_buf(alerting.sdp, sizeof(alerting.sdp), &trans->cc.local);
 	if (rc >= sizeof(alerting.sdp)) {
 		LOG_TRANS(trans, LOGL_ERROR, "MNCC_ALERT_IND: SDP too long (%d > %zu bytes)\n",
 			  rc, sizeof(alerting.sdp));
@@ -1206,7 +1207,7 @@ static int gsm48_cc_rx_connect(struct gsm_trans *trans, struct msgb *msg)
 	rate_ctr_inc(rate_ctr_group_get_ctr(trans->net->msc_ctrs, MSC_CTR_CALL_MT_CONNECT));
 
 	trans_cc_filter_run(trans);
-	sdp_msg_to_sdp_str_buf(connect.sdp, sizeof(connect.sdp), &trans->cc.codecs.result);
+	sdp_msg_to_sdp_str_buf(connect.sdp, sizeof(connect.sdp), &trans->cc.local);
 	return mncc_recvmsg(trans->net, trans, MNCC_SETUP_CNF, &connect);
 }
 
@@ -2044,7 +2045,7 @@ int gsm48_tch_rtp_create(struct gsm_trans *trans)
 	}
 
 	trans_cc_filter_run(trans);
-	codecs = &trans->cc.codecs.result.audio_codecs;
+	codecs = &trans->cc.local.audio_codecs;
 	if (!codecs->count) {
 		LOG_TRANS_CAT(trans, DMNCC, LOGL_ERROR,
 			      "Cannot RTP CREATE to MNCC, there is no codec available\n");
@@ -2063,7 +2064,7 @@ int gsm48_tch_rtp_create(struct gsm_trans *trans)
 	}
 
 	return mncc_recv_rtp(net, trans, trans->callref, MNCC_RTP_CREATE, rtp_cn_local,
-			     codec->payload_type, mncc_payload_msg_type, &trans->cc.codecs.result);
+			     codec->payload_type, mncc_payload_msg_type, &trans->cc.local);
 }
 
 static int tch_rtp_connect(struct gsm_network *net, const struct gsm_mncc_rtp *rtp)
