@@ -676,11 +676,10 @@ static int gsm48_cc_rx_setup(struct gsm_trans *trans, struct msgb *msg)
 	trans_cc_filter_set_bss(trans, trans->msc_a);
 	if (setup.fields & MNCC_F_BEARER_CAP)
 		trans_cc_filter_set_ms_from_bc(trans, &trans->bearer_cap);
-	codec_filter_run(&trans->cc.codecs);
+	trans_cc_filter_run(trans);
 
 	LOG_TRANS(trans, setup.emergency ? LOGL_NOTICE : LOGL_INFO, "%sSETUP to %s\n",
 		  setup.emergency ? "EMERGENCY_" : "", setup.called.number);
-	LOG_TRANS(trans, LOGL_DEBUG, "codecs: %s\n", codec_filter_to_str(&trans->cc.codecs));
 
 	rate_ctr_inc(rate_ctr_group_get_ctr(trans->net->msc_ctrs, MSC_CTR_CALL_MO_SETUP));
 
@@ -822,8 +821,7 @@ static int gsm48_cc_tx_setup(struct gsm_trans *trans, void *arg)
 		LOG_TRANS(trans, LOGL_INFO,
 			  "Got no information of remote audio codecs: neither SDP nor Bearer Capability. Trying anyway.\n");
 
-	codec_filter_run(&trans->cc.codecs);
-	LOG_TRANS(trans, LOGL_DEBUG, "codecs: %s\n", codec_filter_to_str(&trans->cc.codecs));
+	trans_cc_filter_run(trans);
 
 	/* Compose Bearer Capability information that reflects only the codecs (Speech Versions) remaining after
 	 * intersecting MS, BSS and remote call leg restrictions. To store in trans for later use, and to include in
@@ -982,8 +980,7 @@ static int gsm48_cc_mt_rtp_port_and_codec_known(struct gsm_trans *trans)
 	}
 	codec_filter_set_local_rtp(&trans->cc.codecs, rtp_cn_local);
 
-	codec_filter_run(&trans->cc.codecs);
-	LOG_TRANS(trans, LOGL_DEBUG, "codecs: %s\n", codec_filter_to_str(&trans->cc.codecs));
+	trans_cc_filter_run(trans);
 
 	/* If we haven't completed Assignment yet, don't sent MNCC_RTP_CREATE */
 	if (!sdp_audio_codec_is_set(&trans->cc.codecs.assignment)) {
@@ -1062,8 +1059,7 @@ static int gsm48_cc_rx_alerting(struct gsm_trans *trans, struct msgb *msg)
 
 	new_cc_state(trans, GSM_CSTATE_CALL_RECEIVED);
 
-	codec_filter_run(&trans->cc.codecs);
-	LOG_TRANS(trans, LOGL_DEBUG, "codecs: %s\n", codec_filter_to_str(&trans->cc.codecs));
+	trans_cc_filter_run(trans);
 	rc = sdp_msg_to_sdp_str_buf(alerting.sdp, sizeof(alerting.sdp), &trans->cc.codecs.result);
 	if (rc >= sizeof(alerting.sdp)) {
 		LOG_TRANS(trans, LOGL_ERROR, "MNCC_ALERT_IND: SDP too long (%d > %zu bytes)\n",
@@ -1100,9 +1096,8 @@ static int gsm48_cc_tx_alerting(struct gsm_trans *trans, void *arg)
 		struct call_leg *cl = trans->msc_a->cc.call_leg;
 		struct rtp_stream *rtp_cn = cl ? cl->rtp[RTP_TO_CN] : NULL;
 		codec_filter_set_remote(&trans->cc.codecs, alerting->sdp);
-		codec_filter_run(&trans->cc.codecs);
-		LOG_TRANS(trans, LOGL_DEBUG, "%s codecs: %s\n",
-			  get_mncc_name(alerting->msg_type), codec_filter_to_str(&trans->cc.codecs));
+		trans_cc_filter_run(trans);
+		LOG_TRANS(trans, LOGL_DEBUG, "msg_type=%s\n", get_mncc_name(alerting->msg_type));
 		if (rtp_cn) {
 			rtp_stream_set_remote_addr_and_codecs(rtp_cn, &trans->cc.codecs.remote);
 			rtp_stream_commit(rtp_cn);
@@ -1160,10 +1155,8 @@ static int gsm48_cc_tx_connect(struct gsm_trans *trans, void *arg)
 		struct call_leg *cl = trans->msc_a->cc.call_leg;
 		struct rtp_stream *rtp_cn = cl ? cl->rtp[RTP_TO_CN] : NULL;
 		rx_mncc_sdp(trans, connect->msg_type, connect->sdp);
-		codec_filter_run(&trans->cc.codecs);
-		LOG_TRANS(trans, LOGL_DEBUG, "%s codecs: %s\n",
-			  get_mncc_name(connect->msg_type),
-			  codec_filter_to_str(&trans->cc.codecs));
+		trans_cc_filter_run(trans);
+		LOG_TRANS(trans, LOGL_DEBUG, "msg_type=%s\n", get_mncc_name(connect->msg_type));
 		if (rtp_cn) {
 			rtp_stream_set_remote_addr_and_codecs(rtp_cn, &trans->cc.codecs.remote);
 			rtp_stream_commit(rtp_cn);
@@ -1212,7 +1205,7 @@ static int gsm48_cc_rx_connect(struct gsm_trans *trans, struct msgb *msg)
 	new_cc_state(trans, GSM_CSTATE_CONNECT_REQUEST);
 	rate_ctr_inc(rate_ctr_group_get_ctr(trans->net->msc_ctrs, MSC_CTR_CALL_MT_CONNECT));
 
-	codec_filter_run(&trans->cc.codecs);
+	trans_cc_filter_run(trans);
 	sdp_msg_to_sdp_str_buf(connect.sdp, sizeof(connect.sdp), &trans->cc.codecs.result);
 	return mncc_recvmsg(trans->net, trans, MNCC_SETUP_CNF, &connect);
 }
@@ -2050,8 +2043,7 @@ int gsm48_tch_rtp_create(struct gsm_trans *trans)
 		return -EINVAL;
 	}
 
-	codec_filter_run(&trans->cc.codecs);
-	LOG_TRANS(trans, LOGL_DEBUG, "codecs: %s\n", codec_filter_to_str(&trans->cc.codecs));
+	trans_cc_filter_run(trans);
 	codecs = &trans->cc.codecs.result.audio_codecs;
 	if (!codecs->count) {
 		LOG_TRANS_CAT(trans, DMNCC, LOGL_ERROR,
