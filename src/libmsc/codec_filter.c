@@ -84,11 +84,6 @@ void codec_filter_set_bss(struct codec_filter *codec_filter,
 		sdp_audio_codecs_from_speech_codec_list(&codec_filter->bss, codec_list_bss_supported);
 }
 
-int codec_filter_set_remote(struct codec_filter *codec_filter, const char *remote_sdp)
-{
-	return sdp_msg_from_sdp_str(&codec_filter->remote, remote_sdp);
-}
-
 void codec_filter_set_local_rtp(struct codec_filter *codec_filter, const struct osmo_sockaddr_str *rtp)
 {
 	if (!rtp)
@@ -99,7 +94,7 @@ void codec_filter_set_local_rtp(struct codec_filter *codec_filter, const struct 
 
 /* Render intersections of all known audio codec constraints to reach a resulting choice of favorite audio codec, plus
  * possible set of alternative audio codecs, in codec_filter->result. (The result.rtp address remains unchanged.) */
-int codec_filter_run(struct codec_filter *codec_filter)
+int codec_filter_run(struct codec_filter *codec_filter, const struct sdp_msg *remote)
 {
 	struct sdp_audio_codecs *r = &codec_filter->result.audio_codecs;
 	struct sdp_audio_codec *a = &codec_filter->assignment;
@@ -108,8 +103,8 @@ int codec_filter_run(struct codec_filter *codec_filter)
 		sdp_audio_codecs_intersection(r, &codec_filter->ms, false);
 	if (codec_filter->bss.count)
 		sdp_audio_codecs_intersection(r, &codec_filter->bss, false);
-	if (codec_filter->remote.audio_codecs.count)
-		sdp_audio_codecs_intersection(r, &codec_filter->remote.audio_codecs, true);
+	if (remote->audio_codecs.count)
+		sdp_audio_codecs_intersection(r, &remote->audio_codecs, true);
 
 #if 0
 	/* Future: If osmo-msc were able to trigger a re-assignment after the remote side has picked a codec mismatching
@@ -154,7 +149,8 @@ int codec_filter_run(struct codec_filter *codec_filter)
 	return 0;
 }
 
-int codec_filter_to_str_buf(char *buf, size_t buflen, const struct codec_filter *codec_filter)
+int codec_filter_to_str_buf(char *buf, size_t buflen, const struct codec_filter *codec_filter,
+			    const struct sdp_msg *remote)
 {
 	struct osmo_strbuf sb = { .buf = buf, .len = buflen };
 	OSMO_STRBUF_APPEND(sb, sdp_msg_to_str_buf, &codec_filter->result);
@@ -165,10 +161,10 @@ int codec_filter_to_str_buf(char *buf, size_t buflen, const struct codec_filter 
 		OSMO_STRBUF_APPEND(sb, sdp_audio_codec_to_str_buf, &codec_filter->assignment);
 	}
 
-	if (codec_filter->remote.audio_codecs.count
-	    || osmo_sockaddr_str_is_nonzero(&codec_filter->remote.rtp)) {
+	if (remote->audio_codecs.count
+	    || osmo_sockaddr_str_is_nonzero(&remote->rtp)) {
 		OSMO_STRBUF_PRINTF(sb, " remote=");
-		OSMO_STRBUF_APPEND(sb, sdp_msg_to_str_buf, &codec_filter->remote);
+		OSMO_STRBUF_APPEND(sb, sdp_msg_to_str_buf, remote);
 	}
 
 	if (codec_filter->ms.count) {
@@ -192,12 +188,12 @@ int codec_filter_to_str_buf(char *buf, size_t buflen, const struct codec_filter 
 	return sb.chars_needed;
 }
 
-char *codec_filter_to_str_c(void *ctx, const struct codec_filter *codec_filter)
+char *codec_filter_to_str_c(void *ctx, const struct codec_filter *codec_filter, const struct sdp_msg *remote)
 {
-	OSMO_NAME_C_IMPL(ctx, 128, "codec_filter_to_str_c-ERROR", codec_filter_to_str_buf, codec_filter)
+	OSMO_NAME_C_IMPL(ctx, 128, "codec_filter_to_str_c-ERROR", codec_filter_to_str_buf, codec_filter, remote)
 }
 
-const char *codec_filter_to_str(const struct codec_filter *codec_filter)
+const char *codec_filter_to_str(const struct codec_filter *codec_filter, const struct sdp_msg *remote)
 {
-	return codec_filter_to_str_c(OTC_SELECT, codec_filter);
+	return codec_filter_to_str_c(OTC_SELECT, codec_filter, remote);
 }

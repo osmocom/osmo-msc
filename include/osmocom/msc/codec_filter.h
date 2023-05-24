@@ -40,9 +40,6 @@ struct codec_filter {
 	 * Should be ignored if empty. */
 	struct sdp_audio_codecs bss;
 
-	/* SDP as last received from the remote call leg. */
-	struct sdp_msg remote;
-
 	/* After a channel was assigned, this reflects the chosen codec. */
 	struct sdp_audio_codec assignment;
 
@@ -55,10 +52,10 @@ struct codec_filter {
 void codec_filter_set_ran(struct codec_filter *codec_filter, enum osmo_rat_type ran_type);
 void codec_filter_set_bss(struct codec_filter *codec_filter,
 			  const struct gsm0808_speech_codec_list *codec_list_bss_supported);
-int codec_filter_set_remote(struct codec_filter *codec_filter, const char *remote_sdp);
 void codec_filter_set_local_rtp(struct codec_filter *codec_filter, const struct osmo_sockaddr_str *rtp);
-int codec_filter_run(struct codec_filter *codec_filter);
+int codec_filter_run(struct codec_filter *codec_filter, const struct sdp_msg *remote);
 
-int codec_filter_to_str_buf(char *buf, size_t buflen, const struct codec_filter *codec_filter);
-char *codec_filter_to_str_c(void *ctx, const struct codec_filter *codec_filter);
-const char *codec_filter_to_str(const struct codec_filter *codec_filter);
+int codec_filter_to_str_buf(char *buf, size_t buflen, const struct codec_filter *codec_filter,
+			    const struct sdp_msg *remote);
+char *codec_filter_to_str_c(void *ctx, const struct codec_filter *codec_filter, const struct sdp_msg *remote);
+const char *codec_filter_to_str(const struct codec_filter *codec_filter, const struct sdp_msg *remote);
