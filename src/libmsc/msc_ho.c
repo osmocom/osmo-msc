@@ -416,14 +416,14 @@ static void msc_ho_send_handover_request(struct msc_a *msc_a)
 
 	if (cc_trans) {
 		if (sdp_audio_codecs_to_gsm0808_channel_type(&channel_type,
-							     &cc_trans->cc.codecs.result.audio_codecs)) {
+							     &cc_trans->cc.local.audio_codecs)) {
 			msc_ho_failed(msc_a, GSM0808_CAUSE_EQUIPMENT_FAILURE,
 				      "Failed to determine Channel Type for Handover Request message\n");
 			return;
 		}
 		ran_enc_msg.handover_request.geran.channel_type = &channel_type;
 
-		sdp_audio_codecs_to_speech_codec_list(&scl, &cc_trans->cc.codecs.result.audio_codecs);
+		sdp_audio_codecs_to_speech_codec_list(&scl, &cc_trans->cc.local.audio_codecs);
 		if (!scl.len) {
 			msc_ho_failed(msc_a, GSM0808_CAUSE_EQUIPMENT_FAILURE, "Failed to compose"
 				      " Codec List (MSC Preferred) for Handover Request message\n");

@@ -109,6 +109,9 @@ struct gsm_trans {
 			struct sdp_msg remote;
 			/* Track codec choices from BSS and remote call leg */
 			struct codec_filter codecs;
+			/* Resulting choice from codecs/bearer services and the
+			 * local RTP address to be sent to the remote call leg. */
+			struct sdp_msg local;
 		} cc;
 		struct {
 			struct gsm411_smc_inst smc_inst;
