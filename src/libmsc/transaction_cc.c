@@ -42,8 +42,8 @@ void trans_cc_filter_set_bss(struct gsm_trans *trans, struct msc_a *msc_a)
 
 void trans_cc_filter_run(struct gsm_trans *trans)
 {
-	codec_filter_run(&trans->cc.codecs);
-	LOG_TRANS(trans, LOGL_DEBUG, "codecs: %s\n", codec_filter_to_str(&trans->cc.codecs));
+	codec_filter_run(&trans->cc.codecs, &trans->cc.remote);
+	LOG_TRANS(trans, LOGL_DEBUG, "codecs: %s\n", codec_filter_to_str(&trans->cc.codecs, &trans->cc.remote));
 }
 
 void trans_cc_filter_set_ms_from_bc(struct gsm_trans *trans, const struct gsm_mncc_bearer_cap *bcap)

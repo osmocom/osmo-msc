@@ -750,7 +750,7 @@ static void rx_mncc_sdp(struct gsm_trans *trans, uint32_t mncc_msg_type, const c
 	int rc;
 	if (!sdp[0])
 		return;
-	rc = sdp_msg_from_sdp_str(&trans->cc.codecs.remote, sdp);
+	rc = sdp_msg_from_sdp_str(&trans->cc.remote, sdp);
 	if (rc)
 		LOG_TRANS_CAT(trans, DMNCC, LOGL_ERROR, "rx %s: Failed to parse SDP: %d\n",
 			      get_mncc_name(mncc_msg_type), rc);
@@ -810,14 +810,14 @@ static int gsm48_cc_tx_setup(struct gsm_trans *trans, void *arg)
 	rx_mncc_sdp(trans, setup->msg_type, setup->sdp);
 	/* sdp.remote: if there is no SDP information or we failed to parse it, try using the Bearer Capability from
 	 * MNCC, if any. */
-	if (!trans->cc.codecs.remote.audio_codecs.count && (setup->fields & MNCC_F_BEARER_CAP)) {
-		trans->cc.codecs.remote = (struct sdp_msg){};
-		sdp_audio_codecs_from_bearer_cap(&trans->cc.codecs.remote.audio_codecs,
+	if (!trans->cc.remote.audio_codecs.count && (setup->fields & MNCC_F_BEARER_CAP)) {
+		trans->cc.remote = (struct sdp_msg){};
+		sdp_audio_codecs_from_bearer_cap(&trans->cc.remote.audio_codecs,
 						 &setup->bearer_cap);
 		LOG_TRANS_CAT(trans, DMNCC, LOGL_DEBUG, "rx %s Bearer Cap: remote=%s\n",
-			      get_mncc_name(setup->msg_type), sdp_msg_to_str(&trans->cc.codecs.remote));
+			      get_mncc_name(setup->msg_type), sdp_msg_to_str(&trans->cc.remote));
 	}
-	if (!trans->cc.codecs.remote.audio_codecs.count)
+	if (!trans->cc.remote.audio_codecs.count)
 		LOG_TRANS(trans, LOGL_INFO,
 			  "Got no information of remote audio codecs: neither SDP nor Bearer Capability. Trying anyway.\n");
 
@@ -844,7 +844,7 @@ static int gsm48_cc_tx_setup(struct gsm_trans *trans, void *arg)
 	 * finding a matching codec. */
 	if (bearer_cap.speech_ver[0] == -1) {
 		LOG_TRANS(trans, LOGL_ERROR, "%s: no codec match possible: %s\n",
-			  get_mncc_name(setup->msg_type), codec_filter_to_str(&trans->cc.codecs));
+			  get_mncc_name(setup->msg_type), codec_filter_to_str(&trans->cc.codecs, &trans->cc.remote));
 
 		/* incompatible codecs */
 		rc = mncc_release_ind(trans->net, trans, trans->callref,
@@ -1095,11 +1095,11 @@ static int gsm48_cc_tx_alerting(struct gsm_trans *trans, void *arg)
 	if (alerting->sdp[0]) {
 		struct call_leg *cl = trans->msc_a->cc.call_leg;
 		struct rtp_stream *rtp_cn = cl ? cl->rtp[RTP_TO_CN] : NULL;
-		codec_filter_set_remote(&trans->cc.codecs, alerting->sdp);
+		sdp_msg_from_sdp_str(&trans->cc.remote, alerting->sdp);
 		trans_cc_filter_run(trans);
 		LOG_TRANS(trans, LOGL_DEBUG, "msg_type=%s\n", get_mncc_name(alerting->msg_type));
 		if (rtp_cn) {
-			rtp_stream_set_remote_addr_and_codecs(rtp_cn, &trans->cc.codecs.remote);
+			rtp_stream_set_remote_addr_and_codecs(rtp_cn, &trans->cc.remote);
 			rtp_stream_commit(rtp_cn);
 		}
 	}
@@ -1158,7 +1158,7 @@ static int gsm48_cc_tx_connect(struct gsm_trans *trans, void *arg)
 		trans_cc_filter_run(trans);
 		LOG_TRANS(trans, LOGL_DEBUG, "msg_type=%s\n", get_mncc_name(connect->msg_type));
 		if (rtp_cn) {
-			rtp_stream_set_remote_addr_and_codecs(rtp_cn, &trans->cc.codecs.remote);
+			rtp_stream_set_remote_addr_and_codecs(rtp_cn, &trans->cc.remote);
 			rtp_stream_commit(rtp_cn);
 		}
 	}
@@ -2098,7 +2098,7 @@ static int tch_rtp_connect(struct gsm_network *net, const struct gsm_mncc_rtp *r
 	}
 
 	rx_mncc_sdp(trans, rtp->msg_type, rtp->sdp);
-	rtp_stream_set_remote_addr_and_codecs(rtps, &trans->cc.codecs.remote);
+	rtp_stream_set_remote_addr_and_codecs(rtps, &trans->cc.remote);
 
 	if (!osmo_sockaddr_str_is_nonzero(&rtps->remote)) {
 		/* Didn't get an IP address from SDP. Try legacy MNCC IP address */

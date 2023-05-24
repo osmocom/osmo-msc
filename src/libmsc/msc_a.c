@@ -642,7 +642,7 @@ static void msc_a_call_leg_ran_local_addr_available(struct msc_a *msc_a)
 
 	if (!cc_trans->cc.codecs.result.audio_codecs.count) {
 		LOG_TRANS(cc_trans, LOGL_ERROR, "Assignment not possible, no matching codec: %s\n",
-			  codec_filter_to_str(&cc_trans->cc.codecs));
+			  codec_filter_to_str(&cc_trans->cc.codecs, &cc_trans->cc.remote));
 		call_leg_release(msc_a->cc.call_leg);
 		return;
 	}
@@ -651,7 +651,7 @@ static void msc_a_call_leg_ran_local_addr_available(struct msc_a *msc_a)
 	 * capabilities. */
 	if (sdp_audio_codecs_to_gsm0808_channel_type(&channel_type, &cc_trans->cc.codecs.result.audio_codecs)) {
 		LOG_MSC_A(msc_a, LOGL_ERROR, "Cannot compose Channel Type (Permitted Speech) from codecs: %s\n",
-			  codec_filter_to_str(&cc_trans->cc.codecs));
+			  codec_filter_to_str(&cc_trans->cc.codecs, &cc_trans->cc.remote));
 		trans_free(cc_trans);
 		return;
 	}

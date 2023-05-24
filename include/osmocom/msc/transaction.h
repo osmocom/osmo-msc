@@ -105,6 +105,8 @@ struct gsm_trans {
 			struct gsm_mncc msg;	/* stores setup/disconnect/release message */
 			bool mncc_initiated;	/* Whether an MNCC Release is necessary on failure */
 			struct osmo_lcls *lcls;
+			/* SDP as last received from the remote call leg. */
+			struct sdp_msg remote;
 			/* Track codec choices from BSS and remote call leg */
 			struct codec_filter codecs;
 		} cc;
