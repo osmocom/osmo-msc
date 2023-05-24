@@ -36,6 +36,7 @@
 #include <osmocom/msc/signal.h>
 #include <osmocom/msc/vlr.h>
 #include <osmocom/msc/transaction.h>
+#include <osmocom/msc/transaction_cc.h>
 #include <osmocom/msc/ran_peer.h>
 #include <osmocom/msc/ran_msg_a.h>
 #include <osmocom/msc/ran_msg_iu.h>
@@ -47,7 +48,6 @@
 #include <osmocom/msc/rtp_stream.h>
 #include <osmocom/msc/msc_ho.h>
 #include <osmocom/msc/codec_mapping.h>
-#include <osmocom/msc/codec_filter.h>
 
 #define MSC_A_USE_WAIT_CLEAR_COMPLETE "wait-Clear-Complete"
 
@@ -637,9 +637,8 @@ static void msc_a_call_leg_ran_local_addr_available(struct msc_a *msc_a)
 		return;
 	}
 
-	codec_filter_run(&cc_trans->cc.codecs);
-	LOG_TRANS(cc_trans, LOGL_DEBUG, "Sending Assignment Command with codecs: %s\n",
-		  codec_filter_to_str(&cc_trans->cc.codecs));
+	trans_cc_filter_run(cc_trans);
+	LOG_TRANS(cc_trans, LOGL_DEBUG, "Sending Assignment Command\n");
 
 	if (!cc_trans->cc.codecs.result.audio_codecs.count) {
 		LOG_TRANS(cc_trans, LOGL_ERROR, "Assignment not possible, no matching codec: %s\n",
@@ -1453,7 +1452,7 @@ static void msc_a_up_call_assignment_complete(struct msc_a *msc_a, const struct 
 	if (ac->assignment_complete.codec_list_bss_supported)
 		codec_filter_set_bss(&cc_trans->cc.codecs, ac->assignment_complete.codec_list_bss_supported);
 
-	codec_filter_run(&cc_trans->cc.codecs);
+	trans_cc_filter_run(cc_trans);
 	LOG_TRANS(cc_trans, LOGL_INFO, "Assignment Complete: RAN: %s, CN: %s\n",
 		  sdp_audio_codecs_to_str(&rtps_to_ran->codecs),
 		  sdp_audio_codecs_to_str(&cc_trans->cc.codecs.result.audio_codecs));
@@ -1865,7 +1864,7 @@ static int msc_a_start_assignment(struct msc_a *msc_a, struct gsm_trans *cc_tran
 		return -EINVAL;
 
 	/* See if we can set a preliminary codec. If not, pass none for the time being. */
-	codec_filter_run(&cc_trans->cc.codecs);
+	trans_cc_filter_run(cc_trans);
 
 	cn_rtp_available = call_leg_local_ip(cl, RTP_TO_CN);
 	ran_rtp_available = call_leg_local_ip(cl, RTP_TO_RAN);

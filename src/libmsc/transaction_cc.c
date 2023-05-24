@@ -40,6 +40,12 @@ void trans_cc_filter_set_bss(struct gsm_trans *trans, struct msc_a *msc_a)
 	codec_filter_set_bss(&trans->cc.codecs, &msc_a->cc.compl_l3_codec_list_bss_supported);
 }
 
+void trans_cc_filter_run(struct gsm_trans *trans)
+{
+	codec_filter_run(&trans->cc.codecs);
+	LOG_TRANS(trans, LOGL_DEBUG, "codecs: %s\n", codec_filter_to_str(&trans->cc.codecs));
+}
+
 void trans_cc_filter_set_ms_from_bc(struct gsm_trans *trans, const struct gsm_mncc_bearer_cap *bcap)
 {
 	trans->cc.codecs.ms = (struct sdp_audio_codecs){0};
