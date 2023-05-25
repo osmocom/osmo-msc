@@ -203,6 +203,14 @@ const struct codec_mapping codec_map[] = {
 		},
 		.mgcp = CODEC_IUFP,
 	},
+	{
+		.sdp = {
+			.payload_type = 120,
+			.subtype_name = "CLEARMODE",
+			.rate = 8000,
+		},
+		.mgcp = CODEC_CLEARMODE,
+	},
 };
 
 #define foreach_codec_mapping(CODEC_MAPPING) \
