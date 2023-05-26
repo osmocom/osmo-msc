@@ -4,6 +4,8 @@ Wants=osmo-hlr.service
 Wants=osmo-mgw.service
 After=osmo-hlr.service
 After=osmo-hnbgw.service
+After=network-online.target
+Wants=network-online.target
 
 [Service]
 Type=simple
