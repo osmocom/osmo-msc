@@ -14,14 +14,12 @@ if ! [ -x "$(command -v osmo-build-dep.sh)" ]; then
 fi
 
 exit_tar_workspace() {
-	cat-testlogs.sh
-
 	if [ "$IS_MASTER_BUILD" = "1" ]; then
 		tar -cJf "/tmp/workspace.tar.xz" "$base"
 		mv /tmp/workspace.tar.xz "$base"
 	fi
 
-	exit 1
+	cat-testlogs.sh
 }
 
 set -ex
