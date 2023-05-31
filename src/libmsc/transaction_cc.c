@@ -64,3 +64,21 @@ void trans_cc_filter_set_ms_from_bc(struct gsm_trans *trans, const struct gsm_mn
 		break;
 	}
 }
+
+void trans_cc_set_remote_from_bc(struct gsm_trans *trans, const struct gsm_mncc_bearer_cap *bcap)
+{
+	trans->cc.remote.audio_codecs = (struct sdp_audio_codecs){0};
+
+	if (!bcap)
+		return;
+
+	switch (bcap->transfer) {
+	case GSM48_BCAP_ITCAP_SPEECH:
+		sdp_audio_codecs_from_bearer_cap(&trans->cc.remote.audio_codecs, bcap);
+		break;
+	default:
+		LOG_TRANS(trans, LOGL_ERROR, "Handling of information transfer capability %d not implemented\n",
+			  bcap->transfer);
+		break;
+	}
+}

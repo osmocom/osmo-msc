@@ -812,8 +812,7 @@ static int gsm48_cc_tx_setup(struct gsm_trans *trans, void *arg)
 	 * MNCC, if any. */
 	if (!trans->cc.remote.audio_codecs.count && (setup->fields & MNCC_F_BEARER_CAP)) {
 		trans->cc.remote = (struct sdp_msg){};
-		sdp_audio_codecs_from_bearer_cap(&trans->cc.remote.audio_codecs,
-						 &setup->bearer_cap);
+		trans_cc_set_remote_from_bc(trans, &setup->bearer_cap);
 		LOG_TRANS_CAT(trans, DMNCC, LOGL_DEBUG, "rx %s Bearer Cap: remote=%s\n",
 			      get_mncc_name(setup->msg_type), sdp_msg_to_str(&trans->cc.remote));
 	}
