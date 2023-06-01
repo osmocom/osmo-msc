@@ -36,6 +36,7 @@
 #include <osmocom/msc/debug.h>
 #include <osmocom/msc/gsm_data.h>
 #include <osmocom/msc/gsm_04_08.h>
+#include <osmocom/msc/msc_vgcs.h>
 #include <osmocom/msc/signal.h>
 #include <osmocom/msc/transaction.h>
 #include <osmocom/msc/vlr.h>
@@ -1411,6 +1412,9 @@ int gsm0408_rcv_rr(struct msc_a *msc_a, struct msgb *msg)
 		break;
 	case GSM48_MT_RR_APP_INFO:
 		rc = gsm48_rx_rr_app_info(msc_a, msg);
+		break;
+	case GSM48_MT_RR_UPLINK_RELEASE:
+		rc = gsm44068_rcv_rr(msc_a, msg);
 		break;
 	default:
 		LOG_MSC_A_CAT(msc_a, DRR, LOGL_NOTICE, "MSC: Unimplemented %s GSM 04.08 RR "
