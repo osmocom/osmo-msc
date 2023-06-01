@@ -64,7 +64,9 @@ class TestCtrlBase(unittest.TestCase):
 
     def tearDown(self):
         self.disconnect()
-        osmoutil.end_proc(self.proc)
+        rc = osmoutil.end_proc(self.proc)
+        if rc is not None and rc != 0:
+            raise Exception("Process returned %d" % rc)
 
     def disconnect(self):
         if not (self.sock is None):

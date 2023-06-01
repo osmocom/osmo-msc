@@ -65,7 +65,9 @@ class TestVTYBase(unittest.TestCase):
         if self.vty:
             self.vty._close_socket()
         self.vty = None
-        osmoutil.end_proc(self.proc)
+        rc = osmoutil.end_proc(self.proc)
+        if rc is not None and rc != 0:
+            raise Exception("Process returned %d" % rc)
 
 class TestVTYMSC(TestVTYBase):
 
