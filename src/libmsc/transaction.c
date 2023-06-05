@@ -199,8 +199,8 @@ struct gsm_trans *trans_alloc(struct gsm_network *net,
 	int subsys = trans_log_subsys(type);
 	struct gsm_trans *trans;
 
-	/* a valid subscriber is indispensable */
-	if (vsub == NULL) {
+	/* A valid subscriber is indispensable, except for voice group/broadcast calls. */
+	if (vsub == NULL && type != TRANS_GCC && type != TRANS_BCC) {
 		LOGP(subsys, LOGL_ERROR, "unable to alloc transaction, invalid subscriber (NULL)\n");
 		return NULL;
 	}
@@ -222,7 +222,8 @@ struct gsm_trans *trans_alloc(struct gsm_network *net,
 			.speech_ver = { -1 },
 		},
 	};
-	vlr_subscr_get(vsub, trans_vsub_use(type));
+	if (vsub)
+		vlr_subscr_get(vsub, trans_vsub_use(type));
 	llist_add_tail(&trans->entry, &net->trans_list);
 
 	LOG_TRANS(trans, LOGL_DEBUG, "New transaction\n");
