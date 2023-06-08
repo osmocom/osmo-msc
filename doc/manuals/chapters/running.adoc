@@ -107,6 +107,7 @@ cs7 instance 0
  point-code 0.23.1
  asp asp-clnt-OsmoMSC-A-Iu 2905 0 m3ua
   remote-ip 127.0.0.1
+  role asp
   sctp-role client
 ----
 
@@ -118,9 +119,13 @@ Note that _A_ and _IuCS_ may use different SCCP instances, if so desired:
 cs7 instance 0
  asp my-OsmoMSC-A 2905 0 m3ua
   remote-ip 10.23.42.1
+  role asp
+  sctp-role client
 cs7 instance 1
  asp my-OsmoMSC-Iu 2905 0 m3ua
   remote-ip 10.23.42.2
+  role asp
+  sctp-role client
 msc
  cs7-instance-a 0
  cs7-instance-iu 1
