@@ -1235,10 +1235,10 @@ struct gsm_network *test_net(void *ctx)
 	INIT_LLIST_HEAD(&net->iu.sri->ran_conns);
 
 	net->mgw.tdefs = g_mgw_tdefs;
-	mgcp_client_conf_init(&net->mgw.conf);
 	net->mgw.tdefs = g_mgw_tdefs;
+	net->mgw.conf = mgcp_client_conf_alloc(net);
 	net->mgw.mgw_pool = mgcp_client_pool_alloc(net);
-	client = mgcp_client_init(net, &net->mgw.conf);
+	client = mgcp_client_init(net, net->mgw.conf);
 	mgcp_client_pool_register_single(net->mgw.mgw_pool, client);
 	return net;
 }

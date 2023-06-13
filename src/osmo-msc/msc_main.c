@@ -257,7 +257,7 @@ struct gsm_network *msc_network_alloc(void *ctx,
 	net->gsup_server_port = MSC_HLR_REMOTE_PORT_DEFAULT;
 
 	net->mgw.mgw_pool = mgcp_client_pool_alloc(net);
-	mgcp_client_conf_init(&net->mgw.conf);
+	net->mgw.conf = mgcp_client_conf_alloc(net);
 	net->call_waiting = true;
 	net->lcls_permitted = false;
 
@@ -575,15 +575,15 @@ static int msc_mgw_setup(void)
 	/* Initialize and connect a single MGCP client. This MGCP client will appear as the one and only pool
 	 * member if there is no MGW pool configured. */
 	LOGP(DMSC, LOGL_NOTICE, "No MGW pool configured, using MGW configuration in VTY node 'msc'\n");
-	mgcp_client_single = mgcp_client_init(msc_network, &msc_network->mgw.conf);
+	mgcp_client_single = mgcp_client_init(msc_network, msc_network->mgw.conf);
 	if (!mgcp_client_single) {
 		LOGP(DMSC, LOGL_ERROR, "MGW (single) client initalization failed\n");
 		return -EINVAL;
 	}
 	if (mgcp_client_connect(mgcp_client_single)) {
 		LOGP(DMSC, LOGL_ERROR, "MGW (single) connect failed at (%s:%u)\n",
-		     msc_network->mgw.conf.remote_addr,
-		     msc_network->mgw.conf.remote_port);
+		     msc_network->mgw.conf->remote_addr,
+		     msc_network->mgw.conf->remote_port);
 		return -EINVAL;
 	}
 	mgcp_client_pool_register_single(msc_network->mgw.mgw_pool, mgcp_client_single);

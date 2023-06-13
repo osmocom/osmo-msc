@@ -7,5 +7,5 @@
 # If any interfaces have been added since the last public release: c:r:a + 1.
 # If any interfaces have been removed or changed since the last public release: c:r:0.
 #library	what		description / commit summary line
-libosmo-mgcp-client > 1.11.0	mgcp_client_pool_empty()
+libosmo-mgcp-client > 1.11.0	mgcp_client_pool_empty(), mgcp_client_conf_alloc()
 		MNCC		osmo-sip-connector should do full SDP via MNCC and be released at the same time as the next osmo-msc, ask neels, thanks
