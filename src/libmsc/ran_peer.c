@@ -119,7 +119,12 @@ void ran_peer_discard_all_conns(struct ran_peer *rp)
 	struct ran_conn *conn, *next;
 
 	ran_peer_for_each_ran_conn_safe(conn, next, rp) {
-		ran_conn_discard(conn);
+		/* Tell VGCS FSM that the connections have been cleared. */
+		if (conn->vgcs.bss)
+			vgcs_vbs_clear_cpl(conn->vgcs.bss, NULL);
+		else if (conn->vgcs.cell)
+			vgcs_vbs_clear_cpl_channel(conn->vgcs.cell, NULL);
+		else ran_conn_discard(conn);
 	}
 }
 
