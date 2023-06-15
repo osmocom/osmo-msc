@@ -840,8 +840,6 @@ static int gsm48_cc_tx_setup(struct gsm_trans *trans, void *arg)
 		return rc;
 	}
 	/* Create a copy of the bearer capability in the transaction struct, so we can use this information later */
-	/* TODO: we should be able to drop trans->bearer_cap, replaced by the codecs filter. Verify this.
-	 * So far let's just store it there like previous code did. */
 	trans->bearer_cap = bearer_cap;
 	/* If no resulting codecs remain, error out. We cannot find a codec that matches both call legs. If the MGW were
 	 * able to transcode, we could use non-identical codecs on each conn of the MGW endpoint, but we are aiming for
