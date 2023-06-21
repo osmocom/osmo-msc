@@ -45,6 +45,7 @@ struct rtp_stream {
 	struct osmo_mgcpc_ep_ci *ci;
 
 	enum mgcp_connection_mode crcx_conn_mode;
+	bool mode_sent_to_mgw;
 
 	/* configured to use Osmux */
 	bool use_osmux;
@@ -68,6 +69,7 @@ int rtp_stream_do_mdcx(struct rtp_stream *rtps);
 bool rtp_stream_set_codecs_from_mgcp_codec(struct rtp_stream *rtps, enum mgcp_codecs codec);
 void rtp_stream_set_one_codec(struct rtp_stream *rtps, const struct sdp_audio_codec *codec);
 void rtp_stream_set_codecs(struct rtp_stream *rtps, const struct sdp_audio_codecs *codecs);
+void rtp_stream_set_mode(struct rtp_stream *rtps, enum mgcp_connection_mode mode);
 void rtp_stream_set_remote_addr(struct rtp_stream *rtps, const struct osmo_sockaddr_str *r);
 void rtp_stream_set_remote_addr_and_codecs(struct rtp_stream *rtps, const struct sdp_msg *sdp);
 void rtp_stream_set_remote_osmux_cid(struct rtp_stream *rtps, uint8_t osmux_cid);
