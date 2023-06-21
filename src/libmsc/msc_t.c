@@ -160,7 +160,7 @@ static int msc_t_ho_request_decode_and_store_cb(struct osmo_fsm_inst *msc_t_fi, 
 	}
 
 	msc_t->inter_msc.cell_id_target = ran_dec->handover_request.cell_id_target;
-	msc_t->inter_msc.callref = ran_dec->handover_request.call_id;
+	msc_t->inter_msc.call_id = ran_dec->handover_request.call_id;
 
 	/* TODO other parameters...?
 	 * Global Call Reference
@@ -358,8 +358,8 @@ void msc_t_fsm_wait_local_rtp_onenter(struct osmo_fsm_inst *fi, uint32_t prev_st
 						   MSC_EV_CALL_LEG_RTP_LOCAL_ADDR_AVAILABLE,
 						   MSC_EV_CALL_LEG_RTP_COMPLETE);
 	if (!msc_t->inter_msc.call_leg
-	    || call_leg_ensure_ci(msc_t->inter_msc.call_leg, RTP_TO_RAN, msc_t->inter_msc.callref, NULL, NULL, NULL)
-	    || call_leg_ensure_ci(msc_t->inter_msc.call_leg, RTP_TO_CN, msc_t->inter_msc.callref, NULL, NULL, NULL)) {
+	    || call_leg_ensure_ci(msc_t->inter_msc.call_leg, RTP_TO_RAN, msc_t->inter_msc.call_id, NULL, NULL, NULL)
+	    || call_leg_ensure_ci(msc_t->inter_msc.call_leg, RTP_TO_CN, msc_t->inter_msc.call_id, NULL, NULL, NULL)) {
 		msc_t_error("Failed to set up call leg\n");
 		return;
 	}

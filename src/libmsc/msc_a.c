@@ -620,7 +620,7 @@ int msc_a_ensure_cn_local_rtp(struct msc_a *msc_a, struct gsm_trans *cc_trans)
 	 * If no RAN side RTP is established, try to guess a preliminary codec from SDP -- before Assignment, picking a
 	 * codec from the SDP is more politeness/avoiding confusion than necessity. The actual codec to be used would be
 	 * determined later. If no codec could be determined, pass none for the time being. */
-	return call_leg_ensure_ci(cl, RTP_TO_CN, cc_trans->callref, cc_trans,
+	return call_leg_ensure_ci(cl, RTP_TO_CN, cc_trans->call_id, cc_trans,
 				  rtp_to_ran->codecs_known ? &rtp_to_ran->codecs : NULL, NULL);
 }
 
@@ -690,7 +690,7 @@ static void msc_a_call_leg_ran_local_addr_available(struct msc_a *msc_a)
 			.osmux_present = msc_a->cc.call_leg->rtp[RTP_TO_RAN]->use_osmux,
 			.osmux_cid = msc_a->cc.call_leg->rtp[RTP_TO_RAN]->local_osmux_cid,
 			.call_id_present = true,
-			.call_id = cc_trans->callref,
+			.call_id = cc_trans->call_id,
 			.lcls = cc_trans->cc.lcls,
 		},
 	};
@@ -1898,7 +1898,7 @@ static int msc_a_start_assignment(struct msc_a *msc_a, struct gsm_trans *cc_tran
 	 * osmo_mgcpc_ep_fsm automagically waits for the first CRCX to complete before firing the second CRCX. The one
 	 * issued first here will also be the first CRCX sent to the MGW. Usually both still need to be set up. */
 	if (!cn_rtp_available)
-		call_leg_ensure_ci(cl, RTP_TO_CN, cc_trans->callref, cc_trans,
+		call_leg_ensure_ci(cl, RTP_TO_CN, cc_trans->call_id, cc_trans,
 				   &cc_trans->cc.local.audio_codecs, NULL);
 	if (!ran_rtp_available) {
 		struct sdp_audio_codecs *codecs;
@@ -1906,7 +1906,7 @@ static int msc_a_start_assignment(struct msc_a *msc_a, struct gsm_trans *cc_tran
 			codecs = &msc_a->c.ran->force_mgw_codecs_to_ran;
 		else
 			codecs = &cc_trans->cc.local.audio_codecs;
-		return call_leg_ensure_ci(cl, RTP_TO_RAN, cc_trans->callref, cc_trans, codecs, NULL);
+		return call_leg_ensure_ci(cl, RTP_TO_RAN, cc_trans->call_id, cc_trans, codecs, NULL);
 	}
 
 	/* Should these already be set up, immediately continue by retriggering the events signalling that the RTP

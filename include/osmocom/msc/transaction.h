@@ -83,6 +83,9 @@ struct gsm_trans {
 	/* reference from MNCC or other application */
 	uint32_t callref;
 
+	/* reference that may be used by MGW to identify a call */
+	uint32_t call_id;
+
 	/* if traffic channel receive was requested */
 	int tch_recv;
 

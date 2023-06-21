@@ -181,6 +181,8 @@ static const char *trans_vsub_use(enum trans_type type)
 	return get_value_string_or_null(trans_type_names, type) ? : "trans-type-unknown";
 }
 
+static uint32_t new_call_id = 1;
+
 /*! Allocate a new transaction and add it to network list
  *  \param[in] net Netwokr in which we allocate transaction
  *  \param[in] subscr Subscriber for which we allocate transaction
@@ -212,6 +214,7 @@ struct gsm_trans *trans_alloc(struct gsm_network *net,
 		.log_subsys = subsys,
 		.transaction_id = trans_id,
 		.callref = callref,
+		.call_id = new_call_id++,
 		.net = net,
 		/* empty bearer_cap: make sure the speech_ver array is empty */
 		.bearer_cap = {

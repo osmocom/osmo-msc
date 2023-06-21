@@ -30,7 +30,7 @@ struct msc_t {
 	struct {
 		struct an_apdu ho_request;
 		struct gsm0808_cell_id cell_id_target;
-		uint32_t callref;
+		uint32_t call_id;
 		char handover_number[16]; /* No libosmocore definition for MSISDN_MAXLEN? */
 		struct call_leg *call_leg;
 		struct mncc_call *mncc_forwarding_to_remote_cn;

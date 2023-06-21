@@ -440,7 +440,7 @@ static int tch_bridge(struct gsm_network *net, const struct gsm_mncc_bridge *bri
 	cl1 = trans1->msc_a->cc.call_leg;
 	cl2 = trans2->msc_a->cc.call_leg;
 
-	return call_leg_local_bridge(cl1, trans1->callref, trans1, cl2, trans2->callref, trans2);
+	return call_leg_local_bridge(cl1, trans1->call_id, trans1, cl2, trans2->call_id, trans2);
 }
 
 static int gsm48_cc_rx_status_enq(struct gsm_trans *trans, struct msgb *msg)

@@ -421,7 +421,7 @@ static void msc_ho_send_handover_request(struct msc_a *msc_a)
 		}
 		ran_enc_msg.handover_request.geran.channel_type = &channel_type;
 		ran_enc_msg.handover_request.call_id_present = true;
-		ran_enc_msg.handover_request.call_id = cc_trans->callref;
+		ran_enc_msg.handover_request.call_id = cc_trans->call_id;
 
 		sdp_audio_codecs_to_speech_codec_list(&scl, &cc_trans->cc.local.audio_codecs);
 		if (!scl.len) {
