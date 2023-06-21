@@ -1386,6 +1386,10 @@ int msc_a_up_l3(struct msc_a *msc_a, struct msgb *msg)
 #endif
 
 	switch (pdisc) {
+	case GSM48_PDISC_GROUP_CC:
+	case GSM48_PDISC_BCAST_CC:
+		rc = gsm44068_rcv_bcc_gcc(msc_a, NULL, msg);
+		break;
 	case GSM48_PDISC_CC:
 		rc = gsm0408_rcv_cc(msc_a, msg);
 		break;
@@ -1422,10 +1426,22 @@ int msc_a_up_l3(struct msc_a *msc_a, struct msgb *msg)
 
 static void msc_a_up_call_assignment_complete(struct msc_a *msc_a, const struct ran_msg *ac)
 {
-	struct gsm_trans *cc_trans = msc_a->cc.active_trans;
+	struct gsm_trans *cc_trans = msc_a->cc.active_trans, *gcc_trans;
 	struct rtp_stream *rtps_to_ran = msc_a->cc.call_leg ? msc_a->cc.call_leg->rtp[RTP_TO_RAN] : NULL;
 	const struct gsm0808_speech_codec *codec_if_known = ac->assignment_complete.codec_present ?
 							    &ac->assignment_complete.codec : NULL;
+
+	/* For a voice group call, handling is performed by VGCS FSM */
+	gcc_trans = trans_find_by_type(msc_a, TRANS_GCC);
+	if (gcc_trans) {
+		vgcs_vbs_caller_assign_cpl(gcc_trans);
+		return;
+	}
+	gcc_trans = trans_find_by_type(msc_a, TRANS_BCC);
+	if (gcc_trans) {
+		vgcs_vbs_caller_assign_cpl(gcc_trans);
+		return;
+	}
 
 	if (!rtps_to_ran) {
 		LOG_MSC_A(msc_a, LOGL_ERROR, "Rx Assignment Complete, but no RTP stream is set up\n");
@@ -1510,6 +1526,18 @@ static void msc_a_up_call_assignment_failure(struct msc_a *msc_a, const struct r
 	if (msc_a->cc.call_leg && msc_a->cc.call_leg->rtp[RTP_TO_RAN]) {
 		LOG_MSC_A(msc_a, LOGL_ERROR, "Assignment Failure, releasing call\n");
 		rtp_stream_release(msc_a->cc.call_leg->rtp[RTP_TO_RAN]);
+		return;
+	}
+
+	/* For a voice group call, release is performed by VGCS FSM */
+	trans = trans_find_by_type(msc_a, TRANS_GCC);
+	if (trans) {
+		vgcs_vbs_caller_assign_fail(trans);
+		return;
+	}
+	trans = trans_find_by_type(msc_a, TRANS_BCC);
+	if (trans) {
+		vgcs_vbs_caller_assign_fail(trans);
 		return;
 	}
 
