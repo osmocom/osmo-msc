@@ -109,6 +109,8 @@ struct ran_assignment_command {
 	bool call_id_present;
 	uint32_t call_id;
 	struct osmo_lcls *lcls;
+	bool callref_present;
+	struct gsm0808_group_callref callref;
 };
 
 struct ran_cipher_mode_command {

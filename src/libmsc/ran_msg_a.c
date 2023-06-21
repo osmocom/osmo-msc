@@ -1375,13 +1375,6 @@ static int ran_a_channel_type_to_speech_codec_list(struct gsm0808_speech_codec_l
 	return 0;
 }
 
-static void _gsm0808_assignment_extend_osmux(struct msgb *msg, uint8_t cid)
-{
-	OSMO_ASSERT(msg->l3h[1] == msgb_l3len(msg) - 2); /*TL not in len */
-	msgb_tv_put(msg, GSM0808_IE_OSMO_OSMUX_CID, cid);
-	msg->l3h[1] = msgb_l3len(msg) - 2;
-}
-
 /* Compose a BSSAP Assignment Command.
  * Passing an RTP address is optional.
  * The msub is passed merely for error logging. */
@@ -1468,8 +1461,13 @@ static struct msgb *ran_a_make_assignment_command(struct osmo_fsm_inst *log_fi,
 		return NULL;
 	}
 
+	/* Append optional IEs: Group Call Reference and Osmux CID */
+	OSMO_ASSERT(msg->l3h[1] == msgb_l3len(msg) - 2); /* TL not in len */
+	if (ac->callref_present)
+		gsm0808_enc_group_callref(msg, &ac->callref);
 	if (ac->osmux_present)
-		_gsm0808_assignment_extend_osmux(msg, ac->osmux_cid);
+		msgb_tv_put(msg, GSM0808_IE_OSMO_OSMUX_CID, ac->osmux_cid);
+	msg->l3h[1] = msgb_l3len(msg) - 2;
 	return msg;
 }
 
