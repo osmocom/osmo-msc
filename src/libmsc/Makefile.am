@@ -76,6 +76,7 @@ libmsc_a_SOURCES = \
 	sgs_iface.c \
 	sgs_server.c \
 	sgs_vty.c \
+	asci_gcr.c \
 	$(NULL)
 
 if BUILD_IU

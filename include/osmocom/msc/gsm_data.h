@@ -269,6 +269,11 @@ struct gsm_network {
 
 	/* SMS queue config parameters */
 	struct sms_queue_config *sms_queue_cfg;
+
+	/* ASCI feature support */
+	struct {
+		struct llist_head gcr_lists;
+	} asci;
 };
 
 struct smpp_esme;

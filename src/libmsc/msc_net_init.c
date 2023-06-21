@@ -75,6 +75,7 @@ struct gsm_network *gsm_network_init(void *ctx, mncc_recv_cb_t mncc_recv)
 	INIT_LLIST_HEAD(&net->trans_list);
 	INIT_LLIST_HEAD(&net->upqueue);
 	INIT_LLIST_HEAD(&net->neighbor_ident_list);
+	INIT_LLIST_HEAD(&net->asci.gcr_lists);
 
 	/* init statistics */
 	net->msc_ctrs = rate_ctr_group_alloc(net, &msc_ctrg_desc, 0);
