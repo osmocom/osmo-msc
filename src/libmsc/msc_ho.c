@@ -401,8 +401,6 @@ static void msc_ho_send_handover_request(struct msc_a *msc_a)
 			/* Don't send AoIP Transport Layer Address for inter-MSC Handover */
 			.rtp_ran_local = (msc_a->ho.new_cell.type == MSC_NEIGHBOR_TYPE_LOCAL_RAN_PEER)
 				? call_leg_local_ip(msc_a->cc.call_leg, RTP_TO_RAN) : NULL,
-			.call_id_present = true,
-			.call_id = cc_trans->callref,
 		},
 	};
 
@@ -422,6 +420,8 @@ static void msc_ho_send_handover_request(struct msc_a *msc_a)
 			return;
 		}
 		ran_enc_msg.handover_request.geran.channel_type = &channel_type;
+		ran_enc_msg.handover_request.call_id_present = true;
+		ran_enc_msg.handover_request.call_id = cc_trans->callref;
 
 		sdp_audio_codecs_to_speech_codec_list(&scl, &cc_trans->cc.local.audio_codecs);
 		if (!scl.len) {
