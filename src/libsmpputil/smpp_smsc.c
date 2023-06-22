@@ -467,7 +467,7 @@ static int smpp_handle_bind_tx(struct smpp_esme *esme, struct msgb *msg)
 {
 	struct bind_transmitter_t bind;
 	struct bind_transmitter_resp_t bind_r;
-	struct tlv_t tlv;
+	struct tlv_t tlv = {};
 	int rc;
 
 	SMPP34_UNPACK(rc, BIND_TRANSMITTER, &bind, msgb_data(msg),
