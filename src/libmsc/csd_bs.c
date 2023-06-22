@@ -375,13 +375,15 @@ int csd_bs_list_to_gsm0808_channel_type(struct gsm0808_channel_type *ct, const s
 
 	if (csd_bs_is_transp(list->bs[0])) {
 		ct->data_transparent = true;
-		ct->data_rate = csd_bs_to_gsm0808_data_rate_transp(list->bs[0]);
+		rc = csd_bs_to_gsm0808_data_rate_transp(list->bs[0]);
 	} else {
-		ct->data_rate = csd_bs_to_gsm0808_data_rate_non_transp(list->bs[0]);
+		rc = csd_bs_to_gsm0808_data_rate_non_transp(list->bs[0]);
 	}
 
-	if (ct->data_rate < 0)
+	if (rc < 0)
 		return -EINVAL;
+
+	ct->data_rate = rc;
 
 	/* Other possible data rates allowed (3GPP TS 48.008 § 3.2.2.11, 5a) */
 	if (!ct->data_transparent && list->count > 1) {
