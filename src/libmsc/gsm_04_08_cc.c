@@ -1110,6 +1110,7 @@ static int gsm48_cc_tx_alerting(struct gsm_trans *trans, void *arg)
 	struct gsm_mncc *alerting = arg;
 	struct msgb *msg = gsm48_msgb_alloc_name("GSM 04.08 CC ALERT");
 	struct gsm48_hdr *gh = (struct gsm48_hdr *) msgb_put(msg, sizeof(*gh));
+	int rc;
 
 	gh->msg_type = GSM48_MT_CC_ALERTING;
 
@@ -1128,7 +1129,11 @@ static int gsm48_cc_tx_alerting(struct gsm_trans *trans, void *arg)
 	if (alerting->sdp[0]) {
 		struct call_leg *cl = trans->msc_a->cc.call_leg;
 		struct rtp_stream *rtp_cn = cl ? cl->rtp[RTP_TO_CN] : NULL;
-		sdp_msg_from_sdp_str(&trans->cc.remote, alerting->sdp);
+
+		rc = sdp_msg_from_sdp_str(&trans->cc.remote, alerting->sdp);
+		if (rc < 0)
+			return rc;
+
 		trans_cc_filter_run(trans);
 		LOG_TRANS(trans, LOGL_DEBUG, "msg_type=%s\n", get_mncc_name(alerting->msg_type));
 		if (rtp_cn) {
