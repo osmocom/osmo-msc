@@ -526,6 +526,8 @@ static void test_select()
 		struct sdp_msg sdp = {};
 		struct sdp_audio_codec *codec;
 		char buf[1024];
+		const char *expect_sdp;
+
 		printf("\n[%d]\n", i);
 		rc = sdp_msg_from_sdp_str(&sdp, t->sdp);
 		if (rc) {
@@ -542,14 +544,15 @@ static void test_select()
 		printf("SDP: %s\n", sdp_audio_codecs_to_str(&sdp.audio_codecs));
 		sdp_msg_to_sdp_str_buf(buf, sizeof(buf), &sdp);
 
-		if (strcmp(buf, t->expect_sdp ? : t->sdp)) {
+		expect_sdp = t->expect_sdp ? : t->sdp;
+		if (strcmp(buf, expect_sdp)) {
 			int j;
 			ok = false;
 			printf("ERROR:\n");
 			dump_sdp(buf, "selection result: ");
-			dump_sdp(t->expect_sdp, "expect result: ");
-			for (j = 0; t->expect_sdp[j]; j++) {
-				if (t->expect_sdp[j] != buf[j]) {
+			dump_sdp(expect_sdp, "expect result: ");
+			for (j = 0; expect_sdp[j]; j++) {
+				if (expect_sdp[j] != buf[j]) {
 					printf("ERROR at position %d, at:\n", j);
 					dump_sdp(buf + j, "     mismatch: ");
 					break;
