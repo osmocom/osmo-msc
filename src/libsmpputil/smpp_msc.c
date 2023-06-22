@@ -245,6 +245,12 @@ static int submit_to_sms(struct gsm_sms **psms, struct gsm_network *net,
 		sms->data_coding_scheme = GSM338_DCS_1111_7BIT;
 		if (sms->ud_hdr_ind) {
 			ud_len = *sms_msg + 1;
+			if (ud_len > sms_msg_len) {
+				sms_free(sms);
+				LOGP(DLSMS, LOGL_ERROR, "invalid ud_len=%u > sms_msg_len=%u\n", ud_len,
+				     sms_msg_len);
+				return ESME_RINVPARLEN;
+			}
 			printf("copying %u bytes user data...\n", ud_len);
 			memcpy(sms->user_data, sms_msg,
 				OSMO_MIN(ud_len, sizeof(sms->user_data)));
