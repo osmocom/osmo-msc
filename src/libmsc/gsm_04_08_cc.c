@@ -2010,7 +2010,27 @@ static int mncc_tx_to_gsm_cc(struct gsm_network *net, const union mncc_msg *msg)
 
 	LOG_TRANS_CAT(trans, DMNCC, LOGL_DEBUG, "rx %s\n", get_mncc_name(msg->msg_type));
 
-	gsm48_start_guard_timer(trans);
+	/*
+	 * The step of gsm48_start_guard_timer() needs to be done for
+	 * major state-impacting MNCC messages, but not for those
+	 * that are a mere pass-through to CC messages to MS.
+	 */
+	switch(msg->msg_type) {
+	case MNCC_PROGRESS_REQ:
+	case MNCC_NOTIFY_REQ:
+	case MNCC_FACILITY_REQ:
+	case MNCC_START_DTMF_RSP:
+	case MNCC_START_DTMF_REJ:
+	case MNCC_STOP_DTMF_RSP:
+	case MNCC_HOLD_CNF:
+	case MNCC_HOLD_REJ:
+	case MNCC_RETRIEVE_CNF:
+	case MNCC_RETRIEVE_REJ:
+	case MNCC_USERINFO_REQ:
+		break;
+	default:
+		gsm48_start_guard_timer(trans);
+	}
 	trans->cc.mncc_initiated = true;
 
 	if (trans->msc_a)
