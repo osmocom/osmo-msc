@@ -129,7 +129,7 @@ static void gsm48_start_guard_timer(struct gsm_trans *trans)
 
 /* Call Control */
 
-void cc_tx_to_mncc(struct gsm_network *net, struct msgb *msg)
+static void cc_tx_to_mncc(struct gsm_network *net, struct msgb *msg)
 {
 	net->mncc_recv(net, msg);
 }

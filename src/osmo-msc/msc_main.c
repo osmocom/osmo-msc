@@ -242,8 +242,8 @@ static void handle_options(int argc, char **argv)
 	}
 }
 
-struct gsm_network *msc_network_alloc(void *ctx,
-				      mncc_recv_cb_t mncc_recv)
+static struct gsm_network *msc_network_alloc(void *ctx,
+					     mncc_recv_cb_t mncc_recv)
 {
 	struct gsm_network *net = gsm_network_init(ctx, mncc_recv);
 	if (!net)
