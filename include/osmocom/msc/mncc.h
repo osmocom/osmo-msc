@@ -219,7 +219,6 @@ union mncc_msg {
 
 const char *get_mncc_name(int value);
 void mncc_set_cause(struct gsm_mncc *data, int loc, int val);
-void cc_tx_to_mncc(struct gsm_network *net, struct msgb *msg);
 
 /* input from CC code into mncc_builtin */
 int int_mncc_recv(struct gsm_network *net, struct msgb *msg);
