@@ -110,13 +110,14 @@ void rtp_stream_update_id(struct rtp_stream *rtps)
 /* Allocate RTP stream under a call leg. This is one RTP connection from some remote entity with address and port to a
  * local RTP address and port. call_id is stored for sending in MGCP transactions and as logging context. for_trans is
  * optional, merely stored for reference by callers, and appears as log context if not NULL. */
-struct rtp_stream *rtp_stream_alloc(struct call_leg *parent_call_leg, enum rtp_direction dir,
-				    uint32_t call_id, struct gsm_trans *for_trans)
+struct rtp_stream *rtp_stream_alloc(struct osmo_fsm_inst *parent_fi, uint32_t event_gone, uint32_t event_avail,
+				    uint32_t event_estab, enum rtp_direction dir, uint32_t call_id,
+				    struct gsm_trans *for_trans)
 {
 	struct osmo_fsm_inst *fi;
 	struct rtp_stream *rtps;
 
-	fi = osmo_fsm_inst_alloc_child(&rtp_stream_fsm, parent_call_leg->fi, CALL_LEG_EV_RTP_STREAM_GONE);
+	fi = osmo_fsm_inst_alloc_child(&rtp_stream_fsm, parent_fi, event_gone);
 	OSMO_ASSERT(fi);
 
 	rtps = talloc(fi, struct rtp_stream);
@@ -124,7 +125,8 @@ struct rtp_stream *rtp_stream_alloc(struct call_leg *parent_call_leg, enum rtp_d
 	fi->priv = rtps;
 	*rtps = (struct rtp_stream){
 		.fi = fi,
-		.parent_call_leg = parent_call_leg,
+		.event_avail = event_avail,
+		.event_estab = event_estab,
 		.call_id = call_id,
 		.for_trans = for_trans,
 		.dir = dir,
@@ -172,7 +174,7 @@ static void rtp_stream_fsm_establishing_established(struct osmo_fsm_inst *fi, ui
 		if (crcx_info->x_osmo_osmux_use)
 			rtps->local_osmux_cid = crcx_info->x_osmo_osmux_cid;
 		rtp_stream_update_id(rtps);
-		osmo_fsm_inst_dispatch(fi->proc.parent, CALL_LEG_EV_RTP_STREAM_ADDR_AVAILABLE, rtps);
+		osmo_fsm_inst_dispatch(fi->proc.parent, rtps->event_avail, rtps);
 		check_established(rtps);
 
 		if ((!rtps->remote_sent_to_mgw || !rtps->codecs_sent_to_mgw || !rtps->mode_sent_to_mgw)
@@ -212,7 +214,7 @@ static void rtp_stream_fsm_establishing_established(struct osmo_fsm_inst *fi, ui
 void rtp_stream_fsm_established_onenter(struct osmo_fsm_inst *fi, uint32_t prev_state)
 {
 	struct rtp_stream *rtps = fi->priv;
-	osmo_fsm_inst_dispatch(fi->proc.parent, CALL_LEG_EV_RTP_STREAM_ESTABLISHED, rtps);
+	osmo_fsm_inst_dispatch(fi->proc.parent, rtps->event_estab, rtps);
 }
 
 static int rtp_stream_fsm_timer_cb(struct osmo_fsm_inst *fi)

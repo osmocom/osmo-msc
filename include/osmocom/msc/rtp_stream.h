@@ -26,7 +26,8 @@ static inline const char *rtp_direction_name(enum rtp_direction val)
 /* A single bidirectional RTP hop between remote and MGW's local RTP port. */
 struct rtp_stream {
 	struct osmo_fsm_inst *fi;
-	struct call_leg *parent_call_leg;
+	uint32_t event_avail;
+	uint32_t event_estab;
 	enum rtp_direction dir;
 
 	uint32_t call_id;
@@ -60,8 +61,9 @@ struct rtp_stream {
 #define RTP_STREAM_FMT "local=" RTP_IP_PORT_FMT ",remote=" RTP_IP_PORT_FMT
 #define RTP_STREAM_ARGS(RS) RTP_IP_PORT_ARGS(&(RS)->local), RTP_IP_PORT_ARGS(&(RS)->remote),
 
-struct rtp_stream *rtp_stream_alloc(struct call_leg *parent_call_leg, enum rtp_direction dir,
-				    uint32_t call_id, struct gsm_trans *for_trans);
+struct rtp_stream *rtp_stream_alloc(struct osmo_fsm_inst *parent_fi, uint32_t event_gone, uint32_t event_avail,
+				    uint32_t event_estab, enum rtp_direction dir, uint32_t call_id,
+				    struct gsm_trans *for_trans);
 
 int rtp_stream_ensure_ci(struct rtp_stream *rtps, struct osmo_mgcpc_ep *at_endpoint);
 int rtp_stream_do_mdcx(struct rtp_stream *rtps);

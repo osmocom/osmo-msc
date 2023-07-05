@@ -303,7 +303,8 @@ int call_leg_ensure_rtp_alloc(struct call_leg *cl, enum rtp_direction dir, uint3
 		return -EIO;
 	}
 
-	cl->rtp[dir] = rtp_stream_alloc(cl, dir, call_id, for_trans);
+	cl->rtp[dir] = rtp_stream_alloc(cl->fi, CALL_LEG_EV_RTP_STREAM_GONE, CALL_LEG_EV_RTP_STREAM_ADDR_AVAILABLE,
+					CALL_LEG_EV_RTP_STREAM_ESTABLISHED, dir, call_id, for_trans);
 	OSMO_ASSERT(cl->rtp[dir]);
 	return 0;
 }
