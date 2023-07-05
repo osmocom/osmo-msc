@@ -826,7 +826,16 @@ static int gsm48_cc_tx_setup(struct gsm_trans *trans, void *arg)
 				  "Got no information of remote audio codecs: neither SDP nor Bearer Capability. Trying anyway.\n");
 		break;
 	case GSM48_BCAP_ITCAP_UNR_DIG_INF:
-		sdp_audio_codecs_set_csd(&trans->cc.codecs.ms);
+		if (setup->fields & MNCC_F_BEARER_CAP) {
+			trans->cc.remote = (struct sdp_msg){};
+			trans_cc_set_remote_from_bc(trans, &setup->bearer_cap);
+			LOG_TRANS_CAT(trans, DMNCC, LOGL_DEBUG, "rx %s Bearer Cap: remote=%s\n",
+				      get_mncc_name(setup->msg_type), sdp_msg_to_str(&trans->cc.remote));
+		} else {
+			LOG_TRANS(trans, LOGL_INFO,
+				  "Got no information of remote Bearer Capability. Trying anyway.\n");
+			sdp_audio_codecs_set_csd(&trans->cc.codecs.ms);
+		}
 		break;
 	default:
 		LOG_TRANS(trans, LOGL_ERROR, "Handling of information transfer capability %d not implemented\n",
