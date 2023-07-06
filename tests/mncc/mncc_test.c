@@ -67,7 +67,7 @@ const struct log_info log_info = {
 
 int main(void)
 {
-	void *ctx = talloc_named_const(NULL, 0, "smpp_test");
+	void *ctx = talloc_named_const(NULL, 0, "mncc_test");
 	osmo_init_logging2(ctx, &log_info);
 	log_set_use_color(osmo_stderr_target, 0);
 	log_set_print_filename2(osmo_stderr_target, LOG_FILENAME_NONE);
