@@ -340,14 +340,14 @@ void csd_bs_list_remove(struct csd_bs_list *list, enum csd_bs bs)
 	bool found = false;
 
 	for (i = 0; i < list->count; i++) {
-		if (list->bs[i] == bs) {
+		if (list->bs[i] == bs)
 			found = true;
-			list->count--;
-			continue;
-		}
-		if (i && found)
-			list->bs[i-1] = list->bs[i];
+		if (found && i + 1 < list->count)
+			list->bs[i] = list->bs[i + 1];
 	}
+
+	if (found)
+		list->count--;
 }
 
 void csd_bs_list_intersection(struct csd_bs_list *dest, const struct csd_bs_list *other)

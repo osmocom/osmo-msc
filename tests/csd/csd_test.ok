@@ -4,8 +4,8 @@ initial:
 removing BS25T (not in the list):
   BS21T,BS22T,BS24T
 removing BS22T:
-  BS21T,BS22T
+  BS21T,BS24T
 removing BS24T:
-  BS21T,BS22T
-removing BS21T:
   BS21T
+removing BS21T:
+  (no-bearer-services)
