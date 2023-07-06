@@ -249,6 +249,7 @@ AC_OUTPUT(
     tests/msc_vlr/Makefile
     tests/sdp_msg/Makefile
     tests/mncc/Makefile
+    tests/csd/Makefile
     doc/Makefile
     doc/examples/Makefile
     doc/manuals/Makefile
