@@ -180,16 +180,23 @@ const char *csd_bs_to_str(enum csd_bs bs)
 	return csd_bs_to_str_c(OTC_SELECT, bs);
 }
 
-static int csd_bs_to_gsm0808_data_rate_transp(enum csd_bs bs)
+static int csd_bs_to_gsm0808_data_rate_transp(enum csd_bs bs, uint8_t *ch_rate_type)
 {
 	switch (bs_map[bs].rate) {
+	case 300:
+		*ch_rate_type = GSM0808_DATA_FULL_PREF;
+		return GSM0808_DATA_RATE_TRANSP_600;
 	case 1200:
+		*ch_rate_type = GSM0808_DATA_FULL_BM;
 		return GSM0808_DATA_RATE_TRANSP_1k2;
 	case 2400:
+		*ch_rate_type = GSM0808_DATA_FULL_BM;
 		return GSM0808_DATA_RATE_TRANSP_2k4;
 	case 4800:
+		*ch_rate_type = GSM0808_DATA_FULL_BM;
 		return GSM0808_DATA_RATE_TRANSP_4k8;
 	case 9600:
+		*ch_rate_type = GSM0808_DATA_FULL_BM;
 		return GSM0808_DATA_RATE_TRANSP_9k6;
 	}
 	return -EINVAL;
@@ -375,9 +382,10 @@ int csd_bs_list_to_gsm0808_channel_type(struct gsm0808_channel_type *ct, const s
 
 	if (csd_bs_is_transp(list->bs[0])) {
 		ct->data_transparent = true;
-		rc = csd_bs_to_gsm0808_data_rate_transp(list->bs[0]);
+		rc = csd_bs_to_gsm0808_data_rate_transp(list->bs[0], &ct->ch_rate_type);
 	} else {
 		rc = csd_bs_to_gsm0808_data_rate_non_transp(list->bs[0]);
+		ct->ch_rate_type = GSM0808_DATA_FULL_BM;
 	}
 
 	if (rc < 0)
@@ -403,8 +411,6 @@ int csd_bs_list_to_gsm0808_channel_type(struct gsm0808_channel_type *ct, const s
 		if (ct->data_rate_allowed)
 			ct->data_rate_allowed_is_set = true;
 	}
-
-	ct->ch_rate_type = GSM0808_SPEECH_FULL_BM;
 
 	return 0;
 }
