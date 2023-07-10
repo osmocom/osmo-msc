@@ -85,10 +85,14 @@ static int mncc_setup_ind(struct gsm_call *call,
 		goto out_reject;
 	}
 
-	/* we currently only do speech */
-	if (setup->bearer_cap.transfer != GSM_MNCC_BCAP_SPEECH) {
+	/* we currently only do speech and CSD */
+	switch (setup->bearer_cap.transfer) {
+	case GSM_MNCC_BCAP_SPEECH:
+	case GSM_MNCC_BCAP_UNR_DIG:
+		break;
+	default:
 		LOGP(DMNCC, LOGL_NOTICE, "(call %x) We only support "
-			"voice calls\n", call->callref);
+			"voice calls and CSD\n", call->callref);
 		mncc_set_cause(&mncc, GSM48_CAUSE_LOC_PRN_S_LU,
 				GSM48_CC_CAUSE_BEARER_CA_UNAVAIL);
 		goto out_reject;
