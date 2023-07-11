@@ -798,13 +798,13 @@ int gsm48_rx_mm_serv_req(struct msc_a *msc_a, struct msgb *msg)
 		return msc_gsm48_tx_mm_serv_rej(msc_a, GSM48_REJECT_INCORRECT_MESSAGE);
 	}
 
-	if (!msc_a_cm_service_type_to_use(req->cm_service_type))
+	if (!msc_a_cm_service_type_to_use(msc_a, req->cm_service_type))
 		return msc_gsm48_tx_mm_serv_rej(msc_a, GSM48_REJECT_SRV_OPT_NOT_SUPPORTED);
 
 	/* At this point, the CM Service Request message is being accepted.
 	 * Increment the matching use token, and from here on use msc_vlr_tx_cm_serv_rej() to respond in case of
 	 * failure. */
-	msc_a_get(msc_a, msc_a_cm_service_type_to_use(req->cm_service_type));
+	msc_a_get(msc_a, msc_a_cm_service_type_to_use(msc_a, req->cm_service_type));
 
 	if (msc_a_is_accepted(msc_a))
 		return cm_serv_reuse_conn(msc_a, &mi, req->cm_service_type);
@@ -1531,7 +1531,7 @@ static int msc_vlr_tx_cm_serv_rej(void *msc_conn_ref, enum osmo_cm_service_type 
 {
 	struct msc_a *msc_a = msc_conn_ref;
 	msc_gsm48_tx_mm_serv_rej(msc_a, cause);
-	msc_a_put(msc_a, msc_a_cm_service_type_to_use(cm_service_type));
+	msc_a_put(msc_a, msc_a_cm_service_type_to_use(msc_a, cm_service_type));
 	return 0;
 }
 

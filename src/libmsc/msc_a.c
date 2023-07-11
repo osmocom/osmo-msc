@@ -2085,8 +2085,10 @@ int msc_a_try_call_assignment(struct gsm_trans *cc_trans)
  * Given a CM Service type, return a matching token intended for osmo_use_count.
  * For unknown service type, return NULL.
  */
-const char *msc_a_cm_service_type_to_use(enum osmo_cm_service_type cm_service_type)
+const char *msc_a_cm_service_type_to_use(struct msc_a *msc_a, enum osmo_cm_service_type cm_service_type)
 {
+	struct gsm_network *net = msc_a_net(msc_a);
+
 	switch (cm_service_type) {
 	case GSM48_CMSERV_MO_CALL_PACKET:
 	case GSM48_CMSERV_EMERGENCY:
@@ -2099,10 +2101,16 @@ const char *msc_a_cm_service_type_to_use(enum osmo_cm_service_type cm_service_ty
 		return MSC_A_USE_CM_SERVICE_SS;
 
 	case GSM48_CMSERV_VGCS:
-		return MSC_A_USE_CM_SERVICE_GCC;
+		if (net->asci.enable)
+			return MSC_A_USE_CM_SERVICE_GCC;
+		else
+			return NULL;
 
 	case GSM48_CMSERV_VBS:
-		return MSC_A_USE_CM_SERVICE_BCC;
+		if (net->asci.enable)
+			return MSC_A_USE_CM_SERVICE_BCC;
+		else
+			return NULL;
 
 	default:
 		return NULL;

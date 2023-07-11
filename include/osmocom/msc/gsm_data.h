@@ -272,6 +272,7 @@ struct gsm_network {
 
 	/* ASCI feature support */
 	struct {
+		bool enable;
 		struct llist_head gcr_lists;
 	} asci;
 };

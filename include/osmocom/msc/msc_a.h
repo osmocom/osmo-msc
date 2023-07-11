@@ -217,7 +217,7 @@ bool msc_a_is_establishing_auth_ciph(const struct msc_a *msc_a);
 int msc_a_ensure_cn_local_rtp(struct msc_a *msc_a, struct gsm_trans *cc_trans);
 int msc_a_try_call_assignment(struct gsm_trans *cc_trans);
 
-const char *msc_a_cm_service_type_to_use(enum osmo_cm_service_type cm_service_type);
+const char *msc_a_cm_service_type_to_use(struct msc_a *msc_a, enum osmo_cm_service_type cm_service_type);
 
 void msc_a_release_cn(struct msc_a *msc_a);
 void msc_a_release_mo(struct msc_a *msc_a, enum gsm48_gsm_cause gsm_cause);
