@@ -153,7 +153,7 @@ struct osmo_lcls *trans_lcls_compose(const struct gsm_trans *trans, bool use_lac
 	lcls->gcr.node = ss7->cfg.primary_pc;
 
 	/* net id from Q.1902.3 3-5 bytes, this function gives 3 bytes exactly */
-	osmo_plmn_to_bcd(lcls->gcr.net, &trans->net->plmn);
+	osmo_plmn_to_bcd(lcls->gcr.net, &trans->msc_a->via_cell.lai.plmn);
 
 
 	/* TS 29.205 Table B.2.1.9.2 Call Reference ID
