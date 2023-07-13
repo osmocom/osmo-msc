@@ -120,12 +120,7 @@ static int gsm0408_loc_upd_acc(struct msc_a *msc_a, uint32_t send_tmsi)
 	struct msgb *msg = gsm48_msgb_alloc_name("GSM 04.08 LOC UPD ACC");
 	struct gsm48_hdr *gh;
 	struct gsm48_loc_area_id *lai;
-	struct gsm_network *net = msc_a_net(msc_a);
 	struct vlr_subscr *vsub = msc_a_vsub(msc_a);
-	struct osmo_location_area_id laid = {
-		.plmn = net->plmn,
-		.lac = vsub->cgi.lai.lac,
-	};
 	uint8_t *l;
 	int rc;
 	struct osmo_mobile_identity mi = {};
@@ -135,7 +130,7 @@ static int gsm0408_loc_upd_acc(struct msc_a *msc_a, uint32_t send_tmsi)
 	gh->msg_type = GSM48_MT_MM_LOC_UPD_ACCEPT;
 
 	lai = (struct gsm48_loc_area_id *) msgb_put(msg, sizeof(*lai));
-	gsm48_generate_lai2(lai, &laid);
+	gsm48_generate_lai2(lai, &vsub->cgi.lai);
 
 	if (send_tmsi == GSM_RESERVED_TMSI) {
 		/* we did not allocate a TMSI to the MS, so we need to
