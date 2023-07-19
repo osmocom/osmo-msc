@@ -2351,12 +2351,12 @@ static void vgcs_cell_fsm_null(struct osmo_fsm_inst *fi, uint32_t event, void *d
 		/* Set initial mode. */
 		rtp_stream_set_mode(cell->rtps, MGCP_CONN_RECV_ONLY);
 		/* Commit RTP stream. */
-		if (!cell->bss && !cell->bss->trans) {
-			LOG_CELL(cell, LOGL_DEBUG, "No transaction, cannot continue.\n");
+		if (!cell->bss || !cell->bss->trans) {
+			LOG_CELL(cell, LOGL_DEBUG, "No BSS/transaction, cannot continue.\n");
 			cell_clear(cell, GSM0808_CAUSE_PROTOCOL_ERROR_BETWEEN_BSS_AND_MSC);
 			break;
 		}
-		if (!cell->mgw && !cell->mgw->mgw_ep) {
+		if (!cell->mgw || !cell->mgw->mgw_ep) {
 			LOG_CELL(cell, LOGL_DEBUG, "No MGW endpoint, cannot continue.\n");
 			cell_clear(cell, GSM0808_CAUSE_PROTOCOL_ERROR_BETWEEN_BSS_AND_MSC);
 			break;
