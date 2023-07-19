@@ -2508,7 +2508,7 @@ channel_fail:
 				.gsm0808_cause = GSM0808_CAUSE_PROTOCOL_ERROR_BETWEEN_BSS_AND_MSC,
 			},
 		};
-		ran_encode_and_send(bss->fi, &tx_ran_msg, cell->conn, false);
+		ran_encode_and_send(fi, &tx_ran_msg, cell->conn, false);
 		cell_clear(cell, GSM0808_CAUSE_PROTOCOL_ERROR_BETWEEN_BSS_AND_MSC);
 		/* Notify BSS FSM about channel failure. */
 		if (bss)
