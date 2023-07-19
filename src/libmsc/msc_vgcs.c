@@ -1531,12 +1531,11 @@ void gsm44068_bcc_gcc_trans_free(struct gsm_trans *trans)
 {
 	struct vgcs_bss *bss, *bss2;
 
-	/* Change state. */
-	osmo_fsm_inst_state_chg(trans->gcc.fi, VGCS_GCC_ST_N0_NULL, 0, 0);
-
 	/* Free FSM. */
-	if (trans->gcc.fi)
+	if (trans->gcc.fi) {
+		osmo_fsm_inst_state_chg(trans->gcc.fi, VGCS_GCC_ST_N0_NULL, 0, 0);
 		osmo_fsm_inst_term(trans->gcc.fi, OSMO_FSM_TERM_REGULAR, NULL);
+	}
 
 	/* Remove relations to cells.
 	 * We must loop safe, because bss_clear() will detach every call control instance from list. */
