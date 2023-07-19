@@ -2347,6 +2347,11 @@ static void vgcs_cell_fsm_null(struct osmo_fsm_inst *fi, uint32_t event, void *d
 		}
 		/* Hard coded codec: GSM V1 */
 		cm = codec_mapping_by_gsm0808_speech_codec_type(GSM0808_SCT_FR1);
+		if (!cm) {
+			LOG_CELL(cell, LOGL_DEBUG, "Selected codec not supported, cannot continue.\n");
+			cell_clear(cell, GSM0808_CAUSE_PROTOCOL_ERROR_BETWEEN_BSS_AND_MSC);
+			break;
+		}
 		rtp_stream_set_one_codec(cell->rtps, &cm->sdp);
 		/* Set initial mode. */
 		rtp_stream_set_mode(cell->rtps, MGCP_CONN_RECV_ONLY);
