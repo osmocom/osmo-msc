@@ -976,7 +976,8 @@ static int ran_a_decode_uplink_request(struct ran_dec *ran_dec, const struct msg
 
 	/* Mobile Identity,  3.2.2.41 */
 	if (ie_mi) {
-		if (osmo_mobile_identity_decode(&r->mi, ie_mi->val, ie_mi->len, false)) {
+		rc = osmo_mobile_identity_decode(&r->mi, ie_mi->val, ie_mi->len, false);
+		if (rc < 0) {
 			LOG_RAN_A_DEC_MSG(LOGL_ERROR, "Decoding Mobile Identity gave rc=%d\n", rc);
 			return -EINVAL;
 		}
