@@ -1320,8 +1320,8 @@ static struct gsm_trans *trans_alloc_vgcs(struct gsm_network *net,
 static struct gsm_trans *trans_create_bcc_gcc(struct msc_a *msc_a, enum trans_type trans_type, uint8_t transaction_id,
 					      uint8_t pdisc, uint8_t msg_type, uint32_t callref)
 {
-	struct gsm_network *net = msc_a_net(msc_a);
-	struct vlr_subscr *vsub = msc_a_vsub(msc_a);
+	struct gsm_network *net;
+	struct vlr_subscr *vsub;
 	struct gsm_trans *trans = NULL;
 	struct gcr *gcr;
 	int rc;
@@ -1330,6 +1330,9 @@ static struct gsm_trans *trans_create_bcc_gcc(struct msc_a *msc_a, enum trans_ty
 		LOG_GCC(trans, LOGL_ERROR, "Invalid conn: no msc_a\n");
 		return NULL;
 	}
+	net = msc_a_net(msc_a);
+	vsub = msc_a_vsub(msc_a);
+
 	if (!vsub) {
 		LOG_GCC(trans, LOGL_ERROR, "Invalid conn: no subscriber\n");
 		return NULL;
