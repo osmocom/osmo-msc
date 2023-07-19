@@ -967,13 +967,12 @@ static void _assign_complete(struct gsm_trans *trans, bool send_connect)
 {
 	uint16_t cell_id;
 
+	OSMO_ASSERT(trans->msc_a);
+
 	/* Change state. */
 	osmo_fsm_inst_state_chg(trans->gcc.fi, VGCS_GCC_ST_N2_CALL_ACTIVE, 0, 0);
 	/* Get cell ID. */
-	if (trans->msc_a)
-		cell_id = trans->msc_a->via_cell.cell_identity;
-	else
-		LOG_GCC(trans, LOGL_ERROR, "Missing msc_a, please fix!\n");
+	cell_id = trans->msc_a->via_cell.cell_identity;
 	/* Releasing dedicated channel. */
 	release_msc_a(trans);
 	/* Send CONNECT to the calling subscriber. */
