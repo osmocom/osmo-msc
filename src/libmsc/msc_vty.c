@@ -132,19 +132,23 @@ DEFUN(cfg_net_mnc,
 
 DEFUN(cfg_net_name_short,
       cfg_net_name_short_cmd,
-      "short name NAME",
+      "short name .NAME",
       "Set the short GSM network name\n" NAME_CMD_STR NAME_STR)
 {
-	osmo_talloc_replace_string(gsmnet, &gsmnet->name_short, argv[0]);
+	if (gsmnet->name_short != NULL)
+		talloc_free(gsmnet->name_short);
+	gsmnet->name_short = argv_concat(argv, argc, 0);
 	return CMD_SUCCESS;
 }
 
 DEFUN(cfg_net_name_long,
       cfg_net_name_long_cmd,
-      "long name NAME",
+      "long name .NAME",
       "Set the long GSM network name\n" NAME_CMD_STR NAME_STR)
 {
-	osmo_talloc_replace_string(gsmnet, &gsmnet->name_long, argv[0]);
+	if (gsmnet->name_long != NULL)
+		talloc_free(gsmnet->name_long);
+	gsmnet->name_long = argv_concat(argv, argc, 0);
 	return CMD_SUCCESS;
 }
 

@@ -16,8 +16,8 @@ OsmoMSC(config-net)# list
 ...
   network country code <1-999>
   mobile network code <0-999>
-  short name NAME
-  long name NAME
+  short name .NAME
+  long name .NAME
   encryption a5 <0-4> [<0-4>] [<0-4>] [<0-4>] [<0-4>]
   encryption uea <0-2> [<0-2>] [<0-2>]
   authentication (optional|required)
