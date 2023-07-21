@@ -788,6 +788,7 @@ static int deliver_to_esme(struct smpp_esme *esme, struct gsm_sms *sms,
 		       sms->msg_ref);
 
 	ret = smpp_tx_deliver(esme, &deliver);
+	destroy_tlv(deliver.tlv);
 	if (ret < 0)
 		return ret;
 
