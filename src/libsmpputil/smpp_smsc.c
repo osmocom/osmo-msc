@@ -694,6 +694,7 @@ static int smpp_handle_submit(struct smpp_esme *esme, struct msgb *msg)
 
 	if (!(esme->bind_flags & ESME_BIND_TX)) {
 		submit_r.command_status = ESME_RINVBNDSTS;
+		destroy_tlv(submit.tlv);
 		return PACK_AND_SEND(esme->esme, &submit_r);
 	}
 
@@ -703,6 +704,7 @@ static int smpp_handle_submit(struct smpp_esme *esme, struct msgb *msg)
 	INIT_RESP(SUBMIT_SM_RESP, &submit_r, &submit);
 
 	rc = handle_smpp_submit(esme, &submit, &submit_r);
+	destroy_tlv(submit.tlv);
 	if (rc == 0)
 		return PACK_AND_SEND(esme->esme, &submit_r);
 
