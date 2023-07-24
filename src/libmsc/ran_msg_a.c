@@ -238,34 +238,24 @@ enum mgcp_codecs ran_a_mgcp_codec_from_sc(const struct gsm0808_speech_codec *sc)
 	switch (sc->type) {
 	case GSM0808_SCT_FR1:
 		return CODEC_GSM_8000_1;
-		break;
 	case GSM0808_SCT_FR2:
 		return CODEC_GSMEFR_8000_1;
-		break;
 	case GSM0808_SCT_FR3:
 		return CODEC_AMR_8000_1;
-		break;
 	case GSM0808_SCT_FR4:
 		return CODEC_AMRWB_16000_1;
-		break;
 	case GSM0808_SCT_FR5:
 		return CODEC_AMRWB_16000_1;
-		break;
 	case GSM0808_SCT_HR1:
 		return CODEC_GSMHR_8000_1;
-		break;
 	case GSM0808_SCT_HR3:
 		return CODEC_AMR_8000_1;
-		break;
 	case GSM0808_SCT_HR4:
 		return CODEC_AMRWB_16000_1;
-		break;
 	case GSM0808_SCT_HR6:
 		return CODEC_AMRWB_16000_1;
-		break;
 	default:
 		return CODEC_PCMU_8000_1;
-		break;
 	}
 }
 
