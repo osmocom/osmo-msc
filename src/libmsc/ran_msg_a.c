@@ -254,6 +254,8 @@ enum mgcp_codecs ran_a_mgcp_codec_from_sc(const struct gsm0808_speech_codec *sc)
 		return CODEC_AMRWB_16000_1;
 	case GSM0808_SCT_HR6:
 		return CODEC_AMRWB_16000_1;
+	case GSM0808_SCT_CSD:
+		return CODEC_CLEARMODE;
 	default:
 		return CODEC_PCMU_8000_1;
 	}
