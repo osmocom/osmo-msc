@@ -1349,7 +1349,12 @@ static int ran_a_channel_type_to_speech_codec_list(struct gsm0808_speech_codec_l
 
 	switch (ct->ch_indctr) {
 	case GSM0808_CHAN_DATA:
-		scl->codec[0].type = GSM0808_SCT_CSD;
+		scl->codec[0] = (struct gsm0808_speech_codec) {
+			.pi = true, /* PI indicates CSDoIP is supported */
+			.pt = false, /* PT indicates CSDoTDM is not supported */
+			.type = GSM0808_SCT_CSD,
+			.cfg = 0, /* R2/R3 not set (redundancy not supported) */
+		};
 		scl->len = 1;
 		break;
 	case GSM0808_CHAN_SPEECH:
