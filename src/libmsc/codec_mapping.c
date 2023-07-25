@@ -209,6 +209,13 @@ const struct codec_mapping codec_map[] = {
 			.subtype_name = "CLEARMODE",
 			.rate = 8000,
 		},
+		.has_gsm0808_speech_codec = true,
+		.gsm0808_speech_codec = {
+			.pi = true, /* PI indicates CSDoIP is supported */
+			.pt = false, /* PT indicates CSDoTDM is not supported */
+			.type = GSM0808_SCT_CSD,
+			.cfg = 0, /* R2/R3 not set (redundancy not supported) */
+		},
 		.mgcp = CODEC_CLEARMODE,
 	},
 };
