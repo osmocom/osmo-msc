@@ -422,6 +422,9 @@ int csd_bs_list_to_bearer_cap(struct gsm_mncc_bearer_cap *cap, const struct csd_
 {
 	*cap = (struct gsm_mncc_bearer_cap){
 		.transfer = GSM_MNCC_BCAP_UNR_DIG,
+		.mode = GSM48_BCAP_TMOD_CIRCUIT,
+		.coding = GSM48_BCAP_CODING_GSM_STD,
+		.radio = GSM48_BCAP_RRQ_FR_ONLY,
 	};
 	enum csd_bs bs;
 	int i;
@@ -430,24 +433,39 @@ int csd_bs_list_to_bearer_cap(struct gsm_mncc_bearer_cap *cap, const struct csd_
 		bs = list->bs[i];
 
 		cap->data.rate_adaption = GSM48_BCAP_RA_V110_X30;
+		cap->data.sig_access = GSM48_BCAP_SA_I440_I450;
 		cap->data.async = bs_map[bs].async;
-		cap->data.transp = bs_map[bs].transp;
+		if (bs_map[bs].transp)
+			cap->data.transp = GSM48_BCAP_TR_TRANSP;
+		else
+			cap->data.transp = GSM48_BCAP_TR_RLP;
+
+		/* FIXME: proper values for sync/async (current: 8N1) */
+		cap->data.nr_data_bits = 8;
+		cap->data.parity = GSM48_BCAP_PAR_NONE;
+		cap->data.nr_stop_bits = 1;
+		cap->data.modem_type = GSM48_BCAP_MT_NONE;
 
 		switch (bs_map[bs].rate) {
 		case 300:
 			cap->data.user_rate = GSM48_BCAP_UR_300;
+			cap->data.interm_rate = GSM48_BCAP_IR_8k;
 			break;
 		case 1200:
 			cap->data.user_rate = GSM48_BCAP_UR_1200;
+			cap->data.interm_rate = GSM48_BCAP_IR_8k;
 			break;
 		case 2400:
 			cap->data.user_rate = GSM48_BCAP_UR_2400;
+			cap->data.interm_rate = GSM48_BCAP_IR_8k;
 			break;
 		case 4800:
 			cap->data.user_rate = GSM48_BCAP_UR_4800;
+			cap->data.interm_rate = GSM48_BCAP_IR_8k;
 			break;
 		case 9600:
 			cap->data.user_rate = GSM48_BCAP_UR_9600;
+			cap->data.interm_rate = GSM48_BCAP_IR_16k;
 			break;
 		}
 
