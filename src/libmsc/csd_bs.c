@@ -467,6 +467,11 @@ int csd_bs_list_to_bearer_cap(struct gsm_mncc_bearer_cap *cap, const struct csd_
 			cap->data.user_rate = GSM48_BCAP_UR_9600;
 			cap->data.interm_rate = GSM48_BCAP_IR_16k;
 			break;
+		default:
+			LOGP(DMSC, LOGL_ERROR,
+			     "%s(): bs=%d (rate=%u) is not implemented\n",
+			     __func__, bs, bs_map[bs].rate);
+			continue;
 		}
 
 		/* FIXME: handle more than one list entry */
