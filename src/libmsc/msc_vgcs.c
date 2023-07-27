@@ -890,7 +890,8 @@ static int set_parameter(struct gsm_trans *trans)
 	uint8_t pdisc = (trans->type == TRANS_GCC) ? GSM48_PDISC_GROUP_CC : GSM48_PDISC_BCAST_CC;
 	int rc;
 
-	rc = gsm44068_tx_set_parameter(trans, pdisc, !trans->gcc.mute_talker, 1, 1, trans->gcc.uplink_originator);
+	rc = gsm44068_tx_set_parameter(trans, pdisc | (trans->transaction_id << 4),
+				       !trans->gcc.mute_talker, 1, 1, trans->gcc.uplink_originator);
 	if (rc < 0)
 		LOG_GCC(trans, LOGL_ERROR, "Failed to send SET PARAMETER towards MS.\n");
 	return rc;
