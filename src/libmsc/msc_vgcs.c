@@ -636,6 +636,7 @@ static int gcc_establish_bss(struct gsm_trans *trans)
 	}
 
 	/* Create BSS list structures. */
+	LOG_GCC(trans, LOGL_DEBUG, "Creating BSS list structure with cell list structures.\n");
 	llist_for_each_entry(b, &gcr->bss_list, list) {
 		LOG_GCC(trans, LOGL_DEBUG, " -> BSS with PC %s.\n", osmo_ss7_pointcode_print(NULL, b->pc));
 		/* Resolve ran_peer. */
@@ -668,12 +669,14 @@ static int gcc_establish_bss(struct gsm_trans *trans)
 		/* Create ran connection. */
 		bss->conn = ran_conn_create_outgoing(rp);
 		if (!bss->conn) {
+			LOG_GCC(trans, LOGL_ERROR, "Failed to create RAN connection.\n");
 			osmo_fsm_inst_free(bss->fi);
 			continue;
 		}
 		bss->conn->vgcs.bss = bss;
 		/* Create cell list structures. */
 		llist_for_each_entry(c, &b->cell_list, list) {
+			LOG_GCC(trans, LOGL_DEBUG, " -> Cell ID %d.\n", c->cell_id);
 			/* Create state machine. */
 			fi = osmo_fsm_inst_alloc(&vgcs_cell_fsm, net, NULL, LOGL_DEBUG, NULL);
 			if (!fi) {
@@ -698,6 +701,7 @@ static int gcc_establish_bss(struct gsm_trans *trans)
 			/* Create ran connection. */
 			cell->conn = ran_conn_create_outgoing(rp);
 			if (!cell->conn) {
+				LOG_GCC(trans, LOGL_ERROR, "Failed to create RAN connection.\n");
 				osmo_fsm_inst_free(cell->fi);
 				continue;
 			}
@@ -710,6 +714,7 @@ static int gcc_establish_bss(struct gsm_trans *trans)
 		}
 		/* No cell? */
 		if (llist_empty(&bss->cell_list)) {
+			LOG_GCC(trans, LOGL_DEBUG, " -> No Cell in this BSS.\n");
 			osmo_fsm_inst_free(bss->fi);
 			break;
 		}
@@ -721,6 +726,7 @@ static int gcc_establish_bss(struct gsm_trans *trans)
 	/* No BSS? */
 	if (llist_empty(&trans->gcc.bss_list)) {
 		/* Also destroy MGW, because this list is empty too! */
+		LOG_GCC(trans, LOGL_NOTICE, "No BSS found, please check your VTY configuration and add cells.\n");
 		goto err_mgw;
 	}
 	return 0;
