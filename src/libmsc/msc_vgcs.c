@@ -2508,14 +2508,6 @@ static void vgcs_cell_fsm_assignment(struct osmo_fsm_inst *fi, uint32_t event, v
 		LOG_CELL(cell, LOGL_NOTICE, "Received VGCS/VBS ASSIGNMENT FAILURE from BSS.\n");
 channel_fail:
 		bss = cell->bss;
-		/* Remove cell. */
-		tx_ran_msg = (struct ran_msg){
-			.msg_type = RAN_MSG_CLEAR_COMMAND,
-			.clear_command = {
-				.gsm0808_cause = GSM0808_CAUSE_PROTOCOL_ERROR_BETWEEN_BSS_AND_MSC,
-			},
-		};
-		ran_encode_and_send(fi, &tx_ran_msg, cell->conn, false);
 		cell_clear(cell, GSM0808_CAUSE_PROTOCOL_ERROR_BETWEEN_BSS_AND_MSC);
 		/* Notify BSS FSM about channel failure. */
 		if (bss)
