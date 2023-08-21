@@ -859,6 +859,21 @@ static void gcc_terminate_and_destroy(struct gsm_trans *trans, enum osmo_gsm4406
 	trans_free(trans);
 }
 
+/* Send TERMINATION REJECT to the calling/talking subscriber. */
+static void gcc_termination_reject(struct gsm_trans *trans, enum osmo_gsm44068_cause cause)
+{
+	uint8_t pdisc = (trans->type == TRANS_GCC) ? GSM48_PDISC_GROUP_CC : GSM48_PDISC_BCAST_CC;
+	int rc;
+
+	/* Send TERMINATION towards MS. */
+	rc = gsm44068_tx_termination(trans->msc_a, trans->gcc.uplink_bss,
+				     pdisc | (trans->transaction_id << 4),
+				     OSMO_GSM44068_MSGT_TERMINATION_REJECT,
+				     cause,  NULL, 0);
+	if (rc < 0)
+		LOG_GCC(trans, LOGL_ERROR, "Failed to send TERMINATION REJECT towards MS.\n");
+}
+
 /* Start inactivity timer.
  * This timer is used to terminate the call, if the radio connection to the caller gets lost. */
 static void start_inactivity_timer(struct gsm_trans *trans)
@@ -1112,6 +1127,11 @@ static void vgcs_gcc_fsm_n2_call_active(struct osmo_fsm_inst *fi, uint32_t event
 		gcc_terminate_and_destroy(trans, OSMO_GSM44068_CAUSE_NORMAL_CALL_CLEARING);
 		break;
 	case VGCS_GCC_EV_USER_TERM:
+		if (!trans->gcc.uplink_originator) {
+			LOG_GCC(trans, LOGL_ERROR, "Termination by user, but it is not the originator.\n");
+			gcc_termination_reject(trans, OSMO_GSM44068_CAUSE_USER_NOT_ORIGINATOR);
+			break;
+		}
 		LOG_GCC(trans, LOGL_DEBUG, "Termination by user, destroying call.\n");
 		/* Send TERMINATE to the calling subscriber and destroy group call in all cells. */
 		gcc_terminate_and_destroy(trans, OSMO_GSM44068_CAUSE_NORMAL_CALL_CLEARING);
