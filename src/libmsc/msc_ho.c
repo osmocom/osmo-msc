@@ -413,12 +413,29 @@ static void msc_ho_send_handover_request(struct msc_a *msc_a)
 			    : "-");
 
 	if (cc_trans) {
-		if (sdp_audio_codecs_to_gsm0808_channel_type(&channel_type,
-							     &cc_trans->cc.local.audio_codecs)) {
-			msc_ho_failed(msc_a, GSM0808_CAUSE_EQUIPMENT_FAILURE,
-				      "Failed to determine Channel Type for Handover Request message\n");
+		switch (cc_trans->bearer_cap.transfer) {
+		case GSM48_BCAP_ITCAP_SPEECH:
+			if (sdp_audio_codecs_to_gsm0808_channel_type(&channel_type,
+								     &cc_trans->cc.local.audio_codecs)) {
+				msc_ho_failed(msc_a, GSM0808_CAUSE_EQUIPMENT_FAILURE,
+					      "Failed to determine Channel Type for Handover Request message (speech)\n");
+				return;
+			}
+			break;
+		case GSM48_BCAP_ITCAP_UNR_DIG_INF:
+			if (csd_bs_list_to_gsm0808_channel_type(&channel_type, &cc_trans->cc.local.bearer_services)) {
+				msc_ho_failed(msc_a, GSM0808_CAUSE_EQUIPMENT_FAILURE,
+					      "Failed to determine Channel Type for Handover Request message (CSD)\n");
+				return;
+			}
+			break;
+		default:
+			msc_ho_failed(msc_a, GSM0808_CAUSE_EQUIPMENT_FAILURE, "Failed to create"
+				      " Handover Request message for information transfer capability %d\n",
+				      cc_trans->bearer_cap.transfer);
 			return;
 		}
+
 		ran_enc_msg.handover_request.geran.channel_type = &channel_type;
 		ran_enc_msg.handover_request.call_id_present = true;
 		ran_enc_msg.handover_request.call_id = cc_trans->call_id;
