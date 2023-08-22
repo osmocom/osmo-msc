@@ -186,7 +186,7 @@ static const char *trans_vsub_use(enum trans_type type)
 static uint32_t new_call_id = 1;
 
 /*! Allocate a new transaction and add it to network list
- *  \param[in] net Netwokr in which we allocate transaction
+ *  \param[in] net Network in which we allocate transaction
  *  \param[in] subscr Subscriber for which we allocate transaction
  *  \param[in] protocol Protocol (CC/SMS/...)
  *  \param[in] callref Call Reference
