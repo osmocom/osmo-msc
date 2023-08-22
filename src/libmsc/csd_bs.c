@@ -382,7 +382,8 @@ int csd_bs_list_to_gsm0808_channel_type(struct gsm0808_channel_type *ct, const s
 		.ch_indctr = GSM0808_CHAN_DATA,
 	};
 
-	OSMO_ASSERT(list->count);
+	if (!list->count)
+		return -EINVAL;
 
 	if (csd_bs_is_transp(list->bs[0])) {
 		ct->data_transparent = true;
