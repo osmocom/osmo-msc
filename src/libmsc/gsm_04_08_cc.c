@@ -1047,6 +1047,14 @@ static int gsm48_cc_tx_call_proc_and_assign(struct gsm_trans *trans, void *arg)
 
 	/* bearer capability */
 	if (proceeding->fields & MNCC_F_BEARER_CAP) {
+		/* MNCC should not switch from e.g. CSD to speech */
+		if (proceeding->bearer_cap.transfer != trans->bearer_cap.transfer) {
+			LOG_TRANS(trans, LOGL_ERROR, "Unexpected Information Transfer Capability %d from MNCC,"
+				  " transaction has %d\n",
+				  proceeding->bearer_cap.transfer,
+				  trans->bearer_cap.transfer);
+			return -EINVAL;
+		}
 		gsm48_encode_bearer_cap(msg, 0, &proceeding->bearer_cap);
 		memcpy(&trans->bearer_cap, &proceeding->bearer_cap, sizeof(trans->bearer_cap));
 	}
