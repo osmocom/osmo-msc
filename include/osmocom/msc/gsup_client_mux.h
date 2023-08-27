@@ -28,6 +28,7 @@ int gsup_client_mux_start(struct gsup_client_mux *gcm, const char *gsup_server_a
 			  struct ipaccess_unit *ipa_dev);
 
 int gsup_client_mux_tx(struct gsup_client_mux *gcm, const struct osmo_gsup_message *gsup_msg);
+void gsup_client_mux_tx_set_source(struct gsup_client_mux *gcm, struct osmo_gsup_message *gsup_msg);
 void gsup_client_mux_tx_error_reply(struct gsup_client_mux *gcm, const struct osmo_gsup_message *gsup_orig,
 				    enum gsm48_gmm_cause cause);
 

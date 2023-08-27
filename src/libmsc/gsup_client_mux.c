@@ -136,6 +136,25 @@ int gsup_client_mux_tx(struct gsup_client_mux *gcm, const struct osmo_gsup_messa
 	return osmo_gsup_client_send(gcm->gsup_client, msg);
 }
 
+/* Set GSUP source_name to our local IPA name */
+void gsup_client_mux_tx_set_source(struct gsup_client_mux *gcm,
+				   struct osmo_gsup_message *gsup_msg)
+{
+	const char *local_msc_name;
+
+	if (!gcm)
+		return;
+	if (!gcm->gsup_client)
+		return;
+	if (!gcm->gsup_client->ipa_dev)
+		return;
+	local_msc_name = gcm->gsup_client->ipa_dev->serno;
+	if (!local_msc_name)
+		return;
+	gsup_msg->source_name = (const uint8_t *) local_msc_name;
+	gsup_msg->source_name_len = strlen(local_msc_name) + 1;
+}
+
 /* Transmit GSUP error in response to original message */
 void gsup_client_mux_tx_error_reply(struct gsup_client_mux *gcm, const struct osmo_gsup_message *gsup_orig,
 				    enum gsm48_gmm_cause cause)
@@ -158,6 +177,7 @@ void gsup_client_mux_tx_error_reply(struct gsup_client_mux *gcm, const struct os
 	};
 
 	OSMO_STRLCPY_ARRAY(gsup_reply.imsi, gsup_orig->imsi);
+	gsup_client_mux_tx_set_source(gcm, &gsup_reply);
 
 	/* For SS/USSD, it's important to keep both session state and ID IEs */
 	if (gsup_orig->session_state != OSMO_GSUP_SESSION_STATE_NONE) {

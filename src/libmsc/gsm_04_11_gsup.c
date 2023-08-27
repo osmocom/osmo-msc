@@ -200,6 +200,7 @@ int gsm411_gsup_mt_fwd_sm_res(struct gsm_trans *trans, uint8_t sm_rp_mr)
 	/* Ensure routing through OsmoHLR to the MT-sending SMSC */
 	gsup_msg.destination_name = trans->sms.gsup_source_name;
 	gsup_msg.destination_name_len = trans->sms.gsup_source_name_len;
+	gsup_client_mux_tx_set_source(trans->net->gcm, &gsup_msg);
 
 	return gsup_client_mux_tx(trans->net->gcm, &gsup_msg);
 }
@@ -221,6 +222,7 @@ int gsm411_gsup_mt_fwd_sm_err(struct gsm_trans *trans,
 	/* Ensure routing through OsmoHLR to the MT-sending SMSC */
 	gsup_msg.destination_name = trans->sms.gsup_source_name;
 	gsup_msg.destination_name_len = trans->sms.gsup_source_name_len;
+	gsup_client_mux_tx_set_source(trans->net->gcm, &gsup_msg);
 
 	/* SM-RP-Cause value */
 	gsup_msg.sm_rp_cause = &cause;
