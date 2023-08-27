@@ -112,6 +112,9 @@ struct gsm_trans {
 			bool sm_rp_mmts_ind;
 
 			struct gsm_sms *sms;
+
+			uint8_t *gsup_source_name;
+			size_t gsup_source_name_len;
 		} sms;
 		struct {
 			/**

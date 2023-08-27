@@ -197,6 +197,10 @@ int gsm411_gsup_mt_fwd_sm_res(struct gsm_trans *trans, uint8_t sm_rp_mr)
 	gsup_sm_msg_init(&gsup_msg, OSMO_GSUP_MSGT_MT_FORWARD_SM_RESULT,
 		trans->vsub->imsi, &sm_rp_mr);
 
+	/* Ensure routing through OsmoHLR to the MT-sending SMSC */
+	gsup_msg.destination_name = trans->sms.gsup_source_name;
+	gsup_msg.destination_name_len = trans->sms.gsup_source_name_len;
+
 	return gsup_client_mux_tx(trans->net->gcm, &gsup_msg);
 }
 
@@ -213,6 +217,10 @@ int gsm411_gsup_mt_fwd_sm_err(struct gsm_trans *trans,
 	/* Initialize a new GSUP message */
 	gsup_sm_msg_init(&gsup_msg, OSMO_GSUP_MSGT_MT_FORWARD_SM_ERROR,
 		trans->vsub->imsi, &sm_rp_mr);
+
+	/* Ensure routing through OsmoHLR to the MT-sending SMSC */
+	gsup_msg.destination_name = trans->sms.gsup_source_name;
+	gsup_msg.destination_name_len = trans->sms.gsup_source_name_len;
 
 	/* SM-RP-Cause value */
 	gsup_msg.sm_rp_cause = &cause;
@@ -258,7 +266,8 @@ static int gsm411_gsup_mt_handler(struct gsm_network *net, struct vlr_subscr *vs
 	rc = gsm411_send_rp_data(net, vsub,
 		gsup_msg->sm_rp_oa_len, gsup_msg->sm_rp_oa,
 		gsup_msg->sm_rp_ui_len, gsup_msg->sm_rp_ui,
-		sm_rp_mmts_ind);
+		sm_rp_mmts_ind, gsup_msg->source_name,
+		gsup_msg->source_name_len);
 	if (rc) {
 		LOGP(DLSMS, LOGL_NOTICE, "Failed to send MT SMS, "
 			"ignoring MT-forwardSM-Req message...\n");

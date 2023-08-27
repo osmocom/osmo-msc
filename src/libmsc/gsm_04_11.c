@@ -1230,7 +1230,8 @@ int gsm411_send_sms(struct gsm_network *net,
 int gsm411_send_rp_data(struct gsm_network *net, struct vlr_subscr *vsub,
 			size_t sm_rp_oa_len, const uint8_t *sm_rp_oa,
 			size_t sm_rp_ud_len, const uint8_t *sm_rp_ud,
-			bool sm_rp_mmts_ind)
+			bool sm_rp_mmts_ind, const uint8_t *gsup_source_name,
+			size_t gsup_source_name_len)
 {
 	struct gsm_trans *trans;
 	struct msgb *msg;
@@ -1250,6 +1251,19 @@ int gsm411_send_rp_data(struct gsm_network *net, struct vlr_subscr *vsub,
 	if (!msg) {
 		trans_free(trans);
 		return -ENOMEM;
+	}
+
+	/* Save GSUP source_name for subsequent response messages */
+	if (gsup_source_name && gsup_source_name_len) {
+		trans->sms.gsup_source_name = talloc_size(trans, gsup_source_name_len);
+		if (!trans->sms.gsup_source_name) {
+			msgb_free(msg);
+			trans_free(trans);
+			return -ENOMEM;
+		}
+		memcpy(trans->sms.gsup_source_name, gsup_source_name,
+			gsup_source_name_len);
+		trans->sms.gsup_source_name_len = gsup_source_name_len;
 	}
 
 	/* Encode SM-RP-OA (SMSC address) */
