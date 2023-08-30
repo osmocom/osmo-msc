@@ -45,6 +45,8 @@
 
 #ifdef BUILD_IU
 #include <osmocom/ranap/iu_client.h>
+#include <osmocom/ranap/ranap_msg_factory.h>
+#include <osmocom/msc/ran_msg_iu.h>
 #endif
 
 #include <osmocom/msc/vty.h>
@@ -530,6 +532,53 @@ DEFUN(cfg_msc_cs7_instance_iu,
 #endif
 }
 
+#if BUILD_IU
+static const struct value_string rab_mode_strs[] = {
+	{ OSMO_RANAP_RAB_MODE_AMR_4_75, "4k75" },
+	{ OSMO_RANAP_RAB_MODE_AMR_5_15, "5k15" },
+	{ OSMO_RANAP_RAB_MODE_AMR_5_90, "5k90" },
+	{ OSMO_RANAP_RAB_MODE_AMR_6_70, "6k70" },
+	{ OSMO_RANAP_RAB_MODE_AMR_7_40, "7k40" },
+	{ OSMO_RANAP_RAB_MODE_AMR_7_95, "7k95" },
+	{ OSMO_RANAP_RAB_MODE_AMR_10_2, "10k2" },
+	{ OSMO_RANAP_RAB_MODE_AMR_12_2, "12k2" },
+	{ OSMO_RANAP_RAB_MODE_AMR_SID, "SID" },
+	{}
+};
+#endif
+
+DEFUN(cfg_msc_iu_rab_modes,
+      cfg_msc_iu_rab_modes_cmd,
+      "iu global rab-modes .LIST",
+      "UTRAN related\n"
+      "Applies to all attached RNCs\n" /* future: also allow individual settings per CGI */
+      "Set RAB modes (AMR rates) to request from RNC in RAB Assignment\n"
+      "List of RAB modes. The full list would be '4k75 5k15 5k90 6k70 7k40 7k95 10k2 12k2 SID'\n")
+{
+#if BUILD_IU
+	int i;
+	int modes = 0;
+	for (i = 0; i < argc; i++) {
+		const char *arg = argv[i];
+		int val = get_string_value(rab_mode_strs, arg);
+
+		if (val < 0) {
+			vty_out(vty, "%% Error: unknown RAB mode: '%s'%s", arg, VTY_NEWLINE);
+			return CMD_WARNING;
+		}
+
+		modes |= (1 << val);
+	}
+
+	g_ranap_rab_modes = modes;
+	return CMD_SUCCESS;
+#else
+	vty_out(vty, "WARNING: 'iu * rab-modes' without effect: built without Iu support%s",
+		VTY_NEWLINE);
+	return CMD_WARNING;
+#endif
+}
+
 DEFUN(cfg_msc_auth_tuple_max_reuse_count, cfg_msc_auth_tuple_max_reuse_count_cmd,
       "auth-tuple-max-reuse-count <-1-2147483647>",
       "Configure authentication tuple re-use\n"
@@ -777,6 +826,19 @@ static int config_write_msc(struct vty *vty)
 #if BUILD_IU
 	vty_out(vty, " cs7-instance-iu %u%s", gsmnet->iu.cs7_instance,
 		VTY_NEWLINE);
+
+	if (g_ranap_rab_modes != g_ranap_rab_modes_default) {
+		int i;
+
+		vty_out(vty, " iu global rab-modes");
+
+		for (i = 0; i < OSMO_RANAP_RAB_MODE_COUNT; i++) {
+			if ((g_ranap_rab_modes & (1 << i)) == 0)
+				continue;
+			vty_out(vty, " %s", get_value_string(rab_mode_strs, i));
+		}
+		vty_out(vty, "%s", VTY_NEWLINE);
+	}
 #endif
 
 	if (gsmnet->vlr->cfg.auth_tuple_max_reuse_count)
@@ -2060,6 +2122,9 @@ void msc_vty_init(struct gsm_network *msc_network)
 	install_element(MSC_NODE, &cfg_msc_check_imei_rqd_cmd);
 	install_element(MSC_NODE, &cfg_msc_cs7_instance_a_cmd);
 	install_element(MSC_NODE, &cfg_msc_cs7_instance_iu_cmd);
+
+	install_element(MSC_NODE, &cfg_msc_iu_rab_modes_cmd);
+
 	install_element(MSC_NODE, &cfg_msc_paging_response_timer_cmd);
 	install_element(MSC_NODE, &cfg_msc_emergency_msisdn_cmd);
 	install_element(MSC_NODE, &cfg_msc_sms_over_gsup_cmd);
@@ -2081,6 +2146,7 @@ void msc_vty_init(struct gsm_network *msc_network)
 #ifdef BUILD_IU
 	ranap_iu_vty_init(MSC_NODE, (enum ranap_nsap_addr_enc*)&msc_network->iu.rab_assign_addr_enc);
 #endif
+
 	sgs_vty_init();
 	smsc_vty_init(msc_network);
 	asci_vty_init(msc_network);

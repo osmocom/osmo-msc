@@ -344,6 +344,22 @@ static struct msgb *ran_iu_wrap_dtap(struct msgb *dtap)
 	return an_apdu;
 }
 
+const int g_ranap_rab_modes_default = (1 << OSMO_RANAP_RAB_MODE_AMR_12_2) | (1 << OSMO_RANAP_RAB_MODE_AMR_SID);
+
+/* HACK: a single set of AMR rates to add to RAB Assignment Request.
+ * A proper implementation would pick rates according to the codec filter results, to allow matching rates in both call
+ * legs.
+ * This is a quick hack to be able to quickly test supported AMR rates in 3G femto cells, without having to resolve the
+ * lack of AMR rates in struct ran_assignment_command: this is not trivial, because it needs to encompass
+ * - 2G: rates communicated in predefined sets as explained in gsm0808_speech_codec_defaults; see
+ *   gsm0808_speech_codec_from_chan_type().
+ * - 3G: individual SDUs per AMR rate.
+ * - AMR-WB: rates not present in 2G signalling.
+ *
+ * Bitmask composed from enum osmo_ranap_rab_mode.
+ */
+int g_ranap_rab_modes = g_ranap_rab_modes_default;
+
 static struct msgb *ran_iu_make_rab_assignment(struct osmo_fsm_inst *caller_fi, const struct ran_assignment_command *ac)
 {
 	struct msgb *msg;
@@ -371,7 +387,7 @@ static struct msgb *ran_iu_make_rab_assignment(struct osmo_fsm_inst *caller_fi, 
 	LOG_RAN_IU_ENC(caller_fi, LOGL_DEBUG, "RAB Assignment: rab_id=%d, rtp=" OSMO_SOCKADDR_STR_FMT ", use_x213_nsap=%d\n",
 			rab_id, OSMO_SOCKADDR_STR_FMT_ARGS(ac->cn_rtp), use_x213_nsap);
 
-	msg = ranap_new_msg_rab_assign_voice(rab_id, cn_rtp_ip, ac->cn_rtp->port, use_x213_nsap);
+	msg = ranap_new_msg_rab_assign_voice_2(rab_id, cn_rtp_ip, ac->cn_rtp->port, use_x213_nsap, g_ranap_rab_modes);
 	msg->l2h = msg->data;
 
 	return msg;

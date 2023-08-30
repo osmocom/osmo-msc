@@ -63,6 +63,7 @@ OsmoMSC(config-msc)# list
   check-imei-rqd (0|1|early)
   cs7-instance-a <0-15>
   cs7-instance-iu <0-15>
+  iu global rab-modes .LIST
   emergency-call route-to-msisdn MSISDN
   sms-over-gsup
   no sms-over-gsup
@@ -106,6 +107,21 @@ msc
 OsmoMSC(config-msc)# mncc internal
 OsmoMSC(config-msc)# show running-config
 ... ! mncc external
+
+OsmoMSC(config-msc)# iu?
+  iu  UTRAN related
+OsmoMSC(config-msc)# iu ?
+  global               Applies to all attached RNCs
+...
+OsmoMSC(config-msc)# iu global ?
+  rab-modes  Set RAB modes (AMR rates) to request from RNC in RAB Assignment
+OsmoMSC(config-msc)# iu global rab-modes ?
+  LIST  List of RAB modes. The full list would be '4k75 5k15 5k90 6k70 7k40 7k95 10k2 12k2 SID'
+OsmoMSC(config-msc)# iu global rab-modes 4k75 5k15 5k90 6k70 7k40 7k95 10k2 12k2 SID
+OsmoMSC(config-msc)# show running-config
+...
+ iu global rab-modes 4k75 5k15 5k90 6k70 7k40 7k95 10k2 12k2 SID
+...
 
 OsmoMSC(config-msc)# exit
 OsmoMSC(config)# mncc-int

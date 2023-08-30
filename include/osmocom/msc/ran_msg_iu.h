@@ -24,8 +24,7 @@
 
 #include <osmocom/msc/ran_msg.h>
 #include <osmocom/msc/paging.h>
-
-struct sccp_ran_inst;
+#include <osmocom/msc/sccp_ran.h>
 
 int ran_iu_decode_l2(struct ran_dec *ran_dec_iu, struct msgb *ranap);
 struct msgb *ran_iu_encode(struct osmo_fsm_inst *caller_fi, const struct ran_msg *ran_enc_msg);
@@ -36,3 +35,6 @@ struct msgb *ranap_make_reset_msg(const struct sccp_ran_inst *sri, enum reset_ms
 struct msgb *ranap_make_paging_msg(const struct sccp_ran_inst *sri, const struct gsm0808_cell_id *page_cell_id,
 				   const char *imsi, uint32_t tmsi, enum paging_cause cause);
 const char *ranap_msg_name(const struct sccp_ran_inst *sri, const struct msgb *l2);
+
+extern const int g_ranap_rab_modes_default;
+extern int g_ranap_rab_modes;
