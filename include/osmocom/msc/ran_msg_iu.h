@@ -25,6 +25,8 @@
 #include <osmocom/msc/ran_msg.h>
 #include <osmocom/msc/paging.h>
 
+struct sccp_ran_inst;
+
 int ran_iu_decode_l2(struct ran_dec *ran_dec_iu, struct msgb *ranap);
 struct msgb *ran_iu_encode(struct osmo_fsm_inst *caller_fi, const struct ran_msg *ran_enc_msg);
 
