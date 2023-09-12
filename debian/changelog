@@ -1,3 +1,146 @@
+osmo-msc (1.11.0) unstable; urgency=medium
+
+  [ arehbein ]
+  * Transition to use of 'telnet_init_default'
+
+  [ Neels Hofmeyr ]
+  * sdp_msg.c: fix missing rate in sdp_audio_codecs_add()
+  * comment: clarify L3 Info processing
+  * IuCS: remove IuUP LOOPBACK hack
+  * make: doc/sequence_charts: use wildcards for EXTRA_DIST and CLEANFILES
+  * tweak MNCC logging, add RTP info
+  * msc_log_to_ladder.py: various tweaks
+  * charts: Rename voice_call_full.msc to voice_call_external_mncc.msc
+  * update doc/sequence_charts/voice_call_external_mncc.msc
+  * add voice_call_internal_mncc.msc
+  * add codec_mapping.h,c
+  * MNCC: use codec_mapping, drop mgcp_codec_to_mncc_payload_msg_type()
+  * [codecs filter] add codec_filter.h,c
+  * [codecs filter] add trans.cc.codecs
+  * [codecs filter] store BSS codec list from Compl L3
+  * [codecs filter] MO call: apply BSS codec list
+  * [codecs filter] MT call: apply BSS codec list
+  * [codecs filter] MT call: apply remote call leg codecs
+  * [codecs filter] MT call: store MS Bearer Cap from CC Call Conf
+  * msc_vlr_test_call: include RAN RTP addr in ass compl
+  * [codecs filter] apply BSS codecs from Assignment Complete
+  * add ran_infra.force_mgw_codecs_to_ran
+  * rtp_stream: allow multiple codecs / use codec filter from Assignment
+  * in ran_msg, return gsm0808_speech_codec (intra-MSC)
+  * in ran_msg, return gsm0808_speech_codec (inter-MSC)
+  * [codecs filter] use filter result in MT DTAP CC Setup
+  * [codecs filter] use filter result in Assignment
+  * [codecs filter] send + receive SDP via MNCC
+  * msc_vlr_tests: confirm crcx by RAN/CN side separately
+  * [codecs filter] use codecs filter on crcx ok
+  * do CN CRCX first
+  * mncc_recvmsg(): log caller file,line
+  * [codecs filter] msc_vlr_test_call: test codecs resolution
+  * codecs: compose HO Req Ch Type from cc.codecs
+  * HO Req: include IE Codec List (MSC Preferred)
+  * fix msc_vlr_test_call SDP mncc_rtp
+  * coverity: sdp_msg_test.c: check rc of sdp_msg_from_sdp_str()
+  * 3G: decapsulate IuUP to AMR at the MGW; allow 3G<-AMR->2G
+  * TODO-RELEASE: add note on osmo-sip-connector and SDP
+
+  [ Vadim Yanitskiy ]
+  * src/Makefile.am: remove unneeded AM_LDFLAGS with LIBS
+  * tests: use -no-install libtool flag to avoid ./lt-* scripts
+  * tests: $(BUILT_SOURCES) is not defined, depend on osmo-msc
+  * copyright: fix typo: sysmocom s/s.m.f.c./s.f.m.c./ GmbH
+  * fixup: contrib/jenkins: create workspace.tar.xz on error
+  * tests/{ctrl,vty}_test_runner.py: raise an exception if proc's rc != 0
+  * msc_vty: support spaces in short/long network name
+  * ran_a_mgcp_codec_from_sc(): cosmetic: remove unneeded breaks
+  * ran_a_mgcp_codec_from_sc(): map GSM0808_SCT_CSD to CODEC_CLEARMODE
+  * ran_a_channel_type_to_speech_codec_list(): set PI/PT for CSD
+  * codec_mapping: codec_map[]: add missing speech codec for CLEARMODE
+  * csd_bs_list_to_bearer_cap(): properly initialize bcap fields
+  * csd_bs_list_to_bearer_cap(): add default branch for safety
+
+  [ Pau Espin Pedrol ]
+  * mncc_sock: Call osmo_fd_unregister() before closing and changing bfd->fd
+  * rtp_stream: Update id after modifying fields upon Tx of MGCP msg
+  * rtp_stream: Fix remote_osmux_cid_sent_to_mgw never set to true
+  * UserManual: Include sigtran*.adoc from osmo-gsm-manuals.git
+  * Write explicit role & sctp-role fields in ASP configurations
+  * Use new mgcp_client_conf_alloc() API to alloc mgcp_client_conf
+  * Tx Loc UPD ACC: Use PLMN provided by subscr
+  * trans_lcls_compose(): Set PLMN fron cell currently in use
+
+  [ Oliver Smith ]
+  * msc_mgw_setup: use mgcp_client_pool_empty()
+  * msc_main: close SMS db on startup error
+  * debian: set compat level to 10
+  * contrib/jenkins: create workspace.tar.xz on error
+  * systemd: depend on networking-online.target
+  * codec_mapping: add clearmode
+  * ran_a_channel_type_to_speech_codec_list: add CSD
+  * codec_filter_set_ms_from_bc: prepare for CSD
+  * Cosmetic: gsm48_cc_tx_setup: tweak comment
+  * Cosmetic: gsm48_cc_tx_setup: remove TODO comment
+  * codec_filter_init: prepare for CSD
+  * codec_filter_set_ran: prepare for CSD
+  * codec_filter_set_bss: prepare for CSD
+  * codec_filter_run: prepare for CSD
+  * transaction: move cc.codecs.remote -> cc.remote
+  * transaction: move cc.codecs.result -> cc.local
+  * msc: add trans_cc_set_remote_from_bc
+  * gsm48_cc_tx_setup: set trans->bearer_cap.transfer early
+  * Add initial CSD support with external MNCC
+  * smpp_handle_bind_tx: initialize tlv
+  * sdp_msg_test: fix dereference after null check
+  * smpp_msc: submit_to_sms: check ud_len > sms_msg_len
+  * msc_ho_send_handover_request: fix check_after_deref
+  * csd_bs_list_to_gsm0808_channel_type: fix rc check
+  * gsm48_cc_tx_alerting: check rc of sdp_msg_from_sdp_str
+  * mncc_test: fix talloc_named_const
+  * gsm48_cc_tx_setup: use MNCC bcaps for CSD
+  * test: add csd_test
+  * csd_bs_list_remove: fix removal logic
+  * mncc_builtin: permit data bearer types
+  * csd_bs_to_gsm0808: add T 300 / proper ch_rate_type
+  * Cosmetic: fix typo
+  * csd_bs_list_to_gsm0808_ct: assert -> ret -EINVAL
+  * msc_ho_send_handover_request: support CSD
+  * msc_a_up_call_assignment_complete: check CSD codec
+  * gsm48_cc_tx_call_proc_…: verify bcap.transfer
+
+  [ Andreas Eversberg ]
+  * ASCI: Add log categories for GCC/BCC (call control)
+  * ASCI: Add log category for VGCS/VBS call and channel FSM
+  * ASCI: Use a unique call-id for RTP streams
+  * ASCI: rtp_stream_commit(): Also update MGW on conn mode change
+  * ASCI: Allow usage of rtp_stream with other FSM
+  * ASCI: Add transaction type to trans_find_by_callref()
+  * ASCI: Add two new transaction types for VGCS and VBS
+  * ASCI: Allow transaction without subscriber associated
+  * ASCI: Add simple implementation of Group Call Register
+  * ASCI: Add functions to transcode VGCS/VBS messages on A-interface
+  * ASCI: Add callref to assignment command
+  * ASCI: Add call control for VGCS/VBS
+  * ASCI: Add decoder for VGCS/VBS messages to msc_a.c
+  * ASCI: Add function to receive VGCS/VBS messages from BSS
+  * ASCI: Add option to switch on or off ASCI support
+  * ASCI: Check return code of osmo_mobile_identity_decode()
+  * ASCI: Remove check for trans->msc_a to be set in _assign_complete()
+  * ASCI: Add VTY to configure GCR (Group Call Register)
+  * ASCI: Add reception of UPLINK RELEASE on dedicated channel
+  * ASCI: Clear VGCS call and channel on BSSMAP reset message
+  * ASCI: Receive messages from MSC-A role related to VGCS/VBS
+  * ASCI: Null pointer bug fix in trans_create_bcc_gcc
+  * ASCI: Fix wrong check for Null pointer in vgcs_cell_fsm_null()
+  * ASCI: Check if codec mapping exists for given codec
+  * ASCI: Fix Null pointer dereference bug in gsm44068_bcc_gcc_trans_free()
+  * ASCI: Point to correct state machine when calling ran_encode_and_send()
+  * ASCI: Add debugging and error logging to VGCS/VBS call control
+  * ASCI: Add missing transaction ID to SET PARAMETER message
+
+  [ Keith Whyte ]
+  * SMPP: Fix Memory leaks
+
+ -- Pau Espin Pedrol <pespin@sysmocom.de>  Tue, 12 Sep 2023 16:46:11 +0200
+
 osmo-msc (1.10.0) unstable; urgency=medium
 
   [ Keith Whyte ]
