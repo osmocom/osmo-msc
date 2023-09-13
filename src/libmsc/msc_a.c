@@ -1461,32 +1461,37 @@ static void msc_a_up_call_assignment_complete(struct msc_a *msc_a, const struct 
 
 	if (codec_if_known) {
 		const struct codec_mapping *codec_cn;
-		/* For 2G:
-		 * - The Assignment Complete has returned a specific codec (e.g. FR3 for AMR FR).
-		 * - Set this codec at the MGW endpoint facing the RAN.
-		 * - Also set this codec at the MGW endpoint facing the CN -- we require an exact match on both call
-		 *   legs.
-		 *   - TODO: be aware of transcoding that the MGW is capable of, e.g. AMR octet-aligned to AMR
-		 *     bandwidth-efficient...
-		 *
-		 * For 3G:
-		 * - ran_infra->force_mgw_codecs_to_ran sets VND.3GPP.IUFP as single codec at the MGW towards RAN.
-		 * - ran_msg_iu.c always returns FR3 (AMR FR) for the assigned codec. Set that at the MGW towards CN.
-		 * - So the MGW decapsulates IuUP <-> AMR
-		 */
-		codec_cn = codec_mapping_by_gsm0808_speech_codec_type(codec_if_known->type);
-		/* TODO: use codec_mapping_by_gsm0808_speech_codec() to also match on codec_if_known->cfg */
-		if (!codec_cn) {
-			LOG_TRANS(cc_trans, LOGL_ERROR, "Unknown codec in Assignment Complete: %s\n",
-				  gsm0808_speech_codec_type_name(codec_if_known->type));
-			call_leg_release(msc_a->cc.call_leg);
-			return;
-		}
 
 		/* Check for unexpected codec with CSD */
 		if (cc_trans->bearer_cap.transfer == GSM48_BCAP_ITCAP_UNR_DIG_INF &&
 		    codec_if_known->type != GSM0808_SCT_CSD) {
 			LOG_TRANS(cc_trans, LOGL_ERROR, "Unexpected codec in Assignment Complete for CSD: %s\n",
+				  gsm0808_speech_codec_type_name(codec_if_known->type));
+			call_leg_release(msc_a->cc.call_leg);
+			return;
+		}
+
+		/*
+		 * The Assignment Complete has returned a specific codec in codec_if_known.
+		 *
+		 * For 2G:
+		 * - Set this codec at the MGW endpoint on both the RAN and the CN sides.
+		 *   - TODO: be aware of transcoding that the MGW is capable of, e.g. AMR octet-aligned to AMR
+		 *     bandwidth-efficient...
+		 *
+		 *   RAN <--CODEC--> MGW <--CODEC--> CN
+		 *
+		 * For 3G:
+		 * - ran_infra->force_mgw_codecs_to_ran sets VND.3GPP.IUFP as single codec at the MGW towards RAN.
+		 * - Iu always returns FR3 (AMR FR) in codec_if_known. Set that at the MGW towards CN.
+		 * - So the MGW decapsulates IuUP <-> AMR
+		 *
+		 *   RAN <--IuFP--> MGW <--CODEC=AMR--> CN
+		 */
+		codec_cn = codec_mapping_by_gsm0808_speech_codec_type(codec_if_known->type);
+		/* TODO: use codec_mapping_by_gsm0808_speech_codec() to also match on codec_if_known->cfg */
+		if (!codec_cn) {
+			LOG_TRANS(cc_trans, LOGL_ERROR, "Unknown codec in Assignment Complete: %s\n",
 				  gsm0808_speech_codec_type_name(codec_if_known->type));
 			call_leg_release(msc_a->cc.call_leg);
 			return;
