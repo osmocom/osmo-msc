@@ -28,7 +28,8 @@ int gsm411_send_sms(struct gsm_network *net,
 int gsm411_send_rp_data(struct gsm_network *net, struct vlr_subscr *vsub,
 			size_t sm_rp_oa_len, const uint8_t *sm_rp_oa,
 			size_t sm_rp_ud_len, const uint8_t *sm_rp_ud,
-			bool sm_rp_mmts_ind);
+			bool sm_rp_mmts_ind, const uint8_t *gsup_source_name,
+			size_t gsup_source_name_len);
 
 void gsm411_sapi_n_reject(struct msc_a *msc_a);
 
