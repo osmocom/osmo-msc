@@ -1,3 +1,20 @@
+osmo-msc (1.11.1) unstable; urgency=medium
+
+  [ Neels Hofmeyr ]
+  * fix codecs in internal call bridge
+  * make two functions static
+
+  [ Mychaela N. Falconia ]
+  * CC: don't start guard timer on mid-call MNCC messages
+  * gsup_client_mux: set destination_name in error reply function
+  * SMS over GSUP: correctly route GSUP responses to MT SMS
+  * SMS over GSUP: set source_name in GSUP reply messages
+
+  [ Andreas Eversberg ]
+  * ASCI: Remove duplicated CLEAR COMMAND from VGCS/VBS channel handling
+
+ -- Oliver Smith <osmith@sysmocom.de>  Thu, 28 Sep 2023 13:53:07 +0200
+
 osmo-msc (1.11.0) unstable; urgency=medium
 
   [ arehbein ]
