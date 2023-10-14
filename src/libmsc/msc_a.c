@@ -669,6 +669,8 @@ static void msc_a_call_leg_ran_local_addr_available(struct msc_a *msc_a)
 			return;
 		}
 		break;
+	case GSM48_BCAP_ITCAP_3k1_AUDIO:
+	case GSM48_BCAP_ITCAP_FAX_G3:
 	case GSM48_BCAP_ITCAP_UNR_DIG_INF:
 		if (!cc_trans->cc.local.bearer_services.count) {
 			LOG_TRANS(cc_trans, LOGL_ERROR, "Assignment not possible, no matching bearer service: %s\n",

@@ -88,6 +88,8 @@ static int mncc_setup_ind(struct gsm_call *call,
 	/* we currently only do speech and CSD */
 	switch (setup->bearer_cap.transfer) {
 	case GSM_MNCC_BCAP_SPEECH:
+	case GSM_MNCC_BCAP_AUDIO:
+	case GSM_MNCC_BCAP_FAX_G3:
 	case GSM_MNCC_BCAP_UNR_DIG:
 		break;
 	default:

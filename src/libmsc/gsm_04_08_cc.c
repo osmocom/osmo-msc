@@ -825,6 +825,8 @@ static int gsm48_cc_tx_setup(struct gsm_trans *trans, void *arg)
 			LOG_TRANS(trans, LOGL_INFO,
 				  "Got no information of remote audio codecs: neither SDP nor Bearer Capability. Trying anyway.\n");
 		break;
+	case GSM48_BCAP_ITCAP_3k1_AUDIO:
+	case GSM48_BCAP_ITCAP_FAX_G3:
 	case GSM48_BCAP_ITCAP_UNR_DIG_INF:
 		if (setup->fields & MNCC_F_BEARER_CAP) {
 			trans->cc.remote = (struct sdp_msg){};
@@ -878,6 +880,8 @@ static int gsm48_cc_tx_setup(struct gsm_trans *trans, void *arg)
 			return rc;
 		}
 		break;
+	case GSM48_BCAP_ITCAP_3k1_AUDIO:
+	case GSM48_BCAP_ITCAP_FAX_G3:
 	case GSM48_BCAP_ITCAP_UNR_DIG_INF:
 		if (csd_bs_list_to_bearer_cap(&bearer_cap, &trans->cc.local.bearer_services) == 0) {
 			LOG_TRANS(trans, LOGL_ERROR, "Error composing Bearer Capability for CC Setup\n");

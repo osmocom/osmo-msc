@@ -54,6 +54,8 @@ void trans_cc_filter_run(struct gsm_trans *trans)
 		LOG_TRANS(trans, LOGL_DEBUG, "codecs: %s\n",
 			  codec_filter_to_str(&trans->cc.codecs, &trans->cc.local, &trans->cc.remote));
 		break;
+	case GSM48_BCAP_ITCAP_3k1_AUDIO:
+	case GSM48_BCAP_ITCAP_FAX_G3:
 	case GSM48_BCAP_ITCAP_UNR_DIG_INF:
 		csd_filter_run(&trans->cc.csd, &trans->cc.local, &trans->cc.remote);
 		LOG_TRANS(trans, LOGL_DEBUG, "codec/BS: %s\n",
@@ -78,6 +80,8 @@ void trans_cc_filter_set_ms_from_bc(struct gsm_trans *trans, const struct gsm_mn
 	case GSM48_BCAP_ITCAP_SPEECH:
 		sdp_audio_codecs_from_bearer_cap(&trans->cc.codecs.ms, bcap);
 		break;
+	case GSM48_BCAP_ITCAP_3k1_AUDIO:
+	case GSM48_BCAP_ITCAP_FAX_G3:
 	case GSM48_BCAP_ITCAP_UNR_DIG_INF:
 		sdp_audio_codecs_set_csd(&trans->cc.codecs.ms);
 		csd_bs_list_from_bearer_cap(&trans->cc.csd.ms, bcap);
@@ -101,6 +105,8 @@ void trans_cc_set_remote_from_bc(struct gsm_trans *trans, const struct gsm_mncc_
 	case GSM48_BCAP_ITCAP_SPEECH:
 		sdp_audio_codecs_from_bearer_cap(&trans->cc.remote.audio_codecs, bcap);
 		break;
+	case GSM48_BCAP_ITCAP_3k1_AUDIO:
+	case GSM48_BCAP_ITCAP_FAX_G3:
 	case GSM48_BCAP_ITCAP_UNR_DIG_INF:
 		sdp_audio_codecs_set_csd(&trans->cc.remote.audio_codecs);
 		csd_bs_list_from_bearer_cap(&trans->cc.remote.bearer_services, bcap);
