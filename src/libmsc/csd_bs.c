@@ -236,6 +236,11 @@ enum csd_bs csd_bs_from_bearer_cap(const struct gsm_mncc_bearer_cap *cap, bool t
 	enum gsm48_bcap_user_rate rate = cap->data.user_rate;
 	bool async = cap->data.async;
 
+	/* 3.1kHz CSD calls won't have the rate adaptation field set
+	   but do require rate adaptation. */
+	if (cap->data.interm_rate && !ra)
+		ra = GSM48_BCAP_RA_V110_X30;
+
 	if (ra == GSM48_BCAP_RA_V110_X30 && async && transp) {
 		switch (rate) {
 		case GSM48_BCAP_UR_300:
