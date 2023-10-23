@@ -38,6 +38,8 @@ include::{srcdir}/chapters/osmux_msc.adoc[]
 
 include::./common/chapters/mgwpool.adoc[]
 
+include::{srcdir}/chapters/sgs.adoc[]
+
 include::./common/chapters/control_if.adoc[]
 
 include::./common/chapters/gsup.adoc[]

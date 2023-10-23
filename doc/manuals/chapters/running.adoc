@@ -74,15 +74,8 @@ msc
 
 More on MNCC in <<mncc-external>>.
 
-The SGs interface by default listens on 0.0.0.0:29118. Configure a different IP and/or port for each osmo-msc instance.
-You may also want to configure different VLR names:
-
-----
-sgs
- local-ip 127.0.0.1
- local-port 29118
- vlr-name vlr.example.net
-----
+The SGs interface by default listens on 0.0.0.0:29118 (SCTP). Each instance of OsmoMSC must use a different IP address
+and/or port. For details about the configuration of the SGs interface, see section <<sgs>>.
 
 For the following links, OsmoMSC acts as a client and does not listen/bind to a
 specific interface, and will hence not encounter conflicts for multiple instances

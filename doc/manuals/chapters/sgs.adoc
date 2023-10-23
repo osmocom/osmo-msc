@@ -1,0 +1,55 @@
+[[sgs]]
+== SGs interface
+
+OsmoMSC offers an SGs interface using the SGsAP protocol. The SGs interface is an
+optional interface between a 2G (GERAN) / 3G (UTRAN) MSC and an 4G (EUTRAN) MME.
+Its purpose is to facilitate both CSFB (Circuit-Switched Fall Back) and SMSoS
+(SMS over SGs). It is used for Mobility management (MM) and paging procedures
+between the EPS (Evolved Packet Services) and CS (Circuit Switched) domain.
+
+=== VTY configuration
+
+The SGs interface implementation in OsmoMSC is automatically active and requires
+only minimal configuration. When no specific configuration is provided OsmoMSC
+will listen on 0.0.0.0:29118 (SCTP) for incoming connections.
+
+This is sufficient in the most configurations, but in larger installations,
+where services are either tied to specific interfaces and/or more instances of
+OsmoMSC run in parallel, a custom configuration is necessary.
+
+The user has the option to configure the IP address (`local-ip`) and the SCTP
+port (`local-port`) and also the `vlr-name` that OsmoMSC uses to identify itself
+towards the MME. It should be noted that the `vlr-name` is usually the DNS name
+for the IP address of the VLR/MSC, so IP address used and the `vlr-name` should
+match the DNS server entry.
+
+----
+sgs
+ local-ip 127.0.0.1
+ local-port 29118
+ vlr-name vlr.example.net
+----
+
+In order to fine tune the behavior of the SGs interface the user also has
+control over the relevant timers (`ts5`, `ts6-2`, `ts7`, `ts11`, `ts14`, `ts15`)
+and counters (`ns7`, `ns11`). Each timer and counter has to be configured
+separately. In the following example we change the value of ts and ns11.
+
+----
+sgs
+ timer ts7 23
+ counter ns11 100
+----
+
+
+[NOTE]
+====
+In case multiple instances of OsmoMSC run in parallel, it is advised to use a
+different `vlr-name` for each instance. In any case it must be ensured that the
+SGs interface of each instance is bound to a different IP address and/or port.
+====
+
+=== Connection monitoring
+
+The user can use the VTY command `show sgs-connections` to list the MMEs that
+are currently connected to OsmoMSC.
