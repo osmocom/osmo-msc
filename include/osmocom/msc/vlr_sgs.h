@@ -69,7 +69,7 @@ static inline const char *vlr_sgs_state_timer_name(enum vlr_sgs_state_tmr Ts)
 extern const struct value_string sgs_state_counter_names[];
 static inline const char *vlr_sgs_state_counter_name(enum vlr_sgs_state_ctr Ns)
 {
-	return get_value_string(sgs_state_timer_names, Ns);
+	return get_value_string(sgs_state_counter_names, Ns);
 }
 
 /* This callback function is called when an SGs location update is complete */
