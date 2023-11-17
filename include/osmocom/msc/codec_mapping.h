@@ -56,6 +56,7 @@ struct sdp_audio_codec *sdp_audio_codecs_add_speech_ver(struct sdp_audio_codecs 
 struct sdp_audio_codec *sdp_audio_codecs_add_mgcp_codec(struct sdp_audio_codecs *ac, enum mgcp_codecs mgcp_codec);
 void sdp_audio_codecs_from_bearer_cap(struct sdp_audio_codecs *ac, const struct gsm_mncc_bearer_cap *bc);
 
+int sdp_audio_codec_to_speech_codec_list(struct gsm0808_speech_codec_list *scl, const struct sdp_audio_codec *codec);
 void sdp_audio_codecs_to_speech_codec_list(struct gsm0808_speech_codec_list *cl, const struct sdp_audio_codecs *ac);
 void sdp_audio_codecs_from_speech_codec_list(struct sdp_audio_codecs *ac, const struct gsm0808_speech_codec_list *cl);
 
