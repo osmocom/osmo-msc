@@ -636,7 +636,7 @@ int msc_a_ensure_cn_local_rtp(struct msc_a *msc_a, struct gsm_trans *cc_trans)
 }
 
 /* The MGW has given us a local IP address for the RAN side. Ready to start the Assignment of a voice channel. */
-static void msc_a_call_leg_ran_local_addr_available(struct msc_a *msc_a)
+void msc_a_tx_assignment_cmd(struct msc_a *msc_a)
 {
 	struct ran_msg msg;
 	struct gsm_trans *cc_trans = msc_a->cc.active_trans;
@@ -804,7 +804,7 @@ static void msc_a_fsm_communicating(struct osmo_fsm_inst *fi, uint32_t event, vo
 			  rtps->use_osmux ? "yes" : "no", rtps->local_osmux_cid);
 		switch (rtps->dir) {
 		case RTP_TO_RAN:
-			msc_a_call_leg_ran_local_addr_available(msc_a);
+			msc_a_tx_assignment_cmd(msc_a);
 			return;
 		case RTP_TO_CN:
 			cc_on_cn_local_rtp_port_known(rtps->for_trans);

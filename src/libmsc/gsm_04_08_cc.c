@@ -270,7 +270,16 @@ static void _log_mncc_rx_tx(const char *file, int line,
 		break;
 	}
 
-	if (sdp && sdp[0] && (sdp_msg_from_sdp_str(&sdp_msg, sdp) == 0)) {
+	if (sdp && sdp[0]) {
+		int rc = sdp_msg_from_sdp_str(&sdp_msg, sdp);
+		if (rc != 0) {
+			LOG_TRANS_CAT_SRC(trans, DMNCC, LOGL_ERROR, file, line, "%s %s: invalid SDP message (trying anyway)\n",
+					  rx_tx,
+					  get_mncc_name(mncc->msg_type));
+			LOG_TRANS_CAT_SRC(trans, DMNCC, LOGL_DEBUG, file, line, "erratic SDP: %s\n",
+					  osmo_quote_cstr_c(OTC_SELECT, sdp, -1));
+			return;
+		}
 		LOG_TRANS_CAT_SRC(trans, DMNCC, LOGL_DEBUG, file, line, "%s %s (RTP=%s)\n",
 				  rx_tx,
 				  get_mncc_name(mncc->msg_type),
@@ -748,6 +757,7 @@ void gsm48_cc_rx_setup_cn_local_rtp_port_known(struct gsm_trans *trans)
 static void rx_mncc_sdp(struct gsm_trans *trans, uint32_t mncc_msg_type, const char *sdp,
 			const struct gsm_mncc_bearer_cap *bcap)
 {
+	struct codec_filter *codecs = &trans->cc.codecs;
 	struct call_leg *cl = trans->msc_a ? trans->msc_a->cc.call_leg : NULL;
 	struct rtp_stream *rtp_cn = cl ? cl->rtp[RTP_TO_CN] : NULL;
 
@@ -775,6 +785,30 @@ static void rx_mncc_sdp(struct gsm_trans *trans, uint32_t mncc_msg_type, const c
 		rtp_stream_set_remote_addr_and_codecs(rtp_cn, &trans->cc.remote);
 		rtp_stream_commit(rtp_cn);
 	}
+
+	/* See if we need to switch codecs to maintain TFO: has the remote side changed the codecs information? If we
+	 * have already assigned a specific codec here, but the remote call leg has now chosen a different codec, we
+	 * need to re-assign this call leg to match the remote leg. */
+	if (!sdp_audio_codec_is_set(&codecs->assignment)) {
+		/* Voice channel assignment has not completed. Do not interfere. */
+		return;
+	}
+	if (!trans->cc.remote.audio_codecs.count) {
+		/* Don't know remote codecs, nothing to do. */
+		return;
+	}
+	if (sdp_audio_codecs_by_descr(&trans->cc.remote.audio_codecs, &codecs->assignment)) {
+		/* The assigned codec is part of the remote codec set. All is well. */
+		/* TODO: maybe this should require exactly the *first* remote codec to match, because we cannot flexibly
+		 * transcode, and assume the actual payload we will receive is listed in the first place? */
+		return;
+	}
+
+	/* We've already completed Assignment of a voice channel (some time ago), and now the remote side has changed
+	 * to a mismatching codec (list). Try to re-assign this side to a matching codec. */
+	LOG_TRANS(trans, LOGL_INFO, "Remote call leg mismatches assigned codec: %s\n",
+		  codec_filter_to_str(&trans->cc.codecs, &trans->cc.local, &trans->cc.remote));
+	msc_a_tx_assignment_cmd(trans->msc_a);
 }
 
 static int gsm48_cc_tx_setup(struct gsm_trans *trans, void *arg)
@@ -2049,17 +2083,23 @@ int cc_on_assignment_done(struct gsm_trans *trans)
 	switch (trans->cc.state) {
 	case GSM_CSTATE_INITIATED:
 	case GSM_CSTATE_MO_CALL_PROC:
-		/* MO call */
+		/* MO call, send ACK in form of an MNCC_RTP_CREATE (below) */
 		break;
 
 	case GSM_CSTATE_CALL_RECEIVED:
 	case GSM_CSTATE_MO_TERM_CALL_CONF:
-		/* MT call */
+		/* MT call, send ACK in form of an MNCC_RTP_CREATE (below) */
 		break;
 
 	case GSM_CSTATE_ACTIVE:
-		/* already active. MNCC finished before Abis completed the Assignment. */
-		break;
+		/* already active. We decided to re-assign later on during the call - at time of writing this never
+		 * happens. */
+	case GSM_CSTATE_CALL_DELIVERED:
+	case GSM_CSTATE_CONNECT_IND:
+		/* MNCC has progressed past the initial assignment. Usually it means that this happened: after
+		 * MNCC_ALERT_REQ, MO has triggered a re-assignment, to adjust MO's codec to MT's codec. */
+		LOG_TRANS(trans, LOGL_DEBUG, "Re-Assignment complete\n");
+		return 0;
 
 	default:
 		LOG_TRANS(trans, LOGL_ERROR, "Assignment done in unexpected CC state: %d\n", trans->cc.state);

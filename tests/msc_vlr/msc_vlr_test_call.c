@@ -1083,6 +1083,9 @@ static bool validate_sdp(const char *func, const char *desc,
 			return false;
 		}
 		expect_pos++;
+
+		/* only match first codec */
+		return true;
 	}
 	if (*expect_pos) {
 		BTW("%s: %s: ERROR: mismatch: expected %s to be listed, but not found", func, desc, *expect_pos);

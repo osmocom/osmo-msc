@@ -380,7 +380,7 @@ static void msc_ho_send_handover_request(struct msc_a *msc_a)
 	struct vlr_subscr *vsub = msc_a_vsub(msc_a);
 	struct gsm_network *net = msc_a_net(msc_a);
 	struct gsm0808_channel_type channel_type;
-	struct gsm0808_speech_codec_list scl;
+	struct gsm0808_speech_codec_list scl = {};
 	struct gsm_trans *cc_trans = msc_a->cc.active_trans;
 	struct ran_msg ran_enc_msg = {
 		.msg_type = RAN_MSG_HANDOVER_REQUEST,
@@ -442,7 +442,13 @@ static void msc_ho_send_handover_request(struct msc_a *msc_a)
 		ran_enc_msg.handover_request.call_id_present = true;
 		ran_enc_msg.handover_request.call_id = cc_trans->call_id;
 
-		sdp_audio_codecs_to_speech_codec_list(&scl, &cc_trans->cc.local.audio_codecs);
+		/* Call assignment is now capable of re-assigning to overcome a codec mismatch with the remote call leg.
+		 * But for inter-MSC handover, that is not supported yet. So keep here the old limitation of only
+		 * offering the assigned codec. */
+		if (sdp_audio_codec_is_set(&cc_trans->cc.codecs.assignment))
+			sdp_audio_codec_to_speech_codec_list(&scl, &cc_trans->cc.codecs.assignment);
+		else
+			sdp_audio_codecs_to_speech_codec_list(&scl, &cc_trans->cc.local.audio_codecs);
 		if (!scl.len) {
 			msc_ho_failed(msc_a, GSM0808_CAUSE_EQUIPMENT_FAILURE, "Failed to compose"
 				      " Codec List (MSC Preferred) for Handover Request message\n");
