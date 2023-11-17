@@ -414,6 +414,24 @@ void sdp_audio_codecs_from_bearer_cap(struct sdp_audio_codecs *ac, const struct 
 	}
 }
 
+/* Append an entry for the given sdp_audio_codec to the gsm0808_speech_codec_list.
+ * Return 0 if an entry was added, -ENOENT when there is no mapping to gsm0808_speech_codec for the given
+ * sdp_audio_codec, and -ENOSPC when scl is full and nothing could be added. */
+int sdp_audio_codec_to_speech_codec_list(struct gsm0808_speech_codec_list *scl, const struct sdp_audio_codec *codec)
+{
+	const struct codec_mapping *m = codec_mapping_by_subtype_name(codec->subtype_name);
+	if (!m)
+		return -ENOENT;
+	if (!m->has_gsm0808_speech_codec)
+		return -ENOENT;
+	if (scl->len >= ARRAY_SIZE(scl->codec))
+		return -ENOSPC;
+	scl->codec[scl->len] = m->gsm0808_speech_codec;
+	/* FIXME: apply AMR configuration according to codec->fmtp */
+	scl->len++;
+	return 0;
+}
+
 void sdp_audio_codecs_to_speech_codec_list(struct gsm0808_speech_codec_list *scl, const struct sdp_audio_codecs *ac)
 {
 	const struct sdp_audio_codec *codec;
@@ -421,16 +439,9 @@ void sdp_audio_codecs_to_speech_codec_list(struct gsm0808_speech_codec_list *scl
 	*scl = (struct gsm0808_speech_codec_list){};
 
 	foreach_sdp_audio_codec(codec, ac) {
-		const struct codec_mapping *m = codec_mapping_by_subtype_name(codec->subtype_name);
-		if (!m)
-			continue;
-		if (!m->has_gsm0808_speech_codec)
-			continue;
-		if (scl->len >= ARRAY_SIZE(scl->codec))
+		int rc = sdp_audio_codec_to_speech_codec_list(scl, codec);
+		if (rc == -ENOSPC)
 			break;
-		scl->codec[scl->len] = m->gsm0808_speech_codec;
-		/* FIXME: apply AMR configuration according to codec->fmtp */
-		scl->len++;
 	}
 }
 
