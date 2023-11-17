@@ -283,7 +283,16 @@ static void _log_mncc_rx_tx(const char *file, int line,
 		break;
 	}
 
-	if (sdp && sdp[0] && (sdp_msg_from_sdp_str(&sdp_msg, sdp) == 0)) {
+	if (sdp && sdp[0]) {
+		int rc = sdp_msg_from_sdp_str(&sdp_msg, sdp);
+		if (rc != 0) {
+			LOG_TRANS_CAT_SRC(trans, DMNCC, LOGL_ERROR, file, line, "%s %s: invalid SDP message (trying anyway)\n",
+					  rx_tx,
+					  get_mncc_name(mncc->msg_type));
+			LOG_TRANS_CAT_SRC(trans, DMNCC, LOGL_DEBUG, file, line, "erratic SDP: %s\n",
+					  osmo_quote_cstr_c(OTC_SELECT, sdp, -1));
+			return;
+		}
 		LOG_TRANS_CAT_SRC(trans, DMNCC, LOGL_DEBUG, file, line, "%s %s (RTP=%s)\n",
 				  rx_tx,
 				  get_mncc_name(mncc->msg_type),
@@ -1130,6 +1139,7 @@ static int gsm48_cc_tx_alerting(struct gsm_trans *trans, void *arg)
 	struct gsm_mncc *alerting = arg;
 	struct msgb *msg = gsm48_msgb_alloc_name("GSM 04.08 CC ALERT");
 	struct gsm48_hdr *gh = (struct gsm48_hdr *) msgb_put(msg, sizeof(*gh));
+	struct codec_filter *codecs = &trans->cc.codecs;
 	int rc;
 
 	gh->msg_type = GSM48_MT_CC_ALERTING;
@@ -1162,7 +1172,23 @@ static int gsm48_cc_tx_alerting(struct gsm_trans *trans, void *arg)
 		}
 	}
 
-	return trans_tx_gsm48(trans, msg);
+	/* First handle the MNCC event */
+	rc = trans_tx_gsm48(trans, msg);
+
+	/* Now see if the codecs are fine for TFO:
+	 * This is the first time we are told the MT call leg's codec capabilities, via the MNCC_ALERT_REQ from MT to
+	 * MO. Here, at MO, we have already assigned a specific codec. If the MT call leg does not support this codec,
+	 * but the MO does support one of MT's codecs, we need to re-assign our assigned codec to match MT. */
+	if (sdp_audio_codec_is_set(&codecs->assignment)
+	    && trans->cc.remote.audio_codecs.count
+	    && !sdp_audio_codecs_by_descr(&trans->cc.remote.audio_codecs, &codecs->assignment)) {
+		LOG_TRANS(trans, LOGL_INFO, "Remote call leg mismatches assigned codec: %s\n",
+			  codec_filter_to_str(&trans->cc.codecs, &trans->cc.local, &trans->cc.remote));
+
+		msc_a_tx_assignment(trans->msc_a);
+	}
+
+	return rc;
 }
 
 static int gsm48_cc_tx_progress(struct gsm_trans *trans, void *arg)
@@ -2055,17 +2081,23 @@ int cc_on_assignment_done(struct gsm_trans *trans)
 	switch (trans->cc.state) {
 	case GSM_CSTATE_INITIATED:
 	case GSM_CSTATE_MO_CALL_PROC:
-		/* MO call */
+		/* MO call, send ACK in form of an MNCC_RTP_CREATE (below) */
 		break;
 
 	case GSM_CSTATE_CALL_RECEIVED:
 	case GSM_CSTATE_MO_TERM_CALL_CONF:
-		/* MT call */
+		/* MT call, send ACK in form of an MNCC_RTP_CREATE (below) */
 		break;
 
 	case GSM_CSTATE_ACTIVE:
-		/* already active. MNCC finished before Abis completed the Assignment. */
-		break;
+		/* already active. We decided to re-assign later on during the call - at time of writing this never
+		 * happens. */
+	case GSM_CSTATE_CALL_DELIVERED:
+	case GSM_CSTATE_CONNECT_IND:
+		/* MNCC has progressed past the initial assignment. Usually it means that this happened: after
+		 * MNCC_ALERT_REQ, MO has triggered a re-assignment, to adjust MO's codec to MT's codec. */
+		LOG_TRANS(trans, LOGL_DEBUG, "Re-Assignment complete\n");
+		return 0;
 
 	default:
 		LOG_TRANS(trans, LOGL_ERROR, "Assignment done in unexpected CC state: %d\n", trans->cc.state);

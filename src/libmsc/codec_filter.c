@@ -98,46 +98,16 @@ int codec_filter_run(struct codec_filter *codec_filter, struct sdp_msg *result, 
 	if (remote->audio_codecs.count)
 		sdp_audio_codecs_intersection(r, &remote->audio_codecs, true);
 
-#if 0
-	/* Future: If osmo-msc were able to trigger a re-assignment after the remote side has picked a codec mismatching
-	 * the initial Assignment, then this code here would make sense: keep the other codecs as available to choose
-	 * from, but put the currently assigned codec in the first position. So far we only offer the single assigned
-	 * codec, because we have no way to deal with the remote side picking a different codec.
-	 * Another approach would be to postpone assignment until we know the codecs from the remote side. */
 	if (sdp_audio_codec_is_set(a)) {
 		/* Assignment has completed, the chosen codec should be the first of the resulting SDP.
-		 * Make sure this is actually listed in the result SDP and move to first place. */
+		 * If present, make sure this is listed in first place.
+		 * If 'select' is NULL, the assigned codec is not present in the intersection of possible choices for
+		 * TFO. Just omit the assigned codec from the filter result, and it is the CC code's responsibility to
+		 * detect this and assign a working codec instead. */
 		struct sdp_audio_codec *select = sdp_audio_codecs_by_descr(r, a);
-
-		if (!select) {
-			/* Not present. Add. */
-			if (sdp_audio_codec_by_payload_type(r, a->payload_type, false)) {
-				/* Oh crunch, that payload type number is already in use.
-				 * Find an unused one. */
-				for (a->payload_type = 96; a->payload_type <= 127; a->payload_type++) {
-					if (!sdp_audio_codec_by_payload_type(r, a->payload_type, false))
-						break;
-				}
-
-				if (a->payload_type > 127)
-					return -ENOSPC;
-			}
-			select = sdp_audio_codecs_add_copy(r, a);
-		}
-
-		sdp_audio_codecs_select(r, select);
+		if (select)
+			sdp_audio_codecs_select(r, select);
 	}
-#else
-	/* Currently, osmo-msc does not trigger re-assignment if the remote side has picked a codec that is different
-	 * from the already assigned codec.
-	 * So, if locally, Assignment has already chosen a codec, this is the single definitive result to be used
-	 * towards the CN. */
-	if (sdp_audio_codec_is_set(a)) {
-		/* Assignment has completed, the chosen codec should be the the only possible one. */
-		*r = (struct sdp_audio_codecs){};
-		sdp_audio_codecs_add_copy(r, a);
-	}
-#endif
 	return 0;
 }
 
