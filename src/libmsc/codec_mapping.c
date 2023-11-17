@@ -105,7 +105,6 @@ const struct codec_mapping codec_map[] = {
 		.gsm0808_speech_codec = {
 			.fi = true,
 			.type = GSM0808_SCT_HR1,
-			.cfg = GSM0808_SC_CFG_DEFAULT_HR_AMR,
 		},
 		.perm_speech = GSM0808_PERM_HR1,
 		.frhr = CODEC_FRHR_HR,
