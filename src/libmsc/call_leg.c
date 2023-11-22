@@ -158,7 +158,8 @@ static void call_leg_fsm_establishing_established(struct osmo_fsm_inst *fi, uint
 		}
 		if (!established)
 			break;
-		call_leg_state_chg(cl, CALL_LEG_ST_ESTABLISHED);
+		if (cl->fi->state != CALL_LEG_ST_ESTABLISHED)
+			call_leg_state_chg(cl, CALL_LEG_ST_ESTABLISHED);
 		break;
 
 	case CALL_LEG_EV_RTP_STREAM_ADDR_AVAILABLE:
