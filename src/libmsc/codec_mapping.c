@@ -111,6 +111,7 @@ const struct codec_mapping codec_map[] = {
 	},
 	{
 		.sdp = {
+			/* 112 is just what we use by default. The other call leg may impose a different number. */
 			.payload_type = 112,
 			.subtype_name = "AMR",
 			.rate = 8000,
