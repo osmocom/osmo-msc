@@ -824,6 +824,11 @@ struct codec_test {
 	const char *mt_tx_sdp_mncc_rtp_create[8];
 
 	const char *mt_tx_sdp_mncc_alert_ind[8];
+
+	bool mo_expect_reassignment;
+	enum gsm0808_permitted_speech mo_tx_reassignment_perm_speech[8];
+	const char *mo_rx_reassigned_codec;
+
 	const char *mt_tx_sdp_mncc_setup_cnf[8];
 	const char *mt_rx_sdp_mncc_setup_compl_req[8];
 
@@ -878,23 +883,33 @@ static const struct codec_test codec_tests[] = {
 		.mo_rx_sdp_mncc_rtp_create = {},
 		.mo_tx_assignment_perm_speech = PERM_SPEECH_ALL_GSM,
 		.mo_rx_assigned_codec = "AMR",
-		.mo_tx_sdp_mncc_rtp_create = { "AMR" },
+		.mo_tx_sdp_mncc_rtp_create = { "AMR", "GSM-EFR", "GSM", "GSM-HR-08" },
 		/* mt_rx_sdp_mncc_setup_req == mo_tx_sdp_mncc_rtp_create */
 		.mt_rx_compl_l3_codec_list_bss_supported = CODEC_LIST_ALL_GSM,
 		.mt_tx_cc_setup_bcap = {
 			GSM48_BCAP_SV_AMR_F,
 			GSM48_BCAP_SV_AMR_H,
 			GSM48_BCAP_SV_AMR_OH,
+			GSM48_BCAP_SV_EFR,
+			GSM48_BCAP_SV_FR,
+			GSM48_BCAP_SV_HR,
 			LIST_END
 		},
 		.mt_rx_ms_bcap = BCAP_ALL_GSM,
 		.mt_tx_sdp_mncc_call_conf_ind = {},
 		.mt_rx_sdp_mncc_rtp_create = {},
-		.mt_tx_assignment_perm_speech = { GSM0808_PERM_FR3, GSM0808_PERM_HR3, LIST_END },
+		.mt_tx_assignment_perm_speech = {
+			GSM0808_PERM_FR3,
+			GSM0808_PERM_HR3,
+			GSM0808_PERM_FR2,
+			GSM0808_PERM_FR1,
+			GSM0808_PERM_HR1,
+			LIST_END
+		},
 		.mt_rx_assigned_codec = "AMR",
-		.mt_tx_sdp_mncc_rtp_create = { "AMR" },
-		.mt_tx_sdp_mncc_alert_ind = { "AMR" },
-		.mt_tx_sdp_mncc_setup_cnf = { "AMR" },
+		.mt_tx_sdp_mncc_rtp_create = { "AMR", "GSM-EFR", "GSM", "GSM-HR-08" },
+		.mt_tx_sdp_mncc_alert_ind = { "AMR", "GSM-EFR", "GSM", "GSM-HR-08" },
+		.mt_tx_sdp_mncc_setup_cnf = { "AMR", "GSM-EFR", "GSM", "GSM-HR-08" },
 		.mo_tx_sdp_mncc_setup_compl_ind = {},
 	},
 
@@ -945,49 +960,83 @@ static const struct codec_test codec_tests[] = {
 	},
 
 	{
-		.desc = "FR1 picked by MT's Codec List (BSS Supported), hence MO also picks FR1 (EXPECTED FAILURE)",
-		/* Currently the MO Assignment happens before MT gets a chance to send its available codecs.
-		 * So even though the MO side would be able to assign FR1 and match MT, this is established too late
-		 * and MO mismatches MT. This can only be fixed by a) moving MO Assignment to after MT Assignment
-		 * or b) doing a Channel Mode Change or re-assignment after MT Assignment -- since re-assigning might
-		 * need an lchan type change and means more overhead, a) would be the best option. */
+		.desc = "FR1 picked by MT's Codec List (BSS Supported), hence MO re-assigns to FR1",
 		.mo_rx_compl_l3_codec_list_bss_supported = CODEC_LIST_ALL_GSM,
 		.mo_rx_ms_bcap = BCAP_ALL_GSM,
 		.mo_tx_sdp_mncc_setup_ind = SDP_CODECS_ALL_GSM,
 		.mo_rx_sdp_mncc_rtp_create = {},
 		.mo_tx_assignment_perm_speech = PERM_SPEECH_ALL_GSM,
-		.mo_rx_assigned_codec = "AMR", /* <- Early Assignment means codec mismatch */
-		.mo_tx_sdp_mncc_rtp_create = { "AMR" },
+		.mo_rx_assigned_codec = "AMR", /* <- Early Assignment first picks a mismatching codec */
+		.mo_tx_sdp_mncc_rtp_create = { "AMR", "GSM-EFR", "GSM", "GSM-HR-08" },
 
+		/* This is the codec limitation this test verifies, Codec List (BSS Supported): */
 		.mt_rx_compl_l3_codec_list_bss_supported = { GSM0808_SCT_FR1, LIST_END },
-		.expect_codec_mismatch_on_paging_response = true,
-		/* The mismatching codec AMR vs. GSM means the call fails (in the lack of transcoding) */
+
+		/* from above codec list, MSC derives the limited bcap sent in CC Setup to MS */
+		.mt_tx_cc_setup_bcap = {
+			GSM48_BCAP_SV_FR,
+			LIST_END
+		},
+		/* MS could do more, but it doesn't affect the choice of FR1 */
+		.mt_rx_ms_bcap = BCAP_ALL_GSM,
+		.mt_tx_sdp_mncc_call_conf_ind = {},
+		.mt_rx_sdp_mncc_rtp_create = {},
+		.mt_tx_assignment_perm_speech = {
+			GSM0808_PERM_FR1,
+			LIST_END
+		},
+		.mt_rx_assigned_codec = "GSM",
+		.mt_tx_sdp_mncc_rtp_create = { "GSM" },
+		.mt_tx_sdp_mncc_alert_ind = { "GSM" },
+
+		.mo_expect_reassignment = true,
+		.mo_tx_reassignment_perm_speech = {
+			GSM0808_PERM_FR1,
+			LIST_END
+		},
+		.mo_rx_reassigned_codec = "GSM",
+
+		.mt_tx_sdp_mncc_setup_cnf = { "GSM" },
+		.mo_tx_sdp_mncc_setup_compl_ind = {},
 	},
 
 	{
-		.desc = "FR1 picked by MT's MS Bearer Capability, hence MO also picks FR1 (EXPECTED FAILURE)",
-		/* Like above, MO Assignment happens too early to be able to match MT's codec availability. */
+		.desc = "FR1 picked by MT's MS Bearer Capability, hence MO re-assigns to FR1",
 		.mo_rx_compl_l3_codec_list_bss_supported = CODEC_LIST_ALL_GSM,
 		.mo_rx_ms_bcap = BCAP_ALL_GSM,
 		.mo_tx_sdp_mncc_setup_ind = SDP_CODECS_ALL_GSM,
 		.mo_rx_sdp_mncc_rtp_create = {},
 		.mo_tx_assignment_perm_speech = PERM_SPEECH_ALL_GSM,
-		.mo_rx_assigned_codec = "AMR", /* <- Early Assignment means codec mismatch */
-		.mo_tx_sdp_mncc_rtp_create = { "AMR" },
+		.mo_rx_assigned_codec = "AMR", /* <- Early Assignment first picks a mismatching codec */
+		.mo_tx_sdp_mncc_rtp_create = { "AMR", "GSM-EFR", "GSM", "GSM-HR-08" },
 
 		.mt_rx_compl_l3_codec_list_bss_supported = CODEC_LIST_ALL_GSM,
-		.mt_tx_cc_setup_bcap = {
-			GSM48_BCAP_SV_AMR_F,
-			GSM48_BCAP_SV_AMR_H,
-			GSM48_BCAP_SV_AMR_OH,
+		.mt_tx_cc_setup_bcap = BCAP_ALL_GSM,
+
+		/* This is the codec limitation this test verifies: */
+		.mt_rx_ms_bcap = {
+			GSM48_BCAP_SV_FR,
 			LIST_END
 		},
-		.mt_rx_ms_bcap = { GSM48_BCAP_SV_FR, LIST_END },
 		.mt_tx_sdp_mncc_call_conf_ind = {},
 		.mt_rx_sdp_mncc_rtp_create = {},
-		.mt_tx_assignment_perm_speech = { GSM0808_PERM_FR3, GSM0808_PERM_HR3, LIST_END },
-		.expect_codec_mismatch_on_cc_call_conf = true,
-		/* The mismatching codec AMR vs. GSM means the call fails (in the lack of transcoding) */
+		.mt_tx_assignment_perm_speech = {
+			GSM0808_PERM_FR1,
+			LIST_END
+		},
+		.mt_rx_assigned_codec = "GSM",
+		.mt_tx_sdp_mncc_rtp_create = { "GSM" },
+		.mt_tx_sdp_mncc_alert_ind = { "GSM" },
+
+		.mo_expect_reassignment = true,
+		.mo_tx_reassignment_perm_speech = {
+			GSM0808_PERM_FR1,
+			LIST_END
+		},
+		.mo_rx_reassigned_codec = "GSM",
+
+		.mt_tx_sdp_mncc_setup_cnf = { "GSM" },
+		.mo_tx_sdp_mncc_setup_compl_ind = {},
 	},
 
 };
@@ -1258,9 +1307,22 @@ static void test_codecs_mo(const struct codec_test *t)
 	btw("The other call leg got established (not shown here), MNCC tells us so, with codecs {%s }",
 	    strlist_name(t->mo_rx_sdp_mncc_alert_req));
 	dtap_expect_tx("8301" /* CC: Call Alerting */);
+
+	if (t->mo_expect_reassignment) {
+		btw("Expecting re-assignment");
+		expect_bssap_assignment();
+	}
+
 	sdp_str_from_subtype_names(mncc.sdp, sizeof(mncc.sdp), t->mo_rx_sdp_mncc_alert_req);
 	mncc_sends_to_cc(MNCC_ALERT_REQ, &mncc);
 	OSMO_ASSERT(dtap_tx_confirmed);
+
+	if (t->mo_expect_reassignment) {
+		btw("Validating re-assignment");
+		OSMO_ASSERT(bssap_assignment_sent);
+		VALIDATE_PERM_SPEECH(&bssap_assignment_command_last_channel_type, t->mo_tx_reassignment_perm_speech);
+		ms_sends_assignment_complete(t->mo_rx_reassigned_codec);
+	}
 
 	dtap_expect_tx("8307" /* CC: Connect */);
 	sdp_str_from_subtype_names(mncc.sdp, sizeof(mncc.sdp), t->mo_rx_sdp_mncc_setup_rsp);
