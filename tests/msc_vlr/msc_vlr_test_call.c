@@ -1071,9 +1071,9 @@ static const struct codec_test codec_tests[] = {
 			LIST_END
 		},
 		.mt_rx_assigned_codec = "AMR",
-		.mt_tx_sdp_mncc_rtp_create = { "AMR", "GSM-EFR", "GSM", "GSM-HR-08" },
-		.mt_tx_sdp_mncc_alert_ind = { "AMR", "GSM-EFR", "GSM", "GSM-HR-08" },
-		.mt_tx_sdp_mncc_setup_cnf = { "AMR", "GSM-EFR", "GSM", "GSM-HR-08" },
+		.mt_tx_sdp_mncc_rtp_create = { "AMR#96", "GSM-EFR", "GSM", "GSM-HR-08" },
+		.mt_tx_sdp_mncc_alert_ind = { "AMR#96", "GSM-EFR", "GSM", "GSM-HR-08" },
+		.mt_tx_sdp_mncc_setup_cnf = { "AMR#96", "GSM-EFR", "GSM", "GSM-HR-08" },
 		.mo_tx_sdp_mncc_setup_compl_ind = {},
 	},
 };
@@ -1146,6 +1146,24 @@ static const char *strlist_name(const char *const*strs)
 	return sb.buf;
 }
 
+/* Split an input string of "AMR#96" into "AMR" and 96: copy the subtype name without the "#96" part to
+ * split_subtype_name_and_pt_nr which must be a char[16]. If pt_nr is non-NULL, write the 96 to *pt_nr.
+ */
+static void split_subtype_name_and_pt_nr(char subtype_name_wo_pt[], int *pt_nr, const char *input)
+{
+	char *hash;
+	osmo_strlcpy(subtype_name_wo_pt, input, 16);
+	hash = strchr(subtype_name_wo_pt, '#');
+	if (hash) {
+		*hash = '\0';
+		if (pt_nr)
+			*pt_nr = atoi(hash + 1);
+	}
+}
+
+/* Validate that the codecs in sdp_str appear in the order as expected by the list of subtype names in expected_codecs.
+ * Ignore any payload type numbers ("#96") in expected_codecs.
+ */
 static bool validate_sdp(const char *func, const char *desc,
 			 const char *sdp_str, const char * const expected_codecs[])
 {
@@ -1159,11 +1177,13 @@ static bool validate_sdp(const char *func, const char *desc,
 
 	expect_pos = expected_codecs;
 	foreach_sdp_audio_codec(codec, &sdp.audio_codecs) {
+		char subtype_name_wo_pt[16];
 		if (!*expect_pos) {
 			BTW("%s: %s: ERROR: did not expect %s", func, desc, codec->subtype_name);
 			return false;
 		}
-		if (strcmp(*expect_pos, codec->subtype_name)) {
+		split_subtype_name_and_pt_nr(subtype_name_wo_pt, NULL, *expect_pos);
+		if (strcmp(subtype_name_wo_pt, codec->subtype_name)) {
 			BTW("%s: %s: ERROR: mismatch: in idx %d, expect %s, got %s", func, desc,
 			    (int)(expect_pos - expected_codecs), *expect_pos, codec->subtype_name);
 			return false;
@@ -1232,6 +1252,8 @@ static bool validate_perm_speech(const char *func, const char *desc,
 		} \
 	} while (0)
 
+/* Compose a valid SDP string from the list of codec subtype names given. If a subtype name includes a payload type
+ * number ("AMR#96") then use that PT number in the SDP instead of the default from codec_mapping.c. */
 static struct sdp_msg *sdp_from_subtype_names(const char *const *subtype_names)
 {
 	static struct sdp_msg sdp;
@@ -1239,12 +1261,19 @@ static struct sdp_msg *sdp_from_subtype_names(const char *const *subtype_names)
 	const char *const *subtype_name;
 	osmo_sockaddr_str_from_str(&sdp.rtp, "1.2.3.4", 56);
 	for (subtype_name = subtype_names; *subtype_name; subtype_name++) {
-		const struct codec_mapping *m = codec_mapping_by_subtype_name(*subtype_name);
+		char subtype_name_wo_pt[16];
+		const struct codec_mapping *m;
+		struct sdp_audio_codec *ac;
+		int set_pt = -1;
+		split_subtype_name_and_pt_nr(subtype_name_wo_pt, &set_pt, *subtype_name);
+		m = codec_mapping_by_subtype_name(subtype_name_wo_pt);
 		if (!m) {
 			BTW("ERROR: unknown subtype_name: %s", *subtype_name);
 			abort();
 		}
-		sdp_audio_codecs_add_copy(&sdp.audio_codecs, &m->sdp);
+		ac = sdp_audio_codecs_add_copy(&sdp.audio_codecs, &m->sdp);
+		if (set_pt >= 0)
+			ac->payload_type = set_pt;
 	}
 	return &sdp;
 }
