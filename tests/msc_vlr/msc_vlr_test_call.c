@@ -242,7 +242,7 @@ static void test_call_mo()
 
 	BTW("a call is initiated");
 
-	btw("CC SETUP causes CRCX towards CN");
+	btw("CC SETUP causes CRCX towards CN and RAN");
 	expect_crcx(RTP_TO_CN);
 	expect_crcx(RTP_TO_RAN);
 	ms_sends_msg("0385" /* CC, seq = 2 -> 0x80 | CC Setup = 0x5 */
@@ -262,7 +262,7 @@ static void test_call_mo()
 	OSMO_ASSERT(cc_to_mncc_tx_confirmed);
 	mncc.callref = mncc_rtp.callref = cc_to_mncc_tx_got_callref;
 
-	btw("MNCC replies with MNCC_RTP_CREATE, causing MGW endpoint CRCX to RAN");
+	btw("MNCC replies with MNCC_RTP_CREATE");
 	mncc_sends_to_cc(MNCC_RTP_CREATE, &mncc_rtp);
 
 	btw("MGW acknowledges the CRCX, triggering Assignment");
@@ -623,7 +623,7 @@ static void test_call_mo_to_unknown()
 
 	BTW("a call is initiated");
 
-	btw("CC SETUP causes CRCX towards CN");
+	btw("CC SETUP causes CRCX towards CN and RAN");
 	expect_crcx(RTP_TO_CN);
 	expect_crcx(RTP_TO_RAN);
 	ms_sends_msg("0385" /* CC, seq = 2 -> 0x80 | CC Setup = 0x5 */
@@ -643,7 +643,7 @@ static void test_call_mo_to_unknown()
 	OSMO_ASSERT(cc_to_mncc_tx_confirmed);
 	mncc.callref = mncc_rtp.callref = cc_to_mncc_tx_got_callref;
 
-	btw("MNCC replies with MNCC_RTP_CREATE, causing MGW endpoint CRCX to RAN");
+	btw("MNCC replies with MNCC_RTP_CREATE");
 	mncc_sends_to_cc(MNCC_RTP_CREATE, &mncc_rtp);
 
 	btw("MGW acknowledges the CRCX, triggering Assignment");
@@ -720,7 +720,7 @@ static void test_call_mo_to_unknown_timeout()
 
 	BTW("a call is initiated");
 
-	btw("CC SETUP causes CRCX towards CN");
+	btw("CC SETUP causes CRCX towards CN and RAN");
 	expect_crcx(RTP_TO_CN);
 	expect_crcx(RTP_TO_RAN);
 	ms_sends_msg("0385" /* CC, seq = 2 -> 0x80 | CC Setup = 0x5 */
@@ -740,7 +740,7 @@ static void test_call_mo_to_unknown_timeout()
 	OSMO_ASSERT(cc_to_mncc_tx_confirmed);
 	mncc.callref = mncc_rtp.callref = cc_to_mncc_tx_got_callref;
 
-	btw("MNCC replies with MNCC_RTP_CREATE, causing MGW endpoint CRCX to RAN");
+	btw("MNCC replies with MNCC_RTP_CREATE");
 	mncc_sends_to_cc(MNCC_RTP_CREATE, &mncc_rtp);
 
 	btw("MGW acknowledges the CRCX, triggering Assignment");
@@ -1232,7 +1232,7 @@ static void test_codecs_mo(const struct codec_test *t)
 	mncc.callref = mncc_rtp.callref = cc_to_mncc_tx_got_callref;
 	VALIDATE_SDP(cc_to_mncc_tx_last_sdp, t->mo_tx_sdp_mncc_setup_ind);
 
-	btw("MNCC replies with MNCC_RTP_CREATE, causing MGW endpoint CRCX to RAN");
+	btw("MNCC replies with MNCC_RTP_CREATE");
 	sdp_str_from_subtype_names(mncc_rtp.sdp, sizeof(mncc_rtp.sdp), t->mo_rx_sdp_mncc_rtp_create);
 	mncc_sends_to_cc(MNCC_RTP_CREATE, &mncc_rtp);
 
