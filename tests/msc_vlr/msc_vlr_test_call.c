@@ -1076,6 +1076,44 @@ static const struct codec_test codec_tests[] = {
 		.mt_tx_sdp_mncc_setup_cnf = { "AMR#96", "GSM-EFR", "GSM", "GSM-HR-08" },
 		.mo_tx_sdp_mncc_setup_compl_ind = {},
 	},
+
+	{
+		.desc = "AMR picked by both MO and MT, but MO assigns a different payload type number",
+		.mo_rx_compl_l3_codec_list_bss_supported = CODEC_LIST_ALL_GSM,
+		.mo_rx_ms_bcap = BCAP_ALL_GSM,
+		.mo_tx_sdp_mncc_setup_ind = SDP_CODECS_ALL_GSM,
+		.mo_rx_sdp_mncc_rtp_create = {},
+		.mo_tx_assignment_perm_speech = PERM_SPEECH_ALL_GSM,
+		.mo_rx_assigned_codec = "AMR",
+		.mo_tx_sdp_mncc_rtp_create = { "AMR#98", "GSM-EFR", "GSM", "GSM-HR-08" },
+		/* mt_rx_sdp_mncc_setup_req == mo_tx_sdp_mncc_rtp_create */
+		.mt_rx_compl_l3_codec_list_bss_supported = CODEC_LIST_ALL_GSM,
+		.mt_tx_cc_setup_bcap = {
+			GSM48_BCAP_SV_AMR_F,
+			GSM48_BCAP_SV_AMR_H,
+			GSM48_BCAP_SV_AMR_OH,
+			GSM48_BCAP_SV_EFR,
+			GSM48_BCAP_SV_FR,
+			GSM48_BCAP_SV_HR,
+			LIST_END
+		},
+		.mt_rx_ms_bcap = BCAP_ALL_GSM,
+		.mt_tx_sdp_mncc_call_conf_ind = {},
+		.mt_rx_sdp_mncc_rtp_create = {},
+		.mt_tx_assignment_perm_speech = {
+			GSM0808_PERM_FR3,
+			GSM0808_PERM_HR3,
+			GSM0808_PERM_FR2,
+			GSM0808_PERM_FR1,
+			GSM0808_PERM_HR1,
+			LIST_END
+		},
+		.mt_rx_assigned_codec = "AMR",
+		.mt_tx_sdp_mncc_rtp_create = { "AMR#98", "GSM-EFR", "GSM", "GSM-HR-08" },
+		.mt_tx_sdp_mncc_alert_ind = { "AMR#98", "GSM-EFR", "GSM", "GSM-HR-08" },
+		.mt_tx_sdp_mncc_setup_cnf = { "AMR#98", "GSM-EFR", "GSM", "GSM-HR-08" },
+		.mo_tx_sdp_mncc_setup_compl_ind = {},
+	},
 };
 
 static char namebuf[4][1024];
