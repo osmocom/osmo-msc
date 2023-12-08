@@ -25,7 +25,7 @@ struct sdp_audio_codec {
 	/* Like "GSM", "AMR", "EFR", ... */
 	char subtype_name[16];
 	unsigned int rate;
-	char fmtp[64];
+	char fmtp[256];
 };
 
 struct sdp_audio_codecs {
