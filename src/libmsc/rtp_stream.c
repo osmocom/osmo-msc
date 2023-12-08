@@ -334,6 +334,7 @@ static int rtp_stream_do_mgcp_verb(struct rtp_stream *rtps, enum mgcp_verb verb,
 				.codec = m->mgcp,
 				.pt = codec->payload_type,
 			};
+			OSMO_STRLCPY_ARRAY(verb_info.ptmap[i].fmtp, codec->fmtp);
 			i++;
 			verb_info.codecs_len = i;
 			verb_info.ptmap_len = i;

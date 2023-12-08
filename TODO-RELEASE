@@ -8,3 +8,4 @@
 # If any interfaces have been removed or changed since the last public release: c:r:0.
 #library	what		description / commit summary line
 libosmogsm  >1.9.0  ABI breakage in struct osmo_gsup_pdp_info, use new fields pdp_type_* and pdp_address.
+libosmo-mgcp-client >= 1.13	uses new public API to parse SDP fmtp
