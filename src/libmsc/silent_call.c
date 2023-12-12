@@ -140,7 +140,11 @@ int gsm_silent_call_start(struct vlr_subscr *vsub,
 	struct vty *vty)
 {
 	struct gsm_network *net = vsub->vlr->user_ctx;
-	struct gsm_trans *trans = trans_alloc(net, vsub, TRANS_SILENT_CALL, 0, 0);
+	struct gsm_trans *trans;
+
+	trans = trans_alloc(net, vsub, TRANS_SILENT_CALL, 0, 0);
+	if (trans == NULL)
+		return -ENODEV;
 
 	trans->silent_call.ct = *ct;
 	if (traffic_dst_ip) {
