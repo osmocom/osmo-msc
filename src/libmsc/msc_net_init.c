@@ -130,9 +130,15 @@ int msc_gsup_client_start(struct gsm_network *net)
 	net->gcm = gsup_client_mux_alloc(net);
 	OSMO_ASSERT(net->gcm);
 
+	/* If no IPA name is configured, we need to provide a default
+	 * right here, in order for the defaulted name to get inserted
+	 * as source_name in GSUP response messages. */
+	if (!net->msc_ipa_name)
+		net->msc_ipa_name = "unnamed-MSC";
+
 	ipa_dev = talloc_zero(net->gcm, struct ipaccess_unit);
 	ipa_dev->unit_name = "MSC";
-	ipa_dev->serno = net->msc_ipa_name; /* NULL unless configured via VTY */
+	ipa_dev->serno = net->msc_ipa_name;
 	ipa_dev->swversion = PACKAGE_NAME "-" PACKAGE_VERSION;
 
 	*net->gcm = (struct gsup_client_mux){

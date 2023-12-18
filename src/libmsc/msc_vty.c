@@ -1991,7 +1991,7 @@ DEFUN(cfg_hlr_ipa_name,
       "Set the IPA name of this MSC\n"
       "A unique name for this MSC. For example: PLMN + redundancy server number: MSC-901-70-0. "
       "This name is used for GSUP routing and must be set if more than one MSC is connected to the HLR. "
-      "The default is 'MSC-00-00-00-00-00-00'.\n")
+      "The default is 'unnamed-MSC'.\n")
 {
 	if (vty->type != VTY_FILE) {
 		vty_out(vty, "The IPA name cannot be changed at run-time; "

@@ -171,6 +171,7 @@ mncc-int
 hlr
  remote-ip 127.0.0.1
  remote-port 4222
+ ipa-name unnamed-MSC
 sgs
  local-port 29118
  local-ip 0.0.0.0
