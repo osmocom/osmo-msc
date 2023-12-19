@@ -125,9 +125,14 @@ struct gsm_call {
 #define MNCC_F_KEYPAD		0x1000
 #define MNCC_F_SIGNAL		0x2000
 #define MNCC_F_GCR		0x4000
+#define MNCC_F_HIGHL_COMPAT	0x8000
+#define MNCC_F_LOWL_COMPAT	0x10000
 
 /* UPDATEME when adding new MNCC_F_* entries above */
-#define MNCC_F_ALL		0x7fff
+#define MNCC_F_ALL		0x1ffff
+
+#define GSM_MAX_LOWL_COMPAT	16 /* (18 with TLV) */
+#define GSM_MAX_HIGHL_COMPAT	3 /* (5 with TLV) */
 
 struct gsm_mncc {
 	/* context based information */
@@ -170,6 +175,20 @@ struct gsm_mncc {
 
 	/* A buffer to contain SDP ('\0' terminated) */
 	char		sdp[1024];
+
+	/* Additional information that extends current socket interface version. */
+
+	/* The content requals of Low Layer compatibility IE, described in 3GPP TS 24.008 §10.5.4.18. */
+	struct gsm_mncc_lowl_compat {
+		uint8_t	len;
+		uint8_t	compat[GSM_MAX_LOWL_COMPAT];
+	} llc;
+
+	/* The content requals of High Layer compatibility IE, described in 3GPP TS 24.008 §10.5.4.16. */
+	struct gsm_mncc_highl_compat {
+		uint8_t	len;
+		uint8_t	compat[GSM_MAX_HIGHL_COMPAT];
+	} hlc;
 };
 
 struct gsm_data_frame {

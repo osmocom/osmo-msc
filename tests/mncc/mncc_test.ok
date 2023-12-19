@@ -1,10 +1,10 @@
 test_sdp_termination()
 
 struct gsm_mncc:
-empty SDP: len=1876 sdplen=1026 sdp="\0" rc=0
+empty SDP: len=1896 sdplen=1046 sdp="\0" rc=0
 empty SDP, shortest possible: len=851 sdplen=1 sdp="\0" rc=0
 empty SDP, zero len: len=850 sdplen=0 sdp=- rc=-22
-terminated SDP str: len=1876 sdplen=1026 sdp="Privacy is a desirable marketing option\0" rc=0
+terminated SDP str: len=1896 sdplen=1046 sdp="Privacy is a desirable marketing option\0" rc=0
 terminated SDP str, shortest possible: len=890 sdplen=40 sdp="Privacy is a desirable marketing option\0" rc=0
 terminated SDP str, but len excludes nul: len=889 sdplen=39 sdp="Privacy is a desirable marketing option" rc=-22
 terminated SDP str, but len too short: len=873 sdplen=23 sdp="Privacy is a desirable " rc=-22
