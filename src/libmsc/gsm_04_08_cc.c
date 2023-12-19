@@ -654,6 +654,20 @@ static int gsm48_cc_rx_setup(struct gsm_trans *trans, struct msgb *msg)
 		gsm48_decode_called(&setup.called,
 			      TLVP_VAL(&tp, GSM48_IE_CALLED_BCD)-1);
 	}
+	/* low layer compatibility */
+	if (TLVP_PRESENT(&tp, GSM48_IE_LOWL_COMPAT) && TLVP_LEN(&tp, GSM48_IE_LOWL_COMPAT) > 0 &&
+	    TLVP_LEN(&tp, GSM48_IE_LOWL_COMPAT) <= sizeof(setup.llc.compat)) {
+		setup.fields |= MNCC_F_LOWL_COMPAT;
+		setup.llc.len = TLVP_LEN(&tp, GSM48_IE_LOWL_COMPAT);
+		memcpy(setup.llc.compat, TLVP_VAL(&tp, GSM48_IE_LOWL_COMPAT), setup.llc.len);
+	}
+	/* high layer compatibility */
+	if (TLVP_PRESENT(&tp, GSM48_IE_HIGHL_COMPAT) && TLVP_LEN(&tp, GSM48_IE_HIGHL_COMPAT) > 0 &&
+	    TLVP_LEN(&tp, GSM48_IE_HIGHL_COMPAT) <= sizeof(setup.hlc.compat)) {
+		setup.fields |= MNCC_F_HIGHL_COMPAT;
+		setup.hlc.len = TLVP_LEN(&tp, GSM48_IE_HIGHL_COMPAT);
+		memcpy(setup.hlc.compat, TLVP_VAL(&tp, GSM48_IE_HIGHL_COMPAT), setup.hlc.len);
+	}
 	/* user-user */
 	if (TLVP_PRESENT(&tp, GSM48_IE_USER_USER)) {
 		setup.fields |= MNCC_F_USERUSER;
@@ -961,6 +975,12 @@ static int gsm48_cc_tx_setup(struct gsm_trans *trans, void *arg)
 	/* called party BCD number */
 	if (setup->fields & MNCC_F_CALLED)
 		gsm48_encode_called(msg, &setup->called);
+	/* low layer compatibility */
+	if (setup->fields & MNCC_F_LOWL_COMPAT && setup->llc.len > 0 && setup->llc.len <= sizeof(setup->llc.compat))
+		msgb_tlv_put(msg, GSM48_IE_LOWL_COMPAT, setup->llc.len, setup->llc.compat);
+	/* high layer compatibility */
+	if (setup->fields & MNCC_F_HIGHL_COMPAT && setup->hlc.len > 0 && setup->hlc.len <= sizeof(setup->hlc.compat))
+		msgb_tlv_put(msg, GSM48_IE_HIGHL_COMPAT, setup->hlc.len, setup->hlc.compat);
 	/* user-user */
 	if (setup->fields & MNCC_F_USERUSER)
 		gsm48_encode_useruser(msg, 0, &setup->useruser);
