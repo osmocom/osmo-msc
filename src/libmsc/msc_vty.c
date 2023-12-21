@@ -763,6 +763,8 @@ static int config_write_msc(struct vty *vty)
 	vty_out(vty, "msc%s", VTY_NEWLINE);
 	if (gsmnet->mncc_sock_path)
 		vty_out(vty, " mncc external %s%s", gsmnet->mncc_sock_path, VTY_NEWLINE);
+	else
+		vty_out(vty, " mncc internal%s", VTY_NEWLINE);
 	vty_out(vty, " mncc guard-timeout %i%s",
 		gsmnet->mncc_guard_timeout, VTY_NEWLINE);
 	vty_out(vty, " ncss guard-timeout %i%s",

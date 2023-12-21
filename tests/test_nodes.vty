@@ -99,12 +99,16 @@ OsmoMSC(config-msc)# mncc external /path/not/used
 OsmoMSC(config-msc)# show running-config
 ...
 msc
-...
+... ! mncc internal
  mncc external /path/not/used
-...
+... ! mncc internal
 
 OsmoMSC(config-msc)# mncc internal
 OsmoMSC(config-msc)# show running-config
+...
+msc
+... ! mncc external
+ mncc internal
 ... ! mncc external
 
 OsmoMSC(config-msc)# exit
@@ -157,6 +161,7 @@ network
  mm info 1
 ...
 msc
+ mncc internal
  mncc guard-timeout 180
  ncss guard-timeout 30
  assign-tmsi
