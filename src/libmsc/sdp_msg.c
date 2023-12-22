@@ -27,6 +27,8 @@
 #include <osmocom/core/utils.h>
 #include <osmocom/core/logging.h>
 
+#include <osmocom/mgcp_client/fmtp.h>
+
 #include <osmocom/msc/debug.h>
 #include <osmocom/msc/sdp_msg.h>
 
@@ -272,7 +274,7 @@ int sdp_msg_to_sdp_str_buf(char *dst, size_t dst_size, const struct sdp_msg *sdp
 		OSMO_STRBUF_PRINTF(sb, "a=rtpmap:%d %s/%d\r\n", codec->payload_type, codec->subtype_name,
 				   codec->rate > 0 ? codec->rate : 8000);
 		if (codec->fmtp[0])
-			OSMO_STRBUF_PRINTF(sb, "a=fmtp:%d %s\r\n", codec->payload_type, codec->fmtp);
+			OSMO_STRBUF_PRINTF(sb, OSMO_SDP_PREFIX_A_FMTP "%d %s\r\n", codec->payload_type, codec->fmtp);
 	}
 
 	OSMO_STRBUF_PRINTF(sb, "a=ptime:%d\r\n", sdp->ptime > 0? sdp->ptime : 20);
@@ -302,7 +304,6 @@ int sdp_parse_attrib(struct sdp_msg *sdp, const char *src)
 	unsigned int payload_type;
 	struct sdp_audio_codec *codec;
 #define A_RTPMAP "rtpmap:"
-#define A_FMTP "fmtp:"
 #define A_PTIME "ptime:"
 #define A_RTCP "rtcp:"
 
@@ -328,11 +329,11 @@ int sdp_parse_attrib(struct sdp_msg *sdp, const char *src)
 			return -ENOTSUP;
 	}
 
-	else if (osmo_str_startswith(src, A_FMTP)) {
+	else if (osmo_str_startswith(src, OSMO_SDP_PREFIX_FMTP)) {
 		/* "a=fmtp:112 octet-align=1;mode-set=0,1,2,3" */
 		char *fmtp_str;
 		const char *line_end = sdp_msg_line_end(src);
-		if (sscanf(src, A_FMTP "%u", &payload_type) != 1)
+		if (sscanf(src, OSMO_SDP_PREFIX_FMTP "%u", &payload_type) != 1)
 			return -EINVAL;
 
 		fmtp_str = strchr(src, ' ');

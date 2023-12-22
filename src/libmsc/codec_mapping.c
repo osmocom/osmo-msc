@@ -24,6 +24,8 @@
 
 #include <osmocom/gsm/mncc.h>
 
+#include <osmocom/mgcp_client/fmtp.h>
+
 #include <osmocom/msc/sdp_msg.h>
 #include <osmocom/msc/codec_mapping.h>
 #include <osmocom/msc/mncc.h>
@@ -118,7 +120,7 @@ const struct codec_mapping codec_map[] = {
 			/* AMR is always octet-aligned in 2G and 3G RAN, so this fmtp is signalled to remote call legs.
 			 * So far, fmtp is ignored in incoming SIP SDP, so an incoming SDP without 'octet-align=1' will
 			 * match with this entry; we will still reply with 'octet-align=1', which often works out. */
-			.fmtp = "octet-align=1",
+			.fmtp = OSMO_SDP_VAL_AMR_OCTET_ALIGN_1,
 		},
 		.mgcp = CODEC_AMR_8000_1,
 		.speech_ver_count = 1,
@@ -139,7 +141,7 @@ const struct codec_mapping codec_map[] = {
 			.payload_type = 112,
 			.subtype_name = "AMR",
 			.rate = 8000,
-			.fmtp = "octet-align=1",
+			.fmtp = OSMO_SDP_VAL_AMR_OCTET_ALIGN_1,
 		},
 		.mgcp = CODEC_AMR_8000_1,
 		.speech_ver_count = 1,
@@ -159,7 +161,7 @@ const struct codec_mapping codec_map[] = {
 			.payload_type = 113,
 			.subtype_name = "AMR-WB",
 			.rate = 16000,
-			.fmtp = "octet-align=1",
+			.fmtp = OSMO_SDP_VAL_AMR_OCTET_ALIGN_1,
 		},
 		.mgcp = CODEC_AMRWB_16000_1,
 		.speech_ver_count = 2,
