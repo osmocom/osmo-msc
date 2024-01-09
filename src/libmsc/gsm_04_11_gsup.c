@@ -98,6 +98,7 @@ int gsm411_gsup_mo_fwd_sm_req(struct gsm_trans *trans, struct msgb *msg,
 	gsup_msg.sm_rp_ui_len = msgb_l4len(msg);
 	gsup_msg.sm_rp_ui = (uint8_t *) msgb_sms(msg);
 
+	gsup_client_mux_tx_set_source(trans->net->gcm, &gsup_msg);
 	return gsup_client_mux_tx(trans->net->gcm, &gsup_msg);
 }
 
@@ -120,6 +121,7 @@ int gsm411_gsup_mo_ready_for_sm_req(struct gsm_trans *trans, uint8_t sm_rp_mr)
 	/* Indicate SMMA as the Alert Reason */
 	gsup_msg.sm_alert_rsn = OSMO_GSUP_SMS_SM_ALERT_RSN_MEM_AVAIL;
 
+	gsup_client_mux_tx_set_source(trans->net->gcm, &gsup_msg);
 	return gsup_client_mux_tx(trans->net->gcm, &gsup_msg);
 }
 
