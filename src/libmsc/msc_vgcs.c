@@ -1776,7 +1776,6 @@ static int talker_identity(struct vgcs_bss *bss, uint8_t *l3, int l3_len)
 	struct osmo_mobile_identity mi;
 	int rc;
 
-	puts(osmo_hexdump(l3, l3_len));
 	rc = osmo_mobile_identity_decode_from_l3_buf(&mi, l3, l3_len, false);
 	if (rc < 0) {
 		LOG_BSS(bss, LOGL_DEBUG, "Talker's Identity cannot be decoded.\n");
