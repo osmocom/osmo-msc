@@ -31,7 +31,9 @@
 #include <osmocom/msc/codec_mapping.h>
 #include <osmocom/msc/mncc.h>
 
-const struct codec_mapping codec_map[] = {
+#define S(N) (1 << (N))
+
+static const struct codec_mapping codec_map[] = {
 	/* FIXME: sdp.fmtp handling is not done properly yet, proper mode-set and octet-align handling will follow in
 	 * separate patches. */
 	{
@@ -112,51 +114,121 @@ const struct codec_mapping codec_map[] = {
 		.perm_speech = GSM0808_PERM_HR1,
 		.frhr = CODEC_FRHR_HR,
 	},
-	{
-		.sdp = {
-			/* 112 is just what we use by default. The other call leg may impose a different number. */
-			.payload_type = 112,
-			.subtype_name = "AMR",
-			.rate = 8000,
-			/* AMR is always octet-aligned in 2G and 3G RAN, so this fmtp is signalled to remote call legs.
-			 * So far, fmtp is ignored in incoming SIP SDP, so an incoming SDP without 'octet-align=1' will
-			 * match with this entry; we will still reply with 'octet-align=1', which often works out. */
-			.fmtp = OSMO_SDP_VAL_AMR_OCTET_ALIGN_1,
-		},
-		.mgcp = CODEC_AMR_8000_1,
-		.speech_ver_count = 1,
-		.speech_ver = { GSM48_BCAP_SV_AMR_F },
-		.mncc_payload_msg_type = GSM_TCH_FRAME_AMR,
-		.has_gsm0808_speech_codec = true,
-		.gsm0808_speech_codec = {
-			.fi = true,
-			.type = GSM0808_SCT_FR3,
-			.cfg = GSM0808_SC_CFG_DEFAULT_FR_AMR,
-		},
-		.perm_speech = GSM0808_PERM_FR3,
-		.frhr = CODEC_FRHR_FR,
-	},
-	{
-		/* Another entry like the above, to map HR3 to AMR, too. */
-		.sdp = {
-			.payload_type = 112,
-			.subtype_name = "AMR",
-			.rate = 8000,
-			.fmtp = OSMO_SDP_VAL_AMR_OCTET_ALIGN_1,
-		},
-		.mgcp = CODEC_AMR_8000_1,
-		.speech_ver_count = 1,
-		.speech_ver = { GSM48_BCAP_SV_AMR_H },
-		.mncc_payload_msg_type = GSM_TCH_FRAME_AMR,
-		.has_gsm0808_speech_codec = true,
-		.gsm0808_speech_codec = {
-			.fi = true,
-			.type = GSM0808_SCT_HR3,
-			.cfg = GSM0808_SC_CFG_DEFAULT_HR_AMR,
-		},
-		.perm_speech = GSM0808_PERM_HR3,
-		.frhr = CODEC_FRHR_HR,
-	},
+
+/* payload_type = 112 is just what we use by default. The other call leg may impose a different number. */
+#define AMR_FR(IS_OA, FMTP, SPEECH_CODEC_CFG) \
+	{ \
+		.sdp = { \
+			.payload_type = 112, \
+			.subtype_name = "AMR", \
+			.rate = 8000, \
+			.fmtp = FMTP, \
+		}, \
+		.mgcp = CODEC_AMR_8000_1, \
+		.speech_ver_count = 1, \
+		.speech_ver = { GSM48_BCAP_SV_AMR_F }, \
+		.mncc_payload_msg_type = GSM_TCH_FRAME_AMR, \
+		.has_gsm0808_speech_codec = true, \
+		.gsm0808_speech_codec = { \
+			.fi = true, \
+			.type = GSM0808_SCT_FR3, \
+			.cfg = SPEECH_CODEC_CFG, \
+		}, \
+		.perm_speech = GSM0808_PERM_FR3, \
+		.frhr = CODEC_FRHR_FR, \
+	}
+
+#define AMR_HR(IS_OA, FMTP, SPEECH_CODEC_CFG) \
+	{ \
+		.sdp = { \
+			.payload_type = 112, \
+			.subtype_name = "AMR", \
+			.rate = 8000, \
+			.fmtp = FMTP, \
+		}, \
+		.mgcp = CODEC_AMR_8000_1, \
+		.speech_ver_count = 1, \
+		.speech_ver = { GSM48_BCAP_SV_AMR_H }, \
+		.mncc_payload_msg_type = GSM_TCH_FRAME_AMR, \
+		.has_gsm0808_speech_codec = true, \
+		.gsm0808_speech_codec = { \
+			.fi = true, \
+			.type = GSM0808_SCT_HR3, \
+			.cfg = SPEECH_CODEC_CFG, \
+		}, \
+		.perm_speech = GSM0808_PERM_HR3, \
+		.frhr = CODEC_FRHR_HR, \
+	}
+
+	/* AMR rates as in 3GPP TS 28.062, Table 7.11.3.1.3-2; gsm0808_speech_codec.cfg is a bitmask of Sn bits:
+	 *
+	 *       S0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15
+	 * 12,20    (x)                x                    x  x
+	 * 10,20                    x                 x  x
+	 * 7,95                  x                          x  x
+	 * 7,40      x        x                 x  x
+	 * 6,70            x                 x  x  x  x  x
+	 * 5,90      x  x                 x  x  x  x  x  x  x  x
+	 * 5,15
+	 * 4,75   x  x                    x  x  x  x  x  x  x  x
+	 *
+	 * OM     F  F  F  F  F  F  F  F  F  F  F  A  F  A  F  A
+	 *
+	 * HR     Y  Y  Y  Y  Y  Y        Y  Y  Y
+	 * FR     Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y
+	 */
+
+#if 0
+
+/* Add *all* AMR rate combinations as separate entries to the codec mapping */
+#define ALL_AMR(IS_OA, FMTP_PREFIX) \
+	/* FR rates */ \
+	AMR_FR(IS_OA, FMTP_PREFIX "mode-set=0", S(0)), \
+	AMR_FR(IS_OA, FMTP_PREFIX "mode-set=0,2,4,7", S(1)), \
+	AMR_FR(IS_OA, FMTP_PREFIX "mode-set=2", S(2)), \
+	AMR_FR(IS_OA, FMTP_PREFIX "mode-set=3", S(3)), \
+	AMR_FR(IS_OA, FMTP_PREFIX "mode-set=4", S(4)), \
+	AMR_FR(IS_OA, FMTP_PREFIX "mode-set=5", S(5)), \
+	AMR_FR(IS_OA, FMTP_PREFIX "mode-set=6", S(6)), \
+	AMR_FR(IS_OA, FMTP_PREFIX "mode-set=7", S(7)), \
+	AMR_FR(IS_OA, FMTP_PREFIX "mode-set=0,2", S(8)), \
+	AMR_FR(IS_OA, FMTP_PREFIX "mode-set=0,2,3", S(9)), \
+	AMR_FR(IS_OA, FMTP_PREFIX "mode-set=0,2,3,4", S(10)), \
+	AMR_FR(IS_OA, FMTP_PREFIX "mode-set=0,2,3,6", S(12)), \
+	AMR_FR(IS_OA, FMTP_PREFIX "mode-set=0,2,5,7", S(14)), \
+	/* AMR FR: S1 in compatibility with AMR-HR = without 12k2 */ \
+	AMR_FR(IS_OA, FMTP_PREFIX "mode-set=0,2,4", S(1)), \
+	\
+	/* HR rates */ \
+	AMR_HR(IS_OA, FMTP_PREFIX "mode-set=0", S(0)), \
+	AMR_HR(IS_OA, FMTP_PREFIX "mode-set=0,2,4", S(1)), \
+	AMR_HR(IS_OA, FMTP_PREFIX "mode-set=2", S(2)), \
+	AMR_HR(IS_OA, FMTP_PREFIX "mode-set=3", S(3)), \
+	AMR_HR(IS_OA, FMTP_PREFIX "mode-set=4", S(4)), \
+	AMR_HR(IS_OA, FMTP_PREFIX "mode-set=5", S(5)), \
+	AMR_HR(IS_OA, FMTP_PREFIX "mode-set=0,2", S(8)), \
+	AMR_HR(IS_OA, FMTP_PREFIX "mode-set=0,2,3", S(9)), \
+	AMR_HR(IS_OA, FMTP_PREFIX "mode-set=0,2,3,4", S(10))
+
+#else
+
+/* Add only AMR rates for S1 (0,2,4,7) as well as 12k2 only. */
+#define ALL_AMR(IS_OA, FMTP_PREFIX) \
+	/* FR rates */ \
+	AMR_FR(IS_OA, FMTP_PREFIX "mode-set=0,2,4,7", S(1)), \
+	AMR_FR(IS_OA, FMTP_PREFIX "mode-set=7", S(7)), \
+	AMR_FR(IS_OA, FMTP_PREFIX "mode-set=0,2,4", S(1)), \
+	\
+	/* HR rates */ \
+	AMR_HR(IS_OA, FMTP_PREFIX "mode-set=0,2,4", S(1))
+
+#endif
+
+	/* All AMR rates, once with and once without octet-align=1 */
+	ALL_AMR(true, OSMO_SDP_STR_AMR_OCTET_ALIGN_1 ";"),
+	ALL_AMR(false, ""),
+
+	/* AMR-WB */
 	{
 		.sdp = {
 			.payload_type = 113,
