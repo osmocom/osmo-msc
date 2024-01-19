@@ -731,7 +731,9 @@ struct sgsn_subscriber_pdp_data {
 	struct llist_head	list;
 
 	unsigned int		context_id;
-	uint16_t		pdp_type;
+	enum gsm48_pdp_type_org	pdp_type_org;
+	enum gsm48_pdp_type_nr	pdp_type_nr;
+	struct osmo_sockaddr	pdp_address[2];
 	char			apn_str[GSM_APN_LENGTH];
 	uint8_t			qos_subscribed[20];
 	size_t			qos_subscribed_len;
@@ -1024,7 +1026,10 @@ static void vlr_subscr_gsup_insert_data(struct vlr_subscr *vsub,
 		}
 
 		OSMO_ASSERT(pdp_data != NULL);
-		pdp_data->pdp_type = pdp_info->pdp_type;
+		pdp_data->pdp_type_org = pdp_info->pdp_type_org;
+		pdp_data->pdp_type_nr = pdp_info->pdp_type_nr;
+		memcpy(&pdp_data->pdp_address[0], &pdp_info->pdp_address[0], sizeof(pdp_data->pdp_address[0]));
+		memcpy(&pdp_data->pdp_address[1], &pdp_info->pdp_address[1], sizeof(pdp_data->pdp_address[1]));
 		osmo_apn_to_str(pdp_data->apn_str,
 				pdp_info->apn_enc, pdp_info->apn_enc_len);
 		memcpy(pdp_data->qos_subscribed, pdp_info->qos_enc, pdp_info->qos_enc_len);
