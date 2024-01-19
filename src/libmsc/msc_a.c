@@ -1463,6 +1463,8 @@ static void msc_a_up_call_assignment_complete(struct msc_a *msc_a, const struct 
 
 	if (codec_if_known) {
 		const struct codec_mapping *codec_assigned;
+		const struct codec_mapping *m;
+		bool use_octet_aligned_on_aoip = true; /* TODO: by VTY config */
 
 		/* Check for unexpected codec with CSD */
 		if (cc_trans->bearer_cap.transfer == GSM48_BCAP_ITCAP_UNR_DIG_INF &&
@@ -1486,14 +1488,27 @@ static void msc_a_up_call_assignment_complete(struct msc_a *msc_a, const struct 
 		 * - ran_msg_iu.c always returns FR3 (AMR FR) for the assigned codec. Set that at the MGW towards CN.
 		 * - So the MGW decapsulates IuUP <-> AMR
 		 */
-		codec_assigned = codec_mapping_by_gsm0808_speech_codec_type(codec_if_known->type);
-		/* TODO: use codec_mapping_by_gsm0808_speech_codec() to also match on codec_if_known->cfg */
+
+		codec_assigned = NULL;
+		codec_mapping_foreach (m) {
+			/* look for a full match, including the S0-S15 bits in codec.cfg that configure AMR rates. */
+			if (!codec_mapping_matches_gsm0808_speech_codec(m, codec_if_known))
+				continue;
+			/* In case of AMR, match OA/BE with what osmo-msc should use on AoIP (configured in VTY) */
+			if (m->amr.is_amr && m->amr.is_octet_aligned != use_octet_aligned_on_aoip)
+				continue;
+			codec_assigned = m;
+			break;
+		}
+
 		if (!codec_assigned) {
-			LOG_TRANS(cc_trans, LOGL_ERROR, "Unknown codec in Assignment Complete: %s\n",
-				  gsm0808_speech_codec_type_name(codec_if_known->type));
+			LOG_TRANS(cc_trans, LOGL_ERROR, "Unknown codec in Assignment Complete: %s 0x%x\n",
+				  gsm0808_speech_codec_type_name(codec_if_known->type), codec_if_known->cfg);
 			call_leg_release(msc_a->cc.call_leg);
 			return;
 		}
+
+		/* TODO: validate that the codec was indeed allowed */
 
 		/* Update RAN-side endpoint CI from Assignment result -- unless it is forced by the ran_infra, in which
 		 * case it remains unchanged as passed to the earlier call of call_leg_ensure_ci(). */

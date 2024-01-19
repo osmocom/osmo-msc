@@ -203,7 +203,7 @@ static const struct codec_mapping codec_map[] = {
 	AMR_FR(IS_OA, FMTP_PREFIX "mode-set=0,2,3,4", S(10)), \
 	AMR_FR(IS_OA, FMTP_PREFIX "mode-set=0,2,3,6", S(12)), \
 	AMR_FR(IS_OA, FMTP_PREFIX "mode-set=0,2,5,7", S(14)), \
-	/* AMR FR: S1 in compatibility with AMR-HR = without 12k2 */ \
+	/* AMR-FR with a mode-set compatible with AMR-HR on S1 */ \
 	AMR_FR(IS_OA, FMTP_PREFIX "mode-set=0,2,4", S(1)), \
 	\
 	/* HR rates */ \
@@ -224,6 +224,7 @@ static const struct codec_mapping codec_map[] = {
 	/* FR rates */ \
 	AMR_FR(IS_OA, FMTP_PREFIX "mode-set=0,2,4,7", S(1)), \
 	AMR_FR(IS_OA, FMTP_PREFIX "mode-set=7", S(7)), \
+	/* AMR-FR with a mode-set compatible with AMR-HR on S1 */ \
 	AMR_FR(IS_OA, FMTP_PREFIX "mode-set=0,2,4", S(1)), \
 	\
 	/* HR rates */ \
