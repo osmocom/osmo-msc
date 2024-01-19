@@ -1,0 +1,69 @@
+AMR bitrates
+============
+
+AMR has 8 distinct bitrates that it can switch between.
+In GSM, only up to four rates can be selected; they are limited by the S bits.
+
+In SDP:
+-------
+
+  m=audio 16010 RTP/AVP 112
+  a=fmtp:112 mode-set=0,2,4,7
+
+where
+
+  7 = 12k20
+  6 = 10k20
+  5 = 7k95
+  4 = 7k40
+  3 = 6k70
+  2 = 5k90
+  1 = 5k15
+  0 = 4k75
+
+On A-interface:
+---------------
+
+"S-bits", S0 to S15, where each Sn defines a set of bitrates that are enabled.
+For example, S0 means: allow only 4k75.
+
+A particular S bit, S1, has a special meaning: when on a half-rate channel,
+exclude 12k2 implicitly.
+
+3GPP TS 28.062, Table 7.11.3.1.3-2
+
+        S0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15
+  12.20    (x)                x                    x  x
+  10.20                    x                 x  x
+  7.95                  x                          x  x
+  7.40      x        x                 x  x
+  6.70            x                 x  x  x  x  x
+  5.90      x  x                 x  x  x  x  x  x  x  x
+  5.15
+  4.75   x  x                    x  x  x  x  x  x  x  x
+
+  OM     F  F  F  F  F  F  F  F  F  F  F  A  F  A  F  A
+
+  HR     Y  Y  Y  Y  Y  Y        Y  Y  Y
+  FR     Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y
+
+The immediate question is, are the S0-15 bits a combinatory bitmask,
+or a list of distinct rate selections?
+
+Explained in an example:
+
+Say S = 0x18 = S7 | S8
+
+If it is combinatory, the SDP equivalent is a single resulting payload type:
+
+  m=audio 1234 RTP/AVP 96
+  a=fmtp:96 mode-set=0,2,7
+
+If a list of distinct selections, the SDP equivalent is two distinct payload
+types:
+
+  m=audio 1234 RTP/AVP 96 97
+  a=fmtp:96 mode-set=7
+  a=fmtp:97 mode-set=0,2
+
+
