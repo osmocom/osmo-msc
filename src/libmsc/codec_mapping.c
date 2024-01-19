@@ -431,13 +431,13 @@ int bearer_cap_set_radio(struct gsm_mncc_bearer_cap *bearer_cap)
 		if (bearer_cap->speech_ver[i] == -1)
 			break;
 
-		m = codec_mapping_by_speech_ver(bearer_cap->speech_ver[i]);
+		codec_mapping_foreach (m) {
+			if (!codec_mapping_matches_speech_ver(m, bearer_cap->speech_ver[i]))
+				continue;
 
-		if (!m)
-			continue;
-
-		if (m->frhr == CODEC_FRHR_HR)
-			hr_present = true;
+			if (m->frhr == CODEC_FRHR_HR)
+				hr_present = true;
+		}
 	}
 
 	if (hr_present)
