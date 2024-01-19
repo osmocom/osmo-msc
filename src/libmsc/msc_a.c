@@ -1464,6 +1464,15 @@ static void msc_a_up_call_assignment_complete(struct msc_a *msc_a, const struct 
 	if (codec_if_known) {
 		const struct codec_mapping *codec_assigned;
 
+		/* Check for unexpected codec with CSD */
+		if (cc_trans->bearer_cap.transfer == GSM48_BCAP_ITCAP_UNR_DIG_INF &&
+		    codec_if_known->type != GSM0808_SCT_CSD) {
+			LOG_TRANS(cc_trans, LOGL_ERROR, "Unexpected codec in Assignment Complete for CSD: %s\n",
+				  gsm0808_speech_codec_type_name(codec_if_known->type));
+			call_leg_release(msc_a->cc.call_leg);
+			return;
+		}
+
 		/* For 2G:
 		 * - The Assignment Complete has returned a specific codec (e.g. FR3 for AMR FR).
 		 * - Set this codec at the MGW endpoint facing the RAN.
@@ -1481,15 +1490,6 @@ static void msc_a_up_call_assignment_complete(struct msc_a *msc_a, const struct 
 		/* TODO: use codec_mapping_by_gsm0808_speech_codec() to also match on codec_if_known->cfg */
 		if (!codec_assigned) {
 			LOG_TRANS(cc_trans, LOGL_ERROR, "Unknown codec in Assignment Complete: %s\n",
-				  gsm0808_speech_codec_type_name(codec_if_known->type));
-			call_leg_release(msc_a->cc.call_leg);
-			return;
-		}
-
-		/* Check for unexpected codec with CSD */
-		if (cc_trans->bearer_cap.transfer == GSM48_BCAP_ITCAP_UNR_DIG_INF &&
-		    codec_if_known->type != GSM0808_SCT_CSD) {
-			LOG_TRANS(cc_trans, LOGL_ERROR, "Unexpected codec in Assignment Complete for CSD: %s\n",
 				  gsm0808_speech_codec_type_name(codec_if_known->type));
 			call_leg_release(msc_a->cc.call_leg);
 			return;
