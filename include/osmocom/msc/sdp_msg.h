@@ -30,7 +30,7 @@ struct sdp_audio_codec {
 
 struct sdp_audio_codecs {
 	unsigned int count;
-	struct sdp_audio_codec codec[16];
+	struct sdp_audio_codec codec[64];
 };
 
 struct sdp_msg {
