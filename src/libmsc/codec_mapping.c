@@ -224,6 +224,15 @@ const struct gsm_mncc_bearer_cap bearer_cap_empty = {
 		.speech_ver = { -1 },
 	};
 
+bool codec_mapping_matches_speech_ver(const struct codec_mapping *m, enum gsm48_bcap_speech_ver speech_ver)
+{
+	int i;
+	for (i = 0; i < m->speech_ver_count; i++)
+		if (m->speech_ver[i] == speech_ver)
+			return true;
+	return false;
+}
+
 const struct codec_mapping *codec_mapping_by_speech_ver(enum gsm48_bcap_speech_ver speech_ver)
 {
 	const struct codec_mapping *m;
