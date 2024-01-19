@@ -502,11 +502,13 @@ void sdp_audio_codecs_from_speech_codec_list(struct sdp_audio_codecs *ac, const 
 	int i;
 	for (i = 0; i < cl->len; i++) {
 		const struct gsm0808_speech_codec *sc = &cl->codec[i];
-		const struct codec_mapping *m = codec_mapping_by_gsm0808_speech_codec(sc);
-		if (!m)
-			continue;
-		sdp_audio_codecs_add_copy(ac, &m->sdp);
-		/* FIXME: for AMR, apply sc->cfg to the added codec's fmtp */
+		const struct codec_mapping *m;
+
+		codec_mapping_foreach (m) {
+			if (!codec_mapping_matches_gsm0808_speech_codec(m, sc))
+				continue;
+			sdp_audio_codecs_add_copy(ac, &m->sdp);
+		}
 	}
 }
 
