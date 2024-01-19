@@ -244,6 +244,15 @@ const struct codec_mapping *codec_mapping_by_speech_ver(enum gsm48_bcap_speech_v
 	return NULL;
 }
 
+bool codec_mapping_matches_gsm0808_speech_codec_type(const struct codec_mapping *m, enum gsm0808_speech_codec_type sct)
+{
+	if (!m->has_gsm0808_speech_codec)
+		return false;
+	if (m->gsm0808_speech_codec.type == sct)
+		return true;
+	return false;
+}
+
 const struct codec_mapping *codec_mapping_by_gsm0808_speech_codec_type(enum gsm0808_speech_codec_type sct)
 {
 	const struct codec_mapping *m;
@@ -254,6 +263,16 @@ const struct codec_mapping *codec_mapping_by_gsm0808_speech_codec_type(enum gsm0
 			return m;
 	}
 	return NULL;
+}
+
+bool codec_mapping_matches_gsm0808_speech_codec(const struct codec_mapping *m, const struct gsm0808_speech_codec *sc)
+{
+	if (!codec_mapping_matches_gsm0808_speech_codec_type(m, sc->type))
+		return false;
+	/* Return all those where m->gsm0808_speech_codec.cfg is a subset of sc->cfg.
+	 * codec_mapping entries all have just a single cfg bit set. An incoming Speech Codec may list multiple cfg bits
+	 * in one mask. */
+	return (m->gsm0808_speech_codec.cfg & sc->cfg) == m->gsm0808_speech_codec.cfg;
 }
 
 const struct codec_mapping *codec_mapping_by_gsm0808_speech_codec(const struct gsm0808_speech_codec *sc)

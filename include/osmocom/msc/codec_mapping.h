@@ -59,6 +59,8 @@ const struct codec_mapping *codec_mapping_next(const struct codec_mapping *c);
 	for ((CODEC_MAPPING) = codec_mapping_next(NULL); (CODEC_MAPPING); (CODEC_MAPPING) = codec_mapping_next(CODEC_MAPPING))
 
 bool codec_mapping_matches_speech_ver(const struct codec_mapping *m, enum gsm48_bcap_speech_ver speech_ver);
+bool codec_mapping_matches_gsm0808_speech_codec_type(const struct codec_mapping *m, enum gsm0808_speech_codec_type sct);
+bool codec_mapping_matches_gsm0808_speech_codec(const struct codec_mapping *m, const struct gsm0808_speech_codec *sc);
 
 const struct codec_mapping *codec_mapping_by_speech_ver(enum gsm48_bcap_speech_ver speech_ver);
 const struct codec_mapping *codec_mapping_by_gsm0808_speech_codec_type(enum gsm0808_speech_codec_type sct);
