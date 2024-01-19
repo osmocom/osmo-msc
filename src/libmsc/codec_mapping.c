@@ -135,6 +135,10 @@ static const struct codec_mapping codec_map[] = {
 		}, \
 		.perm_speech = GSM0808_PERM_FR3, \
 		.frhr = CODEC_FRHR_FR, \
+		.amr = { \
+			.is_amr = true, \
+			.is_octet_aligned = IS_OA, \
+		}, \
 	}
 
 #define AMR_HR(IS_OA, FMTP, SPEECH_CODEC_CFG) \
@@ -157,6 +161,10 @@ static const struct codec_mapping codec_map[] = {
 		}, \
 		.perm_speech = GSM0808_PERM_HR3, \
 		.frhr = CODEC_FRHR_HR, \
+		.amr = { \
+			.is_amr = true, \
+			.is_octet_aligned = IS_OA, \
+		}, \
 	}
 
 	/* AMR rates as in 3GPP TS 28.062, Table 7.11.3.1.3-2; gsm0808_speech_codec.cfg is a bitmask of Sn bits:
