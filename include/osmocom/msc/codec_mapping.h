@@ -37,6 +37,14 @@ struct codec_mapping {
 	/* If applicable, indicator whether this codec can work on a GERAN half-rate lchan, or whether full-rate is
 	 * required. Leave zero when this codec does not apply to GERAN. */
 	enum codec_frhr frhr;
+	/* Shortcut flags for AMR: there are a lot of entries with sdp.subtype_name = "AMR". These AMR related flags
+	 * duplicate the state of sdp.subtype_name and sdp.fmtp, in order to speed up some codec iterations. */
+	struct {
+		/* true iff sdp.subtype_name = "AMR". */
+		bool is_amr;
+		/* true iff is_amr and sdp.fmtp contains "octet-align=1". */
+		bool is_octet_aligned;
+	} amr;
 };
 
 const struct codec_mapping *codec_mapping_next(const struct codec_mapping *c);
