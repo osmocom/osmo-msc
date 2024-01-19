@@ -2521,7 +2521,7 @@ DMSC msc_a(IMSI-901700000010650:MSISDN-46071:GERAN-A:LU){MSC_A_ST_RELEASED}: Dea
 
 
 - ======================== MO call: AMR picked by both MO and MT
-- CM Service Request with Codec List (BSS Supported) = FR1 FR2 FR3 HR1 HR3
+- CM Service Request with Codec List (BSS Supported) = FR1 FR2 FR3:57ff HR1 HR3:73f
   MSC <--GERAN-A-- MS: GSM48_MT_MM_CM_SERV_REQ
   new conn
 DMSC msub_fsm{active}: Allocated
@@ -2874,7 +2874,7 @@ DPAG Paging: IMSI-901700000010650:MSISDN-46071 for MNCC: establish call: Startin
 DREF VLR subscr IMSI-901700000010650:MSISDN-46071 + Paging: now used by 4 (attached,mncc_tx_to_gsm_cc,CC,Paging)
 DREF VLR subscr IMSI-901700000010650:MSISDN-46071 - mncc_tx_to_gsm_cc: now used by 3 (attached,CC,Paging)
   paging_sent == 1
-- MS replies with Paging Response, with Codec List (BSS Supported) = FR1 FR2 FR3 HR1 HR3
+- MS replies with Paging Response, with Codec List (BSS Supported) = FR1 FR2 FR3:57ff HR1 HR3:73f
 - VLR accepts, MSC sends CC Setup with Bearer Capability =  AMR AMR GSM-EFR GSM GSM-HR-08
   MSC <--GERAN-A-- MS: GSM48_MT_RR_PAG_RESP
   new conn
@@ -3489,7 +3489,7 @@ DPAG Paging: IMSI-901700000010650:MSISDN-46071 for MNCC: establish call: Startin
 DREF VLR subscr IMSI-901700000010650:MSISDN-46071 + Paging: now used by 4 (attached,mncc_tx_to_gsm_cc,CC,Paging)
 DREF VLR subscr IMSI-901700000010650:MSISDN-46071 - mncc_tx_to_gsm_cc: now used by 3 (attached,CC,Paging)
   paging_sent == 1
-- MS replies with Paging Response, with Codec List (BSS Supported) = FR1 FR2 FR3 HR1 HR3
+- MS replies with Paging Response, with Codec List (BSS Supported) = FR1 FR2 FR3:57ff HR1 HR3:73f
 - VLR accepts, MSC sends CC Setup with Bearer Capability =  GSM
   MSC <--GERAN-A-- MS: GSM48_MT_RR_PAG_RESP
   new conn
@@ -3763,7 +3763,7 @@ DMSC msc_a(IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP){MSC_A_ST_RELEA
 
 
 - ======================== MO call: FR1 picked by MO from Bearer Cap, MT hence also picks FR1
-- CM Service Request with Codec List (BSS Supported) = FR1 FR2 FR3 HR1 HR3
+- CM Service Request with Codec List (BSS Supported) = FR1 FR2 FR3:57ff HR1 HR3:73f
   MSC <--GERAN-A-- MS: GSM48_MT_MM_CM_SERV_REQ
   new conn
 DMSC msub_fsm{active}: Allocated
@@ -4092,7 +4092,7 @@ DPAG Paging: IMSI-901700000010650:MSISDN-46071 for MNCC: establish call: Startin
 DREF VLR subscr IMSI-901700000010650:MSISDN-46071 + Paging: now used by 4 (attached,mncc_tx_to_gsm_cc,CC,Paging)
 DREF VLR subscr IMSI-901700000010650:MSISDN-46071 - mncc_tx_to_gsm_cc: now used by 3 (attached,CC,Paging)
   paging_sent == 1
-- MS replies with Paging Response, with Codec List (BSS Supported) = FR1 FR2 FR3 HR1 HR3
+- MS replies with Paging Response, with Codec List (BSS Supported) = FR1 FR2 FR3:57ff HR1 HR3:73f
 - VLR accepts, MSC sends CC Setup with Bearer Capability =  GSM
   MSC <--GERAN-A-- MS: GSM48_MT_RR_PAG_RESP
   new conn
@@ -4366,7 +4366,7 @@ DMSC msc_a(IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP){MSC_A_ST_RELEA
 
 
 - ======================== MO call: FR1 picked by MT's Codec List (BSS Supported), hence MO re-assigns to FR1
-- CM Service Request with Codec List (BSS Supported) = FR1 FR2 FR3 HR1 HR3
+- CM Service Request with Codec List (BSS Supported) = FR1 FR2 FR3:57ff HR1 HR3:73f
   MSC <--GERAN-A-- MS: GSM48_MT_MM_CM_SERV_REQ
   new conn
 DMSC msub_fsm{active}: Allocated
@@ -4996,7 +4996,7 @@ DMSC msc_a(IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP){MSC_A_ST_RELEA
 
 
 - ======================== MO call: FR1 picked by MT's MS Bearer Capability, hence MO re-assigns to FR1
-- CM Service Request with Codec List (BSS Supported) = FR1 FR2 FR3 HR1 HR3
+- CM Service Request with Codec List (BSS Supported) = FR1 FR2 FR3:57ff HR1 HR3:73f
   MSC <--GERAN-A-- MS: GSM48_MT_MM_CM_SERV_REQ
   new conn
 DMSC msub_fsm{active}: Allocated
@@ -5352,7 +5352,7 @@ DPAG Paging: IMSI-901700000010650:MSISDN-46071 for MNCC: establish call: Startin
 DREF VLR subscr IMSI-901700000010650:MSISDN-46071 + Paging: now used by 4 (attached,mncc_tx_to_gsm_cc,CC,Paging)
 DREF VLR subscr IMSI-901700000010650:MSISDN-46071 - mncc_tx_to_gsm_cc: now used by 3 (attached,CC,Paging)
   paging_sent == 1
-- MS replies with Paging Response, with Codec List (BSS Supported) = FR1 FR2 FR3 HR1 HR3
+- MS replies with Paging Response, with Codec List (BSS Supported) = FR1 FR2 FR3:57ff HR1 HR3:73f
 - VLR accepts, MSC sends CC Setup with Bearer Capability =  AMR AMR GSM-EFR GSM GSM-HR-08
   MSC <--GERAN-A-- MS: GSM48_MT_RR_PAG_RESP
   new conn
@@ -5626,7 +5626,7 @@ DMSC msc_a(IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP){MSC_A_ST_RELEA
 
 
 - ======================== MO call: AMR picked by both MO and MT, but MT assigns a different payload type number
-- CM Service Request with Codec List (BSS Supported) = FR1 FR2 FR3 HR1 HR3
+- CM Service Request with Codec List (BSS Supported) = FR1 FR2 FR3:57ff HR1 HR3:73f
   MSC <--GERAN-A-- MS: GSM48_MT_MM_CM_SERV_REQ
   new conn
 DMSC msub_fsm{active}: Allocated
@@ -5979,7 +5979,7 @@ DPAG Paging: IMSI-901700000010650:MSISDN-46071 for MNCC: establish call: Startin
 DREF VLR subscr IMSI-901700000010650:MSISDN-46071 + Paging: now used by 4 (attached,mncc_tx_to_gsm_cc,CC,Paging)
 DREF VLR subscr IMSI-901700000010650:MSISDN-46071 - mncc_tx_to_gsm_cc: now used by 3 (attached,CC,Paging)
   paging_sent == 1
-- MS replies with Paging Response, with Codec List (BSS Supported) = FR1 FR2 FR3 HR1 HR3
+- MS replies with Paging Response, with Codec List (BSS Supported) = FR1 FR2 FR3:57ff HR1 HR3:73f
 - VLR accepts, MSC sends CC Setup with Bearer Capability =  AMR AMR GSM-EFR GSM GSM-HR-08
   MSC <--GERAN-A-- MS: GSM48_MT_RR_PAG_RESP
   new conn
@@ -6265,7 +6265,7 @@ DMSC msc_a(IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP){MSC_A_ST_RELEA
 
 
 - ======================== MO call: AMR picked by both MO and MT, but MO assigns a different payload type number
-- CM Service Request with Codec List (BSS Supported) = FR1 FR2 FR3 HR1 HR3
+- CM Service Request with Codec List (BSS Supported) = FR1 FR2 FR3:57ff HR1 HR3:73f
   MSC <--GERAN-A-- MS: GSM48_MT_MM_CM_SERV_REQ
   new conn
 DMSC msub_fsm{active}: Allocated
@@ -6618,7 +6618,7 @@ DPAG Paging: IMSI-901700000010650:MSISDN-46071 for MNCC: establish call: Startin
 DREF VLR subscr IMSI-901700000010650:MSISDN-46071 + Paging: now used by 4 (attached,mncc_tx_to_gsm_cc,CC,Paging)
 DREF VLR subscr IMSI-901700000010650:MSISDN-46071 - mncc_tx_to_gsm_cc: now used by 3 (attached,CC,Paging)
   paging_sent == 1
-- MS replies with Paging Response, with Codec List (BSS Supported) = FR1 FR2 FR3 HR1 HR3
+- MS replies with Paging Response, with Codec List (BSS Supported) = FR1 FR2 FR3:57ff HR1 HR3:73f
 - VLR accepts, MSC sends CC Setup with Bearer Capability =  AMR AMR GSM-EFR GSM GSM-HR-08
   MSC <--GERAN-A-- MS: GSM48_MT_RR_PAG_RESP
   new conn

@@ -785,7 +785,7 @@ struct codec_test {
 	const char *desc;
 
 	/* What to send during Complete Layer 3 as Codec List (BSS Supported). List ends with a LIST_END entry */
-	enum gsm0808_speech_codec_type mo_rx_compl_l3_codec_list_bss_supported[8];
+	struct gsm0808_speech_codec mo_rx_compl_l3_codec_list_bss_supported[8];
 
 	/* What to send during CC Setup as MS Bearer Capability. List ends with a LIST_END entry */
 	enum gsm48_bcap_speech_ver mo_rx_ms_bcap[8];
@@ -810,7 +810,7 @@ struct codec_test {
 	/* mt_rx_sdp_mncc_setup_req == mo_tx_sdp_mncc_rtp_create */
 #define mt_rx_sdp_mncc_setup_req  mo_tx_sdp_mncc_rtp_create
 
-	enum gsm0808_speech_codec_type mt_rx_compl_l3_codec_list_bss_supported[8];
+	struct gsm0808_speech_codec mt_rx_compl_l3_codec_list_bss_supported[8];
 	bool expect_codec_mismatch_on_paging_response;
 	enum gsm48_bcap_speech_ver mt_tx_cc_setup_bcap[8];
 	enum gsm48_bcap_speech_ver mt_rx_ms_bcap[8];
@@ -839,13 +839,16 @@ struct codec_test {
 	const char *mo_tx_sdp_mncc_setup_compl_ind[8];
 };
 
+/* define a struct gsm0808_speech_codec */
+#define SC(TYPE, CFG) { .fi = true, .type = TYPE, .cfg = CFG }
+
+/* define a struct gsm0808_speech_codec list[] */
 #define CODEC_LIST_ALL_GSM { \
-			GSM0808_SCT_FR1, \
-			GSM0808_SCT_FR2, \
-			GSM0808_SCT_FR3, \
-			GSM0808_SCT_HR1, \
-			GSM0808_SCT_HR3, \
-			LIST_END \
+			SC(GSM0808_SCT_FR1, 0), \
+			SC(GSM0808_SCT_FR2, 0), \
+			SC(GSM0808_SCT_FR3, GSM0808_SC_CFG_DEFAULT_FR_AMR), \
+			SC(GSM0808_SCT_HR1, 0), \
+			SC(GSM0808_SCT_HR3, GSM0808_SC_CFG_DEFAULT_HR_AMR), \
 		}
 
 #define BCAP_ALL_GSM { \
@@ -913,7 +916,7 @@ static const struct codec_test codec_tests[] = {
 
 	{
 		.desc = "FR1 picked by MO from Codec List (BSS Supported), MT hence also picks FR1",
-		.mo_rx_compl_l3_codec_list_bss_supported = { GSM0808_SCT_FR1, LIST_END },
+		.mo_rx_compl_l3_codec_list_bss_supported = { SC(GSM0808_SCT_FR1, 0) },
 		.mo_rx_ms_bcap = BCAP_ALL_GSM,
 		.mo_tx_sdp_mncc_setup_ind = { "GSM" },
 		.mo_rx_sdp_mncc_rtp_create = {},
@@ -968,7 +971,7 @@ static const struct codec_test codec_tests[] = {
 		.mo_tx_sdp_mncc_rtp_create = { "AMR", "GSM-EFR", "GSM", "GSM-HR-08" },
 
 		/* This is the codec limitation this test verifies, Codec List (BSS Supported): */
-		.mt_rx_compl_l3_codec_list_bss_supported = { GSM0808_SCT_FR1, LIST_END },
+		.mt_rx_compl_l3_codec_list_bss_supported = { SC(GSM0808_SCT_FR1, 0) },
 
 		/* from above codec list, MSC derives the limited bcap sent in CC Setup to MS */
 		.mt_tx_cc_setup_bcap = {
@@ -1115,28 +1118,28 @@ static const struct codec_test codec_tests[] = {
 static char namebuf[4][1024];
 static int use_namebuf = 0;
 
-static const char *codec_list_name(const enum gsm0808_speech_codec_type compl_l3_codec_list_bss_supported[])
+static const char *codec_list_name(const struct gsm0808_speech_codec compl_l3_codec_list_bss_supported[])
 {
 	struct osmo_strbuf sb = { .buf = namebuf[use_namebuf], .len = sizeof(namebuf[0]) };
 	use_namebuf = (use_namebuf + 1) % ARRAY_SIZE(namebuf);
 
-	const enum gsm0808_speech_codec_type *pos;
+	const struct gsm0808_speech_codec *pos;
 	sb.buf[0] = '\0';
-	for (pos = compl_l3_codec_list_bss_supported; *pos != LIST_END; pos++)
-		OSMO_STRBUF_PRINTF(sb, " %s", gsm0808_speech_codec_type_name(*pos));
+	for (pos = compl_l3_codec_list_bss_supported; pos->fi; pos++) {
+		OSMO_STRBUF_PRINTF(sb, " %s", gsm0808_speech_codec_type_name(pos->type));
+		if (pos->cfg)
+			OSMO_STRBUF_PRINTF(sb, ":%x", pos->cfg);
+	}
 	return sb.buf;
 }
 
-static const struct gsm0808_speech_codec_list *codec_list(const enum gsm0808_speech_codec_type compl_l3_codec_list_bss_supported[])
+static const struct gsm0808_speech_codec_list *codec_list(const struct gsm0808_speech_codec compl_l3_codec_list_bss_supported[])
 {
 	static struct gsm0808_speech_codec_list scl;
 	scl = (struct gsm0808_speech_codec_list){};
-	const enum gsm0808_speech_codec_type *pos;
-	for (pos = compl_l3_codec_list_bss_supported; *pos != LIST_END; pos++) {
-		scl.codec[scl.len] = (struct gsm0808_speech_codec){
-			.fi = true,
-			.type = *pos,
-		};
+	const struct gsm0808_speech_codec *pos;
+	for (pos = compl_l3_codec_list_bss_supported; pos->fi; pos++) {
+		scl.codec[scl.len] = *pos;
 		scl.len++;
 	}
 	return &scl;
