@@ -201,8 +201,23 @@ const struct codec_mapping codec_map[] = {
 	},
 };
 
-#define foreach_codec_mapping(CODEC_MAPPING) \
-	for ((CODEC_MAPPING) = codec_map; (CODEC_MAPPING) < codec_map + ARRAY_SIZE(codec_map); (CODEC_MAPPING)++)
+/* Iterate the entire codec_map, one struct codec_mapping per call.
+ * Initiate iteration by passing c = NULL, and call repeatedly until NULL is returned:
+ *
+ *   for (const struct codec_mapping *c = codec_mapping_next(NULL); c; c = codec_mapping_next(c))
+ *           handle(c);
+ */
+const struct codec_mapping *codec_mapping_next(const struct codec_mapping *c)
+{
+	if (!c)
+		return codec_map;
+	if (c < codec_map)
+		return NULL;
+	c++;
+	if (c >= codec_map + ARRAY_SIZE(codec_map))
+		return NULL;
+	return c;
+}
 
 const struct gsm_mncc_bearer_cap bearer_cap_empty = {
 		.speech_ver = { -1 },
@@ -211,7 +226,7 @@ const struct gsm_mncc_bearer_cap bearer_cap_empty = {
 const struct codec_mapping *codec_mapping_by_speech_ver(enum gsm48_bcap_speech_ver speech_ver)
 {
 	const struct codec_mapping *m;
-	foreach_codec_mapping(m) {
+	codec_mapping_foreach(m) {
 		int i;
 		for (i = 0; i < m->speech_ver_count; i++)
 			if (m->speech_ver[i] == speech_ver)
@@ -223,7 +238,7 @@ const struct codec_mapping *codec_mapping_by_speech_ver(enum gsm48_bcap_speech_v
 const struct codec_mapping *codec_mapping_by_gsm0808_speech_codec_type(enum gsm0808_speech_codec_type sct)
 {
 	const struct codec_mapping *m;
-	foreach_codec_mapping(m) {
+	codec_mapping_foreach(m) {
 		if (!m->has_gsm0808_speech_codec)
 			continue;
 		if (m->gsm0808_speech_codec.type == sct)
@@ -235,7 +250,7 @@ const struct codec_mapping *codec_mapping_by_gsm0808_speech_codec_type(enum gsm0
 const struct codec_mapping *codec_mapping_by_gsm0808_speech_codec(const struct gsm0808_speech_codec *sc)
 {
 	const struct codec_mapping *m;
-	foreach_codec_mapping(m) {
+	codec_mapping_foreach(m) {
 		if (!m->has_gsm0808_speech_codec)
 			continue;
 		if (m->gsm0808_speech_codec.type != sc->type)
@@ -251,7 +266,7 @@ const struct codec_mapping *codec_mapping_by_gsm0808_speech_codec(const struct g
 const struct codec_mapping *codec_mapping_by_perm_speech(enum gsm0808_permitted_speech perm_speech)
 {
 	const struct codec_mapping *m;
-	foreach_codec_mapping(m) {
+	codec_mapping_foreach(m) {
 		if (m->perm_speech == perm_speech)
 			return m;
 	}
@@ -261,7 +276,7 @@ const struct codec_mapping *codec_mapping_by_perm_speech(enum gsm0808_permitted_
 const struct codec_mapping *codec_mapping_by_subtype_name(const char *subtype_name)
 {
 	const struct codec_mapping *m;
-	foreach_codec_mapping(m) {
+	codec_mapping_foreach(m) {
 		if (!strcmp(m->sdp.subtype_name, subtype_name))
 			return m;
 	}
@@ -271,7 +286,7 @@ const struct codec_mapping *codec_mapping_by_subtype_name(const char *subtype_na
 const struct codec_mapping *codec_mapping_by_mgcp_codec(enum mgcp_codecs mgcp)
 {
 	const struct codec_mapping *m;
-	foreach_codec_mapping(m) {
+	codec_mapping_foreach(m) {
 		if (m->mgcp == mgcp)
 			return m;
 	}
@@ -331,7 +346,7 @@ int sdp_audio_codec_add_to_bearer_cap(struct gsm_mncc_bearer_cap *bearer_cap, co
 {
 	const struct codec_mapping *m;
 	int added = 0;
-	foreach_codec_mapping(m) {
+	codec_mapping_foreach(m) {
 		int i;
 		if (strcmp(m->sdp.subtype_name, codec->subtype_name))
 			continue;
@@ -365,7 +380,7 @@ struct sdp_audio_codec *sdp_audio_codecs_add_speech_ver(struct sdp_audio_codecs 
 {
 	const struct codec_mapping *m;
 	struct sdp_audio_codec *ret = NULL;
-	foreach_codec_mapping(m) {
+	codec_mapping_foreach(m) {
 		int i;
 		for (i = 0; i < m->speech_ver_count; i++) {
 			if (m->speech_ver[i] == speech_ver) {
@@ -485,7 +500,7 @@ int sdp_audio_codecs_to_gsm0808_channel_type(struct gsm0808_channel_type *ct, co
 		int i;
 		bool dup;
 		idx++;
-		foreach_codec_mapping(m) {
+		codec_mapping_foreach(m) {
 			if (strcmp(m->sdp.subtype_name, codec->subtype_name))
 				continue;
 
@@ -547,7 +562,7 @@ int sdp_audio_codecs_to_gsm0808_channel_type(struct gsm0808_channel_type *ct, co
 enum mgcp_codecs sdp_audio_codec_to_mgcp_codec(const struct sdp_audio_codec *codec)
 {
 	const struct codec_mapping *m;
-	foreach_codec_mapping(m) {
+	codec_mapping_foreach(m) {
 		if (!sdp_audio_codec_cmp(&m->sdp, codec, false, false))
 			return m->mgcp;
 	}

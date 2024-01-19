@@ -39,6 +39,25 @@ struct codec_mapping {
 	enum codec_frhr frhr;
 };
 
+const struct codec_mapping *codec_mapping_next(const struct codec_mapping *c);
+
+/* Iterate all known codec mappings.
+ * CODEC_MAPPING: const struct codec_mapping*.
+ * Example:
+ *
+ *     const struct codec_mapping *m;
+ *     codec_mapping_foreach (m) {
+ *             if (codec_mapping_matches_speech_ver(m, GSM48_BCAP_SV_FR))
+ *                     break;
+ *     }
+ *     if (!m)
+ *             printf("not found\n");
+ *     else
+ *             printf("%s\n", sdp_audio_codec_to_str(&m->sdp);
+ */
+#define codec_mapping_foreach(CODEC_MAPPING) \
+	for ((CODEC_MAPPING) = codec_mapping_next(NULL); (CODEC_MAPPING); (CODEC_MAPPING) = codec_mapping_next(CODEC_MAPPING))
+
 const struct codec_mapping *codec_mapping_by_speech_ver(enum gsm48_bcap_speech_ver speech_ver);
 const struct codec_mapping *codec_mapping_by_gsm0808_speech_codec_type(enum gsm0808_speech_codec_type sct);
 const struct codec_mapping *codec_mapping_by_gsm0808_speech_codec(const struct gsm0808_speech_codec *sc);
