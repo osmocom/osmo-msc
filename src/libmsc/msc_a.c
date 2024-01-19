@@ -1462,7 +1462,8 @@ static void msc_a_up_call_assignment_complete(struct msc_a *msc_a, const struct 
 	}
 
 	if (codec_if_known) {
-		const struct codec_mapping *codec_cn;
+		const struct codec_mapping *codec_assigned;
+
 		/* For 2G:
 		 * - The Assignment Complete has returned a specific codec (e.g. FR3 for AMR FR).
 		 * - Set this codec at the MGW endpoint facing the RAN.
@@ -1476,9 +1477,9 @@ static void msc_a_up_call_assignment_complete(struct msc_a *msc_a, const struct 
 		 * - ran_msg_iu.c always returns FR3 (AMR FR) for the assigned codec. Set that at the MGW towards CN.
 		 * - So the MGW decapsulates IuUP <-> AMR
 		 */
-		codec_cn = codec_mapping_by_gsm0808_speech_codec_type(codec_if_known->type);
+		codec_assigned = codec_mapping_by_gsm0808_speech_codec_type(codec_if_known->type);
 		/* TODO: use codec_mapping_by_gsm0808_speech_codec() to also match on codec_if_known->cfg */
-		if (!codec_cn) {
+		if (!codec_assigned) {
 			LOG_TRANS(cc_trans, LOGL_ERROR, "Unknown codec in Assignment Complete: %s\n",
 				  gsm0808_speech_codec_type_name(codec_if_known->type));
 			call_leg_release(msc_a->cc.call_leg);
@@ -1497,10 +1498,10 @@ static void msc_a_up_call_assignment_complete(struct msc_a *msc_a, const struct 
 		/* Update RAN-side endpoint CI from Assignment result -- unless it is forced by the ran_infra, in which
 		 * case it remains unchanged as passed to the earlier call of call_leg_ensure_ci(). */
 		if (msc_a->c.ran->force_mgw_codecs_to_ran.count == 0)
-			rtp_stream_set_one_codec(rtps_to_ran, &codec_cn->sdp);
+			rtp_stream_set_one_codec(rtps_to_ran, &codec_assigned->sdp);
 
 		/* Update codec filter with Assignment result, for the CN side */
-		cc_trans->cc.codecs.assignment = codec_cn->sdp;
+		cc_trans->cc.codecs.assignment = codec_assigned->sdp;
 	} else {
 		/* No codec passed in Assignment Complete, set 'codecs.assignment' to none. */
 		cc_trans->cc.codecs.assignment = (struct sdp_audio_codec){};
