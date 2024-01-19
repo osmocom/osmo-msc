@@ -728,13 +728,13 @@ done:
 /* see GSM 09.02, 17.7.1, PDP-Context and GPRSSubscriptionData */
 /* see GSM 09.02, B.1, gprsSubscriptionData */
 struct sgsn_subscriber_pdp_data {
-        struct llist_head       list;
+	struct llist_head	list;
 
-        unsigned int            context_id;
-        uint16_t                pdp_type;
-        char                    apn_str[GSM_APN_LENGTH];
-        uint8_t                 qos_subscribed[20];
-        size_t                  qos_subscribed_len;
+	unsigned int		context_id;
+	uint16_t		pdp_type;
+	char			apn_str[GSM_APN_LENGTH];
+	uint8_t			qos_subscribed[20];
+	size_t			qos_subscribed_len;
 };
 
 struct sgsn_subscriber_pdp_data *
