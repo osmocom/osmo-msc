@@ -19,6 +19,7 @@ SUBDIRS = \
 BUILT_SOURCES = $(top_srcdir)/.version
 EXTRA_DIST = \
 	     .version \
+	     README.md \
 	     contrib/osmo-msc.spec.in \
 	     debian \
 	     git-version-gen \
