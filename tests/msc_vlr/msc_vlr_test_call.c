@@ -1422,7 +1422,8 @@ static void test_codecs_mo(const struct codec_test *t)
 	OSMO_ASSERT(bssap_assignment_sent);
 	VALIDATE_PERM_SPEECH(&bssap_assignment_command_last_channel_type, t->mo_tx_assignment_perm_speech);
 
-	btw("Assignment succeeds, triggering MNCC_RTP_CREATE ack to MNCC");
+	btw("Assignment succeeds with %s, triggering MNCC_RTP_CREATE ack to MNCC with %s", t->mo_rx_assigned_codec,
+	    strlist_name(t->mo_tx_sdp_mncc_rtp_create));
 	cc_to_mncc_expect_tx("", MNCC_RTP_CREATE);
 	ms_sends_assignment_complete(t->mo_rx_assigned_codec);
 	OSMO_ASSERT(cc_to_mncc_tx_confirmed);
