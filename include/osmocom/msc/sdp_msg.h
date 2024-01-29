@@ -56,9 +56,11 @@ int sdp_audio_codecs_cmp(const struct sdp_audio_codecs *a, const struct sdp_audi
 			 bool cmp_fmtp, bool cmp_payload_type);
 
 struct sdp_audio_codec *sdp_audio_codecs_add(struct sdp_audio_codecs *ac, unsigned int payload_type,
-					     const char *subtype_name, unsigned int rate, const char *fmtp);
+					     const char *subtype_name, unsigned int rate, const char *fmtp,
+					     bool once, bool pick_unused_pt_nr);
 struct sdp_audio_codec *sdp_audio_codecs_add_copy(struct sdp_audio_codecs *ac,
-						  const struct sdp_audio_codec *codec);
+						  const struct sdp_audio_codec *codec,
+						  bool once, bool pick_unused_pt_nr);
 int sdp_audio_codecs_remove(struct sdp_audio_codecs *ac, const struct sdp_audio_codec *codec);
 struct sdp_audio_codec *sdp_audio_codecs_by_payload_type(struct sdp_audio_codecs *ac,
 							 unsigned int payload_type, bool create);
