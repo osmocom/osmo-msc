@@ -41,8 +41,8 @@ struct sdp_msg {
 	struct csd_bs_list bearer_services;
 };
 
-#define foreach_sdp_audio_codec(/* struct sdp_audio_codec* */ CODEC, \
-				/* struct sdp_audio_codecs* */ AC) \
+#define sdp_audio_codecs_foreach(/* struct sdp_audio_codec* */ CODEC, \
+				 /* struct sdp_audio_codecs* */ AC) \
 	for (CODEC = (AC)->codec; \
 	     (CODEC - (AC)->codec) < OSMO_MIN((AC)->count, ARRAY_SIZE((AC)->codec)); \
 	     CODEC++)

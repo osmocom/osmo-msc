@@ -1214,7 +1214,7 @@ static bool validate_sdp(const char *func, const char *desc,
 	}
 
 	expect_pos = expected_codecs;
-	foreach_sdp_audio_codec(codec, &sdp.audio_codecs) {
+	sdp_audio_codecs_foreach(codec, &sdp.audio_codecs) {
 		char subtype_name_wo_pt[16];
 		if (!*expect_pos) {
 			BTW("%s: %s: ERROR: did not expect %s", func, desc, codec->subtype_name);

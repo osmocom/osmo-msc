@@ -102,9 +102,9 @@ int sdp_audio_codecs_cmp(const struct sdp_audio_codecs *a, const struct sdp_audi
 		return cmp;
 
 	/* See if each codec in a is also present in b */
-	foreach_sdp_audio_codec(codec_a, a) {
+	sdp_audio_codecs_foreach(codec_a, a) {
 		bool match_found = false;
-		foreach_sdp_audio_codec(codec_b, b) {
+		sdp_audio_codecs_foreach(codec_b, b) {
 			if (!sdp_audio_codec_cmp(codec_a, codec_b, cmp_fmtp, cmp_payload_type)) {
 				match_found = true;
 				break;
@@ -175,7 +175,7 @@ struct sdp_audio_codec *sdp_audio_codecs_by_payload_type(struct sdp_audio_codecs
 							 bool create)
 {
 	struct sdp_audio_codec *codec;
-	foreach_sdp_audio_codec(codec, ac) {
+	sdp_audio_codecs_foreach(codec, ac) {
 		if (codec->payload_type == payload_type)
 			return codec;
 	}
@@ -199,7 +199,7 @@ struct sdp_audio_codec *sdp_audio_codecs_by_payload_type(struct sdp_audio_codecs
 struct sdp_audio_codec *sdp_audio_codecs_by_descr(struct sdp_audio_codecs *ac, const struct sdp_audio_codec *codec)
 {
 	struct sdp_audio_codec *i;
-	foreach_sdp_audio_codec(i, ac) {
+	sdp_audio_codecs_foreach(i, ac) {
 		if (!sdp_audio_codec_cmp(i, codec, false, false))
 			return i;
 	}
@@ -218,7 +218,7 @@ int sdp_audio_codecs_remove(struct sdp_audio_codecs *ac, const struct sdp_audio_
 
 	/* Move all following entries one up */
 	ac->count--;
-	foreach_sdp_audio_codec(i, ac) {
+	sdp_audio_codecs_foreach(i, ac) {
 		if (i < codec)
 			continue;
 		*i = *(i+1);
@@ -261,12 +261,12 @@ int sdp_msg_to_sdp_str_buf(char *dst, size_t dst_size, const struct sdp_msg *sdp
 			   sdp->rtp.port);
 
 	/* Append all payload type numbers to 'm=audio <port> RTP/AVP 3 4 112' line */
-	foreach_sdp_audio_codec(codec, &sdp->audio_codecs)
+	sdp_audio_codecs_foreach(codec, &sdp->audio_codecs)
 		OSMO_STRBUF_PRINTF(sb, " %d", codec->payload_type);
 	OSMO_STRBUF_PRINTF(sb, "\r\n");
 
 	/* Add details for all codecs */
-	foreach_sdp_audio_codec(codec, &sdp->audio_codecs) {
+	sdp_audio_codecs_foreach(codec, &sdp->audio_codecs) {
 		if (!sdp_audio_codec_is_set(codec))
 			continue;
 		OSMO_STRBUF_PRINTF(sb, "a=rtpmap:%d %s/%d\r\n", codec->payload_type, codec->subtype_name,
@@ -624,7 +624,7 @@ int sdp_audio_codecs_to_str_buf(char *buf, size_t buflen, const struct sdp_audio
 	const struct sdp_audio_codec *codec;
 	if (!ac->count)
 		OSMO_STRBUF_PRINTF(sb, "(no-codecs)");
-	foreach_sdp_audio_codec(codec, ac) {
+	sdp_audio_codecs_foreach(codec, ac) {
 		bool first = (codec == ac->codec);
 		if (!first)
 			OSMO_STRBUF_PRINTF(sb, ",");

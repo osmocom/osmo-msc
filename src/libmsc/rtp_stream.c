@@ -322,7 +322,7 @@ static int rtp_stream_do_mgcp_verb(struct rtp_stream *rtps, enum mgcp_verb verb,
 		 * reasons we still need to translate to a struct mgcp_conn_peer representation to send it. */
 		struct sdp_audio_codec *codec;
 		int i = 0;
-		foreach_sdp_audio_codec(codec, &rtps->codecs) {
+		sdp_audio_codecs_foreach(codec, &rtps->codecs) {
 			const struct codec_mapping *m = codec_mapping_by_subtype_name(codec->subtype_name);
 			if (!m) {
 				LOG_RTPS(rtps, LOGL_ERROR, "Cannot map codec '%s' to MGCP: codec is unknown\n",

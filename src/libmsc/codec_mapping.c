@@ -371,7 +371,7 @@ int sdp_audio_codecs_to_bearer_cap(struct gsm_mncc_bearer_cap *bearer_cap, const
 	const struct sdp_audio_codec *codec;
 	int added = 0;
 
-	foreach_sdp_audio_codec(codec, ac) {
+	sdp_audio_codecs_foreach(codec, ac) {
 		added += sdp_audio_codec_add_to_bearer_cap(bearer_cap, codec);
 	}
 
@@ -439,7 +439,7 @@ void sdp_audio_codecs_to_speech_codec_list(struct gsm0808_speech_codec_list *scl
 
 	*scl = (struct gsm0808_speech_codec_list){};
 
-	foreach_sdp_audio_codec(codec, ac) {
+	sdp_audio_codecs_foreach(codec, ac) {
 		int rc = sdp_audio_codec_to_speech_codec_list(scl, codec);
 		if (rc == -ENOSPC)
 			break;
@@ -472,7 +472,7 @@ int sdp_audio_codecs_to_gsm0808_channel_type(struct gsm0808_channel_type *ct, co
 		.ch_indctr = GSM0808_CHAN_SPEECH,
 	};
 
-	foreach_sdp_audio_codec(codec, ac) {
+	sdp_audio_codecs_foreach(codec, ac) {
 		const struct codec_mapping *m;
 		int i;
 		bool dup;
