@@ -875,6 +875,7 @@ static int gsm48_cc_tx_setup(struct gsm_trans *trans, void *arg)
 	trans_cc_filter_init(trans);
 	trans_cc_filter_set_ran(trans, trans->msc_a->c.ran->type);
 	trans_cc_filter_set_bss(trans, trans->msc_a);
+
 	if (setup->fields & MNCC_F_BEARER_CAP)
 		trans->bearer_cap.transfer = setup->bearer_cap.transfer;
 
