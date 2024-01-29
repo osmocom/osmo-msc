@@ -1340,7 +1340,7 @@ static struct sdp_msg *sdp_from_codec_strs(const char *const *codec_strs)
 			BTW("ERROR: unknown codec_str: %s", *codec_str);
 			abort();
 		}
-		if (!sdp_audio_codecs_add_copy(&sdp.audio_codecs, &c)) {
+		if (!sdp_audio_codecs_add_copy(&sdp.audio_codecs, &c, false, false)) {
 			BTW("ERROR: list full, cannot add %s", *codec_str);
 			abort();
 		}

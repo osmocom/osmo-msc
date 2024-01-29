@@ -449,7 +449,7 @@ void rtp_stream_set_mode(struct rtp_stream *rtps, enum mgcp_connection_mode mode
 void rtp_stream_set_one_codec(struct rtp_stream *rtps, const struct sdp_audio_codec *codec)
 {
 	struct sdp_audio_codecs codecs = {};
-	sdp_audio_codecs_add_copy(&codecs, codec);
+	sdp_audio_codecs_add_copy(&codecs, codec, false, false);
 	rtp_stream_set_codecs(rtps, &codecs);
 }
 

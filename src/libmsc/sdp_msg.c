@@ -119,51 +119,81 @@ int sdp_audio_codecs_cmp(const struct sdp_audio_codecs *a, const struct sdp_audi
 	return 0;
 }
 
-/* Given a predefined fixed payload_type number, add an SDP audio codec entry, if not present yet.
- * The payload_type must exist in sdp_msg_payload_type_names.
- * Return the audio codec created or already existing for this payload type number.
+/* Add an SDP audio codec entry.
+ * If 'once' == true, do not add an entry if an identical entry (except for the payload_type number) already exists.
+ * If 'pick_unused_pt_nr' == true, pick an unused PT nr in case 'payload_type' is already taken in 'ac'.
+ * Return the new entry, or NULL if there is no more space in the list.
  */
 struct sdp_audio_codec *sdp_audio_codecs_add(struct sdp_audio_codecs *ac, unsigned int payload_type,
-					     const char *subtype_name, unsigned int rate, const char *fmtp)
+					     const char *subtype_name, unsigned int rate, const char *fmtp,
+					     bool once, bool pick_unused_pt_nr)
 {
-	struct sdp_audio_codec *codec;
-
-	/* Does an entry already exist? */
-	codec = sdp_audio_codecs_by_payload_type(ac, payload_type, false);
-	if (codec) {
-		/* Already exists, sanity check */
-		if (!codec->subtype_name[0])
-			OSMO_STRLCPY_ARRAY(codec->subtype_name, subtype_name);
-		else if (strcmp(codec->subtype_name, subtype_name)) {
-			/* There already is an entry with this payload_type number but a mismatching subtype_name. That is
-			 * weird, rather abort. */
-			return NULL;
-		}
-		if (codec->rate != rate
-		    || (fmtp && strcmp(fmtp, codec->fmtp))) {
-			/* Mismatching details. Rather abort */
-			return NULL;
-		}
-		return codec;
-	}
-
-	/* None exists, create codec entry for this payload type number */
-	codec = sdp_audio_codecs_by_payload_type(ac, payload_type, true);
-	/* NULL means unable to add an entry */
-	if (!codec)
-		return NULL;
-
-	OSMO_STRLCPY_ARRAY(codec->subtype_name, subtype_name);
-	if (fmtp)
-		OSMO_STRLCPY_ARRAY(codec->fmtp, fmtp);
-	codec->rate = rate;
-	return codec;
+	struct sdp_audio_codec c = {
+		.payload_type = payload_type,
+		.rate = rate,
+	};
+	OSMO_STRLCPY_ARRAY(c.subtype_name, subtype_name);
+	if (fmtp && *fmtp)
+		OSMO_STRLCPY_ARRAY(c.fmtp, fmtp);
+	return sdp_audio_codecs_add_copy(ac, &c, once, pick_unused_pt_nr);
 }
 
-struct sdp_audio_codec *sdp_audio_codecs_add_copy(struct sdp_audio_codecs *ac, const struct sdp_audio_codec *codec)
+struct sdp_audio_codec *sdp_audio_codecs_add_copy(struct sdp_audio_codecs *ac,
+						  const struct sdp_audio_codec *codec,
+						  bool once, bool pick_unused_pt_nr)
 {
-	return sdp_audio_codecs_add(ac, codec->payload_type, codec->subtype_name, codec->rate,
-				    codec->fmtp[0] ? codec->fmtp : NULL);
+	struct sdp_audio_codec *new_entry;
+
+	if (once) {
+		struct sdp_audio_codec *exists;
+		exists = sdp_audio_codecs_by_descr(ac, codec);
+		if (exists)
+			return exists;
+	}
+
+	if (ac->count >= ARRAY_SIZE(ac->codec))
+		return NULL;
+
+	/* Compose new_entry in an unused entry, and increment 'count' further below. */
+	new_entry = &ac->codec[ac->count];
+
+	/* Take provided entry as-is. */
+	*new_entry = *codec;
+
+	/* Adjust payload_type number? */
+	if (pick_unused_pt_nr) {
+		const struct sdp_audio_codec *c;
+		bool exists = false;
+		unsigned int existing_pt_max = 96;
+
+		sdp_audio_codecs_foreach(c, ac) {
+			if (c->payload_type == new_entry->payload_type)
+				exists = true;
+
+			existing_pt_max = OSMO_MAX(existing_pt_max, c->payload_type);
+
+			/* For dynamic allocations, skip these predefined numbers, taken from enum mgcp_codecs:
+			 * CODEC_GSMEFR_8000_1 = 110,	3GPP TS 48.103 table 5.4.2.2.1
+			 * CODEC_GSMHR_8000_1 = 111,	3GPP TS 48.103 table 5.4.2.2.1
+			 * CODEC_AMR_8000_1 = 112,		3GPP TS 48.103 table 5.4.2.2.1
+			 * CODEC_AMRWB_16000_1 = 113,	3GPP TS 48.103 table 5.4.2.2.1
+			 * CODEC_IUFP = 96,
+			 * CODEC_CLEARMODE = 120,		3GPP TS 48.103 table 5.4.2.2.1
+			 */
+			if (existing_pt_max >= 110 && existing_pt_max < 113)
+				existing_pt_max = 113;
+			else if (existing_pt_max == 120)
+				existing_pt_max++;
+		}
+
+		if (exists)
+			new_entry->payload_type = existing_pt_max + 1;
+	}
+
+	/* new_entry is complete, increment list count. */
+	ac->count++;
+
+	return new_entry;
 }
 
 /* Find or create an entry for the given payload_type number in the given list of codecs.

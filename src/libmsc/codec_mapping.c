@@ -494,7 +494,7 @@ struct sdp_audio_codec *sdp_audio_codecs_add_speech_ver(struct sdp_audio_codecs 
 		int i;
 		for (i = 0; i < m->speech_ver_count; i++) {
 			if (m->speech_ver[i] == speech_ver) {
-				ret = sdp_audio_codecs_add_copy(ac, &m->sdp);
+				ret = sdp_audio_codecs_add_copy(ac, &m->sdp, true, true);
 				break;
 			}
 		}
@@ -507,7 +507,7 @@ struct sdp_audio_codec *sdp_audio_codecs_add_mgcp_codec(struct sdp_audio_codecs 
 	const struct codec_mapping *m = codec_mapping_by_mgcp_codec(mgcp_codec);
 	if (!m)
 		return NULL;
-	return sdp_audio_codecs_add_copy(ac, &m->sdp);
+	return sdp_audio_codecs_add_copy(ac, &m->sdp, true, true);
 }
 
 void sdp_audio_codecs_from_bearer_cap(struct sdp_audio_codecs *ac, const struct gsm_mncc_bearer_cap *bc)
@@ -589,7 +589,7 @@ void sdp_audio_codecs_from_speech_codec_list(struct sdp_audio_codecs *ac, const 
 		codec_mapping_foreach (m) {
 			if (!codec_mapping_matches_gsm0808_speech_codec(m, sc))
 				continue;
-			sdp_audio_codecs_add_copy(ac, &m->sdp);
+			sdp_audio_codecs_add_copy(ac, &m->sdp, true, true);
 		}
 	}
 }
