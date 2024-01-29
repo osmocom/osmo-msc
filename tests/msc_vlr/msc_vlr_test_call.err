@@ -2615,7 +2615,7 @@ a=rtpmap:3 GSM/8000
 a=rtpmap:111 GSM-HR-08/8000
 a=ptime:20
 
-- VALIDATE_SDP OK: cc_to_mncc_tx_last_sdp == t->mo_tx_sdp_mncc_setup_ind == AMR GSM-EFR GSM GSM-HR-08
+- VALIDATE_SDP OK: cc_to_mncc_tx_last_sdp == t->mo_tx_sdp_mncc_setup_ind == AMR:octet-align=1#112 GSM-EFR#110 GSM#3 GSM-HR-08#111
 - MNCC replies with MNCC_RTP_CREATE
   MSC <-- MNCC: callref 0x80000004: MNCC_RTP_CREATE
 
@@ -2654,7 +2654,7 @@ a=rtpmap:3 GSM/8000
 a=rtpmap:111 GSM-HR-08/8000
 a=ptime:20
 
-- VALIDATE_SDP OK: cc_to_mncc_tx_last_sdp == t->mo_tx_sdp_mncc_rtp_create == AMR GSM-EFR GSM GSM-HR-08
+- VALIDATE_SDP OK: cc_to_mncc_tx_last_sdp == t->mo_tx_sdp_mncc_rtp_create == AMR:octet-align=1#112 GSM-EFR#110 GSM#3 GSM-HR-08#111
 - MNCC says that's fine
   MSC <-- MNCC: callref 0x80000004: MNCC_CALL_PROC_REQ
 
@@ -2669,7 +2669,7 @@ DMSC msc_a(IMSI-901700000010650:MSISDN-46071:GERAN-A:CM_SERVICE_REQ){MSC_A_ST_CO
 DMSC dummy_msc_i(IMSI-901700000010650:MSISDN-46071:GERAN-A:CM_SERVICE_REQ){0}: Received Event MSC_I_EV_FROM_A_FORWARD_ACCESS_SIGNALLING_REQUEST
 DBSSAP msc_a(IMSI-901700000010650:MSISDN-46071:GERAN-A:CM_SERVICE_REQ){MSC_A_ST_COMMUNICATING}: Assignment for this trans already started earlier
 - Total time passed: 1.000023 s
-- The other call leg got established (not shown here), MNCC tells us so, with codecs { AMR GSM-EFR GSM GSM-HR-08 }
+- The other call leg got established (not shown here), MNCC tells us so, with codecs { AMR:octet-align=1#112 GSM-EFR#110 GSM#3 GSM-HR-08#111 }
   MSC <-- MNCC: callref 0x80000004: MNCC_ALERT_REQ
 v=0
 o=OsmoMSC 0 0 IN IP4 1.2.3.4
@@ -3000,7 +3000,7 @@ a=rtpmap:3 GSM/8000
 a=rtpmap:111 GSM-HR-08/8000
 a=ptime:20
 
-- VALIDATE_SDP OK: cc_to_mncc_tx_last_sdp == t->mt_tx_sdp_mncc_rtp_create == AMR GSM-EFR GSM GSM-HR-08
+- VALIDATE_SDP OK: cc_to_mncc_tx_last_sdp == t->mt_tx_sdp_mncc_rtp_create == AMR:octet-align=1#112 GSM-EFR#110 GSM#3 GSM-HR-08#111
 - Total time passed: 126.000114 s
   MSC <--GERAN-A-- MS: GSM48_MT_CC_ALERTING
 DREF msc_a(IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP){MSC_A_ST_COMMUNICATING}: + rx_from_ms: now used by 2 (cc,rx_from_ms)
@@ -3027,7 +3027,7 @@ a=rtpmap:111 GSM-HR-08/8000
 a=ptime:20
 
 DREF msc_a(IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP){MSC_A_ST_COMMUNICATING}: - rx_from_ms: now used by 1 (cc)
-- VALIDATE_SDP OK: cc_to_mncc_tx_last_sdp == t->mt_tx_sdp_mncc_alert_ind == AMR GSM-EFR GSM GSM-HR-08
+- VALIDATE_SDP OK: cc_to_mncc_tx_last_sdp == t->mt_tx_sdp_mncc_alert_ind == AMR:octet-align=1#112 GSM-EFR#110 GSM#3 GSM-HR-08#111
 - Total time passed: 127.000137 s
   MSC <--GERAN-A-- MS: GSM48_MT_CC_CONNECT
 DREF msc_a(IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP){MSC_A_ST_COMMUNICATING}: + rx_from_ms: now used by 2 (cc,rx_from_ms)
@@ -3053,7 +3053,7 @@ a=rtpmap:111 GSM-HR-08/8000
 a=ptime:20
 
 DREF msc_a(IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP){MSC_A_ST_COMMUNICATING}: - rx_from_ms: now used by 1 (cc)
-- VALIDATE_SDP OK: cc_to_mncc_tx_last_sdp == t->mt_tx_sdp_mncc_setup_cnf == AMR GSM-EFR GSM GSM-HR-08
+- VALIDATE_SDP OK: cc_to_mncc_tx_last_sdp == t->mt_tx_sdp_mncc_setup_cnf == AMR:octet-align=1#112 GSM-EFR#110 GSM#3 GSM-HR-08#111
   MSC <-- MNCC: callref 0x423: MNCC_SETUP_COMPL_REQ
 
 DMNCC trans(CC:CONNECT_REQUEST IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP callref-0x423 tid-0) rx MNCC_SETUP_COMPL_REQ
@@ -3250,7 +3250,7 @@ m=audio 23 RTP/AVP 3
 a=rtpmap:3 GSM/8000
 a=ptime:20
 
-- VALIDATE_SDP OK: cc_to_mncc_tx_last_sdp == t->mo_tx_sdp_mncc_setup_ind == GSM
+- VALIDATE_SDP OK: cc_to_mncc_tx_last_sdp == t->mo_tx_sdp_mncc_setup_ind == GSM#3
 - MNCC replies with MNCC_RTP_CREATE
   MSC <-- MNCC: callref 0x80000005: MNCC_RTP_CREATE
 
@@ -3285,7 +3285,7 @@ m=audio 23 RTP/AVP 3
 a=rtpmap:3 GSM/8000
 a=ptime:20
 
-- VALIDATE_SDP OK: cc_to_mncc_tx_last_sdp == t->mo_tx_sdp_mncc_rtp_create == GSM
+- VALIDATE_SDP OK: cc_to_mncc_tx_last_sdp == t->mo_tx_sdp_mncc_rtp_create == GSM#3
 - MNCC says that's fine
   MSC <-- MNCC: callref 0x80000005: MNCC_CALL_PROC_REQ
 
@@ -3300,7 +3300,7 @@ DMSC msc_a(IMSI-901700000010650:MSISDN-46071:GERAN-A:CM_SERVICE_REQ){MSC_A_ST_CO
 DMSC dummy_msc_i(IMSI-901700000010650:MSISDN-46071:GERAN-A:CM_SERVICE_REQ){0}: Received Event MSC_I_EV_FROM_A_FORWARD_ACCESS_SIGNALLING_REQUEST
 DBSSAP msc_a(IMSI-901700000010650:MSISDN-46071:GERAN-A:CM_SERVICE_REQ){MSC_A_ST_COMMUNICATING}: Assignment for this trans already started earlier
 - Total time passed: 251.000205 s
-- The other call leg got established (not shown here), MNCC tells us so, with codecs { GSM }
+- The other call leg got established (not shown here), MNCC tells us so, with codecs { GSM#3 }
   MSC <-- MNCC: callref 0x80000005: MNCC_ALERT_REQ
 v=0
 o=OsmoMSC 0 0 IN IP4 1.2.3.4
@@ -3611,7 +3611,7 @@ m=audio 23 RTP/AVP 3
 a=rtpmap:3 GSM/8000
 a=ptime:20
 
-- VALIDATE_SDP OK: cc_to_mncc_tx_last_sdp == t->mt_tx_sdp_mncc_rtp_create == GSM
+- VALIDATE_SDP OK: cc_to_mncc_tx_last_sdp == t->mt_tx_sdp_mncc_rtp_create == GSM#3
 - Total time passed: 376.000296 s
   MSC <--GERAN-A-- MS: GSM48_MT_CC_ALERTING
 DREF msc_a(IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP){MSC_A_ST_COMMUNICATING}: + rx_from_ms: now used by 2 (cc,rx_from_ms)
@@ -3634,7 +3634,7 @@ a=rtpmap:3 GSM/8000
 a=ptime:20
 
 DREF msc_a(IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP){MSC_A_ST_COMMUNICATING}: - rx_from_ms: now used by 1 (cc)
-- VALIDATE_SDP OK: cc_to_mncc_tx_last_sdp == t->mt_tx_sdp_mncc_alert_ind == GSM
+- VALIDATE_SDP OK: cc_to_mncc_tx_last_sdp == t->mt_tx_sdp_mncc_alert_ind == GSM#3
 - Total time passed: 377.000319 s
   MSC <--GERAN-A-- MS: GSM48_MT_CC_CONNECT
 DREF msc_a(IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP){MSC_A_ST_COMMUNICATING}: + rx_from_ms: now used by 2 (cc,rx_from_ms)
@@ -3656,7 +3656,7 @@ a=rtpmap:3 GSM/8000
 a=ptime:20
 
 DREF msc_a(IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP){MSC_A_ST_COMMUNICATING}: - rx_from_ms: now used by 1 (cc)
-- VALIDATE_SDP OK: cc_to_mncc_tx_last_sdp == t->mt_tx_sdp_mncc_setup_cnf == GSM
+- VALIDATE_SDP OK: cc_to_mncc_tx_last_sdp == t->mt_tx_sdp_mncc_setup_cnf == GSM#3
   MSC <-- MNCC: callref 0x423: MNCC_SETUP_COMPL_REQ
 
 DMNCC trans(CC:CONNECT_REQUEST IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP callref-0x423 tid-0) rx MNCC_SETUP_COMPL_REQ
@@ -3853,7 +3853,7 @@ m=audio 23 RTP/AVP 3
 a=rtpmap:3 GSM/8000
 a=ptime:20
 
-- VALIDATE_SDP OK: cc_to_mncc_tx_last_sdp == t->mo_tx_sdp_mncc_setup_ind == GSM
+- VALIDATE_SDP OK: cc_to_mncc_tx_last_sdp == t->mo_tx_sdp_mncc_setup_ind == GSM#3
 - MNCC replies with MNCC_RTP_CREATE
   MSC <-- MNCC: callref 0x80000006: MNCC_RTP_CREATE
 
@@ -3888,7 +3888,7 @@ m=audio 23 RTP/AVP 3
 a=rtpmap:3 GSM/8000
 a=ptime:20
 
-- VALIDATE_SDP OK: cc_to_mncc_tx_last_sdp == t->mo_tx_sdp_mncc_rtp_create == GSM
+- VALIDATE_SDP OK: cc_to_mncc_tx_last_sdp == t->mo_tx_sdp_mncc_rtp_create == GSM#3
 - MNCC says that's fine
   MSC <-- MNCC: callref 0x80000006: MNCC_CALL_PROC_REQ
 
@@ -3903,7 +3903,7 @@ DMSC msc_a(IMSI-901700000010650:MSISDN-46071:GERAN-A:CM_SERVICE_REQ){MSC_A_ST_CO
 DMSC dummy_msc_i(IMSI-901700000010650:MSISDN-46071:GERAN-A:CM_SERVICE_REQ){0}: Received Event MSC_I_EV_FROM_A_FORWARD_ACCESS_SIGNALLING_REQUEST
 DBSSAP msc_a(IMSI-901700000010650:MSISDN-46071:GERAN-A:CM_SERVICE_REQ){MSC_A_ST_COMMUNICATING}: Assignment for this trans already started earlier
 - Total time passed: 501.000387 s
-- The other call leg got established (not shown here), MNCC tells us so, with codecs { GSM }
+- The other call leg got established (not shown here), MNCC tells us so, with codecs { GSM#3 }
   MSC <-- MNCC: callref 0x80000006: MNCC_ALERT_REQ
 v=0
 o=OsmoMSC 0 0 IN IP4 1.2.3.4
@@ -4214,7 +4214,7 @@ m=audio 23 RTP/AVP 3
 a=rtpmap:3 GSM/8000
 a=ptime:20
 
-- VALIDATE_SDP OK: cc_to_mncc_tx_last_sdp == t->mt_tx_sdp_mncc_rtp_create == GSM
+- VALIDATE_SDP OK: cc_to_mncc_tx_last_sdp == t->mt_tx_sdp_mncc_rtp_create == GSM#3
 - Total time passed: 626.000478 s
   MSC <--GERAN-A-- MS: GSM48_MT_CC_ALERTING
 DREF msc_a(IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP){MSC_A_ST_COMMUNICATING}: + rx_from_ms: now used by 2 (cc,rx_from_ms)
@@ -4237,7 +4237,7 @@ a=rtpmap:3 GSM/8000
 a=ptime:20
 
 DREF msc_a(IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP){MSC_A_ST_COMMUNICATING}: - rx_from_ms: now used by 1 (cc)
-- VALIDATE_SDP OK: cc_to_mncc_tx_last_sdp == t->mt_tx_sdp_mncc_alert_ind == GSM
+- VALIDATE_SDP OK: cc_to_mncc_tx_last_sdp == t->mt_tx_sdp_mncc_alert_ind == GSM#3
 - Total time passed: 627.000501 s
   MSC <--GERAN-A-- MS: GSM48_MT_CC_CONNECT
 DREF msc_a(IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP){MSC_A_ST_COMMUNICATING}: + rx_from_ms: now used by 2 (cc,rx_from_ms)
@@ -4259,7 +4259,7 @@ a=rtpmap:3 GSM/8000
 a=ptime:20
 
 DREF msc_a(IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP){MSC_A_ST_COMMUNICATING}: - rx_from_ms: now used by 1 (cc)
-- VALIDATE_SDP OK: cc_to_mncc_tx_last_sdp == t->mt_tx_sdp_mncc_setup_cnf == GSM
+- VALIDATE_SDP OK: cc_to_mncc_tx_last_sdp == t->mt_tx_sdp_mncc_setup_cnf == GSM#3
   MSC <-- MNCC: callref 0x423: MNCC_SETUP_COMPL_REQ
 
 DMNCC trans(CC:CONNECT_REQUEST IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP callref-0x423 tid-0) rx MNCC_SETUP_COMPL_REQ
@@ -4460,7 +4460,7 @@ a=rtpmap:3 GSM/8000
 a=rtpmap:111 GSM-HR-08/8000
 a=ptime:20
 
-- VALIDATE_SDP OK: cc_to_mncc_tx_last_sdp == t->mo_tx_sdp_mncc_setup_ind == AMR GSM-EFR GSM GSM-HR-08
+- VALIDATE_SDP OK: cc_to_mncc_tx_last_sdp == t->mo_tx_sdp_mncc_setup_ind == AMR:octet-align=1#112 GSM-EFR#110 GSM#3 GSM-HR-08#111
 - MNCC replies with MNCC_RTP_CREATE
   MSC <-- MNCC: callref 0x80000007: MNCC_RTP_CREATE
 
@@ -4499,7 +4499,7 @@ a=rtpmap:3 GSM/8000
 a=rtpmap:111 GSM-HR-08/8000
 a=ptime:20
 
-- VALIDATE_SDP OK: cc_to_mncc_tx_last_sdp == t->mo_tx_sdp_mncc_rtp_create == AMR GSM-EFR GSM GSM-HR-08
+- VALIDATE_SDP OK: cc_to_mncc_tx_last_sdp == t->mo_tx_sdp_mncc_rtp_create == AMR:octet-align=1#112 GSM-EFR#110 GSM#3 GSM-HR-08#111
 - MNCC says that's fine
   MSC <-- MNCC: callref 0x80000007: MNCC_CALL_PROC_REQ
 
@@ -4514,7 +4514,7 @@ DMSC msc_a(IMSI-901700000010650:MSISDN-46071:GERAN-A:CM_SERVICE_REQ){MSC_A_ST_CO
 DMSC dummy_msc_i(IMSI-901700000010650:MSISDN-46071:GERAN-A:CM_SERVICE_REQ){0}: Received Event MSC_I_EV_FROM_A_FORWARD_ACCESS_SIGNALLING_REQUEST
 DBSSAP msc_a(IMSI-901700000010650:MSISDN-46071:GERAN-A:CM_SERVICE_REQ){MSC_A_ST_COMMUNICATING}: Assignment for this trans already started earlier
 - Total time passed: 751.000569 s
-- The other call leg got established (not shown here), MNCC tells us so, with codecs { GSM }
+- The other call leg got established (not shown here), MNCC tells us so, with codecs { GSM#3 }
 - Expecting re-assignment
   MSC <-- MNCC: callref 0x80000007: MNCC_ALERT_REQ
 v=0
@@ -4844,7 +4844,7 @@ m=audio 23 RTP/AVP 3
 a=rtpmap:3 GSM/8000
 a=ptime:20
 
-- VALIDATE_SDP OK: cc_to_mncc_tx_last_sdp == t->mt_tx_sdp_mncc_rtp_create == GSM
+- VALIDATE_SDP OK: cc_to_mncc_tx_last_sdp == t->mt_tx_sdp_mncc_rtp_create == GSM#3
 - Total time passed: 876.000660 s
   MSC <--GERAN-A-- MS: GSM48_MT_CC_ALERTING
 DREF msc_a(IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP){MSC_A_ST_COMMUNICATING}: + rx_from_ms: now used by 2 (cc,rx_from_ms)
@@ -4867,7 +4867,7 @@ a=rtpmap:3 GSM/8000
 a=ptime:20
 
 DREF msc_a(IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP){MSC_A_ST_COMMUNICATING}: - rx_from_ms: now used by 1 (cc)
-- VALIDATE_SDP OK: cc_to_mncc_tx_last_sdp == t->mt_tx_sdp_mncc_alert_ind == GSM
+- VALIDATE_SDP OK: cc_to_mncc_tx_last_sdp == t->mt_tx_sdp_mncc_alert_ind == GSM#3
 - Total time passed: 877.000683 s
   MSC <--GERAN-A-- MS: GSM48_MT_CC_CONNECT
 DREF msc_a(IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP){MSC_A_ST_COMMUNICATING}: + rx_from_ms: now used by 2 (cc,rx_from_ms)
@@ -4889,7 +4889,7 @@ a=rtpmap:3 GSM/8000
 a=ptime:20
 
 DREF msc_a(IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP){MSC_A_ST_COMMUNICATING}: - rx_from_ms: now used by 1 (cc)
-- VALIDATE_SDP OK: cc_to_mncc_tx_last_sdp == t->mt_tx_sdp_mncc_setup_cnf == GSM
+- VALIDATE_SDP OK: cc_to_mncc_tx_last_sdp == t->mt_tx_sdp_mncc_setup_cnf == GSM#3
   MSC <-- MNCC: callref 0x423: MNCC_SETUP_COMPL_REQ
 
 DMNCC trans(CC:CONNECT_REQUEST IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP callref-0x423 tid-0) rx MNCC_SETUP_COMPL_REQ
@@ -5090,7 +5090,7 @@ a=rtpmap:3 GSM/8000
 a=rtpmap:111 GSM-HR-08/8000
 a=ptime:20
 
-- VALIDATE_SDP OK: cc_to_mncc_tx_last_sdp == t->mo_tx_sdp_mncc_setup_ind == AMR GSM-EFR GSM GSM-HR-08
+- VALIDATE_SDP OK: cc_to_mncc_tx_last_sdp == t->mo_tx_sdp_mncc_setup_ind == AMR:octet-align=1#112 GSM-EFR#110 GSM#3 GSM-HR-08#111
 - MNCC replies with MNCC_RTP_CREATE
   MSC <-- MNCC: callref 0x80000008: MNCC_RTP_CREATE
 
@@ -5129,7 +5129,7 @@ a=rtpmap:3 GSM/8000
 a=rtpmap:111 GSM-HR-08/8000
 a=ptime:20
 
-- VALIDATE_SDP OK: cc_to_mncc_tx_last_sdp == t->mo_tx_sdp_mncc_rtp_create == AMR GSM-EFR GSM GSM-HR-08
+- VALIDATE_SDP OK: cc_to_mncc_tx_last_sdp == t->mo_tx_sdp_mncc_rtp_create == AMR:octet-align=1#112 GSM-EFR#110 GSM#3 GSM-HR-08#111
 - MNCC says that's fine
   MSC <-- MNCC: callref 0x80000008: MNCC_CALL_PROC_REQ
 
@@ -5144,7 +5144,7 @@ DMSC msc_a(IMSI-901700000010650:MSISDN-46071:GERAN-A:CM_SERVICE_REQ){MSC_A_ST_CO
 DMSC dummy_msc_i(IMSI-901700000010650:MSISDN-46071:GERAN-A:CM_SERVICE_REQ){0}: Received Event MSC_I_EV_FROM_A_FORWARD_ACCESS_SIGNALLING_REQUEST
 DBSSAP msc_a(IMSI-901700000010650:MSISDN-46071:GERAN-A:CM_SERVICE_REQ){MSC_A_ST_COMMUNICATING}: Assignment for this trans already started earlier
 - Total time passed: 1001.000751 s
-- The other call leg got established (not shown here), MNCC tells us so, with codecs { GSM }
+- The other call leg got established (not shown here), MNCC tells us so, with codecs { GSM#3 }
 - Expecting re-assignment
   MSC <-- MNCC: callref 0x80000008: MNCC_ALERT_REQ
 v=0
@@ -5474,7 +5474,7 @@ m=audio 23 RTP/AVP 3
 a=rtpmap:3 GSM/8000
 a=ptime:20
 
-- VALIDATE_SDP OK: cc_to_mncc_tx_last_sdp == t->mt_tx_sdp_mncc_rtp_create == GSM
+- VALIDATE_SDP OK: cc_to_mncc_tx_last_sdp == t->mt_tx_sdp_mncc_rtp_create == GSM#3
 - Total time passed: 1126.000842 s
   MSC <--GERAN-A-- MS: GSM48_MT_CC_ALERTING
 DREF msc_a(IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP){MSC_A_ST_COMMUNICATING}: + rx_from_ms: now used by 2 (cc,rx_from_ms)
@@ -5497,7 +5497,7 @@ a=rtpmap:3 GSM/8000
 a=ptime:20
 
 DREF msc_a(IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP){MSC_A_ST_COMMUNICATING}: - rx_from_ms: now used by 1 (cc)
-- VALIDATE_SDP OK: cc_to_mncc_tx_last_sdp == t->mt_tx_sdp_mncc_alert_ind == GSM
+- VALIDATE_SDP OK: cc_to_mncc_tx_last_sdp == t->mt_tx_sdp_mncc_alert_ind == GSM#3
 - Total time passed: 1127.000865 s
   MSC <--GERAN-A-- MS: GSM48_MT_CC_CONNECT
 DREF msc_a(IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP){MSC_A_ST_COMMUNICATING}: + rx_from_ms: now used by 2 (cc,rx_from_ms)
@@ -5519,7 +5519,7 @@ a=rtpmap:3 GSM/8000
 a=ptime:20
 
 DREF msc_a(IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP){MSC_A_ST_COMMUNICATING}: - rx_from_ms: now used by 1 (cc)
-- VALIDATE_SDP OK: cc_to_mncc_tx_last_sdp == t->mt_tx_sdp_mncc_setup_cnf == GSM
+- VALIDATE_SDP OK: cc_to_mncc_tx_last_sdp == t->mt_tx_sdp_mncc_setup_cnf == GSM#3
   MSC <-- MNCC: callref 0x423: MNCC_SETUP_COMPL_REQ
 
 DMNCC trans(CC:CONNECT_REQUEST IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP callref-0x423 tid-0) rx MNCC_SETUP_COMPL_REQ
@@ -5720,7 +5720,7 @@ a=rtpmap:3 GSM/8000
 a=rtpmap:111 GSM-HR-08/8000
 a=ptime:20
 
-- VALIDATE_SDP OK: cc_to_mncc_tx_last_sdp == t->mo_tx_sdp_mncc_setup_ind == AMR GSM-EFR GSM GSM-HR-08
+- VALIDATE_SDP OK: cc_to_mncc_tx_last_sdp == t->mo_tx_sdp_mncc_setup_ind == AMR:octet-align=1#112 GSM-EFR#110 GSM#3 GSM-HR-08#111
 - MNCC replies with MNCC_RTP_CREATE
   MSC <-- MNCC: callref 0x80000009: MNCC_RTP_CREATE
 
@@ -5759,7 +5759,7 @@ a=rtpmap:3 GSM/8000
 a=rtpmap:111 GSM-HR-08/8000
 a=ptime:20
 
-- VALIDATE_SDP OK: cc_to_mncc_tx_last_sdp == t->mo_tx_sdp_mncc_rtp_create == AMR GSM-EFR GSM GSM-HR-08
+- VALIDATE_SDP OK: cc_to_mncc_tx_last_sdp == t->mo_tx_sdp_mncc_rtp_create == AMR:octet-align=1#112 GSM-EFR#110 GSM#3 GSM-HR-08#111
 - MNCC says that's fine
   MSC <-- MNCC: callref 0x80000009: MNCC_CALL_PROC_REQ
 
@@ -5774,27 +5774,27 @@ DMSC msc_a(IMSI-901700000010650:MSISDN-46071:GERAN-A:CM_SERVICE_REQ){MSC_A_ST_CO
 DMSC dummy_msc_i(IMSI-901700000010650:MSISDN-46071:GERAN-A:CM_SERVICE_REQ){0}: Received Event MSC_I_EV_FROM_A_FORWARD_ACCESS_SIGNALLING_REQUEST
 DBSSAP msc_a(IMSI-901700000010650:MSISDN-46071:GERAN-A:CM_SERVICE_REQ){MSC_A_ST_COMMUNICATING}: Assignment for this trans already started earlier
 - Total time passed: 1251.000933 s
-- The other call leg got established (not shown here), MNCC tells us so, with codecs { AMR#96 GSM-EFR GSM GSM-HR-08 }
+- The other call leg got established (not shown here), MNCC tells us so, with codecs { AMR:octet-align=1#127 GSM-EFR#110 GSM#3 GSM-HR-08#111 }
   MSC <-- MNCC: callref 0x80000009: MNCC_ALERT_REQ
 v=0
 o=OsmoMSC 0 0 IN IP4 1.2.3.4
 s=GSM Call
 c=IN IP4 1.2.3.4
 t=0 0
-m=audio 56 RTP/AVP 96 110 3 111
-a=rtpmap:96 AMR/8000
-a=fmtp:96 octet-align=1
+m=audio 56 RTP/AVP 127 110 3 111
+a=rtpmap:127 AMR/8000
+a=fmtp:127 octet-align=1
 a=rtpmap:110 GSM-EFR/8000
 a=rtpmap:3 GSM/8000
 a=rtpmap:111 GSM-HR-08/8000
 a=ptime:20
 
-DMNCC trans(CC:MO_CALL_PROC IMSI-901700000010650:MSISDN-46071:GERAN-A:CM_SERVICE_REQ callref-0x80000009 tid-8) rx MNCC_ALERT_REQ (RTP=1.2.3.4:56{AMR:octet-align=1#96,GSM-EFR#110,GSM#3,GSM-HR-08#111})
+DMNCC trans(CC:MO_CALL_PROC IMSI-901700000010650:MSISDN-46071:GERAN-A:CM_SERVICE_REQ callref-0x80000009 tid-8) rx MNCC_ALERT_REQ (RTP=1.2.3.4:56{AMR:octet-align=1#127,GSM-EFR#110,GSM#3,GSM-HR-08#111})
 DCC trans(CC:MO_CALL_PROC IMSI-901700000010650:MSISDN-46071:GERAN-A:CM_SERVICE_REQ callref-0x80000009 tid-8) stopping pending guard timer
 DCC trans(CC:MO_CALL_PROC IMSI-901700000010650:MSISDN-46071:GERAN-A:CM_SERVICE_REQ callref-0x80000009 tid-8) starting guard timer with 180 seconds
 DCC trans(CC:MO_CALL_PROC IMSI-901700000010650:MSISDN-46071:GERAN-A:CM_SERVICE_REQ callref-0x80000009 tid-8) new state MO_CALL_PROC -> CALL_DELIVERED
-DCC trans(CC:CALL_DELIVERED IMSI-901700000010650:MSISDN-46071:GERAN-A:CM_SERVICE_REQ callref-0x80000009 tid-8) codecs: 10.23.23.1:23{AMR:octet-align=1#96,GSM-EFR#110,GSM#3,GSM-HR-08#111} (from: assigned=AMR:octet-align=1#112 remote=1.2.3.4:56{AMR:octet-align=1#96,GSM-EFR#110,GSM#3,GSM-HR-08#111} MS={AMR:octet-align=1#112,GSM-EFR#110,GSM#3,GSM-HR-08#111} bss={GSM#3,GSM-EFR#110,AMR:octet-align=1#112,GSM-HR-08#111} RAN={AMR:octet-align=1#112,GSM-EFR#110,GSM#3,GSM-HR-08#111})
-DCC rtp_stream(IMSI-901700000010650:MSISDN-46071:GERAN-A:CM_SERVICE_REQ:trans-8:call-16:RTP_TO_CN:no-CI){UNINITIALIZED}: setting codecs to AMR:octet-align=1#96,GSM-EFR#110,GSM#3,GSM-HR-08#111
+DCC trans(CC:CALL_DELIVERED IMSI-901700000010650:MSISDN-46071:GERAN-A:CM_SERVICE_REQ callref-0x80000009 tid-8) codecs: 10.23.23.1:23{AMR:octet-align=1#127,GSM-EFR#110,GSM#3,GSM-HR-08#111} (from: assigned=AMR:octet-align=1#112 remote=1.2.3.4:56{AMR:octet-align=1#127,GSM-EFR#110,GSM#3,GSM-HR-08#111} MS={AMR:octet-align=1#112,GSM-EFR#110,GSM#3,GSM-HR-08#111} bss={GSM#3,GSM-EFR#110,AMR:octet-align=1#112,GSM-HR-08#111} RAN={AMR:octet-align=1#112,GSM-EFR#110,GSM#3,GSM-HR-08#111})
+DCC rtp_stream(IMSI-901700000010650:MSISDN-46071:GERAN-A:CM_SERVICE_REQ:trans-8:call-16:RTP_TO_CN:no-CI){UNINITIALIZED}: setting codecs to AMR:octet-align=1#127,GSM-EFR#110,GSM#3,GSM-HR-08#111
 DCC rtp_stream(IMSI-901700000010650:MSISDN-46071:GERAN-A:CM_SERVICE_REQ:trans-8:call-16:RTP_TO_CN:no-CI:local-10-23-23-1-23){UNINITIALIZED}: setting remote addr to 1.2.3.4:56
 DCC rtp_stream(IMSI-901700000010650:MSISDN-46071:GERAN-A:CM_SERVICE_REQ:trans-8:call-16:RTP_TO_CN:no-CI:local-10-23-23-1-23:remote-1-2-3-4-56){UNINITIALIZED}: Not committing: no MGW endpoint CI set up
 DBSSAP msc_a(IMSI-901700000010650:MSISDN-46071:GERAN-A:CM_SERVICE_REQ){MSC_A_ST_COMMUNICATING}: Sending DTAP: CC GSM48_MT_CC_ALERTING
@@ -5808,21 +5808,21 @@ o=OsmoMSC 0 0 IN IP4 1.2.3.4
 s=GSM Call
 c=IN IP4 1.2.3.4
 t=0 0
-m=audio 56 RTP/AVP 96 110 3 111
-a=rtpmap:96 AMR/8000
-a=fmtp:96 octet-align=1
+m=audio 56 RTP/AVP 127 110 3 111
+a=rtpmap:127 AMR/8000
+a=fmtp:127 octet-align=1
 a=rtpmap:110 GSM-EFR/8000
 a=rtpmap:3 GSM/8000
 a=rtpmap:111 GSM-HR-08/8000
 a=ptime:20
 
-DMNCC trans(CC:CALL_DELIVERED IMSI-901700000010650:MSISDN-46071:GERAN-A:CM_SERVICE_REQ callref-0x80000009 tid-8) rx MNCC_SETUP_RSP (RTP=1.2.3.4:56{AMR:octet-align=1#96,GSM-EFR#110,GSM#3,GSM-HR-08#111})
+DMNCC trans(CC:CALL_DELIVERED IMSI-901700000010650:MSISDN-46071:GERAN-A:CM_SERVICE_REQ callref-0x80000009 tid-8) rx MNCC_SETUP_RSP (RTP=1.2.3.4:56{AMR:octet-align=1#127,GSM-EFR#110,GSM#3,GSM-HR-08#111})
 DCC trans(CC:CALL_DELIVERED IMSI-901700000010650:MSISDN-46071:GERAN-A:CM_SERVICE_REQ callref-0x80000009 tid-8) stopping pending guard timer
 DCC trans(CC:CALL_DELIVERED IMSI-901700000010650:MSISDN-46071:GERAN-A:CM_SERVICE_REQ callref-0x80000009 tid-8) starting guard timer with 180 seconds
 DCC trans(CC:CALL_DELIVERED IMSI-901700000010650:MSISDN-46071:GERAN-A:CM_SERVICE_REQ callref-0x80000009 tid-8) starting timer T313 with 30 seconds
 DCC trans(CC:CALL_DELIVERED IMSI-901700000010650:MSISDN-46071:GERAN-A:CM_SERVICE_REQ callref-0x80000009 tid-8) new state CALL_DELIVERED -> CONNECT_IND
-DCC trans(CC:CONNECT_IND IMSI-901700000010650:MSISDN-46071:GERAN-A:CM_SERVICE_REQ callref-0x80000009 tid-8) codecs: 10.23.23.1:23{AMR:octet-align=1#96,GSM-EFR#110,GSM#3,GSM-HR-08#111} (from: assigned=AMR:octet-align=1#112 remote=1.2.3.4:56{AMR:octet-align=1#96,GSM-EFR#110,GSM#3,GSM-HR-08#111} MS={AMR:octet-align=1#112,GSM-EFR#110,GSM#3,GSM-HR-08#111} bss={GSM#3,GSM-EFR#110,AMR:octet-align=1#112,GSM-HR-08#111} RAN={AMR:octet-align=1#112,GSM-EFR#110,GSM#3,GSM-HR-08#111})
-DCC rtp_stream(IMSI-901700000010650:MSISDN-46071:GERAN-A:CM_SERVICE_REQ:trans-8:call-16:RTP_TO_CN:no-CI:local-10-23-23-1-23:remote-1-2-3-4-56){UNINITIALIZED}: no change: codecs already set to AMR:octet-align=1#96,GSM-EFR#110,GSM#3,GSM-HR-08#111
+DCC trans(CC:CONNECT_IND IMSI-901700000010650:MSISDN-46071:GERAN-A:CM_SERVICE_REQ callref-0x80000009 tid-8) codecs: 10.23.23.1:23{AMR:octet-align=1#127,GSM-EFR#110,GSM#3,GSM-HR-08#111} (from: assigned=AMR:octet-align=1#112 remote=1.2.3.4:56{AMR:octet-align=1#127,GSM-EFR#110,GSM#3,GSM-HR-08#111} MS={AMR:octet-align=1#112,GSM-EFR#110,GSM#3,GSM-HR-08#111} bss={GSM#3,GSM-EFR#110,AMR:octet-align=1#112,GSM-HR-08#111} RAN={AMR:octet-align=1#112,GSM-EFR#110,GSM#3,GSM-HR-08#111})
+DCC rtp_stream(IMSI-901700000010650:MSISDN-46071:GERAN-A:CM_SERVICE_REQ:trans-8:call-16:RTP_TO_CN:no-CI:local-10-23-23-1-23:remote-1-2-3-4-56){UNINITIALIZED}: no change: codecs already set to AMR:octet-align=1#127,GSM-EFR#110,GSM#3,GSM-HR-08#111
 DCC rtp_stream(IMSI-901700000010650:MSISDN-46071:GERAN-A:CM_SERVICE_REQ:trans-8:call-16:RTP_TO_CN:no-CI:local-10-23-23-1-23:remote-1-2-3-4-56){UNINITIALIZED}: remote addr already 1.2.3.4:56, no change
 DCC rtp_stream(IMSI-901700000010650:MSISDN-46071:GERAN-A:CM_SERVICE_REQ:trans-8:call-16:RTP_TO_CN:no-CI:local-10-23-23-1-23:remote-1-2-3-4-56){UNINITIALIZED}: Not committing: no MGW endpoint CI set up
 DBSSAP msc_a(IMSI-901700000010650:MSISDN-46071:GERAN-A:CM_SERVICE_REQ){MSC_A_ST_COMMUNICATING}: Sending DTAP: CC GSM48_MT_CC_CONNECT
@@ -5867,9 +5867,9 @@ o=OsmoMSC 0 0 IN IP4 1.2.3.4
 s=GSM Call
 c=IN IP4 1.2.3.4
 t=0 0
-m=audio 56 RTP/AVP 96 110 3 111
-a=rtpmap:96 AMR/8000
-a=fmtp:96 octet-align=1
+m=audio 56 RTP/AVP 127 110 3 111
+a=rtpmap:127 AMR/8000
+a=fmtp:127 octet-align=1
 a=rtpmap:110 GSM-EFR/8000
 a=rtpmap:3 GSM/8000
 a=rtpmap:111 GSM-HR-08/8000
@@ -6105,7 +6105,7 @@ a=rtpmap:3 GSM/8000
 a=rtpmap:111 GSM-HR-08/8000
 a=ptime:20
 
-- VALIDATE_SDP OK: cc_to_mncc_tx_last_sdp == t->mt_tx_sdp_mncc_rtp_create == AMR#96 GSM-EFR GSM GSM-HR-08
+- VALIDATE_SDP OK: cc_to_mncc_tx_last_sdp == t->mt_tx_sdp_mncc_rtp_create == AMR:octet-align=1#127 GSM-EFR#110 GSM#3 GSM-HR-08#111
 - Total time passed: 1376.001024 s
   MSC <--GERAN-A-- MS: GSM48_MT_CC_ALERTING
 DREF msc_a(IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP){MSC_A_ST_COMMUNICATING}: + rx_from_ms: now used by 2 (cc,rx_from_ms)
@@ -6132,7 +6132,7 @@ a=rtpmap:111 GSM-HR-08/8000
 a=ptime:20
 
 DREF msc_a(IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP){MSC_A_ST_COMMUNICATING}: - rx_from_ms: now used by 1 (cc)
-- VALIDATE_SDP OK: cc_to_mncc_tx_last_sdp == t->mt_tx_sdp_mncc_alert_ind == AMR#96 GSM-EFR GSM GSM-HR-08
+- VALIDATE_SDP OK: cc_to_mncc_tx_last_sdp == t->mt_tx_sdp_mncc_alert_ind == AMR:octet-align=1#127 GSM-EFR#110 GSM#3 GSM-HR-08#111
 - Total time passed: 1377.001047 s
   MSC <--GERAN-A-- MS: GSM48_MT_CC_CONNECT
 DREF msc_a(IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP){MSC_A_ST_COMMUNICATING}: + rx_from_ms: now used by 2 (cc,rx_from_ms)
@@ -6158,7 +6158,7 @@ a=rtpmap:111 GSM-HR-08/8000
 a=ptime:20
 
 DREF msc_a(IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP){MSC_A_ST_COMMUNICATING}: - rx_from_ms: now used by 1 (cc)
-- VALIDATE_SDP OK: cc_to_mncc_tx_last_sdp == t->mt_tx_sdp_mncc_setup_cnf == AMR#96 GSM-EFR GSM GSM-HR-08
+- VALIDATE_SDP OK: cc_to_mncc_tx_last_sdp == t->mt_tx_sdp_mncc_setup_cnf == AMR:octet-align=1#127 GSM-EFR#110 GSM#3 GSM-HR-08#111
   MSC <-- MNCC: callref 0x423: MNCC_SETUP_COMPL_REQ
 
 DMNCC trans(CC:CONNECT_REQUEST IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP callref-0x423 tid-0) rx MNCC_SETUP_COMPL_REQ
@@ -6359,7 +6359,7 @@ a=rtpmap:3 GSM/8000
 a=rtpmap:111 GSM-HR-08/8000
 a=ptime:20
 
-- VALIDATE_SDP OK: cc_to_mncc_tx_last_sdp == t->mo_tx_sdp_mncc_setup_ind == AMR GSM-EFR GSM GSM-HR-08
+- VALIDATE_SDP OK: cc_to_mncc_tx_last_sdp == t->mo_tx_sdp_mncc_setup_ind == AMR:octet-align=1#112 GSM-EFR#110 GSM#3 GSM-HR-08#111
 - MNCC replies with MNCC_RTP_CREATE
   MSC <-- MNCC: callref 0x8000000a: MNCC_RTP_CREATE
 
@@ -6398,7 +6398,7 @@ a=rtpmap:3 GSM/8000
 a=rtpmap:111 GSM-HR-08/8000
 a=ptime:20
 
-- VALIDATE_SDP OK: cc_to_mncc_tx_last_sdp == t->mo_tx_sdp_mncc_rtp_create == AMR#98 GSM-EFR GSM GSM-HR-08
+- VALIDATE_SDP OK: cc_to_mncc_tx_last_sdp == t->mo_tx_sdp_mncc_rtp_create == AMR:octet-align=1#127 GSM-EFR#110 GSM#3 GSM-HR-08#111
 - MNCC says that's fine
   MSC <-- MNCC: callref 0x8000000a: MNCC_CALL_PROC_REQ
 
@@ -6413,27 +6413,27 @@ DMSC msc_a(IMSI-901700000010650:MSISDN-46071:GERAN-A:CM_SERVICE_REQ){MSC_A_ST_CO
 DMSC dummy_msc_i(IMSI-901700000010650:MSISDN-46071:GERAN-A:CM_SERVICE_REQ){0}: Received Event MSC_I_EV_FROM_A_FORWARD_ACCESS_SIGNALLING_REQUEST
 DBSSAP msc_a(IMSI-901700000010650:MSISDN-46071:GERAN-A:CM_SERVICE_REQ){MSC_A_ST_COMMUNICATING}: Assignment for this trans already started earlier
 - Total time passed: 1501.001115 s
-- The other call leg got established (not shown here), MNCC tells us so, with codecs { AMR#98 GSM-EFR GSM GSM-HR-08 }
+- The other call leg got established (not shown here), MNCC tells us so, with codecs { AMR:octet-align=1#127 GSM-EFR#110 GSM#3 GSM-HR-08#111 }
   MSC <-- MNCC: callref 0x8000000a: MNCC_ALERT_REQ
 v=0
 o=OsmoMSC 0 0 IN IP4 1.2.3.4
 s=GSM Call
 c=IN IP4 1.2.3.4
 t=0 0
-m=audio 56 RTP/AVP 98 110 3 111
-a=rtpmap:98 AMR/8000
-a=fmtp:98 octet-align=1
+m=audio 56 RTP/AVP 127 110 3 111
+a=rtpmap:127 AMR/8000
+a=fmtp:127 octet-align=1
 a=rtpmap:110 GSM-EFR/8000
 a=rtpmap:3 GSM/8000
 a=rtpmap:111 GSM-HR-08/8000
 a=ptime:20
 
-DMNCC trans(CC:MO_CALL_PROC IMSI-901700000010650:MSISDN-46071:GERAN-A:CM_SERVICE_REQ callref-0x8000000a tid-8) rx MNCC_ALERT_REQ (RTP=1.2.3.4:56{AMR:octet-align=1#98,GSM-EFR#110,GSM#3,GSM-HR-08#111})
+DMNCC trans(CC:MO_CALL_PROC IMSI-901700000010650:MSISDN-46071:GERAN-A:CM_SERVICE_REQ callref-0x8000000a tid-8) rx MNCC_ALERT_REQ (RTP=1.2.3.4:56{AMR:octet-align=1#127,GSM-EFR#110,GSM#3,GSM-HR-08#111})
 DCC trans(CC:MO_CALL_PROC IMSI-901700000010650:MSISDN-46071:GERAN-A:CM_SERVICE_REQ callref-0x8000000a tid-8) stopping pending guard timer
 DCC trans(CC:MO_CALL_PROC IMSI-901700000010650:MSISDN-46071:GERAN-A:CM_SERVICE_REQ callref-0x8000000a tid-8) starting guard timer with 180 seconds
 DCC trans(CC:MO_CALL_PROC IMSI-901700000010650:MSISDN-46071:GERAN-A:CM_SERVICE_REQ callref-0x8000000a tid-8) new state MO_CALL_PROC -> CALL_DELIVERED
-DCC trans(CC:CALL_DELIVERED IMSI-901700000010650:MSISDN-46071:GERAN-A:CM_SERVICE_REQ callref-0x8000000a tid-8) codecs: 10.23.23.1:23{AMR:octet-align=1#98,GSM-EFR#110,GSM#3,GSM-HR-08#111} (from: assigned=AMR:octet-align=1#112 remote=1.2.3.4:56{AMR:octet-align=1#98,GSM-EFR#110,GSM#3,GSM-HR-08#111} MS={AMR:octet-align=1#112,GSM-EFR#110,GSM#3,GSM-HR-08#111} bss={GSM#3,GSM-EFR#110,AMR:octet-align=1#112,GSM-HR-08#111} RAN={AMR:octet-align=1#112,GSM-EFR#110,GSM#3,GSM-HR-08#111})
-DCC rtp_stream(IMSI-901700000010650:MSISDN-46071:GERAN-A:CM_SERVICE_REQ:trans-8:call-18:RTP_TO_CN:no-CI){UNINITIALIZED}: setting codecs to AMR:octet-align=1#98,GSM-EFR#110,GSM#3,GSM-HR-08#111
+DCC trans(CC:CALL_DELIVERED IMSI-901700000010650:MSISDN-46071:GERAN-A:CM_SERVICE_REQ callref-0x8000000a tid-8) codecs: 10.23.23.1:23{AMR:octet-align=1#127,GSM-EFR#110,GSM#3,GSM-HR-08#111} (from: assigned=AMR:octet-align=1#112 remote=1.2.3.4:56{AMR:octet-align=1#127,GSM-EFR#110,GSM#3,GSM-HR-08#111} MS={AMR:octet-align=1#112,GSM-EFR#110,GSM#3,GSM-HR-08#111} bss={GSM#3,GSM-EFR#110,AMR:octet-align=1#112,GSM-HR-08#111} RAN={AMR:octet-align=1#112,GSM-EFR#110,GSM#3,GSM-HR-08#111})
+DCC rtp_stream(IMSI-901700000010650:MSISDN-46071:GERAN-A:CM_SERVICE_REQ:trans-8:call-18:RTP_TO_CN:no-CI){UNINITIALIZED}: setting codecs to AMR:octet-align=1#127,GSM-EFR#110,GSM#3,GSM-HR-08#111
 DCC rtp_stream(IMSI-901700000010650:MSISDN-46071:GERAN-A:CM_SERVICE_REQ:trans-8:call-18:RTP_TO_CN:no-CI:local-10-23-23-1-23){UNINITIALIZED}: setting remote addr to 1.2.3.4:56
 DCC rtp_stream(IMSI-901700000010650:MSISDN-46071:GERAN-A:CM_SERVICE_REQ:trans-8:call-18:RTP_TO_CN:no-CI:local-10-23-23-1-23:remote-1-2-3-4-56){UNINITIALIZED}: Not committing: no MGW endpoint CI set up
 DBSSAP msc_a(IMSI-901700000010650:MSISDN-46071:GERAN-A:CM_SERVICE_REQ){MSC_A_ST_COMMUNICATING}: Sending DTAP: CC GSM48_MT_CC_ALERTING
@@ -6447,21 +6447,21 @@ o=OsmoMSC 0 0 IN IP4 1.2.3.4
 s=GSM Call
 c=IN IP4 1.2.3.4
 t=0 0
-m=audio 56 RTP/AVP 98 110 3 111
-a=rtpmap:98 AMR/8000
-a=fmtp:98 octet-align=1
+m=audio 56 RTP/AVP 127 110 3 111
+a=rtpmap:127 AMR/8000
+a=fmtp:127 octet-align=1
 a=rtpmap:110 GSM-EFR/8000
 a=rtpmap:3 GSM/8000
 a=rtpmap:111 GSM-HR-08/8000
 a=ptime:20
 
-DMNCC trans(CC:CALL_DELIVERED IMSI-901700000010650:MSISDN-46071:GERAN-A:CM_SERVICE_REQ callref-0x8000000a tid-8) rx MNCC_SETUP_RSP (RTP=1.2.3.4:56{AMR:octet-align=1#98,GSM-EFR#110,GSM#3,GSM-HR-08#111})
+DMNCC trans(CC:CALL_DELIVERED IMSI-901700000010650:MSISDN-46071:GERAN-A:CM_SERVICE_REQ callref-0x8000000a tid-8) rx MNCC_SETUP_RSP (RTP=1.2.3.4:56{AMR:octet-align=1#127,GSM-EFR#110,GSM#3,GSM-HR-08#111})
 DCC trans(CC:CALL_DELIVERED IMSI-901700000010650:MSISDN-46071:GERAN-A:CM_SERVICE_REQ callref-0x8000000a tid-8) stopping pending guard timer
 DCC trans(CC:CALL_DELIVERED IMSI-901700000010650:MSISDN-46071:GERAN-A:CM_SERVICE_REQ callref-0x8000000a tid-8) starting guard timer with 180 seconds
 DCC trans(CC:CALL_DELIVERED IMSI-901700000010650:MSISDN-46071:GERAN-A:CM_SERVICE_REQ callref-0x8000000a tid-8) starting timer T313 with 30 seconds
 DCC trans(CC:CALL_DELIVERED IMSI-901700000010650:MSISDN-46071:GERAN-A:CM_SERVICE_REQ callref-0x8000000a tid-8) new state CALL_DELIVERED -> CONNECT_IND
-DCC trans(CC:CONNECT_IND IMSI-901700000010650:MSISDN-46071:GERAN-A:CM_SERVICE_REQ callref-0x8000000a tid-8) codecs: 10.23.23.1:23{AMR:octet-align=1#98,GSM-EFR#110,GSM#3,GSM-HR-08#111} (from: assigned=AMR:octet-align=1#112 remote=1.2.3.4:56{AMR:octet-align=1#98,GSM-EFR#110,GSM#3,GSM-HR-08#111} MS={AMR:octet-align=1#112,GSM-EFR#110,GSM#3,GSM-HR-08#111} bss={GSM#3,GSM-EFR#110,AMR:octet-align=1#112,GSM-HR-08#111} RAN={AMR:octet-align=1#112,GSM-EFR#110,GSM#3,GSM-HR-08#111})
-DCC rtp_stream(IMSI-901700000010650:MSISDN-46071:GERAN-A:CM_SERVICE_REQ:trans-8:call-18:RTP_TO_CN:no-CI:local-10-23-23-1-23:remote-1-2-3-4-56){UNINITIALIZED}: no change: codecs already set to AMR:octet-align=1#98,GSM-EFR#110,GSM#3,GSM-HR-08#111
+DCC trans(CC:CONNECT_IND IMSI-901700000010650:MSISDN-46071:GERAN-A:CM_SERVICE_REQ callref-0x8000000a tid-8) codecs: 10.23.23.1:23{AMR:octet-align=1#127,GSM-EFR#110,GSM#3,GSM-HR-08#111} (from: assigned=AMR:octet-align=1#112 remote=1.2.3.4:56{AMR:octet-align=1#127,GSM-EFR#110,GSM#3,GSM-HR-08#111} MS={AMR:octet-align=1#112,GSM-EFR#110,GSM#3,GSM-HR-08#111} bss={GSM#3,GSM-EFR#110,AMR:octet-align=1#112,GSM-HR-08#111} RAN={AMR:octet-align=1#112,GSM-EFR#110,GSM#3,GSM-HR-08#111})
+DCC rtp_stream(IMSI-901700000010650:MSISDN-46071:GERAN-A:CM_SERVICE_REQ:trans-8:call-18:RTP_TO_CN:no-CI:local-10-23-23-1-23:remote-1-2-3-4-56){UNINITIALIZED}: no change: codecs already set to AMR:octet-align=1#127,GSM-EFR#110,GSM#3,GSM-HR-08#111
 DCC rtp_stream(IMSI-901700000010650:MSISDN-46071:GERAN-A:CM_SERVICE_REQ:trans-8:call-18:RTP_TO_CN:no-CI:local-10-23-23-1-23:remote-1-2-3-4-56){UNINITIALIZED}: remote addr already 1.2.3.4:56, no change
 DCC rtp_stream(IMSI-901700000010650:MSISDN-46071:GERAN-A:CM_SERVICE_REQ:trans-8:call-18:RTP_TO_CN:no-CI:local-10-23-23-1-23:remote-1-2-3-4-56){UNINITIALIZED}: Not committing: no MGW endpoint CI set up
 DBSSAP msc_a(IMSI-901700000010650:MSISDN-46071:GERAN-A:CM_SERVICE_REQ){MSC_A_ST_COMMUNICATING}: Sending DTAP: CC GSM48_MT_CC_CONNECT
@@ -6506,9 +6506,9 @@ o=OsmoMSC 0 0 IN IP4 1.2.3.4
 s=GSM Call
 c=IN IP4 1.2.3.4
 t=0 0
-m=audio 56 RTP/AVP 98 110 3 111
-a=rtpmap:98 AMR/8000
-a=fmtp:98 octet-align=1
+m=audio 56 RTP/AVP 127 110 3 111
+a=rtpmap:127 AMR/8000
+a=fmtp:127 octet-align=1
 a=rtpmap:110 GSM-EFR/8000
 a=rtpmap:3 GSM/8000
 a=rtpmap:111 GSM-HR-08/8000
@@ -6599,9 +6599,9 @@ o=OsmoMSC 0 0 IN IP4 1.2.3.4
 s=GSM Call
 c=IN IP4 1.2.3.4
 t=0 0
-m=audio 56 RTP/AVP 98 110 3 111
-a=rtpmap:98 AMR/8000
-a=fmtp:98 octet-align=1
+m=audio 56 RTP/AVP 127 110 3 111
+a=rtpmap:127 AMR/8000
+a=fmtp:127 octet-align=1
 a=rtpmap:110 GSM-EFR/8000
 a=rtpmap:3 GSM/8000
 a=rtpmap:111 GSM-HR-08/8000
@@ -6610,8 +6610,8 @@ a=ptime:20
 DREF VLR subscr IMSI-901700000010650:MSISDN-46071 + mncc_tx_to_gsm_cc: now used by 2 (attached,mncc_tx_to_gsm_cc)
 DREF VLR subscr IMSI-901700000010650:MSISDN-46071 + CC: now used by 3 (attached,mncc_tx_to_gsm_cc,CC)
 DCC trans(CC:NULL IMSI-901700000010650:MSISDN-46071 callref-0x423 tid-255) New transaction
-DCC trans(CC:NULL IMSI-901700000010650:MSISDN-46071 callref-0x423 tid-255) codecs: :0{(no-codecs)} (from: remote=1.2.3.4:56{AMR:octet-align=1#98,GSM-EFR#110,GSM#3,GSM-HR-08#111} RAN={(no-codecs)})
-DMNCC trans(CC:NULL IMSI-901700000010650:MSISDN-46071 callref-0x423 tid-255) rx MNCC_SETUP_REQ (RTP=1.2.3.4:56{AMR:octet-align=1#98,GSM-EFR#110,GSM#3,GSM-HR-08#111})
+DCC trans(CC:NULL IMSI-901700000010650:MSISDN-46071 callref-0x423 tid-255) codecs: :0{(no-codecs)} (from: remote=1.2.3.4:56{AMR:octet-align=1#127,GSM-EFR#110,GSM#3,GSM-HR-08#111} RAN={(no-codecs)})
+DMNCC trans(CC:NULL IMSI-901700000010650:MSISDN-46071 callref-0x423 tid-255) rx MNCC_SETUP_REQ (RTP=1.2.3.4:56{AMR:octet-align=1#127,GSM-EFR#110,GSM#3,GSM-HR-08#111})
 DPAG Paging: IMSI-901700000010650:MSISDN-46071 for MNCC: establish call: Starting paging
   paging request (CALL_CONVERSATIONAL) to IMSI-901700000010650:MSISDN-46071 on GERAN-A
   strcmp(paging_expecting_imsi, vsub->imsi) == 0
@@ -6663,7 +6663,7 @@ DREF msc_a(IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP){MSC_A_ST_AUTHE
 DMSC msc_a(IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP){MSC_A_ST_AUTHENTICATED}: Received Event MSC_A_EV_TRANSACTION_ACCEPTED
 DMSC msc_a(IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP){MSC_A_ST_AUTHENTICATED}: state_chg to MSC_A_ST_COMMUNICATING
 DCC trans(CC:NULL IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP callref-0x423 tid-0) starting timer T303 with 30 seconds
-DCC trans(CC:NULL IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP callref-0x423 tid-0) codecs: :0{AMR:octet-align=1#98,GSM-EFR#110,GSM#3,GSM-HR-08#111} (from: remote=1.2.3.4:56{AMR:octet-align=1#98,GSM-EFR#110,GSM#3,GSM-HR-08#111} bss={GSM#3,GSM-EFR#110,AMR:octet-align=1#112,GSM-HR-08#111} RAN={AMR:octet-align=1#112,GSM-EFR#110,GSM#3,GSM-HR-08#111})
+DCC trans(CC:NULL IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP callref-0x423 tid-0) codecs: :0{AMR:octet-align=1#127,GSM-EFR#110,GSM#3,GSM-HR-08#111} (from: remote=1.2.3.4:56{AMR:octet-align=1#127,GSM-EFR#110,GSM#3,GSM-HR-08#111} bss={GSM#3,GSM-EFR#110,AMR:octet-align=1#112,GSM-HR-08#111} RAN={AMR:octet-align=1#112,GSM-EFR#110,GSM#3,GSM-HR-08#111})
 DCC trans(CC:NULL IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP callref-0x423 tid-0) new state NULL -> CALL_PRESENT
 DBSSAP msc_a(IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP){MSC_A_ST_COMMUNICATING}: Sending DTAP: CC GSM48_MT_CC_SETUP
 DMSC msc_a(IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP){MSC_A_ST_COMMUNICATING}: RAN encode: DTAP on GERAN-A
@@ -6685,15 +6685,15 @@ DCC trans(CC:CALL_PRESENT IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP 
 DBSSAP msc_a(IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP){MSC_A_ST_COMMUNICATING}: Starting call assignment
 DCC call_leg(IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP){ESTABLISHING}: Allocated
 DCC call_leg(IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP){ESTABLISHING}: is child of msc_a(IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP)
-DCC trans(CC:CALL_PRESENT IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP callref-0x423 tid-0) codecs: :0{AMR:octet-align=1#98,GSM-EFR#110,GSM#3,GSM-HR-08#111} (from: remote=1.2.3.4:56{AMR:octet-align=1#98,GSM-EFR#110,GSM#3,GSM-HR-08#111} MS={AMR:octet-align=1#112,GSM-EFR#110,GSM#3,GSM-HR-08#111} bss={GSM#3,GSM-EFR#110,AMR:octet-align=1#112,GSM-HR-08#111} RAN={AMR:octet-align=1#112,GSM-EFR#110,GSM#3,GSM-HR-08#111})
-  MGW <--CRCX to RTP_TO_CN-- MSC: call_id=0x13 codecs=AMR:octet-align=1#98,GSM-EFR#110,GSM#3,GSM-HR-08#111
+DCC trans(CC:CALL_PRESENT IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP callref-0x423 tid-0) codecs: :0{AMR:octet-align=1#127,GSM-EFR#110,GSM#3,GSM-HR-08#111} (from: remote=1.2.3.4:56{AMR:octet-align=1#127,GSM-EFR#110,GSM#3,GSM-HR-08#111} MS={AMR:octet-align=1#112,GSM-EFR#110,GSM#3,GSM-HR-08#111} bss={GSM#3,GSM-EFR#110,AMR:octet-align=1#112,GSM-HR-08#111} RAN={AMR:octet-align=1#112,GSM-EFR#110,GSM#3,GSM-HR-08#111})
+  MGW <--CRCX to RTP_TO_CN-- MSC: call_id=0x13 codecs=AMR:octet-align=1#127,GSM-EFR#110,GSM#3,GSM-HR-08#111
 DCC rtp_stream(IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP){UNINITIALIZED}: Allocated
 DCC rtp_stream(IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP){UNINITIALIZED}: is child of call_leg(IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP)
-DCC rtp_stream(IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP:trans-0:call-19:RTP_TO_CN:no-CI){UNINITIALIZED}: setting codecs to AMR:octet-align=1#98,GSM-EFR#110,GSM#3,GSM-HR-08#111
-  MGW <--CRCX to RTP_TO_RAN-- MSC: call_id=0x13 codecs=AMR:octet-align=1#98,GSM-EFR#110,GSM#3,GSM-HR-08#111
+DCC rtp_stream(IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP:trans-0:call-19:RTP_TO_CN:no-CI){UNINITIALIZED}: setting codecs to AMR:octet-align=1#127,GSM-EFR#110,GSM#3,GSM-HR-08#111
+  MGW <--CRCX to RTP_TO_RAN-- MSC: call_id=0x13 codecs=AMR:octet-align=1#127,GSM-EFR#110,GSM#3,GSM-HR-08#111
 DCC rtp_stream(IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP){UNINITIALIZED}: Allocated
 DCC rtp_stream(IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP){UNINITIALIZED}: is child of call_leg(IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP)
-DCC rtp_stream(IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP:trans-0:call-19:RTP_TO_RAN:no-CI){UNINITIALIZED}: setting codecs to AMR:octet-align=1#98,GSM-EFR#110,GSM#3,GSM-HR-08#111
+DCC rtp_stream(IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP:trans-0:call-19:RTP_TO_RAN:no-CI){UNINITIALIZED}: setting codecs to AMR:octet-align=1#127,GSM-EFR#110,GSM#3,GSM-HR-08#111
 DCC trans(CC:CALL_PRESENT IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP callref-0x423 tid-0) new state CALL_PRESENT -> MO_TERM_CALL_CONF
 DMNCC trans(CC:MO_TERM_CALL_CONF IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP callref-0x423 tid-0) tx MNCC_CALL_CONF_IND
   MSC --> MNCC: callref 0x423: MNCC_CALL_CONF_IND
@@ -6705,7 +6705,7 @@ DREF msc_a(IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP){MSC_A_ST_COMMU
 DCC call_leg(IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP){ESTABLISHING}: Received Event CALL_LEG_EV_RTP_STREAM_ADDR_AVAILABLE
 DMSC msc_a(IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP){MSC_A_ST_COMMUNICATING}: Received Event MSC_EV_CALL_LEG_RTP_LOCAL_ADDR_AVAILABLE
 DBSSAP msc_a(IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP){MSC_A_ST_COMMUNICATING}: MGW endpoint's RTP address available for the CI RTP_TO_RAN: 10.23.23.1:23 (osmux=no:-2)
-DCC trans(CC:MO_TERM_CALL_CONF IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP callref-0x423 tid-0) codecs: :0{AMR:octet-align=1#98,GSM-EFR#110,GSM#3,GSM-HR-08#111} (from: remote=1.2.3.4:56{AMR:octet-align=1#98,GSM-EFR#110,GSM#3,GSM-HR-08#111} MS={AMR:octet-align=1#112,GSM-EFR#110,GSM#3,GSM-HR-08#111} bss={GSM#3,GSM-EFR#110,AMR:octet-align=1#112,GSM-HR-08#111} RAN={AMR:octet-align=1#112,GSM-EFR#110,GSM#3,GSM-HR-08#111})
+DCC trans(CC:MO_TERM_CALL_CONF IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP callref-0x423 tid-0) codecs: :0{AMR:octet-align=1#127,GSM-EFR#110,GSM#3,GSM-HR-08#111} (from: remote=1.2.3.4:56{AMR:octet-align=1#127,GSM-EFR#110,GSM#3,GSM-HR-08#111} MS={AMR:octet-align=1#112,GSM-EFR#110,GSM#3,GSM-HR-08#111} bss={GSM#3,GSM-EFR#110,AMR:octet-align=1#112,GSM-HR-08#111} RAN={AMR:octet-align=1#112,GSM-EFR#110,GSM#3,GSM-HR-08#111})
 DCC trans(CC:MO_TERM_CALL_CONF IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP callref-0x423 tid-0) Sending Assignment Command
 DMSC msc_a(IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP){MSC_A_ST_COMMUNICATING}: RAN encode: ASSIGNMENT_COMMAND on GERAN-A
 DMSC dummy_msc_i(IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP){0}: Received Event MSC_I_EV_FROM_A_FORWARD_ACCESS_SIGNALLING_REQUEST
@@ -6715,8 +6715,8 @@ DBSSAP msc_a(IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP){MSC_A_ST_COM
 DCC rtp_stream(IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP:trans-0:call-19:RTP_TO_RAN:no-CI){UNINITIALIZED}: setting codecs to AMR:octet-align=1#112
 DCC rtp_stream(IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP:trans-0:call-19:RTP_TO_RAN:no-CI:local-10-23-23-1-23){UNINITIALIZED}: setting remote addr to 1.2.3.4:1234
 DCC rtp_stream(IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP:trans-0:call-19:RTP_TO_RAN:no-CI:local-10-23-23-1-23:remote-1-2-3-4-1234){UNINITIALIZED}: Not committing: no MGW endpoint CI set up
-DCC trans(CC:MO_TERM_CALL_CONF IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP callref-0x423 tid-0) codecs: :0{AMR:octet-align=1#98,GSM-EFR#110,GSM#3,GSM-HR-08#111} (from: assigned=AMR:octet-align=1#112 remote=1.2.3.4:56{AMR:octet-align=1#98,GSM-EFR#110,GSM#3,GSM-HR-08#111} MS={AMR:octet-align=1#112,GSM-EFR#110,GSM#3,GSM-HR-08#111} bss={GSM#3,GSM-EFR#110,AMR:octet-align=1#112,GSM-HR-08#111} RAN={AMR:octet-align=1#112,GSM-EFR#110,GSM#3,GSM-HR-08#111})
-DCC trans(CC:MO_TERM_CALL_CONF IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP callref-0x423 tid-0) Assignment Complete: RAN: AMR:octet-align=1#112, CN: AMR:octet-align=1#98,GSM-EFR#110,GSM#3,GSM-HR-08#111
+DCC trans(CC:MO_TERM_CALL_CONF IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP callref-0x423 tid-0) codecs: :0{AMR:octet-align=1#127,GSM-EFR#110,GSM#3,GSM-HR-08#111} (from: assigned=AMR:octet-align=1#112 remote=1.2.3.4:56{AMR:octet-align=1#127,GSM-EFR#110,GSM#3,GSM-HR-08#111} MS={AMR:octet-align=1#112,GSM-EFR#110,GSM#3,GSM-HR-08#111} bss={GSM#3,GSM-EFR#110,AMR:octet-align=1#112,GSM-HR-08#111} RAN={AMR:octet-align=1#112,GSM-EFR#110,GSM#3,GSM-HR-08#111})
+DCC trans(CC:MO_TERM_CALL_CONF IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP callref-0x423 tid-0) Assignment Complete: RAN: AMR:octet-align=1#112, CN: AMR:octet-align=1#127,GSM-EFR#110,GSM#3,GSM-HR-08#111
 DCC trans(CC:MO_TERM_CALL_CONF IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP callref-0x423 tid-0) Assignment complete, but still waiting for the CRCX OK on the CN side RTP
 - MNCC sends MNCC_RTP_CREATE, which first waits for the CN side RTP
   MSC <-- MNCC: callref 0x423: MNCC_RTP_CREATE
@@ -6728,23 +6728,23 @@ DBSSAP msc_a(IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP){MSC_A_ST_COM
 DCC call_leg(IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP){ESTABLISHING}: Received Event CALL_LEG_EV_RTP_STREAM_ADDR_AVAILABLE
 DMSC msc_a(IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP){MSC_A_ST_COMMUNICATING}: Received Event MSC_EV_CALL_LEG_RTP_LOCAL_ADDR_AVAILABLE
 DBSSAP msc_a(IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP){MSC_A_ST_COMMUNICATING}: MGW endpoint's RTP address available for the CI RTP_TO_CN: 10.23.23.1:23 (osmux=no:-2)
-DCC trans(CC:MO_TERM_CALL_CONF IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP callref-0x423 tid-0) codecs: 10.23.23.1:23{AMR:octet-align=1#98,GSM-EFR#110,GSM#3,GSM-HR-08#111} (from: assigned=AMR:octet-align=1#112 remote=1.2.3.4:56{AMR:octet-align=1#98,GSM-EFR#110,GSM#3,GSM-HR-08#111} MS={AMR:octet-align=1#112,GSM-EFR#110,GSM#3,GSM-HR-08#111} bss={GSM#3,GSM-EFR#110,AMR:octet-align=1#112,GSM-HR-08#111} RAN={AMR:octet-align=1#112,GSM-EFR#110,GSM#3,GSM-HR-08#111})
-DMNCC trans(CC:MO_TERM_CALL_CONF IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP callref-0x423 tid-0) tx MNCC_RTP_CREATE (RTP=10.23.23.1:23{AMR:octet-align=1#98,GSM-EFR#110,GSM#3,GSM-HR-08#111})
+DCC trans(CC:MO_TERM_CALL_CONF IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP callref-0x423 tid-0) codecs: 10.23.23.1:23{AMR:octet-align=1#127,GSM-EFR#110,GSM#3,GSM-HR-08#111} (from: assigned=AMR:octet-align=1#112 remote=1.2.3.4:56{AMR:octet-align=1#127,GSM-EFR#110,GSM#3,GSM-HR-08#111} MS={AMR:octet-align=1#112,GSM-EFR#110,GSM#3,GSM-HR-08#111} bss={GSM#3,GSM-EFR#110,AMR:octet-align=1#112,GSM-HR-08#111} RAN={AMR:octet-align=1#112,GSM-EFR#110,GSM#3,GSM-HR-08#111})
+DMNCC trans(CC:MO_TERM_CALL_CONF IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP callref-0x423 tid-0) tx MNCC_RTP_CREATE (RTP=10.23.23.1:23{AMR:octet-align=1#127,GSM-EFR#110,GSM#3,GSM-HR-08#111})
   MSC --> MNCC: callref 0x423: MNCC_RTP_CREATE
 v=0
 o=OsmoMSC 0 0 IN IP4 10.23.23.1
 s=GSM Call
 c=IN IP4 10.23.23.1
 t=0 0
-m=audio 23 RTP/AVP 98 110 3 111
-a=rtpmap:98 AMR/8000
-a=fmtp:98 octet-align=1
+m=audio 23 RTP/AVP 127 110 3 111
+a=rtpmap:127 AMR/8000
+a=fmtp:127 octet-align=1
 a=rtpmap:110 GSM-EFR/8000
 a=rtpmap:3 GSM/8000
 a=rtpmap:111 GSM-HR-08/8000
 a=ptime:20
 
-- VALIDATE_SDP OK: cc_to_mncc_tx_last_sdp == t->mt_tx_sdp_mncc_rtp_create == AMR#98 GSM-EFR GSM GSM-HR-08
+- VALIDATE_SDP OK: cc_to_mncc_tx_last_sdp == t->mt_tx_sdp_mncc_rtp_create == AMR:octet-align=1#127 GSM-EFR#110 GSM#3 GSM-HR-08#111
 - Total time passed: 1626.001206 s
   MSC <--GERAN-A-- MS: GSM48_MT_CC_ALERTING
 DREF msc_a(IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP){MSC_A_ST_COMMUNICATING}: + rx_from_ms: now used by 2 (cc,rx_from_ms)
@@ -6754,24 +6754,24 @@ DCC trans(CC:MO_TERM_CALL_CONF IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_
 DCC trans(CC:MO_TERM_CALL_CONF IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP callref-0x423 tid-0) stopping pending timer T310
 DCC trans(CC:MO_TERM_CALL_CONF IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP callref-0x423 tid-0) starting timer T301 with 180 seconds
 DCC trans(CC:MO_TERM_CALL_CONF IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP callref-0x423 tid-0) new state MO_TERM_CALL_CONF -> CALL_RECEIVED
-DCC trans(CC:CALL_RECEIVED IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP callref-0x423 tid-0) codecs: 10.23.23.1:23{AMR:octet-align=1#98,GSM-EFR#110,GSM#3,GSM-HR-08#111} (from: assigned=AMR:octet-align=1#112 remote=1.2.3.4:56{AMR:octet-align=1#98,GSM-EFR#110,GSM#3,GSM-HR-08#111} MS={AMR:octet-align=1#112,GSM-EFR#110,GSM#3,GSM-HR-08#111} bss={GSM#3,GSM-EFR#110,AMR:octet-align=1#112,GSM-HR-08#111} RAN={AMR:octet-align=1#112,GSM-EFR#110,GSM#3,GSM-HR-08#111})
-DMNCC trans(CC:CALL_RECEIVED IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP callref-0x423 tid-0) tx MNCC_ALERT_IND (RTP=10.23.23.1:23{AMR:octet-align=1#98,GSM-EFR#110,GSM#3,GSM-HR-08#111})
+DCC trans(CC:CALL_RECEIVED IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP callref-0x423 tid-0) codecs: 10.23.23.1:23{AMR:octet-align=1#127,GSM-EFR#110,GSM#3,GSM-HR-08#111} (from: assigned=AMR:octet-align=1#112 remote=1.2.3.4:56{AMR:octet-align=1#127,GSM-EFR#110,GSM#3,GSM-HR-08#111} MS={AMR:octet-align=1#112,GSM-EFR#110,GSM#3,GSM-HR-08#111} bss={GSM#3,GSM-EFR#110,AMR:octet-align=1#112,GSM-HR-08#111} RAN={AMR:octet-align=1#112,GSM-EFR#110,GSM#3,GSM-HR-08#111})
+DMNCC trans(CC:CALL_RECEIVED IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP callref-0x423 tid-0) tx MNCC_ALERT_IND (RTP=10.23.23.1:23{AMR:octet-align=1#127,GSM-EFR#110,GSM#3,GSM-HR-08#111})
   MSC --> MNCC: callref 0x423: MNCC_ALERT_IND
 v=0
 o=OsmoMSC 0 0 IN IP4 10.23.23.1
 s=GSM Call
 c=IN IP4 10.23.23.1
 t=0 0
-m=audio 23 RTP/AVP 98 110 3 111
-a=rtpmap:98 AMR/8000
-a=fmtp:98 octet-align=1
+m=audio 23 RTP/AVP 127 110 3 111
+a=rtpmap:127 AMR/8000
+a=fmtp:127 octet-align=1
 a=rtpmap:110 GSM-EFR/8000
 a=rtpmap:3 GSM/8000
 a=rtpmap:111 GSM-HR-08/8000
 a=ptime:20
 
 DREF msc_a(IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP){MSC_A_ST_COMMUNICATING}: - rx_from_ms: now used by 1 (cc)
-- VALIDATE_SDP OK: cc_to_mncc_tx_last_sdp == t->mt_tx_sdp_mncc_alert_ind == AMR#98 GSM-EFR GSM GSM-HR-08
+- VALIDATE_SDP OK: cc_to_mncc_tx_last_sdp == t->mt_tx_sdp_mncc_alert_ind == AMR:octet-align=1#127 GSM-EFR#110 GSM#3 GSM-HR-08#111
 - Total time passed: 1627.001229 s
   MSC <--GERAN-A-- MS: GSM48_MT_CC_CONNECT
 DREF msc_a(IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP){MSC_A_ST_COMMUNICATING}: + rx_from_ms: now used by 2 (cc,rx_from_ms)
@@ -6780,24 +6780,24 @@ DRLL msc_a(IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP){MSC_A_ST_COMMU
 DCC trans(CC:CALL_RECEIVED IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP callref-0x423 tid-0) rx CONNECT in state CALL_RECEIVED
 DCC trans(CC:CALL_RECEIVED IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP callref-0x423 tid-0) stopping pending timer T301
 DCC trans(CC:CALL_RECEIVED IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP callref-0x423 tid-0) new state CALL_RECEIVED -> CONNECT_REQUEST
-DCC trans(CC:CONNECT_REQUEST IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP callref-0x423 tid-0) codecs: 10.23.23.1:23{AMR:octet-align=1#98,GSM-EFR#110,GSM#3,GSM-HR-08#111} (from: assigned=AMR:octet-align=1#112 remote=1.2.3.4:56{AMR:octet-align=1#98,GSM-EFR#110,GSM#3,GSM-HR-08#111} MS={AMR:octet-align=1#112,GSM-EFR#110,GSM#3,GSM-HR-08#111} bss={GSM#3,GSM-EFR#110,AMR:octet-align=1#112,GSM-HR-08#111} RAN={AMR:octet-align=1#112,GSM-EFR#110,GSM#3,GSM-HR-08#111})
-DMNCC trans(CC:CONNECT_REQUEST IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP callref-0x423 tid-0) tx MNCC_SETUP_CNF (RTP=10.23.23.1:23{AMR:octet-align=1#98,GSM-EFR#110,GSM#3,GSM-HR-08#111})
+DCC trans(CC:CONNECT_REQUEST IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP callref-0x423 tid-0) codecs: 10.23.23.1:23{AMR:octet-align=1#127,GSM-EFR#110,GSM#3,GSM-HR-08#111} (from: assigned=AMR:octet-align=1#112 remote=1.2.3.4:56{AMR:octet-align=1#127,GSM-EFR#110,GSM#3,GSM-HR-08#111} MS={AMR:octet-align=1#112,GSM-EFR#110,GSM#3,GSM-HR-08#111} bss={GSM#3,GSM-EFR#110,AMR:octet-align=1#112,GSM-HR-08#111} RAN={AMR:octet-align=1#112,GSM-EFR#110,GSM#3,GSM-HR-08#111})
+DMNCC trans(CC:CONNECT_REQUEST IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP callref-0x423 tid-0) tx MNCC_SETUP_CNF (RTP=10.23.23.1:23{AMR:octet-align=1#127,GSM-EFR#110,GSM#3,GSM-HR-08#111})
   MSC --> MNCC: callref 0x423: MNCC_SETUP_CNF
 v=0
 o=OsmoMSC 0 0 IN IP4 10.23.23.1
 s=GSM Call
 c=IN IP4 10.23.23.1
 t=0 0
-m=audio 23 RTP/AVP 98 110 3 111
-a=rtpmap:98 AMR/8000
-a=fmtp:98 octet-align=1
+m=audio 23 RTP/AVP 127 110 3 111
+a=rtpmap:127 AMR/8000
+a=fmtp:127 octet-align=1
 a=rtpmap:110 GSM-EFR/8000
 a=rtpmap:3 GSM/8000
 a=rtpmap:111 GSM-HR-08/8000
 a=ptime:20
 
 DREF msc_a(IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP){MSC_A_ST_COMMUNICATING}: - rx_from_ms: now used by 1 (cc)
-- VALIDATE_SDP OK: cc_to_mncc_tx_last_sdp == t->mt_tx_sdp_mncc_setup_cnf == AMR#98 GSM-EFR GSM GSM-HR-08
+- VALIDATE_SDP OK: cc_to_mncc_tx_last_sdp == t->mt_tx_sdp_mncc_setup_cnf == AMR:octet-align=1#127 GSM-EFR#110 GSM#3 GSM-HR-08#111
   MSC <-- MNCC: callref 0x423: MNCC_SETUP_COMPL_REQ
 
 DMNCC trans(CC:CONNECT_REQUEST IMSI-901700000010650:MSISDN-46071:GERAN-A:PAGING_RESP callref-0x423 tid-0) rx MNCC_SETUP_COMPL_REQ
