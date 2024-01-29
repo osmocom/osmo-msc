@@ -792,10 +792,10 @@ struct codec_test {
 
 	/* What codecs should osmo-msc send in the MNCC_SETUP_IND message.
 	 * Just the SDP subtype names like "GSM", "GSM-EFR", "AMR", ..., list ends with NULL entry */
-	const char *mo_tx_sdp_mncc_setup_ind[8];
+	const char *mo_tx_sdp_mncc_setup_ind[16];
 
 	/* What codecs the remote call leg should send as SDP via MNCC during MNCC_RTP_CREATE (if any). */
-	const char *mo_rx_sdp_mncc_rtp_create[8];
+	const char *mo_rx_sdp_mncc_rtp_create[16];
 
 	/* What the MSC should send as Channel Type IE in the Assignment Command to the BSS. List ends with a
 	 * LIST_END entry */
@@ -805,7 +805,7 @@ struct codec_test {
 	const char *mo_rx_assigned_codec;
 
 	/* MO acks the MNCC_RTP_CREATE with these codecs (if any). */
-	const char *mo_tx_sdp_mncc_rtp_create[8];
+	const char *mo_tx_sdp_mncc_rtp_create[16];
 
 	/* mt_rx_sdp_mncc_setup_req == mo_tx_sdp_mncc_rtp_create */
 #define mt_rx_sdp_mncc_setup_req  mo_tx_sdp_mncc_rtp_create
@@ -815,28 +815,28 @@ struct codec_test {
 	enum gsm48_bcap_speech_ver mt_tx_cc_setup_bcap[8];
 	enum gsm48_bcap_speech_ver mt_rx_ms_bcap[8];
 	bool expect_codec_mismatch_on_cc_call_conf;
-	const char *mt_tx_sdp_mncc_call_conf_ind[8];
+	const char *mt_tx_sdp_mncc_call_conf_ind[16];
 
 	enum gsm0808_permitted_speech mt_tx_assignment_perm_speech[8];
 	const char *mt_rx_assigned_codec;
 
-	const char *mt_rx_sdp_mncc_rtp_create[8];
-	const char *mt_tx_sdp_mncc_rtp_create[8];
+	const char *mt_rx_sdp_mncc_rtp_create[16];
+	const char *mt_tx_sdp_mncc_rtp_create[16];
 
-	const char *mt_tx_sdp_mncc_alert_ind[8];
+	const char *mt_tx_sdp_mncc_alert_ind[16];
 
 	bool mo_expect_reassignment;
 	enum gsm0808_permitted_speech mo_tx_reassignment_perm_speech[8];
 	const char *mo_rx_reassigned_codec;
 
-	const char *mt_tx_sdp_mncc_setup_cnf[8];
-	const char *mt_rx_sdp_mncc_setup_compl_req[8];
+	const char *mt_tx_sdp_mncc_setup_cnf[16];
+	const char *mt_rx_sdp_mncc_setup_compl_req[16];
 
 	/* mo_rx_sdp_mncc_alert_req == mt_tx_sdp_mncc_alert_ind */
 #define mo_rx_sdp_mncc_alert_req  mt_tx_sdp_mncc_alert_ind
 #define mo_rx_sdp_mncc_setup_rsp  mt_tx_sdp_mncc_alert_ind
 
-	const char *mo_tx_sdp_mncc_setup_compl_ind[8];
+	const char *mo_tx_sdp_mncc_setup_compl_ind[16];
 };
 
 /* define a struct gsm0808_speech_codec */
