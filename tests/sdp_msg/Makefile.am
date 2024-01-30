@@ -17,6 +17,7 @@ AM_LDFLAGS = \
 LDADD = \
 	$(top_builddir)/src/libmsc/libmsc.a \
 	$(LIBOSMOCORE_LIBS) \
+	$(LIBOSMOMGCPCLIENT_LIBS) \
 	$(NULL)
 
 EXTRA_DIST = \
