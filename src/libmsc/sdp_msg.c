@@ -644,9 +644,9 @@ void sdp_audio_codecs_intersection(struct sdp_audio_codecs *ac_dest, const struc
 			continue;
 		}
 
-		/* Doing payload_type number translation of part of the intersection because it makes the algorithm
-		 * simpler: we already know ac_dest is a subset of ac_other, and there is no need to resolve payload
-		 * type number conflicts. */
+		/* Doing payload_type number translation as part of the intersection algorithm is a good match:
+		 * we already know ac_dest will be a subset of ac_other, and there is no need to resolve payload type
+		 * number conflicts. */
 		if (translate_payload_type_numbers)
 			codec->payload_type = other->payload_type;
 	}
