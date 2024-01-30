@@ -281,7 +281,7 @@ struct sdp_audio_codec *sdp_audio_codecs_by_descr(struct sdp_audio_codecs *ac, c
 {
 	struct sdp_audio_codec *i;
 	sdp_audio_codecs_foreach(i, ac) {
-		if (!sdp_audio_codec_cmp(i, codec, false, false))
+		if (!sdp_audio_codec_cmp(i, codec, true, false))
 			return i;
 	}
 	return NULL;
