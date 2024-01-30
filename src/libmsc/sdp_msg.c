@@ -22,6 +22,7 @@
  */
 
 #include <string.h>
+#include <ctype.h>
 #include <errno.h>
 
 #include <osmocom/core/utils.h>
@@ -35,6 +36,49 @@
 bool sdp_audio_codec_is_set(const struct sdp_audio_codec *a)
 {
 	return a && a->subtype_name[0];
+}
+
+static void strip_whitespace(char *str)
+{
+	char *i = str;
+	char *o = str;
+	for (; *i; i++, o++) {
+		while (isspace(*i))
+			i++;
+		*o = *i;
+		if (!*i)
+			break;
+	}
+}
+
+static bool amr_fmtp_match(const char *a, const char *b)
+{
+	char a_modeset[32] = {};
+	char b_modeset[32] = {};
+
+	/* octet-align=1. Omission means octet-align=0 */
+	if (osmo_sdp_fmtp_amr_is_octet_aligned(a) != osmo_sdp_fmtp_amr_is_octet_aligned(b))
+		return false;
+
+	/* mode-set=0,1,2,3,4,5,6,7. Omission of 'mode-set' means, match any and all codec modes. So if either a or b
+	 * have no 'mode-set', it's a match. If both have one, they must be identical to match. We expect the
+	 * mode-set string to be in ascending order. */
+	if (osmo_sdp_fmtp_get_val(a_modeset, sizeof(a_modeset), a, "mode-set")
+	    && osmo_sdp_fmtp_get_val(b_modeset, sizeof(b_modeset), b, "mode-set")) {
+		/* Strip whitespace: We don't know what remote SDP peers may throw at us. There could be whitespace
+		 * around the separators like 'mode-set=2,3 ; octet-align=1', which may show up here as whitespace in
+		 * the value string as "2,3 ", which would mismatch "2,3". */
+		strip_whitespace(a_modeset);
+		strip_whitespace(b_modeset);
+		if (strcmp(a_modeset, b_modeset))
+			return false;
+	}
+
+	/* TODO: treat other AMR traits, see RFC4867 8.1. Maybe generically match all values that are present?
+	 * So far we have not seen any peer use other values than octet-align and mode-set. */
+
+	/* No mismatch found, it's a match */
+	return true;
 }
 
 /* Compare name, rate and fmtp, returning typical cmp result: 0 on match, and -1 / 1 on mismatch.
@@ -60,6 +104,11 @@ int sdp_audio_codec_cmp(const struct sdp_audio_codec *a, const struct sdp_audio_
 		return cmp;
 	if (cmp_fmtp) {
 		cmp = strncmp(a->fmtp, b->fmtp, sizeof(a->fmtp));
+		/* In case of AMR, allow logical matching; we only need to do that if the strings differ. */
+		if (cmp
+		    && !strcmp("AMR", a->subtype_name)
+		    && amr_fmtp_match(a->fmtp, b->fmtp))
+			cmp = 0;
 		if (cmp)
 			return cmp;
 	}
