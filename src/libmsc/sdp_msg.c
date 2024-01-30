@@ -179,20 +179,18 @@ struct sdp_audio_codec *sdp_audio_codecs_by_payload_type(struct sdp_audio_codecs
 		if (codec->payload_type == payload_type)
 			return codec;
 	}
-
 	if (!create)
 		return NULL;
 
-	/* Not found; codec points after the last entry now. */
-	if ((codec - ac->codec) >= ARRAY_SIZE(ac->codec))
+	if (ac->count >= ARRAY_SIZE(ac->codec))
 		return NULL;
 
+	codec = &ac->codec[ac->count];
 	*codec = (struct sdp_audio_codec){
 		.payload_type = payload_type,
 		.rate = 8000,
 	};
-
-	ac->count = (codec - ac->codec) + 1;
+	ac->count++;
 	return codec;
 }
 
