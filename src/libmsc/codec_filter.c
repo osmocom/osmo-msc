@@ -50,10 +50,7 @@ static void sdp_add_all_utran_codecs(struct sdp_audio_codecs *ac)
 	static const enum gsm48_bcap_speech_ver utran_codecs[] = {
 		GSM48_BCAP_SV_AMR_F	/*!< 4   GSM FR V3 (FR AMR) */,
 		GSM48_BCAP_SV_AMR_H	/*!< 5   GSM HR V3 (HR_AMR) */,
-		GSM48_BCAP_SV_AMR_OH	/*!< 11  GSM HR V6 (OHR AMR) */,
 		GSM48_BCAP_SV_AMR_FW	/*!< 8   GSM FR V5 (FR AMR-WB) */,
-		GSM48_BCAP_SV_AMR_OFW	/*!< 6   GSM FR V4 (OFR AMR-WB) */,
-		GSM48_BCAP_SV_AMR_OHW	/*!< 7   GSM HR V4 (OHR AMR-WB) */,
 	};
 	int i;
 	for (i = 0; i < ARRAY_SIZE(utran_codecs); i++)

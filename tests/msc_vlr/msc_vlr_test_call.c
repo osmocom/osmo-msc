@@ -339,7 +339,7 @@ static void test_call_mt()
 		/* NOTE: below SDP includes only AMR, above bearer_cap includes more codecs. Ideally, these would match,
 		 * but in reality the bearer cap in MNCC was never implemented properly. This test shows that above
 		 * bearer_cap is ignored when SDP is present: In the CC Setup below, the Bearer Capability is only
-		 * "04 04 60 04 05 8b" with speech versions '04' == GSM48_BCAP_SV_AMR_F and '05' == GSM48_BCAP_SV_AMR_H.
+		 * "04 03 60 04 85" with speech versions '04' == GSM48_BCAP_SV_AMR_F and '05' == GSM48_BCAP_SV_AMR_H.
 		 */
 		.sdp = "v=0\r\n"
 		       "o=OsmoMSC 0 0 IN IP4 10.23.23.1\r\n"
@@ -386,7 +386,7 @@ static void test_call_mt()
 	VERBOSE_ASSERT(security_mode_ctrl_sent, == true, "%d");
 
 	btw("MS sends SecurityModeControl acceptance, VLR accepts, sends CC Setup");
-	dtap_expect_tx("0305" /* CC: Setup */ "04 04 60 04 05 8b" /* Bearer Cap, speech ver of AMR-FR and AMR-HR */);
+	dtap_expect_tx("0305" /* CC: Setup */ "04 03 60 04 85" /* Bearer Cap, speech ver of AMR-FR and AMR-HR */);
 	ms_sends_security_mode_complete(1);
 
 	btw("MS confirms call, we create a RAN-side RTP and forward MNCC_CALL_CONF_IND");
@@ -469,7 +469,7 @@ static void test_call_mt2()
 		/* NOTE: below SDP includes only AMR, above bearer_cap includes only GSM-FR. Ideally, these would match,
 		 * but in reality the bearer cap in MNCC was never implemented properly. This test shows that above
 		 * bearer_cap is ignored when SDP is present: In the CC Setup below, the Bearer Capability is only
-		 * "04 04 60 04 05 8b" with speech versions '04' == GSM48_BCAP_SV_AMR_F and '05' == GSM48_BCAP_SV_AMR_H.
+		 * "04 03 60 04 85" with speech versions '04' == GSM48_BCAP_SV_AMR_F and '05' == GSM48_BCAP_SV_AMR_H.
 		 */
 		.sdp = "v=0\r\n"
 		       "o=OsmoMSC 0 0 IN IP4 10.23.23.1\r\n"
@@ -524,7 +524,7 @@ static void test_call_mt2()
 	VERBOSE_ASSERT(security_mode_ctrl_sent, == true, "%d");
 
 	btw("MS sends SecurityModeControl acceptance, VLR accepts, sends CC Setup");
-	dtap_expect_tx("0305" /* CC: Setup */ "04 04 60 04 05 8b" /* Bearer Cap, speech ver of AMR-FR and AMR-HR */);
+	dtap_expect_tx("0305" /* CC: Setup */ "04 03 60 04 85" /* Bearer Cap, speech ver of AMR-FR and AMR-HR */);
 	ms_sends_security_mode_complete(1);
 
 	btw("MS confirms call, we create a RAN-side RTP and forward MNCC_CALL_CONF_IND");
@@ -851,7 +851,6 @@ struct codec_test {
 #define BCAP_ALL_GSM { \
 			GSM48_BCAP_SV_AMR_F, \
 			GSM48_BCAP_SV_AMR_H, \
-			GSM48_BCAP_SV_AMR_OH, \
 			GSM48_BCAP_SV_EFR, \
 			GSM48_BCAP_SV_FR, \
 			GSM48_BCAP_SV_HR, \
@@ -889,7 +888,6 @@ static const struct codec_test codec_tests[] = {
 		.mt_tx_cc_setup_bcap = {
 			GSM48_BCAP_SV_AMR_F,
 			GSM48_BCAP_SV_AMR_H,
-			GSM48_BCAP_SV_AMR_OH,
 			GSM48_BCAP_SV_EFR,
 			GSM48_BCAP_SV_FR,
 			GSM48_BCAP_SV_HR,
@@ -1053,7 +1051,6 @@ static const struct codec_test codec_tests[] = {
 		.mt_tx_cc_setup_bcap = {
 			GSM48_BCAP_SV_AMR_F,
 			GSM48_BCAP_SV_AMR_H,
-			GSM48_BCAP_SV_AMR_OH,
 			GSM48_BCAP_SV_EFR,
 			GSM48_BCAP_SV_FR,
 			GSM48_BCAP_SV_HR,
@@ -1091,7 +1088,6 @@ static const struct codec_test codec_tests[] = {
 		.mt_tx_cc_setup_bcap = {
 			GSM48_BCAP_SV_AMR_F,
 			GSM48_BCAP_SV_AMR_H,
-			GSM48_BCAP_SV_AMR_OH,
 			GSM48_BCAP_SV_EFR,
 			GSM48_BCAP_SV_FR,
 			GSM48_BCAP_SV_HR,

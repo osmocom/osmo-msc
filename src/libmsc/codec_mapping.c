@@ -142,8 +142,8 @@ const struct codec_mapping codec_map[] = {
 			.fmtp = "octet-align=1",
 		},
 		.mgcp = CODEC_AMR_8000_1,
-		.speech_ver_count = 2,
-		.speech_ver = { GSM48_BCAP_SV_AMR_H, GSM48_BCAP_SV_AMR_OH },
+		.speech_ver_count = 1,
+		.speech_ver = { GSM48_BCAP_SV_AMR_H },
 		.mncc_payload_msg_type = GSM_TCH_FRAME_AMR,
 		.has_gsm0808_speech_codec = true,
 		.gsm0808_speech_codec = {
@@ -173,27 +173,6 @@ const struct codec_mapping codec_map[] = {
 		},
 		.perm_speech = GSM0808_PERM_FR5,
 		.frhr = CODEC_FRHR_FR,
-	},
-	{
-		/* Another entry like the above, to map HR4 to AMR-WB, too. */
-		.sdp = {
-			.payload_type = 113,
-			.subtype_name = "AMR-WB",
-			.rate = 16000,
-			.fmtp = "octet-align=1",
-		},
-		.mgcp = CODEC_AMRWB_16000_1,
-		.speech_ver_count = 1,
-		.speech_ver = { GSM48_BCAP_SV_AMR_OHW },
-		.mncc_payload_msg_type = GSM_TCH_FRAME_AMR,
-		.has_gsm0808_speech_codec = true,
-		.gsm0808_speech_codec = {
-			.fi = true,
-			.type = GSM0808_SCT_HR4,
-			.cfg = GSM0808_SC_CFG_DEFAULT_OHR_AMR_WB,
-		},
-		.perm_speech = GSM0808_PERM_HR4,
-		.frhr = CODEC_FRHR_HR,
 	},
 	{
 		.sdp = {
