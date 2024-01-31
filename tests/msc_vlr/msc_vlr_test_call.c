@@ -1175,6 +1175,31 @@ static const struct codec_test codec_tests[] = {
 		.mt_tx_sdp_mncc_setup_cnf = SDP_CODECS_ALL_GSM_WITH_ODD_PT_NRS,
 		.mo_tx_sdp_mncc_setup_compl_ind = {},
 	},
+
+	{
+		.desc = "AMR with rate limitations",
+		.mo_rx_compl_l3_codec_list_bss_supported = CODEC_LIST_ALL_GSM,
+		.mo_rx_ms_bcap = BCAP_ALL_GSM,
+		.mo_tx_sdp_mncc_setup_ind = SDP_CODECS_ALL_GSM,
+		.mo_rx_sdp_mncc_rtp_create = {},
+		.mo_tx_assignment_perm_speech = PERM_SPEECH_ALL_GSM,
+		.mo_rx_assigned_codec_fr = true,
+		.mo_rx_assigned_codec = "AMR",
+		.mo_tx_sdp_mncc_rtp_create = SDP_CODECS_ALL_GSM,
+		/* mt_rx_sdp_mncc_setup_req == mo_tx_sdp_mncc_rtp_create */
+		.mt_rx_compl_l3_codec_list_bss_supported = CODEC_LIST_ALL_GSM,
+		.mt_tx_cc_setup_bcap = BCAP_ALL_GSM,
+		.mt_rx_ms_bcap = BCAP_ALL_GSM,
+		.mt_tx_sdp_mncc_call_conf_ind = {},
+		.mt_rx_sdp_mncc_rtp_create = {},
+		.mt_tx_assignment_perm_speech = PERM_SPEECH_ALL_GSM,
+		.mt_rx_assigned_codec_fr = true,
+		.mt_rx_assigned_codec = "AMR",
+		.mt_tx_sdp_mncc_rtp_create = SDP_CODECS_ALL_GSM,
+		.mt_tx_sdp_mncc_alert_ind = SDP_CODECS_ALL_GSM,
+		.mt_tx_sdp_mncc_setup_cnf = SDP_CODECS_ALL_GSM,
+		.mo_tx_sdp_mncc_setup_compl_ind = {},
+	},
 };
 
 static char namebuf[4][1024];
