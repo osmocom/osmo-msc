@@ -401,16 +401,43 @@ void sdp_audio_codecs_from_bearer_cap(struct sdp_audio_codecs *ac, const struct 
  * sdp_audio_codec, and -ENOSPC when scl is full and nothing could be added. */
 int sdp_audio_codec_to_speech_codec_list(struct gsm0808_speech_codec_list *scl, const struct sdp_audio_codec *codec)
 {
-	const struct codec_mapping *m = codec_mapping_by_subtype_name(codec->subtype_name);
-	if (!m)
+	const struct codec_mapping *m;
+	int added = 0;
+	int i;
+
+	codec_mapping_foreach (m) {
+		if (sdp_audio_codec_cmp(&m->sdp, codec, true, false))
+			continue;
+		if (!m->has_gsm0808_speech_codec)
+			continue;
+
+		/* If there already is an entry for this gsm0808_speech_codec_type, don't add another one. */
+		for (i = 0; i < scl->len; i++) {
+			if (scl->codec[i].type == m->gsm0808_speech_codec.type)
+				break;
+		}
+		/* If i is a valid index now, it means this gsm0808_speech_codec_type is already listed. */
+		if (i < scl->len) {
+			/* In case of FR3 and HR3 == AMR, bitwise-or the gsm0808_speech_codec.cfg to accumulate Sn.
+			 * The cfg represents a bitmask of Sn bits. codec_mapping.c lists each of these bits separately,
+			 * but on the A-interface, send a combined mask. */
+			if (m->gsm0808_speech_codec.type == GSM0808_SCT_FR3
+			    || m->gsm0808_speech_codec.type == GSM0808_SCT_HR3)
+				scl->codec[i].cfg |= m->gsm0808_speech_codec.cfg;
+			/* We found and possibly enriched an existing entry. Nothing left to do for this codec. */
+			continue;
+		}
+
+		/* Not listed yet. Create a new entry. */
+		if (scl->len >= ARRAY_SIZE(scl->codec))
+			return -ENOSPC;
+
+		scl->codec[scl->len] = m->gsm0808_speech_codec;
+		scl->len++;
+		added++;
+	}
+	if (!added)
 		return -ENOENT;
-	if (!m->has_gsm0808_speech_codec)
-		return -ENOENT;
-	if (scl->len >= ARRAY_SIZE(scl->codec))
-		return -ENOSPC;
-	scl->codec[scl->len] = m->gsm0808_speech_codec;
-	/* FIXME: apply AMR configuration according to codec->fmtp */
-	scl->len++;
 	return 0;
 }
 
