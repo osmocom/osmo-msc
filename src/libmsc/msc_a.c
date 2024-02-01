@@ -700,6 +700,7 @@ void msc_a_tx_assignment_cmd(struct msc_a *msc_a)
 		.assignment_command = {
 			.cn_rtp = &msc_a->cc.call_leg->rtp[RTP_TO_RAN]->local,
 			.channel_type = &channel_type,
+			.codecs = &cc_trans->cc.local.audio_codecs,
 			.osmux_present = msc_a->cc.call_leg->rtp[RTP_TO_RAN]->use_osmux,
 			.osmux_cid = msc_a->cc.call_leg->rtp[RTP_TO_RAN]->local_osmux_cid,
 			.call_id_present = true,
