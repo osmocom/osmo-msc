@@ -35,6 +35,7 @@
 #include <osmocom/msc/sccp_ran.h>
 #include <osmocom/msc/ran_msg_iu.h>
 #include <osmocom/msc/gsm_04_11.h>
+#include <osmocom/msc/codec_mapping.h>
 
 #define LOG_RAN_IU_DEC(RAN_DEC, level, fmt, args...) \
 	LOG_RAN_DEC(RAN_DEC, DIUCS, level, "RANAP: " fmt, ## args)
@@ -344,6 +345,45 @@ static struct msgb *ran_iu_wrap_dtap(struct msgb *dtap)
 	return an_apdu;
 }
 
+static uint32_t gsm0808_cfg_to_rab_modes(bool full_rate, uint16_t cfg)
+{
+	int bit;
+	uint32_t rab_modes = 0;
+	for (bit = 0; bit < 16; bit++) {
+		if (!(cfg & (1 << bit)))
+			continue;
+		rab_modes |= gsm0808_amr_modes_from_cfg[full_rate ? 1 : 0][bit];
+	}
+	return rab_modes;
+}
+
+/* Combine all the AMR cfg bits across the codecs */
+static uint32_t codecs_to_rab_modes(const struct sdp_audio_codecs *codecs)
+{
+	struct gsm0808_speech_codec_list scl = {};
+	int i;
+	uint32_t rab_modes = 0;
+	sdp_audio_codecs_to_speech_codec_list(&scl, codecs);
+	for (i = 0; i < scl.len; i++) {
+		bool amr = false;
+		bool fr = false;
+		switch (scl.codec[i].type) {
+		case GSM0808_SCT_FR3:
+			amr = true;
+			fr = true;
+			break;
+		case GSM0808_SCT_HR3:
+			amr = true;
+			break;
+		default:
+			break;
+		}
+		if (amr)
+			rab_modes |= gsm0808_cfg_to_rab_modes(fr, scl.codec[i].cfg);
+	}
+	return rab_modes;
+}
+
 static struct msgb *ran_iu_make_rab_assignment(struct osmo_fsm_inst *caller_fi, const struct ran_assignment_command *ac)
 {
 	struct msgb *msg;
@@ -351,6 +391,7 @@ static struct msgb *ran_iu_make_rab_assignment(struct osmo_fsm_inst *caller_fi, 
 	uint32_t cn_rtp_ip;
 	static uint8_t next_rab_id = 1;
 	uint8_t rab_id = next_rab_id;
+	uint32_t rab_modes;
 
 	next_rab_id ++;
 	if (!next_rab_id)
@@ -371,7 +412,16 @@ static struct msgb *ran_iu_make_rab_assignment(struct osmo_fsm_inst *caller_fi, 
 	LOG_RAN_IU_ENC(caller_fi, LOGL_DEBUG, "RAB Assignment: rab_id=%d, rtp=" OSMO_SOCKADDR_STR_FMT ", use_x213_nsap=%d\n",
 			rab_id, OSMO_SOCKADDR_STR_FMT_ARGS(ac->cn_rtp), use_x213_nsap);
 
-	msg = ranap_new_msg_rab_assign_voice(rab_id, cn_rtp_ip, ac->cn_rtp->port, use_x213_nsap);
+	rab_modes = codecs_to_rab_modes(ac->codecs);
+	if (!rab_modes) {
+		LOG_RAN_IU_ENC(caller_fi, LOGL_ERROR, "Error during RAB Assignment:"
+			       " no AMR codec available, or no matching AMR rates. AMR is required on 3G\n");
+		return NULL;
+	}
+	/* Always include SID */
+	rab_modes |= (1 << OSMO_RANAP_RAB_MODE_AMR_SID);
+
+	msg = ranap_new_msg_rab_assign_voice_2(rab_id, cn_rtp_ip, ac->cn_rtp->port, use_x213_nsap, rab_modes);
 	msg->l2h = msg->data;
 
 	return msg;
