@@ -32,6 +32,7 @@
 #include <osmocom/msc/ran_msg_a.h>
 #include <osmocom/msc/sccp_ran.h>
 #include <osmocom/msc/gsm_data.h>
+#include <osmocom/msc/codec_mapping.h>
 
 #define LOG_RAN_A_DEC(RAN_DEC, level, fmt, args...) \
 	LOG_RAN_DEC(RAN_DEC, DBSSAP, level, "BSSMAP: " fmt, ## args)
@@ -1340,39 +1341,6 @@ static struct msgb *ran_a_wrap_dtap(struct msgb *dtap)
 	return an_apdu;
 }
 
-static int ran_a_channel_type_to_speech_codec_list(struct gsm0808_speech_codec_list *scl, const struct gsm0808_channel_type *ct)
-{
-	unsigned int i;
-	int rc;
-
-	memset(scl, 0, sizeof(*scl));
-
-	switch (ct->ch_indctr) {
-	case GSM0808_CHAN_DATA:
-		scl->codec[0] = (struct gsm0808_speech_codec) {
-			.pi = true, /* PI indicates CSDoIP is supported */
-			.pt = false, /* PT indicates CSDoTDM is not supported */
-			.type = GSM0808_SCT_CSD,
-			.cfg = 0, /* R2/R3 not set (redundancy not supported) */
-		};
-		scl->len = 1;
-		break;
-	case GSM0808_CHAN_SPEECH:
-		for (i = 0; i < ct->perm_spch_len; i++) {
-			rc = gsm0808_speech_codec_from_chan_type(&scl->codec[i], ct->perm_spch[i]);
-			if (rc != 0)
-				return -EINVAL;
-		}
-		scl->len = i;
-		break;
-	default:
-		OSMO_ASSERT(0);
-		break;
-	}
-
-	return 0;
-}
-
 /* Compose a BSSAP Assignment Command.
  * Passing an RTP address is optional.
  * The msub is passed merely for error logging. */
@@ -1385,7 +1353,6 @@ static struct msgb *ran_a_make_assignment_command(struct osmo_fsm_inst *log_fi,
 	struct sockaddr_storage *use_rtp_addr = NULL;
 	struct msgb *msg;
 	const uint32_t *call_id = NULL;
-	int rc;
 
 	if (!ac->channel_type) {
 		LOG_RAN_A_ENC(log_fi, LOGL_ERROR, "Assignment Command: missing Channel Type\n");
@@ -1393,10 +1360,23 @@ static struct msgb *ran_a_make_assignment_command(struct osmo_fsm_inst *log_fi,
 	}
 
 	if (ac->channel_type->ch_indctr == GSM0808_CHAN_SPEECH || ac->channel_type->ch_indctr == GSM0808_CHAN_DATA) {
-		rc = ran_a_channel_type_to_speech_codec_list(&scl, ac->channel_type);
-		if (rc < 0) {
-			LOG_RAN_A_ENC(log_fi, LOGL_ERROR, "Assignment Command: Cannot translate Channel Type to Speech Codec List\n");
-			return NULL;
+		switch (ac->channel_type->ch_indctr) {
+		case GSM0808_CHAN_SPEECH:
+			sdp_audio_codecs_to_speech_codec_list(&scl, ac->codecs);
+			break;
+		case GSM0808_CHAN_DATA:
+			scl = (struct gsm0808_speech_codec_list){
+				.codec = {
+					{
+						.pi = true, /* PI indicates CSDoIP is supported */
+						.pt = false, /* PT indicates CSDoTDM is not supported */
+						.type = GSM0808_SCT_CSD,
+						.cfg = 0, /* R2/R3 not set (redundancy not supported) */
+					},
+				},
+				.len = 1,
+			};
+			break;
 		}
 		use_scl = &scl;
 
