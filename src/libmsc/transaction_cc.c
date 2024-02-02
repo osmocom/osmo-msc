@@ -25,6 +25,7 @@
 #include <osmocom/msc/transaction_cc.h>
 #include <osmocom/msc/codec_filter.h>
 #include <osmocom/msc/csd_filter.h>
+#include <osmocom/msc/ran_infra.h>
 
 void trans_cc_filter_init(struct gsm_trans *trans)
 {
@@ -34,7 +35,7 @@ void trans_cc_filter_init(struct gsm_trans *trans)
 
 void trans_cc_filter_set_ran(struct gsm_trans *trans, enum osmo_rat_type ran_type)
 {
-	codec_filter_set_ran(&trans->cc.codecs, ran_type);
+	codec_filter_set_ran(&trans->cc.codecs, &msc_ran_infra[ran_type].codecs);
 	csd_filter_set_ran(&trans->cc.csd, ran_type);
 }
 

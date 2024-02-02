@@ -26,6 +26,9 @@ struct ran_infra {
 	const ran_dec_l2_t ran_dec_l2;
 	const ran_encode_t ran_encode;
 	struct sccp_ran_inst *sri;
+	/* Codecs available on this RAN type by default, in order of preference. If empty, all known codecs will be
+	 * allowed and offered to peers. */
+	struct sdp_audio_codecs codecs;
 	/* To always set up the MGW endpoint facing the RAN side with specific codecs, list those here. Otherwise leave
 	 * empty (to use the result of codecs filtering). This exists for IuCS, to always set the MGW endpoint facing
 	 * RAN to IUFP, to decapsulate the IuUP headers. */

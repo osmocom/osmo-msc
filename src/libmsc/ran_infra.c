@@ -28,6 +28,7 @@
 #include <osmocom/msc/ran_msg_a.h>
 #include <osmocom/msc/ran_msg_iu.h>
 #include <osmocom/msc/ran_peer.h>
+#include <osmocom/msc/codec_mapping.h>
 
 #include <osmocom/msc/ran_infra.h>
 
@@ -128,3 +129,31 @@ struct ran_infra msc_ran_infra[] = {
 };
 
 const int msc_ran_infra_len = ARRAY_SIZE(msc_ran_infra);
+
+static __attribute__((constructor)) void on_dso_load_geran(void)
+{
+	/* Initialize GERAN default codecs, in order of preference. By definition, all codec_mapping entries that match
+	 * one of the GERAN GMSK Speech Versions are available. */
+	static const enum gsm48_bcap_speech_ver mobile_codecs[] = {
+		GSM48_BCAP_SV_AMR_F	/*!< 4   GSM FR V3 (FR AMR) */,
+		GSM48_BCAP_SV_AMR_H	/*!< 5   GSM HR V3 (HR_AMR) */,
+		GSM48_BCAP_SV_EFR	/*!< 2   GSM FR V2 (GSM EFR) */,
+		GSM48_BCAP_SV_FR	/*!< 0   GSM FR V1 (GSM FR) */,
+		GSM48_BCAP_SV_HR	/*!< 1   GSM HR V1 (GSM HR) */,
+	};
+	int i;
+	for (i = 0; i < ARRAY_SIZE(mobile_codecs); i++)
+		sdp_audio_codecs_add_speech_ver(&msc_ran_infra[OSMO_RAT_GERAN_A].codecs, mobile_codecs[i]);
+}
+
+static __attribute__((constructor)) void on_dso_load_utran(void)
+{
+	static const enum gsm48_bcap_speech_ver utran_codecs[] = {
+		GSM48_BCAP_SV_AMR_F	/*!< 4   GSM FR V3 (FR AMR) */,
+		GSM48_BCAP_SV_AMR_H	/*!< 5   GSM HR V3 (HR_AMR) */,
+		GSM48_BCAP_SV_AMR_FW	/*!< 8   GSM FR V5 (FR AMR-WB) */,
+	};
+	int i;
+	for (i = 0; i < ARRAY_SIZE(utran_codecs); i++)
+		sdp_audio_codecs_add_speech_ver(&msc_ran_infra[OSMO_RAT_UTRAN_IU].codecs, utran_codecs[i]);
+}
