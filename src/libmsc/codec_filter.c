@@ -25,52 +25,16 @@
 
 #include <osmocom/msc/codec_filter.h>
 #include <osmocom/msc/codec_mapping.h>
+#include <osmocom/msc/ran_infra.h>
 #include <osmocom/msc/debug.h>
 
-/* Add all known payload types encountered in GSM networks */
-static void sdp_add_all_geran_codecs(struct sdp_audio_codecs *ac)
+void codec_filter_set_ran(struct codec_filter *codec_filter, const struct sdp_audio_codecs *codecs)
 {
-	/* In order of preference. TODO: make configurable */
-	static const enum gsm48_bcap_speech_ver mobile_codecs[] = {
-		GSM48_BCAP_SV_AMR_F	/*!< 4   GSM FR V3 (FR AMR) */,
-		GSM48_BCAP_SV_AMR_H	/*!< 5   GSM HR V3 (HR_AMR) */,
-		GSM48_BCAP_SV_EFR	/*!< 2   GSM FR V2 (GSM EFR) */,
-		GSM48_BCAP_SV_FR	/*!< 0   GSM FR V1 (GSM FR) */,
-		GSM48_BCAP_SV_HR	/*!< 1   GSM HR V1 (GSM HR) */,
-	};
-	int i;
-	for (i = 0; i < ARRAY_SIZE(mobile_codecs); i++)
-		sdp_audio_codecs_add_speech_ver(ac, mobile_codecs[i]);
-}
-
-/* Add all known AMR payload types encountered in UTRAN networks */
-static void sdp_add_all_utran_codecs(struct sdp_audio_codecs *ac)
-{
-	/* In order of preference. TODO: make configurable */
-	static const enum gsm48_bcap_speech_ver utran_codecs[] = {
-		GSM48_BCAP_SV_AMR_F	/*!< 4   GSM FR V3 (FR AMR) */,
-		GSM48_BCAP_SV_AMR_H	/*!< 5   GSM HR V3 (HR_AMR) */,
-		GSM48_BCAP_SV_AMR_FW	/*!< 8   GSM FR V5 (FR AMR-WB) */,
-	};
-	int i;
-	for (i = 0; i < ARRAY_SIZE(utran_codecs); i++)
-		sdp_audio_codecs_add_speech_ver(ac, utran_codecs[i]);
-}
-
-void codec_filter_set_ran(struct codec_filter *codec_filter, enum osmo_rat_type ran_type)
-{
+	const struct sdp_audio_codec *c;
 	codec_filter->ran = (struct sdp_audio_codecs){};
-
-	switch (ran_type) {
-	default:
-	case OSMO_RAT_GERAN_A:
-		sdp_add_all_geran_codecs(&codec_filter->ran);
-		break;
-
-	case OSMO_RAT_UTRAN_IU:
-		sdp_add_all_utran_codecs(&codec_filter->ran);
-		break;
-	}
+	/* Add codecs one by one, to resolve any payload type number conflicts or duplicates. */
+	sdp_audio_codecs_foreach (c, codecs)
+		sdp_audio_codecs_add_copy(&codec_filter->ran, c, true, true);
 }
 
 void codec_filter_set_bss(struct codec_filter *codec_filter,

@@ -44,7 +44,7 @@ struct codec_filter {
 	struct sdp_audio_codec assignment;
 };
 
-void codec_filter_set_ran(struct codec_filter *codec_filter, enum osmo_rat_type ran_type);
+void codec_filter_set_ran(struct codec_filter *codec_filter, const struct sdp_audio_codecs *codecs);
 void codec_filter_set_bss(struct codec_filter *codec_filter,
 			  const struct gsm0808_speech_codec_list *codec_list_bss_supported);
 int codec_filter_run(struct codec_filter *codec_filter, struct sdp_msg *result, const struct sdp_msg *remote);
