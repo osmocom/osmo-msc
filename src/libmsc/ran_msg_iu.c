@@ -357,29 +357,39 @@ static uint32_t gsm0808_cfg_to_rab_modes(bool full_rate, uint16_t cfg)
 	return rab_modes;
 }
 
-/* Combine all the AMR cfg bits across the codecs */
+static const struct sdp_audio_codec *first_amr(const struct sdp_audio_codecs *codecs)
+{
+	const struct sdp_audio_codec *c;
+	sdp_audio_codecs_foreach (c, codecs) {
+		if (!strcmp("AMR", c->subtype_name))
+			return c;
+	}
+	return NULL;
+}
+
+/* Get the RAB modes (AMR rates) from the first AMR codec in this list */
 static uint32_t codecs_to_rab_modes(const struct sdp_audio_codecs *codecs)
 {
+	const struct sdp_audio_codec *c;
 	struct gsm0808_speech_codec_list scl = {};
 	int i;
 	uint32_t rab_modes = 0;
-	sdp_audio_codecs_to_speech_codec_list(&scl, codecs);
+	c = first_amr(codecs);
+	if (!c)
+		return 0;
+	sdp_audio_codec_to_speech_codec_list(&scl, c);
 	for (i = 0; i < scl.len; i++) {
-		bool amr = false;
 		bool fr = false;
 		switch (scl.codec[i].type) {
 		case GSM0808_SCT_FR3:
-			amr = true;
 			fr = true;
 			break;
 		case GSM0808_SCT_HR3:
-			amr = true;
 			break;
 		default:
 			break;
 		}
-		if (amr)
-			rab_modes |= gsm0808_cfg_to_rab_modes(fr, scl.codec[i].cfg);
+		rab_modes |= gsm0808_cfg_to_rab_modes(fr, scl.codec[i].cfg);
 	}
 	return rab_modes;
 }
