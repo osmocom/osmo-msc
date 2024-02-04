@@ -685,3 +685,42 @@ void sdp_audio_codecs_set_csd(struct sdp_audio_codecs *ac)
 		}},
 	};
 }
+
+static void token_copy(char *dst, size_t dst_size, const char *start, const char *end1, const char *end2)
+{
+	const char *end;
+	if (end1 && end2)
+		end = OSMO_MIN(end1, end2);
+	else
+		end = end1 ? : end2;
+	if (!end)
+		end = start + strlen(start);
+	osmo_strlcpy(dst, start, OSMO_MIN(dst_size, end - start + 1));
+}
+#define TOKEN_COPY_ARRAY(DST, START, END1, END2) \
+	token_copy(DST, sizeof(DST), START, END1, END2)
+
+/* Parse a codec string as from sdp_audio_codec_to_str_buf() back to an sdp_audio_codec struct.
+ * Write the parsed result to *dst.
+ * The input string is like <subtype_name>[:<fmtp-string>][#<payload-type-nr>],
+ * for example:
+ *    "FOO:my-fmtp=val;my-other-fmtp=val2#96"
+ * Note that ';' are separators only within the fmtp string. This function does not separate those. In above example,
+ * the fmtp string part is "my-fmtp=val;my-other-fmtp=val2" and ends up in dst->ftmp as-is.
+ * Return 0 on success, negative on failure. */
+int sdp_audio_codec_from_str(struct sdp_audio_codec *dst, const char *str)
+{
+	const char *colon = strchr(str, ':');
+	const char *hash = strchr(str, '#');
+
+	*dst = (struct sdp_audio_codec){
+		.rate = 8000,
+	};
+
+	TOKEN_COPY_ARRAY(dst->subtype_name, str, colon, hash);
+	if (colon)
+		TOKEN_COPY_ARRAY(dst->fmtp, colon + 1, hash > colon ? hash : NULL, NULL);
+	if (hash)
+		dst->payload_type = atoi(hash + 1);
+	return 0;
+}
