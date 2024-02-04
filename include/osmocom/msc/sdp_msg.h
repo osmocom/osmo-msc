@@ -76,6 +76,8 @@ int sdp_audio_codec_to_str_buf(char *buf, size_t buflen, const struct sdp_audio_
 char *sdp_audio_codec_to_str_c(void *ctx, const struct sdp_audio_codec *codec);
 const char *sdp_audio_codec_to_str(const struct sdp_audio_codec *codec);
 
+int sdp_audio_codec_from_str(struct sdp_audio_codec *dst, const char *str);
+
 int sdp_audio_codecs_to_str_buf(char *buf, size_t buflen, const struct sdp_audio_codecs *ac);
 char *sdp_audio_codecs_to_str_c(void *ctx, const struct sdp_audio_codecs *ac);
 const char *sdp_audio_codecs_to_str(const struct sdp_audio_codecs *ac);
