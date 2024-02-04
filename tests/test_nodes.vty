@@ -4,6 +4,7 @@ OsmoMSC(config)# list
 ...
   network
   msc
+  codecs (a|iu)
   sgs
   smsc
   asci
@@ -112,6 +113,15 @@ msc
 ... ! mncc external
 
 OsmoMSC(config-msc)# exit
+
+OsmoMSC(config)# codecs?
+  codecs  Configure allowed codecs and order of preference
+OsmoMSC(config)# codecs ?
+  a   Configure codecs on GERAN (2G). For AMR codecs, the 'mode-set' instructs the 2G RAN to support specific AMR rates. The octet-align has no effect on the 2G RAN side: on AoIP, osmo-msc always uses a fixed octet-align mode, see <future cfg option>. Make sure that an entry matching the AoIP octet-align mode is present; optionally offer AMR alignment conversion to the other call leg by adding another entry in mismatching octet-align mode. For TrFO between TCH/H channels with AMR-FR used on TCH/F and 3G, consider that AMR-HR does not support mode-set 6 nor 7.
+  iu  Configure (inner) AMR codecs on UTRAN. Towards 3G RAN, osmo-msc *always* uses VND.3GPP.IUFP. The codecs configured here need to be AMR or AMR-WB, corresponding to the AMR payload within the IUFP header. The 'mode-set' instructs the 3G RAN to support specific AMR rates. 'octet-align' has no effect on the 3G RAN, but simply offers AMR alignment conversion to the other call leg.
+OsmoMSC(config)# codecs a
+OsmoMSC(config-codecs)# exit
+
 OsmoMSC(config)# mncc-int
 OsmoMSC(config-mncc-int)# list
 ...
@@ -191,6 +201,26 @@ smsc
 asci
  disable
  gcr
+codecs a
+ clear
+ AMR:octet-align=1;mode-set=0,2,4,7#112
+ AMR:octet-align=1;mode-set=7#114
+ AMR:octet-align=1;mode-set=0,2,4#115
+ AMR:mode-set=0,2,4,7#116
+ AMR:mode-set=7#117
+ AMR:mode-set=0,2,4#118
+ GSM-EFR#110
+ GSM#3
+ GSM-HR-08#111
+codecs iu
+ clear
+ AMR:octet-align=1;mode-set=0,2,4,7#112
+ AMR:octet-align=1;mode-set=7#114
+ AMR:octet-align=1;mode-set=0,2,4#115
+ AMR:mode-set=0,2,4,7#116
+ AMR:mode-set=7#117
+ AMR:mode-set=0,2,4#118
+ AMR-WB/16000:octet-align=1#113
 end
 
 OsmoMSC# configure terminal

@@ -30,6 +30,7 @@ enum bsc_vty_node {
 	GCR_NODE,
 	VGC_NODE,
 	VBC_NODE,
+	CODECS_NODE,
 };
 
 int bsc_vty_init_extra(void);
