@@ -206,8 +206,8 @@ struct sdp_audio_codec *sdp_audio_codecs_by_descr(struct sdp_audio_codecs *ac, c
 	return NULL;
 }
 
-/* Remove the codec entry pointed at by 'codec'. 'codec' must point at an entry of 'sdp' (to use an external codec
- * instance, use sdp_audio_codecs_by_descr()).
+/* Remove the codec entry pointed at by 'codec'. 'codec' must point at an entry of 'ac'.
+ * To use any external codec instance, use sdp_audio_codecs_remove(ac, sdp_audio_codecs_by_descr(ac, codec)).
  * Return 0 on success, -ENOENT if codec does not point at the sdp->codec array. */
 int sdp_audio_codecs_remove(struct sdp_audio_codecs *ac, const struct sdp_audio_codec *codec)
 {
