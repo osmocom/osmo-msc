@@ -38,7 +38,7 @@ EXTRA_DIST = \
 	vty_test_runner.py \
 	ctrl_test_runner.py \
 	smpp_test_runner.py \
-	test_nodes.vty \
+	$(srcdir)/*.vty \
 	$(NULL)
 
 TESTSUITE = $(srcdir)/testsuite
