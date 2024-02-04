@@ -1,0 +1,296 @@
+OsmoMSC> show codecs?
+  codecs  Show codecs listings
+
+OsmoMSC> show codecs ?
+  [a]          Show codecs currently allowed on 2G AoIP calls.
+  [iu]         Show codecs currently allowed on 3G CS calls.
+  [supported]  List all codecs that osmo-msc supports, in general.
+
+OsmoMSC> show codecs a
+codecs a
+ clear
+ AMR:octet-align=1;mode-set=0,2,4,7#112
+ AMR:octet-align=1;mode-set=7#114
+ AMR:octet-align=1;mode-set=0,2,4#115
+ AMR:mode-set=0,2,4,7#116
+ AMR:mode-set=7#117
+ AMR:mode-set=0,2,4#118
+ GSM-EFR#110
+ GSM#3
+ GSM-HR-08#111
+
+OsmoMSC> show codecs iu
+codecs iu
+ clear
+ AMR:octet-align=1;mode-set=0,2,4,7#112
+ AMR:octet-align=1;mode-set=7#114
+ AMR:octet-align=1;mode-set=0,2,4#115
+ AMR:mode-set=0,2,4,7#116
+ AMR:mode-set=7#117
+ AMR:mode-set=0,2,4#118
+ AMR-WB/16000:octet-align=1#113
+
+OsmoMSC> show codecs supported
+Supported codecs are:
+  PCMU#0
+  GSM#3
+  PCMA#8
+  G729#18
+  GSM-EFR#110
+  GSM-HR-08#111
+  AMR:octet-align=1;mode-set=0,2,4,7#112
+  AMR:octet-align=1;mode-set=7#112
+  AMR:octet-align=1;mode-set=0,2,4#112
+  AMR:octet-align=1;mode-set=0,2,4#112
+  AMR:mode-set=0,2,4,7#112
+  AMR:mode-set=7#112
+  AMR:mode-set=0,2,4#112
+  AMR:mode-set=0,2,4#112
+  AMR-WB/16000:octet-align=1#113
+  VND.3GPP.IUFP/16000#96
+  CLEARMODE#120
+
+OsmoMSC> show codecs
+codecs a
+ clear
+ AMR:octet-align=1;mode-set=0,2,4,7#112
+ AMR:octet-align=1;mode-set=7#114
+ AMR:octet-align=1;mode-set=0,2,4#115
+ AMR:mode-set=0,2,4,7#116
+ AMR:mode-set=7#117
+ AMR:mode-set=0,2,4#118
+ GSM-EFR#110
+ GSM#3
+ GSM-HR-08#111
+codecs iu
+ clear
+ AMR:octet-align=1;mode-set=0,2,4,7#112
+ AMR:octet-align=1;mode-set=7#114
+ AMR:octet-align=1;mode-set=0,2,4#115
+ AMR:mode-set=0,2,4,7#116
+ AMR:mode-set=7#117
+ AMR:mode-set=0,2,4#118
+ AMR-WB/16000:octet-align=1#113
+
+OsmoMSC> enable
+OsmoMSC# show codecs
+codecs a
+ clear
+ AMR:octet-align=1;mode-set=0,2,4,7#112
+ AMR:octet-align=1;mode-set=7#114
+ AMR:octet-align=1;mode-set=0,2,4#115
+ AMR:mode-set=0,2,4,7#116
+ AMR:mode-set=7#117
+ AMR:mode-set=0,2,4#118
+ GSM-EFR#110
+ GSM#3
+ GSM-HR-08#111
+codecs iu
+ clear
+ AMR:octet-align=1;mode-set=0,2,4,7#112
+ AMR:octet-align=1;mode-set=7#114
+ AMR:octet-align=1;mode-set=0,2,4#115
+ AMR:mode-set=0,2,4,7#116
+ AMR:mode-set=7#117
+ AMR:mode-set=0,2,4#118
+ AMR-WB/16000:octet-align=1#113
+
+OsmoMSC# configure terminal
+
+OsmoMSC(config)# do show codecs?
+  codecs  Show codecs listings
+OsmoMSC(config)# do show codecs ?
+  [a]          Show codecs currently allowed on 2G AoIP calls.
+  [iu]         Show codecs currently allowed on 3G CS calls.
+  [supported]  List all codecs that osmo-msc supports, in general.
+
+OsmoMSC(config)# do show codecs
+codecs a
+ clear
+ AMR:octet-align=1;mode-set=0,2,4,7#112
+ AMR:octet-align=1;mode-set=7#114
+ AMR:octet-align=1;mode-set=0,2,4#115
+ AMR:mode-set=0,2,4,7#116
+ AMR:mode-set=7#117
+ AMR:mode-set=0,2,4#118
+ GSM-EFR#110
+ GSM#3
+ GSM-HR-08#111
+codecs iu
+ clear
+ AMR:octet-align=1;mode-set=0,2,4,7#112
+ AMR:octet-align=1;mode-set=7#114
+ AMR:octet-align=1;mode-set=0,2,4#115
+ AMR:mode-set=0,2,4,7#116
+ AMR:mode-set=7#117
+ AMR:mode-set=0,2,4#118
+ AMR-WB/16000:octet-align=1#113
+
+OsmoMSC(config)# codecs?
+  codecs  Configure allowed codecs and order of preference
+OsmoMSC(config)# codecs ?
+  a   Configure codecs on GERAN (2G). For AMR codecs, the 'mode-set' instructs the 2G RAN to support specific AMR rates. The octet-align has no effect on the 2G RAN side: on AoIP, osmo-msc always uses a fixed octet-align mode, see <future cfg option>. Make sure that an entry matching the AoIP octet-align mode is present; optionally offer AMR alignment conversion to the other call leg by adding another entry in mismatching octet-align mode. For TrFO between TCH/H channels with AMR-FR used on TCH/F and 3G, consider that AMR-HR does not support mode-set 6 nor 7.
+  iu  Configure (inner) AMR codecs on UTRAN. Towards 3G RAN, osmo-msc *always* uses VND.3GPP.IUFP. The codecs configured here need to be AMR or AMR-WB, corresponding to the AMR payload within the IUFP header. The 'mode-set' instructs the 3G RAN to support specific AMR rates. 'octet-align' has no effect on the 3G RAN, but simply offers AMR alignment conversion to the other call leg.
+
+OsmoMSC(config)# do show codecs
+codecs a
+ clear
+ AMR:octet-align=1;mode-set=0,2,4,7#112
+ AMR:octet-align=1;mode-set=7#114
+ AMR:octet-align=1;mode-set=0,2,4#115
+ AMR:mode-set=0,2,4,7#116
+ AMR:mode-set=7#117
+ AMR:mode-set=0,2,4#118
+ GSM-EFR#110
+ GSM#3
+ GSM-HR-08#111
+codecs iu
+ clear
+ AMR:octet-align=1;mode-set=0,2,4,7#112
+ AMR:octet-align=1;mode-set=7#114
+ AMR:octet-align=1;mode-set=0,2,4#115
+ AMR:mode-set=0,2,4,7#116
+ AMR:mode-set=7#117
+ AMR:mode-set=0,2,4#118
+ AMR-WB/16000:octet-align=1#113
+
+OsmoMSC(config)# codecs a
+OsmoMSC(config-codecs)# list
+...
+  clear
+  (add|no) CODEC_STR
+OsmoMSC(config-codecs)# ?
+...
+  clear  Clear all codecs from the list -- this breaks voice calls, you should add new entries after this.
+  add    Add a codec entry
+  no     Delete a codec entry
+
+OsmoMSC(config-codecs)# ### Remove an entry. (1) affects only 'codecs a'. (2) does not affect the 'octet-align=1' entry
+OsmoMSC(config-codecs)# no AMR:mode-set=7
+OsmoMSC(config-codecs)# do show codecs
+codecs a
+ clear
+ AMR:octet-align=1;mode-set=0,2,4,7#112
+ AMR:octet-align=1;mode-set=7#114
+ AMR:octet-align=1;mode-set=0,2,4#115
+ AMR:mode-set=0,2,4,7#116
+ AMR:mode-set=0,2,4#118
+ GSM-EFR#110
+ GSM#3
+ GSM-HR-08#111
+codecs iu
+ clear
+ AMR:octet-align=1;mode-set=0,2,4,7#112
+ AMR:octet-align=1;mode-set=7#114
+ AMR:octet-align=1;mode-set=0,2,4#115
+ AMR:mode-set=0,2,4,7#116
+ AMR:mode-set=7#117
+ AMR:mode-set=0,2,4#118
+ AMR-WB/16000:octet-align=1#113
+OsmoMSC(config-codecs)# ### Also remove the octet-align=1 variant
+OsmoMSC(config-codecs)# no AMR:octet-align=1;mode-set=7
+OsmoMSC(config-codecs)# do show codecs
+codecs a
+ clear
+ AMR:octet-align=1;mode-set=0,2,4,7#112
+ AMR:octet-align=1;mode-set=0,2,4#115
+ AMR:mode-set=0,2,4,7#116
+ AMR:mode-set=0,2,4#118
+ GSM-EFR#110
+ GSM#3
+ GSM-HR-08#111
+codecs iu
+ clear
+ AMR:octet-align=1;mode-set=0,2,4,7#112
+ AMR:octet-align=1;mode-set=7#114
+ AMR:octet-align=1;mode-set=0,2,4#115
+ AMR:mode-set=0,2,4,7#116
+ AMR:mode-set=7#117
+ AMR:mode-set=0,2,4#118
+ AMR-WB/16000:octet-align=1#113
+
+OsmoMSC(config-codecs)# ### Remove nonexisting entry
+OsmoMSC(config-codecs)# no AMR:mode-set=7
+% Codec not present in the list: AMR:mode-set=7
+
+OsmoMSC(config-codecs)# clear
+OsmoMSC(config-codecs)# do show codecs
+codecs a
+ clear
+codecs iu
+ clear
+ AMR:octet-align=1;mode-set=0,2,4,7#112
+ AMR:octet-align=1;mode-set=7#114
+ AMR:octet-align=1;mode-set=0,2,4#115
+ AMR:mode-set=0,2,4,7#116
+ AMR:mode-set=7#117
+ AMR:mode-set=0,2,4#118
+ AMR-WB/16000:octet-align=1#113
+
+OsmoMSC(config-codecs)# add AMR:mode-set=1
+% Error: unsupported codec 'AMR:mode-set=1'. See 'do show codecs supported' command.
+
+OsmoMSC(config-codecs)# do show codecs
+codecs a
+ clear
+codecs iu
+ clear
+ AMR:octet-align=1;mode-set=0,2,4,7#112
+ AMR:octet-align=1;mode-set=7#114
+ AMR:octet-align=1;mode-set=0,2,4#115
+ AMR:mode-set=0,2,4,7#116
+ AMR:mode-set=7#117
+ AMR:mode-set=0,2,4#118
+ AMR-WB/16000:octet-align=1#113
+
+OsmoMSC(config-codecs)# add AMR:octet-align=1;mode-set=0,2,4,7#98
+OsmoMSC(config-codecs)# do show codecs
+codecs a
+ clear
+ AMR:octet-align=1;mode-set=0,2,4,7#98
+codecs iu
+ clear
+ AMR:octet-align=1;mode-set=0,2,4,7#112
+ AMR:octet-align=1;mode-set=7#114
+ AMR:octet-align=1;mode-set=0,2,4#115
+ AMR:mode-set=0,2,4,7#116
+ AMR:mode-set=7#117
+ AMR:mode-set=0,2,4#118
+ AMR-WB/16000:octet-align=1#113
+
+OsmoMSC(config-codecs)# add AMR:octet-align=1;mode-set=0,2,4,7#112
+% Codec already present in the list: AMR:octet-align=1;mode-set=0,2,4,7#98
+
+OsmoMSC(config-codecs)# do show codecs
+codecs a
+ clear
+ AMR:octet-align=1;mode-set=0,2,4,7#98
+codecs iu
+ clear
+ AMR:octet-align=1;mode-set=0,2,4,7#112
+ AMR:octet-align=1;mode-set=7#114
+ AMR:octet-align=1;mode-set=0,2,4#115
+ AMR:mode-set=0,2,4,7#116
+ AMR:mode-set=7#117
+ AMR:mode-set=0,2,4#118
+ AMR-WB/16000:octet-align=1#113
+
+OsmoMSC(config-codecs)# add AMR:mode-set=0,2,4,7#98
+OsmoMSC(config-codecs)# do show codecs
+codecs a
+ clear
+ AMR:octet-align=1;mode-set=0,2,4,7#98
+ AMR:mode-set=0,2,4,7#98
+codecs iu
+ clear
+ AMR:octet-align=1;mode-set=0,2,4,7#112
+ AMR:octet-align=1;mode-set=7#114
+ AMR:octet-align=1;mode-set=0,2,4#115
+ AMR:mode-set=0,2,4,7#116
+ AMR:mode-set=7#117
+ AMR:mode-set=0,2,4#118
+ AMR-WB/16000:octet-align=1#113
+
+OsmoMSC(config-codecs)# ### The AMR octet-align and mode-set fmtp are handled logically, in any order:
+OsmoMSC(config-codecs)# add AMR:mode-set=0,2,4,7;octet-align=1#112
+% Codec already present in the list: AMR:octet-align=1;mode-set=0,2,4,7#98

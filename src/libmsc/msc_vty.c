@@ -69,12 +69,19 @@
 #include <osmocom/msc/ran_peer.h>
 #include <osmocom/msc/ran_infra.h>
 #include <osmocom/msc/asci_vty.h>
+#include <osmocom/msc/codec_mapping.h>
 
 static struct gsm_network *gsmnet = NULL;
 
 static struct cmd_node net_node = {
 	GSMNET_NODE,
 	"%s(config-net)# ",
+	1,
+};
+
+static struct cmd_node codecs_node = {
+	CODECS_NODE,
+	"%s(config-codecs)# ",
 	1,
 };
 
@@ -755,6 +762,145 @@ DEFUN(show_nri, show_nri_cmd,
       SHOW_STR NRI_STR)
 {
 	msc_write_nri(vty);
+	return CMD_SUCCESS;
+}
+
+DEFUN(cfg_codecs, cfg_codecs_cmd,
+      "codecs (a|iu)",
+      "Configure allowed codecs and order of preference\n"
+      "Configure codecs on GERAN (2G). For AMR codecs, the 'mode-set' instructs the 2G RAN to support specific AMR"
+      " rates."
+      " The octet-align has no effect on the 2G RAN side: on AoIP, osmo-msc always uses a fixed octet-align mode,"
+      " see <future cfg option>."
+      " Make sure that an entry matching the AoIP octet-align mode is present; optionally offer AMR alignment"
+      " conversion to the other call leg by adding another entry in mismatching octet-align mode."
+      " For TrFO between TCH/H channels with AMR-FR used on TCH/F and 3G, consider that AMR-HR does not support"
+      " mode-set 6 nor 7.\n"
+      "Configure (inner) AMR codecs on UTRAN. Towards 3G RAN, osmo-msc *always* uses VND.3GPP.IUFP. The codecs"
+      " configured here need to be AMR or AMR-WB, corresponding to the AMR payload within the IUFP header."
+      " The 'mode-set' instructs the 3G RAN to support specific AMR rates."
+      " 'octet-align' has no effect on the 3G RAN, but simply offers AMR alignment conversion to the other call leg.\n")
+{
+	enum osmo_rat_type rat;
+	vty->node = CODECS_NODE;
+	if (!strcmp(argv[0], "a"))
+		rat = OSMO_RAT_GERAN_A;
+	else
+		rat = OSMO_RAT_UTRAN_IU;
+	vty->index = &msc_ran_infra[rat];
+	return CMD_SUCCESS;
+}
+
+DEFUN_ATTR(cfg_codecs_clear, cfg_codecs_clear_cmd,
+	   "clear",
+	   "Clear all codecs from the list -- this breaks voice calls, you should add new entries after this.\n",
+	   CMD_ATTR_IMMEDIATE)
+{
+	struct ran_infra *dst = vty->index;
+	dst->codecs = (struct sdp_audio_codecs){};
+	return CMD_SUCCESS;
+}
+
+DEFUN_ATTR(cfg_codecs_entry, cfg_codecs_entry_cmd,
+	   "(add|no) CODEC_STR",
+	   "Add a codec entry\n"
+	   "Delete a codec entry\n"
+	   "A string like <subtype_name>[:<fmtp-string>][#<payload-type-nr>],"
+	   " for example: AMR:octet-align=1;mode-set=0,2,4,7#112."
+	   " For AMR fmtp option details, see RFC 4867 8.1."
+	   " The '#112' payload type number is the default payload type number used for the codec,"
+	   " which may end up being chosen differently in specific calls when osmo-msc needs to avoid duplicates,"
+	   " or when the other call leg asks for a different payload type number for the same codec.\n",
+	   CMD_ATTR_IMMEDIATE)
+{
+	struct ran_infra *dst = vty->index;
+	const char *add_del = argv[0];
+	const char *codec_str = argv[1];
+	struct sdp_audio_codec c;
+	struct sdp_audio_codec *exists;
+	const struct codec_mapping *m;
+	bool ok;
+
+	if (sdp_audio_codec_from_str(&c, codec_str))
+		return CMD_WARNING;
+
+	/* make sure this is a known codec */
+	ok = false;
+	codec_mapping_foreach (m) {
+		if (sdp_audio_codec_cmp(&m->sdp, &c, true, false))
+			continue;
+		ok = true;
+		break;
+	}
+
+	if (!ok) {
+		vty_out(vty, "%% Error: unsupported codec '%s'. See 'do show codecs supported' command.%s", codec_str, VTY_NEWLINE);
+		return CMD_WARNING;
+	}
+
+	exists = sdp_audio_codecs_by_descr(&dst->codecs, &c);
+
+	if (!strcmp("add", add_del)) {
+		if (exists) {
+			vty_out(vty, "%% Codec already present in the list: %s%s", sdp_audio_codec_to_str(exists),
+				VTY_NEWLINE);
+			return CMD_WARNING;
+		}
+
+		if (!sdp_audio_codecs_add_copy(&dst->codecs, &c, false, false)) {
+			vty_out(vty, "%% Error: failed to add codec '%s' -- too many entries?%s", codec_str, VTY_NEWLINE);
+			return CMD_WARNING;
+		}
+	} else {
+		/* "del" */
+		if (!exists) {
+			vty_out(vty, "%% Codec not present in the list: %s%s", codec_str, VTY_NEWLINE);
+			return CMD_WARNING;
+		}
+		sdp_audio_codecs_remove(&dst->codecs, exists);
+	}
+	return CMD_SUCCESS;
+}
+
+static void config_write_codecs_for_rat(struct vty *vty, enum osmo_rat_type rat)
+{
+	const struct sdp_audio_codec *c;
+	char buf[128];
+	vty_out(vty, "codecs %s%s", rat == OSMO_RAT_GERAN_A ? "a" : "iu", VTY_NEWLINE);
+	vty_out(vty, " clear%s", VTY_NEWLINE);
+	sdp_audio_codecs_foreach (c, &msc_ran_infra[rat].codecs) {
+		sdp_audio_codec_to_str_buf(buf, sizeof(buf), c);
+		vty_out(vty, " %s%s", buf, VTY_NEWLINE);
+	}
+}
+
+static int config_write_codecs(struct vty *vty)
+{
+	config_write_codecs_for_rat(vty, OSMO_RAT_GERAN_A);
+	config_write_codecs_for_rat(vty, OSMO_RAT_UTRAN_IU);
+	return 0;
+}
+
+DEFUN(show_codecs, show_codecs_cmd,
+	"show codecs [(a|iu|supported)]\n",
+	SHOW_STR "Show codecs listings\n"
+	"Show codecs currently allowed on 2G AoIP calls.\n"
+	"Show codecs currently allowed on 3G CS calls.\n"
+	"List all codecs that osmo-msc supports, in general.\n"
+	)
+{
+	if (!argc)
+		config_write_codecs(vty);
+	else if (!strcmp("a", argv[0]))
+		config_write_codecs_for_rat(vty, OSMO_RAT_GERAN_A);
+	else if (!strcmp("iu", argv[0]))
+		config_write_codecs_for_rat(vty, OSMO_RAT_UTRAN_IU);
+	else {
+		const struct codec_mapping *m;
+		vty_out(vty, "Supported codecs are:%s", VTY_NEWLINE);
+		codec_mapping_foreach (m)
+			vty_out(vty, "  %s%s", sdp_audio_codec_to_str(&m->sdp), VTY_NEWLINE);
+	}
 	return CMD_SUCCESS;
 }
 
@@ -2072,6 +2218,11 @@ void msc_vty_init(struct gsm_network *msc_network)
 	install_element(MSC_NODE, &cfg_msc_nri_add_cmd);
 	install_element(MSC_NODE, &cfg_msc_nri_del_cmd);
 
+	install_element(CONFIG_NODE, &cfg_codecs_cmd);
+	install_node(&codecs_node, config_write_codecs);
+	install_element(CODECS_NODE, &cfg_codecs_clear_cmd);
+	install_element(CODECS_NODE, &cfg_codecs_entry_cmd);
+
 	neighbor_ident_vty_init(msc_network);
 
 	/* Timer configuration commands (generic osmo_tdef API) */
@@ -2097,6 +2248,7 @@ void msc_vty_init(struct gsm_network *msc_network)
 	install_element_ve(&show_msc_conn_cmd);
 	install_element_ve(&show_msc_transaction_cmd);
 	install_element_ve(&show_nri_cmd);
+	install_element_ve(&show_codecs_cmd);
 
 	install_element_ve(&sms_send_pend_cmd);
 	install_element_ve(&sms_delete_expired_cmd);
