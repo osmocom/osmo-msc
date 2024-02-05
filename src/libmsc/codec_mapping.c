@@ -616,6 +616,9 @@ int sdp_audio_codecs_to_gsm0808_channel_type(struct gsm0808_channel_type *ct, co
 		LOGP(DLGLOBAL, LOGL_ERROR, "- codec = %s\n", sdp_audio_codec_to_str(codec));
 
 		codec_mapping_foreach(m) {
+			LOGP(DLGLOBAL, LOGL_ERROR, "   (m=%s %s)\n", sdp_audio_codec_to_str(&m->sdp),
+			     gsm0808_permitted_speech_name(m->perm_speech));
+
 			if (sdp_audio_codec_cmp(codec, &m->sdp, true, false))
 				continue;
 
