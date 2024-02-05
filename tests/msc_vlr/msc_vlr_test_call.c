@@ -900,6 +900,20 @@ struct codec_test {
 		"GSM-HR-08#111", \
 	}
 
+/* same as SDP_CODECS_ALL_GSM, but AMR-HR octet-align=1 listed as first entry */
+#define SDP_CODECS_ALL_GSM_AMR_HR_FIRST \
+	{ \
+		"AMR:octet-align=1;mode-set=0,2,4#115", \
+		"AMR:octet-align=1;mode-set=0,2,4,7#112", \
+		"AMR:octet-align=1;mode-set=7#114", \
+		"AMR:mode-set=0,2,4,7#116", \
+		"AMR:mode-set=7#117", \
+		"AMR:mode-set=0,2,4#118", \
+		"GSM-EFR#110", \
+		"GSM#3", \
+		"GSM-HR-08#111", \
+	}
+
 static const struct codec_test codec_tests[] = {
 	{
 		.desc = "AMR picked by both MO and MT",
@@ -1198,6 +1212,50 @@ static const struct codec_test codec_tests[] = {
 		.mt_tx_sdp_mncc_rtp_create = SDP_CODECS_ALL_GSM,
 		.mt_tx_sdp_mncc_alert_ind = SDP_CODECS_ALL_GSM,
 		.mt_tx_sdp_mncc_setup_cnf = SDP_CODECS_ALL_GSM,
+		.mo_tx_sdp_mncc_setup_compl_ind = {},
+	},
+
+	{
+		.desc = "MO on AMR-HR, MT on AMR-FR. See that the AMR modes are selected to match AMR-HR",
+		.mo_rx_compl_l3_codec_list_bss_supported = CODEC_LIST_ALL_GSM,
+		.mo_rx_ms_bcap = BCAP_ALL_GSM,
+		.mo_tx_sdp_mncc_setup_ind = SDP_CODECS_ALL_GSM,
+		.mo_rx_sdp_mncc_rtp_create = {},
+		.mo_tx_assignment_perm_speech = PERM_SPEECH_ALL_GSM,
+		.mo_rx_assigned_codec_fr = false,
+		.mo_rx_assigned_codec = "AMR:octet-align=1;mode-set=0,2,4",
+		.mo_tx_sdp_mncc_rtp_create = {
+			/* same as SDP_CODECS_ALL_GSM, but AMR-HR rates listed as first entry */
+			"AMR:octet-align=1;mode-set=0,2,4#115",
+			"AMR:octet-align=1;mode-set=0,2,4,7#112",
+			"AMR:octet-align=1;mode-set=7#114",
+			"AMR:mode-set=0,2,4,7#116",
+			"AMR:mode-set=7#117",
+			"AMR:mode-set=0,2,4#118",
+			"GSM-EFR#110",
+			"GSM#3",
+			"GSM-HR-08#111",
+		},
+		/* mt_rx_sdp_mncc_setup_req == mo_tx_sdp_mncc_rtp_create */
+		.mt_rx_compl_l3_codec_list_bss_supported = CODEC_LIST_ALL_GSM,
+		.mt_tx_cc_setup_bcap = BCAP_ALL_GSM,
+		.mt_rx_ms_bcap = BCAP_ALL_GSM,
+		.mt_tx_sdp_mncc_call_conf_ind = {},
+		.mt_rx_sdp_mncc_rtp_create = {},
+		.mt_tx_assignment_perm_speech = {
+			/* same as PERM_SPEECH_ALL_GSM, but HR3 (AMR-HR) listed first */
+			GSM0808_PERM_HR3,
+			GSM0808_PERM_FR3,
+			GSM0808_PERM_FR2,
+			GSM0808_PERM_FR1,
+			GSM0808_PERM_HR1,
+			LIST_END
+		},
+		.mt_rx_assigned_codec_fr = false,
+		.mt_rx_assigned_codec = "AMR:octet-align=1;mode-set=0,2,4",
+		.mt_tx_sdp_mncc_rtp_create = SDP_CODECS_ALL_GSM_AMR_HR_FIRST,
+		.mt_tx_sdp_mncc_alert_ind = SDP_CODECS_ALL_GSM_AMR_HR_FIRST,
+		.mt_tx_sdp_mncc_setup_cnf = SDP_CODECS_ALL_GSM_AMR_HR_FIRST,
 		.mo_tx_sdp_mncc_setup_compl_ind = {},
 	},
 };
