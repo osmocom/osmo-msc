@@ -654,7 +654,7 @@ void sdp_audio_codecs_intersection(struct sdp_audio_codecs *ac_dest, const struc
 
 /* Make sure the given codec is listed as the first codec. 'codec' must be an actual codec entry of the given audio
  * codecs list. */
-void sdp_audio_codecs_select(struct sdp_audio_codecs *ac, struct sdp_audio_codec *codec)
+void sdp_audio_codecs_select_member(struct sdp_audio_codecs *ac, struct sdp_audio_codec *codec)
 {
 	struct sdp_audio_codec tmp;
 	struct sdp_audio_codec *pos;
@@ -671,6 +671,15 @@ void sdp_audio_codecs_select(struct sdp_audio_codecs *ac, struct sdp_audio_codec
 
 	ac->codec[0] = tmp;
 	return;
+}
+
+bool sdp_audio_codecs_select(struct sdp_audio_codecs *ac, const struct sdp_audio_codec *codec)
+{
+	struct sdp_audio_codec *select = sdp_audio_codecs_by_descr(ac, codec);
+	if (!select)
+		return false;
+	sdp_audio_codecs_select_member(ac, select);
+	return true;
 }
 
 /* Short single-line representation of an SDP audio codec, convenient for logging.

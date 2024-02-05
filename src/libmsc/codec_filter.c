@@ -62,12 +62,10 @@ int codec_filter_run(struct codec_filter *codec_filter, struct sdp_msg *result, 
 	if (sdp_audio_codec_is_set(a)) {
 		/* Assignment has completed, the chosen codec should be the first of the resulting SDP.
 		 * If present, make sure this is listed in first place.
-		 * If 'select' is NULL, the assigned codec is not present in the intersection of possible choices for
-		 * TFO. Just omit the assigned codec from the filter result, and it is the CC code's responsibility to
-		 * detect this and assign a working codec instead. */
-		struct sdp_audio_codec *select = sdp_audio_codecs_by_descr(r, a);
-		if (select)
-			sdp_audio_codecs_select(r, select);
+		 * If the assigned codec is not present in the intersection of possible choices for TrFO, just omit the
+		 * assigned codec from the filter result, and it is the CC code's responsibility to detect this and
+		 * assign a working codec instead. */
+		sdp_audio_codecs_select(r,  a);
 	}
 	return 0;
 }
