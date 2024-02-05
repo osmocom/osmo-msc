@@ -457,9 +457,8 @@ int sdp_audio_codec_add_to_bearer_cap(struct gsm_mncc_bearer_cap *bearer_cap, co
 	int added = 0;
 	codec_mapping_foreach(m) {
 		int i;
-		if (strcmp(m->sdp.subtype_name, codec->subtype_name))
+		if (sdp_audio_codec_cmp(&m->sdp, codec, true, false))
 			continue;
-		/* TODO also match rate and fmtp? */
 		for (i = 0; i < m->speech_ver_count; i++)
 			added += bearer_cap_add_speech_ver(bearer_cap, m->speech_ver[i]);
 	}
@@ -612,7 +611,7 @@ int sdp_audio_codecs_to_gsm0808_channel_type(struct gsm0808_channel_type *ct, co
 		bool dup;
 		idx++;
 		codec_mapping_foreach(m) {
-			if (strcmp(m->sdp.subtype_name, codec->subtype_name))
+			if (sdp_audio_codec_cmp(codec, &m->sdp, true, false))
 				continue;
 
 			switch (m->perm_speech) {
@@ -674,7 +673,7 @@ enum mgcp_codecs sdp_audio_codec_to_mgcp_codec(const struct sdp_audio_codec *cod
 {
 	const struct codec_mapping *m;
 	codec_mapping_foreach(m) {
-		if (!sdp_audio_codec_cmp(&m->sdp, codec, false, false))
+		if (!sdp_audio_codec_cmp(&m->sdp, codec, true, false))
 			return m->mgcp;
 	}
 	return NO_MGCP_CODEC;

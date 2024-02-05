@@ -2165,7 +2165,13 @@ int gsm48_tch_rtp_create(struct gsm_trans *trans)
 
 	/* Populate the legacy MNCC codec elements: payload_type and payload_msg_type */
 	codec = &codecs->codec[0];
-	m = codec_mapping_by_subtype_name(codec->subtype_name);
+	codec_mapping_foreach (m) {
+		if (!m->mncc_payload_msg_type)
+			continue;
+		if (sdp_audio_codec_cmp(&m->sdp, codec, true, false))
+			continue;
+		break;
+	}
 	mncc_payload_msg_type = m ? m->mncc_payload_msg_type : 0;
 
 	rtp_cn_local = call_leg_local_ip(cl, RTP_TO_CN);
