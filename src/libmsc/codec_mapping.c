@@ -606,12 +606,16 @@ int sdp_audio_codecs_to_gsm0808_channel_type(struct gsm0808_channel_type *ct, co
 	*ct = (struct gsm0808_channel_type){
 		.ch_indctr = GSM0808_CHAN_SPEECH,
 	};
+	LOGP(DLGLOBAL, LOGL_ERROR, "sdp_audio_codecs_to_gsm0808_channel_type()\n");
 
 	sdp_audio_codecs_foreach(codec, ac) {
 		const struct codec_mapping *m;
 		int i;
 		bool dup;
 		idx++;
+
+		LOGP(DLGLOBAL, LOGL_ERROR, "- codec = %s\n", sdp_audio_codec_to_str(codec));
+
 		codec_mapping_foreach(m) {
 			if (sdp_audio_codec_cmp(codec, &m->sdp, true, false))
 				continue;
@@ -652,6 +656,7 @@ int sdp_audio_codecs_to_gsm0808_channel_type(struct gsm0808_channel_type *ct, co
 			if (dup)
 				continue;
 
+			LOGP(DLGLOBAL, LOGL_ERROR, "    adding %s\n", gsm0808_permitted_speech_name(m->perm_speech));
 			ct->perm_spch[ct->perm_spch_len] = m->perm_speech;
 			ct->perm_spch_len++;
 		}
