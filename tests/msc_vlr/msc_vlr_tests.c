@@ -1059,7 +1059,7 @@ void ms_sends_security_mode_complete(uint8_t utran_encryption)
 		g_msub = NULL;
 }
 
-void ms_sends_assignment_complete(const char *sdp_codec_str)
+void ms_sends_assignment_complete(bool fr, const char *sdp_codec_str)
 {
 	const struct codec_mapping *m;
 	struct sdp_audio_codec codec;
@@ -1069,10 +1069,26 @@ void ms_sends_assignment_complete(const char *sdp_codec_str)
 	codec_mapping_foreach (m) {
 		if (!m->has_gsm0808_speech_codec)
 			continue;
-		if (!sdp_audio_codec_cmp(&m->sdp, &codec, true, false))
-			break;
+
+		if (fr) {
+			if (m->frhr != CODEC_FRHR_FR)
+				continue;
+		} else {
+			if (m->frhr != CODEC_FRHR_HR)
+				continue;
+		}
+
+		if (sdp_audio_codec_cmp(&m->sdp, &codec, true, false))
+			continue;
+		break;
 	}
+	if (!m)
+		btw("ERROR: no codec_mapping for %s", sdp_codec_str);
 	OSMO_ASSERT(m);
+
+	btw("ms_sends_assignment_complete(%s) -> %s 0x%x", sdp_codec_str,
+	    gsm0808_speech_codec_type_name(m->gsm0808_speech_codec.type),
+	    m->gsm0808_speech_codec.cfg);
 
 	ran_dec = (struct ran_msg){
 		.msg_type = RAN_MSG_ASSIGNMENT_COMPLETE,
