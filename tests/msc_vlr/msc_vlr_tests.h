@@ -192,7 +192,7 @@ void ms_sends_compl_l3(const char *hex, const struct gsm0808_speech_codec_list *
 void ms_sends_classmark_update(const struct osmo_gsm48_classmark *classmark);
 void ms_sends_ciphering_mode_complete(const char *inner_nas_msg);
 void ms_sends_security_mode_complete(uint8_t utran_encryption);
-void ms_sends_assignment_complete(const char *sdp_codec_name);
+void ms_sends_assignment_complete(bool fr, const char *sdp_codec_str);
 void gsup_rx(const char *rx_hex, const char *expect_tx_hex);
 void send_sms(struct vlr_subscr *receiver,
 	      struct vlr_subscr *sender,

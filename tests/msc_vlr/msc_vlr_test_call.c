@@ -272,7 +272,7 @@ static void test_call_mo()
 
 	btw("Assignment succeeds, triggering MNCC_RTP_CREATE ack to MNCC");
 	cc_to_mncc_expect_tx("", MNCC_RTP_CREATE);
-	ms_sends_assignment_complete("AMR");
+	ms_sends_assignment_complete(true, "AMR:octet-align=1");
 	OSMO_ASSERT(cc_to_mncc_tx_confirmed);
 
 	btw("MNCC says that's fine");
@@ -408,7 +408,7 @@ static void test_call_mt()
 
 	btw("Assignment completes, triggering CRCX to CN");
 	expect_crcx(RTP_TO_CN);
-	ms_sends_assignment_complete("AMR");
+	ms_sends_assignment_complete(true, "AMR:octet-align=1");
 
 	btw("MNCC sends MNCC_RTP_CREATE, which first waits for the CN side RTP");
 	mncc_sends_to_cc(MNCC_RTP_CREATE, &mncc_rtp);
@@ -548,7 +548,7 @@ static void test_call_mt2()
 	OSMO_ASSERT(iu_rab_assignment_sent);
 
 	btw("Assignment completes, triggering CRCX to CN");
-	ms_sends_assignment_complete("AMR");
+	ms_sends_assignment_complete(true, "AMR:octet-align=1");
 
 	btw("When the CN side RTP address is known, ack MNCC_RTP_CREATE with full SDP");
 	cc_to_mncc_expect_tx("", MNCC_RTP_CREATE);
@@ -653,7 +653,7 @@ static void test_call_mo_to_unknown()
 
 	btw("Assignment succeeds, triggering MNCC_RTP_CREATE ack to MNCC");
 	cc_to_mncc_expect_tx("", MNCC_RTP_CREATE);
-	ms_sends_assignment_complete("AMR");
+	ms_sends_assignment_complete(true, "AMR:octet-align=1");
 	OSMO_ASSERT(cc_to_mncc_tx_confirmed);
 
 	btw("MNCC says that's fine");
@@ -750,7 +750,7 @@ static void test_call_mo_to_unknown_timeout()
 
 	btw("Assignment succeeds, triggering MNCC_RTP_CREATE ack to MNCC");
 	cc_to_mncc_expect_tx("", MNCC_RTP_CREATE);
-	ms_sends_assignment_complete("AMR");
+	ms_sends_assignment_complete(true, "AMR:octet-align=1");
 	OSMO_ASSERT(cc_to_mncc_tx_confirmed);
 
 	btw("MNCC says that's fine");
@@ -802,6 +802,7 @@ struct codec_test {
 	enum gsm0808_permitted_speech mo_tx_assignment_perm_speech[8];
 
 	/* What codec to assign in the Assignment Complete's Codec (Chosen) IE. Just a subtype name. */
+	bool mo_rx_assigned_codec_fr;
 	const char *mo_rx_assigned_codec;
 
 	/* MO acks the MNCC_RTP_CREATE with these codecs (if any). */
@@ -819,6 +820,7 @@ struct codec_test {
 	const char *mt_tx_sdp_mncc_call_conf_ind[16];
 
 	enum gsm0808_permitted_speech mt_tx_assignment_perm_speech[8];
+	bool mt_rx_assigned_codec_fr;
 	const char *mt_rx_assigned_codec;
 
 	const char *mt_rx_sdp_mncc_rtp_create[16];
@@ -829,6 +831,7 @@ struct codec_test {
 
 	bool mo_expect_reassignment;
 	enum gsm0808_permitted_speech mo_tx_reassignment_perm_speech[8];
+	bool mo_rx_reassigned_codec_fr;
 	const char *mo_rx_reassigned_codec;
 
 	const char *mt_tx_sdp_mncc_setup_cnf[16];
@@ -905,6 +908,7 @@ static const struct codec_test codec_tests[] = {
 		.mo_tx_sdp_mncc_setup_ind = SDP_CODECS_ALL_GSM,
 		.mo_rx_sdp_mncc_rtp_create = {},
 		.mo_tx_assignment_perm_speech = PERM_SPEECH_ALL_GSM,
+		.mo_rx_assigned_codec_fr = true,
 		.mo_rx_assigned_codec = "AMR",
 		.mo_tx_sdp_mncc_rtp_create = SDP_CODECS_ALL_GSM,
 		/* mt_rx_sdp_mncc_setup_req == mo_tx_sdp_mncc_rtp_create */
@@ -928,6 +932,7 @@ static const struct codec_test codec_tests[] = {
 			GSM0808_PERM_HR1,
 			LIST_END
 		},
+		.mt_rx_assigned_codec_fr = true,
 		.mt_rx_assigned_codec = "AMR",
 		.mt_tx_sdp_mncc_rtp_create = SDP_CODECS_ALL_GSM,
 		.mt_tx_sdp_mncc_alert_ind = SDP_CODECS_ALL_GSM,
@@ -942,6 +947,7 @@ static const struct codec_test codec_tests[] = {
 		.mo_tx_sdp_mncc_setup_ind = { "GSM#3" },
 		.mo_rx_sdp_mncc_rtp_create = {},
 		.mo_tx_assignment_perm_speech = { GSM0808_PERM_FR1, LIST_END },
+		.mo_rx_assigned_codec_fr = true,
 		.mo_rx_assigned_codec = "GSM",
 		.mo_tx_sdp_mncc_rtp_create = { "GSM#3" },
 		/* mt_rx_sdp_mncc_setup_req == mo_tx_sdp_mncc_rtp_create */
@@ -951,6 +957,7 @@ static const struct codec_test codec_tests[] = {
 		.mt_tx_sdp_mncc_call_conf_ind = {},
 		.mt_rx_sdp_mncc_rtp_create = {},
 		.mt_tx_assignment_perm_speech = { GSM0808_PERM_FR1, LIST_END },
+		.mt_rx_assigned_codec_fr = true,
 		.mt_rx_assigned_codec = "GSM",
 		.mt_tx_sdp_mncc_rtp_create = { "GSM#3" },
 		.mt_tx_sdp_mncc_alert_ind = { "GSM#3" },
@@ -965,6 +972,7 @@ static const struct codec_test codec_tests[] = {
 		.mo_tx_sdp_mncc_setup_ind = { "GSM#3" },
 		.mo_rx_sdp_mncc_rtp_create = {},
 		.mo_tx_assignment_perm_speech = { GSM0808_PERM_FR1, LIST_END },
+		.mo_rx_assigned_codec_fr = true,
 		.mo_rx_assigned_codec = "GSM",
 		.mo_tx_sdp_mncc_rtp_create = { "GSM#3" },
 		/* mt_rx_sdp_mncc_setup_req == mo_tx_sdp_mncc_rtp_create */
@@ -974,6 +982,7 @@ static const struct codec_test codec_tests[] = {
 		.mt_tx_sdp_mncc_call_conf_ind = {},
 		.mt_rx_sdp_mncc_rtp_create = {},
 		.mt_tx_assignment_perm_speech = { GSM0808_PERM_FR1, LIST_END },
+		.mt_rx_assigned_codec_fr = true,
 		.mt_rx_assigned_codec = "GSM",
 		.mt_tx_sdp_mncc_rtp_create = { "GSM#3" },
 		.mt_tx_sdp_mncc_alert_ind = { "GSM#3" },
@@ -988,6 +997,7 @@ static const struct codec_test codec_tests[] = {
 		.mo_tx_sdp_mncc_setup_ind = SDP_CODECS_ALL_GSM,
 		.mo_rx_sdp_mncc_rtp_create = {},
 		.mo_tx_assignment_perm_speech = PERM_SPEECH_ALL_GSM,
+		.mo_rx_assigned_codec_fr = true,
 		.mo_rx_assigned_codec = "AMR", /* <- Early Assignment first picks a mismatching codec */
 		.mo_tx_sdp_mncc_rtp_create = SDP_CODECS_ALL_GSM,
 
@@ -1007,6 +1017,7 @@ static const struct codec_test codec_tests[] = {
 			GSM0808_PERM_FR1,
 			LIST_END
 		},
+		.mt_rx_assigned_codec_fr = true,
 		.mt_rx_assigned_codec = "GSM",
 		.mt_tx_sdp_mncc_rtp_create = { "GSM#3" },
 		.mt_tx_sdp_mncc_alert_ind = { "GSM#3" },
@@ -1016,6 +1027,7 @@ static const struct codec_test codec_tests[] = {
 			GSM0808_PERM_FR1,
 			LIST_END
 		},
+		.mo_rx_reassigned_codec_fr = true,
 		.mo_rx_reassigned_codec = "GSM",
 
 		.mt_tx_sdp_mncc_setup_cnf = { "GSM#3" },
@@ -1029,6 +1041,7 @@ static const struct codec_test codec_tests[] = {
 		.mo_tx_sdp_mncc_setup_ind = SDP_CODECS_ALL_GSM,
 		.mo_rx_sdp_mncc_rtp_create = {},
 		.mo_tx_assignment_perm_speech = PERM_SPEECH_ALL_GSM,
+		.mo_rx_assigned_codec_fr = true,
 		.mo_rx_assigned_codec = "AMR", /* <- Early Assignment first picks a mismatching codec */
 		.mo_tx_sdp_mncc_rtp_create = SDP_CODECS_ALL_GSM,
 
@@ -1046,6 +1059,7 @@ static const struct codec_test codec_tests[] = {
 			GSM0808_PERM_FR1,
 			LIST_END
 		},
+		.mt_rx_assigned_codec_fr = true,
 		.mt_rx_assigned_codec = "GSM",
 		.mt_tx_sdp_mncc_rtp_create = { "GSM#3" },
 		.mt_tx_sdp_mncc_alert_ind = { "GSM#3" },
@@ -1055,6 +1069,7 @@ static const struct codec_test codec_tests[] = {
 			GSM0808_PERM_FR1,
 			LIST_END
 		},
+		.mo_rx_reassigned_codec_fr = true,
 		.mo_rx_reassigned_codec = "GSM",
 
 		.mt_tx_sdp_mncc_setup_cnf = { "GSM#3" },
@@ -1068,6 +1083,7 @@ static const struct codec_test codec_tests[] = {
 		.mo_tx_sdp_mncc_setup_ind = SDP_CODECS_ALL_GSM,
 		.mo_rx_sdp_mncc_rtp_create = {},
 		.mo_tx_assignment_perm_speech = PERM_SPEECH_ALL_GSM,
+		.mo_rx_assigned_codec_fr = true,
 		.mo_rx_assigned_codec = "AMR",
 		.mo_tx_sdp_mncc_rtp_create = SDP_CODECS_ALL_GSM,
 		/* mt_rx_sdp_mncc_setup_req == mo_tx_sdp_mncc_rtp_create */
@@ -1091,6 +1107,7 @@ static const struct codec_test codec_tests[] = {
 			GSM0808_PERM_HR1,
 			LIST_END
 		},
+		.mt_rx_assigned_codec_fr = true,
 		.mt_rx_assigned_codec = "AMR",
 
 		/* We want to test how osmo-msc reacts to a peer using different payload type nrs. So below SDP string
@@ -1117,6 +1134,7 @@ static const struct codec_test codec_tests[] = {
 		.mo_tx_sdp_mncc_setup_ind = SDP_CODECS_ALL_GSM,
 		.mo_rx_sdp_mncc_rtp_create = {},
 		.mo_tx_assignment_perm_speech = PERM_SPEECH_ALL_GSM,
+		.mo_rx_assigned_codec_fr = true,
 		.mo_rx_assigned_codec = "AMR",
 		/* We want to test how osmo-msc reacts to a peer using different payload type nrs. So below SDP string
 		 * features odd numbers that osmo-msc would never pick.
@@ -1150,6 +1168,7 @@ static const struct codec_test codec_tests[] = {
 			GSM0808_PERM_HR1,
 			LIST_END
 		},
+		.mt_rx_assigned_codec_fr = true,
 		.mt_rx_assigned_codec = "AMR",
 		.mt_tx_sdp_mncc_rtp_create = SDP_CODECS_ALL_GSM_WITH_ODD_PT_NRS,
 		.mt_tx_sdp_mncc_alert_ind = SDP_CODECS_ALL_GSM_WITH_ODD_PT_NRS,
@@ -1422,10 +1441,11 @@ static void test_codecs_mo(const struct codec_test *t)
 	OSMO_ASSERT(bssap_assignment_sent);
 	VALIDATE_PERM_SPEECH(&bssap_assignment_command_last_channel_type, t->mo_tx_assignment_perm_speech);
 
-	btw("Assignment succeeds with %s, triggering MNCC_RTP_CREATE ack to MNCC with %s", t->mo_rx_assigned_codec,
+	btw("Assignment succeeds with %s %s, triggering MNCC_RTP_CREATE ack to MNCC with %s",
+	    t->mo_rx_assigned_codec_fr ? "FR" : "HR", t->mo_rx_assigned_codec,
 	    strlist_name(t->mo_tx_sdp_mncc_rtp_create));
 	cc_to_mncc_expect_tx("", MNCC_RTP_CREATE);
-	ms_sends_assignment_complete(t->mo_rx_assigned_codec);
+	ms_sends_assignment_complete(t->mo_rx_assigned_codec_fr, t->mo_rx_assigned_codec);
 	OSMO_ASSERT(cc_to_mncc_tx_confirmed);
 	VALIDATE_SDP(cc_to_mncc_tx_last_sdp, t->mo_tx_sdp_mncc_rtp_create,
 		     !t->mo_tx__ignore_pt_nrs);
@@ -1454,7 +1474,7 @@ static void test_codecs_mo(const struct codec_test *t)
 		btw("Validating re-assignment");
 		OSMO_ASSERT(bssap_assignment_sent);
 		VALIDATE_PERM_SPEECH(&bssap_assignment_command_last_channel_type, t->mo_tx_reassignment_perm_speech);
-		ms_sends_assignment_complete(t->mo_rx_reassigned_codec);
+		ms_sends_assignment_complete(t->mo_rx_reassigned_codec_fr, t->mo_rx_reassigned_codec);
 	}
 
 	dtap_expect_tx("8307" /* CC: Connect */);
@@ -1591,7 +1611,7 @@ static void test_codecs_mt(const struct codec_test *t)
 	VALIDATE_PERM_SPEECH(&bssap_assignment_command_last_channel_type, t->mt_tx_assignment_perm_speech);
 
 	btw("Assignment completes, triggering CRCX to CN");
-	ms_sends_assignment_complete(t->mt_rx_assigned_codec);
+	ms_sends_assignment_complete(t->mt_rx_assigned_codec_fr, t->mt_rx_assigned_codec);
 
 	btw("MNCC sends MNCC_RTP_CREATE, which first waits for the CN side RTP");
 	sdp_str_from_codec_strs(mncc_rtp.sdp, sizeof(mncc_rtp.sdp), t->mt_rx_sdp_mncc_rtp_create);
