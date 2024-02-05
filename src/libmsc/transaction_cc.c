@@ -46,24 +46,25 @@ void trans_cc_filter_set_bss(struct gsm_trans *trans, struct msc_a *msc_a)
 	 * Complete Layer 3. TODO: make it configurable? */
 }
 
-void trans_cc_filter_run(struct gsm_trans *trans)
+void _trans_cc_filter_run(const char *file, int line, struct gsm_trans *trans)
 {
 	switch (trans->bearer_cap.transfer) {
 	case GSM48_BCAP_ITCAP_SPEECH:
 		codec_filter_run(&trans->cc.codecs, &trans->cc.local, &trans->cc.remote);
-		LOG_TRANS(trans, LOGL_DEBUG, "codecs: %s\n",
-			  codec_filter_to_str(&trans->cc.codecs, &trans->cc.local, &trans->cc.remote));
+		LOG_TRANS_CAT_SRC(trans, DCC, LOGL_DEBUG, file, line, "codecs: %s\n",
+				  codec_filter_to_str(&trans->cc.codecs, &trans->cc.local, &trans->cc.remote));
 		break;
 	case GSM48_BCAP_ITCAP_3k1_AUDIO:
 	case GSM48_BCAP_ITCAP_FAX_G3:
 	case GSM48_BCAP_ITCAP_UNR_DIG_INF:
 		csd_filter_run(&trans->cc.csd, &trans->cc.local, &trans->cc.remote);
-		LOG_TRANS(trans, LOGL_DEBUG, "codec/BS: %s\n",
-			  csd_filter_to_str(&trans->cc.csd, &trans->cc.local, &trans->cc.remote));
+		LOG_TRANS_CAT_SRC(trans, DCC, LOGL_DEBUG, file, line, "codec/BS: %s\n",
+				  csd_filter_to_str(&trans->cc.csd, &trans->cc.local, &trans->cc.remote));
 		break;
 	default:
-		LOG_TRANS(trans, LOGL_ERROR, "Handling of information transfer capability %d not implemented\n",
-			  trans->bearer_cap.transfer);
+		LOG_TRANS_CAT_SRC(trans, DCC, LOGL_ERROR, file, line,
+				  "Handling of information transfer capability %d not implemented\n",
+				  trans->bearer_cap.transfer);
 		break;
 	}
 }
