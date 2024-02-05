@@ -69,7 +69,8 @@ struct sdp_audio_codec *sdp_audio_codecs_by_descr(struct sdp_audio_codecs *ac,
 
 void sdp_audio_codecs_intersection(struct sdp_audio_codecs *ac_dest, const struct sdp_audio_codecs *ac_other,
 				   bool translate_payload_type_numbers);
-void sdp_audio_codecs_select(struct sdp_audio_codecs *ac, struct sdp_audio_codec *codec);
+bool sdp_audio_codecs_select(struct sdp_audio_codecs *ac, const struct sdp_audio_codec *codec);
+void sdp_audio_codecs_select_member(struct sdp_audio_codecs *ac, struct sdp_audio_codec *codec);
 
 int sdp_msg_to_sdp_str_buf(char *dst, size_t dst_size, const struct sdp_msg *sdp);
 int sdp_msg_from_sdp_str(struct sdp_msg *sdp, const char *src);
