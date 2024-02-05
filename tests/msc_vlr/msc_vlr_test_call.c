@@ -922,7 +922,7 @@ static const struct codec_test codec_tests[] = {
 		.mo_tx_assignment_perm_speech = { GSM0808_PERM_FR1, LIST_END },
 		.mo_rx_assigned_codec = "GSM",
 		.mo_tx_sdp_mncc_rtp_create = { "GSM" },
-		/* .mt_rx_sdp_mncc_setup_req == .mo_tx_sdp_mncc_setup_ind */
+		/* mt_rx_sdp_mncc_setup_req == mo_tx_sdp_mncc_rtp_create */
 		.mt_rx_compl_l3_codec_list_bss_supported = CODEC_LIST_ALL_GSM,
 		.mt_tx_cc_setup_bcap = { GSM48_BCAP_SV_FR, LIST_END },
 		.mt_rx_ms_bcap = BCAP_ALL_GSM,
@@ -945,7 +945,7 @@ static const struct codec_test codec_tests[] = {
 		.mo_tx_assignment_perm_speech = { GSM0808_PERM_FR1, LIST_END },
 		.mo_rx_assigned_codec = "GSM",
 		.mo_tx_sdp_mncc_rtp_create = { "GSM" },
-		/* .mt_rx_sdp_mncc_setup_req == .mo_tx_sdp_mncc_setup_ind */
+		/* mt_rx_sdp_mncc_setup_req == mo_tx_sdp_mncc_rtp_create */
 		.mt_rx_compl_l3_codec_list_bss_supported = CODEC_LIST_ALL_GSM,
 		.mt_tx_cc_setup_bcap = { GSM48_BCAP_SV_FR, LIST_END },
 		.mt_rx_ms_bcap = BCAP_ALL_GSM,
