@@ -66,6 +66,11 @@ int codec_filter_run(struct codec_filter *codec_filter, struct sdp_msg *result, 
 		 * assigned codec from the filter result, and it is the CC code's responsibility to detect this and
 		 * assign a working codec instead. */
 		sdp_audio_codecs_select(r,  a);
+	} else if (remote && remote->audio_codecs.count) {
+		/* If we haven't assigned yet, favor remote's first pick. Assume that the remote side has placed its
+		 * favorite codec up first. Remote may already have assigned a codec, and picking a different one might
+		 * trigger a change of codec mode (Re-Assignment). So try to adhere to the first codec listed. */
+		sdp_audio_codecs_select(r, &remote->audio_codecs.codec[0]);
 	}
 	return 0;
 }
