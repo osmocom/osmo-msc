@@ -1394,7 +1394,16 @@ static bool validate_perm_speech(const char *func, const char *desc,
 				 const enum gsm0808_permitted_speech perm_speech[])
 {
 	const enum gsm0808_permitted_speech *pos;
-	const uint8_t *pos2 = ct->perm_spch;
+	const uint8_t *pos2;
+
+	btw("validate_perm_speech(): expect:");
+	for (pos = perm_speech; *pos != LIST_END; pos++)
+		btw("  %s", gsm0808_permitted_speech_name(*pos));
+	btw("got:");
+	for (pos2 = ct->perm_spch; (pos2 - ct->perm_spch) < ct->perm_spch_len; pos2++)
+		btw("  %s", gsm0808_permitted_speech_name(*pos2));
+
+	pos2 = ct->perm_spch;
 	for (pos = perm_speech; *pos != LIST_END; pos++, pos2++) {
 		if (pos2 - ct->perm_spch >= ct->perm_spch_len) {
 			BTW("%s: %s: ERROR: mismatch: expected %s to be listed, but not found", func, desc,
