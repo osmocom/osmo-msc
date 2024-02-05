@@ -1059,12 +1059,20 @@ void ms_sends_security_mode_complete(uint8_t utran_encryption)
 		g_msub = NULL;
 }
 
-void ms_sends_assignment_complete(const char *sdp_codec_name)
+void ms_sends_assignment_complete(const char *sdp_codec_str)
 {
+	const struct codec_mapping *m;
+	struct sdp_audio_codec codec;
 	struct ran_msg ran_dec;
-	const struct codec_mapping *m = codec_mapping_by_subtype_name(sdp_codec_name);
+
+	sdp_audio_codec_from_str(&codec, sdp_codec_str);
+	codec_mapping_foreach (m) {
+		if (!m->has_gsm0808_speech_codec)
+			continue;
+		if (!sdp_audio_codec_cmp(&m->sdp, &codec, true, false))
+			break;
+	}
 	OSMO_ASSERT(m);
-	OSMO_ASSERT(m->has_gsm0808_speech_codec);
 
 	ran_dec = (struct ran_msg){
 		.msg_type = RAN_MSG_ASSIGNMENT_COMPLETE,
