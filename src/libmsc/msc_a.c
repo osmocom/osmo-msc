@@ -1465,12 +1465,18 @@ static void msc_a_up_call_assignment_complete(struct msc_a *msc_a, const struct 
 		const struct codec_mapping *codec_assigned;
 
 		/* Check for unexpected codec with CSD */
-		if (cc_trans->bearer_cap.transfer == GSM48_BCAP_ITCAP_UNR_DIG_INF &&
-		    codec_if_known->type != GSM0808_SCT_CSD) {
+		switch (cc_trans->bearer_cap.transfer) {
+		case GSM48_BCAP_ITCAP_FAX_G3:
+		case GSM48_BCAP_ITCAP_3k1_AUDIO:
+		case GSM48_BCAP_ITCAP_UNR_DIG_INF:
+			if (codec_if_known->type == GSM0808_SCT_CSD)
+				break; /* we're good */
 			LOG_TRANS(cc_trans, LOGL_ERROR, "Unexpected codec in Assignment Complete for CSD: %s\n",
 				  gsm0808_speech_codec_type_name(codec_if_known->type));
 			call_leg_release(msc_a->cc.call_leg);
 			return;
+		default:
+			break;
 		}
 
 		/* For 2G:
