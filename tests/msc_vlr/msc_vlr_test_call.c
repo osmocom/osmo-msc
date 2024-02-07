@@ -956,14 +956,7 @@ static const struct codec_test codec_tests[] = {
 		.mt_rx_ms_bcap = BCAP_ALL_GSM,
 		.mt_tx_sdp_mncc_call_conf_ind = {},
 		.mt_rx_sdp_mncc_rtp_create = {},
-		.mt_tx_assignment_perm_speech = {
-			GSM0808_PERM_FR3,
-			GSM0808_PERM_HR3,
-			GSM0808_PERM_FR2,
-			GSM0808_PERM_FR1,
-			GSM0808_PERM_HR1,
-			LIST_END
-		},
+		.mt_tx_assignment_perm_speech = PERM_SPEECH_ALL_GSM,
 		.mt_rx_assigned_codec_fr = true,
 		.mt_rx_assigned_codec = "AMR",
 		.mt_tx_sdp_mncc_rtp_create = SDP_CODECS_ALL_GSM,
@@ -1120,25 +1113,11 @@ static const struct codec_test codec_tests[] = {
 		.mo_tx_sdp_mncc_rtp_create = SDP_CODECS_ALL_GSM,
 		/* mt_rx_sdp_mncc_setup_req == mo_tx_sdp_mncc_rtp_create */
 		.mt_rx_compl_l3_codec_list_bss_supported = CODEC_LIST_ALL_GSM,
-		.mt_tx_cc_setup_bcap = {
-			GSM48_BCAP_SV_AMR_F,
-			GSM48_BCAP_SV_AMR_H,
-			GSM48_BCAP_SV_EFR,
-			GSM48_BCAP_SV_FR,
-			GSM48_BCAP_SV_HR,
-			LIST_END
-		},
+		.mt_tx_cc_setup_bcap = BCAP_ALL_GSM,
 		.mt_rx_ms_bcap = BCAP_ALL_GSM,
 		.mt_tx_sdp_mncc_call_conf_ind = {},
 		.mt_rx_sdp_mncc_rtp_create = {},
-		.mt_tx_assignment_perm_speech = {
-			GSM0808_PERM_FR3,
-			GSM0808_PERM_HR3,
-			GSM0808_PERM_FR2,
-			GSM0808_PERM_FR1,
-			GSM0808_PERM_HR1,
-			LIST_END
-		},
+		.mt_tx_assignment_perm_speech = PERM_SPEECH_ALL_GSM,
 		.mt_rx_assigned_codec_fr = true,
 		.mt_rx_assigned_codec = "AMR",
 
@@ -1181,25 +1160,11 @@ static const struct codec_test codec_tests[] = {
 		.mo_tx__ignore_pt_nrs = true,
 		/* mt_rx_sdp_mncc_setup_req == mo_tx_sdp_mncc_rtp_create */
 		.mt_rx_compl_l3_codec_list_bss_supported = CODEC_LIST_ALL_GSM,
-		.mt_tx_cc_setup_bcap = {
-			GSM48_BCAP_SV_AMR_F,
-			GSM48_BCAP_SV_AMR_H,
-			GSM48_BCAP_SV_EFR,
-			GSM48_BCAP_SV_FR,
-			GSM48_BCAP_SV_HR,
-			LIST_END
-		},
+		.mt_tx_cc_setup_bcap = BCAP_ALL_GSM,
 		.mt_rx_ms_bcap = BCAP_ALL_GSM,
 		.mt_tx_sdp_mncc_call_conf_ind = {},
 		.mt_rx_sdp_mncc_rtp_create = {},
-		.mt_tx_assignment_perm_speech = {
-			GSM0808_PERM_FR3,
-			GSM0808_PERM_HR3,
-			GSM0808_PERM_FR2,
-			GSM0808_PERM_FR1,
-			GSM0808_PERM_HR1,
-			LIST_END
-		},
+		.mt_tx_assignment_perm_speech = PERM_SPEECH_ALL_GSM,
 		.mt_rx_assigned_codec_fr = true,
 		.mt_rx_assigned_codec = "AMR",
 		.mt_tx_sdp_mncc_rtp_create = SDP_CODECS_ALL_GSM_WITH_ODD_PT_NRS,
@@ -1260,19 +1225,12 @@ static const struct codec_test codec_tests[] = {
 		.mt_rx_ms_bcap = BCAP_ALL_GSM,
 		.mt_tx_sdp_mncc_call_conf_ind = {},
 		.mt_rx_sdp_mncc_rtp_create = {},
-		.mt_tx_assignment_perm_speech = {
-			/* same as PERM_SPEECH_ALL_GSM, but HR3 (AMR-HR) listed first */
-			GSM0808_PERM_HR3,
-			GSM0808_PERM_FR3,
-			GSM0808_PERM_FR2,
-			GSM0808_PERM_FR1,
-			GSM0808_PERM_HR1,
-			LIST_END
-		},
+		.mt_tx_assignment_perm_speech = PERM_SPEECH_ALL_GSM,
 		.mt_rx_assigned_codec_fr = false,
 		.mt_rx_assigned_codec = "AMR:octet-align=1;mode-set=0,2,4",
 		.mt_tx_sdp_mncc_rtp_create = SDP_CODECS_ALL_GSM_AMR_HR_FIRST,
 		.mt_tx_sdp_mncc_alert_ind = SDP_CODECS_ALL_GSM_AMR_HR_FIRST,
+		/* mo_rx_sdp_mncc_alert_req == mt_tx_sdp_mncc_alert_ind */
 		.mt_tx_sdp_mncc_setup_cnf = SDP_CODECS_ALL_GSM_AMR_HR_FIRST,
 		.mo_tx_sdp_mncc_setup_compl_ind = {},
 	},
