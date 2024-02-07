@@ -456,12 +456,18 @@ int sdp_audio_codec_add_to_bearer_cap(struct gsm_mncc_bearer_cap *bearer_cap, co
 {
 	const struct codec_mapping *m;
 	int added = 0;
+	LOGP(DLGLOBAL, LOGL_ERROR, "sdp_audio_codec_add_to_bearer_cap(%s)\n", sdp_audio_codec_to_str(codec));
 	codec_mapping_foreach(m) {
 		int i;
 		if (sdp_audio_codec_cmp(&m->sdp, codec, true, false))
 			continue;
-		for (i = 0; i < m->speech_ver_count; i++)
+		LOGP(DLGLOBAL, LOGL_ERROR, " %s speech_ver_count %d\n", sdp_audio_codec_to_str(&m->sdp),
+		     m->speech_ver_count);
+		for (i = 0; i < m->speech_ver_count; i++) {
+			LOGP(DLGLOBAL, LOGL_ERROR, " - add %s  (enum gsm48_bcap_speech_ver)%d\n", sdp_audio_codec_to_str(&m->sdp),
+			     m->speech_ver[i]);
 			added += bearer_cap_add_speech_ver(bearer_cap, m->speech_ver[i]);
+		}
 	}
 	return added;
 }
