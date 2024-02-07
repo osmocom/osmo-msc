@@ -419,7 +419,7 @@ void rtp_stream_set_codecs(struct rtp_stream *rtps, const struct sdp_audio_codec
 {
 	if (!codecs || !codecs->count)
 		return;
-	if (sdp_audio_codecs_cmp(&rtps->codecs, codecs, false, true) == 0) {
+	if (sdp_audio_codecs_cmp(&rtps->codecs, codecs, true, true) == 0) {
 		LOG_RTPS(rtps, LOGL_DEBUG, "no change: codecs already set to %s\n",
 			 sdp_audio_codecs_to_str(&rtps->codecs));
 		return;
