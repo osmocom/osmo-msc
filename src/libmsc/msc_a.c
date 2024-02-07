@@ -1497,14 +1497,20 @@ static void msc_a_up_call_assignment_complete(struct msc_a *msc_a, const struct 
 		 * - So the MGW decapsulates IuUP <-> AMR
 		 */
 
+		LOGP(DLGLOBAL, LOGL_ERROR, "Assigned %s cfg=0x%x\n",
+		     gsm0808_speech_codec_type_name(codec_if_known->type), codec_if_known->cfg);
 		codec_assigned = NULL;
 		codec_mapping_foreach (m) {
+			LOGP(DLGLOBAL, LOGL_ERROR, " - %s\n", sdp_audio_codec_to_str(&m->sdp));
 			/* look for a full match, including the S0-S15 bits in codec.cfg that configure AMR rates. */
 			if (!codec_mapping_matches_gsm0808_speech_codec(m, codec_if_known))
 				continue;
+			LOGP(DLGLOBAL, LOGL_ERROR, " - matches gsm0808_speech_codec_type %s\n",
+			     sdp_audio_codec_to_str(&m->sdp));
 			/* In case of AMR, match OA/BE with what osmo-msc should use on AoIP (configured in VTY) */
 			if (m->amr.is_amr && m->amr.is_octet_aligned != use_octet_aligned_on_aoip)
 				continue;
+			LOGP(DLGLOBAL, LOGL_ERROR, "- MATCH %s\n", sdp_audio_codec_to_str(&m->sdp));
 			codec_assigned = m;
 			break;
 		}
