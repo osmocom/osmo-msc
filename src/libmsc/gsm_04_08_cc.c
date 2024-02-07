@@ -811,10 +811,16 @@ static void rx_mncc_sdp(struct gsm_trans *trans, uint32_t mncc_msg_type, const c
 		/* Don't know remote codecs, nothing to do. */
 		return;
 	}
-	if (sdp_audio_codecs_by_descr(&trans->cc.remote.audio_codecs, &codecs->assignment)) {
-		/* The assigned codec is part of the remote codec set. All is well. */
-		/* TODO: maybe this should require exactly the *first* remote codec to match, because we cannot flexibly
-		 * transcode, and assume the actual payload we will receive is listed in the first place? */
+
+	/* Assume that the remote side put its actually assigned codec in first place. If our assigned codec doesn't
+	 * match that, continue re-assignment below. If they do match, exit here to leave as-is.
+	 * I'm not sure if this is common practice, or just a workaround: we cannot dynamically switch between all of
+	 * the payload types, but we still want to communicate all supported codecs. Maybe the proper way to tell the
+	 * other side to use a single codec is to leave only that single codec in the SDP; but at least MO *must* send
+	 * all possible codecs along, to give MT a chance to find a good match. Maybe MO should offer all supported
+	 * codecs, but MT should limit to a single pick -- but what do other SDP peers do, say via SIP? */
+	if (!sdp_audio_codec_cmp(&trans->cc.remote.audio_codecs.codec[0], &codecs->assignment, true, false)) {
+		/* remote's first codec matches our assigned codec. All is well. */
 		return;
 	}
 
