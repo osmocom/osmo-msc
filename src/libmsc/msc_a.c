@@ -641,6 +641,7 @@ void msc_a_tx_assignment_cmd(struct msc_a *msc_a)
 	struct ran_msg msg;
 	struct gsm_trans *cc_trans = msc_a->cc.active_trans;
 	struct gsm0808_channel_type channel_type;
+	struct sdp_audio_codec was_assignment;
 
 	if (!cc_trans) {
 		LOG_MSC_A(msc_a, LOGL_ERROR, "No CC transaction active\n");
@@ -648,7 +649,13 @@ void msc_a_tx_assignment_cmd(struct msc_a *msc_a)
 		return;
 	}
 
+	/* Make sure any previously assigned codec doesn't override other codec preferences: clear any previously
+	 * assigned codec. */
+	was_assignment = cc_trans->cc.codecs.assignment;
+	cc_trans->cc.codecs.assignment = (struct sdp_audio_codec){};
 	trans_cc_filter_run(cc_trans);
+	cc_trans->cc.codecs.assignment = was_assignment;
+
 	LOG_TRANS(cc_trans, LOGL_DEBUG, "Sending Assignment Command\n");
 
 	switch (cc_trans->bearer_cap.transfer) {
