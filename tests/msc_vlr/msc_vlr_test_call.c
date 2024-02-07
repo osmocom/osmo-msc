@@ -1477,14 +1477,19 @@ static const char *bcap_hexstr(const enum gsm48_bcap_speech_ver ms_bcap[])
 		.transfer = GSM_MNCC_BCAP_SPEECH,
 		.speech_ver = { -1 },
 	};
+	LOGP(DLGLOBAL, LOGL_ERROR, "bcap_hexstr():\n");
 	const enum gsm48_bcap_speech_ver *pos;
-	for (pos = ms_bcap; *pos != LIST_END; pos++)
+	for (pos = ms_bcap; *pos != LIST_END; pos++) {
+		LOGP(DLGLOBAL, LOGL_ERROR, " - %d\n", *pos);
 		bearer_cap_add_speech_ver(&bcap, *pos);
+	}
 	bearer_cap_set_radio(&bcap);
 	struct msgb *msg = msgb_alloc(128, "bcap");
 	gsm48_encode_bearer_cap(msg, 0, &bcap);
 	char *ret = osmo_hexdump_nospc(msg->data, msg->len);
 	msgb_free(msg);
+
+	LOGP(DLGLOBAL, LOGL_ERROR, " --> %s\n", ret);
 	return ret;
 }
 
