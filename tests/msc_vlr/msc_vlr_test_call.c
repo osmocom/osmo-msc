@@ -1221,11 +1221,12 @@ static const struct codec_test codec_tests[] = {
 		},
 		/* mt_rx_sdp_mncc_setup_req == mo_tx_sdp_mncc_rtp_create */
 		.mt_rx_compl_l3_codec_list_bss_supported = CODEC_LIST_ALL_GSM,
-		.mt_tx_cc_setup_bcap = BCAP_ALL_GSM,
+		/* HR is sent first in the CC Setup Bearer Capabilities */
+		.mt_tx_cc_setup_bcap = BCAP_ALL_GSM_AMR_HR_FIRST,
 		.mt_rx_ms_bcap = BCAP_ALL_GSM,
 		.mt_tx_sdp_mncc_call_conf_ind = {},
 		.mt_rx_sdp_mncc_rtp_create = {},
-		.mt_tx_assignment_perm_speech = PERM_SPEECH_ALL_GSM,
+		.mt_tx_assignment_perm_speech = PERM_SPEECH_ALL_GSM_HR3_FIRST,
 		.mt_rx_assigned_codec_fr = false,
 		.mt_rx_assigned_codec = "AMR:octet-align=1;mode-set=0,2,4",
 		.mt_tx_sdp_mncc_rtp_create = SDP_CODECS_ALL_GSM_AMR_HR_FIRST,
