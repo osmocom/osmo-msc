@@ -1664,8 +1664,8 @@ static void test_codecs_mt(const struct codec_test *t)
 		return;
 	}
 
-	btw("VLR accepts, MSC sends CC Setup with Bearer Capability = %s",
-	    bcap_name(t->mt_tx_cc_setup_bcap));
+	btw("VLR accepts, MSC sends CC Setup with Bearer Capability = %s %s",
+	    bcap_name(t->mt_tx_cc_setup_bcap), bcap_hexstr(t->mt_tx_cc_setup_bcap));
 	char *cc_setup_bcap = talloc_asprintf(msc_vlr_tests_ctx, "0305%s",
 					      bcap_hexstr(t->mt_tx_cc_setup_bcap));
 	dtap_expect_tx(cc_setup_bcap);
