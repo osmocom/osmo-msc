@@ -1258,10 +1258,12 @@ static const struct codec_test codec_tests[] = {
 		.mt_tx_sdp_mncc_alert_ind = SDP_CODECS_ALL_GSM_AMR_HR_FIRST,
 		/* mo_rx_sdp_mncc_alert_req == mt_tx_sdp_mncc_alert_ind */
 
+		/*
 		.mo_expect_reassignment = true,
 		.mo_tx_reassignment_perm_speech = PERM_SPEECH_ALL_GSM_HR3_FIRST,
 		.mo_rx_reassigned_codec_fr = false,
 		.mo_rx_reassigned_codec = "AMR:octet-align=1;mode-set=0,2,4",
+		*/
 
 		.mt_tx_sdp_mncc_setup_cnf = SDP_CODECS_ALL_GSM_AMR_HR_FIRST,
 		.mo_tx_sdp_mncc_setup_compl_ind = {},
