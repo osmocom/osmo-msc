@@ -391,7 +391,8 @@ static void auth_fsm_wait_ai(struct osmo_fsm_inst *fi, uint32_t event,
 	case VLR_AUTH_E_HLR_SAI_NACK:
 		/* HLR did not return Auth Info, hence cannot authenticate. (The caller may still decide to permit
 		 * attaching without authentication) */
-		auth_fsm_term(fi, AUTH_FSM_NO_AUTH_INFO, gsup->cause);
+		vlr_gmm_cause_to_mm_cause(gsup->cause, &gsm48_rej);
+		auth_fsm_term(fi, AUTH_FSM_NO_AUTH_INFO, gsm48_rej);
 		break;
 	case VLR_AUTH_E_HLR_SAI_ABORT:
 		vlr_gmm_cause_to_mm_cause(gsup->cause, &gsm48_rej);
