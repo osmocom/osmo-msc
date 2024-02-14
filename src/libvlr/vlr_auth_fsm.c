@@ -388,7 +388,6 @@ static void auth_fsm_wait_ai(struct osmo_fsm_inst *fi, uint32_t event,
 		}
 		vlr_subscr_update_tuples(vsub, gsup);
 		goto pass;
-		break;
 	case VLR_AUTH_E_HLR_SAI_NACK:
 		/* HLR did not return Auth Info, hence cannot authenticate. (The caller may still decide to permit
 		 * attaching without authentication) */
