@@ -124,7 +124,7 @@ static void subscr_conn_toss(struct vlr_subscr *vsub)
 	LOG_MSUB(msub, LOGL_ERROR, "Force releasing previous subscriber connection: an SGs connection for this"
 		 " subscriber is being initiated\n");
 
-	msc_a_release_mo(msub_msc_a(msub), GSM48_REJECT_CONGESTION);
+	msc_a_release_mo(msub_msc_a(msub), GSM_CAUSE_AUTH_FAILED);
 	/* TODO: is this strong enough? After this, it should be completely disassociated with this subscriber. */
 }
 
