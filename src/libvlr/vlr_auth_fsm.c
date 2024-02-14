@@ -257,7 +257,7 @@ static void auth_fsm_term(struct osmo_fsm_inst *fi, enum auth_fsm_result result,
 	LOGPFSM(fi, "Authentication terminating with result %s%s%s\n",
 		auth_fsm_result_str[result],
 		cause ? ", cause " : "",
-		cause ? get_value_string(gsm48_gmm_cause_names, cause) : "");
+		cause ? gsm48_reject_value_name(cause) : "");
 
 	/* Do one final state transition (mostly for logging purpose)
 	 * and set the parent_term_event according to result */
