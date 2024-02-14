@@ -241,7 +241,7 @@ static int submit_to_sms(struct gsm_sms **psms, struct gsm_network *net,
 	}
 
 	if (mode == MODE_7BIT) {
-		uint8_t ud_len = 0, padbits = 0;
+		unsigned int ud_len = 0, padbits = 0;
 		sms->data_coding_scheme = GSM338_DCS_1111_7BIT;
 		if (sms->ud_hdr_ind) {
 			ud_len = *sms_msg + 1;
