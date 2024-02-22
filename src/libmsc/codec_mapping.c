@@ -171,14 +171,14 @@ static const struct codec_mapping codec_map[] = {
 	/* AMR rates as in 3GPP TS 28.062, Table 7.11.3.1.3-2; gsm0808_speech_codec.cfg is a bitmask of Sn bits:
 	 *
 	 *       S0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15
-	 * 12,20    (x)                x                    x  x
-	 * 10,20                    x                 x  x
-	 * 7,95                  x                          x  x
-	 * 7,40      x        x                 x  x
-	 * 6,70            x                 x  x  x  x  x
-	 * 5,90      x  x                 x  x  x  x  x  x  x  x
+	 * 12,20    (x)                x                    x  -
+	 * 10,20                    x                 x  -
+	 * 7,95                  x                       -  x  -
+	 * 7,40      x        x                 x  -
+	 * 6,70            x                 x  x  -  x  -
+	 * 5,90      x  x                 x  x  x  -  x  -  x  -
 	 * 5,15
-	 * 4,75   x  x                    x  x  x  x  x  x  x  x
+	 * 4,75   x  x                    x  x  x  -  x  -  x  -
 	 *
 	 * OM     F  F  F  F  F  F  F  F  F  F  F  A  F  A  F  A
 	 *
