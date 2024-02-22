@@ -131,7 +131,7 @@ void test_parse_and_compose()
 
 	for (i = 0; i < ARRAY_SIZE(sdp_tests); i++) {
 		struct sdp_test_data *t = &sdp_tests[i];
-		struct sdp_msg sdp = {};
+		struct osmo_sdp_msg sdp = {};
 		char str[1024];
 		printf("\n[%d]\n", i);
 		dump_sdp(t->sdp_input, "sdp input: ");
@@ -343,7 +343,7 @@ struct sdp_intersect_test_data sdp_intersect_tests[] = {
 	}
 };
 
-const char *sdp_msg_logstr(const struct sdp_msg *sdp)
+const char *sdp_msg_logstr(const struct osmo_sdp_msg *sdp)
 {
 	static char buf[1024];
 	sdp_msg_to_sdp_str_buf(buf, sizeof(buf), sdp);
@@ -360,8 +360,8 @@ static void test_intersect()
 
 	for (i = 0; i < ARRAY_SIZE(sdp_intersect_tests); i++) {
 		struct sdp_intersect_test_data *t = &sdp_intersect_tests[i];
-		struct sdp_msg sdp_a = {};
-		struct sdp_msg sdp_b = {};
+		struct osmo_sdp_msg sdp_a = {};
+		struct osmo_sdp_msg sdp_b = {};
 		char str[1024];
 		printf("\n[%d] %s\n", i, t->descr);
 		dump_sdp(t->sdp_a, "SDP A: ");
@@ -523,7 +523,7 @@ static void test_select()
 
 	for (i = 0; i < ARRAY_SIZE(sdp_select_tests); i++) {
 		struct sdp_select_test_data *t = &sdp_select_tests[i];
-		struct sdp_msg sdp = {};
+		struct osmo_sdp_msg sdp = {};
 		struct sdp_audio_codec *codec;
 		char buf[1024];
 		const char *expect_sdp;

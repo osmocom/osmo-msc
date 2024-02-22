@@ -47,7 +47,7 @@ void codec_filter_set_bss(struct codec_filter *codec_filter,
 
 /* Render intersections of all known audio codec constraints to reach a resulting choice of favorite audio codec, plus
  * possible set of alternative audio codecs, in codec_filter->result. (The result.rtp address remains unchanged.) */
-int codec_filter_run(struct codec_filter *codec_filter, struct sdp_msg *result, const struct sdp_msg *remote)
+int codec_filter_run(struct codec_filter *codec_filter, struct osmo_sdp_msg *result, const struct osmo_sdp_msg *remote)
 {
 	struct sdp_audio_codecs *r = &result->audio_codecs;
 	struct sdp_audio_codec *a = &codec_filter->assignment;
@@ -76,7 +76,7 @@ int codec_filter_run(struct codec_filter *codec_filter, struct sdp_msg *result, 
 }
 
 int codec_filter_to_str_buf(char *buf, size_t buflen, const struct codec_filter *codec_filter,
-			    const struct sdp_msg *result, const struct sdp_msg *remote)
+			    const struct osmo_sdp_msg *result, const struct osmo_sdp_msg *remote)
 {
 	struct osmo_strbuf sb = { .buf = buf, .len = buflen };
 	OSMO_STRBUF_APPEND(sb, sdp_msg_to_str_buf, result);
@@ -114,14 +114,14 @@ int codec_filter_to_str_buf(char *buf, size_t buflen, const struct codec_filter 
 	return sb.chars_needed;
 }
 
-char *codec_filter_to_str_c(void *ctx, const struct codec_filter *codec_filter, const struct sdp_msg *result,
-			    const struct sdp_msg *remote)
+char *codec_filter_to_str_c(void *ctx, const struct codec_filter *codec_filter, const struct osmo_sdp_msg *result,
+			    const struct osmo_sdp_msg *remote)
 {
 	OSMO_NAME_C_IMPL(ctx, 128, "codec_filter_to_str_c-ERROR", codec_filter_to_str_buf, codec_filter, result, remote)
 }
 
-const char *codec_filter_to_str(const struct codec_filter *codec_filter, const struct sdp_msg *result,
-				const struct sdp_msg *remote)
+const char *codec_filter_to_str(const struct codec_filter *codec_filter, const struct osmo_sdp_msg *result,
+				const struct osmo_sdp_msg *remote)
 {
 	return codec_filter_to_str_c(OTC_SELECT, codec_filter, result, remote);
 }

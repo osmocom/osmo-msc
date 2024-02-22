@@ -240,7 +240,7 @@ static void _log_mncc_rx_tx(const char *file, int line,
 			    struct gsm_trans *trans, const char *rx_tx, const union mncc_msg *mncc)
 {
 	const char *sdp = NULL;
-	struct sdp_msg sdp_msg = {};
+	struct osmo_sdp_msg sdp_msg = {};
 	struct osmo_sockaddr addr = {};
 
 	if (!log_check_level(DMNCC, LOGL_DEBUG))
@@ -723,7 +723,7 @@ void gsm48_cc_rx_setup_cn_local_rtp_port_known(struct gsm_trans *trans)
 	struct msc_a *msc_a = trans->msc_a;
 	struct gsm_mncc setup = trans->cc.msg;
 	struct osmo_sockaddr_str *rtp_cn_local;
-	struct sdp_msg *sdp;
+	struct osmo_sdp_msg *sdp;
 	int rc;
 
 	if (trans->cc.state != GSM_CSTATE_INITIATED
@@ -797,7 +797,7 @@ static void rx_mncc_sdp(struct gsm_trans *trans, uint32_t mncc_msg_type, const c
 
 	/* if there is no SDP information or we failed to parse it, try using the Bearer Cap from MNCC, if any. */
 	if (!trans->cc.remote.audio_codecs.count && bcap) {
-		trans->cc.remote = (struct sdp_msg){};
+		trans->cc.remote = (struct osmo_sdp_msg){};
 		trans_cc_set_remote_from_bc(trans, bcap);
 		LOG_TRANS_CAT(trans, DMNCC, LOGL_DEBUG, "rx %s Bearer Cap: remote=%s\n",
 			      get_mncc_name(mncc_msg_type), sdp_msg_to_str(&trans->cc.remote));
@@ -908,7 +908,7 @@ static int gsm48_cc_tx_setup(struct gsm_trans *trans, void *arg)
 	case GSM48_BCAP_ITCAP_FAX_G3:
 	case GSM48_BCAP_ITCAP_UNR_DIG_INF:
 		if (setup->fields & MNCC_F_BEARER_CAP) {
-			trans->cc.remote = (struct sdp_msg){};
+			trans->cc.remote = (struct osmo_sdp_msg){};
 			trans_cc_set_remote_from_bc(trans, &setup->bearer_cap);
 			LOG_TRANS_CAT(trans, DMNCC, LOGL_DEBUG, "rx %s Bearer Cap: remote=%s\n",
 				      get_mncc_name(setup->msg_type), sdp_msg_to_str(&trans->cc.remote));
@@ -1087,7 +1087,7 @@ static int gsm48_cc_rx_call_conf(struct gsm_trans *trans, struct msgb *msg)
 
 static int mncc_recv_rtp(struct gsm_network *net, struct gsm_trans *trans, uint32_t callref,
 			 int cmd, struct osmo_sockaddr_str *rtp_addr, uint32_t payload_type,
-			 uint32_t payload_msg_type, const struct sdp_msg *sdp);
+			 uint32_t payload_msg_type, const struct osmo_sdp_msg *sdp);
 
 static int gsm48_cc_mt_rtp_port_and_codec_known(struct gsm_trans *trans)
 {
@@ -2042,7 +2042,7 @@ static int gsm48_cc_rx_userinfo(struct gsm_trans *trans, struct msgb *msg)
 
 static int mncc_recv_rtp(struct gsm_network *net, struct gsm_trans *trans, uint32_t callref,
 			 int cmd, struct osmo_sockaddr_str *rtp_addr, uint32_t payload_type,
-			 uint32_t payload_msg_type, const struct sdp_msg *sdp)
+			 uint32_t payload_msg_type, const struct osmo_sdp_msg *sdp)
 {
 	uint8_t data[sizeof(struct gsm_mncc)];
 	struct gsm_mncc_rtp *rtp;

@@ -47,11 +47,11 @@ struct codec_filter {
 void codec_filter_set_ran(struct codec_filter *codec_filter, const struct sdp_audio_codecs *codecs);
 void codec_filter_set_bss(struct codec_filter *codec_filter,
 			  const struct gsm0808_speech_codec_list *codec_list_bss_supported);
-int codec_filter_run(struct codec_filter *codec_filter, struct sdp_msg *result, const struct sdp_msg *remote);
+int codec_filter_run(struct codec_filter *codec_filter, struct osmo_sdp_msg *result, const struct osmo_sdp_msg *remote);
 
 int codec_filter_to_str_buf(char *buf, size_t buflen, const struct codec_filter *codec_filter,
-			    const struct sdp_msg *result, const struct sdp_msg *remote);
-char *codec_filter_to_str_c(void *ctx, const struct codec_filter *codec_filter, const struct sdp_msg *result,
-			    const struct sdp_msg *remote);
-const char *codec_filter_to_str(const struct codec_filter *codec_filter, const struct sdp_msg *result,
-				const struct sdp_msg *remote);
+			    const struct osmo_sdp_msg *result, const struct osmo_sdp_msg *remote);
+char *codec_filter_to_str_c(void *ctx, const struct codec_filter *codec_filter, const struct osmo_sdp_msg *result,
+			    const struct osmo_sdp_msg *remote);
+const char *codec_filter_to_str(const struct codec_filter *codec_filter, const struct osmo_sdp_msg *result,
+				const struct osmo_sdp_msg *remote);

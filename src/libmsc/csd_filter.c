@@ -75,7 +75,7 @@ void csd_filter_set_ran(struct csd_filter *filter, enum osmo_rat_type ran_type)
 	}
 }
 
-int csd_filter_run(struct csd_filter *filter, struct sdp_msg *result, const struct sdp_msg *remote)
+int csd_filter_run(struct csd_filter *filter, struct osmo_sdp_msg *result, const struct osmo_sdp_msg *remote)
 {
 	struct csd_bs_list *r = &result->bearer_services;
 	enum csd_bs a = filter->assignment;
@@ -109,7 +109,7 @@ int csd_filter_run(struct csd_filter *filter, struct sdp_msg *result, const stru
 
 
 int csd_filter_to_str_buf(char *buf, size_t buflen, const struct csd_filter *filter,
-			    const struct sdp_msg *result, const struct sdp_msg *remote)
+			    const struct osmo_sdp_msg *result, const struct osmo_sdp_msg *remote)
 {
 	struct osmo_strbuf sb = { .buf = buf, .len = buflen };
 	OSMO_STRBUF_APPEND(sb, sdp_msg_to_str_buf, result);
@@ -146,12 +146,12 @@ int csd_filter_to_str_buf(char *buf, size_t buflen, const struct csd_filter *fil
 	return sb.chars_needed;
 }
 
-char *csd_filter_to_str_c(void *ctx, const struct csd_filter *filter, const struct sdp_msg *result, const struct sdp_msg *remote)
+char *csd_filter_to_str_c(void *ctx, const struct csd_filter *filter, const struct osmo_sdp_msg *result, const struct osmo_sdp_msg *remote)
 {
 	OSMO_NAME_C_IMPL(ctx, 128, "csd_filter_to_str_c-ERROR", csd_filter_to_str_buf, filter, result, remote)
 }
 
-const char *csd_filter_to_str(const struct csd_filter *filter, const struct sdp_msg *result, const struct sdp_msg *remote)
+const char *csd_filter_to_str(const struct csd_filter *filter, const struct osmo_sdp_msg *result, const struct osmo_sdp_msg *remote)
 {
 	return csd_filter_to_str_c(OTC_SELECT, filter, result, remote);
 }

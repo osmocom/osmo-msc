@@ -1329,7 +1329,7 @@ static bool validate_sdp(const char *func, const char *desc,
 {
 	const char * const *expect_pos;
 	struct sdp_audio_codec *codec;
-	struct sdp_msg sdp;
+	struct osmo_sdp_msg sdp;
 	if (sdp_msg_from_sdp_str(&sdp, sdp_str)) {
 		BTW("%s: %s: ERROR: failed to parse SDP\n%s", func, desc, sdp_str);
 		return false;
@@ -1427,10 +1427,10 @@ static bool validate_perm_speech(const char *func, const char *desc,
 
 /* Compose a valid SDP string from the list of codec subtype names given. If a subtype name includes a payload type
  * number ("AMR#96") then use that PT number in the SDP instead of the default from codec_mapping.c. */
-static struct sdp_msg *sdp_from_codec_strs(const char *const *codec_strs)
+static struct osmo_sdp_msg *sdp_from_codec_strs(const char *const *codec_strs)
 {
-	static struct sdp_msg sdp;
-	sdp = (struct sdp_msg){};
+	static struct osmo_sdp_msg sdp;
+	sdp = (struct osmo_sdp_msg){};
 	const char *const *codec_str;
 	osmo_sockaddr_str_from_str(&sdp.rtp, "1.2.3.4", 56);
 	for (codec_str = codec_strs; *codec_str; codec_str++) {

@@ -478,7 +478,7 @@ void rtp_stream_set_remote_addr(struct rtp_stream *rtps, const struct osmo_socka
 	rtp_stream_update_id(rtps);
 }
 
-void rtp_stream_set_remote_addr_and_codecs(struct rtp_stream *rtps, const struct sdp_msg *sdp)
+void rtp_stream_set_remote_addr_and_codecs(struct rtp_stream *rtps, const struct osmo_sdp_msg *sdp)
 {
 	rtp_stream_set_codecs(rtps, &sdp->audio_codecs);
 	if (osmo_sockaddr_str_is_nonzero(&sdp->rtp))
