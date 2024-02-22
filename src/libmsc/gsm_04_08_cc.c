@@ -915,7 +915,7 @@ static int gsm48_cc_tx_setup(struct gsm_trans *trans, void *arg)
 		} else {
 			LOG_TRANS(trans, LOGL_INFO,
 				  "Got no information of remote Bearer Capability. Trying anyway.\n");
-			sdp_audio_codecs_set_csd(&trans->cc.codecs.ms);
+			sdp_audio_codecs_set_csd(trans, &trans->cc.codecs.ms);
 		}
 		trans_cc_filter_run(trans);
 		break;
