@@ -28,11 +28,11 @@ struct ran_infra {
 	struct sccp_ran_inst *sri;
 	/* Codecs available on this RAN type by default, in order of preference. If empty, all known codecs will be
 	 * allowed and offered to peers. */
-	struct sdp_audio_codecs codecs;
+	struct osmo_sdp_codec_list *codecs;
 	/* To always set up the MGW endpoint facing the RAN side with specific codecs, list those here. Otherwise leave
 	 * empty (to use the result of codecs filtering). This exists for IuCS, to always set the MGW endpoint facing
 	 * RAN to IUFP, to decapsulate the IuUP headers. */
-	struct sdp_audio_codecs force_mgw_codecs_to_ran;
+	struct osmo_sdp_codec_list *force_mgw_codecs_to_ran;
 };
 
 extern struct ran_infra msc_ran_infra[];

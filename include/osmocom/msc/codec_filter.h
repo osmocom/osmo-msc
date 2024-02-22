@@ -32,19 +32,19 @@ struct gsm0808_speech_codec_list;
  * Call codec_filter_run() and obtain the resulting set of codecs in codec_filter.result. */
 struct codec_filter {
 	/* The fixed set of codecs available on the RAN type, per definition. */
-	struct sdp_audio_codecs ran;
+	struct osmo_sdp_codec_list *ran;
 	/* The codecs advertised by the MS Bearer Capabilities */
-	struct sdp_audio_codecs ms;
+	struct osmo_sdp_codec_list *ms;
 	/* If known, the set of codecs the current RAN cell allows / has available.
 	 * This may not be available if the BSC does not issue this information early enough.
 	 * Should be ignored if empty. */
-	struct sdp_audio_codecs bss;
+	struct osmo_sdp_codec_list *bss;
 
 	/* After a channel was assigned, this reflects the chosen codec. */
-	struct sdp_audio_codec assignment;
+	struct osmo_sdp_codec *assignment;
 };
 
-void codec_filter_set_ran(struct codec_filter *codec_filter, const struct sdp_audio_codecs *codecs);
+void codec_filter_set_ran(struct codec_filter *codec_filter, const struct osmo_sdp_codec_list *codecs);
 void codec_filter_set_bss(struct codec_filter *codec_filter,
 			  const struct gsm0808_speech_codec_list *codec_list_bss_supported);
 int codec_filter_run(struct codec_filter *codec_filter, struct osmo_sdp_msg *result, const struct osmo_sdp_msg *remote);

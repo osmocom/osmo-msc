@@ -28,49 +28,65 @@
 #include <osmocom/msc/ran_infra.h>
 #include <osmocom/msc/debug.h>
 
-void codec_filter_set_ran(struct codec_filter *codec_filter, const struct sdp_audio_codecs *codecs)
+static void ensure_empty_list(void *ctx, struct osmo_sdp_codec_list **codecs)
 {
-	const struct sdp_audio_codec *c;
-	codec_filter->ran = (struct sdp_audio_codecs){};
+	if (*codecs)
+		osmo_sdp_codec_list_free_items(*codecs);
+	else
+		*codecs = osmo_sdp_codec_list_alloc(ctx);
+}
+
+void codec_filter_set_ran(struct codec_filter *codec_filter, const struct osmo_sdp_codec_list *codecs)
+{
+	const struct osmo_sdp_codec *c;
+	ensure_empty_list(codec_filter, &codec_filter->ran);
 	/* Add codecs one by one, to resolve any payload type number conflicts or duplicates. */
-	sdp_audio_codecs_foreach (c, codecs)
-		sdp_audio_codecs_add_copy(&codec_filter->ran, c, true, true);
+	osmo_sdp_codec_list_foreach (c, codecs)
+		osmo_sdp_codec_list_add(codec_filter->ran, c, &osmo_sdp_codec_cmp_equivalent, true);
 }
 
 void codec_filter_set_bss(struct codec_filter *codec_filter,
 			  const struct gsm0808_speech_codec_list *codec_list_bss_supported)
 {
-	codec_filter->bss = (struct sdp_audio_codecs){};
+	ensure_empty_list(codec_filter, &codec_filter->bss);
 	if (codec_list_bss_supported)
-		sdp_audio_codecs_from_speech_codec_list(&codec_filter->bss, codec_list_bss_supported);
+		sdp_audio_codecs_from_speech_codec_list(codec_filter->bss, codec_list_bss_supported);
 }
 
 /* Render intersections of all known audio codec constraints to reach a resulting choice of favorite audio codec, plus
  * possible set of alternative audio codecs, in codec_filter->result. (The result.rtp address remains unchanged.) */
 int codec_filter_run(struct codec_filter *codec_filter, struct osmo_sdp_msg *result, const struct osmo_sdp_msg *remote)
 {
-	struct sdp_audio_codecs *r = &result->audio_codecs;
-	struct sdp_audio_codec *a = &codec_filter->assignment;
-	*r = codec_filter->ran;
-	if (codec_filter->ms.count)
-		sdp_audio_codecs_intersection(r, &codec_filter->ms, false);
-	if (codec_filter->bss.count)
-		sdp_audio_codecs_intersection(r, &codec_filter->bss, false);
-	if (remote->audio_codecs.count)
-		sdp_audio_codecs_intersection(r, &remote->audio_codecs, true);
+	struct osmo_sdp_codec_list *r;
+	struct osmo_sdp_codec *c;
+	struct osmo_sdp_codec *a = codec_filter->assignment;
 
-	if (sdp_audio_codec_is_set(a)) {
+	ensure_empty_list(result, &result->codecs);
+	r = result->codecs;
+	osmo_sdp_codec_list_foreach (c, codec_filter->ran) {
+		osmo_sdp_codec_list_add(r, c, &osmo_sdp_codec_cmp_equivalent, true);
+	}
+
+	if (!osmo_sdp_codec_list_is_empty(codec_filter->ms))
+		osmo_sdp_codec_list_intersection(r, codec_filter->ms, &osmo_sdp_codec_cmp_equivalent, false);
+	if (!osmo_sdp_codec_list_is_empty(codec_filter->bss))
+		osmo_sdp_codec_list_intersection(r, codec_filter->bss, &osmo_sdp_codec_cmp_equivalent, false);
+	if (!osmo_sdp_codec_list_is_empty(remote->codecs))
+		osmo_sdp_codec_list_intersection(r, remote->codecs, &osmo_sdp_codec_cmp_equivalent, false);
+
+	if (osmo_sdp_codec_is_set(a)) {
 		/* Assignment has completed, the chosen codec should be the first of the resulting SDP.
 		 * If present, make sure this is listed in first place.
 		 * If the assigned codec is not present in the intersection of possible choices for TrFO, just omit the
 		 * assigned codec from the filter result, and it is the CC code's responsibility to detect this and
 		 * assign a working codec instead. */
-		sdp_audio_codecs_select(r,  a);
-	} else if (remote && remote->audio_codecs.count) {
+		osmo_sdp_codec_list_move_to_first(r, a, &osmo_sdp_codec_cmp_equivalent);
+	} else if (remote && !osmo_sdp_codec_list_is_empty(remote->codecs)) {
 		/* If we haven't assigned yet, favor remote's first pick. Assume that the remote side has placed its
 		 * favorite codec up first. Remote may already have assigned a codec, and picking a different one might
 		 * trigger a change of codec mode (Re-Assignment). So try to adhere to the first codec listed. */
-		sdp_audio_codecs_select(r, &remote->audio_codecs.codec[0]);
+		osmo_sdp_codec_list_move_to_first(r, osmo_sdp_codec_list_first(remote->codecs),
+						  &osmo_sdp_codec_cmp_equivalent);
 	}
 	return 0;
 }
@@ -82,9 +98,9 @@ int codec_filter_to_str_buf(char *buf, size_t buflen, const struct codec_filter 
 	OSMO_STRBUF_APPEND(sb, sdp_msg_to_str_buf, result);
 	OSMO_STRBUF_PRINTF(sb, " (from:");
 
-	if (sdp_audio_codec_is_set(&codec_filter->assignment)) {
+	if (osmo_sdp_codec_is_set(&codec_filter->assignment)) {
 		OSMO_STRBUF_PRINTF(sb, " assigned=");
-		OSMO_STRBUF_APPEND(sb, sdp_audio_codec_to_str_buf, &codec_filter->assignment);
+		OSMO_STRBUF_APPEND(sb, osmo_sdp_codec_to_str_buf, &codec_filter->assignment);
 	}
 
 	if (remote->audio_codecs.count
@@ -95,18 +111,18 @@ int codec_filter_to_str_buf(char *buf, size_t buflen, const struct codec_filter 
 
 	if (codec_filter->ms.count) {
 		OSMO_STRBUF_PRINTF(sb, " MS={");
-		OSMO_STRBUF_APPEND(sb, sdp_audio_codecs_to_str_buf, &codec_filter->ms);
+		OSMO_STRBUF_APPEND(sb, osmo_sdp_codec_list_to_str_buf, &codec_filter->ms);
 		OSMO_STRBUF_PRINTF(sb, "}");
 	}
 
 	if (codec_filter->bss.count) {
 		OSMO_STRBUF_PRINTF(sb, " bss={");
-		OSMO_STRBUF_APPEND(sb, sdp_audio_codecs_to_str_buf, &codec_filter->bss);
+		OSMO_STRBUF_APPEND(sb, osmo_sdp_codec_list_to_str_buf, &codec_filter->bss);
 		OSMO_STRBUF_PRINTF(sb, "}");
 	}
 
 	OSMO_STRBUF_PRINTF(sb, " RAN={");
-	OSMO_STRBUF_APPEND(sb, sdp_audio_codecs_to_str_buf, &codec_filter->ran);
+	OSMO_STRBUF_APPEND(sb, osmo_sdp_codec_list_to_str_buf, &codec_filter->ran);
 	OSMO_STRBUF_PRINTF(sb, "}");
 
 	OSMO_STRBUF_PRINTF(sb, ")");

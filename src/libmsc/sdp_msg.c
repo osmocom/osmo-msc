@@ -21,8 +21,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <osmocom/msc/sdp_msg.h>
+
 static const struct osmo_sdp_codec codec_csd = {
-	.payload_type = 120,
+	.payload_type = CODEC_CLEARMODE,
 	.encoding_name = "CLEARMODE",
 	.rate = 8000,
 };

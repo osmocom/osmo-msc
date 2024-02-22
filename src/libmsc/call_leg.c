@@ -333,7 +333,7 @@ struct osmo_sockaddr_str *call_leg_local_ip(struct call_leg *cl, enum rtp_direct
  * MDCX.
  */
 int call_leg_ensure_ci(struct call_leg *cl, enum rtp_direction dir, uint32_t call_id, struct gsm_trans *for_trans,
-		       const struct sdp_audio_codecs *codecs_if_known,
+		       const struct osmo_sdp_codec_list *codecs_if_known,
 		       const struct osmo_sockaddr_str *remote_addr_if_known)
 {
 	if (call_leg_ensure_rtp_alloc(cl, dir, call_id, for_trans))
@@ -353,7 +353,7 @@ int call_leg_ensure_ci(struct call_leg *cl, enum rtp_direction dir, uint32_t cal
 int call_leg_local_bridge(struct call_leg *cl1, uint32_t call_id1, struct gsm_trans *trans1,
 			  struct call_leg *cl2, uint32_t call_id2, struct gsm_trans *trans2)
 {
-	struct sdp_audio_codecs *cn_codecs = NULL;
+	struct osmo_sdp_codec_list *cn_codecs = NULL;
 
 	cl1->local_bridge = cl2;
 	cl2->local_bridge = cl1;
@@ -381,9 +381,9 @@ int call_leg_local_bridge(struct call_leg *cl1, uint32_t call_id1, struct gsm_tr
 	 *                               ^MGW-endpoint converts payload type numbers between 112 and 96.
 	 */
 	if (cl1->rtp[RTP_TO_CN] && cl1->rtp[RTP_TO_CN]->codecs_known)
-		cn_codecs = &cl1->rtp[RTP_TO_CN]->codecs;
+		cn_codecs = cl1->rtp[RTP_TO_CN]->codecs;
 	else if (cl2->rtp[RTP_TO_CN] && cl2->rtp[RTP_TO_CN]->codecs_known)
-		cn_codecs = &cl2->rtp[RTP_TO_CN]->codecs;
+		cn_codecs = cl2->rtp[RTP_TO_CN]->codecs;
 	if (!cn_codecs) {
 		LOG_CALL_LEG(cl1, LOGL_ERROR, "RAN-side CN stream codec is not known, not ready for bridging\n");
 		LOG_CALL_LEG(cl2, LOGL_ERROR, "RAN-side CN stream codec is not known, not ready for bridging\n");

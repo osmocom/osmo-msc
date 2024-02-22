@@ -20,7 +20,7 @@ enum codec_frhr {
 struct codec_mapping {
 	/* The sdp.payload_type number in a mapping is not necessarily imperative, but may just reflect the usual
 	 * payload type number for a given codec. */
-	struct sdp_audio_codec sdp;
+	struct osmo_sdp_codec sdp;
 	/* The id that mgcp_client.h uses for this codec. Must be set in each mapping, because 0 means PCMU. */
 	enum mgcp_codecs mgcp;
 	/* Nr of used entries in speech_ver[] below. */
@@ -78,19 +78,19 @@ const struct codec_mapping *codec_mapping_by_subtype_name(const char *subtype_na
 const struct codec_mapping *codec_mapping_by_mgcp_codec(enum mgcp_codecs mgcp);
 
 int bearer_cap_add_speech_ver(struct gsm_mncc_bearer_cap *bearer_cap, enum gsm48_bcap_speech_ver speech_ver);
-int sdp_audio_codec_add_to_bearer_cap(struct gsm_mncc_bearer_cap *bearer_cap, const struct sdp_audio_codec *codec);
-int sdp_audio_codecs_to_bearer_cap(struct gsm_mncc_bearer_cap *bearer_cap, const struct sdp_audio_codecs *ac);
+int sdp_audio_codec_add_to_bearer_cap(struct gsm_mncc_bearer_cap *bearer_cap, const struct osmo_sdp_codec *codec);
+int sdp_audio_codecs_to_bearer_cap(struct gsm_mncc_bearer_cap *bearer_cap, const struct osmo_sdp_codec_list *ac);
 int bearer_cap_set_radio(struct gsm_mncc_bearer_cap *bearer_cap);
 
-struct sdp_audio_codec *sdp_audio_codecs_add_speech_ver(struct sdp_audio_codecs *ac,
+struct osmo_sdp_codec *sdp_audio_codecs_add_speech_ver(struct osmo_sdp_codec_list *ac,
 							enum gsm48_bcap_speech_ver speech_ver);
-struct sdp_audio_codec *sdp_audio_codecs_add_mgcp_codec(struct sdp_audio_codecs *ac, enum mgcp_codecs mgcp_codec);
-void sdp_audio_codecs_from_bearer_cap(struct sdp_audio_codecs *ac, const struct gsm_mncc_bearer_cap *bc);
+struct osmo_sdp_codec *sdp_audio_codecs_add_mgcp_codec(struct osmo_sdp_codec_list *ac, enum mgcp_codecs mgcp_codec);
+void sdp_audio_codecs_from_bearer_cap(struct osmo_sdp_codec_list *ac, const struct gsm_mncc_bearer_cap *bc);
 
-int sdp_audio_codec_to_speech_codec_list(struct gsm0808_speech_codec_list *scl, const struct sdp_audio_codec *codec);
-void sdp_audio_codecs_to_speech_codec_list(struct gsm0808_speech_codec_list *cl, const struct sdp_audio_codecs *ac);
-void sdp_audio_codecs_from_speech_codec_list(struct sdp_audio_codecs *ac, const struct gsm0808_speech_codec_list *cl);
+int sdp_audio_codec_to_speech_codec_list(struct gsm0808_speech_codec_list *scl, const struct osmo_sdp_codec *codec);
+void sdp_audio_codecs_to_speech_codec_list(struct gsm0808_speech_codec_list *cl, const struct osmo_sdp_codec_list *ac);
+void sdp_audio_codecs_from_speech_codec_list(struct osmo_sdp_codec_list *ac, const struct gsm0808_speech_codec_list *cl);
 
-int sdp_audio_codecs_to_gsm0808_channel_type(struct gsm0808_channel_type *ct, const struct sdp_audio_codecs *ac);
+int sdp_audio_codecs_to_gsm0808_channel_type(struct gsm0808_channel_type *ct, const struct osmo_sdp_codec_list *ac);
 
-enum mgcp_codecs sdp_audio_codec_to_mgcp_codec(const struct sdp_audio_codec *codec);
+enum mgcp_codecs sdp_audio_codec_to_mgcp_codec(const struct osmo_sdp_codec *codec);

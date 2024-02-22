@@ -75,9 +75,10 @@ void csd_filter_set_ran(struct csd_filter *filter, enum osmo_rat_type ran_type)
 	}
 }
 
-int csd_filter_run(struct csd_filter *filter, struct osmo_sdp_msg *result, const struct osmo_sdp_msg *remote)
+int csd_filter_run(struct csd_filter *filter, struct osmo_sdp_msg *sdp_result, struct csd_bs_list *bs_result,
+		   const struct csd_bs_list *remote)
 {
-	struct csd_bs_list *r = &result->bearer_services;
+	struct csd_bs_list *r = bs_result;
 	enum csd_bs a = filter->assignment;
 
 	*r = filter->ran;
@@ -86,8 +87,8 @@ int csd_filter_run(struct csd_filter *filter, struct osmo_sdp_msg *result, const
 		csd_bs_list_intersection(r, &filter->ms);
 	if (filter->bss.count)
 		csd_bs_list_intersection(r, &filter->bss);
-	if (remote->bearer_services.count)
-		csd_bs_list_intersection(r, &remote->bearer_services);
+	if (remote->count)
+		csd_bs_list_intersection(r, remote);
 
 	/* Future: If osmo-msc were able to trigger a re-assignment [...] see
 	 * comment in codec_filter_run(). */
@@ -97,13 +98,7 @@ int csd_filter_run(struct csd_filter *filter, struct osmo_sdp_msg *result, const
 		csd_bs_list_add_bs(r, a);
 	}
 
-	result->audio_codecs.count = 1;
-	result->audio_codecs.codec[0] = (struct sdp_audio_codec){
-		.payload_type = CODEC_CLEARMODE,
-		.subtype_name = "CLEARMODE",
-		.rate = 8000,
-	};
-
+	sdp_codecs_set_csd(sdp_result, &result->codecs);
 	return 0;
 }
 

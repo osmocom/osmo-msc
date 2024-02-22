@@ -45,7 +45,8 @@ struct csd_filter {
 };
 
 void csd_filter_set_ran(struct csd_filter *filter, enum osmo_rat_type ran_type);
-int csd_filter_run(struct csd_filter *filter, struct osmo_sdp_msg *result, const struct osmo_sdp_msg *remote);
+int csd_filter_run(struct csd_filter *filter, struct osmo_sdp_msg *sdp_result, struct csd_bs_list *bs_result,
+		   const struct csd_bs_list *remote);
 
 int csd_filter_to_str_buf(char *buf, size_t buflen, const struct csd_filter *filter,
 			    const struct osmo_sdp_msg *result, const struct osmo_sdp_msg *remote);

@@ -39,7 +39,7 @@ static const struct codec_mapping codec_map[] = {
 	{
 		.sdp = {
 			.payload_type = 0,
-			.subtype_name = "PCMU",
+			.encoding_name = "PCMU",
 			.rate = 8000,
 		},
 		.mgcp = CODEC_PCMU_8000_1,
@@ -47,7 +47,7 @@ static const struct codec_mapping codec_map[] = {
 	{
 		.sdp = {
 			.payload_type = 3,
-			.subtype_name = "GSM",
+			.encoding_name = "GSM",
 			.rate = 8000,
 		},
 		.mgcp = CODEC_GSM_8000_1,
@@ -65,7 +65,7 @@ static const struct codec_mapping codec_map[] = {
 	{
 		.sdp = {
 			.payload_type = 8,
-			.subtype_name = "PCMA",
+			.encoding_name = "PCMA",
 			.rate = 8000,
 		},
 		.mgcp = CODEC_PCMA_8000_1,
@@ -73,7 +73,7 @@ static const struct codec_mapping codec_map[] = {
 	{
 		.sdp = {
 			.payload_type = 18,
-			.subtype_name = "G729",
+			.encoding_name = "G729",
 			.rate = 8000,
 		},
 		.mgcp = CODEC_G729_8000_1,
@@ -81,7 +81,7 @@ static const struct codec_mapping codec_map[] = {
 	{
 		.sdp = {
 			.payload_type = 110,
-			.subtype_name = "GSM-EFR",
+			.encoding_name = "GSM-EFR",
 			.rate = 8000,
 		},
 		.mgcp = CODEC_GSMEFR_8000_1,
@@ -99,7 +99,7 @@ static const struct codec_mapping codec_map[] = {
 	{
 		.sdp = {
 			.payload_type = 111,
-			.subtype_name = "GSM-HR-08",
+			.encoding_name = "GSM-HR-08",
 			.rate = 8000,
 		},
 		.mgcp = CODEC_GSMHR_8000_1,
@@ -120,7 +120,7 @@ static const struct codec_mapping codec_map[] = {
 	{ \
 		.sdp = { \
 			.payload_type = 112, \
-			.subtype_name = "AMR", \
+			.encoding_name = "AMR", \
 			.rate = 8000, \
 			.fmtp = FMTP, \
 		}, \
@@ -146,7 +146,7 @@ static const struct codec_mapping codec_map[] = {
 	{ \
 		.sdp = { \
 			.payload_type = 112, \
-			.subtype_name = "AMR", \
+			.encoding_name = "AMR", \
 			.rate = 8000, \
 			.fmtp = FMTP, \
 		}, \
@@ -226,7 +226,7 @@ static const struct codec_mapping codec_map[] = {
 	{
 		.sdp = {
 			.payload_type = 113,
-			.subtype_name = "AMR-WB",
+			.encoding_name = "AMR-WB",
 			.rate = 16000,
 			.fmtp = OSMO_SDP_STR_AMR_OCTET_ALIGN_1,
 		},
@@ -246,7 +246,7 @@ static const struct codec_mapping codec_map[] = {
 	{
 		.sdp = {
 			.payload_type = 96,
-			.subtype_name = "VND.3GPP.IUFP",
+			.encoding_name = "VND.3GPP.IUFP",
 			.rate = 16000,
 		},
 		.mgcp = CODEC_IUFP,
@@ -254,7 +254,7 @@ static const struct codec_mapping codec_map[] = {
 	{
 		.sdp = {
 			.payload_type = 120,
-			.subtype_name = "CLEARMODE",
+			.encoding_name = "CLEARMODE",
 			.rate = 8000,
 		},
 		.has_gsm0808_speech_codec = true,
@@ -368,11 +368,11 @@ const struct codec_mapping *codec_mapping_by_perm_speech(enum gsm0808_permitted_
 	return NULL;
 }
 
-const struct codec_mapping *codec_mapping_by_subtype_name(const char *subtype_name)
+const struct codec_mapping *codec_mapping_by_encoding_name(const char *encoding_name)
 {
 	const struct codec_mapping *m;
 	codec_mapping_foreach(m) {
-		if (!strcmp(m->sdp.subtype_name, subtype_name))
+		if (!strcmp(m->sdp.encoding_name, encoding_name))
 			return m;
 	}
 	return NULL;
@@ -579,7 +579,7 @@ void sdp_audio_codecs_from_speech_codec_list(struct sdp_audio_codecs *ac, const 
 		codec_mapping_foreach (m) {
 			if (!codec_mapping_matches_gsm0808_speech_codec(m, sc))
 				continue;
-			sdp_audio_codecs_add_copy(ac, &m->sdp, true, true);
+			osmo_sdp_codec_list_add(ac, &m->sdp, &osmo_sdp_codec_cmp_equivalent, true);
 		}
 	}
 }
