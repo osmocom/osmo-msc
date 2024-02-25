@@ -186,9 +186,8 @@ static const struct codec_mapping codec_map[] = {
 	 * FR     Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y  Y
 	 */
 
-#if 0
-
-/* Add *all* AMR rate combinations as separate entries to the codec mapping */
+/* Add *all* AMR rate combinations as separate entries to the codec mapping, so that osmo-msc is able to recognize and
+ * map them. */
 #define ALL_AMR(IS_OA, FMTP_PREFIX) \
 	/* FR rates */ \
 	AMR_FR(IS_OA, FMTP_PREFIX "mode-set=0", S(0)), \
@@ -204,8 +203,6 @@ static const struct codec_mapping codec_map[] = {
 	AMR_FR(IS_OA, FMTP_PREFIX "mode-set=0,2,3,4", S(10)), \
 	AMR_FR(IS_OA, FMTP_PREFIX "mode-set=0,2,3,6", S(12)), \
 	AMR_FR(IS_OA, FMTP_PREFIX "mode-set=0,2,5,7", S(14)), \
-	/* AMR-FR with a mode-set compatible with AMR-HR on S1 */ \
-	AMR_FR(IS_OA, FMTP_PREFIX "mode-set=0,2,4", S(1)), \
 	\
 	/* HR rates */ \
 	AMR_HR(IS_OA, FMTP_PREFIX "mode-set=0", S(0)), \
@@ -216,23 +213,10 @@ static const struct codec_mapping codec_map[] = {
 	AMR_HR(IS_OA, FMTP_PREFIX "mode-set=5", S(5)), \
 	AMR_HR(IS_OA, FMTP_PREFIX "mode-set=0,2", S(8)), \
 	AMR_HR(IS_OA, FMTP_PREFIX "mode-set=0,2,3", S(9)), \
-	AMR_HR(IS_OA, FMTP_PREFIX "mode-set=0,2,3,4", S(10))
-
-#else
-
-/* Add only AMR rates for S1 (0,2,4,7) as well as 12k2 only. */
-#define ALL_AMR(IS_OA, FMTP_PREFIX) \
-	/* FR rates */ \
-	AMR_FR(IS_OA, FMTP_PREFIX "mode-set=0,2,4,7", S(1)), \
-	AMR_FR(IS_OA, FMTP_PREFIX "mode-set=7", S(7)), \
-	\
-	/* HR rates */ \
-	AMR_HR(IS_OA, FMTP_PREFIX "mode-set=0,2,4", S(1)), \
+	AMR_HR(IS_OA, FMTP_PREFIX "mode-set=0,2,3,4", S(10)), \
 	\
 	/* AMR-FR with a mode-set compatible with AMR-HR on S1 */ \
 	AMR_FR(IS_OA, FMTP_PREFIX "mode-set=0,2,4", S(1))
-
-#endif
 
 	/* All AMR rates, once with and once without octet-align=1 */
 	ALL_AMR(true, OSMO_SDP_STR_AMR_OCTET_ALIGN_1 ";"),
