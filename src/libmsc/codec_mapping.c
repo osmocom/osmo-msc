@@ -677,3 +677,8 @@ enum mgcp_codecs sdp_audio_codec_to_mgcp_codec(const struct sdp_audio_codec *cod
 	}
 	return NO_MGCP_CODEC;
 }
+
+char *sdp_codec_to_str(const struct osmo_sdp_codec *codec)
+{
+	return osmo_sdp_codec_to_str_c(OTC_SELECT, codec);
+}
