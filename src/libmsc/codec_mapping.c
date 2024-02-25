@@ -444,7 +444,7 @@ int sdp_audio_codec_add_to_bearer_cap(struct gsm_mncc_bearer_cap *bearer_cap, co
 	LOGP(DLGLOBAL, LOGL_ERROR, "sdp_audio_codec_add_to_bearer_cap(%s)\n", sdp_audio_codec_to_str(codec));
 	codec_mapping_foreach(m) {
 		int i;
-		if (sdp_audio_codec_cmp(&m->sdp, codec, true, false))
+		if (osmo_sdp_codec_cmp(&m->sdp, codec, &osmo_sdp_codec_cmp_equivalent))
 			continue;
 		LOGP(DLGLOBAL, LOGL_ERROR, " %s speech_ver_count %d\n", sdp_audio_codec_to_str(&m->sdp),
 		     m->speech_ver_count);
