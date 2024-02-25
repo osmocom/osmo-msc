@@ -98,7 +98,7 @@ int csd_filter_run(struct csd_filter *filter, struct osmo_sdp_msg *sdp_result, s
 		csd_bs_list_add_bs(r, a);
 	}
 
-	sdp_codecs_set_csd(sdp_result, &result->codecs);
+	sdp_codecs_set_csd(sdp_result, &sdp_result->codecs);
 	return 0;
 }
 
@@ -107,7 +107,7 @@ int csd_filter_to_str_buf(char *buf, size_t buflen, const struct csd_filter *fil
 			    const struct osmo_sdp_msg *result, const struct osmo_sdp_msg *remote)
 {
 	struct osmo_strbuf sb = { .buf = buf, .len = buflen };
-	OSMO_STRBUF_APPEND(sb, sdp_msg_to_str_buf, result);
+	OSMO_STRBUF_APPEND(sb, osmo_sdp_msg_to_str_buf, result, false);
 	OSMO_STRBUF_PRINTF(sb, " (from:");
 
 	if (filter->assignment) {
@@ -115,9 +115,9 @@ int csd_filter_to_str_buf(char *buf, size_t buflen, const struct csd_filter *fil
 		OSMO_STRBUF_APPEND(sb, csd_bs_to_str_buf, filter->assignment);
 	}
 
-	if (remote->bearer_services.count || osmo_sockaddr_str_is_nonzero(&remote->rtp)) {
+	if (!osmo_sdp_codec_list_is_empty(remote->codecs) || osmo_sockaddr_str_is_nonzero(&remote->rtp)) {
 		OSMO_STRBUF_PRINTF(sb, " remote=");
-		OSMO_STRBUF_APPEND(sb, sdp_msg_to_str_buf, remote);
+		OSMO_STRBUF_APPEND(sb, osmo_sdp_msg_to_str_buf, remote, true);
 	}
 
 	if (filter->ms.count) {

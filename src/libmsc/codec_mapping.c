@@ -437,19 +437,19 @@ int bearer_cap_set_radio(struct gsm_mncc_bearer_cap *bearer_cap)
 /* Try to convert the SDP audio codec name to Speech Versions to append to Bearer Capabilities.
  * Return the number of Speech Version entries added (some may add more than one, others may be unknown/unapplicable and
  * return 0). */
-int sdp_audio_codec_add_to_bearer_cap(struct gsm_mncc_bearer_cap *bearer_cap, const struct sdp_audio_codec *codec)
+int sdp_audio_codec_add_to_bearer_cap(struct gsm_mncc_bearer_cap *bearer_cap, const struct osmo_sdp_codec *codec)
 {
 	const struct codec_mapping *m;
 	int added = 0;
-	LOGP(DLGLOBAL, LOGL_ERROR, "sdp_audio_codec_add_to_bearer_cap(%s)\n", sdp_audio_codec_to_str(codec));
+	LOGP(DLGLOBAL, LOGL_ERROR, "sdp_audio_codec_add_to_bearer_cap(%s)\n", sdp_codec_to_str(codec));
 	codec_mapping_foreach(m) {
 		int i;
 		if (osmo_sdp_codec_cmp(&m->sdp, codec, &osmo_sdp_codec_cmp_equivalent))
 			continue;
-		LOGP(DLGLOBAL, LOGL_ERROR, " %s speech_ver_count %d\n", sdp_audio_codec_to_str(&m->sdp),
+		LOGP(DLGLOBAL, LOGL_ERROR, " %s speech_ver_count %d\n", sdp_codec_to_str(&m->sdp),
 		     m->speech_ver_count);
 		for (i = 0; i < m->speech_ver_count; i++) {
-			LOGP(DLGLOBAL, LOGL_ERROR, " - add %s  (enum gsm48_bcap_speech_ver)%d\n", sdp_audio_codec_to_str(&m->sdp),
+			LOGP(DLGLOBAL, LOGL_ERROR, " - add %s  (enum gsm48_bcap_speech_ver)%d\n", sdp_codec_to_str(&m->sdp),
 			     m->speech_ver[i]);
 			added += bearer_cap_add_speech_ver(bearer_cap, m->speech_ver[i]);
 		}
@@ -513,14 +513,14 @@ void sdp_audio_codecs_from_bearer_cap(struct osmo_sdp_codec_list *codecs, const 
 /* Append an entry for the given sdp_audio_codec to the gsm0808_speech_codec_list.
  * Return 0 if an entry was added, -ENOENT when there is no mapping to gsm0808_speech_codec for the given
  * sdp_audio_codec, and -ENOSPC when scl is full and nothing could be added. */
-int sdp_audio_codec_to_speech_codec_list(struct gsm0808_speech_codec_list *scl, const struct sdp_audio_codec *codec)
+int sdp_audio_codec_to_speech_codec_list(struct gsm0808_speech_codec_list *scl, const struct osmo_sdp_codec *codec)
 {
 	const struct codec_mapping *m;
 	int added = 0;
 	int i;
 
 	codec_mapping_foreach (m) {
-		if (sdp_audio_codec_cmp(&m->sdp, codec, true, false))
+		if (osmo_sdp_codec_cmp(&m->sdp, codec, &osmo_sdp_codec_cmp_equivalent))
 			continue;
 		if (!m->has_gsm0808_speech_codec)
 			continue;
@@ -555,20 +555,20 @@ int sdp_audio_codec_to_speech_codec_list(struct gsm0808_speech_codec_list *scl, 
 	return 0;
 }
 
-void sdp_audio_codecs_to_speech_codec_list(struct gsm0808_speech_codec_list *scl, const struct sdp_audio_codecs *ac)
+void sdp_audio_codecs_to_speech_codec_list(struct gsm0808_speech_codec_list *scl, const struct osmo_sdp_codec_list *ac)
 {
-	const struct sdp_audio_codec *codec;
+	const struct osmo_sdp_codec *codec;
 
 	*scl = (struct gsm0808_speech_codec_list){};
 
-	sdp_audio_codecs_foreach(codec, ac) {
+	osmo_sdp_codec_list_foreach(codec, ac) {
 		int rc = sdp_audio_codec_to_speech_codec_list(scl, codec);
 		if (rc == -ENOSPC)
 			break;
 	}
 }
 
-void sdp_audio_codecs_from_speech_codec_list(struct sdp_audio_codecs *ac, const struct gsm0808_speech_codec_list *cl)
+void sdp_audio_codecs_from_speech_codec_list(struct osmo_sdp_codec_list *ac, const struct gsm0808_speech_codec_list *cl)
 {
 	int i;
 	for (i = 0; i < cl->len; i++) {
@@ -583,9 +583,9 @@ void sdp_audio_codecs_from_speech_codec_list(struct sdp_audio_codecs *ac, const 
 	}
 }
 
-int sdp_audio_codecs_to_gsm0808_channel_type(struct gsm0808_channel_type *ct, const struct sdp_audio_codecs *ac)
+int sdp_audio_codecs_to_gsm0808_channel_type(struct gsm0808_channel_type *ct, const struct osmo_sdp_codec_list *ac)
 {
-	const struct sdp_audio_codec *codec;
+	const struct osmo_sdp_codec *codec;
 	bool fr_present = false;
 	int first_fr_idx = -1;
 	bool hr_present = false;
@@ -597,19 +597,19 @@ int sdp_audio_codecs_to_gsm0808_channel_type(struct gsm0808_channel_type *ct, co
 	};
 	LOGP(DLGLOBAL, LOGL_ERROR, "sdp_audio_codecs_to_gsm0808_channel_type()\n");
 
-	sdp_audio_codecs_foreach(codec, ac) {
+	osmo_sdp_codec_list_foreach(codec, ac) {
 		const struct codec_mapping *m;
 		int i;
 		bool dup;
 		idx++;
 
-		LOGP(DLGLOBAL, LOGL_ERROR, "- codec = %s\n", sdp_audio_codec_to_str(codec));
+		LOGP(DLGLOBAL, LOGL_ERROR, "- codec = %s\n", sdp_codec_to_str(codec));
 
 		codec_mapping_foreach(m) {
-			LOGP(DLGLOBAL, LOGL_ERROR, "   (m=%s %s)\n", sdp_audio_codec_to_str(&m->sdp),
+			LOGP(DLGLOBAL, LOGL_ERROR, "   (m=%s %s)\n", sdp_codec_to_str(&m->sdp),
 			     gsm0808_permitted_speech_name(m->perm_speech));
 
-			if (sdp_audio_codec_cmp(codec, &m->sdp, true, false))
+			if (osmo_sdp_codec_cmp(codec, &m->sdp, &osmo_sdp_codec_cmp_equivalent))
 				continue;
 
 			switch (m->perm_speech) {
@@ -668,11 +668,11 @@ int sdp_audio_codecs_to_gsm0808_channel_type(struct gsm0808_channel_type *ct, co
 	return 0;
 }
 
-enum mgcp_codecs sdp_audio_codec_to_mgcp_codec(const struct sdp_audio_codec *codec)
+enum mgcp_codecs sdp_audio_codec_to_mgcp_codec(const struct osmo_sdp_codec *codec)
 {
 	const struct codec_mapping *m;
 	codec_mapping_foreach(m) {
-		if (!sdp_audio_codec_cmp(&m->sdp, codec, true, false))
+		if (!osmo_sdp_codec_cmp(&m->sdp, codec, &osmo_sdp_codec_cmp_equivalent))
 			return m->mgcp;
 	}
 	return NO_MGCP_CODEC;
@@ -681,4 +681,22 @@ enum mgcp_codecs sdp_audio_codec_to_mgcp_codec(const struct sdp_audio_codec *cod
 char *sdp_codec_to_str(const struct osmo_sdp_codec *codec)
 {
 	return osmo_sdp_codec_to_str_c(OTC_SELECT, codec);
+}
+
+char *sdp_msg_to_str(const struct osmo_sdp_msg *msg, bool summarize)
+{
+	return osmo_sdp_msg_to_str_c(OTC_SELECT, msg, summarize);
+}
+
+void sdp_msg_replace(void *ctx, struct osmo_sdp_msg **var, struct osmo_sdp_msg *new_msg)
+{
+	struct osmo_sdp_msg *msg = *var;
+	if (msg)
+		talloc_free(msg);
+	msg = new_msg;
+	if (msg)
+		talloc_steal(ctx, msg);
+	else
+		msg = osmo_sdp_msg_alloc(ctx);
+	*var = msg;
 }

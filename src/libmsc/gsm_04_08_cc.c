@@ -240,7 +240,7 @@ static void _log_mncc_rx_tx(const char *file, int line,
 			    struct gsm_trans *trans, const char *rx_tx, const union mncc_msg *mncc)
 {
 	const char *sdp = NULL;
-	struct osmo_sdp_msg sdp_msg = {};
+	struct osmo_sdp_msg *sdp_msg = NULL;
 	struct osmo_sockaddr addr = {};
 
 	if (!log_check_level(DMNCC, LOGL_DEBUG))
@@ -271,19 +271,20 @@ static void _log_mncc_rx_tx(const char *file, int line,
 	}
 
 	if (sdp && sdp[0]) {
-		int rc = sdp_msg_from_sdp_str(&sdp_msg, sdp);
-		if (rc != 0) {
-			LOG_TRANS_CAT_SRC(trans, DMNCC, LOGL_ERROR, file, line, "%s %s: invalid SDP message (trying anyway)\n",
+		struct osmo_sdp_err err;
+		sdp_msg = osmo_sdp_msg_decode(OTC_SELECT, sdp, &err);
+		if (err.rc != 0) {
+			LOG_TRANS_CAT_SRC(trans, DMNCC, LOGL_ERROR, file, line,
+					  "%s %s: invalid SDP message (trying anyway): %s\n",
 					  rx_tx,
-					  get_mncc_name(mncc->msg_type));
-			LOG_TRANS_CAT_SRC(trans, DMNCC, LOGL_DEBUG, file, line, "erratic SDP: %s\n",
-					  osmo_quote_cstr_c(OTC_SELECT, sdp, -1));
+					  get_mncc_name(mncc->msg_type),
+					  osmo_quote_cstr_c(OTC_SELECT, err.src_str, err.src_str_len));
 			return;
 		}
 		LOG_TRANS_CAT_SRC(trans, DMNCC, LOGL_DEBUG, file, line, "%s %s (RTP=%s)\n",
 				  rx_tx,
 				  get_mncc_name(mncc->msg_type),
-				  sdp_msg_to_str(&sdp_msg));
+				  sdp_msg_to_str(sdp_msg, false));
 		return;
 	}
 
@@ -754,10 +755,10 @@ void gsm48_cc_rx_setup_cn_local_rtp_port_known(struct gsm_trans *trans)
 		trans_free(trans);
 		return;
 	}
-	trans->cc.local.rtp = *rtp_cn_local;
+	trans->cc.local->rtp = *rtp_cn_local;
 
-	sdp = trans->cc.local.audio_codecs.count ? &trans->cc.local : NULL;
-	rc = sdp_msg_to_sdp_str_buf(setup.sdp, sizeof(setup.sdp), sdp);
+	sdp = osmo_sdp_codec_list_is_empty(trans->cc.local->codecs) ? NULL : trans->cc.local;
+	rc = osmo_sdp_msg_encode_buf(setup.sdp, sizeof(setup.sdp), sdp);
 	if (rc >= sizeof(setup.sdp)) {
 		LOG_TRANS(trans, LOGL_ERROR, "MNCC_SETUP_IND: SDP too long (%d > %zu bytes)\n", rc, sizeof(setup.sdp));
 		trans_free(trans);
@@ -768,14 +769,22 @@ void gsm48_cc_rx_setup_cn_local_rtp_port_known(struct gsm_trans *trans)
 	mncc_recvmsg(trans->net, trans, MNCC_SETUP_IND, &setup);
 }
 
-static bool codecs_match(const struct sdp_audio_codec *a, const struct sdp_audio_codec *b)
+static bool codecs_match(const struct osmo_sdp_codec *a, const struct osmo_sdp_codec *b)
 {
-	if (!sdp_audio_codec_cmp(a, b, true, false))
+	if (!osmo_sdp_codec_cmp(a, b, &osmo_sdp_codec_cmp_equivalent))
 		return true;
 
 	/* Codecs are not identical. But will the MGW be able to transcode? */
-	if (!strcmp("AMR", a->subtype_name) && !strcmp("AMR", b->subtype_name)) {
-		/* TODO: compare matching mode-set. */
+	if (!strcmp("AMR", a->encoding_name) && !strcmp("AMR", b->encoding_name)) {
+		/* MGW is expected to even out octet-align=0 vs 1 mismatches, so do not compare AMR octet-align. */
+
+		/* FIXME: compare matching mode-set.
+		 * So far regarding any and all mode-sets as equivalent.
+		 * Instead, a well-guided 'false' here may help to switch the BSS to an FR channel if the remote side
+		 * cannot do any HR rates. */
+
+		/* TODO: any other important AMR fmtp parameters? So far we've only ever seen 'octet-align' and
+		 * 'mode-set' in practice. So far regard all of them as not important for codec matching. */
 		return true;
 	}
 	return false;
@@ -784,43 +793,48 @@ static bool codecs_match(const struct sdp_audio_codec *a, const struct sdp_audio
 static void rx_mncc_sdp(struct gsm_trans *trans, uint32_t mncc_msg_type, const char *sdp,
 			const struct gsm_mncc_bearer_cap *bcap)
 {
-	struct codec_filter *codecs = &trans->cc.codecs;
+	struct codec_filter *codecs = trans->cc.codec_filter;
 	struct call_leg *cl = trans->msc_a ? trans->msc_a->cc.call_leg : NULL;
 	struct rtp_stream *rtp_cn = cl ? cl->rtp[RTP_TO_CN] : NULL;
 
 	if (sdp[0]) {
-		int rc = sdp_msg_from_sdp_str(&trans->cc.remote, sdp);
-		if (rc)
-			LOG_TRANS_CAT(trans, DMNCC, LOGL_ERROR, "rx %s: Failed to parse SDP: %d. Trying anyway.\n",
-				      get_mncc_name(mncc_msg_type), rc);
+		struct osmo_sdp_err err;
+		struct osmo_sdp_msg *msg = osmo_sdp_msg_decode(OTC_SELECT, sdp, &err);
+		if (err.rc)
+			LOG_TRANS_CAT(trans, DMNCC, LOGL_ERROR,
+				      "rx %s: Failed to parse SDP, trying anyway: %d at %s\n",
+				      get_mncc_name(mncc_msg_type), err.rc,
+				      osmo_quote_cstr_c(OTC_SELECT, err.src_str, err.src_str_len));
+		else if (msg)
+			sdp_msg_replace(trans, &trans->cc.remote, msg);
 	}
 
 	/* if there is no SDP information or we failed to parse it, try using the Bearer Cap from MNCC, if any. */
-	if (!trans->cc.remote.audio_codecs.count && bcap) {
-		trans->cc.remote = (struct osmo_sdp_msg){};
+	if (bcap && (!trans->cc.remote || osmo_sdp_codec_list_is_empty(trans->cc.remote->codecs))) {
+		sdp_msg_replace(trans, &trans->cc.remote, NULL);
 		trans_cc_set_remote_from_bc(trans, bcap);
 		LOG_TRANS_CAT(trans, DMNCC, LOGL_DEBUG, "rx %s Bearer Cap: remote=%s\n",
-			      get_mncc_name(mncc_msg_type), sdp_msg_to_str(&trans->cc.remote));
+			      get_mncc_name(mncc_msg_type), sdp_msg_to_str(trans->cc.remote, false));
 	}
 
-	if (!trans->cc.remote.audio_codecs.count)
+	if (!trans->cc.remote || osmo_sdp_codec_list_is_empty(trans->cc.remote->codecs))
 		LOG_TRANS(trans, LOGL_INFO,
 			  "Got no information of remote audio codecs: neither SDP nor Bearer Capability. Trying anyway.\n");
 
 	trans_cc_filter_run(trans);
 	if (rtp_cn) {
-		rtp_stream_set_remote_addr_and_codecs(rtp_cn, &trans->cc.remote);
+		rtp_stream_set_remote_addr_and_codecs(rtp_cn, trans->cc.remote);
 		rtp_stream_commit(rtp_cn);
 	}
 
 	/* See if we need to switch codecs to maintain TFO: has the remote side changed the codecs information? If we
 	 * have already assigned a specific codec here, but the remote call leg has now chosen a different codec, we
 	 * need to re-assign this call leg to match the remote leg. */
-	if (!sdp_audio_codec_is_set(&codecs->assignment)) {
+	if (!osmo_sdp_codec_is_set(codecs->assignment)) {
 		/* Voice channel assignment has not completed. Do not interfere. */
 		return;
 	}
-	if (!trans->cc.remote.audio_codecs.count) {
+	if (!trans->cc.remote || osmo_sdp_codec_list_is_empty(trans->cc.remote->codecs)) {
 		/* Don't know remote codecs, nothing to do. */
 		return;
 	}
@@ -833,13 +847,13 @@ static void rx_mncc_sdp(struct gsm_trans *trans, uint32_t mncc_msg_type, const c
 	 * single codec in the SDP; but at least MO *must* send all possible codecs along, to give MT a chance to find a
 	 * good match. Maybe MO should offer all supported codecs, but MT should limit to a single pick -- but what do
 	 * other SDP peers do, say via SIP? */
-	if (codecs_match(&trans->cc.remote.audio_codecs.codec[0], &codecs->assignment))
+	if (codecs_match(osmo_sdp_codec_list_first(trans->cc.remote->codecs), codecs->assignment))
 		return;
 
 	/* We've already completed Assignment of a voice channel (some time ago), and now the remote side has changed
 	 * to a mismatching codec (list). Try to re-assign this side to a matching codec. */
 	LOG_TRANS(trans, LOGL_INFO, "Remote call leg mismatches assigned codec: %s\n",
-		  codec_filter_to_str(&trans->cc.codecs, &trans->cc.local, &trans->cc.remote));
+		  codec_filter_to_str(trans->cc.codec_filter, trans->cc.local, trans->cc.remote));
 	msc_a_tx_assignment_cmd(trans->msc_a);
 }
 
@@ -908,14 +922,14 @@ static int gsm48_cc_tx_setup(struct gsm_trans *trans, void *arg)
 	case GSM48_BCAP_ITCAP_FAX_G3:
 	case GSM48_BCAP_ITCAP_UNR_DIG_INF:
 		if (setup->fields & MNCC_F_BEARER_CAP) {
-			trans->cc.remote = (struct osmo_sdp_msg){};
+			sdp_msg_replace(trans, &trans->cc.remote, NULL);
 			trans_cc_set_remote_from_bc(trans, &setup->bearer_cap);
 			LOG_TRANS_CAT(trans, DMNCC, LOGL_DEBUG, "rx %s Bearer Cap: remote=%s\n",
-				      get_mncc_name(setup->msg_type), sdp_msg_to_str(&trans->cc.remote));
+				      get_mncc_name(setup->msg_type), sdp_msg_to_str(trans->cc.remote, false));
 		} else {
 			LOG_TRANS(trans, LOGL_INFO,
 				  "Got no information of remote Bearer Capability. Trying anyway.\n");
-			sdp_audio_codecs_set_csd(trans, &trans->cc.codecs.ms);
+			sdp_codecs_set_csd(trans->cc.codec_filter, &trans->cc.codec_filter->ms);
 		}
 		trans_cc_filter_run(trans);
 		break;
@@ -933,7 +947,7 @@ static int gsm48_cc_tx_setup(struct gsm_trans *trans, void *arg)
 		bearer_cap = (struct gsm_mncc_bearer_cap){
 			.speech_ver = { -1 },
 		};
-		sdp_audio_codecs_to_bearer_cap(&bearer_cap, &trans->cc.local.audio_codecs);
+		sdp_audio_codecs_to_bearer_cap(&bearer_cap, trans->cc.local->codecs);
 		rc = bearer_cap_set_radio(&bearer_cap);
 		if (rc) {
 			LOG_TRANS(trans, LOGL_ERROR, "Error composing Bearer Capability for CC Setup\n");
@@ -947,7 +961,7 @@ static int gsm48_cc_tx_setup(struct gsm_trans *trans, void *arg)
 		if (bearer_cap.speech_ver[0] == -1) {
 			LOG_TRANS(trans, LOGL_ERROR, "%s: no codec match possible: %s\n",
 				  get_mncc_name(setup->msg_type),
-				  codec_filter_to_str(&trans->cc.codecs, &trans->cc.local, &trans->cc.remote));
+				  codec_filter_to_str(trans->cc.codec_filter, trans->cc.local, trans->cc.remote));
 
 			/* incompatible codecs */
 			rc = mncc_release_ind(trans->net, trans, trans->callref,
@@ -962,7 +976,7 @@ static int gsm48_cc_tx_setup(struct gsm_trans *trans, void *arg)
 	case GSM48_BCAP_ITCAP_3k1_AUDIO:
 	case GSM48_BCAP_ITCAP_FAX_G3:
 	case GSM48_BCAP_ITCAP_UNR_DIG_INF:
-		if (csd_bs_list_to_bearer_cap(&bearer_cap, &trans->cc.local.bearer_services) == 0) {
+		if (csd_bs_list_to_bearer_cap(&bearer_cap, &trans->cc.local_bearer_services) == 0) {
 			LOG_TRANS(trans, LOGL_ERROR, "Error composing Bearer Capability for CC Setup\n");
 
 			/* incompatible codecs */
@@ -1109,7 +1123,7 @@ static int gsm48_cc_mt_rtp_port_and_codec_known(struct gsm_trans *trans)
 		trans_free(trans);
 		return -EINVAL;
 	}
-	trans->cc.local.rtp = *rtp_cn_local;
+	trans->cc.local->rtp = *rtp_cn_local;
 
 	trans_cc_filter_run(trans);
 
@@ -2165,7 +2179,7 @@ int gsm48_tch_rtp_create(struct gsm_trans *trans)
 	struct osmo_sockaddr_str *rtp_cn_local;
 	struct rtp_stream *rtp_cn = cl ? cl->rtp[RTP_TO_CN] : NULL;
 	int mncc_payload_msg_type;
-	struct sdp_audio_codec *codec;
+	struct osmo_sdp_codec *codec;
 	const struct codec_mapping *m;
 	struct sdp_audio_codecs *codecs;
 

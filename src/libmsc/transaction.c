@@ -225,6 +225,11 @@ struct gsm_trans *trans_alloc(struct gsm_network *net,
 	};
 	if (vsub)
 		vlr_subscr_get(vsub, trans_vsub_use(type));
+	if (type == TRANS_CC) {
+		trans->cc.codec_filter = talloc_zero(trans, struct codec_filter);
+		trans->cc.remote = osmo_sdp_codec_alloc(trans);
+		trans->cc.local = osmo_sdp_codec_alloc(trans);
+	}
 	llist_add_tail(&trans->entry, &net->trans_list);
 
 	LOG_TRANS(trans, LOGL_DEBUG, "New transaction\n");

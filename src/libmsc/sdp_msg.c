@@ -29,8 +29,11 @@ static const struct osmo_sdp_codec codec_csd = {
 	.rate = 8000,
 };
 
-void sdp_codecs_set_csd(void *ctx, struct osmo_sdp_codec_list *codecs)
+void sdp_codecs_set_csd(void *ctx, struct osmo_sdp_codec_list **codecs)
 {
-	osmo_sdp_codec_list_free(codecs);
-	osmo_sdp_codec_list_add(ctx, &codec_csd);
+	if (*codecs)
+		osmo_sdp_codec_list_free_items(*codecs);
+	else
+		*codecs = osmo_sdp_codec_list_alloc(ctx);
+	osmo_sdp_codec_list_add(*codecs, &codec_csd);
 }

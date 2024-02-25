@@ -96,3 +96,6 @@ int sdp_audio_codecs_to_gsm0808_channel_type(struct gsm0808_channel_type *ct, co
 enum mgcp_codecs sdp_audio_codec_to_mgcp_codec(const struct osmo_sdp_codec *codec);
 
 char *sdp_codec_to_str(const struct osmo_sdp_codec *codec);
+char *sdp_msg_to_str(const struct osmo_sdp_msg *msg, bool summarize);
+
+void sdp_msg_replace(void *ctx, struct osmo_sdp_msg **var, struct osmo_sdp_msg *new_msg);

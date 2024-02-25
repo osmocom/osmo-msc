@@ -131,13 +131,14 @@ struct gsm_trans {
 			bool mncc_initiated;	/* Whether an MNCC Release is necessary on failure */
 			struct osmo_lcls *lcls;
 			/* SDP as last received from the remote call leg. */
-			struct osmo_sdp_msg remote;
+			struct osmo_sdp_msg *remote;
 			/* Track codec/CSD choices from BSS and remote call leg */
-			struct codec_filter codecs;
+			struct codec_filter *codec_filter;
 			struct csd_filter csd;
 			/* Resulting choice from codecs/bearer services and the
 			 * local RTP address to be sent to the remote call leg. */
-			struct osmo_sdp_msg local;
+			struct osmo_sdp_msg *local;
+			struct csd_bs_list local_bearer_services;
 		} cc;
 		struct {
 			struct gsm411_smc_inst smc_inst;

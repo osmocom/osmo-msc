@@ -797,7 +797,7 @@ DEFUN_ATTR(cfg_codecs_clear, cfg_codecs_clear_cmd,
 	   CMD_ATTR_IMMEDIATE)
 {
 	struct ran_infra *dst = vty->index;
-	dst->codecs = (struct sdp_audio_codecs){};
+	osmo_sdp_codec_list_free_items(dst->codecs);
 	return CMD_SUCCESS;
 }
 
@@ -816,18 +816,22 @@ DEFUN_ATTR(cfg_codecs_entry, cfg_codecs_entry_cmd,
 	struct ran_infra *dst = vty->index;
 	const char *add_del = argv[0];
 	const char *codec_str = argv[1];
-	struct sdp_audio_codec c;
-	struct sdp_audio_codec *exists;
+	struct osmo_sdp_codec *c;
+	struct osmo_sdp_codec *i;
+	struct osmo_sdp_codec *exists;
 	const struct codec_mapping *m;
 	bool ok;
 
-	if (sdp_audio_codec_from_str(&c, codec_str))
+	c = osmo_sdp_codec_alloc(OTC_SELECT);
+	if (osmo_sdp_codec_from_str(c, codec_str, -1)) {
+		vty_out(vty, "%% Error: cannot parse codec string '%s'%s", codec_str, VTY_NEWLINE);
 		return CMD_WARNING;
+	}
 
 	/* make sure this is a known codec */
 	ok = false;
 	codec_mapping_foreach (m) {
-		if (sdp_audio_codec_cmp(&m->sdp, &c, true, false))
+		if (osmo_sdp_codec_cmp(&m->sdp, c, &osmo_sdp_codec_cmp_equivalent))
 			continue;
 		ok = true;
 		break;
@@ -838,39 +842,42 @@ DEFUN_ATTR(cfg_codecs_entry, cfg_codecs_entry_cmd,
 		return CMD_WARNING;
 	}
 
-	exists = sdp_audio_codecs_by_descr(&dst->codecs, &c);
+	exists = NULL;
+	osmo_sdp_codec_list_foreach (i, dst->codecs) {
+		if (osmo_sdp_codec_cmp(i, c, &osmo_sdp_codec_cmp_equivalent))
+			continue;
+		exists = i;
+		break;
+	}
 
 	if (!strcmp("add", add_del)) {
 		if (exists) {
-			vty_out(vty, "%% Codec already present in the list: %s%s", sdp_audio_codec_to_str(exists),
+			vty_out(vty, "%% Codec already present in the list: %s%s", sdp_codec_to_str(exists),
 				VTY_NEWLINE);
 			return CMD_WARNING;
 		}
 
-		if (!sdp_audio_codecs_add_copy(&dst->codecs, &c, false, false)) {
-			vty_out(vty, "%% Error: failed to add codec '%s' -- too many entries?%s", codec_str, VTY_NEWLINE);
-			return CMD_WARNING;
-		}
+		osmo_sdp_codec_list_add(dst->codecs, c, NULL, false);
 	} else {
 		/* "del" */
 		if (!exists) {
 			vty_out(vty, "%% Codec not present in the list: %s%s", codec_str, VTY_NEWLINE);
 			return CMD_WARNING;
 		}
-		sdp_audio_codecs_remove(&dst->codecs, exists);
+
+		osmo_sdp_codec_list_remove_entry(exists);
+		talloc_free(exists);
 	}
 	return CMD_SUCCESS;
 }
 
 static void config_write_codecs_for_rat(struct vty *vty, enum osmo_rat_type rat)
 {
-	const struct sdp_audio_codec *c;
-	char buf[128];
+	const struct osmo_sdp_codec *c;
 	vty_out(vty, "codecs %s%s", rat == OSMO_RAT_GERAN_A ? "a" : "iu", VTY_NEWLINE);
 	vty_out(vty, " clear%s", VTY_NEWLINE);
-	sdp_audio_codecs_foreach (c, &msc_ran_infra[rat].codecs) {
-		sdp_audio_codec_to_str_buf(buf, sizeof(buf), c);
-		vty_out(vty, " %s%s", buf, VTY_NEWLINE);
+	osmo_sdp_codec_list_foreach (c, msc_ran_infra[rat].codecs) {
+		vty_out(vty, " %s%s", sdp_codec_to_str(c), VTY_NEWLINE);
 	}
 }
 
@@ -899,7 +906,7 @@ DEFUN(show_codecs, show_codecs_cmd,
 		const struct codec_mapping *m;
 		vty_out(vty, "Supported codecs are:%s", VTY_NEWLINE);
 		codec_mapping_foreach (m)
-			vty_out(vty, "  %s%s", sdp_audio_codec_to_str(&m->sdp), VTY_NEWLINE);
+			vty_out(vty, "  %s%s", sdp_codec_to_str(&m->sdp), VTY_NEWLINE);
 	}
 	return CMD_SUCCESS;
 }
