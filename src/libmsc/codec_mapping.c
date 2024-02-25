@@ -462,14 +462,13 @@ int sdp_audio_codec_add_to_bearer_cap(struct gsm_mncc_bearer_cap *bearer_cap, co
  * Note that Speech Version entries are only appended, no previous entries are removed.
  * Note that only the Speech Version entries are modified; to make a valid Bearer Capabiliy, at least bearer_cap->radio
  * must also be set (before or after this function); see also bearer_cap_set_radio(). */
-int sdp_audio_codecs_to_bearer_cap(struct gsm_mncc_bearer_cap *bearer_cap, const struct sdp_audio_codecs *ac)
+int sdp_audio_codecs_to_bearer_cap(struct gsm_mncc_bearer_cap *bearer_cap, const struct osmo_sdp_codec_list *codecs)
 {
-	const struct sdp_audio_codec *codec;
+	const struct osmo_sdp_codec *codec;
 	int added = 0;
 
-	sdp_audio_codecs_foreach(codec, ac) {
+	osmo_sdp_codec_list_foreach(codec, codecs)
 		added += sdp_audio_codec_add_to_bearer_cap(bearer_cap, codec);
-	}
 
 	return added;
 }
