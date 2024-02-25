@@ -94,3 +94,5 @@ void sdp_audio_codecs_from_speech_codec_list(struct osmo_sdp_codec_list *ac, con
 int sdp_audio_codecs_to_gsm0808_channel_type(struct gsm0808_channel_type *ct, const struct osmo_sdp_codec_list *ac);
 
 enum mgcp_codecs sdp_audio_codec_to_mgcp_codec(const struct osmo_sdp_codec *codec);
+
+char *sdp_codec_to_str(const struct osmo_sdp_codec *codec);
