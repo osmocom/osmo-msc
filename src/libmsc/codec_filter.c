@@ -95,34 +95,34 @@ int codec_filter_to_str_buf(char *buf, size_t buflen, const struct codec_filter 
 			    const struct osmo_sdp_msg *result, const struct osmo_sdp_msg *remote)
 {
 	struct osmo_strbuf sb = { .buf = buf, .len = buflen };
-	OSMO_STRBUF_APPEND(sb, sdp_msg_to_str_buf, result);
+	OSMO_STRBUF_APPEND(sb, osmo_sdp_msg_to_str_buf, result, false);
 	OSMO_STRBUF_PRINTF(sb, " (from:");
 
-	if (osmo_sdp_codec_is_set(&codec_filter->assignment)) {
+	if (osmo_sdp_codec_is_set(codec_filter->assignment)) {
 		OSMO_STRBUF_PRINTF(sb, " assigned=");
-		OSMO_STRBUF_APPEND(sb, osmo_sdp_codec_to_str_buf, &codec_filter->assignment);
+		OSMO_STRBUF_APPEND(sb, osmo_sdp_codec_to_str_buf, codec_filter->assignment);
 	}
 
-	if (remote->audio_codecs.count
+	if (!osmo_sdp_codec_list_is_empty(remote->codecs)
 	    || osmo_sockaddr_str_is_nonzero(&remote->rtp)) {
 		OSMO_STRBUF_PRINTF(sb, " remote=");
-		OSMO_STRBUF_APPEND(sb, sdp_msg_to_str_buf, remote);
+		OSMO_STRBUF_APPEND(sb, osmo_sdp_msg_to_str_buf, remote, true);
 	}
 
-	if (codec_filter->ms.count) {
+	if (!osmo_sdp_codec_list_is_empty(codec_filter->ms)) {
 		OSMO_STRBUF_PRINTF(sb, " MS={");
-		OSMO_STRBUF_APPEND(sb, osmo_sdp_codec_list_to_str_buf, &codec_filter->ms);
+		OSMO_STRBUF_APPEND(sb, osmo_sdp_codec_list_to_str_buf, codec_filter->ms, true);
 		OSMO_STRBUF_PRINTF(sb, "}");
 	}
 
-	if (codec_filter->bss.count) {
+	if (!osmo_sdp_codec_list_is_empty(codec_filter->bss)) {
 		OSMO_STRBUF_PRINTF(sb, " bss={");
-		OSMO_STRBUF_APPEND(sb, osmo_sdp_codec_list_to_str_buf, &codec_filter->bss);
+		OSMO_STRBUF_APPEND(sb, osmo_sdp_codec_list_to_str_buf, codec_filter->bss, true);
 		OSMO_STRBUF_PRINTF(sb, "}");
 	}
 
 	OSMO_STRBUF_PRINTF(sb, " RAN={");
-	OSMO_STRBUF_APPEND(sb, osmo_sdp_codec_list_to_str_buf, &codec_filter->ran);
+	OSMO_STRBUF_APPEND(sb, osmo_sdp_codec_list_to_str_buf, codec_filter->ran, true);
 	OSMO_STRBUF_PRINTF(sb, "}");
 
 	OSMO_STRBUF_PRINTF(sb, ")");
