@@ -474,16 +474,16 @@ int sdp_audio_codecs_to_bearer_cap(struct gsm_mncc_bearer_cap *bearer_cap, const
 }
 
 /* Convert Speech Version to SDP audio codec and append to SDP message struct. */
-struct sdp_audio_codec *sdp_audio_codecs_add_speech_ver(struct sdp_audio_codecs *ac,
+struct osmo_sdp_codec *sdp_audio_codecs_add_speech_ver(struct osmo_sdp_codec_list *codecs,
 							enum gsm48_bcap_speech_ver speech_ver)
 {
 	const struct codec_mapping *m;
-	struct sdp_audio_codec *ret = NULL;
+	struct osmo_sdp_codec *ret = NULL;
 	codec_mapping_foreach(m) {
 		int i;
 		for (i = 0; i < m->speech_ver_count; i++) {
 			if (m->speech_ver[i] == speech_ver) {
-				ret = sdp_audio_codecs_add_copy(ac, &m->sdp, true, true);
+				ret = osmo_sdp_codec_list_add(codecs, &m->sdp, &osmo_sdp_codec_cmp_equivalent, true);
 				break;
 			}
 		}
@@ -491,22 +491,22 @@ struct sdp_audio_codec *sdp_audio_codecs_add_speech_ver(struct sdp_audio_codecs 
 	return ret;
 }
 
-struct sdp_audio_codec *sdp_audio_codecs_add_mgcp_codec(struct sdp_audio_codecs *ac, enum mgcp_codecs mgcp_codec)
+struct osmo_sdp_codec *sdp_audio_codecs_add_mgcp_codec(struct osmo_sdp_codec_list *codecs, enum mgcp_codecs mgcp_codec)
 {
 	const struct codec_mapping *m = codec_mapping_by_mgcp_codec(mgcp_codec);
 	if (!m)
 		return NULL;
-	return sdp_audio_codecs_add_copy(ac, &m->sdp, true, true);
+	return osmo_sdp_codec_list_add(codecs, &m->sdp, &osmo_sdp_codec_cmp_equivalent, true);
 }
 
-void sdp_audio_codecs_from_bearer_cap(struct sdp_audio_codecs *ac, const struct gsm_mncc_bearer_cap *bc)
+void sdp_audio_codecs_from_bearer_cap(struct osmo_sdp_codec_list *codecs, const struct gsm_mncc_bearer_cap *bc)
 {
 	unsigned int i;
 
 	for (i = 0; i < ARRAY_SIZE(bc->speech_ver); i++) {
 		if (bc->speech_ver[i] == -1)
 			break;
-		sdp_audio_codecs_add_speech_ver(ac, bc->speech_ver[i]);
+		sdp_audio_codecs_add_speech_ver(codecs, bc->speech_ver[i]);
 	}
 }
 
