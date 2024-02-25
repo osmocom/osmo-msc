@@ -895,11 +895,9 @@ struct codec_test {
 #define SDP_CODECS_ALL_GSM \
 	{ \
 		"AMR:octet-align=1;mode-set=0,2,4,7#112", \
-		"AMR:octet-align=1;mode-set=7#114", \
-		"AMR:octet-align=1;mode-set=0,2,4#115", \
-		"AMR:mode-set=0,2,4,7#116", \
-		"AMR:mode-set=7#117", \
-		"AMR:mode-set=0,2,4#118", \
+		"AMR:octet-align=1;mode-set=0,2,4#114", \
+		"AMR:mode-set=0,2,4,7#115", \
+		"AMR:mode-set=0,2,4#116", \
 		"GSM-EFR#110", \
 		"GSM#3", \
 		"GSM-HR-08#111", \
@@ -908,11 +906,9 @@ struct codec_test {
 #define SDP_CODECS_ALL_GSM_WITH_ODD_PT_NRS \
 	{ \
 		"AMR:octet-align=1;mode-set=0,2,4,7#127", \
-		"AMR:octet-align=1;mode-set=7#126", \
-		"AMR:octet-align=1;mode-set=0,2,4#125", \
-		"AMR:mode-set=0,2,4,7#124", \
-		"AMR:mode-set=7#123", \
-		"AMR:mode-set=0,2,4#122", \
+		"AMR:octet-align=1;mode-set=0,2,4#126", \
+		"AMR:mode-set=0,2,4,7#125", \
+		"AMR:mode-set=0,2,4#124", \
 		"GSM-EFR#110", \
 		"GSM#3", \
 		"GSM-HR-08#111", \
@@ -921,12 +917,10 @@ struct codec_test {
 /* same as SDP_CODECS_ALL_GSM, but AMR-HR octet-align=1 listed as first entry */
 #define SDP_CODECS_ALL_GSM_AMR_HR_FIRST \
 	{ \
-		"AMR:octet-align=1;mode-set=0,2,4#115", \
+		"AMR:octet-align=1;mode-set=0,2,4#114", \
 		"AMR:octet-align=1;mode-set=0,2,4,7#112", \
-		"AMR:octet-align=1;mode-set=7#114", \
-		"AMR:mode-set=0,2,4,7#116", \
-		"AMR:mode-set=7#117", \
-		"AMR:mode-set=0,2,4#118", \
+		"AMR:mode-set=0,2,4,7#115", \
+		"AMR:mode-set=0,2,4#116", \
 		"GSM-EFR#110", \
 		"GSM#3", \
 		"GSM-HR-08#111", \
@@ -1207,18 +1201,7 @@ static const struct codec_test codec_tests[] = {
 		.mo_tx_assignment_perm_speech = PERM_SPEECH_ALL_GSM,
 		.mo_rx_assigned_codec_fr = false,
 		.mo_rx_assigned_codec = "AMR:octet-align=1;mode-set=0,2,4",
-		.mo_tx_sdp_mncc_rtp_create = {
-			/* same as SDP_CODECS_ALL_GSM, but AMR-HR rates listed as first entry */
-			"AMR:octet-align=1;mode-set=0,2,4#115",
-			"AMR:octet-align=1;mode-set=0,2,4,7#112",
-			"AMR:octet-align=1;mode-set=7#114",
-			"AMR:mode-set=0,2,4,7#116",
-			"AMR:mode-set=7#117",
-			"AMR:mode-set=0,2,4#118",
-			"GSM-EFR#110",
-			"GSM#3",
-			"GSM-HR-08#111",
-		},
+		.mo_tx_sdp_mncc_rtp_create = SDP_CODECS_ALL_GSM_AMR_HR_FIRST,
 		/* mt_rx_sdp_mncc_setup_req == mo_tx_sdp_mncc_rtp_create */
 		.mt_rx_compl_l3_codec_list_bss_supported = CODEC_LIST_ALL_GSM,
 		/* HR is sent first in the CC Setup Bearer Capabilities */
