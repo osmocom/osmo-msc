@@ -469,6 +469,8 @@ static void lu_compl_vlr_wait_subscr_pres(struct osmo_fsm_inst *fi,
 		lu_compl_vlr_new_tmsi(fi);
 		return;
 	}
+	/* else, any previously used TMSI is now invalid. */
+	vsub->tmsi = GSM_RESERVED_TMSI;
 
 	/* Location Updating Accept */
 	vlr->ops.tx_lu_acc(lcvp->msc_conn_ref, GSM_RESERVED_TMSI);
@@ -514,6 +516,8 @@ static void lu_compl_vlr_wait_imei(struct osmo_fsm_inst *fi, uint32_t event,
 		/* Wait for TMSI ack */
 		return;
 	}
+	/* else, any previously used TMSI is now invalid. */
+	vsub->tmsi = GSM_RESERVED_TMSI;
 
 	/* No TMSI needed, accept now. */
 	vlr->ops.tx_lu_acc(lcvp->msc_conn_ref, GSM_RESERVED_TMSI);
