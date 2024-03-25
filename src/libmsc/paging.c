@@ -120,6 +120,34 @@ struct paging_request *paging_request_start(struct vlr_subscr *vsub, enum paging
 	return pr;
 }
 
+/* Two subscribers (e.g. an old TMSI and a new TMSI) turn out to have the same identity, so in order to discard one of
+ * them, transfer any pending Paging requests to the vsub that will survive. */
+void paging_request_join_vsub(struct vlr_subscr *keep_vsub, struct vlr_subscr *discarding_vsub)
+{
+	struct paging_request *pr;
+
+	if (!discarding_vsub->cs.is_paging)
+		return;
+
+	/* transfer all Paging Response callbacks */
+	while ((pr = llist_first_entry_or_null(&discarding_vsub->cs.requests, struct paging_request, entry))) {
+		llist_del(&pr->entry);
+		talloc_steal(keep_vsub, pr);
+		llist_add_tail(&pr->entry, &keep_vsub->cs.requests);
+	}
+
+	/* make sure a Paging use count is present on keep_vsub, if needed */
+	if (!keep_vsub->cs.is_paging && !llist_empty(&keep_vsub->cs.requests)) {
+		vlr_subscr_get(keep_vsub, VSUB_USE_PAGING);
+		keep_vsub->cs.is_paging = true;
+	}
+
+	/* Already made sure at the top of this function that discarding_vsub->cs.is_paging == true */
+	discarding_vsub->cs.is_paging = false;
+	osmo_timer_del(&discarding_vsub->cs.paging_response_timer);
+	vlr_subscr_put(discarding_vsub, VSUB_USE_PAGING);
+}
+
 void paging_request_remove(struct paging_request *pr)
 {
 	struct gsm_trans *trans = pr->trans;

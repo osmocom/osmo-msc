@@ -40,6 +40,7 @@ struct paging_request {
 struct paging_request *paging_request_start(struct vlr_subscr *vsub, enum paging_cause cause,
 					    paging_cb_t paging_cb, struct gsm_trans *trans,
 					    const char *label);
+void paging_request_join_vsub(struct vlr_subscr *keep_vsub, struct vlr_subscr *discarding_vsub);
 void paging_request_remove(struct paging_request *pr);
 
 void paging_response(struct msc_a *msc_a);

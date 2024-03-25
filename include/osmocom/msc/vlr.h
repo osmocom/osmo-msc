@@ -257,6 +257,8 @@ struct vlr_ops {
 	/* notify MSC/SGSN that the given subscriber has been associated
 	 * with this msc_conn_ref */
 	int (*subscr_assoc)(void *msc_conn_ref, struct vlr_subscr *vsub);
+	/* notify MSC that the given subscriber is no longer valid */
+	void (*subscr_inval)(void *msc_conn_ref, struct vlr_subscr *vsub);
 };
 
 /* An instance of the VLR codebase */

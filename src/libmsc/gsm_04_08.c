@@ -1572,6 +1572,24 @@ static int msc_vlr_subscr_assoc(void *msc_conn_ref,
 	return 0;
 }
 
+static void msc_vlr_subscr_inval(void *msc_conn_ref, struct vlr_subscr *vsub)
+{
+	/* Search vsub backwards to make sure msc_conn_ref is a valid msc_a instance. */
+	struct msub *msub;
+	OSMO_ASSERT(vsub);
+	llist_for_each_entry(msub, &msub_list, entry) {
+		struct msc_a *msc_a;
+		if (msub->vsub != vsub)
+			continue;
+
+		msc_a = msub_msc_a(msub);
+		if (msc_a)
+			msc_a_release_cn(msc_a);
+
+		msub->vsub = NULL;
+	}
+}
+
 /* operations that we need to implement for libvlr */
 const struct vlr_ops msc_vlr_ops = {
 	.tx_auth_req = msc_vlr_tx_auth_req,
@@ -1586,6 +1604,7 @@ const struct vlr_ops msc_vlr_ops = {
 	.tx_mm_info = msc_vlr_tx_mm_info,
 	.subscr_update = msc_vlr_subscr_update,
 	.subscr_assoc = msc_vlr_subscr_assoc,
+	.subscr_inval = msc_vlr_subscr_inval,
 };
 
 struct msgb *gsm48_create_mm_serv_rej(enum gsm48_reject_value value)

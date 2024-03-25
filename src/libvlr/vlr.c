@@ -36,6 +36,7 @@
 #include <osmocom/msc/vlr.h>
 #include <osmocom/msc/debug.h>
 #include <osmocom/msc/gsup_client_mux.h>
+#include <osmocom/msc/paging.h>
 
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -272,7 +273,8 @@ struct vlr_subscr *_vlr_subscr_find_by_imsi(struct vlr_instance *vlr,
 
 	llist_for_each_entry(vsub, &vlr->subscribers, list) {
 		if (vlr_subscr_matches_imsi(vsub, imsi)) {
-			vlr_subscr_get_src(vsub, use, file, line);
+			if (use)
+				vlr_subscr_get_src(vsub, use, file, line);
 			return vsub;
 		}
 	}
@@ -577,11 +579,63 @@ struct vlr_subscr *_vlr_subscr_find_or_create_by_tmsi(struct vlr_instance *vlr,
 	return vsub;
 }
 
+static void dedup_vsub(struct vlr_subscr *exists, struct vlr_subscr *vsub)
+{
+	struct vlr_instance *vlr = exists->vlr;
+	int i;
+	int j;
+	LOGP(DVLR, LOGL_NOTICE,
+	     "There is an existing subscriber for IMSI %s used by %s, replacing with new VLR subscr: %s used by %s\n",
+	     exists->imsi, osmo_use_count_to_str_c(OTC_SELECT, &exists->use_count),
+	     vlr_subscr_name(vsub),
+	     osmo_use_count_to_str_c(OTC_SELECT, &vsub->use_count));
+
+	/* Take over some state from the previous vsub */
+	paging_request_join_vsub(vsub, exists);
+	if (!vsub->msisdn[0])
+		OSMO_STRLCPY_ARRAY(vsub->msisdn, exists->msisdn);
+	if (!vsub->name[0])
+		OSMO_STRLCPY_ARRAY(vsub->name, exists->name);
+	/* Copy valid auth tuples we may already have, to reduce the need to ask for new ones from the HLR */
+	for (i = 0; i < ARRAY_SIZE(exists->auth_tuples); i++) {
+		if (exists->auth_tuples[i].key_seq == VLR_KEY_SEQ_INVAL)
+			continue;
+		for (j = 0; j < ARRAY_SIZE(vsub->auth_tuples); j++) {
+			if (vsub->auth_tuples[j].key_seq != VLR_KEY_SEQ_INVAL)
+				continue;
+			vsub->auth_tuples[j] = exists->auth_tuples[i];
+		}
+	}
+
+	if (exists->msc_conn_ref)
+		LOGVSUBP(LOGL_ERROR, vsub,
+			 "There is an existing VLR entry for this same subscriber with an active connection."
+			 " That should not be possible. Discarding old subscriber entry %s.\n",
+			 exists->imsi);
+
+	if (vlr->ops.subscr_inval)
+		vlr->ops.subscr_inval(exists->msc_conn_ref, exists);
+	vlr_subscr_free(exists);
+}
+
 void vlr_subscr_set_imsi(struct vlr_subscr *vsub, const char *imsi)
 {
+	struct vlr_subscr *exists;
 	if (!vsub)
 		return;
 
+	/* If the same IMSI is already set, nothing changes. */
+	if (!strcmp(vsub->imsi, imsi))
+		return;
+
+	/* We've just learned about this new IMSI, our primary key in the VLR. make sure to invalidate any prior VLR
+	 * entries for this IMSI. */
+	exists = vlr_subscr_find_by_imsi(vsub->vlr, imsi, NULL);
+
+	if (exists)
+		dedup_vsub(exists, vsub);
+
+	/* Set the IMSI on the new subscriber, here. */
 	if (OSMO_STRLCPY_ARRAY(vsub->imsi, imsi) >= sizeof(vsub->imsi)) {
 		LOGP(DVLR, LOGL_NOTICE, "IMSI was truncated: full IMSI=%s, truncated IMSI=%s\n",
 		       imsi, vsub->imsi);
