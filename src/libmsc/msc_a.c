@@ -999,6 +999,7 @@ static void msc_a_fsm_released(struct osmo_fsm_inst *fi, uint32_t event, void *d
 void msc_a_fsm_cleanup(struct osmo_fsm_inst *fi, enum osmo_fsm_term_cause cause)
 {
 	struct msc_a *msc_a = msc_a_fi_priv(fi);
+	struct vlr_subscr *vsub = msc_a_vsub(msc_a);
 
 	trans_conn_closed(msc_a);
 
@@ -1006,6 +1007,10 @@ void msc_a_fsm_cleanup(struct osmo_fsm_inst *fi, enum osmo_fsm_term_cause cause)
 		LOG_MSC_A(msc_a, LOGL_ERROR, "Deallocating active transactions failed\n");
 
 	LOG_MSC_A_CAT(msc_a, DREF, LOGL_DEBUG, "max total use count was %d\n", msc_a->max_total_use_count);
+
+	/* Invalidate the active conn in VLR subscriber state, if any. */
+	if (vsub && vsub->msc_conn_ref == msc_a)
+		vsub->msc_conn_ref = NULL;
 }
 
 const struct value_string msc_a_fsm_event_names[] = {
