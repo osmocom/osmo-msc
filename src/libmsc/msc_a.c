@@ -182,7 +182,7 @@ static void evaluate_acceptance_outcome(struct osmo_fsm_inst *fi, bool conn_acce
 	if (msc_a->complete_layer3_type == COMPLETE_LAYER3_LU)
 		msc_a_put(msc_a, MSC_A_USE_LOCATION_UPDATING);
 
-	if (msc_a->complete_layer3_type == COMPLETE_LAYER3_CM_RE_ESTABLISH_REQ) {
+	if (conn_accepted && msc_a->complete_layer3_type == COMPLETE_LAYER3_CM_RE_ESTABLISH_REQ) {
 		/* Trigger new Assignment to recommence the voice call. A little dance here because normally we verify
 		 * that no CC trans is already active. */
 		struct gsm_trans *cc_trans = msc_a->cc.active_trans;
