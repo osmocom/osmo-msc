@@ -1,37 +1,28 @@
 #!/bin/sh -e
-# Create 'osmocom' user and group (if it doesn't exist yet) and adjust permissions
-# of directories which are not automatically adjusted by systemd from previous (root-owned)
-# install.
-
-# N. B: the user is intentionally NOT removed during package uninstall:
-# see https://wiki.debian.org/AccountHandlingInMaintainerScripts for reasoning.
-chperms() {
-	# chperms <user> <group> <perms> <file>
-	if ! OVERRIDE=`dpkg-statoverride --list $4 2>&1`; then
-		if [ -e $4 ]; then
-			chown $1:$2 $4
-			chmod $3 $4
-		fi
-	fi
-}
-
 case "$1" in
-  configure)
-    if ! getent passwd osmocom > /dev/null; then
-        adduser --quiet \
-                --system \
-                --group \
-                --no-create-home \
-                --disabled-password \
-                --home /var/lib/osmocom \
-                --gecos "Open Source Mobile Communications" \
-                osmocom
-    fi
-# Set permissions according to https://www.debian.org/doc/debian-policy/ch-files.html#s-permissions-owners
-    chperms osmocom osmocom 0660 /etc/osmocom/osmo-msc.cfg
-    chperms root osmocom 2775 /etc/osmocom
+	configure)
+		# Create the osmocom group and user (if it doesn't exist yet)
+		if ! getent group osmocom >/dev/null; then
+			groupadd --system osmocom
+		fi
+		if ! getent passwd osmocom >/dev/null; then
+			useradd \
+				--system \
+				--gid osmocom \
+				--home-dir /var/lib/osmocom \
+				--shell /sbin/nologin \
+				--comment "Open Source Mobile Communications" \
+				osmocom
+		fi
 
-  ;;
+		# Fix permissions of previous (root-owned) install (OS#4107)
+		chown osmocom:osmocom /etc/osmocom/osmo-msc.cfg
+		chmod 0660 /etc/osmocom/osmo-msc.cfg
+		chown root:osmocom /etc/osmocom
+		chmod 2775 /etc/osmocom
+		mkdir -p /var/lib/osmocom
+		chown -R osmocom:osmocom /var/lib/osmocom
+		;;
 esac
 
 # dh_installdeb(1) will replace this with shell code automatically

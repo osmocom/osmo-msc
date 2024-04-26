@@ -111,6 +111,8 @@ chown osmocom:osmocom /etc/osmocom/osmo-msc.cfg
 chmod 0660 /etc/osmocom/osmo-msc.cfg
 chown root:osmocom /etc/osmocom
 chmod 2775 /etc/osmocom
+mkdir -p /var/lib/osmocom
+chown -R osmocom:osmocom /var/lib/osmocom
 
 %check
 make %{?_smp_mflags} check || (find . -name testsuite.log -exec cat {} +)
