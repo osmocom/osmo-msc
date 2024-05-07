@@ -44,6 +44,9 @@ const struct value_string an_proto_names[] = {
 	{ .T = -2, .default_val = 30, .desc = "RAN connection release sanity timeout" }, \
 	{ .T = -3, .default_val = 10, .desc = "Timeout to find a target BSS after Handover Required" }, \
 	{ .T = -4, .default_val = 10, .desc = "Paging response timeout" }, \
+	{ .T = -36, .default_val = 0, .unit = OSMO_TDEF_MS, \
+	  .desc = "Delay connection release after LU.  Useful to optimize an SMSC to dispatch " \
+		  "pending messages within the initial connection." }, \
 
 struct osmo_tdef msc_tdefs_geran[] = {
 	RAN_TDEFS

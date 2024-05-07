@@ -144,6 +144,9 @@ struct msc_a {
 	struct osmo_use_count use_count;
 	struct osmo_use_count_entry use_count_buf[8];
 	int32_t max_total_use_count;
+
+	/* Used for scheduling X36 (additional delay for LU connections) */
+	struct osmo_timer_list lu_delay_timer;
 };
 
 osmo_static_assert(offsetof(struct msc_a, c) == 0, msc_role_common_first_member_of_msc_a);

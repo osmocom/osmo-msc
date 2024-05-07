@@ -155,6 +155,44 @@ static void update_counters(struct osmo_fsm_inst *fi, bool conn_accepted)
 	}
 }
 
+static void lu_delay_timer_cb(void *data)
+{
+	struct msc_a *msc_a = (struct msc_a *)data;
+	msc_a_put(msc_a, MSC_A_USE_LOCATION_UPDATING);
+}
+
+static void msc_a_put_lu_deferred(struct msc_a *msc_a)
+{
+	unsigned long Tval;
+
+	/* The idea behind timer X36 is to allow re-using the radio channel that was used for
+	 * Location Updating to deliver MT SMS over GSUP.  This is achieved by delaying
+	 * release of a BSSAP/RANAP connection and thus delaying the release of the radio
+	 * channel.  The delay can be configured separately for GERAN and UTRAN. */
+	switch (msc_a->c.ran->type) {
+	case OSMO_RAT_GERAN_A:
+		Tval = osmo_tdef_get(msc_tdefs_geran, -36, OSMO_TDEF_MS, 0);
+		break;
+	case OSMO_RAT_UTRAN_IU:
+		Tval = osmo_tdef_get(msc_tdefs_utran, -36, OSMO_TDEF_MS, 0);
+		break;
+	default:
+		Tval = 0;
+		break;
+	}
+
+	if (Tval == 0) {
+		/* no delay, put LU token immediately */
+		msc_a_put(msc_a, MSC_A_USE_LOCATION_UPDATING);
+		return;
+	}
+
+	LOG_MSC_A(msc_a, LOGL_INFO, "Keeping LU token for +%lu ms\n", Tval);
+	osmo_timer_schedule(&msc_a->lu_delay_timer,
+			    Tval / 1000, /* seconds */
+			    Tval % 1000 * 1000); /* microseconds */
+}
+
 static void evaluate_acceptance_outcome(struct osmo_fsm_inst *fi, bool conn_accepted)
 {
 	struct msc_a *msc_a = fi->priv;
@@ -180,7 +218,7 @@ static void evaluate_acceptance_outcome(struct osmo_fsm_inst *fi, bool conn_acce
 		osmo_signal_dispatch(SS_SUBSCR, S_SUBSCR_ATTACHED, msc_a_vsub(msc_a));
 
 	if (msc_a->complete_layer3_type == COMPLETE_LAYER3_LU)
-		msc_a_put(msc_a, MSC_A_USE_LOCATION_UPDATING);
+		msc_a_put_lu_deferred(msc_a);
 
 	if (conn_accepted && msc_a->complete_layer3_type == COMPLETE_LAYER3_CM_RE_ESTABLISH_REQ) {
 		/* Trigger new Assignment to recommence the voice call. A little dance here because normally we verify
@@ -1011,6 +1049,8 @@ void msc_a_fsm_cleanup(struct osmo_fsm_inst *fi, enum osmo_fsm_term_cause cause)
 	/* Invalidate the active conn in VLR subscriber state, if any. */
 	if (vsub && vsub->msc_conn_ref == msc_a)
 		vsub->msc_conn_ref = NULL;
+
+	osmo_timer_del(&msc_a->lu_delay_timer);
 }
 
 const struct value_string msc_a_fsm_event_names[] = {
@@ -1225,6 +1265,7 @@ struct msc_a *msc_a_alloc(struct msub *msub, struct ran_infra *ran)
 	osmo_use_count_make_static_entries(&msc_a->use_count, msc_a->use_count_buf, ARRAY_SIZE(msc_a->use_count_buf));
 	/* Start timeout for first state */
 	msc_a_state_chg_always(msc_a, MSC_A_ST_VALIDATE_L3);
+	osmo_timer_setup(&msc_a->lu_delay_timer, &lu_delay_timer_cb, msc_a);
 	return msc_a;
 }
 
