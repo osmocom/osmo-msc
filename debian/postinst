@@ -16,12 +16,20 @@ case "$1" in
 		fi
 
 		# Fix permissions of previous (root-owned) install (OS#4107)
-		chown osmocom:osmocom /etc/osmocom/osmo-msc.cfg
-		chmod 0660 /etc/osmocom/osmo-msc.cfg
-		chown root:osmocom /etc/osmocom
-		chmod 2775 /etc/osmocom
-		mkdir -p /var/lib/osmocom
-		chown -R osmocom:osmocom /var/lib/osmocom
+		if dpkg --compare-versions "$2" le "1.12.0"; then
+			if [ -e /etc/osmocom/osmo-msc.cfg ]; then
+				chown -v osmocom:osmocom /etc/osmocom/osmo-msc.cfg
+				chmod -v 0660 /etc/osmocom/osmo-msc.cfg
+			fi
+
+			if [ -d /etc/osmocom ]; then
+				chown -v root:osmocom /etc/osmocom
+				chmod -v 2775 /etc/osmocom
+			fi
+
+			mkdir -p /var/lib/osmocom
+			chown -R -v osmocom:osmocom /var/lib/osmocom
+		fi
 		;;
 esac
 
