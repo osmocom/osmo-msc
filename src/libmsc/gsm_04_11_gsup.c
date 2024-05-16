@@ -133,9 +133,6 @@ static int gsm411_gsup_mo_handler(struct gsm_network *net, struct vlr_subscr *vs
 	const char *msg_name;
 	bool msg_is_err;
 
-	/* Associate logging messages with this subscriber */
-	log_set_context(LOG_CTX_VLR_SUBSCR, vsub);
-
 	/* Determine the message type and name */
 	msg_is_err = OSMO_GSUP_IS_MSGT_ERROR(gsup_msg->message_type);
 	switch (gsup_msg->message_type) {
@@ -241,9 +238,6 @@ static int gsm411_gsup_mt_handler(struct gsm_network *net, struct vlr_subscr *vs
 	bool sm_rp_mmts_ind;
 	int rc;
 
-	/* Associate logging messages with this subscriber */
-	log_set_context(LOG_CTX_VLR_SUBSCR, vsub);
-
 	LOGP(DLSMS, LOGL_DEBUG, "RX MT-forwardSM-Req\n");
 
 	/**
@@ -309,6 +303,9 @@ int gsm411_gsup_rx(struct gsup_client_mux *gcm, void *data, const struct osmo_gs
 		gsup_client_mux_tx_error_reply(gcm, gsup_msg, GMM_CAUSE_IMSI_UNKNOWN);
 		return -GMM_CAUSE_IMSI_UNKNOWN;
 	}
+
+	/* Associate logging messages with this subscriber */
+	log_set_context(LOG_CTX_VLR_SUBSCR, vsub);
 
 	switch (gsup_msg->message_type) {
 	/* GSM 04.11 code implementing MO SMS */
