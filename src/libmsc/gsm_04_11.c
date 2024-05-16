@@ -1280,6 +1280,7 @@ int gsm411_send_rp_data(struct gsm_network *net, struct vlr_subscr *vsub,
 	/* Encode RP-UD itself (SM TPDU) */
 	msgb_lv_put(msg, sm_rp_ud_len, sm_rp_ud);
 
+	/* FIXME: MT SMS is not guaranteed to be delivered (e.g. the MS may be detached) */
 	rate_ctr_inc(rate_ctr_group_get_ctr(net->msc_ctrs, MSC_CTR_SMS_DELIVERED));
 
 	return gsm411_rp_sendmsg(&trans->sms.smr_inst, msg,
