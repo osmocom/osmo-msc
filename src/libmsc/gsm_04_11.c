@@ -1081,6 +1081,13 @@ static struct gsm_trans *gsm411_trans_init(struct gsm_network *net, struct vlr_s
 			else
 				msc_a_put(msc_a, MSC_A_USE_CM_SERVICE_SMS);
 		}
+
+		/* If we're re-using the existing LU connection, drop the LU token.
+		 * The idea behind this timer is explained in msc_a_put_use_lu(). */
+		if (osmo_timer_pending(&msc_a->lu_delay_timer)) {
+			osmo_timer_del(&msc_a->lu_delay_timer);
+			msc_a_put(msc_a, MSC_A_USE_LOCATION_UPDATING);
+		}
 	}
 
 	/* Init both SMC and SMR state machines */
