@@ -27,6 +27,7 @@
 #include <osmocom/gsm/gsm0808.h>
 #include <osmocom/gsm/mncc.h>
 #include <osmocom/gsm/gsm48.h>
+#include <osmocom/gsm/rtp_extensions.h>
 
 #include <osmocom/msc/debug.h>
 #include <osmocom/msc/ran_msg_a.h>
@@ -922,6 +923,15 @@ static void _gsm0808_assignment_extend_osmux(struct msgb *msg, uint8_t cid)
 	msg->l3h[1] = msgb_l3len(msg) - 2;
 }
 
+static void _gsm0808_assignment_extend_themwi(struct msgb *msg)
+{
+	uint8_t val = OSMO_RTP_EXT_TWTS001 | OSMO_RTP_EXT_TWTS002;
+
+	OSMO_ASSERT(msg->l3h[1] == msgb_l3len(msg) - 2); /*TL not in len */
+	msgb_tlv_put(msg, GSM0808_IE_THEMWI_RTP_EXTENSIONS, 1, &val);
+	msg->l3h[1] = msgb_l3len(msg) - 2;
+}
+
 /* Compose a BSSAP Assignment Command.
  * Passing an RTP address is optional.
  * The msub is passed merely for error logging. */
@@ -1007,6 +1017,10 @@ static struct msgb *ran_a_make_assignment_command(struct osmo_fsm_inst *log_fi,
 			      "Failed to encode BSSMAP Assignment Request message\n");
 		return NULL;
 	}
+
+	/* ThemWi local version of this old 2023-02 OsmoMSC:
+	 * request ThemWi RTP extensions unconditionally. */
+	_gsm0808_assignment_extend_themwi(msg);
 
 	if (ac->osmux_present)
 		_gsm0808_assignment_extend_osmux(msg, ac->osmux_cid);
