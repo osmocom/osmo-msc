@@ -117,9 +117,9 @@ static int bind_transceiver(struct esme *esme)
 	memset(&bind, 0, sizeof(bind));
 	bind.command_id = BIND_TRANSCEIVER;
 	bind.sequence_number = esme_inc_seq_nr(esme);
-	snprintf((char *)bind.system_id, SMPP_SYS_ID_LEN + 1, "%s", esme->system_id);
-	snprintf((char *)bind.password, SMPP_SYS_ID_LEN + 1, "%s", esme->password);
-	snprintf((char *)bind.system_type, sizeof(bind.system_type), "mirror");
+	OSMO_STRLCPY_ARRAY(bind.system_id, esme->system_id);
+	OSMO_STRLCPY_ARRAY(bind.password, esme->password);
+	OSMO_STRLCPY_ARRAY(bind.system_type, "mirror");
 	bind.interface_version = esme->smpp_version;
 
 	return PACK_AND_SEND(esme, &bind);
@@ -287,8 +287,8 @@ int main(int argc, char **argv)
 	if (!esme)
 		exit(2);
 
-	snprintf((char *) esme->system_id, sizeof(esme->system_id), "mirror");
-	snprintf((char *) esme->password, sizeof(esme->password), "mirror");
+	OSMO_STRLCPY_ARRAY(esme->system_id, "mirror");
+	OSMO_STRLCPY_ARRAY(esme->password, "mirror");
 	esme->smpp_version = 0x34;
 
 	if (argc >= 2)
