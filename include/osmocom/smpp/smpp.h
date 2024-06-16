@@ -23,7 +23,7 @@ struct esme {
 
 	uint8_t smpp_version;
 	char system_id[SMPP_SYS_ID_LEN + 1];
-	char password[SMPP_SYS_ID_LEN + 1];
+	char password[SMPP_PASSWD_LEN + 1];
 };
 
 #define LOGPESME(ESME, LEVEL, FMT, ARGS...)            \
