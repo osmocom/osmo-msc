@@ -2,7 +2,7 @@
 
 #include <osmocom/msc/gsm_data.h>
 
-/* Length limits according to SMPP 3.4 spec including NUL-byte: */
+/* Length limits according to SMPP 3.4 spec excluding NUL-byte: */
 #define SMPP_SYS_ID_LEN	15
 #define SMPP_PASSWD_LEN	8
 
