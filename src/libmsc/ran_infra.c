@@ -47,6 +47,8 @@ const struct value_string an_proto_names[] = {
 	{ .T = -36, .default_val = 0, .unit = OSMO_TDEF_MS, \
 	  .desc = "Delay connection release after LU.  Useful to optimize an SMSC to dispatch " \
 		  "pending messages within the initial connection." }, \
+	{ .T = -37, .default_val = 10, \
+	  .desc = "Voice channel Assignment sanity timeout, when no response is received (should never happen)." }, \
 
 struct osmo_tdef msc_tdefs_geran[] = {
 	RAN_TDEFS

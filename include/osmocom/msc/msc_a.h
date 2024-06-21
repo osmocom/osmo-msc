@@ -137,6 +137,8 @@ struct msc_a {
 		/* There may be up to 7 incoming calls for this subscriber. This is the currently serviced voice call,
 		 * as in, the other person the subscriber is currently talking to. */
 		struct gsm_trans *active_trans;
+
+		struct osmo_timer_list assignment_request_pending;
 	} cc;
 
 	struct msc_ho_state ho;

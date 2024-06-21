@@ -772,7 +772,8 @@ static void rx_mncc_sdp(struct gsm_trans *trans, uint32_t mncc_msg_type, const c
 			const struct gsm_mncc_bearer_cap *bcap)
 {
 	struct codec_filter *codecs = &trans->cc.codecs;
-	struct call_leg *cl = trans->msc_a ? trans->msc_a->cc.call_leg : NULL;
+	struct msc_a *msc_a = trans->msc_a;
+	struct call_leg *cl = msc_a ? msc_a->cc.call_leg : NULL;
 	struct rtp_stream *rtp_cn = cl ? cl->rtp[RTP_TO_CN] : NULL;
 
 	if (sdp[0]) {
@@ -815,6 +816,16 @@ static void rx_mncc_sdp(struct gsm_trans *trans, uint32_t mncc_msg_type, const c
 		/* The assigned codec is part of the remote codec set. All is well. */
 		/* TODO: maybe this should require exactly the *first* remote codec to match, because we cannot flexibly
 		 * transcode, and assume the actual payload we will receive is listed in the first place? */
+		return;
+	}
+
+	if (msc_a && osmo_timer_pending(&msc_a->cc.assignment_request_pending)) {
+		/* Still waiting for an Assignment Response.
+		 * For example, when the remote call leg sends some MNCC with SDP with a mismatching codec,
+		 * we start Re-Assignment to match that codec: we send an Assignment Request and wait for a response.
+		 * When we receive another MNCC with SDP from the remote call leg before this Re-Assignment is
+		 * completed, we must not trigger *another* Assignment Request, but instead wait for the Re-Assignment
+		 * to come back with a response first. */
 		return;
 	}
 

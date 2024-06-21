@@ -673,12 +673,27 @@ int msc_a_ensure_cn_local_rtp(struct msc_a *msc_a, struct gsm_trans *cc_trans)
 				  rtp_to_ran->codecs_known ? &rtp_to_ran->codecs : NULL, NULL);
 }
 
+static void assignment_request_timeout_cb(void *data);
+
 /* The MGW has given us a local IP address for the RAN side. Ready to start the Assignment of a voice channel. */
 void msc_a_tx_assignment_cmd(struct msc_a *msc_a)
 {
 	struct ran_msg msg;
 	struct gsm_trans *cc_trans = msc_a->cc.active_trans;
 	struct gsm0808_channel_type channel_type;
+
+	/* Do not dispatch another Assignment Command before an earlier assignment is completed. This is a sanity
+	 * safeguard, ideally callers should not even invoke this function when an Assignment is already ongoing.
+	 * (There is no osmo_fsm for Assignment / the CC trans code; when we refactor that one day, this timer should be
+	 * an FSM state.) */
+	if (osmo_timer_pending(&msc_a->cc.assignment_request_pending)) {
+		LOG_MSC_A(msc_a, LOGL_ERROR,
+			  "Not transmitting Assignment, still waiting for the response to an earlier Assignment\n");
+		return;
+	}
+	osmo_timer_setup(&msc_a->cc.assignment_request_pending, assignment_request_timeout_cb, msc_a);
+	osmo_timer_schedule(&msc_a->cc.assignment_request_pending,
+			    osmo_tdef_get(msc_a->c.ran->tdefs, -37, OSMO_TDEF_S, 10), 0);
 
 	if (!cc_trans) {
 		LOG_MSC_A(msc_a, LOGL_ERROR, "No CC transaction active\n");
@@ -943,6 +958,9 @@ static void msc_a_fsm_releasing_onenter(struct osmo_fsm_inst *fi, uint32_t prev_
 		vlr_subscr_enable_expire_lu(vsub);
 	}
 
+	/* We no longer care about assignment responses. */
+	osmo_timer_del(&msc_a->cc.assignment_request_pending);
+
 	/* If we're closing in a middle of a trans, we need to clean up */
 	trans_conn_closed(msc_a);
 
@@ -1051,6 +1069,7 @@ void msc_a_fsm_cleanup(struct osmo_fsm_inst *fi, enum osmo_fsm_term_cause cause)
 		vsub->msc_conn_ref = NULL;
 
 	osmo_timer_del(&msc_a->lu_delay_timer);
+	osmo_timer_del(&msc_a->cc.assignment_request_pending);
 }
 
 const struct value_string msc_a_fsm_event_names[] = {
@@ -1479,6 +1498,9 @@ static void msc_a_up_call_assignment_complete(struct msc_a *msc_a, const struct 
 	const struct gsm0808_speech_codec *codec_if_known = ac->assignment_complete.codec_present ?
 							    &ac->assignment_complete.codec : NULL;
 
+	/* Pending assignment has worked out. We're no longer waiting for a response now. */
+	osmo_timer_del(&msc_a->cc.assignment_request_pending);
+
 	/* For a voice group call, handling is performed by VGCS FSM */
 	gcc_trans = trans_find_by_type(msc_a, TRANS_GCC);
 	if (gcc_trans) {
@@ -1582,9 +1604,14 @@ static void msc_a_up_call_assignment_complete(struct msc_a *msc_a, const struct 
 	}
 }
 
+/* Invoked when Assignment has failed, either by a failure response, or by timeout. When failing on timeout,
+ * pass af == NULL. */
 static void msc_a_up_call_assignment_failure(struct msc_a *msc_a, const struct ran_msg *af)
 {
 	struct gsm_trans *trans;
+
+	/* Pending assignment has failed. We're no longer waiting for a response now. */
+	osmo_timer_del(&msc_a->cc.assignment_request_pending);
 
 	/* For a normal voice call, there will be an rtp_stream FSM. */
 	if (msc_a->cc.call_leg && msc_a->cc.call_leg->rtp[RTP_TO_RAN]) {
@@ -1615,6 +1642,12 @@ static void msc_a_up_call_assignment_failure(struct msc_a *msc_a, const struct r
 
 	/* Neither a voice call nor silent call assignment. Assume the worst and detach. */
 	msc_a_release_cn(msc_a);
+}
+
+static void assignment_request_timeout_cb(void *data)
+{
+	struct msc_a *msc_a = data;
+	msc_a_up_call_assignment_failure(msc_a, NULL);
 }
 
 static void msc_a_up_classmark_update(struct msc_a *msc_a, const struct osmo_gsm48_classmark *classmark,
