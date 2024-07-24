@@ -14,15 +14,15 @@ Build-Depends: debhelper (>= 10),
                libtalloc-dev,
                libsmpp34-dev (>= 1.14.0),
                libasn1c-dev (>= 0.9.30),
-               libosmocore-dev (>= 1.9.0),
-               libosmo-sccp-dev (>= 1.8.0),
-               libosmo-sigtran-dev (>= 1.8.0),
-               libosmo-abis-dev (>= 1.5.0),
-               libosmo-mgcp-client-dev (>= 1.12.0),
-               libosmo-gsup-client-dev (>= 1.7.0),
-               libosmo-netif-dev (>= 1.4.0),
-               libosmo-ranap-dev (>= 1.5.0),
-               osmo-gsm-manuals-dev (>= 1.5.0)
+               libosmocore-dev (>= 1.10.0),
+               libosmo-sccp-dev (>= 1.9.0),
+               libosmo-sigtran-dev (>= 1.9.0),
+               libosmo-abis-dev (>= 1.6.0),
+               libosmo-mgcp-client-dev (>= 1.13.0),
+               libosmo-gsup-client-dev (>= 1.8.0),
+               libosmo-netif-dev (>= 1.5.0),
+               libosmo-ranap-dev (>= 1.6.0),
+               osmo-gsm-manuals-dev (>= 1.6.0)
 Standards-Version: 3.9.8
 Vcs-Git: https://gitea.osmocom.org/cellular-infrastructure/osmo-msc
 Vcs-Browser: https://gitea.osmocom.org/cellular-infrastructure/osmo-msc

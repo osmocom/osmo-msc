@@ -1,3 +1,92 @@
+osmo-msc (1.12.0) unstable; urgency=medium
+
+  [ Manawyrm ]
+  * libmsc: add 3k1_AUDIO and FAX_G3 bearer cap
+  * csd_bs: force rate adaptation mode for CSD calls to V.110
+
+  [ Andreas Eversberg ]
+  * ASCI: Reject TERMINATION, if MS is not the originator
+  * Use uniform log format for default config files
+  * Add LLC and HLC information to MNCC interface definiton
+  * Add LLC and HLC information forwarding to MNCC interface
+  * ASCI: Remove debug line, used during development process
+
+  [ Philipp Maier ]
+  * vlr_sgs: fix VTY setting for SGs counter.
+  * manuals: add section about the SGs interface.
+
+  [ Neels Hofmeyr ]
+  * fix codec mapping for GSM-HR
+  * call_leg: silence some false errors
+  * cc: remove code dup for / fix reading codecs from MNCC
+  * add sdp_audio_codec_to_speech_codec_list()
+  * implement re-assignment to match codecs
+  * msc_vlr_test_call: drop misleading log
+  * msc_vlr_test_call: codecs: properly test new codec matching
+  * add comment in codec_mapping.c
+  * test_call: codecs: allow specific PT numbers [1/2]
+  * test_call: codecs: allow specific PT numbers [2/2]
+  * test_call: codecs: test specific PT from MO to MT
+  * sdp: allow more space for fmtp
+  * tweak example osmo-msc.cfg: 001 01
+  * fix misnomer in msc_a.c: codec_cn -> codec_assigned
+  * cosmetic: move check for CSD further above
+  * cosmetic: tweak sdp_audio_codecs_by_payload_type()
+  * tweak apidoc for sdp_audio_codecs_remove()
+  * msc_vlr_test_call.c: fix misleading comments
+  * report caller's file,line in trans_cc_filter_run()
+  * cosmetic: rename to sdp_audio_codecs_foreach()
+  * pick up all *.vty in EXTRA_DIST
+  * invalidate vsub->msc_conn_ref when msc_a is discarded
+  * fix VLR evil twin on LU with unknown TMSI
+  * never page for TMSI with 'no assign-tmsi'
+  * fixup for re-est: do not succeed on acceptance fail
+  * do not invoke two Assignments (fixup for re-assignment)
+
+  [ Vadim Yanitskiy ]
+  * silent_call: check return value of trans_alloc() against NULL
+  * VTY: always print MNCC handler type (internal/external)
+  * SMS-over-GSUP: set Source Name IE for *all* messages
+  * build: include README.md into the release tarball
+  * libvlr: auth_fsm_wait_ai(): cosmetic: drop redundant break
+  * libvlr: fix wrong cause value passed to auth_fsm_term()
+  * libvlr: fix auth_fsm_term(): use proper value-string for cause
+  * libmsc: fix -Wenum-conversion in subscr_conn_toss()
+  * libsmpputil: fix -Wtautological-constant-out-of-range-compare
+  * msc_a_up_call_assignment_complete(): handle all CSD modes
+  * SMS-over-GSUP: set log context in gsm411_gsup_rx()
+  * libmsc: add timer X36 for delaying LU connections
+  * libmsc: reset the LU delay timer (X36) on MO/MT SMS
+  * gsm411_send_rp_data(): add FIXME for MSC_CTR_SMS_DELIVERED
+  * README.md: cosmetic: fix a typo
+  * smpp: fix typo in comment for SMPP_{SYS_ID,PASSWD}_LEN
+  * smpp: fix password[] length in struct esme
+  * utils/smpp_mirror: use OSMO_STRLCPY_ARRAY, fix -Wstringop-overflow
+  * debian/copyright: remove include/openbsc/slhc.h (no such file)
+
+  [ Mychaela N. Falconia ]
+  * GSUP: set default ipa-name at application level
+
+  [ Pau Espin Pedrol ]
+  * cosmetic: vlc: Fix whitespace formatting in struct sgsn_subscriber_pdp_data
+  * vlr: Use new libosmogsm struct osmo_gsup_pdp_info fields
+
+  [ Harald Welte ]
+  * Fix license headers: Should have been AGPLv3+, not GPLv2+
+  * Add funding link to github mirror
+  * README.md: More hyperlinks and add more interfaces / features
+  * README.md: Add links to forum + issue tracker
+
+  [ Max ]
+  * .deb/.rpm: add osmocom user during package install
+
+  [ Oliver Smith ]
+  * .deb/.rpm: various fixes related to non-root
+  * contrib: remove rpm spec file
+  * debian/postinst: add checks, be verbose
+
+ -- Oliver Smith <osmith@sysmocom.de>  Wed, 24 Jul 2024 17:23:01 +0200
+
 osmo-msc (1.11.1) unstable; urgency=medium
 
   [ Neels Hofmeyr ]
