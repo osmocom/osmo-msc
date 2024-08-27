@@ -37,6 +37,7 @@
 #include <osmocom/msc/vlr.h>
 #include <osmocom/msc/transaction.h>
 #include <osmocom/msc/transaction_cc.h>
+#include <osmocom/msc/ran_conn.h>
 #include <osmocom/msc/ran_peer.h>
 #include <osmocom/msc/ran_msg_a.h>
 #include <osmocom/msc/ran_msg_iu.h>

@@ -86,6 +86,7 @@
 
 #include <osmocom/msc/gsm_data.h>
 #include <osmocom/msc/sccp_ran.h>
+#include <osmocom/msc/ran_conn.h>
 #include <osmocom/msc/ran_infra.h>
 #include <osmocom/msc/ran_peer.h>
 #include <osmocom/msc/ran_msg_a.h>

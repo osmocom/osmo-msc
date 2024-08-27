@@ -23,6 +23,7 @@
 #include <osmocom/sigtran/sccp_helpers.h>
 
 #include <osmocom/msc/msc_ho.h>
+#include <osmocom/msc/ran_conn.h>
 #include <osmocom/msc/ran_msg.h>
 #include <osmocom/msc/msc_a.h>
 #include <osmocom/msc/msc_i.h>
