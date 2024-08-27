@@ -20,6 +20,8 @@
 
 #pragma once
 
+struct vlr_subscr;
+
 enum sgs_ue_fsm_event {
 	SGS_UE_E_VLR_FAILURE,
 	SGS_UE_E_RX_RESET_FROM_MME,

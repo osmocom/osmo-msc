@@ -2,6 +2,8 @@
 
 #include <osmocom/core/utils.h>
 
+struct vlr_subscr;
+
 /* Parameters to VLR_AUTH_E_MS_AUTH_RESP */
 struct vlr_auth_resp_par {
 	bool is_r99;
