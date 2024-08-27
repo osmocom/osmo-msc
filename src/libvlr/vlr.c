@@ -40,7 +40,6 @@
 
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#include <limits.h>
 #include <errno.h>
 
 #include "vlr_core.h"
