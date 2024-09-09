@@ -35,7 +35,7 @@
 #include <osmocom/msc/sccp_ran.h>
 #include <osmocom/msc/cell_id_list.h>
 
-/* XXX greater than or equal to IPA_STRING_MAX (libosmocore) and MAX_PC_STR_LEN (libosmo-sccp). */
+/* XXX greater than or equal to IPA_STRING_MAX (libosmocore) and MAX_PC_STR_LEN (libosmo-sigtran). */
 #define NEIGHBOR_IDENT_ADDR_STRING_MAX 64
 
 static struct gsm_network *gsmnet;

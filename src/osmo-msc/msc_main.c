@@ -356,7 +356,7 @@ static int msc_vty_go_parent(struct vty *vty)
 
 static int msc_vty_is_config_node(struct vty *vty, int node)
 {
-	/* Check if libosmo-sccp declares the node in
+	/* Check if libosmo-sigtran declares the node in
 	 * question as config node */
 	if (osmo_ss7_is_config_node(vty, node))
 		return 1;

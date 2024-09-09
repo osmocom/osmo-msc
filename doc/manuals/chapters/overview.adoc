@@ -42,7 +42,7 @@ Key differences of the new OsmoMSC compared to the old OsmoNITB are:
   had an SCCPlite based _A_ interface towards 3rd party MSC implementations.
   OsmoMSC features a true SCCP/M3UA _A_ interface, which allows running OsmoBSC
   against this Osmocom based MSC implementation. The new SCCP/M3UA SIGTRAN for
-  the _A_ interface is implemented in libosmo-sccp, which is used by OsmoMSC
+  the _A_ interface is implemented in libosmo-sigtran, which is used by OsmoMSC
   and OsmoBSC (and others), to establish a link via an STP (e.g. OsmoSTP).
 
 - Addition of an _IuCS_ interface to allow operating 3G voice services, also
