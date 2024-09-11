@@ -1,7 +1,6 @@
 #pragma once
 
 #include <osmocom/gsm/gsup.h>
-#include <osmocom/msc/gsup_client_mux.h>
 
 struct gsup_client_mux;
 struct ipaccess_unit;
