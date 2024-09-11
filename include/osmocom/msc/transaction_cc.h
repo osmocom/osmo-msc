@@ -28,7 +28,7 @@
 
 #include <osmocom/msc/codec_mapping.h>
 #include <osmocom/msc/transaction.h>
-#include <osmocom/msc/vlr.h>
+#include <osmocom/vlr/vlr.h>
 
 void trans_cc_filter_init(struct gsm_trans *trans);
 void trans_cc_filter_set_ran(struct gsm_trans *trans, enum osmo_rat_type ran_type);

@@ -22,8 +22,8 @@
 
 #include <osmocom/gsm/protocol/gsm_23_003.h>
 #include <osmocom/gsm/protocol/gsm_29_118.h>
-#include <osmocom/msc/vlr.h>
-#include <osmocom/msc/vlr_sgs.h>
+#include <osmocom/vlr/vlr.h>
+#include <osmocom/vlr/vlr_sgs.h>
 #include <osmocom/msc/paging.h>
 #include <osmocom/core/socket.h>
 

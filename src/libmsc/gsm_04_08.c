@@ -39,7 +39,7 @@
 #include <osmocom/msc/msc_vgcs.h>
 #include <osmocom/msc/signal.h>
 #include <osmocom/msc/transaction.h>
-#include <osmocom/msc/vlr.h>
+#include <osmocom/vlr/vlr.h>
 #include <osmocom/msc/msc_a.h>
 
 #include <osmocom/gsm/gsm48.h>

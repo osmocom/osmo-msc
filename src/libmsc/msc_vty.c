@@ -52,7 +52,7 @@
 #include <osmocom/msc/gsm_subscriber.h>
 #include <osmocom/msc/msub.h>
 #include <osmocom/msc/msc_a.h>
-#include <osmocom/msc/vlr.h>
+#include <osmocom/vlr/vlr.h>
 #include <osmocom/msc/transaction.h>
 #include <osmocom/msc/db.h>
 #include <osmocom/msc/sms_queue.h>
@@ -63,7 +63,7 @@
 #include <osmocom/msc/mncc_int.h>
 #include <osmocom/msc/osmux.h>
 #include <osmocom/msc/rrlp.h>
-#include <osmocom/msc/vlr_sgs.h>
+#include <osmocom/vlr/vlr_sgs.h>
 #include <osmocom/msc/sgs_vty.h>
 #include <osmocom/msc/sccp_ran.h>
 #include <osmocom/msc/ran_peer.h>

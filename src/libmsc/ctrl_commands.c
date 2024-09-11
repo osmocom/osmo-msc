@@ -25,7 +25,7 @@
 #include <osmocom/msc/gsm_subscriber.h>
 #include <osmocom/msc/db.h>
 #include <osmocom/msc/debug.h>
-#include <osmocom/msc/vlr.h>
+#include <osmocom/vlr/vlr.h>
 
 #include <stdbool.h>
 

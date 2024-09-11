@@ -27,7 +27,7 @@
 #include <osmocom/crypt/utran_cipher.h>
 
 #include <osmocom/msc/gsm_data.h>
-#include <osmocom/msc/vlr.h>
+#include <osmocom/vlr/vlr.h>
 #include <osmocom/msc/gsup_client_mux.h>
 #include <osmocom/msc/gsm_04_11_gsup.h>
 #include <osmocom/msc/gsm_09_11.h>

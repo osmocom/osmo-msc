@@ -22,8 +22,8 @@
 #include <osmocom/core/fsm.h>
 #include <osmocom/gsm/gsm48.h>
 #include <osmocom/msc/debug.h>
-#include <osmocom/msc/vlr.h>
-#include <osmocom/msc/vlr_sgs.h>
+#include <osmocom/vlr/vlr.h>
+#include <osmocom/vlr/vlr_sgs.h>
 
 #include "vlr_sgs_fsm.h"
 #include "vlr_core.h"

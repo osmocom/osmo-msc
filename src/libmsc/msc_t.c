@@ -35,7 +35,7 @@
 #include <osmocom/msc/call_leg.h>
 #include <osmocom/msc/rtp_stream.h>
 #include <osmocom/msc/ran_infra.h>
-#include <osmocom/msc/vlr.h>
+#include <osmocom/vlr/vlr.h>
 #include <osmocom/msc/msc_i.h>
 #include <osmocom/msc/gsm_data.h>
 #include <osmocom/msc/codec_mapping.h>

@@ -23,8 +23,8 @@
 #include <osmocom/core/utils.h>
 #include <osmocom/core/fsm.h>
 #include <osmocom/msc/debug.h>
-#include <osmocom/msc/vlr.h>
-#include <osmocom/msc/vlr_sgs.h>
+#include <osmocom/vlr/vlr.h>
+#include <osmocom/vlr/vlr_sgs.h>
 #include "vlr_sgs_fsm.h"
 
 const struct value_string sgs_state_timer_names[] = {

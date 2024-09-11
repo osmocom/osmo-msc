@@ -52,7 +52,7 @@
 #include <osmocom/msc/signal.h>
 #include <osmocom/msc/db.h>
 #include <osmocom/msc/transaction.h>
-#include <osmocom/msc/vlr.h>
+#include <osmocom/vlr/vlr.h>
 #include <osmocom/msc/msub.h>
 #include <osmocom/msc/msc_a.h>
 #include <osmocom/msc/paging.h>

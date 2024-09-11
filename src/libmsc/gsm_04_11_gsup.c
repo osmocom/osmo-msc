@@ -30,7 +30,7 @@
 #include <osmocom/msc/transaction.h>
 #include <osmocom/msc/msc_common.h>
 #include <osmocom/msc/debug.h>
-#include <osmocom/msc/vlr.h>
+#include <osmocom/vlr/vlr.h>
 #include <osmocom/msc/msub.h>
 #include <osmocom/msc/gsup_client_mux.h>
 #include <osmocom/msc/msc_a.h>

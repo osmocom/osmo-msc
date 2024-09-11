@@ -34,7 +34,7 @@
 #include <osmocom/msc/msc_a.h>
 #include <osmocom/msc/msc_t.h>
 #include <osmocom/msc/e_link.h>
-#include <osmocom/msc/vlr.h>
+#include <osmocom/vlr/vlr.h>
 #include <osmocom/msc/ran_peer.h>
 
 static struct osmo_fsm msc_a_remote_fsm;

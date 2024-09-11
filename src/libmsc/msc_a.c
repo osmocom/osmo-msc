@@ -34,7 +34,7 @@
 #include <osmocom/msc/msc_i.h>
 #include <osmocom/msc/paging.h>
 #include <osmocom/msc/signal.h>
-#include <osmocom/msc/vlr.h>
+#include <osmocom/vlr/vlr.h>
 #include <osmocom/msc/transaction.h>
 #include <osmocom/msc/transaction_cc.h>
 #include <osmocom/msc/ran_conn.h>

@@ -29,7 +29,7 @@
 #include <osmocom/msc/msc_i.h>
 #include <osmocom/msc/msc_t.h>
 #include <osmocom/msc/ran_conn.h>
-#include <osmocom/msc/vlr.h>
+#include <osmocom/vlr/vlr.h>
 #include <osmocom/msc/e_link.h>
 
 const struct value_string msc_role_names[] = {

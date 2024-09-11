@@ -34,7 +34,7 @@
 #include <osmocom/msc/gsm_data.h>
 #include <osmocom/msc/rtp_stream.h>
 #include <osmocom/msc/msub.h>
-#include <osmocom/msc/vlr.h>
+#include <osmocom/vlr/vlr.h>
 #include <osmocom/msc/codec_mapping.h>
 
 struct osmo_fsm mncc_call_fsm;

@@ -33,8 +33,8 @@
 
 #include <osmocom/netif/stream.h>
 
-#include <osmocom/msc/vlr.h>
-#include <osmocom/msc/vlr_sgs.h>
+#include <osmocom/vlr/vlr.h>
+#include <osmocom/vlr/vlr_sgs.h>
 #include <osmocom/msc/gsm_data.h>
 #include <osmocom/msc/gsm_04_08.h>
 #include <osmocom/msc/msub.h>

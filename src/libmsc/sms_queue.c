@@ -37,7 +37,7 @@
 #include <osmocom/msc/gsm_04_11.h>
 #include <osmocom/msc/gsm_subscriber.h>
 #include <osmocom/msc/signal.h>
-#include <osmocom/msc/vlr.h>
+#include <osmocom/vlr/vlr.h>
 
 #include <osmocom/core/talloc.h>
 #include <osmocom/core/utils.h>

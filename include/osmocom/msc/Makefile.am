@@ -53,8 +53,6 @@ noinst_HEADERS = \
 	sms_queue.h \
 	transaction.h \
 	transaction_cc.h \
-	vlr.h \
-	vlr_sgs.h \
 	vty.h \
 	asci_gcr.h \
 	asci_vty.h \

@@ -32,7 +32,7 @@
 
 #include <osmocom/msc/gsm_data.h>
 #include <osmocom/msc/debug.h>
-#include <osmocom/msc/vlr.h>
+#include <osmocom/vlr/vlr.h>
 #include <osmocom/msc/db.h>
 
 /* Talloc context of this unit test */

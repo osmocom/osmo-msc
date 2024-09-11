@@ -32,8 +32,8 @@
 #include <osmocom/gsm/gsm48.h>
 #include <osmocom/gsm/ipa.h>
 #include <osmocom/gsupclient/gsup_client.h>
-#include <osmocom/msc/vlr_sgs.h>
-#include <osmocom/msc/vlr.h>
+#include <osmocom/vlr/vlr_sgs.h>
+#include <osmocom/vlr/vlr.h>
 #include <osmocom/msc/debug.h>
 #include <osmocom/msc/gsup_client_mux.h>
 #include <osmocom/msc/paging.h>

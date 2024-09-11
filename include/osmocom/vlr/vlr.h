@@ -15,7 +15,7 @@
 #include <osmocom/gsm/ipa.h>
 #include <osmocom/msc/msc_common.h>
 #include <osmocom/gsupclient/gsup_client.h>
-#include <osmocom/msc/vlr_sgs.h>
+#include <osmocom/vlr/vlr_sgs.h>
 
 #define LOGGSUPP(level, gsup, fmt, args...)				\
 	LOGP(DVLR, level, "GSUP(%s) " fmt, (gsup)->imsi, ## args)

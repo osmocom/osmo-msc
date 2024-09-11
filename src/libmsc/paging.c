@@ -22,7 +22,7 @@
 
 #include <osmocom/msc/gsm_data.h>
 #include <osmocom/msc/paging.h>
-#include <osmocom/msc/vlr.h>
+#include <osmocom/vlr/vlr.h>
 #include <osmocom/msc/ran_peer.h>
 #include <osmocom/msc/sgs_iface.h>
 #include <osmocom/msc/signal.h>

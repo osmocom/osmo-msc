@@ -35,7 +35,7 @@
 #include <osmocom/msc/gsm_04_11.h>
 #include <osmocom/msc/db.h>
 #include <osmocom/msc/debug.h>
-#include <osmocom/msc/vlr.h>
+#include <osmocom/vlr/vlr.h>
 
 #include <osmocom/gsm/protocol/gsm_23_003.h>
 #include <osmocom/core/talloc.h>

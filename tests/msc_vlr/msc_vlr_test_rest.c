@@ -23,7 +23,7 @@
 
 #include "msc_vlr_tests.h"
 
-#include <osmocom/msc/vlr.h>
+#include <osmocom/vlr/vlr.h>
 
 #if 0
 static void test_early_stage()

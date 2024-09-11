@@ -1,6 +1,6 @@
 #pragma once
 
-#include <osmocom/msc/vlr.h>
+#include <osmocom/vlr/vlr.h>
 
 struct osmo_gsup_message;
 
