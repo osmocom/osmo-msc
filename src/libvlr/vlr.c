@@ -476,7 +476,7 @@ int vlr_subscr_alloc_tmsi(struct vlr_subscr *vsub)
 	for (tried = 0; tried < 100; tried++) {
 		rc = osmo_get_rand_id((uint8_t *) &tmsi, sizeof(tmsi));
 		if (rc < 0) {
-			LOGP(DDB, LOGL_ERROR, "osmo_get_rand_id() failed: %s\n", strerror(-rc));
+			LOGP(DVLR, LOGL_ERROR, "osmo_get_rand_id() failed: %s\n", strerror(-rc));
 			return rc;
 		}
 
