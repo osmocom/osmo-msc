@@ -21,6 +21,7 @@
 
 #include <osmocom/core/linuxlist.h>
 #include <osmocom/core/fsm.h>
+#include <osmocom/core/stats.h>
 #include <osmocom/core/utils.h>
 #include <osmocom/core/timer.h>
 #include <osmocom/core/tdef.h>
@@ -30,7 +31,6 @@
 #include <osmocom/gsm/apn.h>
 #include <osmocom/gsm/gsm48.h>
 #include <osmocom/gsm/ipa.h>
-#include <osmocom/msc/gsm_subscriber.h>
 #include <osmocom/gsupclient/gsup_client.h>
 #include <osmocom/msc/vlr_sgs.h>
 #include <osmocom/msc/vlr.h>
