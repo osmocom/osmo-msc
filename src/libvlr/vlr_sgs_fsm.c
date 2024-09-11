@@ -24,7 +24,6 @@
 #include <osmocom/msc/debug.h>
 #include <osmocom/msc/vlr.h>
 #include <osmocom/msc/vlr_sgs.h>
-#include <osmocom/msc/paging.h>
 
 #include "vlr_sgs_fsm.h"
 #include "vlr_core.h"
@@ -64,8 +63,8 @@ static void to_null(struct osmo_fsm_inst *fi)
 	vlr_subscr_set_last_used_eutran_plmn_id(vsub, NULL);
 
 	/* Make sure any ongoing paging is aborted. */
-	if (vsub->cs.is_paging)
-		paging_expired(vsub);
+	if (vsub->cs.is_paging && vsub->sgs.paging_cb)
+		vsub->sgs.paging_cb(vsub, SGSAP_SERV_IND_PAGING_TIMEOUT);
 
 	/* Ensure that Ts5 (pending paging via SGs) is deleted */
 	if (vlr_sgs_pag_pend(vsub))

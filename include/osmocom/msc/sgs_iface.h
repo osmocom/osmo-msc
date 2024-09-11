@@ -86,7 +86,7 @@ extern struct sgs_state *g_sgs;
 struct sgs_state *sgs_iface_init(void *ctx, struct gsm_network *network);
 int sgs_iface_rx(struct sgs_connection *sgc, struct msgb *msg);
 enum sgsap_service_ind sgs_serv_ind_from_paging_cause(enum paging_cause);
-int sgs_iface_tx_paging(struct vlr_subscr *vsub, enum sgsap_service_ind serv_ind);
+int sgs_iface_paging_cb(struct vlr_subscr *vsub, enum sgsap_service_ind serv_ind);
 int sgs_iface_tx_dtap_ud(struct msc_a *msc_a, struct msgb *msg);
 void sgs_iface_tx_release(struct vlr_subscr *vsub);
 void sgs_iface_tx_serv_abrt(struct vlr_subscr *vsub);

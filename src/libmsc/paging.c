@@ -71,7 +71,7 @@ static int msc_paging_request(struct paging_request *pr, struct vlr_subscr *vsub
 	case OSMO_RAT_UTRAN_IU:
 		return ran_peers_down_paging(net->iu.sri, CELL_IDENT_LAC, vsub, pr->cause);
 	case OSMO_RAT_EUTRAN_SGS:
-		return sgs_iface_tx_paging(vsub, sgs_serv_ind_from_paging_cause(pr->cause));
+		return sgs_iface_paging_cb(vsub, sgs_serv_ind_from_paging_cause(pr->cause));
 	default:
 		LOG_PAGING(vsub, pr, LOGL_ERROR, "Cannot page, subscriber not attached\n");
 		return -EINVAL;

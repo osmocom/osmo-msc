@@ -81,7 +81,7 @@ struct sgs_lu_response {
 typedef void (*vlr_sgs_lu_response_cb_t) (struct sgs_lu_response *response);
 
 /* This callback function is called in cases where a paging request is required
- * after the LU is completed */
+ * after the LU is completed or when a paging expired */
 typedef int (*vlr_sgs_lu_paging_cb_t) (struct vlr_subscr *vsub, enum sgsap_service_ind serv_ind);
 
 /* This callback function is called to send the MM info to the UE. */

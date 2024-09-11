@@ -466,15 +466,20 @@ enum sgsap_service_ind sgs_serv_ind_from_paging_cause(enum paging_cause cause)
 	}
 }
 
-/*! Page UE through SGs interface
+/*! Page UE through SGs interface or inform about an expired paging
  *  \param[in] vsub subscriber context
  *  \param[in] serv_ind service indicator (sms or voide)
  *  \returns 0 in case of success, -EINVAL in case of error. */
-int sgs_iface_tx_paging(struct vlr_subscr *vsub, enum sgsap_service_ind serv_ind)
+int sgs_iface_paging_cb(struct vlr_subscr *vsub, enum sgsap_service_ind serv_ind)
 {
 	struct msgb *resp;
 	struct gsm29118_paging_req paging_params;
 	struct sgs_mme_ctx *mme;
+
+	if (serv_ind == SGSAP_SERV_IND_PAGING_TIMEOUT) {
+		paging_expired(vsub);
+		return 0;
+	}
 
 	/* See also: 3GPP TS 29.118, chapter 5.1.2.2 Paging Initiation */
 	if (vsub->sgs_fsm->state == SGS_UE_ST_NULL && vsub->conf_by_radio_contact_ind == true) {
@@ -662,7 +667,7 @@ static int sgs_rx_loc_upd_req(struct sgs_connection *sgc, struct msgb *msg, cons
 	/* Perform actual location update */
 	memcpy(vlr_sgs_cfg.timer, sgc->sgs->cfg.timer, sizeof(vlr_sgs_cfg.timer));
 	memcpy(vlr_sgs_cfg.counter, sgc->sgs->cfg.counter, sizeof(vlr_sgs_cfg.counter));
-	rc = vlr_sgs_loc_update(gsm_network->vlr, &vlr_sgs_cfg, sgs_tx_loc_upd_resp_cb, sgs_iface_tx_paging,
+	rc = vlr_sgs_loc_update(gsm_network->vlr, &vlr_sgs_cfg, sgs_tx_loc_upd_resp_cb, sgs_iface_paging_cb,
 				sgs_tx_mm_info_cb, mme_name, type, imsi, &new_lai, last_eutran_plmn);
 	if (rc != 0) {
 		resp = gsm29118_create_lu_rej(imsi, SGSAP_SGS_CAUSE_IMSI_UNKNOWN, NULL);
