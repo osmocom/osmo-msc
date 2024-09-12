@@ -430,7 +430,7 @@ int vlr_subscr_changed(struct vlr_subscr *vsub);
 int vlr_subscr_purge(struct vlr_subscr *vsub) __attribute__((warn_unused_result));
 void vlr_subscr_cancel_attach_fsm(struct vlr_subscr *vsub,
 				  enum osmo_fsm_term_cause fsm_cause,
-				  uint8_t gsm48_cause);
+				  enum gsm48_reject_value gsm48_cause);
 
 void vlr_subscr_enable_expire_lu(struct vlr_subscr *vsub);
 
@@ -491,5 +491,7 @@ bool vlr_use_umts_aka(struct osmo_auth_vector *vec, bool is_r99);
 void log_set_filter_vlr_subscr(struct log_target *target,
 			       struct vlr_subscr *vlr_subscr);
 
-void vlr_gmm_cause_to_mm_cause(enum gsm48_gmm_cause gmm_cause,
-			       enum gsm48_reject_value *gsm48_rej_p);
+enum gsm48_reject_value vlr_gmm_cause_to_reject_cause(enum gsm48_gmm_cause gmm_cause);
+enum gsm48_reject_value vlr_gmm_cause_to_reject_cause_domain(enum gsm48_gmm_cause gmm_cause, bool is_cs);
+enum gsm48_reject_value vlr_reject_causes_cs(enum gsm48_reject_value reject_cause);
+enum gsm48_reject_value vlr_reject_causes_ps(enum gsm48_reject_value reject_cause);

@@ -358,7 +358,6 @@ static void auth_fsm_wait_ai(struct osmo_fsm_inst *fi, uint32_t event,
 	struct auth_fsm_priv *afp = fi->priv;
 	struct vlr_subscr *vsub = afp->vsub;
 	struct osmo_gsup_message *gsup = data;
-	enum gsm48_reject_value gsm48_rej;
 
 	if (event == VLR_AUTH_E_HLR_SAI_NACK)
 		LOGPFSM(fi, "GSUP: rx Auth Info Error cause: %d: %s\n",
@@ -391,12 +390,10 @@ static void auth_fsm_wait_ai(struct osmo_fsm_inst *fi, uint32_t event,
 	case VLR_AUTH_E_HLR_SAI_NACK:
 		/* HLR did not return Auth Info, hence cannot authenticate. (The caller may still decide to permit
 		 * attaching without authentication) */
-		vlr_gmm_cause_to_mm_cause(gsup->cause, &gsm48_rej);
-		auth_fsm_term(fi, AUTH_FSM_NO_AUTH_INFO, gsm48_rej);
+		auth_fsm_term(fi, AUTH_FSM_NO_AUTH_INFO, vlr_gmm_cause_to_reject_cause_domain(gsup->cause, true));
 		break;
 	case VLR_AUTH_E_HLR_SAI_ABORT:
-		vlr_gmm_cause_to_mm_cause(gsup->cause, &gsm48_rej);
-		auth_fsm_term(fi, AUTH_FSM_FAILURE, gsm48_rej);
+		auth_fsm_term(fi, AUTH_FSM_FAILURE, vlr_gmm_cause_to_reject_cause_domain(gsup->cause, true));
 		break;
 	}
 

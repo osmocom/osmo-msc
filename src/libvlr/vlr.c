@@ -434,7 +434,7 @@ int vlr_subscr_purge(struct vlr_subscr *vsub)
 
 void vlr_subscr_cancel_attach_fsm(struct vlr_subscr *vsub,
 				  enum osmo_fsm_term_cause fsm_cause,
-				  uint8_t gsm48_cause)
+				  enum gsm48_reject_value gsm48_cause)
 {
 	if (!vsub)
 		return;
@@ -1166,100 +1166,112 @@ static int vlr_subscr_handle_lu_err(struct vlr_subscr *vsub,
 	return 0;
 }
 
-void vlr_gmm_cause_to_mm_cause(enum gsm48_gmm_cause gmm_cause,
-			       enum gsm48_reject_value *gsm48_rej_p)
+enum gsm48_reject_value vlr_gmm_cause_to_reject_cause_domain(enum gsm48_gmm_cause gmm_cause, bool is_cs)
 {
-	enum gsm48_reject_value gsm48_rej = GSM48_REJECT_NETWORK_FAILURE;
+	enum gsm48_reject_value reject_cause = vlr_gmm_cause_to_reject_cause(gmm_cause);
+	if (is_cs)
+		return vlr_reject_causes_cs(reject_cause);
+	else
+		return vlr_reject_causes_ps(reject_cause);
+}
+
+enum gsm48_reject_value vlr_gmm_cause_to_reject_cause(enum gsm48_gmm_cause gmm_cause)
+{
 	switch (gmm_cause) {
 	case GMM_CAUSE_IMSI_UNKNOWN:
-		gsm48_rej = GSM48_REJECT_IMSI_UNKNOWN_IN_HLR;
-		break;
+		return GSM48_REJECT_IMSI_UNKNOWN_IN_HLR;
 	case GMM_CAUSE_ILLEGAL_MS:
-		gsm48_rej = GSM48_REJECT_ILLEGAL_MS;
-		break;
+		return GSM48_REJECT_ILLEGAL_MS;
 	case GMM_CAUSE_IMEI_NOT_ACCEPTED:
-		gsm48_rej = GSM48_REJECT_IMEI_NOT_ACCEPTED;
-		break;
+		return GSM48_REJECT_IMEI_NOT_ACCEPTED;
 	case GMM_CAUSE_ILLEGAL_ME:
-		gsm48_rej = GSM48_REJECT_ILLEGAL_ME;
-		break;
+		return GSM48_REJECT_ILLEGAL_ME;
 	case GMM_CAUSE_GPRS_NOTALLOWED:
-		gsm48_rej = GSM48_REJECT_GPRS_NOT_ALLOWED;
-		break;
+		return GSM48_REJECT_GPRS_NOT_ALLOWED;
 	case GMM_CAUSE_GPRS_OTHER_NOTALLOWED:
-		gsm48_rej = GSM48_REJECT_SERVICES_NOT_ALLOWED;
-		break;
+		return GSM48_REJECT_SERVICES_NOT_ALLOWED;
 	case GMM_CAUSE_MS_ID_NOT_DERIVED:
-		gsm48_rej = GSM48_REJECT_MS_IDENTITY_NOT_DERVIVABLE;
-		break;
+		return GSM48_REJECT_MS_IDENTITY_NOT_DERVIVABLE;
 	case GMM_CAUSE_IMPL_DETACHED:
-		gsm48_rej = GSM48_REJECT_IMPLICITLY_DETACHED;
-		break;
+		return GSM48_REJECT_IMPLICITLY_DETACHED;
 	case GMM_CAUSE_PLMN_NOTALLOWED:
-		gsm48_rej = GSM48_REJECT_PLMN_NOT_ALLOWED;
-		break;
+		return GSM48_REJECT_PLMN_NOT_ALLOWED;
 	case GMM_CAUSE_LA_NOTALLOWED:
-		gsm48_rej = GSM48_REJECT_LOC_NOT_ALLOWED;
-		break;
+		return GSM48_REJECT_LOC_NOT_ALLOWED;
 	case GMM_CAUSE_ROAMING_NOTALLOWED:
-		gsm48_rej = GSM48_REJECT_ROAMING_NOT_ALLOWED;
-		break;
+		return GSM48_REJECT_ROAMING_NOT_ALLOWED;
 	case GMM_CAUSE_NO_GPRS_PLMN:
-		gsm48_rej = GSM48_REJECT_GPRS_NOT_ALLOWED_IN_PLMN;
-		break;
+		return GSM48_REJECT_GPRS_NOT_ALLOWED_IN_PLMN;
 	case GMM_CAUSE_MSC_TEMP_NOTREACH:
-		gsm48_rej = GSM48_REJECT_MSC_TMP_NOT_REACHABLE;
-		break;
+		return GSM48_REJECT_MSC_TMP_NOT_REACHABLE;
 	case GMM_CAUSE_SYNC_FAIL:
-		gsm48_rej = GSM48_REJECT_SYNCH_FAILURE;
-		break;
+		return GSM48_REJECT_SYNCH_FAILURE;
 	case GMM_CAUSE_CONGESTION:
-		gsm48_rej = GSM48_REJECT_CONGESTION;
-		break;
+		return GSM48_REJECT_CONGESTION;
 	case GMM_CAUSE_SEM_INCORR_MSG:
-		gsm48_rej = GSM48_REJECT_INCORRECT_MESSAGE;
-		break;
+		return GSM48_REJECT_INCORRECT_MESSAGE;
 	case GMM_CAUSE_INV_MAND_INFO:
-		gsm48_rej = GSM48_REJECT_INVALID_MANDANTORY_INF;
-		break;
+		return GSM48_REJECT_INVALID_MANDANTORY_INF;
 	case GMM_CAUSE_MSGT_NOTEXIST_NOTIMPL:
-		gsm48_rej = GSM48_REJECT_MSG_TYPE_NOT_IMPLEMENTED;
-		break;
+		return GSM48_REJECT_MSG_TYPE_NOT_IMPLEMENTED;
 	case GMM_CAUSE_MSGT_INCOMP_P_STATE:
-		gsm48_rej = GSM48_REJECT_MSG_TYPE_NOT_COMPATIBLE;
-		break;
+		return GSM48_REJECT_MSG_TYPE_NOT_COMPATIBLE;
 	case GMM_CAUSE_IE_NOTEXIST_NOTIMPL:
-		gsm48_rej = GSM48_REJECT_INF_ELEME_NOT_IMPLEMENTED;
-		break;
+		return GSM48_REJECT_INF_ELEME_NOT_IMPLEMENTED;
 	case GMM_CAUSE_COND_IE_ERR:
-		gsm48_rej = GSM48_REJECT_CONDTIONAL_IE_ERROR;
-		break;
+		return GSM48_REJECT_CONDTIONAL_IE_ERROR;
 	case GMM_CAUSE_MSG_INCOMP_P_STATE:
-		gsm48_rej = GSM48_REJECT_MSG_NOT_COMPATIBLE;
-		break;
+		return GSM48_REJECT_MSG_NOT_COMPATIBLE;
 	case GMM_CAUSE_PROTO_ERR_UNSPEC:
-		gsm48_rej = GSM48_REJECT_PROTOCOL_ERROR;
-		break;
-
+		return GSM48_REJECT_PROTOCOL_ERROR;
 	case GMM_CAUSE_NO_SUIT_CELL_IN_LA:
+		return GSM48_REJECT_NO_SUIT_CELL_IN_LA;
 	case GMM_CAUSE_MAC_FAIL:
+		return GSM48_REJECT_MAC_FAILURE;
 	case GMM_CAUSE_GSM_AUTH_UNACCEPT:
+		return GSM48_REJECT_GSM_AUTH_UNACCEPTABLE;
 	case GMM_CAUSE_NOT_AUTH_FOR_CSG:
+		return GSM48_REJECT_NOT_AUTH_FOR_CSG;
 	case GMM_CAUSE_SMS_VIA_GPRS_IN_RA:
+		return GSM48_REJECT_SMS_PROV_VIA_GPRS_IN_RA;
 	case GMM_CAUSE_NO_PDP_ACTIVATED:
+		return GSM48_REJECT_NO_PDP_CONTEXT_ACTIVATED;
 	case GMM_CAUSE_NET_FAIL:
-		gsm48_rej = GSM48_REJECT_NETWORK_FAILURE;
-		break;
+		return GSM48_REJECT_NETWORK_FAILURE;
+	default:
+		return GSM48_REJECT_NETWORK_FAILURE;
 	}
+}
 
-	*gsm48_rej_p = gsm48_rej;
+enum gsm48_reject_value vlr_reject_causes_ps(enum gsm48_reject_value reject_cause)
+{
+	switch (reject_cause) {
+	case GSM48_REJECT_CALL_CAN_NOT_BE_IDENTIFIED:
+		return GSM48_REJECT_NETWORK_FAILURE;
+	default:
+		return reject_cause;
+	}
+}
+
+enum gsm48_reject_value vlr_reject_causes_cs(enum gsm48_reject_value reject_cause)
+{
+	switch (reject_cause) {
+	case GSM48_REJECT_NO_SUIT_CELL_IN_LA:
+	case GSM48_REJECT_MAC_FAILURE:
+	case GSM48_REJECT_GSM_AUTH_UNACCEPTABLE:
+	case GSM48_REJECT_NOT_AUTH_FOR_CSG:
+	case GSM48_REJECT_SMS_PROV_VIA_GPRS_IN_RA:
+	case GSM48_REJECT_NO_PDP_CONTEXT_ACTIVATED:
+		return GSM48_REJECT_NETWORK_FAILURE;
+	default:
+		return reject_cause;
+	}
 }
 
 /* Handle LOCATION CANCEL request from HLR */
 static int vlr_subscr_handle_cancel_req(struct vlr_subscr *vsub,
 					const struct osmo_gsup_message *gsup_msg)
 {
-	enum gsm48_reject_value gsm48_rej;
 	enum osmo_fsm_term_cause fsm_cause = OSMO_FSM_TERM_ERROR;
 	struct osmo_gsup_message gsup_reply = {0};
 	int rc, is_update_procedure = !gsup_msg->cancel_type ||
@@ -1274,8 +1286,7 @@ static int vlr_subscr_handle_cancel_req(struct vlr_subscr *vsub,
 	gsup_reply.message_type = OSMO_GSUP_MSGT_LOCATION_CANCEL_RESULT;
 	rc = vlr_subscr_tx_gsup_message(vsub, &gsup_reply);
 
-	vlr_gmm_cause_to_mm_cause(gsup_msg->cause, &gsm48_rej);
-	vlr_subscr_cancel_attach_fsm(vsub, fsm_cause, gsm48_rej);
+	vlr_subscr_cancel_attach_fsm(vsub, fsm_cause, vlr_gmm_cause_to_reject_cause_domain(gsup_msg->cause, true));
 
 	vlr_rate_ctr_inc(vsub->vlr, VLR_CTR_DETACH_BY_CANCEL);
 	vlr_subscr_detach(vsub);
