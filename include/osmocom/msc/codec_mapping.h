@@ -47,6 +47,7 @@ const struct codec_mapping *codec_mapping_by_subtype_name(const char *subtype_na
 const struct codec_mapping *codec_mapping_by_mgcp_codec(enum mgcp_codecs mgcp);
 
 int bearer_cap_add_speech_ver(struct gsm_mncc_bearer_cap *bearer_cap, enum gsm48_bcap_speech_ver speech_ver);
+int bearer_cap_filter_rev_lev(struct gsm_mncc_bearer_cap *bearer_cap, uint8_t rev_lev);
 int sdp_audio_codec_add_to_bearer_cap(struct gsm_mncc_bearer_cap *bearer_cap, const struct sdp_audio_codec *codec);
 int sdp_audio_codecs_to_bearer_cap(struct gsm_mncc_bearer_cap *bearer_cap, const struct sdp_audio_codecs *ac);
 int bearer_cap_set_radio(struct gsm_mncc_bearer_cap *bearer_cap);

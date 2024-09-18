@@ -950,6 +950,13 @@ static int gsm48_cc_tx_setup(struct gsm_trans *trans, void *arg)
 			msgb_free(msg);
 			return rc;
 		}
+		rc = bearer_cap_filter_rev_lev(&bearer_cap, trans->vsub->classmark.classmark1.rev_lev);
+		if (rc) {
+			LOG_TRANS(trans, LOGL_ERROR, "No codec offered is supported by phase 1 mobile.\n");
+			trans_free(trans);
+			msgb_free(msg);
+			return rc;
+		}
 		break;
 	case GSM48_BCAP_ITCAP_3k1_AUDIO:
 	case GSM48_BCAP_ITCAP_FAX_G3:
@@ -1136,6 +1143,7 @@ static int gsm48_cc_tx_call_proc_and_assign(struct gsm_trans *trans, void *arg)
 				  trans->bearer_cap.transfer);
 			return -EINVAL;
 		}
+		bearer_cap_filter_rev_lev(&proceeding->bearer_cap, trans->vsub->classmark.classmark1.rev_lev);
 		gsm48_encode_bearer_cap(msg, 0, &proceeding->bearer_cap);
 		memcpy(&trans->bearer_cap, &proceeding->bearer_cap, sizeof(trans->bearer_cap));
 	}
@@ -1851,6 +1859,7 @@ static int gsm48_cc_tx_modify(struct gsm_trans *trans, void *arg)
 	gsm48_start_cc_timer(trans, 0x323, GSM48_T323);
 
 	/* bearer capability */
+	bearer_cap_filter_rev_lev(&modify->bearer_cap, trans->vsub->classmark.classmark1.rev_lev);
 	gsm48_encode_bearer_cap(msg, 1, &modify->bearer_cap);
 	memcpy(&trans->bearer_cap, &modify->bearer_cap, sizeof(trans->bearer_cap));
 
@@ -1898,6 +1907,7 @@ static int gsm48_cc_tx_modify_complete(struct gsm_trans *trans, void *arg)
 	gh->msg_type = GSM48_MT_CC_MODIFY_COMPL;
 
 	/* bearer capability */
+	bearer_cap_filter_rev_lev(&modify->bearer_cap, trans->vsub->classmark.classmark1.rev_lev);
 	gsm48_encode_bearer_cap(msg, 1, &modify->bearer_cap);
 	memcpy(&trans->bearer_cap, &modify->bearer_cap, sizeof(trans->bearer_cap));
 
@@ -1951,6 +1961,7 @@ static int gsm48_cc_tx_modify_reject(struct gsm_trans *trans, void *arg)
 	gh->msg_type = GSM48_MT_CC_MODIFY_REJECT;
 
 	/* bearer capability */
+	bearer_cap_filter_rev_lev(&modify->bearer_cap, trans->vsub->classmark.classmark1.rev_lev);
 	gsm48_encode_bearer_cap(msg, 1, &modify->bearer_cap);
 	memcpy(&trans->bearer_cap, &modify->bearer_cap, sizeof(trans->bearer_cap));
 	/* cause */

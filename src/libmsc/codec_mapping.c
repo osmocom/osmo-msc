@@ -343,6 +343,37 @@ int bearer_cap_set_radio(struct gsm_mncc_bearer_cap *bearer_cap)
 	return 0;
 }
 
+/* Bearer capability for phase 1 mobile stations must not have a speech version list. It uses the the radio capability
+ * to select the codec. The speech version list is removed. If no phase 1 codec was in the speech version list, an
+ * error is returned also. */
+int bearer_cap_filter_rev_lev(struct gsm_mncc_bearer_cap *bearer_cap, uint8_t rev_lev)
+{
+	bool fr_present = false, hr_present = false;
+	int i;
+
+	if (rev_lev > 0)
+		return 0;
+
+
+	for (i = 0; bearer_cap->speech_ver[i] >= 0; i++) {
+		switch (bearer_cap->speech_ver[i]) {
+		case GSM48_BCAP_SV_FR:
+			fr_present = true;
+			break;
+		case GSM48_BCAP_SV_HR:
+			hr_present = true;
+			break;
+		}
+	}
+
+	bearer_cap->speech_ver[0] = -1;
+
+	if (!fr_present && !hr_present)
+		return -ENOTSUP;
+
+	return 0;
+}
+
 /* Try to convert the SDP audio codec name to Speech Versions to append to Bearer Capabilities.
  * Return the number of Speech Version entries added (some may add more than one, others may be unknown/unapplicable and
  * return 0). */
