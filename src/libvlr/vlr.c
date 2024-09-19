@@ -1581,7 +1581,7 @@ int vlr_start(struct vlr_instance *vlr, struct gsup_client_mux *gcm)
 	return 0;
 }
 
-/* MSC->VLR: Subscribre has disconnected */
+/* MSC->VLR: Subscriber has disconnected */
 int vlr_subscr_disconnected(struct vlr_subscr *vsub)
 {
 	/* This corresponds to a MAP-ABORT from MSC->VLR on a classic B
