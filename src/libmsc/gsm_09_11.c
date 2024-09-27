@@ -142,6 +142,9 @@ int gsm0911_rcv_nc_ss(struct msc_a *msc_a, struct msgb *msg)
 			gsm48_tx_simple(msc_a,
 				GSM48_PDISC_NC_SS | (tid << 4),
 				GSM0480_MTYPE_RELEASE_COMPLETE);
+			/* Decrement use counter that has been incremented by CM Service Request (SS).
+			 * If there is no other service request, the BSS connection will be released. */
+			msc_a_put(msc_a, MSC_A_USE_CM_SERVICE_SS);
 			return -EINVAL;
 		}
 
@@ -151,6 +154,9 @@ int gsm0911_rcv_nc_ss(struct msc_a *msc_a, struct msgb *msg)
 			gsm48_tx_simple(msc_a,
 				GSM48_PDISC_NC_SS | (tid << 4),
 				GSM0480_MTYPE_RELEASE_COMPLETE);
+			/* Decrement use counter that has been incremented by CM Service Request (SS).
+			 * If there is no other service request, the BSS connection will be released. */
+			msc_a_put(msc_a, MSC_A_USE_CM_SERVICE_SS);
 			return -ENOMEM;
 		}
 
