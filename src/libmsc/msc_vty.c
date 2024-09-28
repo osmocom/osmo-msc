@@ -1474,19 +1474,39 @@ err:
 
 #define CHAN_TYPES "(any|tch/f|tch/h|tch/any|sdcch)"
 #define CHAN_TYPE_HELP 			\
-		"Any channel\n"		\
-		"TCH/F channel\n"	\
-		"TCH/H channel\n"	\
-		"Any TCH channel\n"	\
-		"SDCCH channel\n"
+	"Any channel\n"			\
+	"TCH/F channel\n"		\
+	"TCH/H channel\n"		\
+	"Any TCH channel\n"		\
+	"SDCCH channel\n"
 
-#define CHAN_MODES "(signalling|speech-hr|speech-fr|speech-efr|speech-amr)"
-#define CHAN_MODE_HELP				\
-		"Signalling only\n"		\
-		"Speech with HR codec\n"	\
-		"Speech with FR codec\n"	\
-		"Speech with EFR codec\n"	\
-		"Speech with AMR codec\n"
+#define CHAN_MODES_SPEECH "speech-hr|speech-fr|speech-efr|speech-amr"
+#define CHAN_MODE_HELP_SPEECH		\
+	"Speech with HR codec\n"	\
+	"Speech with FR codec\n"	\
+	"Speech with EFR codec\n"	\
+	"Speech with AMR codec\n"
+
+#define CHAN_MODES_DATA_T "data-2400|data-4800|data-9600|data-14400"
+#define CHAN_MODE_HELP_DATA_T				\
+	"Data (transparent) @ 2.4k/3.6k\n"		\
+	"Data (transparent) @ 4.8k/6.0k\n"		\
+	"Data (transparent) @ 9.6k/12.0k\n"		\
+	"Data (transparent) @ 14.4k/14.5k\n"
+
+#define CHAN_MODES_DATA_NT "data-4800-nt|data-9600-nt|data-14400-nt"
+#define CHAN_MODE_HELP_DATA_NT				\
+	"Data (non-transparent) @ 4.8k/6k\n"		\
+	"Data (non-transparent) @ 9.6k/12k\n"		\
+	"Data (non-transparent) @ 14.4k/14.5k\n"
+
+#define CHAN_MODES "(signalling|" CHAN_MODES_SPEECH "|" CHAN_MODES_DATA_T "|" CHAN_MODES_DATA_NT ")"
+#define CHAN_MODE_HELP			\
+	"Signalling only\n"		\
+	CHAN_MODE_HELP_SPEECH		\
+	CHAN_MODE_HELP_DATA_T		\
+	CHAN_MODE_HELP_DATA_NT
+
 
 DEFUN(subscriber_silent_call_start,
       subscriber_silent_call_start_cmd,
@@ -1500,7 +1520,7 @@ DEFUN(subscriber_silent_call_start,
 	struct gsm0808_channel_type ct;
 	const char *ip;
 	uint16_t port;
-	int rc, speech;
+	int rc, sign;
 
 	if (!vsub) {
 		vty_out(vty, "%% No subscriber found for %s %s%s",
@@ -1531,24 +1551,49 @@ DEFUN(subscriber_silent_call_start,
 		ct.perm_spch[0] = GSM0808_PERM_FR3;
 		ct.perm_spch[1] = GSM0808_PERM_HR3;
 		ct.perm_spch_len = 2;
+	} else if (!strcmp(argv[3], "data-2400")) {
+		ct.ch_indctr = GSM0808_CHAN_DATA;
+		ct.data_rate = GSM0808_DATA_RATE_TRANSP_2k4;
+		ct.data_transparent = true;
+	} else if (!strcmp(argv[3], "data-4800")) {
+		ct.ch_indctr = GSM0808_CHAN_DATA;
+		ct.data_rate = GSM0808_DATA_RATE_TRANSP_4k8;
+		ct.data_transparent = true;
+	} else if (!strcmp(argv[3], "data-9600")) {
+		ct.ch_indctr = GSM0808_CHAN_DATA;
+		ct.data_rate = GSM0808_DATA_RATE_TRANSP_9k6;
+		ct.data_transparent = true;
+	} else if (!strcmp(argv[3], "data-14400")) {
+		ct.ch_indctr = GSM0808_CHAN_DATA;
+		ct.data_rate = GSM0808_DATA_RATE_TRANSP_14k4;
+		ct.data_transparent = true;
+	} else if (!strcmp(argv[3], "data-4800-nt")) {
+		ct.ch_indctr = GSM0808_CHAN_DATA;
+		ct.data_rate = GSM0808_DATA_RATE_NON_TRANSP_6k0;
+	} else if (!strcmp(argv[3], "data-9600-nt")) {
+		ct.ch_indctr = GSM0808_CHAN_DATA;
+		ct.data_rate = GSM0808_DATA_RATE_NON_TRANSP_12k0;
+	} else if (!strcmp(argv[3], "data-14400-nt")) {
+		ct.ch_indctr = GSM0808_CHAN_DATA;
+		ct.data_rate = GSM0808_DATA_RATE_NON_TRANSP_14k5;
 	}
 
-	speech = ct.ch_indctr == GSM0808_CHAN_SPEECH;
+	sign = ct.ch_indctr == GSM0808_CHAN_SIGN;
 
 	if (!strcmp(argv[2], "tch/f"))
-		ct.ch_rate_type = speech ? GSM0808_SPEECH_FULL_BM : GSM0808_SIGN_FULL_BM;
+		ct.ch_rate_type = sign ? GSM0808_SIGN_FULL_BM : GSM0808_SPEECH_FULL_BM;
 	else if (!strcmp(argv[2], "tch/h"))
-		ct.ch_rate_type = speech ? GSM0808_SPEECH_HALF_LM : GSM0808_SIGN_HALF_LM;
+		ct.ch_rate_type = sign ? GSM0808_SIGN_HALF_LM : GSM0808_SPEECH_HALF_LM;
 	else if (!strcmp(argv[2], "tch/any"))
-		ct.ch_rate_type = speech ? GSM0808_SPEECH_FULL_PREF : GSM0808_SIGN_FULL_PREF;
+		ct.ch_rate_type = sign ? GSM0808_SIGN_FULL_PREF : GSM0808_SPEECH_FULL_PREF;
 	else if (!strcmp(argv[2], "sdcch")) {
-		if (speech) {
-			vty_out(vty, "Can't request speech on SDCCH%s", VTY_NEWLINE);
+		if (!sign) {
+			vty_out(vty, "Can't request speech/data on SDCCH%s", VTY_NEWLINE);
 			return CMD_WARNING;
 		}
 		ct.ch_rate_type = GSM0808_SIGN_SDCCH;
 	} else
-		ct.ch_rate_type = speech ? GSM0808_SPEECH_FULL_PREF : GSM0808_SIGN_ANY;
+		ct.ch_rate_type = sign ? GSM0808_SIGN_ANY : GSM0808_SPEECH_FULL_PREF;
 
 	ip   = argc >= 5 ? argv[4] : "127.0.0.1";
 	port = argc >= 6 ? atoi(argv[5]) : 4000;
