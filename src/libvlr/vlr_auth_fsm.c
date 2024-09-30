@@ -473,7 +473,7 @@ static void auth_fsm_wait_ai_resync(struct osmo_fsm_inst *fi,
 	case VLR_AUTH_E_HLR_SAI_NACK:
 		auth_fsm_term(fi,
 			      AUTH_FSM_FAILURE,
-			      gsup->cause == GMM_CAUSE_IMSI_UNKNOWN?
+			      gsup->cause == GMM_CAUSE_IMSI_UNKNOWN ?
 				      GSM48_REJECT_IMSI_UNKNOWN_IN_HLR
 				      : GSM48_REJECT_NETWORK_FAILURE);
 		break;
