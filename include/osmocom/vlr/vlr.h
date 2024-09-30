@@ -328,6 +328,9 @@ struct vlr_instance *vlr_alloc(void *ctx, const struct vlr_ops *ops);
 int vlr_start(struct vlr_instance *vlr, struct gsup_client_mux *gcm);
 int vlr_gsup_rx(struct gsup_client_mux *gcm, void *data, const struct osmo_gsup_message *gsup_msg);
 
+static inline bool vlr_is_cs(struct vlr_instance *vlr) { return !vlr->cfg.is_ps; };
+static inline bool vlr_is_ps(struct vlr_instance *vlr) { return vlr->cfg.is_ps; };
+
 /* internal use only */
 
 void sub_pres_vlr_fsm_start(struct osmo_fsm_inst **fsm,
