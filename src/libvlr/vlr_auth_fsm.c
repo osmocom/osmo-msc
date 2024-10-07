@@ -346,7 +346,7 @@ static void auth_fsm_needs_auth(struct osmo_fsm_inst *fi, uint32_t event, void *
 	} else {
 		/* go straight ahead with sending auth request */
 		osmo_fsm_inst_state_chg(fi, VLR_SUB_AS_WAIT_RESP,
-					vlr_timer(vsub->vlr, 3260), 3260);
+					vlr_timer_secs(vsub->vlr, 3260), 3260);
 		_vlr_subscr_authenticate(fi);
 	}
 }
@@ -400,7 +400,7 @@ static void auth_fsm_wait_ai(struct osmo_fsm_inst *fi, uint32_t event,
 	return;
 pass:
 	osmo_fsm_inst_state_chg(fi, VLR_SUB_AS_WAIT_RESP,
-				vlr_timer(vsub->vlr, 3260), 3260);
+				vlr_timer_secs(vsub->vlr, 3260), 3260);
 	_vlr_subscr_authenticate(fi);
 }
 
@@ -424,7 +424,7 @@ static void auth_fsm_wait_auth_resp(struct osmo_fsm_inst *fi, uint32_t event,
 						   GSM_MI_TYPE_IMSI);
 				osmo_fsm_inst_state_chg(fi,
 						VLR_SUB_AS_WAIT_ID_IMSI,
-						vlr_timer(vlr, 3270), 3270);
+						vlr_timer_secs(vlr, 3270), 3270);
 			} else {
 				auth_fsm_term(fi, AUTH_FSM_FAILURE, GSM48_REJECT_ILLEGAL_MS);
 			}
@@ -467,7 +467,7 @@ static void auth_fsm_wait_ai_resync(struct osmo_fsm_inst *fi,
 	case VLR_AUTH_E_HLR_SAI_ACK:
 		vlr_subscr_update_tuples(vsub, gsup);
 		osmo_fsm_inst_state_chg(fi, VLR_SUB_AS_WAIT_RESP_RESYNC,
-					vlr_timer(vsub->vlr, 3260), 3260);
+					vlr_timer_secs(vsub->vlr, 3260), 3260);
 		_vlr_subscr_authenticate(fi);
 		break;
 	case VLR_AUTH_E_HLR_SAI_NACK:
@@ -500,7 +500,7 @@ static void auth_fsm_wait_auth_resp_resync(struct osmo_fsm_inst *fi,
 						   GSM_MI_TYPE_IMSI);
 				osmo_fsm_inst_state_chg(fi,
 						VLR_SUB_AS_WAIT_ID_IMSI,
-						vlr_timer(vlr, 3270), 3270);
+						vlr_timer_secs(vlr, 3270), 3270);
 			} else {
 				/* Result = Aborted */
 				auth_fsm_term(fi, AUTH_FSM_FAILURE, GSM48_REJECT_SYNCH_FAILURE);

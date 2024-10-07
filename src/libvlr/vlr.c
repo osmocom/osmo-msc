@@ -203,7 +203,7 @@ struct osmo_tdef msc_tdefs_vlr[] = {
 
 /* This is just a wrapper around the osmo_tdef API.
  * TODO: we should start using osmo_tdef_fsm_inst_state_chg() */
-uint32_t vlr_timer(struct vlr_instance *vlr, uint32_t timer)
+unsigned long vlr_timer_secs(struct vlr_instance *vlr, int timer)
 {
 	/* NOTE: since we usually do not need more than one instance of the VLR,
 	 * and since libosmocore's osmo_tdef API does not (yet) support dynamic
@@ -731,7 +731,7 @@ void vlr_subscr_enable_expire_lu(struct vlr_subscr *vsub)
 
 	/* Mark the subscriber as inactive if it stopped to do periodical location updates. */
 	if (osmo_clock_gettime(CLOCK_MONOTONIC, &now) == 0) {
-		vsub->expire_lu = now.tv_sec + vlr_timer(vsub->vlr, 3212);
+		vsub->expire_lu = now.tv_sec + vlr_timer_secs(vsub->vlr, 3212);
 	} else {
 		LOGP(DVLR, LOGL_ERROR,
 		     "%s: Could not enable Location Update expiry: unable to read current time\n", vlr_subscr_name(vsub));
@@ -748,7 +748,7 @@ void vlr_subscr_expire_lu(void *data)
 
 	/* Periodic location update might be disabled from the VTY,
 	 * so we shall not expire subscribers until explicit IMSI Detach. */
-	if (!vlr_timer(vlr, 3212))
+	if (!vlr_timer_secs(vlr, 3212))
 		goto done;
 
 	if (llist_empty(&vlr->subscribers))

@@ -203,7 +203,7 @@ static void _proc_arq_vlr_post_trace(struct osmo_fsm_inst *fi)
 		/* Chck_IMEI_VLR */
 		vlr->ops.tx_id_req(par->msc_conn_ref, GSM_MI_TYPE_IMEI);
 		osmo_fsm_inst_state_chg(fi, PR_ARQ_S_WAIT_CHECK_IMEI,
-					vlr_timer(vlr, 3270), 3270);
+					vlr_timer_secs(vlr, 3270), 3270);
 	} else
 		_proc_arq_vlr_post_imei(fi);
 }
@@ -406,7 +406,7 @@ static void proc_arq_vlr_fn_init(struct osmo_fsm_inst *fi,
 		if (vlr->cfg.parq_retrieve_imsi) {
 			/* Obtain_IMSI_VLR */
 			osmo_fsm_inst_state_chg(fi, PR_ARQ_S_WAIT_OBTAIN_IMSI,
-						vlr_timer(vlr, 3270), 3270);
+						vlr_timer_secs(vlr, 3270), 3270);
 			return;
 		} else {
 			/* Set User Error: Unidentified Subscriber */

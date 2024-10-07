@@ -1048,7 +1048,7 @@ static void vty_dump_one_subscr(struct vty *vty, struct vlr_subscr *vsub,
 			     VTY_NEWLINE);
 	}
 
-	if (!vlr_timer(vsub->vlr, 3212)) {
+	if (!vlr_timer_secs(vsub->vlr, 3212)) {
 		MSC_VTY_DUMP(vty, offset, "Expires: never (T3212 is disabled)%s",
 			     VTY_NEWLINE);
 	} else if (vsub->expire_lu == VLR_SUBSCRIBER_NO_EXPIRATION) {

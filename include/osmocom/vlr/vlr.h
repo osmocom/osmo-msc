@@ -424,7 +424,7 @@ bool vlr_subscr_matches_tmsi(struct vlr_subscr *vsub, uint32_t tmsi);
 bool vlr_subscr_matches_msisdn(struct vlr_subscr *vsub, const char *msisdn);
 bool vlr_subscr_matches_imei(struct vlr_subscr *vsub, const char *imei);
 
-uint32_t vlr_timer(struct vlr_instance *vlr, uint32_t timer);
+unsigned long vlr_timer_secs(struct vlr_instance *vlr, int timer);
 
 int vlr_subscr_changed(struct vlr_subscr *vsub);
 int vlr_subscr_purge(struct vlr_subscr *vsub) __attribute__((warn_unused_result));

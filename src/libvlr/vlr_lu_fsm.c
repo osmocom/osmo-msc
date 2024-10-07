@@ -432,7 +432,7 @@ static void lu_compl_vlr_new_tmsi(struct osmo_fsm_inst *fi)
 	}
 
 	osmo_fsm_inst_state_chg(fi, LU_COMPL_VLR_S_WAIT_TMSI_CNF,
-				vlr_timer(vlr, 3250), 3250);
+				vlr_timer_secs(vlr, 3250), 3250);
 
 	vlr->ops.tx_lu_acc(lcvp->msc_conn_ref, vsub->tmsi_new);
 }
@@ -459,7 +459,7 @@ static void lu_compl_vlr_wait_subscr_pres(struct osmo_fsm_inst *fi,
 					lcvp->assign_tmsi ?
 					  LU_COMPL_VLR_S_WAIT_IMEI_TMSI
 					: LU_COMPL_VLR_S_WAIT_IMEI,
-					vlr_timer(vlr, 3270), 3270);
+					vlr_timer_secs(vlr, 3270), 3270);
 		vlr->ops.tx_id_req(lcvp->msc_conn_ref, GSM_MI_TYPE_IMEI);
 		return;
 	}
@@ -939,7 +939,7 @@ static void vlr_loc_upd_node1_pre(struct osmo_fsm_inst *fi)
 	LOGPFSM(fi, "%s()\n", __func__);
 
 	if (vlr->cfg.check_imei_rqd && vlr->cfg.retrieve_imeisv_early) {
-		osmo_fsm_inst_state_chg(fi, VLR_ULA_S_WAIT_HLR_CHECK_IMEI_EARLY, vlr_timer(lfp->vlr, 3270), 3270);
+		osmo_fsm_inst_state_chg(fi, VLR_ULA_S_WAIT_HLR_CHECK_IMEI_EARLY, vlr_timer_secs(lfp->vlr, 3270), 3270);
 		vlr_subscr_tx_req_check_imei(lfp->vsub);
 	} else {
 		vlr_loc_upd_node1(fi);
@@ -975,7 +975,7 @@ static void vlr_loc_upd_want_imsi(struct osmo_fsm_inst *fi)
 
 	/* Obtain_IMSI_VLR */
 	osmo_fsm_inst_state_chg(fi, VLR_ULA_S_WAIT_IMSI,
-				vlr_timer(vlr, 3270), 3270);
+				vlr_timer_secs(vlr, 3270), 3270);
 	vlr->ops.tx_id_req(lfp->msc_conn_ref, GSM_MI_TYPE_IMSI);
 	/* will continue at vlr_loc_upd_node1_pre() once IMSI arrives */
 }
@@ -1112,7 +1112,7 @@ static void lu_fsm_idle(struct osmo_fsm_inst *fi, uint32_t event,
 	} else {
 		vlr->ops.tx_id_req(lfp->msc_conn_ref, GSM_MI_TYPE_IMEISV);
 		osmo_fsm_inst_state_chg(fi, VLR_ULA_S_WAIT_IMEISV,
-					vlr_timer(vlr, 3270), 3270);
+					vlr_timer_secs(vlr, 3270), 3270);
 	}
 }
 
