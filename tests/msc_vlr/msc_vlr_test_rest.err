@@ -81,13 +81,13 @@ DVLR vlr_lu_fsm(IMSI-901700000004620:GERAN-A:LU){VLR_ULA_S_IDLE}: Allocated
 DVLR vlr_lu_fsm(IMSI-901700000004620:GERAN-A:LU){VLR_ULA_S_IDLE}: is child of msc_a(IMSI-901700000004620:GERAN-A:LU)
 DVLR vlr_lu_fsm(IMSI-901700000004620:GERAN-A:LU){VLR_ULA_S_IDLE}: rev=GSM net=GERAN (no Auth)
 DVLR vlr_lu_fsm(IMSI-901700000004620:GERAN-A:LU){VLR_ULA_S_IDLE}: Received Event VLR_ULA_E_UPDATE_LA
-DREF VLR subscr unknown + _lu_fsm_associate_vsub: now used by 1 (_lu_fsm_associate_vsub)
+DVLR VLR subscr unknown + _lu_fsm_associate_vsub: now used by 1 (_lu_fsm_associate_vsub)
 DVLR set IMSI on subscriber; IMSI=901700000004620 id=901700000004620
 DVLR New subscr, IMSI: 901700000004620
-DREF VLR subscr IMSI-901700000004620 + active-conn: now used by 2 (_lu_fsm_associate_vsub,active-conn)
+DVLR VLR subscr IMSI-901700000004620 + active-conn: now used by 2 (_lu_fsm_associate_vsub,active-conn)
 DMSC msc_a(IMSI-901700000004620:GERAN-A:LU){MSC_A_ST_VALIDATE_L3}: Received Event MSC_A_EV_COMPLETE_LAYER_3_OK
 DMSC msc_a(IMSI-901700000004620:GERAN-A:LU){MSC_A_ST_VALIDATE_L3}: state_chg to MSC_A_ST_AUTH_CIPH
-DREF VLR subscr IMSI-901700000004620 - _lu_fsm_associate_vsub: now used by 1 (active-conn)
+DVLR VLR subscr IMSI-901700000004620 - _lu_fsm_associate_vsub: now used by 1 (active-conn)
 DVLR set Last E-UTRAN PLMN ID on subscriber: (none)
 DVLR vlr_lu_fsm(IMSI-901700000004620:GERAN-A:LU){VLR_ULA_S_IDLE}: vlr_loc_upd_node1_pre()
 DVLR vlr_lu_fsm(IMSI-901700000004620:GERAN-A:LU){VLR_ULA_S_IDLE}: vlr_loc_upd_node1()
@@ -107,11 +107,11 @@ DREF msc_a(IMSI-901700000004620:GERAN-A:LU){MSC_A_ST_AUTH_CIPH}: - rx_from_ms: n
   lu_result_sent == 0
 - HLR sends _INSERT_DATA_REQUEST, VLR responds with _INSERT_DATA_RESULT
 <-- GSUP rx OSMO_GSUP_MSGT_INSERT_DATA_REQUEST: 10010809710000004026f00804036470f10a0101
-DREF VLR subscr IMSI-901700000004620 + vlr_gsup_rx: now used by 2 (active-conn,vlr_gsup_rx)
+DVLR VLR subscr IMSI-901700000004620 + vlr_gsup_rx: now used by 2 (active-conn,vlr_gsup_rx)
 DVLR IMSI:901700000004620 has MSISDN:46071
 DMSC msub(IMSI-901700000004620:MSISDN-46071) VLR: update for IMSI=901700000004620 (MSISDN=46071)
 GSUP --> HLR: OSMO_GSUP_MSGT_INSERT_DATA_RESULT: 12010809710000004026f00a0101
-DREF VLR subscr IMSI-901700000004620:MSISDN-46071 - vlr_gsup_rx: now used by 1 (active-conn)
+DVLR VLR subscr IMSI-901700000004620:MSISDN-46071 - vlr_gsup_rx: now used by 1 (active-conn)
 <-- GSUP rx OSMO_GSUP_MSGT_INSERT_DATA_REQUEST: vlr_gsupc_read_cb() returns 0
   lu_result_sent == 0
 - having received subscriber data does not mean acceptance
@@ -136,7 +136,7 @@ DBSSAP msc_a(IMSI-901700000004620:MSISDN-46071:GERAN-A:LU){MSC_A_ST_AUTH_CIPH}: 
   lu_result_sent == 0
 - HLR also sends GSUP _UPDATE_LOCATION_RESULT
 <-- GSUP rx OSMO_GSUP_MSGT_UPDATE_LOCATION_RESULT: 06010809710000004026f00a0101
-DREF VLR subscr IMSI-901700000004620:MSISDN-46071 + vlr_gsup_rx: now used by 2 (active-conn,vlr_gsup_rx)
+DVLR VLR subscr IMSI-901700000004620:MSISDN-46071 + vlr_gsup_rx: now used by 2 (active-conn,vlr_gsup_rx)
 DVLR vlr_lu_fsm(IMSI-901700000004620:MSISDN-46071:GERAN-A:LU){VLR_ULA_S_WAIT_HLR_UPD}: Received Event VLR_ULA_E_HLR_LU_RES
 DVLR upd_hlr_vlr_fsm(IMSI-901700000004620:GERAN-A:LU){UPD_HLR_VLR_S_WAIT_FOR_DATA}: Received Event UPD_HLR_VLR_E_UPD_LOC_ACK
 DVLR upd_hlr_vlr_fsm(IMSI-901700000004620:GERAN-A:LU){UPD_HLR_VLR_S_WAIT_FOR_DATA}: state_chg to UPD_HLR_VLR_S_DONE
@@ -150,7 +150,7 @@ DVLR lu_compl_vlr_fsm(IMSI-901700000004620:MSISDN-46071:GERAN-A:LU){LU_COMPL_VLR
 DVLR lu_compl_vlr_fsm(IMSI-901700000004620:MSISDN-46071:GERAN-A:LU){LU_COMPL_VLR_S_INIT}: state_chg to LU_COMPL_VLR_S_WAIT_SUB_PRES
 DVLR lu_compl_vlr_fsm(IMSI-901700000004620:MSISDN-46071:GERAN-A:LU){LU_COMPL_VLR_S_WAIT_SUB_PRES}: Received Event LU_COMPL_VLR_E_SUB_PRES_COMPL
 - sending LU Accept for IMSI-901700000004620:MSISDN-46071:GERAN-A:LU
-DREF VLR subscr IMSI-901700000004620:MSISDN-46071 + attached: now used by 3 (active-conn,vlr_gsup_rx,attached)
+DVLR VLR subscr IMSI-901700000004620:MSISDN-46071 + attached: now used by 3 (active-conn,vlr_gsup_rx,attached)
 DVLR lu_compl_vlr_fsm(IMSI-901700000004620:MSISDN-46071:GERAN-A:LU){LU_COMPL_VLR_S_WAIT_SUB_PRES}: state_chg to LU_COMPL_VLR_S_DONE
 DVLR vlr_lu_fsm(IMSI-901700000004620:MSISDN-46071:GERAN-A:LU){VLR_ULA_S_WAIT_LU_COMPL}: Received Event VLR_ULA_E_LU_COMPL_SUCCESS
 DVLR lu_compl_vlr_fsm(IMSI-901700000004620:MSISDN-46071:GERAN-A:LU){LU_COMPL_VLR_S_DONE}: Terminating in cascade, depth 2 (cause = OSMO_FSM_TERM_PARENT, caused by: upd_hlr_vlr_fsm(IMSI-901700000004620:GERAN-A:LU))
@@ -163,15 +163,15 @@ DREF msc_a(IMSI-901700000004620:MSISDN-46071:GERAN-A:LU){MSC_A_ST_AUTHENTICATED}
 DMSC msc_a(IMSI-901700000004620:MSISDN-46071:GERAN-A:LU){MSC_A_ST_AUTHENTICATED}: Received Event MSC_A_EV_UNUSED
 DMSC msc_a(IMSI-901700000004620:MSISDN-46071:GERAN-A:LU){MSC_A_ST_AUTHENTICATED}: state_chg to MSC_A_ST_RELEASING
 DBSSAP msc_a(IMSI-901700000004620:MSISDN-46071:GERAN-A:LU){MSC_A_ST_RELEASING}: Releasing: msc_a use is 0 (-)
-DREF VLR subscr IMSI-901700000004620:MSISDN-46071 + msc_a_fsm_releasing_onenter: now used by 4 (active-conn,vlr_gsup_rx,attached,msc_a_fsm_releasing_onenter)
-DREF VLR subscr IMSI-901700000004620:MSISDN-46071 + vlr_subscr_cancel_attach_fsm: now used by 5 (active-conn,vlr_gsup_rx,attached,msc_a_fsm_releasing_onenter,vlr_subscr_cancel_attach_fsm)
-DREF VLR subscr IMSI-901700000004620:MSISDN-46071 - vlr_subscr_cancel_attach_fsm: now used by 4 (active-conn,vlr_gsup_rx,attached,msc_a_fsm_releasing_onenter)
+DVLR VLR subscr IMSI-901700000004620:MSISDN-46071 + msc_a_fsm_releasing_onenter: now used by 4 (active-conn,vlr_gsup_rx,attached,msc_a_fsm_releasing_onenter)
+DVLR VLR subscr IMSI-901700000004620:MSISDN-46071 + vlr_subscr_cancel_attach_fsm: now used by 5 (active-conn,vlr_gsup_rx,attached,msc_a_fsm_releasing_onenter,vlr_subscr_cancel_attach_fsm)
+DVLR VLR subscr IMSI-901700000004620:MSISDN-46071 - vlr_subscr_cancel_attach_fsm: now used by 4 (active-conn,vlr_gsup_rx,attached,msc_a_fsm_releasing_onenter)
 DREF msc_a(IMSI-901700000004620:MSISDN-46071:GERAN-A:LU){MSC_A_ST_RELEASING}: + wait-Clear-Complete: now used by 1 (wait-Clear-Complete)
 DMSC msc_a(IMSI-901700000004620:MSISDN-46071:GERAN-A:LU){MSC_A_ST_RELEASING}: RAN encode: CLEAR_COMMAND on GERAN-A
 DMSC dummy_msc_i(IMSI-901700000004620:MSISDN-46071:GERAN-A:LU){0}: Received Event MSC_I_EV_FROM_A_FORWARD_ACCESS_SIGNALLING_REQUEST
-DREF VLR subscr IMSI-901700000004620:MSISDN-46071 - msc_a_fsm_releasing_onenter: now used by 3 (active-conn,vlr_gsup_rx,attached)
+DVLR VLR subscr IMSI-901700000004620:MSISDN-46071 - msc_a_fsm_releasing_onenter: now used by 3 (active-conn,vlr_gsup_rx,attached)
 DVLR upd_hlr_vlr_fsm(IMSI-901700000004620:GERAN-A:LU){UPD_HLR_VLR_S_DONE}: Deallocated, including all deferred deallocations
-DREF VLR subscr IMSI-901700000004620:MSISDN-46071 - vlr_gsup_rx: now used by 2 (active-conn,attached)
+DVLR VLR subscr IMSI-901700000004620:MSISDN-46071 - vlr_gsup_rx: now used by 2 (active-conn,attached)
 <-- GSUP rx OSMO_GSUP_MSGT_UPDATE_LOCATION_RESULT: vlr_gsupc_read_cb() returns 0
   bssap_clear_sent == 1
 - LU was successful, and the conn has already been closed
@@ -197,7 +197,7 @@ DMSC dummy_msc_i(IMSI-901700000004620:MSISDN-46071:GERAN-A:LU){0}: Terminating i
 DMSC dummy_msc_i(IMSI-901700000004620:MSISDN-46071:GERAN-A:LU){0}: Removing from parent msub_fsm
 DMSC dummy_msc_i(IMSI-901700000004620:MSISDN-46071:GERAN-A:LU){0}: Deferring: will deallocate with msc_a(IMSI-901700000004620:MSISDN-46071:GERAN-A:LU)
 DMSC msub(IMSI-901700000004620:MSISDN-46071) Free
-DREF VLR subscr IMSI-901700000004620:MSISDN-46071 - active-conn: now used by 1 (attached)
+DVLR VLR subscr IMSI-901700000004620:MSISDN-46071 - active-conn: now used by 1 (attached)
 DMSC msub_fsm{terminating}: Deferring: will deallocate with msc_a(IMSI-901700000004620:MSISDN-46071:GERAN-A:LU)
 DMSC msc_a(IMSI-901700000004620:MSISDN-46071:GERAN-A:LU){MSC_A_ST_RELEASED}: Deallocated, including all deferred deallocations
 - msub gone
@@ -225,11 +225,11 @@ DVLR vlr_lu_fsm(IMSI-901700000004620:GERAN-A:LU){VLR_ULA_S_IDLE}: Allocated
 DVLR vlr_lu_fsm(IMSI-901700000004620:GERAN-A:LU){VLR_ULA_S_IDLE}: is child of msc_a(IMSI-901700000004620:GERAN-A:LU)
 DVLR vlr_lu_fsm(IMSI-901700000004620:GERAN-A:LU){VLR_ULA_S_IDLE}: rev=GSM net=GERAN (no Auth)
 DVLR vlr_lu_fsm(IMSI-901700000004620:GERAN-A:LU){VLR_ULA_S_IDLE}: Received Event VLR_ULA_E_UPDATE_LA
-DREF VLR subscr IMSI-901700000004620:MSISDN-46071 + _lu_fsm_associate_vsub: now used by 2 (attached,_lu_fsm_associate_vsub)
-DREF VLR subscr IMSI-901700000004620:MSISDN-46071 + active-conn: now used by 3 (attached,_lu_fsm_associate_vsub,active-conn)
+DVLR VLR subscr IMSI-901700000004620:MSISDN-46071 + _lu_fsm_associate_vsub: now used by 2 (attached,_lu_fsm_associate_vsub)
+DVLR VLR subscr IMSI-901700000004620:MSISDN-46071 + active-conn: now used by 3 (attached,_lu_fsm_associate_vsub,active-conn)
 DMSC msc_a(IMSI-901700000004620:MSISDN-46071:GERAN-A:LU){MSC_A_ST_VALIDATE_L3}: Received Event MSC_A_EV_COMPLETE_LAYER_3_OK
 DMSC msc_a(IMSI-901700000004620:MSISDN-46071:GERAN-A:LU){MSC_A_ST_VALIDATE_L3}: state_chg to MSC_A_ST_AUTH_CIPH
-DREF VLR subscr IMSI-901700000004620:MSISDN-46071 - _lu_fsm_associate_vsub: now used by 2 (attached,active-conn)
+DVLR VLR subscr IMSI-901700000004620:MSISDN-46071 - _lu_fsm_associate_vsub: now used by 2 (attached,active-conn)
 DVLR set Last E-UTRAN PLMN ID on subscriber: (none)
 DVLR vlr_lu_fsm(IMSI-901700000004620:MSISDN-46071:GERAN-A:LU){VLR_ULA_S_IDLE}: vlr_loc_upd_node1_pre()
 DVLR vlr_lu_fsm(IMSI-901700000004620:MSISDN-46071:GERAN-A:LU){VLR_ULA_S_IDLE}: vlr_loc_upd_node1()
@@ -249,11 +249,11 @@ DREF msc_a(IMSI-901700000004620:MSISDN-46071:GERAN-A:LU){MSC_A_ST_AUTH_CIPH}: - 
   lu_result_sent == 0
 - HLR sends _INSERT_DATA_REQUEST, VLR responds with _INSERT_DATA_RESULT
 <-- GSUP rx OSMO_GSUP_MSGT_INSERT_DATA_REQUEST: 10010809710000004026f00804036470f10a0101
-DREF VLR subscr IMSI-901700000004620:MSISDN-46071 + vlr_gsup_rx: now used by 3 (attached,active-conn,vlr_gsup_rx)
+DVLR VLR subscr IMSI-901700000004620:MSISDN-46071 + vlr_gsup_rx: now used by 3 (attached,active-conn,vlr_gsup_rx)
 DVLR IMSI:901700000004620 has MSISDN:46071
 DMSC msub(IMSI-901700000004620:MSISDN-46071) VLR: update for IMSI=901700000004620 (MSISDN=46071)
 GSUP --> HLR: OSMO_GSUP_MSGT_INSERT_DATA_RESULT: 12010809710000004026f00a0101
-DREF VLR subscr IMSI-901700000004620:MSISDN-46071 - vlr_gsup_rx: now used by 2 (attached,active-conn)
+DVLR VLR subscr IMSI-901700000004620:MSISDN-46071 - vlr_gsup_rx: now used by 2 (attached,active-conn)
 <-- GSUP rx OSMO_GSUP_MSGT_INSERT_DATA_REQUEST: vlr_gsupc_read_cb() returns 0
   lu_result_sent == 0
 - having received subscriber data does not mean acceptance
@@ -278,7 +278,7 @@ DBSSAP msc_a(IMSI-901700000004620:MSISDN-46071:GERAN-A:LU){MSC_A_ST_AUTH_CIPH}: 
   lu_result_sent == 0
 - HLR also sends GSUP _UPDATE_LOCATION_RESULT
 <-- GSUP rx OSMO_GSUP_MSGT_UPDATE_LOCATION_RESULT: 06010809710000004026f00a0101
-DREF VLR subscr IMSI-901700000004620:MSISDN-46071 + vlr_gsup_rx: now used by 3 (attached,active-conn,vlr_gsup_rx)
+DVLR VLR subscr IMSI-901700000004620:MSISDN-46071 + vlr_gsup_rx: now used by 3 (attached,active-conn,vlr_gsup_rx)
 DVLR vlr_lu_fsm(IMSI-901700000004620:MSISDN-46071:GERAN-A:LU){VLR_ULA_S_WAIT_HLR_UPD}: Received Event VLR_ULA_E_HLR_LU_RES
 DVLR upd_hlr_vlr_fsm(IMSI-901700000004620:MSISDN-46071:GERAN-A:LU){UPD_HLR_VLR_S_WAIT_FOR_DATA}: Received Event UPD_HLR_VLR_E_UPD_LOC_ACK
 DVLR upd_hlr_vlr_fsm(IMSI-901700000004620:MSISDN-46071:GERAN-A:LU){UPD_HLR_VLR_S_WAIT_FOR_DATA}: state_chg to UPD_HLR_VLR_S_DONE
@@ -304,15 +304,15 @@ DREF msc_a(IMSI-901700000004620:MSISDN-46071:GERAN-A:LU){MSC_A_ST_AUTHENTICATED}
 DMSC msc_a(IMSI-901700000004620:MSISDN-46071:GERAN-A:LU){MSC_A_ST_AUTHENTICATED}: Received Event MSC_A_EV_UNUSED
 DMSC msc_a(IMSI-901700000004620:MSISDN-46071:GERAN-A:LU){MSC_A_ST_AUTHENTICATED}: state_chg to MSC_A_ST_RELEASING
 DBSSAP msc_a(IMSI-901700000004620:MSISDN-46071:GERAN-A:LU){MSC_A_ST_RELEASING}: Releasing: msc_a use is 0 (-)
-DREF VLR subscr IMSI-901700000004620:MSISDN-46071 + msc_a_fsm_releasing_onenter: now used by 4 (attached,active-conn,vlr_gsup_rx,msc_a_fsm_releasing_onenter)
-DREF VLR subscr IMSI-901700000004620:MSISDN-46071 + vlr_subscr_cancel_attach_fsm: now used by 5 (attached,active-conn,vlr_gsup_rx,msc_a_fsm_releasing_onenter,vlr_subscr_cancel_attach_fsm)
-DREF VLR subscr IMSI-901700000004620:MSISDN-46071 - vlr_subscr_cancel_attach_fsm: now used by 4 (attached,active-conn,vlr_gsup_rx,msc_a_fsm_releasing_onenter)
+DVLR VLR subscr IMSI-901700000004620:MSISDN-46071 + msc_a_fsm_releasing_onenter: now used by 4 (attached,active-conn,vlr_gsup_rx,msc_a_fsm_releasing_onenter)
+DVLR VLR subscr IMSI-901700000004620:MSISDN-46071 + vlr_subscr_cancel_attach_fsm: now used by 5 (attached,active-conn,vlr_gsup_rx,msc_a_fsm_releasing_onenter,vlr_subscr_cancel_attach_fsm)
+DVLR VLR subscr IMSI-901700000004620:MSISDN-46071 - vlr_subscr_cancel_attach_fsm: now used by 4 (attached,active-conn,vlr_gsup_rx,msc_a_fsm_releasing_onenter)
 DREF msc_a(IMSI-901700000004620:MSISDN-46071:GERAN-A:LU){MSC_A_ST_RELEASING}: + wait-Clear-Complete: now used by 1 (wait-Clear-Complete)
 DMSC msc_a(IMSI-901700000004620:MSISDN-46071:GERAN-A:LU){MSC_A_ST_RELEASING}: RAN encode: CLEAR_COMMAND on GERAN-A
 DMSC dummy_msc_i(IMSI-901700000004620:MSISDN-46071:GERAN-A:LU){0}: Received Event MSC_I_EV_FROM_A_FORWARD_ACCESS_SIGNALLING_REQUEST
-DREF VLR subscr IMSI-901700000004620:MSISDN-46071 - msc_a_fsm_releasing_onenter: now used by 3 (attached,active-conn,vlr_gsup_rx)
+DVLR VLR subscr IMSI-901700000004620:MSISDN-46071 - msc_a_fsm_releasing_onenter: now used by 3 (attached,active-conn,vlr_gsup_rx)
 DVLR upd_hlr_vlr_fsm(IMSI-901700000004620:MSISDN-46071:GERAN-A:LU){UPD_HLR_VLR_S_DONE}: Deallocated, including all deferred deallocations
-DREF VLR subscr IMSI-901700000004620:MSISDN-46071 - vlr_gsup_rx: now used by 2 (attached,active-conn)
+DVLR VLR subscr IMSI-901700000004620:MSISDN-46071 - vlr_gsup_rx: now used by 2 (attached,active-conn)
 <-- GSUP rx OSMO_GSUP_MSGT_UPDATE_LOCATION_RESULT: vlr_gsupc_read_cb() returns 0
   bssap_clear_sent == 1
 - LU was successful, and the conn has already been closed
@@ -338,7 +338,7 @@ DMSC dummy_msc_i(IMSI-901700000004620:MSISDN-46071:GERAN-A:LU){0}: Terminating i
 DMSC dummy_msc_i(IMSI-901700000004620:MSISDN-46071:GERAN-A:LU){0}: Removing from parent msub_fsm
 DMSC dummy_msc_i(IMSI-901700000004620:MSISDN-46071:GERAN-A:LU){0}: Deferring: will deallocate with msc_a(IMSI-901700000004620:MSISDN-46071:GERAN-A:LU)
 DMSC msub(IMSI-901700000004620:MSISDN-46071) Free
-DREF VLR subscr IMSI-901700000004620:MSISDN-46071 - active-conn: now used by 1 (attached)
+DVLR VLR subscr IMSI-901700000004620:MSISDN-46071 - active-conn: now used by 1 (attached)
 DMSC msub_fsm{terminating}: Deferring: will deallocate with msc_a(IMSI-901700000004620:MSISDN-46071:GERAN-A:LU)
 DMSC msc_a(IMSI-901700000004620:MSISDN-46071:GERAN-A:LU){MSC_A_ST_RELEASED}: Deallocated, including all deferred deallocations
 - msub gone
@@ -358,24 +358,24 @@ DREF msc_a(unknown:GERAN-A:NONE){MSC_A_ST_VALIDATE_L3}: + rx_from_ms: now used b
 DBSSAP msc_a(unknown:GERAN-A:NONE){MSC_A_ST_VALIDATE_L3}: RAN decode: COMPL_L3
 DRLL msc_a(unknown:GERAN-A:NONE){MSC_A_ST_VALIDATE_L3}: Dispatching 04.08 message: MM GSM48_MT_MM_IMSI_DETACH_IND
 DMM IMSI DETACH INDICATION: IMSI-901700000004620
-DREF VLR subscr IMSI-901700000004620:MSISDN-46071 + gsm48_rx_mm_imsi_detach_ind: now used by 2 (attached,gsm48_rx_mm_imsi_detach_ind)
+DVLR VLR subscr IMSI-901700000004620:MSISDN-46071 + gsm48_rx_mm_imsi_detach_ind: now used by 2 (attached,gsm48_rx_mm_imsi_detach_ind)
 DMM IMSI DETACH for IMSI-901700000004620:MSISDN-46071
-DREF VLR subscr IMSI-901700000004620:MSISDN-46071 + active-conn: now used by 3 (attached,gsm48_rx_mm_imsi_detach_ind,active-conn)
-DREF VLR subscr IMSI-901700000004620:MSISDN-46071 + vlr_subscr_cancel_attach_fsm: now used by 4 (attached,gsm48_rx_mm_imsi_detach_ind,active-conn,vlr_subscr_cancel_attach_fsm)
-DREF VLR subscr IMSI-901700000004620:MSISDN-46071 - vlr_subscr_cancel_attach_fsm: now used by 3 (attached,gsm48_rx_mm_imsi_detach_ind,active-conn)
+DVLR VLR subscr IMSI-901700000004620:MSISDN-46071 + active-conn: now used by 3 (attached,gsm48_rx_mm_imsi_detach_ind,active-conn)
+DVLR VLR subscr IMSI-901700000004620:MSISDN-46071 + vlr_subscr_cancel_attach_fsm: now used by 4 (attached,gsm48_rx_mm_imsi_detach_ind,active-conn,vlr_subscr_cancel_attach_fsm)
+DVLR VLR subscr IMSI-901700000004620:MSISDN-46071 - vlr_subscr_cancel_attach_fsm: now used by 3 (attached,gsm48_rx_mm_imsi_detach_ind,active-conn)
 DVLR set Last E-UTRAN PLMN ID on subscriber: (none)
-DREF VLR subscr IMSI-901700000004620:MSISDN-46071 - attached: now used by 2 (gsm48_rx_mm_imsi_detach_ind,active-conn)
-DREF VLR subscr IMSI-901700000004620:MSISDN-46071 - gsm48_rx_mm_imsi_detach_ind: now used by 1 (active-conn)
+DVLR VLR subscr IMSI-901700000004620:MSISDN-46071 - attached: now used by 2 (gsm48_rx_mm_imsi_detach_ind,active-conn)
+DVLR VLR subscr IMSI-901700000004620:MSISDN-46071 - gsm48_rx_mm_imsi_detach_ind: now used by 1 (active-conn)
 DMSC msc_a(IMSI-901700000004620:MSISDN-46071:GERAN-A:NONE){MSC_A_ST_VALIDATE_L3}: Received Event MSC_A_EV_CN_CLOSE
 DMSC msc_a(IMSI-901700000004620:MSISDN-46071:GERAN-A:NONE){MSC_A_ST_VALIDATE_L3}: state_chg to MSC_A_ST_RELEASING
 DBSSAP msc_a(IMSI-901700000004620:MSISDN-46071:GERAN-A:NONE){MSC_A_ST_RELEASING}: Releasing: msc_a use is 1 (rx_from_ms)
-DREF VLR subscr IMSI-901700000004620:MSISDN-46071 + msc_a_fsm_releasing_onenter: now used by 2 (active-conn,msc_a_fsm_releasing_onenter)
-DREF VLR subscr IMSI-901700000004620:MSISDN-46071 + vlr_subscr_cancel_attach_fsm: now used by 3 (active-conn,msc_a_fsm_releasing_onenter,vlr_subscr_cancel_attach_fsm)
-DREF VLR subscr IMSI-901700000004620:MSISDN-46071 - vlr_subscr_cancel_attach_fsm: now used by 2 (active-conn,msc_a_fsm_releasing_onenter)
+DVLR VLR subscr IMSI-901700000004620:MSISDN-46071 + msc_a_fsm_releasing_onenter: now used by 2 (active-conn,msc_a_fsm_releasing_onenter)
+DVLR VLR subscr IMSI-901700000004620:MSISDN-46071 + vlr_subscr_cancel_attach_fsm: now used by 3 (active-conn,msc_a_fsm_releasing_onenter,vlr_subscr_cancel_attach_fsm)
+DVLR VLR subscr IMSI-901700000004620:MSISDN-46071 - vlr_subscr_cancel_attach_fsm: now used by 2 (active-conn,msc_a_fsm_releasing_onenter)
 DREF msc_a(IMSI-901700000004620:MSISDN-46071:GERAN-A:NONE){MSC_A_ST_RELEASING}: + wait-Clear-Complete: now used by 2 (rx_from_ms,wait-Clear-Complete)
 DMSC msc_a(IMSI-901700000004620:MSISDN-46071:GERAN-A:NONE){MSC_A_ST_RELEASING}: RAN encode: CLEAR_COMMAND on GERAN-A
 DMSC dummy_msc_i(IMSI-901700000004620:MSISDN-46071:GERAN-A:NONE){0}: Received Event MSC_I_EV_FROM_A_FORWARD_ACCESS_SIGNALLING_REQUEST
-DREF VLR subscr IMSI-901700000004620:MSISDN-46071 - msc_a_fsm_releasing_onenter: now used by 1 (active-conn)
+DVLR VLR subscr IMSI-901700000004620:MSISDN-46071 - msc_a_fsm_releasing_onenter: now used by 1 (active-conn)
 DREF msc_a(IMSI-901700000004620:MSISDN-46071:GERAN-A:NONE){MSC_A_ST_RELEASING}: - rx_from_ms: now used by 1 (wait-Clear-Complete)
   bssap_clear_sent == 1
 DBSSAP msc_a(IMSI-901700000004620:MSISDN-46071:GERAN-A:NONE){MSC_A_ST_RELEASING}: RAN decode: CLEAR_COMPLETE
@@ -395,7 +395,7 @@ DMSC dummy_msc_i(IMSI-901700000004620:MSISDN-46071:GERAN-A:NONE){0}: Terminating
 DMSC dummy_msc_i(IMSI-901700000004620:MSISDN-46071:GERAN-A:NONE){0}: Removing from parent msub_fsm
 DMSC dummy_msc_i(IMSI-901700000004620:MSISDN-46071:GERAN-A:NONE){0}: Deferring: will deallocate with msc_a(IMSI-901700000004620:MSISDN-46071:GERAN-A:NONE)
 DMSC msub(IMSI-901700000004620:MSISDN-46071) Free
-DREF VLR subscr IMSI-901700000004620:MSISDN-46071 - active-conn: now used by 0 (-)
+DVLR VLR subscr IMSI-901700000004620:MSISDN-46071 - active-conn: now used by 0 (-)
 DVLR SUBSCR(IMSI-901700000004620:MSISDN-46071) freeing VLR subscr (max total use count was 5)
 DMSC msub_fsm{terminating}: Deferring: will deallocate with msc_a(IMSI-901700000004620:MSISDN-46071:GERAN-A:NONE)
 DMSC msc_a(IMSI-901700000004620:MSISDN-46071:GERAN-A:NONE){MSC_A_ST_RELEASED}: Deallocated, including all deferred deallocations
@@ -424,12 +424,12 @@ DVLR vlr_lu_fsm(TMSI-0x23422342:GERAN-A:LU){VLR_ULA_S_IDLE}: Allocated
 DVLR vlr_lu_fsm(TMSI-0x23422342:GERAN-A:LU){VLR_ULA_S_IDLE}: is child of msc_a(TMSI-0x23422342:GERAN-A:LU)
 DVLR vlr_lu_fsm(TMSI-0x23422342:GERAN-A:LU){VLR_ULA_S_IDLE}: rev=GSM net=GERAN (no Auth)
 DVLR vlr_lu_fsm(TMSI-0x23422342:GERAN-A:LU){VLR_ULA_S_IDLE}: Received Event VLR_ULA_E_UPDATE_LA
-DREF VLR subscr unknown + _lu_fsm_associate_vsub: now used by 1 (_lu_fsm_associate_vsub)
+DVLR VLR subscr unknown + _lu_fsm_associate_vsub: now used by 1 (_lu_fsm_associate_vsub)
 DVLR New subscr, TMSI: 0x23422342
-DREF VLR subscr TMSI-0x23422342 + active-conn: now used by 2 (_lu_fsm_associate_vsub,active-conn)
+DVLR VLR subscr TMSI-0x23422342 + active-conn: now used by 2 (_lu_fsm_associate_vsub,active-conn)
 DMSC msc_a(TMSI-0x23422342:GERAN-A:LU){MSC_A_ST_VALIDATE_L3}: Received Event MSC_A_EV_COMPLETE_LAYER_3_OK
 DMSC msc_a(TMSI-0x23422342:GERAN-A:LU){MSC_A_ST_VALIDATE_L3}: state_chg to MSC_A_ST_AUTH_CIPH
-DREF VLR subscr TMSI-0x23422342 - _lu_fsm_associate_vsub: now used by 1 (active-conn)
+DVLR VLR subscr TMSI-0x23422342 - _lu_fsm_associate_vsub: now used by 1 (active-conn)
 DVLR set Last E-UTRAN PLMN ID on subscriber: (none)
 DVLR vlr_lu_fsm(TMSI-0x23422342:GERAN-A:LU){VLR_ULA_S_IDLE}: vlr_loc_upd_want_imsi()
 DVLR vlr_lu_fsm(TMSI-0x23422342:GERAN-A:LU){VLR_ULA_S_IDLE}: state_chg to VLR_ULA_S_WAIT_IMSI
@@ -484,11 +484,11 @@ DREF msc_a(TMSI-0x23422342:GERAN-A:LU){MSC_A_ST_AUTH_CIPH}: - rx_from_ms: now us
   lu_result_sent == 0
 - HLR sends _INSERT_DATA_REQUEST, VLR responds with _INSERT_DATA_RESULT
 <-- GSUP rx OSMO_GSUP_MSGT_INSERT_DATA_REQUEST: 10010809710000004026f00804036470f10a0101
-DREF VLR subscr IMSI-901700000004620:TMSI-0x23422342 + vlr_gsup_rx: now used by 2 (active-conn,vlr_gsup_rx)
+DVLR VLR subscr IMSI-901700000004620:TMSI-0x23422342 + vlr_gsup_rx: now used by 2 (active-conn,vlr_gsup_rx)
 DVLR IMSI:901700000004620 has MSISDN:46071
 DMSC msub(IMSI-901700000004620:MSISDN-46071:TMSI-0x23422342) VLR: update for IMSI=901700000004620 (MSISDN=46071)
 GSUP --> HLR: OSMO_GSUP_MSGT_INSERT_DATA_RESULT: 12010809710000004026f00a0101
-DREF VLR subscr IMSI-901700000004620:MSISDN-46071:TMSI-0x23422342 - vlr_gsup_rx: now used by 1 (active-conn)
+DVLR VLR subscr IMSI-901700000004620:MSISDN-46071:TMSI-0x23422342 - vlr_gsup_rx: now used by 1 (active-conn)
 <-- GSUP rx OSMO_GSUP_MSGT_INSERT_DATA_REQUEST: vlr_gsupc_read_cb() returns 0
   lu_result_sent == 0
 - having received subscriber data does not mean acceptance
@@ -513,7 +513,7 @@ DBSSAP msc_a(IMSI-901700000004620:MSISDN-46071:TMSI-0x23422342:GERAN-A:LU){MSC_A
   lu_result_sent == 0
 - HLR also sends GSUP _UPDATE_LOCATION_RESULT
 <-- GSUP rx OSMO_GSUP_MSGT_UPDATE_LOCATION_RESULT: 06010809710000004026f00a0101
-DREF VLR subscr IMSI-901700000004620:MSISDN-46071:TMSI-0x23422342 + vlr_gsup_rx: now used by 2 (active-conn,vlr_gsup_rx)
+DVLR VLR subscr IMSI-901700000004620:MSISDN-46071:TMSI-0x23422342 + vlr_gsup_rx: now used by 2 (active-conn,vlr_gsup_rx)
 DVLR vlr_lu_fsm(IMSI-901700000004620:MSISDN-46071:TMSI-0x23422342:GERAN-A:LU){VLR_ULA_S_WAIT_HLR_UPD}: Received Event VLR_ULA_E_HLR_LU_RES
 DVLR upd_hlr_vlr_fsm(TMSI-0x23422342:GERAN-A:LU){UPD_HLR_VLR_S_WAIT_FOR_DATA}: Received Event UPD_HLR_VLR_E_UPD_LOC_ACK
 DVLR upd_hlr_vlr_fsm(TMSI-0x23422342:GERAN-A:LU){UPD_HLR_VLR_S_WAIT_FOR_DATA}: state_chg to UPD_HLR_VLR_S_DONE
@@ -527,7 +527,7 @@ DVLR lu_compl_vlr_fsm(IMSI-901700000004620:MSISDN-46071:TMSI-0x23422342:GERAN-A:
 DVLR lu_compl_vlr_fsm(IMSI-901700000004620:MSISDN-46071:TMSI-0x23422342:GERAN-A:LU){LU_COMPL_VLR_S_INIT}: state_chg to LU_COMPL_VLR_S_WAIT_SUB_PRES
 DVLR lu_compl_vlr_fsm(IMSI-901700000004620:MSISDN-46071:TMSI-0x23422342:GERAN-A:LU){LU_COMPL_VLR_S_WAIT_SUB_PRES}: Received Event LU_COMPL_VLR_E_SUB_PRES_COMPL
 - sending LU Accept for IMSI-901700000004620:MSISDN-46071:TMSI-0x23422342:GERAN-A:LU
-DREF VLR subscr IMSI-901700000004620:MSISDN-46071 + attached: now used by 3 (active-conn,vlr_gsup_rx,attached)
+DVLR VLR subscr IMSI-901700000004620:MSISDN-46071 + attached: now used by 3 (active-conn,vlr_gsup_rx,attached)
 DVLR lu_compl_vlr_fsm(IMSI-901700000004620:MSISDN-46071:TMSI-0x23422342:GERAN-A:LU){LU_COMPL_VLR_S_WAIT_SUB_PRES}: state_chg to LU_COMPL_VLR_S_DONE
 DVLR vlr_lu_fsm(IMSI-901700000004620:MSISDN-46071:TMSI-0x23422342:GERAN-A:LU){VLR_ULA_S_WAIT_LU_COMPL}: Received Event VLR_ULA_E_LU_COMPL_SUCCESS
 DVLR lu_compl_vlr_fsm(IMSI-901700000004620:MSISDN-46071:TMSI-0x23422342:GERAN-A:LU){LU_COMPL_VLR_S_DONE}: Terminating in cascade, depth 2 (cause = OSMO_FSM_TERM_PARENT, caused by: upd_hlr_vlr_fsm(TMSI-0x23422342:GERAN-A:LU))
@@ -540,15 +540,15 @@ DREF msc_a(IMSI-901700000004620:MSISDN-46071:TMSI-0x23422342:GERAN-A:LU){MSC_A_S
 DMSC msc_a(IMSI-901700000004620:MSISDN-46071:TMSI-0x23422342:GERAN-A:LU){MSC_A_ST_AUTHENTICATED}: Received Event MSC_A_EV_UNUSED
 DMSC msc_a(IMSI-901700000004620:MSISDN-46071:TMSI-0x23422342:GERAN-A:LU){MSC_A_ST_AUTHENTICATED}: state_chg to MSC_A_ST_RELEASING
 DBSSAP msc_a(IMSI-901700000004620:MSISDN-46071:TMSI-0x23422342:GERAN-A:LU){MSC_A_ST_RELEASING}: Releasing: msc_a use is 0 (-)
-DREF VLR subscr IMSI-901700000004620:MSISDN-46071 + msc_a_fsm_releasing_onenter: now used by 4 (active-conn,vlr_gsup_rx,attached,msc_a_fsm_releasing_onenter)
-DREF VLR subscr IMSI-901700000004620:MSISDN-46071 + vlr_subscr_cancel_attach_fsm: now used by 5 (active-conn,vlr_gsup_rx,attached,msc_a_fsm_releasing_onenter,vlr_subscr_cancel_attach_fsm)
-DREF VLR subscr IMSI-901700000004620:MSISDN-46071 - vlr_subscr_cancel_attach_fsm: now used by 4 (active-conn,vlr_gsup_rx,attached,msc_a_fsm_releasing_onenter)
+DVLR VLR subscr IMSI-901700000004620:MSISDN-46071 + msc_a_fsm_releasing_onenter: now used by 4 (active-conn,vlr_gsup_rx,attached,msc_a_fsm_releasing_onenter)
+DVLR VLR subscr IMSI-901700000004620:MSISDN-46071 + vlr_subscr_cancel_attach_fsm: now used by 5 (active-conn,vlr_gsup_rx,attached,msc_a_fsm_releasing_onenter,vlr_subscr_cancel_attach_fsm)
+DVLR VLR subscr IMSI-901700000004620:MSISDN-46071 - vlr_subscr_cancel_attach_fsm: now used by 4 (active-conn,vlr_gsup_rx,attached,msc_a_fsm_releasing_onenter)
 DREF msc_a(IMSI-901700000004620:MSISDN-46071:TMSI-0x23422342:GERAN-A:LU){MSC_A_ST_RELEASING}: + wait-Clear-Complete: now used by 1 (wait-Clear-Complete)
 DMSC msc_a(IMSI-901700000004620:MSISDN-46071:TMSI-0x23422342:GERAN-A:LU){MSC_A_ST_RELEASING}: RAN encode: CLEAR_COMMAND on GERAN-A
 DMSC dummy_msc_i(IMSI-901700000004620:MSISDN-46071:TMSI-0x23422342:GERAN-A:LU){0}: Received Event MSC_I_EV_FROM_A_FORWARD_ACCESS_SIGNALLING_REQUEST
-DREF VLR subscr IMSI-901700000004620:MSISDN-46071 - msc_a_fsm_releasing_onenter: now used by 3 (active-conn,vlr_gsup_rx,attached)
+DVLR VLR subscr IMSI-901700000004620:MSISDN-46071 - msc_a_fsm_releasing_onenter: now used by 3 (active-conn,vlr_gsup_rx,attached)
 DVLR upd_hlr_vlr_fsm(TMSI-0x23422342:GERAN-A:LU){UPD_HLR_VLR_S_DONE}: Deallocated, including all deferred deallocations
-DREF VLR subscr IMSI-901700000004620:MSISDN-46071 - vlr_gsup_rx: now used by 2 (active-conn,attached)
+DVLR VLR subscr IMSI-901700000004620:MSISDN-46071 - vlr_gsup_rx: now used by 2 (active-conn,attached)
 <-- GSUP rx OSMO_GSUP_MSGT_UPDATE_LOCATION_RESULT: vlr_gsupc_read_cb() returns 0
   bssap_clear_sent == 1
 - LU was successful, and the conn has already been closed
@@ -574,7 +574,7 @@ DMSC dummy_msc_i(IMSI-901700000004620:MSISDN-46071:TMSI-0x23422342:GERAN-A:LU){0
 DMSC dummy_msc_i(IMSI-901700000004620:MSISDN-46071:TMSI-0x23422342:GERAN-A:LU){0}: Removing from parent msub_fsm
 DMSC dummy_msc_i(IMSI-901700000004620:MSISDN-46071:TMSI-0x23422342:GERAN-A:LU){0}: Deferring: will deallocate with msc_a(IMSI-901700000004620:MSISDN-46071:TMSI-0x23422342:GERAN-A:LU)
 DMSC msub(IMSI-901700000004620:MSISDN-46071) Free
-DREF VLR subscr IMSI-901700000004620:MSISDN-46071 - active-conn: now used by 1 (attached)
+DVLR VLR subscr IMSI-901700000004620:MSISDN-46071 - active-conn: now used by 1 (attached)
 DMSC msub_fsm{terminating}: Deferring: will deallocate with msc_a(IMSI-901700000004620:MSISDN-46071:TMSI-0x23422342:GERAN-A:LU)
 DMSC msc_a(IMSI-901700000004620:MSISDN-46071:TMSI-0x23422342:GERAN-A:LU){MSC_A_ST_RELEASED}: Deallocated, including all deferred deallocations
 - msub gone

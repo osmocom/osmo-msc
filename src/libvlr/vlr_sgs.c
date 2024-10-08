@@ -22,7 +22,6 @@
 
 #include <osmocom/core/utils.h>
 #include <osmocom/core/fsm.h>
-#include <osmocom/msc/debug.h>
 #include <osmocom/vlr/vlr.h>
 #include <osmocom/vlr/vlr_sgs.h>
 

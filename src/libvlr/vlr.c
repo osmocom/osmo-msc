@@ -34,7 +34,6 @@
 #include <osmocom/gsupclient/gsup_client.h>
 #include <osmocom/vlr/vlr_sgs.h>
 #include <osmocom/vlr/vlr.h>
-#include <osmocom/msc/debug.h>
 #include <osmocom/msc/gsup_client_mux.h>
 #include <osmocom/msc/paging.h>
 
@@ -365,7 +364,7 @@ static int vlr_subscr_use_cb(struct osmo_use_count_entry *e, int32_t old_use_cou
 	else
 		level = LOGL_DEBUG;
 
-	LOGPSRC(DREF, level, file, line, "VLR subscr %s %s %s: now used by %s\n",
+	LOGPSRC(g_vlr_log_cat[OSMO_VLR_LOGC_VLR], level, file, line, "VLR subscr %s %s %s: now used by %s\n",
 		vlr_subscr_name(vsub), (e->count - old_use_count) > 0? "+" : "-", e->use,
 		osmo_use_count_name_buf(buf, sizeof(buf), e->use_count));
 
