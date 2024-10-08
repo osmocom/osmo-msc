@@ -704,7 +704,7 @@ static void _test_umts_authen_too_short_res(enum osmo_rat_type via_ran)
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("MS sends Authen Response of wrong RES size, VLR thwarts");
-	gsup_expect_tx("0b010809710000000156f0" VLR_TO_HLR); /* OSMO_GSUP_MSGT_AUTH_FAIL_REPORT */
+	gsup_expect_tx("0b010809710000000156f0280102" VLR_TO_HLR); /* OSMO_GSUP_MSGT_AUTH_FAIL_REPORT */
 	expect_release_clear(via_ran);
 	ms_sends_msg("0554" "e229c19e" "2103" "791f2e" /* nipped one byte */);
 	VERBOSE_ASSERT(lu_result_sent, == RES_REJECT, "%d");
@@ -804,7 +804,7 @@ static void _test_umts_authen_too_long_res(enum osmo_rat_type via_ran)
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("MS sends Authen Response of wrong RES size, VLR thwarts");
-	gsup_expect_tx("0b010809710000000156f0" VLR_TO_HLR); /* OSMO_GSUP_MSGT_AUTH_FAIL_REPORT */
+	gsup_expect_tx("0b010809710000000156f0280102" VLR_TO_HLR); /* OSMO_GSUP_MSGT_AUTH_FAIL_REPORT */
 	expect_release_clear(via_ran);
 	ms_sends_msg("0554" "e229c19e" "2105" "791f2e4123" /* added one byte */);
 	VERBOSE_ASSERT(lu_result_sent, == RES_REJECT, "%d");
@@ -909,7 +909,7 @@ static void _test_umts_authen_only_sres(enum osmo_rat_type via_ran)
 	else
 		btw("MS sends Authen Response of wrong RES size, VLR thwarts:"
 		    " UTRAN disallows GSM AKA altogether");
-	gsup_expect_tx("0b010809710000000156f0" VLR_TO_HLR); /* OSMO_GSUP_MSGT_AUTH_FAIL_REPORT */
+	gsup_expect_tx("0b010809710000000156f0280102" VLR_TO_HLR); /* OSMO_GSUP_MSGT_AUTH_FAIL_REPORT */
 	expect_release_clear(via_ran);
 	ms_sends_msg("0554" "e229c19e" /* Only the SRES half of the RES */);
 	VERBOSE_ASSERT(lu_result_sent, == RES_REJECT, "%d");

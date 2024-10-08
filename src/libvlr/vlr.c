@@ -429,6 +429,8 @@ int vlr_subscr_purge(struct vlr_subscr *vsub)
 	gsup_msg.hlr_enc_len = vsub->hlr.len;
 	gsup_msg.hlr_enc = vsub->hlr.buf;
 
+	gsup_msg.cn_domain = vlr_is_cs(vsub->vlr) ? OSMO_GSUP_CN_DOMAIN_CS : OSMO_GSUP_CN_DOMAIN_PS;
+
 	return vlr_subscr_tx_gsup_message(vsub, &gsup_msg);
 }
 
@@ -886,7 +888,7 @@ int vlr_subscr_req_lu(struct vlr_subscr *vsub)
 	vlr_rate_ctr_inc(vsub->vlr, VLR_CTR_GSUP_TX_UL_REQ);
 
 	gsup_msg.message_type = OSMO_GSUP_MSGT_UPDATE_LOCATION_REQUEST;
-	gsup_msg.cn_domain = vsub->vlr->cfg.is_ps ? OSMO_GSUP_CN_DOMAIN_PS : OSMO_GSUP_CN_DOMAIN_CS;
+	gsup_msg.cn_domain = vlr_is_cs(vsub->vlr) ? OSMO_GSUP_CN_DOMAIN_CS : OSMO_GSUP_CN_DOMAIN_PS;
 	rc = vlr_subscr_tx_gsup_message(vsub, &gsup_msg);
 
 	return rc;
@@ -903,7 +905,7 @@ int vlr_subscr_req_sai(struct vlr_subscr *vsub,
 	gsup_msg.message_type = OSMO_GSUP_MSGT_SEND_AUTH_INFO_REQUEST;
 	gsup_msg.auts = auts;
 	gsup_msg.rand = auts_rand;
-	gsup_msg.cn_domain = OSMO_GSUP_CN_DOMAIN_CS;
+	gsup_msg.cn_domain = vlr_is_cs(vsub->vlr) ? OSMO_GSUP_CN_DOMAIN_CS : OSMO_GSUP_CN_DOMAIN_PS;
 
 	return vlr_subscr_tx_gsup_message(vsub, &gsup_msg);
 }
@@ -940,6 +942,7 @@ int vlr_subscr_tx_auth_fail_rep(const struct vlr_subscr *vsub)
 	struct osmo_gsup_message gsup_msg = {
 		.message_class = OSMO_GSUP_MESSAGE_CLASS_SUBSCRIBER_MANAGEMENT,
 		.message_type = OSMO_GSUP_MSGT_AUTH_FAIL_REPORT,
+		.cn_domain = vlr_is_cs(vsub->vlr) ? OSMO_GSUP_CN_DOMAIN_CS : OSMO_GSUP_CN_DOMAIN_PS,
 	};
 
 	vlr_rate_ctr_inc(vsub->vlr, VLR_CTR_GSUP_TX_AUTH_FAIL_REP);
@@ -1284,6 +1287,7 @@ static int vlr_subscr_handle_cancel_req(struct vlr_subscr *vsub,
 		 "update procedure" : "subscription withdraw");
 
 	gsup_reply.message_type = OSMO_GSUP_MSGT_LOCATION_CANCEL_RESULT;
+	gsup_reply.cn_domain = vlr_is_cs(vsub->vlr) ? OSMO_GSUP_CN_DOMAIN_CS : OSMO_GSUP_CN_DOMAIN_PS;
 	rc = vlr_subscr_tx_gsup_message(vsub, &gsup_reply);
 
 	vlr_subscr_cancel_attach_fsm(vsub, fsm_cause, vlr_gmm_cause_to_reject_cause_domain(gsup_msg->cause, true));

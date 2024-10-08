@@ -1170,7 +1170,7 @@ static void test_wrong_sres_length()
 	VERBOSE_ASSERT(lu_result_sent, == RES_NONE, "%d");
 
 	btw("MS sends Authen Response with too short SRES data, auth is thwarted.");
-	gsup_expect_tx("0b010809710000004026f0" VLR_TO_HLR); /* OSMO_GSUP_MSGT_AUTH_FAIL_REPORT */
+	gsup_expect_tx("0b010809710000004026f0280102" VLR_TO_HLR); /* OSMO_GSUP_MSGT_AUTH_FAIL_REPORT */
 	expect_bssap_clear();
 	ms_sends_msg("05542d8b2c");
 	VERBOSE_ASSERT(lu_result_sent, == RES_REJECT, "%d");
