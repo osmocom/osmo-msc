@@ -16,4 +16,5 @@ enum proc_arq_vlr_state {
 	PR_ARQ_S_DONE,
 };
 
+void vlr_parq_fsm_init(void);
 void vlr_parq_fsm_set_log_subsys(int log_level);

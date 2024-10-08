@@ -475,8 +475,6 @@ void vlr_parq_cancel(struct osmo_fsm_inst *fi,
 		     enum osmo_fsm_term_cause fsm_cause,
 		     enum gsm48_reject_value gsm48_cause);
 
-void vlr_parq_fsm_init(void);
-
 int vlr_set_ciph_mode(struct vlr_instance *vlr,
 		      struct osmo_fsm_inst *fi,
 		      void *msc_conn_ref,
