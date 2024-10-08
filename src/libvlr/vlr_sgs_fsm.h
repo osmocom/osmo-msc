@@ -39,6 +39,7 @@ enum sgs_ue_fsm_event {
 };
 
 void vlr_sgs_fsm_init(void);
+void vlr_sgs_fsm_set_log_subsys(int log_subsys);
 void vlr_sgs_fsm_create(struct vlr_subscr *vsub);
 void vlr_sgs_fsm_remove(struct vlr_subscr *vsub);
 void vlr_sgs_fsm_update_id(struct vlr_subscr *vsub);

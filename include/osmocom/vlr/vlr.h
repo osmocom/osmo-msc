@@ -17,12 +17,6 @@
 #include <osmocom/gsupclient/gsup_client.h>
 #include <osmocom/vlr/vlr_sgs.h>
 
-#define LOGGSUPP(level, gsup, fmt, args...)				\
-	LOGP(DVLR, level, "GSUP(%s) " fmt, (gsup)->imsi, ## args)
-
-#define LOGVSUBP(level, vsub, fmt, args...)				\
-	LOGP(DVLR, level, "SUBSCR(%s) " fmt, vlr_subscr_name(vsub), ## args)
-
 struct log_target;
 struct osmo_mobile_identity;
 
@@ -498,3 +492,12 @@ enum gsm48_reject_value vlr_gmm_cause_to_reject_cause(enum gsm48_gmm_cause gmm_c
 enum gsm48_reject_value vlr_gmm_cause_to_reject_cause_domain(enum gsm48_gmm_cause gmm_cause, bool is_cs);
 enum gsm48_reject_value vlr_reject_causes_cs(enum gsm48_reject_value reject_cause);
 enum gsm48_reject_value vlr_reject_causes_ps(enum gsm48_reject_value reject_cause);
+
+/* logging */
+enum osmo_vlr_cat {
+	OSMO_VLR_LOGC_VLR,
+	OSMO_VLR_LOGC_SGS,
+	_OSMO_VLR_LOGC_MAX,
+};
+
+void osmo_vlr_set_log_cat(enum osmo_vlr_cat logc, int logc_num);

@@ -1253,6 +1253,9 @@ int main(int argc, char **argv)
 	msgb_ctx = msgb_talloc_ctx_init(msc_vlr_tests_ctx, 0);
 	osmo_init_logging2(msc_vlr_tests_ctx, &info);
 
+	osmo_vlr_set_log_cat(OSMO_VLR_LOGC_VLR, DVLR);
+	osmo_vlr_set_log_cat(OSMO_VLR_LOGC_SGS, DSGS);
+
 	_log_lines = cmdline_opts.verbose;
 
 	OSMO_ASSERT(osmo_stderr_target);
