@@ -1538,7 +1538,7 @@ static int msc_vlr_tx_cm_serv_rej(void *msc_conn_ref, enum osmo_cm_service_type 
 static void msc_vlr_subscr_update(struct vlr_subscr *subscr)
 {
 	struct msub *msub = msub_for_vsub(subscr);
-	LOGVSUBP(LOGL_NOTICE, subscr, "VLR: update for IMSI=%s (MSISDN=%s)%s\n",
+	LOG_MSUB(msub, LOGL_NOTICE, "VLR: update for IMSI=%s (MSISDN=%s)%s\n",
 		 subscr->imsi, subscr->msisdn, msub ? "" : " (NO CONN!)");
 	msub_update_id(msub);
 }

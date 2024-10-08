@@ -25,6 +25,8 @@
 #include <osmocom/msc/debug.h>
 #include <osmocom/vlr/vlr.h>
 #include <osmocom/vlr/vlr_sgs.h>
+
+#include "vlr_core.h"
 #include "vlr_sgs_fsm.h"
 
 const struct value_string sgs_state_timer_names[] = {
@@ -51,7 +53,7 @@ void vlr_sgs_reset(struct vlr_instance *vlr)
 
 	OSMO_ASSERT(vlr);
 
-	LOGP(DVLR, LOGL_INFO, "dropping all SGs associations.\n");
+	LOGSGS(LOGL_INFO, "dropping all SGs associations.\n");
 
 	llist_for_each_entry(vsub, &vlr->subscribers, list) {
 		osmo_fsm_inst_dispatch(vsub->sgs_fsm, SGS_UE_E_RX_RESET_FROM_MME, NULL);
@@ -85,7 +87,7 @@ int vlr_sgs_loc_update(struct vlr_instance *vlr, struct vlr_sgs_cfg *cfg,
 
 	vsub = vlr_subscr_find_or_create_by_imsi(vlr, imsi, VSUB_USE_SGS_LU, NULL);
 	if (!vsub) {
-		LOGP(DSGS, LOGL_ERROR, "VLR subscriber allocation failed\n");
+		LOGSGS(LOGL_ERROR, "VLR subscriber allocation failed\n");
 		return -EINVAL;
 	}
 
@@ -168,7 +170,7 @@ void vlr_sgs_imsi_detach(struct vlr_instance *vlr, const char *imsi, enum sgsap_
 		evt = SGS_UE_E_RX_DETACH_IND_FROM_MME;
 		break;
 	default:
-		LOGP(DSGS, LOGL_ERROR, "(sub %s) invalid SGS IMSI detach type, detaching anyway...\n",
+		LOGSGS(LOGL_ERROR, "(sub %s) invalid SGS IMSI detach type, detaching anyway...\n",
 		     vlr_subscr_msisdn_or_name(vsub));
 		evt = SGS_UE_E_RX_DETACH_IND_FROM_MME;
 		break;
@@ -206,7 +208,7 @@ void vlr_sgs_eps_detach(struct vlr_instance *vlr, const char *imsi, enum sgsap_i
 		evt = SGS_UE_E_RX_DETACH_IND_FROM_MME;
 		break;
 	default:
-		LOGP(DSGS, LOGL_ERROR, "(sub %s) invalid SGS IMSI detach type, detaching anyway...\n",
+		LOGSGS(LOGL_ERROR, "(sub %s) invalid SGS IMSI detach type, detaching anyway...\n",
 		     vlr_subscr_msisdn_or_name(vsub));
 		evt = SGS_UE_E_RX_DETACH_IND_FROM_MME;
 		break;
@@ -253,7 +255,7 @@ void vlr_sgs_pag_rej(struct vlr_instance *vlr, const char *imsi, enum sgsap_sgs_
 	/* On the reception of a paging rej the VLR is supposed to stop Ts5,
 	   also  3GPP TS 29.118, chapter 5.1.2.4 */
 	osmo_timer_del(&vsub->sgs.Ts5);
-	LOGP(DSGS, LOGL_DEBUG, "(sub %s) Paging via SGs interface rejected by MME, %s stopped, cause: %s!\n",
+	LOGSGS(LOGL_DEBUG, "(sub %s) Paging via SGs interface rejected by MME, %s stopped, cause: %s!\n",
 	     vlr_subscr_msisdn_or_name(vsub), vlr_sgs_state_timer_name(SGS_STATE_TS5), sgsap_sgs_cause_name(cause));
 
 	osmo_fsm_inst_dispatch(vsub->sgs_fsm, SGS_UE_E_RX_PAGING_FAILURE, &cause);
@@ -295,7 +297,7 @@ void vlr_sgs_ue_unr(struct vlr_instance *vlr, const char *imsi, enum sgsap_sgs_c
 	/* On the reception of an UE unreachable the VLR is supposed to stop
 	 * Ts5, also 3GPP TS 29.118, chapter 5.1.2.5 */
 	osmo_timer_del(&vsub->sgs.Ts5);
-	LOGP(DSGS, LOGL_DEBUG,
+	LOGSGS(LOGL_DEBUG,
 	     "(sub %s) Paging via SGs interface not possible, UE unreachable, %s stopped, cause: %s\n",
 	     vlr_subscr_msisdn_or_name(vsub), vlr_sgs_state_timer_name(SGS_STATE_TS5), sgsap_sgs_cause_name(cause));
 
@@ -313,7 +315,7 @@ static void Ts5_timeout_cb(void *arg)
 	 * failed. Other actions may check the status of Ts5 to see if a paging
 	 * is still ongoing or not. */
 
-	LOGP(DSGS, LOGL_ERROR, "(sub %s) Paging via SGs interface timed out (%s expired)!\n",
+	LOGSGS(LOGL_ERROR, "(sub %s) Paging via SGs interface timed out (%s expired)!\n",
 	     vlr_subscr_msisdn_or_name(vsub), vlr_sgs_state_timer_name(SGS_STATE_TS5));
 
 	/* Balance ref count increment from vlr_sgs_pag() */

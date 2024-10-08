@@ -650,7 +650,7 @@ static struct osmo_fsm proc_arq_vlr_fsm = {
 	.num_states = ARRAY_SIZE(proc_arq_vlr_states),
 	.allstate_event_mask = 0,
 	.allstate_action = NULL,
-	.log_subsys = DVLR,
+	.log_subsys = DLGLOBAL,
 	.event_names = proc_arq_vlr_event_names,
 	.cleanup = proc_arq_vlr_cleanup,
 };
@@ -808,4 +808,9 @@ void vlr_parq_fsm_init(void)
 {
 	//OSMO_ASSERT(osmo_fsm_register(&upd_loc_child_vlr_fsm) == 0);
 	OSMO_ASSERT(osmo_fsm_register(&proc_arq_vlr_fsm) == 0);
+}
+
+void vlr_parq_fsm_set_log_subsys(int log_subsys)
+{
+	proc_arq_vlr_fsm.log_subsys = log_subsys;
 }

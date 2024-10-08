@@ -610,7 +610,7 @@ struct osmo_fsm vlr_auth_fsm = {
 	.num_states = ARRAY_SIZE(auth_fsm_states),
 	.allstate_event_mask = 0,
 	.allstate_action = NULL,
-	.log_subsys = DVLR,
+	.log_subsys = DLGLOBAL,
 	.event_names = fsm_auth_event_names,
 	.cleanup = auth_fsm_cleanup,
 };

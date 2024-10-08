@@ -28,6 +28,7 @@
 
 #include <osmocom/msc/gsm_data.h>
 #include <osmocom/vlr/vlr.h>
+#include <osmocom/msc/debug.h>
 #include <osmocom/msc/gsup_client_mux.h>
 #include <osmocom/msc/gsm_04_11_gsup.h>
 #include <osmocom/msc/gsm_09_11.h>
@@ -107,6 +108,8 @@ void gsm_network_set_mncc_sock_path(struct gsm_network *net, const char *mncc_so
 /* Allocate net->vlr so that the VTY may configure the VLR's data structures */
 int msc_vlr_alloc(struct gsm_network *net)
 {
+	osmo_vlr_set_log_cat(OSMO_VLR_LOGC_VLR, DVLR);
+	osmo_vlr_set_log_cat(OSMO_VLR_LOGC_SGS, DSGS);
 	net->vlr = vlr_alloc(net, &msc_vlr_ops);
 	if (!net->vlr)
 		return -ENOMEM;
