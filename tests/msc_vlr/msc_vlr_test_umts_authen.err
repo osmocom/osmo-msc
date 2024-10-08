@@ -19,13 +19,13 @@ DVLR vlr_lu_fsm(IMSI-901700000010650:GERAN-A:LU){VLR_ULA_S_IDLE}: Allocated
 DVLR vlr_lu_fsm(IMSI-901700000010650:GERAN-A:LU){VLR_ULA_S_IDLE}: is child of msc_a(IMSI-901700000010650:GERAN-A:LU)
 DVLR vlr_lu_fsm(IMSI-901700000010650:GERAN-A:LU){VLR_ULA_S_IDLE}: rev=R99 net=GERAN Auth (no Ciph)
 DVLR vlr_lu_fsm(IMSI-901700000010650:GERAN-A:LU){VLR_ULA_S_IDLE}: Received Event VLR_ULA_E_UPDATE_LA
-DREF VLR subscr unknown + _lu_fsm_associate_vsub: now used by 1 (_lu_fsm_associate_vsub)
+DVLR VLR subscr unknown + _lu_fsm_associate_vsub: now used by 1 (_lu_fsm_associate_vsub)
 DVLR set IMSI on subscriber; IMSI=901700000010650 id=901700000010650
 DVLR New subscr, IMSI: 901700000010650
-DREF VLR subscr IMSI-901700000010650 + active-conn: now used by 2 (_lu_fsm_associate_vsub,active-conn)
+DVLR VLR subscr IMSI-901700000010650 + active-conn: now used by 2 (_lu_fsm_associate_vsub,active-conn)
 DMSC msc_a(IMSI-901700000010650:GERAN-A:LU){MSC_A_ST_VALIDATE_L3}: Received Event MSC_A_EV_COMPLETE_LAYER_3_OK
 DMSC msc_a(IMSI-901700000010650:GERAN-A:LU){MSC_A_ST_VALIDATE_L3}: state_chg to MSC_A_ST_AUTH_CIPH
-DREF VLR subscr IMSI-901700000010650 - _lu_fsm_associate_vsub: now used by 1 (active-conn)
+DVLR VLR subscr IMSI-901700000010650 - _lu_fsm_associate_vsub: now used by 1 (active-conn)
 DVLR set Last E-UTRAN PLMN ID on subscriber: (none)
 DVLR vlr_lu_fsm(IMSI-901700000010650:GERAN-A:LU){VLR_ULA_S_IDLE}: vlr_loc_upd_node1_pre()
 DVLR vlr_lu_fsm(IMSI-901700000010650:GERAN-A:LU){VLR_ULA_S_IDLE}: vlr_loc_upd_node1()
@@ -40,7 +40,7 @@ DREF msc_a(IMSI-901700000010650:GERAN-A:LU){MSC_A_ST_AUTH_CIPH}: - rx_from_ms: n
   lu_result_sent == 0
 - from HLR, rx _SEND_AUTH_INFO_RESULT; VLR sends Auth Req to MS
 <-- GSUP rx OSMO_GSUP_MSGT_SEND_AUTH_INFO_RESULT: 0a010809710000000156f00362201039fa2f4e3d523d8619a73b4f65c3e14d21049b36efdf2208059a4f668f6fbe39231027497388b6cb044648f396aa155b95ef2410f64735036e5871319c679f4742a75ea125108704f5ba55f30000d2ee44b22c8ea9192708e229c19e791f2e4103622010c187a53a5e6b9d573cac7c74451fd46d210485aa31302208d3d50a000bf04f6e23101159ec926a50e98c034a6b7d7c9f418d2410df3a03d9ca5335641efc8e36d76cd20b25101843a645b98d00005b2d666af46c45d927087db47cf7f81e4dc703622010efa9c29a9742148d5c9070348716e1bb210469d5f9fb22083df176f0c29f1a3d2310eb50e770ddcc3060101d2f43b6c2b884241076542abce5ff9345b0e8947f4c6e019c2510f9375e6d41e1000096e7fe4ff1c27e392708706f996719ba609c03622010f023d5a3b24726e0631b64b3840f82532104d570c03f2208ec011be8919883d62310c4e58af4ba43f3bcd904e16984f086d724100593f65e752e5cb7f473862bda05aa0a2510541ff1f077270000c5ea00d658bc7e9a27083fd26072eaa2a04d036220102f8f90c780d6a9c0c53da7ac57b6707e2104b072446f220823f39f9f425ad6e6231065af0527fda95b0dc5ae4aa515cdf32f2410537c3b35a3b13b08d08eeb28098f45cc25104bf4e564f75300009bc796706bc6574427080edb0eadbea94ac20a0101
-DREF VLR subscr IMSI-901700000010650 + vlr_gsup_rx: now used by 2 (active-conn,vlr_gsup_rx)
+DVLR VLR subscr IMSI-901700000010650 + vlr_gsup_rx: now used by 2 (active-conn,vlr_gsup_rx)
 DVLR VLR_Authenticate(IMSI-901700000010650:GERAN-A:LU){VLR_SUB_AS_NEEDS_AUTH_WAIT_AI}: Received Event VLR_AUTH_E_HLR_SAI_ACK
 DVLR SUBSCR(IMSI-901700000010650) Received 5 auth tuples
 DVLR VLR_Authenticate(IMSI-901700000010650:GERAN-A:LU){VLR_SUB_AS_NEEDS_AUTH_WAIT_AI}: state_chg to VLR_SUB_AS_WAIT_RESP
@@ -49,7 +49,7 @@ DVLR VLR_Authenticate(IMSI-901700000010650:GERAN-A:LU){VLR_SUB_AS_WAIT_RESP}: go
 - ...rand=39fa2f4e3d523d8619a73b4f65c3e14d
 - ...autn=8704f5ba55f30000d2ee44b22c8ea919
 - ...expecting res=e229c19e791f2e41
-DREF VLR subscr IMSI-901700000010650 - vlr_gsup_rx: now used by 1 (active-conn)
+DVLR VLR subscr IMSI-901700000010650 - vlr_gsup_rx: now used by 1 (active-conn)
 <-- GSUP rx OSMO_GSUP_MSGT_SEND_AUTH_INFO_RESULT: vlr_gsupc_read_cb() returns 0
   auth_request_sent == 1
   lu_result_sent == 0
@@ -84,16 +84,16 @@ DREF msc_a(IMSI-901700000010650:GERAN-A:LU){MSC_A_ST_AUTH_CIPH}: - rx_from_ms: n
   lu_result_sent == 0
 - HLR sends _INSERT_DATA_REQUEST, VLR responds with _INSERT_DATA_RESULT
 <-- GSUP rx OSMO_GSUP_MSGT_INSERT_DATA_REQUEST: 10010809710000000156f00804032443f20a0101
-DREF VLR subscr IMSI-901700000010650 + vlr_gsup_rx: now used by 2 (active-conn,vlr_gsup_rx)
+DVLR VLR subscr IMSI-901700000010650 + vlr_gsup_rx: now used by 2 (active-conn,vlr_gsup_rx)
 DVLR IMSI:901700000010650 has MSISDN:42342
 DMSC msub(IMSI-901700000010650:MSISDN-42342) VLR: update for IMSI=901700000010650 (MSISDN=42342)
 GSUP --> HLR: OSMO_GSUP_MSGT_INSERT_DATA_RESULT: 12010809710000000156f00a0101
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342 - vlr_gsup_rx: now used by 1 (active-conn)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342 - vlr_gsup_rx: now used by 1 (active-conn)
 <-- GSUP rx OSMO_GSUP_MSGT_INSERT_DATA_REQUEST: vlr_gsupc_read_cb() returns 0
   lu_result_sent == 0
 - HLR also sends GSUP _UPDATE_LOCATION_RESULT
 <-- GSUP rx OSMO_GSUP_MSGT_UPDATE_LOCATION_RESULT: 06010809710000000156f00a0101
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342 + vlr_gsup_rx: now used by 2 (active-conn,vlr_gsup_rx)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342 + vlr_gsup_rx: now used by 2 (active-conn,vlr_gsup_rx)
 DVLR vlr_lu_fsm(IMSI-901700000010650:MSISDN-42342:GERAN-A:LU){VLR_ULA_S_WAIT_HLR_UPD}: Received Event VLR_ULA_E_HLR_LU_RES
 DVLR upd_hlr_vlr_fsm(IMSI-901700000010650:GERAN-A:LU){UPD_HLR_VLR_S_WAIT_FOR_DATA}: Received Event UPD_HLR_VLR_E_UPD_LOC_ACK
 DVLR upd_hlr_vlr_fsm(IMSI-901700000010650:GERAN-A:LU){UPD_HLR_VLR_S_WAIT_FOR_DATA}: state_chg to UPD_HLR_VLR_S_DONE
@@ -111,7 +111,7 @@ DMSC msub(IMSI-901700000010650:MSISDN-42342:TMSInew-0x03020100) VLR: update for 
 DVLR lu_compl_vlr_fsm(IMSI-901700000010650:MSISDN-42342:GERAN-A:LU){LU_COMPL_VLR_S_WAIT_SUB_PRES}: state_chg to LU_COMPL_VLR_S_WAIT_TMSI_CNF
 - sending LU Accept for IMSI-901700000010650:MSISDN-42342:TMSInew-0x03020100:GERAN-A:LU, with TMSI 0x03020100
 DVLR upd_hlr_vlr_fsm(IMSI-901700000010650:GERAN-A:LU){UPD_HLR_VLR_S_DONE}: Deallocated
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSInew-0x03020100 - vlr_gsup_rx: now used by 1 (active-conn)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSInew-0x03020100 - vlr_gsup_rx: now used by 1 (active-conn)
 <-- GSUP rx OSMO_GSUP_MSGT_UPDATE_LOCATION_RESULT: vlr_gsupc_read_cb() returns 0
   lu_result_sent == 1
 - a LU Accept with a new TMSI was sent, waiting for TMSI Realloc Compl
@@ -135,12 +135,12 @@ DRLL msc_a(IMSI-901700000010650:MSISDN-42342:TMSInew-0x03020100:GERAN-A:LU){MSC_
 DBSSAP msc_a(IMSI-901700000010650:MSISDN-42342:TMSInew-0x03020100:GERAN-A:LU){MSC_A_ST_AUTH_CIPH}: Message not permitted for initial conn: SMS:0x01
 DBSSAP msc_a(IMSI-901700000010650:MSISDN-42342:TMSInew-0x03020100:GERAN-A:LU){MSC_A_ST_AUTH_CIPH}: RAN decode error (rc=-13) for DTAP from MSC-I
 - even though the TMSI is not acked, we can already find the subscr with it
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSInew-0x03020100 + _test_umts_authen: now used by 2 (active-conn,_test_umts_authen)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSInew-0x03020100 + _test_umts_authen: now used by 2 (active-conn,_test_umts_authen)
   vsub != NULL == 1
   strcmp(vsub->imsi, imsi) == 0
   vsub->tmsi_new == 0x03020100
   vsub->tmsi == 0xffffffff
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSInew-0x03020100 - _test_umts_authen: now used by 1 (active-conn)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSInew-0x03020100 - _test_umts_authen: now used by 1 (active-conn)
 - MS sends TMSI Realloc Complete
   MSC <--GERAN-A-- MS: GSM48_MT_MM_TMSI_REALL_COMPL
 DREF msc_a(IMSI-901700000010650:MSISDN-42342:TMSInew-0x03020100:GERAN-A:LU){MSC_A_ST_AUTH_CIPH}: + rx_from_ms: now used by 2 (lu,rx_from_ms)
@@ -150,7 +150,7 @@ DMM msc_a(IMSI-901700000010650:MSISDN-42342:TMSInew-0x03020100:GERAN-A:LU){MSC_A
 DVLR vlr_lu_fsm(IMSI-901700000010650:MSISDN-42342:TMSInew-0x03020100:GERAN-A:LU){VLR_ULA_S_WAIT_LU_COMPL}: Received Event VLR_ULA_E_NEW_TMSI_ACK
 DVLR lu_compl_vlr_fsm(IMSI-901700000010650:MSISDN-42342:GERAN-A:LU){LU_COMPL_VLR_S_WAIT_TMSI_CNF}: Received Event LU_COMPL_VLR_E_NEW_TMSI_ACK
 DMSC msub(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100) VLR: update for IMSI=901700000010650 (MSISDN=42342)
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + attached: now used by 2 (active-conn,attached)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + attached: now used by 2 (active-conn,attached)
 DVLR lu_compl_vlr_fsm(IMSI-901700000010650:MSISDN-42342:GERAN-A:LU){LU_COMPL_VLR_S_WAIT_TMSI_CNF}: state_chg to LU_COMPL_VLR_S_DONE
 DVLR vlr_lu_fsm(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:GERAN-A:LU){VLR_ULA_S_WAIT_LU_COMPL}: Received Event VLR_ULA_E_LU_COMPL_SUCCESS
 DVLR lu_compl_vlr_fsm(IMSI-901700000010650:MSISDN-42342:GERAN-A:LU){LU_COMPL_VLR_S_DONE}: Terminating (cause = OSMO_FSM_TERM_PARENT)
@@ -164,13 +164,13 @@ DREF msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:GERAN-A:LU){MSC_A_S
 DMSC msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:GERAN-A:LU){MSC_A_ST_AUTHENTICATED}: Received Event MSC_A_EV_UNUSED
 DMSC msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:GERAN-A:LU){MSC_A_ST_AUTHENTICATED}: state_chg to MSC_A_ST_RELEASING
 DBSSAP msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:GERAN-A:LU){MSC_A_ST_RELEASING}: Releasing: msc_a use is 0 (-)
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + msc_a_fsm_releasing_onenter: now used by 3 (active-conn,attached,msc_a_fsm_releasing_onenter)
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + vlr_subscr_cancel_attach_fsm: now used by 4 (active-conn,attached,msc_a_fsm_releasing_onenter,vlr_subscr_cancel_attach_fsm)
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - vlr_subscr_cancel_attach_fsm: now used by 3 (active-conn,attached,msc_a_fsm_releasing_onenter)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + msc_a_fsm_releasing_onenter: now used by 3 (active-conn,attached,msc_a_fsm_releasing_onenter)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + vlr_subscr_cancel_attach_fsm: now used by 4 (active-conn,attached,msc_a_fsm_releasing_onenter,vlr_subscr_cancel_attach_fsm)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - vlr_subscr_cancel_attach_fsm: now used by 3 (active-conn,attached,msc_a_fsm_releasing_onenter)
 DREF msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:GERAN-A:LU){MSC_A_ST_RELEASING}: + wait-Clear-Complete: now used by 1 (wait-Clear-Complete)
 DMSC msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:GERAN-A:LU){MSC_A_ST_RELEASING}: RAN encode: CLEAR_COMMAND on GERAN-A
 DMSC dummy_msc_i(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:GERAN-A:LU){0}: Received Event MSC_I_EV_FROM_A_FORWARD_ACCESS_SIGNALLING_REQUEST
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - msc_a_fsm_releasing_onenter: now used by 2 (active-conn,attached)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - msc_a_fsm_releasing_onenter: now used by 2 (active-conn,attached)
   bssap_clear_sent == 1
 DBSSAP msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:GERAN-A:LU){MSC_A_ST_RELEASING}: RAN decode: CLEAR_COMPLETE
 DREF msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:GERAN-A:LU){MSC_A_ST_RELEASING}: - wait-Clear-Complete: now used by 0 (-)
@@ -193,7 +193,7 @@ DMSC dummy_msc_i(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:GERAN-A:LU){0
 DMSC dummy_msc_i(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:GERAN-A:LU){0}: Removing from parent msub_fsm
 DMSC dummy_msc_i(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:GERAN-A:LU){0}: Deferring: will deallocate with msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:GERAN-A:LU)
 DMSC msub(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100) Free
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - active-conn: now used by 1 (attached)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - active-conn: now used by 1 (attached)
 DMSC msub_fsm{terminating}: Deferring: will deallocate with msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:GERAN-A:LU)
 DMSC msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:GERAN-A:LU){MSC_A_ST_RELEASED}: Deallocated, including all deferred deallocations
 - msub gone
@@ -219,8 +219,8 @@ DVLR Process_Access_Request_VLR(IMSI-901700000010650:GERAN-A:CM_SERVICE_REQ){PR_
 DVLR Process_Access_Request_VLR(IMSI-901700000010650:GERAN-A:CM_SERVICE_REQ){PR_ARQ_S_INIT}: is child of msc_a(IMSI-901700000010650:GERAN-A:CM_SERVICE_REQ)
 DVLR Process_Access_Request_VLR(IMSI-901700000010650:GERAN-A:CM_SERVICE_REQ){PR_ARQ_S_INIT}: rev=R99 net=GERAN Auth (no Ciph)
 DVLR Process_Access_Request_VLR(IMSI-901700000010650:GERAN-A:CM_SERVICE_REQ){PR_ARQ_S_INIT}: Received Event PR_ARQ_E_START
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + proc_arq_vlr_fn_init: now used by 2 (attached,proc_arq_vlr_fn_init)
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + active-conn: now used by 3 (attached,proc_arq_vlr_fn_init,active-conn)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + proc_arq_vlr_fn_init: now used by 2 (attached,proc_arq_vlr_fn_init)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + active-conn: now used by 3 (attached,proc_arq_vlr_fn_init,active-conn)
 DMSC msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:GERAN-A:CM_SERVICE_REQ){MSC_A_ST_VALIDATE_L3}: Received Event MSC_A_EV_COMPLETE_LAYER_3_OK
 DMSC msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:GERAN-A:CM_SERVICE_REQ){MSC_A_ST_VALIDATE_L3}: state_chg to MSC_A_ST_AUTH_CIPH
 DVLR Process_Access_Request_VLR(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:GERAN-A:CM_SERVICE_REQ){PR_ARQ_S_INIT}: proc_arq_vlr_fn_post_imsi()
@@ -234,7 +234,7 @@ DVLR VLR_Authenticate(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:GERAN-A:
 - ...rand=c187a53a5e6b9d573cac7c74451fd46d
 - ...autn=1843a645b98d00005b2d666af46c45d9
 - ...expecting res=7db47cf7f81e4dc7
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - proc_arq_vlr_fn_init: now used by 2 (attached,active-conn)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - proc_arq_vlr_fn_init: now used by 2 (attached,active-conn)
 DREF msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:GERAN-A:CM_SERVICE_REQ){MSC_A_ST_AUTH_CIPH}: - rx_from_ms: now used by 1 (cm_service_sms)
   cm_service_result_sent == 0
   auth_request_sent == 1
@@ -296,13 +296,13 @@ DREF msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:GERAN-A:CM_SERVICE_
 DMSC msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:GERAN-A:CM_SERVICE_REQ){MSC_A_ST_AUTHENTICATED}: Received Event MSC_A_EV_UNUSED
 DMSC msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:GERAN-A:CM_SERVICE_REQ){MSC_A_ST_AUTHENTICATED}: state_chg to MSC_A_ST_RELEASING
 DBSSAP msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:GERAN-A:CM_SERVICE_REQ){MSC_A_ST_RELEASING}: Releasing: msc_a use is 0 (-)
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + msc_a_fsm_releasing_onenter: now used by 3 (attached,active-conn,msc_a_fsm_releasing_onenter)
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + vlr_subscr_cancel_attach_fsm: now used by 4 (attached,active-conn,msc_a_fsm_releasing_onenter,vlr_subscr_cancel_attach_fsm)
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - vlr_subscr_cancel_attach_fsm: now used by 3 (attached,active-conn,msc_a_fsm_releasing_onenter)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + msc_a_fsm_releasing_onenter: now used by 3 (attached,active-conn,msc_a_fsm_releasing_onenter)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + vlr_subscr_cancel_attach_fsm: now used by 4 (attached,active-conn,msc_a_fsm_releasing_onenter,vlr_subscr_cancel_attach_fsm)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - vlr_subscr_cancel_attach_fsm: now used by 3 (attached,active-conn,msc_a_fsm_releasing_onenter)
 DREF msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:GERAN-A:CM_SERVICE_REQ){MSC_A_ST_RELEASING}: + wait-Clear-Complete: now used by 1 (wait-Clear-Complete)
 DMSC msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:GERAN-A:CM_SERVICE_REQ){MSC_A_ST_RELEASING}: RAN encode: CLEAR_COMMAND on GERAN-A
 DMSC dummy_msc_i(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:GERAN-A:CM_SERVICE_REQ){0}: Received Event MSC_I_EV_FROM_A_FORWARD_ACCESS_SIGNALLING_REQUEST
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - msc_a_fsm_releasing_onenter: now used by 2 (attached,active-conn)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - msc_a_fsm_releasing_onenter: now used by 2 (attached,active-conn)
   bssap_clear_sent == 1
 DBSSAP msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:GERAN-A:CM_SERVICE_REQ){MSC_A_ST_RELEASING}: RAN decode: CLEAR_COMPLETE
 DREF msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:GERAN-A:CM_SERVICE_REQ){MSC_A_ST_RELEASING}: - wait-Clear-Complete: now used by 0 (-)
@@ -324,7 +324,7 @@ DMSC dummy_msc_i(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:GERAN-A:CM_SE
 DMSC dummy_msc_i(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:GERAN-A:CM_SERVICE_REQ){0}: Removing from parent msub_fsm
 DMSC dummy_msc_i(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:GERAN-A:CM_SERVICE_REQ){0}: Deferring: will deallocate with msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:GERAN-A:CM_SERVICE_REQ)
 DMSC msub(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100) Free
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - active-conn: now used by 1 (attached)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - active-conn: now used by 1 (attached)
 DMSC msub_fsm{terminating}: Deferring: will deallocate with msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:GERAN-A:CM_SERVICE_REQ)
 DMSC msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:GERAN-A:CM_SERVICE_REQ){MSC_A_ST_RELEASED}: Deallocated, including all deferred deallocations
 - msub gone
@@ -333,10 +333,10 @@ DMSC msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:GERAN-A:CM_SERVICE_
 
 
 - an SMS is sent, MS is paged
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + _test_umts_authen: now used by 2 (attached,_test_umts_authen)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + _test_umts_authen: now used by 2 (attached,_test_umts_authen)
   llist_count(&vsub->cs.requests) == 0
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + SMS-receiver: now used by 3 (attached,_test_umts_authen,SMS-receiver)
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + SMS: now used by 4 (attached,_test_umts_authen,SMS-receiver,SMS)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + SMS-receiver: now used by 3 (attached,_test_umts_authen,SMS-receiver)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + SMS: now used by 4 (attached,_test_umts_authen,SMS-receiver,SMS)
 DLSMS trans(SMS IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 callref-0x40000001 tid-0) New transaction
 DLSMS SMC(0) instance created for network
 DLSMS SMR(0) instance created for network.
@@ -350,14 +350,14 @@ DLSMS trans(SMS IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 callref-0x4000
 DPAG Paging: IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 for MT-SMS: Starting paging
   paging request (SIGNALLING_LOW_PRIO) to IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 on GERAN-A
   strcmp(paging_expecting_imsi, vsub->imsi) == 0
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + Paging: now used by 5 (attached,_test_umts_authen,SMS-receiver,SMS,Paging)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + Paging: now used by 5 (attached,_test_umts_authen,SMS-receiver,SMS,Paging)
   llist_count(&vsub->cs.requests) == 1
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - _test_umts_authen: now used by 4 (attached,SMS-receiver,SMS,Paging)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - _test_umts_authen: now used by 4 (attached,SMS-receiver,SMS,Paging)
   paging_sent == 1
 - the subscriber and its pending request should remain
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + _test_umts_authen: now used by 5 (attached,SMS-receiver,SMS,Paging,_test_umts_authen)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + _test_umts_authen: now used by 5 (attached,SMS-receiver,SMS,Paging,_test_umts_authen)
   llist_count(&vsub->cs.requests) == 1
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - _test_umts_authen: now used by 4 (attached,SMS-receiver,SMS,Paging)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - _test_umts_authen: now used by 4 (attached,SMS-receiver,SMS,Paging)
 - MS replies with Paging Response, and VLR sends Auth Request with third key
   MSC <--GERAN-A-- MS: GSM48_MT_RR_PAG_RESP
   new conn
@@ -376,8 +376,8 @@ DVLR Process_Access_Request_VLR(IMSI-901700000010650:GERAN-A:PAGING_RESP){PR_ARQ
 DVLR Process_Access_Request_VLR(IMSI-901700000010650:GERAN-A:PAGING_RESP){PR_ARQ_S_INIT}: is child of msc_a(IMSI-901700000010650:GERAN-A:PAGING_RESP)
 DVLR Process_Access_Request_VLR(IMSI-901700000010650:GERAN-A:PAGING_RESP){PR_ARQ_S_INIT}: rev=R99 net=GERAN Auth (no Ciph)
 DVLR Process_Access_Request_VLR(IMSI-901700000010650:GERAN-A:PAGING_RESP){PR_ARQ_S_INIT}: Received Event PR_ARQ_E_START
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + proc_arq_vlr_fn_init: now used by 5 (attached,SMS-receiver,SMS,Paging,proc_arq_vlr_fn_init)
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + active-conn: now used by 6 (attached,SMS-receiver,SMS,Paging,proc_arq_vlr_fn_init,active-conn)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + proc_arq_vlr_fn_init: now used by 5 (attached,SMS-receiver,SMS,Paging,proc_arq_vlr_fn_init)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + active-conn: now used by 6 (attached,SMS-receiver,SMS,Paging,proc_arq_vlr_fn_init,active-conn)
 DMSC msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:GERAN-A:PAGING_RESP){MSC_A_ST_VALIDATE_L3}: Received Event MSC_A_EV_COMPLETE_LAYER_3_OK
 DMSC msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:GERAN-A:PAGING_RESP){MSC_A_ST_VALIDATE_L3}: state_chg to MSC_A_ST_AUTH_CIPH
 DVLR Process_Access_Request_VLR(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:GERAN-A:PAGING_RESP){PR_ARQ_S_INIT}: proc_arq_vlr_fn_post_imsi()
@@ -391,7 +391,7 @@ DVLR VLR_Authenticate(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:GERAN-A:
 - ...rand=efa9c29a9742148d5c9070348716e1bb
 - ...autn=f9375e6d41e1000096e7fe4ff1c27e39
 - ...expecting res=706f996719ba609c
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - proc_arq_vlr_fn_init: now used by 5 (attached,SMS-receiver,SMS,Paging,active-conn)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - proc_arq_vlr_fn_init: now used by 5 (attached,SMS-receiver,SMS,Paging,active-conn)
 DREF msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:GERAN-A:PAGING_RESP){MSC_A_ST_AUTH_CIPH}: - rx_from_ms: now used by 1 (paging-response)
   auth_request_sent == 1
 - needs auth, not yet accepted
@@ -454,15 +454,15 @@ DMSC msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:GERAN-A:PAGING_RESP
 - DTAP --GERAN-A--> MS: SMS:0x01: 09015801000791447758100650004c0005802443f2000007101000000000445079da1e1ee7416937485e9ea7c965373d1d6683c270383b3d0ed3d36ff71c949e83c22072799e9687c5ec32a81d96afcbf4b4fb0c7ac3e9e9b7db05
 - DTAP matches expected message
 DMSC dummy_msc_i(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:GERAN-A:PAGING_RESP){0}: Received Event MSC_I_EV_FROM_A_FORWARD_ACCESS_SIGNALLING_REQUEST
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - Paging: now used by 4 (attached,SMS-receiver,SMS,active-conn)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - Paging: now used by 4 (attached,SMS-receiver,SMS,active-conn)
 DREF msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:GERAN-A:PAGING_RESP){MSC_A_ST_AUTHENTICATED}: - paging-response: now used by 2 (rx_from_ms,sms)
 DVLR VLR_Authenticate(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:GERAN-A:PAGING_RESP){VLR_SUB_AS_AUTHENTICATED}: Deallocated
 DREF msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:GERAN-A:PAGING_RESP){MSC_A_ST_AUTHENTICATED}: - rx_from_ms: now used by 1 (sms)
   dtap_tx_confirmed == 1
 - SMS was delivered, no requests pending for subscr
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + _test_umts_authen: now used by 5 (attached,SMS-receiver,SMS,active-conn,_test_umts_authen)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + _test_umts_authen: now used by 5 (attached,SMS-receiver,SMS,active-conn,_test_umts_authen)
   llist_count(&vsub->cs.requests) == 0
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - _test_umts_authen: now used by 4 (attached,SMS-receiver,SMS,active-conn)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - _test_umts_authen: now used by 4 (attached,SMS-receiver,SMS,active-conn)
 - conn is still open to wait for SMS ack dance
   llist_count(&msub_list) == 1
 - MS replies with CP-ACK for received SMS
@@ -496,7 +496,7 @@ DLSMS SMR(0) message MNSMS-DATA-IND received in state WAIT_FOR_RP_ACK
 DLSMS SMR(0) RX SMS RP-ACK
 DLSMS SMR(0) new RP state WAIT_FOR_RP_ACK -> IDLE
 DLSMS trans(SMS IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:GERAN-A:PAGING_RESP callref-0x40000001 tid-0) RX SMS RP-ACK (MO)
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - SMS-receiver: now used by 3 (attached,SMS,active-conn)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - SMS-receiver: now used by 3 (attached,SMS,active-conn)
 DLSMS SMR(0) TX: MNSMS-REL-REQ
 DLSMS SMC(0) message MNSMS-REL-REQ received in state MM_ESTABLISHED
 DLSMS SMC(0) new CP state MM_ESTABLISHED -> IDLE
@@ -504,19 +504,19 @@ DLSMS trans(SMS IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:GERAN-A:PAGING
 DLSMS trans(SMS IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:GERAN-A:PAGING_RESP callref-0x40000001 tid-0) Freeing transaction
 DLSMS SMR(0) clearing SMR instance
 DLSMS SMC(0) clearing instance
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - SMS: now used by 2 (attached,active-conn)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - SMS: now used by 2 (attached,active-conn)
 DREF msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:GERAN-A:PAGING_RESP){MSC_A_ST_AUTHENTICATED}: - sms: now used by 1 (rx_from_ms)
 DREF msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:GERAN-A:PAGING_RESP){MSC_A_ST_AUTHENTICATED}: - rx_from_ms: now used by 0 (-)
 DMSC msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:GERAN-A:PAGING_RESP){MSC_A_ST_AUTHENTICATED}: Received Event MSC_A_EV_UNUSED
 DMSC msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:GERAN-A:PAGING_RESP){MSC_A_ST_AUTHENTICATED}: state_chg to MSC_A_ST_RELEASING
 DBSSAP msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:GERAN-A:PAGING_RESP){MSC_A_ST_RELEASING}: Releasing: msc_a use is 0 (-)
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + msc_a_fsm_releasing_onenter: now used by 3 (attached,active-conn,msc_a_fsm_releasing_onenter)
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + vlr_subscr_cancel_attach_fsm: now used by 4 (attached,active-conn,msc_a_fsm_releasing_onenter,vlr_subscr_cancel_attach_fsm)
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - vlr_subscr_cancel_attach_fsm: now used by 3 (attached,active-conn,msc_a_fsm_releasing_onenter)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + msc_a_fsm_releasing_onenter: now used by 3 (attached,active-conn,msc_a_fsm_releasing_onenter)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + vlr_subscr_cancel_attach_fsm: now used by 4 (attached,active-conn,msc_a_fsm_releasing_onenter,vlr_subscr_cancel_attach_fsm)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - vlr_subscr_cancel_attach_fsm: now used by 3 (attached,active-conn,msc_a_fsm_releasing_onenter)
 DREF msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:GERAN-A:PAGING_RESP){MSC_A_ST_RELEASING}: + wait-Clear-Complete: now used by 1 (wait-Clear-Complete)
 DMSC msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:GERAN-A:PAGING_RESP){MSC_A_ST_RELEASING}: RAN encode: CLEAR_COMMAND on GERAN-A
 DMSC dummy_msc_i(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:GERAN-A:PAGING_RESP){0}: Received Event MSC_I_EV_FROM_A_FORWARD_ACCESS_SIGNALLING_REQUEST
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - msc_a_fsm_releasing_onenter: now used by 2 (attached,active-conn)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - msc_a_fsm_releasing_onenter: now used by 2 (attached,active-conn)
   dtap_tx_confirmed == 1
   bssap_clear_sent == 1
 DBSSAP msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:GERAN-A:PAGING_RESP){MSC_A_ST_RELEASING}: RAN decode: CLEAR_COMPLETE
@@ -539,7 +539,7 @@ DMSC dummy_msc_i(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:GERAN-A:PAGIN
 DMSC dummy_msc_i(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:GERAN-A:PAGING_RESP){0}: Removing from parent msub_fsm
 DMSC dummy_msc_i(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:GERAN-A:PAGING_RESP){0}: Deferring: will deallocate with msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:GERAN-A:PAGING_RESP)
 DMSC msub(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100) Free
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - active-conn: now used by 1 (attached)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - active-conn: now used by 1 (attached)
 DMSC msub_fsm{terminating}: Deferring: will deallocate with msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:GERAN-A:PAGING_RESP)
 DMSC msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:GERAN-A:PAGING_RESP){MSC_A_ST_RELEASED}: Deallocated, including all deferred deallocations
 - msub gone
@@ -560,24 +560,24 @@ DREF msc_a(unknown:GERAN-A:NONE){MSC_A_ST_VALIDATE_L3}: + rx_from_ms: now used b
 DBSSAP msc_a(unknown:GERAN-A:NONE){MSC_A_ST_VALIDATE_L3}: RAN decode: COMPL_L3
 DRLL msc_a(unknown:GERAN-A:NONE){MSC_A_ST_VALIDATE_L3}: Dispatching 04.08 message: MM GSM48_MT_MM_IMSI_DETACH_IND
 DMM IMSI DETACH INDICATION: IMSI-901700000010650
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + gsm48_rx_mm_imsi_detach_ind: now used by 2 (attached,gsm48_rx_mm_imsi_detach_ind)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + gsm48_rx_mm_imsi_detach_ind: now used by 2 (attached,gsm48_rx_mm_imsi_detach_ind)
 DMM IMSI DETACH for IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + active-conn: now used by 3 (attached,gsm48_rx_mm_imsi_detach_ind,active-conn)
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + vlr_subscr_cancel_attach_fsm: now used by 4 (attached,gsm48_rx_mm_imsi_detach_ind,active-conn,vlr_subscr_cancel_attach_fsm)
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - vlr_subscr_cancel_attach_fsm: now used by 3 (attached,gsm48_rx_mm_imsi_detach_ind,active-conn)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + active-conn: now used by 3 (attached,gsm48_rx_mm_imsi_detach_ind,active-conn)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + vlr_subscr_cancel_attach_fsm: now used by 4 (attached,gsm48_rx_mm_imsi_detach_ind,active-conn,vlr_subscr_cancel_attach_fsm)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - vlr_subscr_cancel_attach_fsm: now used by 3 (attached,gsm48_rx_mm_imsi_detach_ind,active-conn)
 DVLR set Last E-UTRAN PLMN ID on subscriber: (none)
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - attached: now used by 2 (gsm48_rx_mm_imsi_detach_ind,active-conn)
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - gsm48_rx_mm_imsi_detach_ind: now used by 1 (active-conn)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - attached: now used by 2 (gsm48_rx_mm_imsi_detach_ind,active-conn)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - gsm48_rx_mm_imsi_detach_ind: now used by 1 (active-conn)
 DMSC msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:GERAN-A:NONE){MSC_A_ST_VALIDATE_L3}: Received Event MSC_A_EV_CN_CLOSE
 DMSC msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:GERAN-A:NONE){MSC_A_ST_VALIDATE_L3}: state_chg to MSC_A_ST_RELEASING
 DBSSAP msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:GERAN-A:NONE){MSC_A_ST_RELEASING}: Releasing: msc_a use is 1 (rx_from_ms)
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + msc_a_fsm_releasing_onenter: now used by 2 (active-conn,msc_a_fsm_releasing_onenter)
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + vlr_subscr_cancel_attach_fsm: now used by 3 (active-conn,msc_a_fsm_releasing_onenter,vlr_subscr_cancel_attach_fsm)
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - vlr_subscr_cancel_attach_fsm: now used by 2 (active-conn,msc_a_fsm_releasing_onenter)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + msc_a_fsm_releasing_onenter: now used by 2 (active-conn,msc_a_fsm_releasing_onenter)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + vlr_subscr_cancel_attach_fsm: now used by 3 (active-conn,msc_a_fsm_releasing_onenter,vlr_subscr_cancel_attach_fsm)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - vlr_subscr_cancel_attach_fsm: now used by 2 (active-conn,msc_a_fsm_releasing_onenter)
 DREF msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:GERAN-A:NONE){MSC_A_ST_RELEASING}: + wait-Clear-Complete: now used by 2 (rx_from_ms,wait-Clear-Complete)
 DMSC msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:GERAN-A:NONE){MSC_A_ST_RELEASING}: RAN encode: CLEAR_COMMAND on GERAN-A
 DMSC dummy_msc_i(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:GERAN-A:NONE){0}: Received Event MSC_I_EV_FROM_A_FORWARD_ACCESS_SIGNALLING_REQUEST
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - msc_a_fsm_releasing_onenter: now used by 1 (active-conn)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - msc_a_fsm_releasing_onenter: now used by 1 (active-conn)
 DREF msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:GERAN-A:NONE){MSC_A_ST_RELEASING}: - rx_from_ms: now used by 1 (wait-Clear-Complete)
   bssap_clear_sent == 1
 DBSSAP msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:GERAN-A:NONE){MSC_A_ST_RELEASING}: RAN decode: CLEAR_COMPLETE
@@ -597,7 +597,7 @@ DMSC dummy_msc_i(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:GERAN-A:NONE)
 DMSC dummy_msc_i(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:GERAN-A:NONE){0}: Removing from parent msub_fsm
 DMSC dummy_msc_i(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:GERAN-A:NONE){0}: Deferring: will deallocate with msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:GERAN-A:NONE)
 DMSC msub(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100) Free
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - active-conn: now used by 0 (-)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - active-conn: now used by 0 (-)
 DVLR SUBSCR(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100) freeing VLR subscr (max total use count was 6)
 DMSC msub_fsm{terminating}: Deferring: will deallocate with msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:GERAN-A:NONE)
 DMSC msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:GERAN-A:NONE){MSC_A_ST_RELEASED}: Deallocated, including all deferred deallocations
@@ -626,13 +626,13 @@ DVLR vlr_lu_fsm(IMSI-901700000010650:UTRAN-Iu:LU){VLR_ULA_S_IDLE}: Allocated
 DVLR vlr_lu_fsm(IMSI-901700000010650:UTRAN-Iu:LU){VLR_ULA_S_IDLE}: is child of msc_a(IMSI-901700000010650:UTRAN-Iu:LU)
 DVLR vlr_lu_fsm(IMSI-901700000010650:UTRAN-Iu:LU){VLR_ULA_S_IDLE}: rev=R99 net=UTRAN Auth (no Ciph)
 DVLR vlr_lu_fsm(IMSI-901700000010650:UTRAN-Iu:LU){VLR_ULA_S_IDLE}: Received Event VLR_ULA_E_UPDATE_LA
-DREF VLR subscr unknown + _lu_fsm_associate_vsub: now used by 1 (_lu_fsm_associate_vsub)
+DVLR VLR subscr unknown + _lu_fsm_associate_vsub: now used by 1 (_lu_fsm_associate_vsub)
 DVLR set IMSI on subscriber; IMSI=901700000010650 id=901700000010650
 DVLR New subscr, IMSI: 901700000010650
-DREF VLR subscr IMSI-901700000010650 + active-conn: now used by 2 (_lu_fsm_associate_vsub,active-conn)
+DVLR VLR subscr IMSI-901700000010650 + active-conn: now used by 2 (_lu_fsm_associate_vsub,active-conn)
 DMSC msc_a(IMSI-901700000010650:UTRAN-Iu:LU){MSC_A_ST_VALIDATE_L3}: Received Event MSC_A_EV_COMPLETE_LAYER_3_OK
 DMSC msc_a(IMSI-901700000010650:UTRAN-Iu:LU){MSC_A_ST_VALIDATE_L3}: state_chg to MSC_A_ST_AUTH_CIPH
-DREF VLR subscr IMSI-901700000010650 - _lu_fsm_associate_vsub: now used by 1 (active-conn)
+DVLR VLR subscr IMSI-901700000010650 - _lu_fsm_associate_vsub: now used by 1 (active-conn)
 DVLR set Last E-UTRAN PLMN ID on subscriber: (none)
 DVLR vlr_lu_fsm(IMSI-901700000010650:UTRAN-Iu:LU){VLR_ULA_S_IDLE}: vlr_loc_upd_node1_pre()
 DVLR vlr_lu_fsm(IMSI-901700000010650:UTRAN-Iu:LU){VLR_ULA_S_IDLE}: vlr_loc_upd_node1()
@@ -647,7 +647,7 @@ DREF msc_a(IMSI-901700000010650:UTRAN-Iu:LU){MSC_A_ST_AUTH_CIPH}: - rx_from_ms: 
   lu_result_sent == 0
 - from HLR, rx _SEND_AUTH_INFO_RESULT; VLR sends Auth Req to MS
 <-- GSUP rx OSMO_GSUP_MSGT_SEND_AUTH_INFO_RESULT: 0a010809710000000156f00362201039fa2f4e3d523d8619a73b4f65c3e14d21049b36efdf2208059a4f668f6fbe39231027497388b6cb044648f396aa155b95ef2410f64735036e5871319c679f4742a75ea125108704f5ba55f30000d2ee44b22c8ea9192708e229c19e791f2e4103622010c187a53a5e6b9d573cac7c74451fd46d210485aa31302208d3d50a000bf04f6e23101159ec926a50e98c034a6b7d7c9f418d2410df3a03d9ca5335641efc8e36d76cd20b25101843a645b98d00005b2d666af46c45d927087db47cf7f81e4dc703622010efa9c29a9742148d5c9070348716e1bb210469d5f9fb22083df176f0c29f1a3d2310eb50e770ddcc3060101d2f43b6c2b884241076542abce5ff9345b0e8947f4c6e019c2510f9375e6d41e1000096e7fe4ff1c27e392708706f996719ba609c03622010f023d5a3b24726e0631b64b3840f82532104d570c03f2208ec011be8919883d62310c4e58af4ba43f3bcd904e16984f086d724100593f65e752e5cb7f473862bda05aa0a2510541ff1f077270000c5ea00d658bc7e9a27083fd26072eaa2a04d036220102f8f90c780d6a9c0c53da7ac57b6707e2104b072446f220823f39f9f425ad6e6231065af0527fda95b0dc5ae4aa515cdf32f2410537c3b35a3b13b08d08eeb28098f45cc25104bf4e564f75300009bc796706bc6574427080edb0eadbea94ac20a0101
-DREF VLR subscr IMSI-901700000010650 + vlr_gsup_rx: now used by 2 (active-conn,vlr_gsup_rx)
+DVLR VLR subscr IMSI-901700000010650 + vlr_gsup_rx: now used by 2 (active-conn,vlr_gsup_rx)
 DVLR VLR_Authenticate(IMSI-901700000010650:UTRAN-Iu:LU){VLR_SUB_AS_NEEDS_AUTH_WAIT_AI}: Received Event VLR_AUTH_E_HLR_SAI_ACK
 DVLR SUBSCR(IMSI-901700000010650) Received 5 auth tuples
 DVLR VLR_Authenticate(IMSI-901700000010650:UTRAN-Iu:LU){VLR_SUB_AS_NEEDS_AUTH_WAIT_AI}: state_chg to VLR_SUB_AS_WAIT_RESP
@@ -656,7 +656,7 @@ DVLR VLR_Authenticate(IMSI-901700000010650:UTRAN-Iu:LU){VLR_SUB_AS_WAIT_RESP}: g
 - ...rand=39fa2f4e3d523d8619a73b4f65c3e14d
 - ...autn=8704f5ba55f30000d2ee44b22c8ea919
 - ...expecting res=e229c19e791f2e41
-DREF VLR subscr IMSI-901700000010650 - vlr_gsup_rx: now used by 1 (active-conn)
+DVLR VLR subscr IMSI-901700000010650 - vlr_gsup_rx: now used by 1 (active-conn)
 <-- GSUP rx OSMO_GSUP_MSGT_SEND_AUTH_INFO_RESULT: vlr_gsupc_read_cb() returns 0
   auth_request_sent == 1
   lu_result_sent == 0
@@ -701,16 +701,16 @@ DVLR upd_hlr_vlr_fsm(IMSI-901700000010650:UTRAN-Iu:LU){UPD_HLR_VLR_S_INIT}: stat
   lu_result_sent == 0
 - HLR sends _INSERT_DATA_REQUEST, VLR responds with _INSERT_DATA_RESULT
 <-- GSUP rx OSMO_GSUP_MSGT_INSERT_DATA_REQUEST: 10010809710000000156f00804032443f20a0101
-DREF VLR subscr IMSI-901700000010650 + vlr_gsup_rx: now used by 2 (active-conn,vlr_gsup_rx)
+DVLR VLR subscr IMSI-901700000010650 + vlr_gsup_rx: now used by 2 (active-conn,vlr_gsup_rx)
 DVLR IMSI:901700000010650 has MSISDN:42342
 DMSC msub(IMSI-901700000010650:MSISDN-42342) VLR: update for IMSI=901700000010650 (MSISDN=42342)
 GSUP --> HLR: OSMO_GSUP_MSGT_INSERT_DATA_RESULT: 12010809710000000156f00a0101
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342 - vlr_gsup_rx: now used by 1 (active-conn)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342 - vlr_gsup_rx: now used by 1 (active-conn)
 <-- GSUP rx OSMO_GSUP_MSGT_INSERT_DATA_REQUEST: vlr_gsupc_read_cb() returns 0
   lu_result_sent == 0
 - HLR also sends GSUP _UPDATE_LOCATION_RESULT
 <-- GSUP rx OSMO_GSUP_MSGT_UPDATE_LOCATION_RESULT: 06010809710000000156f00a0101
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342 + vlr_gsup_rx: now used by 2 (active-conn,vlr_gsup_rx)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342 + vlr_gsup_rx: now used by 2 (active-conn,vlr_gsup_rx)
 DVLR vlr_lu_fsm(IMSI-901700000010650:MSISDN-42342:UTRAN-Iu:LU){VLR_ULA_S_WAIT_HLR_UPD}: Received Event VLR_ULA_E_HLR_LU_RES
 DVLR upd_hlr_vlr_fsm(IMSI-901700000010650:UTRAN-Iu:LU){UPD_HLR_VLR_S_WAIT_FOR_DATA}: Received Event UPD_HLR_VLR_E_UPD_LOC_ACK
 DVLR upd_hlr_vlr_fsm(IMSI-901700000010650:UTRAN-Iu:LU){UPD_HLR_VLR_S_WAIT_FOR_DATA}: state_chg to UPD_HLR_VLR_S_DONE
@@ -728,7 +728,7 @@ DMSC msub(IMSI-901700000010650:MSISDN-42342:TMSInew-0x03020100) VLR: update for 
 DVLR lu_compl_vlr_fsm(IMSI-901700000010650:MSISDN-42342:UTRAN-Iu:LU){LU_COMPL_VLR_S_WAIT_SUB_PRES}: state_chg to LU_COMPL_VLR_S_WAIT_TMSI_CNF
 - sending LU Accept for IMSI-901700000010650:MSISDN-42342:TMSInew-0x03020100:UTRAN-Iu:LU, with TMSI 0x03020100
 DVLR upd_hlr_vlr_fsm(IMSI-901700000010650:UTRAN-Iu:LU){UPD_HLR_VLR_S_DONE}: Deallocated
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSInew-0x03020100 - vlr_gsup_rx: now used by 1 (active-conn)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSInew-0x03020100 - vlr_gsup_rx: now used by 1 (active-conn)
 <-- GSUP rx OSMO_GSUP_MSGT_UPDATE_LOCATION_RESULT: vlr_gsupc_read_cb() returns 0
   lu_result_sent == 1
 - a LU Accept with a new TMSI was sent, waiting for TMSI Realloc Compl
@@ -752,12 +752,12 @@ DRLL msc_a(IMSI-901700000010650:MSISDN-42342:TMSInew-0x03020100:UTRAN-Iu:LU){MSC
 DIUCS msc_a(IMSI-901700000010650:MSISDN-42342:TMSInew-0x03020100:UTRAN-Iu:LU){MSC_A_ST_AUTH_CIPH}: Message not permitted for initial conn: SMS:0x01
 DIUCS msc_a(IMSI-901700000010650:MSISDN-42342:TMSInew-0x03020100:UTRAN-Iu:LU){MSC_A_ST_AUTH_CIPH}: RAN decode error (rc=-13) for DTAP from MSC-I
 - even though the TMSI is not acked, we can already find the subscr with it
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSInew-0x03020100 + _test_umts_authen: now used by 2 (active-conn,_test_umts_authen)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSInew-0x03020100 + _test_umts_authen: now used by 2 (active-conn,_test_umts_authen)
   vsub != NULL == 1
   strcmp(vsub->imsi, imsi) == 0
   vsub->tmsi_new == 0x03020100
   vsub->tmsi == 0xffffffff
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSInew-0x03020100 - _test_umts_authen: now used by 1 (active-conn)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSInew-0x03020100 - _test_umts_authen: now used by 1 (active-conn)
 - MS sends TMSI Realloc Complete
   MSC <--UTRAN-Iu-- MS: GSM48_MT_MM_TMSI_REALL_COMPL
 DREF msc_a(IMSI-901700000010650:MSISDN-42342:TMSInew-0x03020100:UTRAN-Iu:LU){MSC_A_ST_AUTH_CIPH}: + rx_from_ms: now used by 2 (lu,rx_from_ms)
@@ -767,7 +767,7 @@ DMM msc_a(IMSI-901700000010650:MSISDN-42342:TMSInew-0x03020100:UTRAN-Iu:LU){MSC_
 DVLR vlr_lu_fsm(IMSI-901700000010650:MSISDN-42342:TMSInew-0x03020100:UTRAN-Iu:LU){VLR_ULA_S_WAIT_LU_COMPL}: Received Event VLR_ULA_E_NEW_TMSI_ACK
 DVLR lu_compl_vlr_fsm(IMSI-901700000010650:MSISDN-42342:UTRAN-Iu:LU){LU_COMPL_VLR_S_WAIT_TMSI_CNF}: Received Event LU_COMPL_VLR_E_NEW_TMSI_ACK
 DMSC msub(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100) VLR: update for IMSI=901700000010650 (MSISDN=42342)
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + attached: now used by 2 (active-conn,attached)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + attached: now used by 2 (active-conn,attached)
 DVLR lu_compl_vlr_fsm(IMSI-901700000010650:MSISDN-42342:UTRAN-Iu:LU){LU_COMPL_VLR_S_WAIT_TMSI_CNF}: state_chg to LU_COMPL_VLR_S_DONE
 DVLR vlr_lu_fsm(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:LU){VLR_ULA_S_WAIT_LU_COMPL}: Received Event VLR_ULA_E_LU_COMPL_SUCCESS
 DVLR lu_compl_vlr_fsm(IMSI-901700000010650:MSISDN-42342:UTRAN-Iu:LU){LU_COMPL_VLR_S_DONE}: Terminating (cause = OSMO_FSM_TERM_PARENT)
@@ -781,13 +781,13 @@ DREF msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:LU){MSC_A_
 DMSC msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:LU){MSC_A_ST_AUTHENTICATED}: Received Event MSC_A_EV_UNUSED
 DMSC msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:LU){MSC_A_ST_AUTHENTICATED}: state_chg to MSC_A_ST_RELEASING
 DIUCS msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:LU){MSC_A_ST_RELEASING}: Releasing: msc_a use is 0 (-)
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + msc_a_fsm_releasing_onenter: now used by 3 (active-conn,attached,msc_a_fsm_releasing_onenter)
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + vlr_subscr_cancel_attach_fsm: now used by 4 (active-conn,attached,msc_a_fsm_releasing_onenter,vlr_subscr_cancel_attach_fsm)
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - vlr_subscr_cancel_attach_fsm: now used by 3 (active-conn,attached,msc_a_fsm_releasing_onenter)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + msc_a_fsm_releasing_onenter: now used by 3 (active-conn,attached,msc_a_fsm_releasing_onenter)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + vlr_subscr_cancel_attach_fsm: now used by 4 (active-conn,attached,msc_a_fsm_releasing_onenter,vlr_subscr_cancel_attach_fsm)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - vlr_subscr_cancel_attach_fsm: now used by 3 (active-conn,attached,msc_a_fsm_releasing_onenter)
 DREF msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:LU){MSC_A_ST_RELEASING}: + wait-Clear-Complete: now used by 1 (wait-Clear-Complete)
 DMSC msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:LU){MSC_A_ST_RELEASING}: RAN encode: CLEAR_COMMAND on UTRAN-Iu
 DMSC dummy_msc_i(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:LU){0}: Received Event MSC_I_EV_FROM_A_FORWARD_ACCESS_SIGNALLING_REQUEST
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - msc_a_fsm_releasing_onenter: now used by 2 (active-conn,attached)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - msc_a_fsm_releasing_onenter: now used by 2 (active-conn,attached)
   iu_release_sent == 1
 DIUCS msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:LU){MSC_A_ST_RELEASING}: RAN decode: CLEAR_COMPLETE
 DREF msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:LU){MSC_A_ST_RELEASING}: - wait-Clear-Complete: now used by 0 (-)
@@ -810,7 +810,7 @@ DMSC dummy_msc_i(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:LU){
 DMSC dummy_msc_i(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:LU){0}: Removing from parent msub_fsm
 DMSC dummy_msc_i(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:LU){0}: Deferring: will deallocate with msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:LU)
 DMSC msub(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100) Free
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - active-conn: now used by 1 (attached)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - active-conn: now used by 1 (attached)
 DMSC msub_fsm{terminating}: Deferring: will deallocate with msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:LU)
 DMSC msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:LU){MSC_A_ST_RELEASED}: Deallocated, including all deferred deallocations
 - msub gone
@@ -836,8 +836,8 @@ DVLR Process_Access_Request_VLR(IMSI-901700000010650:UTRAN-Iu:CM_SERVICE_REQ){PR
 DVLR Process_Access_Request_VLR(IMSI-901700000010650:UTRAN-Iu:CM_SERVICE_REQ){PR_ARQ_S_INIT}: is child of msc_a(IMSI-901700000010650:UTRAN-Iu:CM_SERVICE_REQ)
 DVLR Process_Access_Request_VLR(IMSI-901700000010650:UTRAN-Iu:CM_SERVICE_REQ){PR_ARQ_S_INIT}: rev=R99 net=UTRAN Auth (no Ciph)
 DVLR Process_Access_Request_VLR(IMSI-901700000010650:UTRAN-Iu:CM_SERVICE_REQ){PR_ARQ_S_INIT}: Received Event PR_ARQ_E_START
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + proc_arq_vlr_fn_init: now used by 2 (attached,proc_arq_vlr_fn_init)
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + active-conn: now used by 3 (attached,proc_arq_vlr_fn_init,active-conn)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + proc_arq_vlr_fn_init: now used by 2 (attached,proc_arq_vlr_fn_init)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + active-conn: now used by 3 (attached,proc_arq_vlr_fn_init,active-conn)
 DMSC msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:CM_SERVICE_REQ){MSC_A_ST_VALIDATE_L3}: Received Event MSC_A_EV_COMPLETE_LAYER_3_OK
 DMSC msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:CM_SERVICE_REQ){MSC_A_ST_VALIDATE_L3}: state_chg to MSC_A_ST_AUTH_CIPH
 DVLR Process_Access_Request_VLR(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:CM_SERVICE_REQ){PR_ARQ_S_INIT}: proc_arq_vlr_fn_post_imsi()
@@ -851,7 +851,7 @@ DVLR VLR_Authenticate(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu
 - ...rand=c187a53a5e6b9d573cac7c74451fd46d
 - ...autn=1843a645b98d00005b2d666af46c45d9
 - ...expecting res=7db47cf7f81e4dc7
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - proc_arq_vlr_fn_init: now used by 2 (attached,active-conn)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - proc_arq_vlr_fn_init: now used by 2 (attached,active-conn)
 DREF msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:CM_SERVICE_REQ){MSC_A_ST_AUTH_CIPH}: - rx_from_ms: now used by 1 (cm_service_sms)
   cm_service_result_sent == 0
   auth_request_sent == 1
@@ -919,13 +919,13 @@ DREF msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:CM_SERVICE
 DMSC msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:CM_SERVICE_REQ){MSC_A_ST_AUTHENTICATED}: Received Event MSC_A_EV_UNUSED
 DMSC msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:CM_SERVICE_REQ){MSC_A_ST_AUTHENTICATED}: state_chg to MSC_A_ST_RELEASING
 DIUCS msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:CM_SERVICE_REQ){MSC_A_ST_RELEASING}: Releasing: msc_a use is 0 (-)
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + msc_a_fsm_releasing_onenter: now used by 3 (attached,active-conn,msc_a_fsm_releasing_onenter)
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + vlr_subscr_cancel_attach_fsm: now used by 4 (attached,active-conn,msc_a_fsm_releasing_onenter,vlr_subscr_cancel_attach_fsm)
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - vlr_subscr_cancel_attach_fsm: now used by 3 (attached,active-conn,msc_a_fsm_releasing_onenter)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + msc_a_fsm_releasing_onenter: now used by 3 (attached,active-conn,msc_a_fsm_releasing_onenter)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + vlr_subscr_cancel_attach_fsm: now used by 4 (attached,active-conn,msc_a_fsm_releasing_onenter,vlr_subscr_cancel_attach_fsm)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - vlr_subscr_cancel_attach_fsm: now used by 3 (attached,active-conn,msc_a_fsm_releasing_onenter)
 DREF msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:CM_SERVICE_REQ){MSC_A_ST_RELEASING}: + wait-Clear-Complete: now used by 1 (wait-Clear-Complete)
 DMSC msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:CM_SERVICE_REQ){MSC_A_ST_RELEASING}: RAN encode: CLEAR_COMMAND on UTRAN-Iu
 DMSC dummy_msc_i(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:CM_SERVICE_REQ){0}: Received Event MSC_I_EV_FROM_A_FORWARD_ACCESS_SIGNALLING_REQUEST
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - msc_a_fsm_releasing_onenter: now used by 2 (attached,active-conn)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - msc_a_fsm_releasing_onenter: now used by 2 (attached,active-conn)
   iu_release_sent == 1
 DIUCS msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:CM_SERVICE_REQ){MSC_A_ST_RELEASING}: RAN decode: CLEAR_COMPLETE
 DREF msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:CM_SERVICE_REQ){MSC_A_ST_RELEASING}: - wait-Clear-Complete: now used by 0 (-)
@@ -947,7 +947,7 @@ DMSC dummy_msc_i(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:CM_S
 DMSC dummy_msc_i(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:CM_SERVICE_REQ){0}: Removing from parent msub_fsm
 DMSC dummy_msc_i(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:CM_SERVICE_REQ){0}: Deferring: will deallocate with msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:CM_SERVICE_REQ)
 DMSC msub(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100) Free
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - active-conn: now used by 1 (attached)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - active-conn: now used by 1 (attached)
 DMSC msub_fsm{terminating}: Deferring: will deallocate with msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:CM_SERVICE_REQ)
 DMSC msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:CM_SERVICE_REQ){MSC_A_ST_RELEASED}: Deallocated, including all deferred deallocations
 - msub gone
@@ -956,10 +956,10 @@ DMSC msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:CM_SERVICE
 
 
 - an SMS is sent, MS is paged
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + _test_umts_authen: now used by 2 (attached,_test_umts_authen)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + _test_umts_authen: now used by 2 (attached,_test_umts_authen)
   llist_count(&vsub->cs.requests) == 0
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + SMS-receiver: now used by 3 (attached,_test_umts_authen,SMS-receiver)
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + SMS: now used by 4 (attached,_test_umts_authen,SMS-receiver,SMS)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + SMS-receiver: now used by 3 (attached,_test_umts_authen,SMS-receiver)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + SMS: now used by 4 (attached,_test_umts_authen,SMS-receiver,SMS)
 DLSMS trans(SMS IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 callref-0x40000002 tid-0) New transaction
 DLSMS SMC(0) instance created for network
 DLSMS SMR(0) instance created for network.
@@ -973,14 +973,14 @@ DLSMS trans(SMS IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 callref-0x4000
 DPAG Paging: IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 for MT-SMS: Starting paging
   paging request (SIGNALLING_LOW_PRIO) to IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 on UTRAN-Iu
   strcmp(paging_expecting_imsi, vsub->imsi) == 0
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + Paging: now used by 5 (attached,_test_umts_authen,SMS-receiver,SMS,Paging)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + Paging: now used by 5 (attached,_test_umts_authen,SMS-receiver,SMS,Paging)
   llist_count(&vsub->cs.requests) == 1
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - _test_umts_authen: now used by 4 (attached,SMS-receiver,SMS,Paging)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - _test_umts_authen: now used by 4 (attached,SMS-receiver,SMS,Paging)
   paging_sent == 1
 - the subscriber and its pending request should remain
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + _test_umts_authen: now used by 5 (attached,SMS-receiver,SMS,Paging,_test_umts_authen)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + _test_umts_authen: now used by 5 (attached,SMS-receiver,SMS,Paging,_test_umts_authen)
   llist_count(&vsub->cs.requests) == 1
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - _test_umts_authen: now used by 4 (attached,SMS-receiver,SMS,Paging)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - _test_umts_authen: now used by 4 (attached,SMS-receiver,SMS,Paging)
 - MS replies with Paging Response, and VLR sends Auth Request with third key
   MSC <--UTRAN-Iu-- MS: GSM48_MT_RR_PAG_RESP
   new conn
@@ -999,8 +999,8 @@ DVLR Process_Access_Request_VLR(IMSI-901700000010650:UTRAN-Iu:PAGING_RESP){PR_AR
 DVLR Process_Access_Request_VLR(IMSI-901700000010650:UTRAN-Iu:PAGING_RESP){PR_ARQ_S_INIT}: is child of msc_a(IMSI-901700000010650:UTRAN-Iu:PAGING_RESP)
 DVLR Process_Access_Request_VLR(IMSI-901700000010650:UTRAN-Iu:PAGING_RESP){PR_ARQ_S_INIT}: rev=R99 net=UTRAN Auth (no Ciph)
 DVLR Process_Access_Request_VLR(IMSI-901700000010650:UTRAN-Iu:PAGING_RESP){PR_ARQ_S_INIT}: Received Event PR_ARQ_E_START
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + proc_arq_vlr_fn_init: now used by 5 (attached,SMS-receiver,SMS,Paging,proc_arq_vlr_fn_init)
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + active-conn: now used by 6 (attached,SMS-receiver,SMS,Paging,proc_arq_vlr_fn_init,active-conn)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + proc_arq_vlr_fn_init: now used by 5 (attached,SMS-receiver,SMS,Paging,proc_arq_vlr_fn_init)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + active-conn: now used by 6 (attached,SMS-receiver,SMS,Paging,proc_arq_vlr_fn_init,active-conn)
 DMSC msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:PAGING_RESP){MSC_A_ST_VALIDATE_L3}: Received Event MSC_A_EV_COMPLETE_LAYER_3_OK
 DMSC msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:PAGING_RESP){MSC_A_ST_VALIDATE_L3}: state_chg to MSC_A_ST_AUTH_CIPH
 DVLR Process_Access_Request_VLR(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:PAGING_RESP){PR_ARQ_S_INIT}: proc_arq_vlr_fn_post_imsi()
@@ -1014,7 +1014,7 @@ DVLR VLR_Authenticate(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu
 - ...rand=efa9c29a9742148d5c9070348716e1bb
 - ...autn=f9375e6d41e1000096e7fe4ff1c27e39
 - ...expecting res=706f996719ba609c
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - proc_arq_vlr_fn_init: now used by 5 (attached,SMS-receiver,SMS,Paging,active-conn)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - proc_arq_vlr_fn_init: now used by 5 (attached,SMS-receiver,SMS,Paging,active-conn)
 DREF msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:PAGING_RESP){MSC_A_ST_AUTH_CIPH}: - rx_from_ms: now used by 1 (paging-response)
   auth_request_sent == 1
 - needs auth, not yet accepted
@@ -1088,12 +1088,12 @@ DMSC msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:PAGING_RES
 - DTAP --UTRAN-Iu--> MS: SMS:0x01: 09015801000791447758100650004c0005802443f2000007101000000000445079da1e1ee7416937485e9ea7c965373d1d6683c270383b3d0ed3d36ff71c949e83c22072799e9687c5ec32a81d96afcbf4b4fb0c7ac3e9e9b7db05
 - DTAP matches expected message
 DMSC dummy_msc_i(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:PAGING_RESP){0}: Received Event MSC_I_EV_FROM_A_FORWARD_ACCESS_SIGNALLING_REQUEST
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - Paging: now used by 4 (attached,SMS-receiver,SMS,active-conn)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - Paging: now used by 4 (attached,SMS-receiver,SMS,active-conn)
 DREF msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:PAGING_RESP){MSC_A_ST_AUTHENTICATED}: - paging-response: now used by 1 (sms)
 - SMS was delivered, no requests pending for subscr
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + _test_umts_authen: now used by 5 (attached,SMS-receiver,SMS,active-conn,_test_umts_authen)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + _test_umts_authen: now used by 5 (attached,SMS-receiver,SMS,active-conn,_test_umts_authen)
   llist_count(&vsub->cs.requests) == 0
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - _test_umts_authen: now used by 4 (attached,SMS-receiver,SMS,active-conn)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - _test_umts_authen: now used by 4 (attached,SMS-receiver,SMS,active-conn)
 - conn is still open to wait for SMS ack dance
   llist_count(&msub_list) == 1
 - MS replies with CP-ACK for received SMS
@@ -1127,7 +1127,7 @@ DLSMS SMR(0) message MNSMS-DATA-IND received in state WAIT_FOR_RP_ACK
 DLSMS SMR(0) RX SMS RP-ACK
 DLSMS SMR(0) new RP state WAIT_FOR_RP_ACK -> IDLE
 DLSMS trans(SMS IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:PAGING_RESP callref-0x40000002 tid-0) RX SMS RP-ACK (MO)
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - SMS-receiver: now used by 3 (attached,SMS,active-conn)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - SMS-receiver: now used by 3 (attached,SMS,active-conn)
 DLSMS SMR(0) TX: MNSMS-REL-REQ
 DLSMS SMC(0) message MNSMS-REL-REQ received in state MM_ESTABLISHED
 DLSMS SMC(0) new CP state MM_ESTABLISHED -> IDLE
@@ -1135,19 +1135,19 @@ DLSMS trans(SMS IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:PAGIN
 DLSMS trans(SMS IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:PAGING_RESP callref-0x40000002 tid-0) Freeing transaction
 DLSMS SMR(0) clearing SMR instance
 DLSMS SMC(0) clearing instance
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - SMS: now used by 2 (attached,active-conn)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - SMS: now used by 2 (attached,active-conn)
 DREF msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:PAGING_RESP){MSC_A_ST_AUTHENTICATED}: - sms: now used by 1 (rx_from_ms)
 DREF msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:PAGING_RESP){MSC_A_ST_AUTHENTICATED}: - rx_from_ms: now used by 0 (-)
 DMSC msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:PAGING_RESP){MSC_A_ST_AUTHENTICATED}: Received Event MSC_A_EV_UNUSED
 DMSC msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:PAGING_RESP){MSC_A_ST_AUTHENTICATED}: state_chg to MSC_A_ST_RELEASING
 DIUCS msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:PAGING_RESP){MSC_A_ST_RELEASING}: Releasing: msc_a use is 0 (-)
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + msc_a_fsm_releasing_onenter: now used by 3 (attached,active-conn,msc_a_fsm_releasing_onenter)
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + vlr_subscr_cancel_attach_fsm: now used by 4 (attached,active-conn,msc_a_fsm_releasing_onenter,vlr_subscr_cancel_attach_fsm)
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - vlr_subscr_cancel_attach_fsm: now used by 3 (attached,active-conn,msc_a_fsm_releasing_onenter)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + msc_a_fsm_releasing_onenter: now used by 3 (attached,active-conn,msc_a_fsm_releasing_onenter)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + vlr_subscr_cancel_attach_fsm: now used by 4 (attached,active-conn,msc_a_fsm_releasing_onenter,vlr_subscr_cancel_attach_fsm)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - vlr_subscr_cancel_attach_fsm: now used by 3 (attached,active-conn,msc_a_fsm_releasing_onenter)
 DREF msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:PAGING_RESP){MSC_A_ST_RELEASING}: + wait-Clear-Complete: now used by 1 (wait-Clear-Complete)
 DMSC msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:PAGING_RESP){MSC_A_ST_RELEASING}: RAN encode: CLEAR_COMMAND on UTRAN-Iu
 DMSC dummy_msc_i(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:PAGING_RESP){0}: Received Event MSC_I_EV_FROM_A_FORWARD_ACCESS_SIGNALLING_REQUEST
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - msc_a_fsm_releasing_onenter: now used by 2 (attached,active-conn)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - msc_a_fsm_releasing_onenter: now used by 2 (attached,active-conn)
   dtap_tx_confirmed == 1
   iu_release_sent == 1
 DIUCS msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:PAGING_RESP){MSC_A_ST_RELEASING}: RAN decode: CLEAR_COMPLETE
@@ -1170,7 +1170,7 @@ DMSC dummy_msc_i(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:PAGI
 DMSC dummy_msc_i(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:PAGING_RESP){0}: Removing from parent msub_fsm
 DMSC dummy_msc_i(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:PAGING_RESP){0}: Deferring: will deallocate with msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:PAGING_RESP)
 DMSC msub(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100) Free
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - active-conn: now used by 1 (attached)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - active-conn: now used by 1 (attached)
 DMSC msub_fsm{terminating}: Deferring: will deallocate with msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:PAGING_RESP)
 DMSC msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:PAGING_RESP){MSC_A_ST_RELEASED}: Deallocated, including all deferred deallocations
 - msub gone
@@ -1191,24 +1191,24 @@ DREF msc_a(unknown:UTRAN-Iu:NONE){MSC_A_ST_VALIDATE_L3}: + rx_from_ms: now used 
 DIUCS msc_a(unknown:UTRAN-Iu:NONE){MSC_A_ST_VALIDATE_L3}: RAN decode: COMPL_L3
 DRLL msc_a(unknown:UTRAN-Iu:NONE){MSC_A_ST_VALIDATE_L3}: Dispatching 04.08 message: MM GSM48_MT_MM_IMSI_DETACH_IND
 DMM IMSI DETACH INDICATION: IMSI-901700000010650
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + gsm48_rx_mm_imsi_detach_ind: now used by 2 (attached,gsm48_rx_mm_imsi_detach_ind)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + gsm48_rx_mm_imsi_detach_ind: now used by 2 (attached,gsm48_rx_mm_imsi_detach_ind)
 DMM IMSI DETACH for IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + active-conn: now used by 3 (attached,gsm48_rx_mm_imsi_detach_ind,active-conn)
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + vlr_subscr_cancel_attach_fsm: now used by 4 (attached,gsm48_rx_mm_imsi_detach_ind,active-conn,vlr_subscr_cancel_attach_fsm)
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - vlr_subscr_cancel_attach_fsm: now used by 3 (attached,gsm48_rx_mm_imsi_detach_ind,active-conn)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + active-conn: now used by 3 (attached,gsm48_rx_mm_imsi_detach_ind,active-conn)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + vlr_subscr_cancel_attach_fsm: now used by 4 (attached,gsm48_rx_mm_imsi_detach_ind,active-conn,vlr_subscr_cancel_attach_fsm)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - vlr_subscr_cancel_attach_fsm: now used by 3 (attached,gsm48_rx_mm_imsi_detach_ind,active-conn)
 DVLR set Last E-UTRAN PLMN ID on subscriber: (none)
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - attached: now used by 2 (gsm48_rx_mm_imsi_detach_ind,active-conn)
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - gsm48_rx_mm_imsi_detach_ind: now used by 1 (active-conn)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - attached: now used by 2 (gsm48_rx_mm_imsi_detach_ind,active-conn)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - gsm48_rx_mm_imsi_detach_ind: now used by 1 (active-conn)
 DMSC msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:NONE){MSC_A_ST_VALIDATE_L3}: Received Event MSC_A_EV_CN_CLOSE
 DMSC msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:NONE){MSC_A_ST_VALIDATE_L3}: state_chg to MSC_A_ST_RELEASING
 DIUCS msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:NONE){MSC_A_ST_RELEASING}: Releasing: msc_a use is 1 (rx_from_ms)
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + msc_a_fsm_releasing_onenter: now used by 2 (active-conn,msc_a_fsm_releasing_onenter)
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + vlr_subscr_cancel_attach_fsm: now used by 3 (active-conn,msc_a_fsm_releasing_onenter,vlr_subscr_cancel_attach_fsm)
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - vlr_subscr_cancel_attach_fsm: now used by 2 (active-conn,msc_a_fsm_releasing_onenter)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + msc_a_fsm_releasing_onenter: now used by 2 (active-conn,msc_a_fsm_releasing_onenter)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + vlr_subscr_cancel_attach_fsm: now used by 3 (active-conn,msc_a_fsm_releasing_onenter,vlr_subscr_cancel_attach_fsm)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - vlr_subscr_cancel_attach_fsm: now used by 2 (active-conn,msc_a_fsm_releasing_onenter)
 DREF msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:NONE){MSC_A_ST_RELEASING}: + wait-Clear-Complete: now used by 2 (rx_from_ms,wait-Clear-Complete)
 DMSC msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:NONE){MSC_A_ST_RELEASING}: RAN encode: CLEAR_COMMAND on UTRAN-Iu
 DMSC dummy_msc_i(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:NONE){0}: Received Event MSC_I_EV_FROM_A_FORWARD_ACCESS_SIGNALLING_REQUEST
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - msc_a_fsm_releasing_onenter: now used by 1 (active-conn)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - msc_a_fsm_releasing_onenter: now used by 1 (active-conn)
 DREF msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:NONE){MSC_A_ST_RELEASING}: - rx_from_ms: now used by 1 (wait-Clear-Complete)
   iu_release_sent == 1
 DIUCS msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:NONE){MSC_A_ST_RELEASING}: RAN decode: CLEAR_COMPLETE
@@ -1228,7 +1228,7 @@ DMSC dummy_msc_i(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:NONE
 DMSC dummy_msc_i(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:NONE){0}: Removing from parent msub_fsm
 DMSC dummy_msc_i(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:NONE){0}: Deferring: will deallocate with msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:NONE)
 DMSC msub(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100) Free
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - active-conn: now used by 0 (-)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - active-conn: now used by 0 (-)
 DVLR SUBSCR(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100) freeing VLR subscr (max total use count was 6)
 DMSC msub_fsm{terminating}: Deferring: will deallocate with msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:NONE)
 DMSC msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:NONE){MSC_A_ST_RELEASED}: Deallocated, including all deferred deallocations
@@ -1257,13 +1257,13 @@ DVLR vlr_lu_fsm(IMSI-901700000010650:UTRAN-Iu:LU){VLR_ULA_S_IDLE}: Allocated
 DVLR vlr_lu_fsm(IMSI-901700000010650:UTRAN-Iu:LU){VLR_ULA_S_IDLE}: is child of msc_a(IMSI-901700000010650:UTRAN-Iu:LU)
 DVLR vlr_lu_fsm(IMSI-901700000010650:UTRAN-Iu:LU){VLR_ULA_S_IDLE}: rev=R99 net=UTRAN Auth+Ciph
 DVLR vlr_lu_fsm(IMSI-901700000010650:UTRAN-Iu:LU){VLR_ULA_S_IDLE}: Received Event VLR_ULA_E_UPDATE_LA
-DREF VLR subscr unknown + _lu_fsm_associate_vsub: now used by 1 (_lu_fsm_associate_vsub)
+DVLR VLR subscr unknown + _lu_fsm_associate_vsub: now used by 1 (_lu_fsm_associate_vsub)
 DVLR set IMSI on subscriber; IMSI=901700000010650 id=901700000010650
 DVLR New subscr, IMSI: 901700000010650
-DREF VLR subscr IMSI-901700000010650 + active-conn: now used by 2 (_lu_fsm_associate_vsub,active-conn)
+DVLR VLR subscr IMSI-901700000010650 + active-conn: now used by 2 (_lu_fsm_associate_vsub,active-conn)
 DMSC msc_a(IMSI-901700000010650:UTRAN-Iu:LU){MSC_A_ST_VALIDATE_L3}: Received Event MSC_A_EV_COMPLETE_LAYER_3_OK
 DMSC msc_a(IMSI-901700000010650:UTRAN-Iu:LU){MSC_A_ST_VALIDATE_L3}: state_chg to MSC_A_ST_AUTH_CIPH
-DREF VLR subscr IMSI-901700000010650 - _lu_fsm_associate_vsub: now used by 1 (active-conn)
+DVLR VLR subscr IMSI-901700000010650 - _lu_fsm_associate_vsub: now used by 1 (active-conn)
 DVLR set Last E-UTRAN PLMN ID on subscriber: (none)
 DVLR vlr_lu_fsm(IMSI-901700000010650:UTRAN-Iu:LU){VLR_ULA_S_IDLE}: vlr_loc_upd_node1_pre()
 DVLR vlr_lu_fsm(IMSI-901700000010650:UTRAN-Iu:LU){VLR_ULA_S_IDLE}: vlr_loc_upd_node1()
@@ -1278,7 +1278,7 @@ DREF msc_a(IMSI-901700000010650:UTRAN-Iu:LU){MSC_A_ST_AUTH_CIPH}: - rx_from_ms: 
   lu_result_sent == 0
 - from HLR, rx _SEND_AUTH_INFO_RESULT; VLR sends Auth Req to MS
 <-- GSUP rx OSMO_GSUP_MSGT_SEND_AUTH_INFO_RESULT: 0a010809710000000156f00362201039fa2f4e3d523d8619a73b4f65c3e14d21049b36efdf2208059a4f668f6fbe39231027497388b6cb044648f396aa155b95ef2410f64735036e5871319c679f4742a75ea125108704f5ba55f30000d2ee44b22c8ea9192708e229c19e791f2e4103622010c187a53a5e6b9d573cac7c74451fd46d210485aa31302208d3d50a000bf04f6e23101159ec926a50e98c034a6b7d7c9f418d2410df3a03d9ca5335641efc8e36d76cd20b25101843a645b98d00005b2d666af46c45d927087db47cf7f81e4dc703622010efa9c29a9742148d5c9070348716e1bb210469d5f9fb22083df176f0c29f1a3d2310eb50e770ddcc3060101d2f43b6c2b884241076542abce5ff9345b0e8947f4c6e019c2510f9375e6d41e1000096e7fe4ff1c27e392708706f996719ba609c03622010f023d5a3b24726e0631b64b3840f82532104d570c03f2208ec011be8919883d62310c4e58af4ba43f3bcd904e16984f086d724100593f65e752e5cb7f473862bda05aa0a2510541ff1f077270000c5ea00d658bc7e9a27083fd26072eaa2a04d036220102f8f90c780d6a9c0c53da7ac57b6707e2104b072446f220823f39f9f425ad6e6231065af0527fda95b0dc5ae4aa515cdf32f2410537c3b35a3b13b08d08eeb28098f45cc25104bf4e564f75300009bc796706bc6574427080edb0eadbea94ac20a0101
-DREF VLR subscr IMSI-901700000010650 + vlr_gsup_rx: now used by 2 (active-conn,vlr_gsup_rx)
+DVLR VLR subscr IMSI-901700000010650 + vlr_gsup_rx: now used by 2 (active-conn,vlr_gsup_rx)
 DVLR VLR_Authenticate(IMSI-901700000010650:UTRAN-Iu:LU){VLR_SUB_AS_NEEDS_AUTH_WAIT_AI}: Received Event VLR_AUTH_E_HLR_SAI_ACK
 DVLR SUBSCR(IMSI-901700000010650) Received 5 auth tuples
 DVLR VLR_Authenticate(IMSI-901700000010650:UTRAN-Iu:LU){VLR_SUB_AS_NEEDS_AUTH_WAIT_AI}: state_chg to VLR_SUB_AS_WAIT_RESP
@@ -1287,7 +1287,7 @@ DVLR VLR_Authenticate(IMSI-901700000010650:UTRAN-Iu:LU){VLR_SUB_AS_WAIT_RESP}: g
 - ...rand=39fa2f4e3d523d8619a73b4f65c3e14d
 - ...autn=8704f5ba55f30000d2ee44b22c8ea919
 - ...expecting res=e229c19e791f2e41
-DREF VLR subscr IMSI-901700000010650 - vlr_gsup_rx: now used by 1 (active-conn)
+DVLR VLR subscr IMSI-901700000010650 - vlr_gsup_rx: now used by 1 (active-conn)
 <-- GSUP rx OSMO_GSUP_MSGT_SEND_AUTH_INFO_RESULT: vlr_gsupc_read_cb() returns 0
   auth_request_sent == 1
   lu_result_sent == 0
@@ -1332,16 +1332,16 @@ DVLR upd_hlr_vlr_fsm(IMSI-901700000010650:UTRAN-Iu:LU){UPD_HLR_VLR_S_INIT}: stat
   lu_result_sent == 0
 - HLR sends _INSERT_DATA_REQUEST, VLR responds with _INSERT_DATA_RESULT
 <-- GSUP rx OSMO_GSUP_MSGT_INSERT_DATA_REQUEST: 10010809710000000156f00804032443f20a0101
-DREF VLR subscr IMSI-901700000010650 + vlr_gsup_rx: now used by 2 (active-conn,vlr_gsup_rx)
+DVLR VLR subscr IMSI-901700000010650 + vlr_gsup_rx: now used by 2 (active-conn,vlr_gsup_rx)
 DVLR IMSI:901700000010650 has MSISDN:42342
 DMSC msub(IMSI-901700000010650:MSISDN-42342) VLR: update for IMSI=901700000010650 (MSISDN=42342)
 GSUP --> HLR: OSMO_GSUP_MSGT_INSERT_DATA_RESULT: 12010809710000000156f00a0101
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342 - vlr_gsup_rx: now used by 1 (active-conn)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342 - vlr_gsup_rx: now used by 1 (active-conn)
 <-- GSUP rx OSMO_GSUP_MSGT_INSERT_DATA_REQUEST: vlr_gsupc_read_cb() returns 0
   lu_result_sent == 0
 - HLR also sends GSUP _UPDATE_LOCATION_RESULT
 <-- GSUP rx OSMO_GSUP_MSGT_UPDATE_LOCATION_RESULT: 06010809710000000156f00a0101
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342 + vlr_gsup_rx: now used by 2 (active-conn,vlr_gsup_rx)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342 + vlr_gsup_rx: now used by 2 (active-conn,vlr_gsup_rx)
 DVLR vlr_lu_fsm(IMSI-901700000010650:MSISDN-42342:UTRAN-Iu:LU){VLR_ULA_S_WAIT_HLR_UPD}: Received Event VLR_ULA_E_HLR_LU_RES
 DVLR upd_hlr_vlr_fsm(IMSI-901700000010650:UTRAN-Iu:LU){UPD_HLR_VLR_S_WAIT_FOR_DATA}: Received Event UPD_HLR_VLR_E_UPD_LOC_ACK
 DVLR upd_hlr_vlr_fsm(IMSI-901700000010650:UTRAN-Iu:LU){UPD_HLR_VLR_S_WAIT_FOR_DATA}: state_chg to UPD_HLR_VLR_S_DONE
@@ -1359,7 +1359,7 @@ DMSC msub(IMSI-901700000010650:MSISDN-42342:TMSInew-0x03020100) VLR: update for 
 DVLR lu_compl_vlr_fsm(IMSI-901700000010650:MSISDN-42342:UTRAN-Iu:LU){LU_COMPL_VLR_S_WAIT_SUB_PRES}: state_chg to LU_COMPL_VLR_S_WAIT_TMSI_CNF
 - sending LU Accept for IMSI-901700000010650:MSISDN-42342:TMSInew-0x03020100:UTRAN-Iu:LU, with TMSI 0x03020100
 DVLR upd_hlr_vlr_fsm(IMSI-901700000010650:UTRAN-Iu:LU){UPD_HLR_VLR_S_DONE}: Deallocated
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSInew-0x03020100 - vlr_gsup_rx: now used by 1 (active-conn)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSInew-0x03020100 - vlr_gsup_rx: now used by 1 (active-conn)
 <-- GSUP rx OSMO_GSUP_MSGT_UPDATE_LOCATION_RESULT: vlr_gsupc_read_cb() returns 0
   lu_result_sent == 1
 - a LU Accept with a new TMSI was sent, waiting for TMSI Realloc Compl
@@ -1383,12 +1383,12 @@ DRLL msc_a(IMSI-901700000010650:MSISDN-42342:TMSInew-0x03020100:UTRAN-Iu:LU){MSC
 DIUCS msc_a(IMSI-901700000010650:MSISDN-42342:TMSInew-0x03020100:UTRAN-Iu:LU){MSC_A_ST_AUTH_CIPH}: Message not permitted for initial conn: SMS:0x01
 DIUCS msc_a(IMSI-901700000010650:MSISDN-42342:TMSInew-0x03020100:UTRAN-Iu:LU){MSC_A_ST_AUTH_CIPH}: RAN decode error (rc=-13) for DTAP from MSC-I
 - even though the TMSI is not acked, we can already find the subscr with it
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSInew-0x03020100 + _test_umts_authen: now used by 2 (active-conn,_test_umts_authen)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSInew-0x03020100 + _test_umts_authen: now used by 2 (active-conn,_test_umts_authen)
   vsub != NULL == 1
   strcmp(vsub->imsi, imsi) == 0
   vsub->tmsi_new == 0x03020100
   vsub->tmsi == 0xffffffff
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSInew-0x03020100 - _test_umts_authen: now used by 1 (active-conn)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSInew-0x03020100 - _test_umts_authen: now used by 1 (active-conn)
 - MS sends TMSI Realloc Complete
   MSC <--UTRAN-Iu-- MS: GSM48_MT_MM_TMSI_REALL_COMPL
 DREF msc_a(IMSI-901700000010650:MSISDN-42342:TMSInew-0x03020100:UTRAN-Iu:LU){MSC_A_ST_AUTH_CIPH}: + rx_from_ms: now used by 2 (lu,rx_from_ms)
@@ -1398,7 +1398,7 @@ DMM msc_a(IMSI-901700000010650:MSISDN-42342:TMSInew-0x03020100:UTRAN-Iu:LU){MSC_
 DVLR vlr_lu_fsm(IMSI-901700000010650:MSISDN-42342:TMSInew-0x03020100:UTRAN-Iu:LU){VLR_ULA_S_WAIT_LU_COMPL}: Received Event VLR_ULA_E_NEW_TMSI_ACK
 DVLR lu_compl_vlr_fsm(IMSI-901700000010650:MSISDN-42342:UTRAN-Iu:LU){LU_COMPL_VLR_S_WAIT_TMSI_CNF}: Received Event LU_COMPL_VLR_E_NEW_TMSI_ACK
 DMSC msub(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100) VLR: update for IMSI=901700000010650 (MSISDN=42342)
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + attached: now used by 2 (active-conn,attached)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + attached: now used by 2 (active-conn,attached)
 DVLR lu_compl_vlr_fsm(IMSI-901700000010650:MSISDN-42342:UTRAN-Iu:LU){LU_COMPL_VLR_S_WAIT_TMSI_CNF}: state_chg to LU_COMPL_VLR_S_DONE
 DVLR vlr_lu_fsm(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:LU){VLR_ULA_S_WAIT_LU_COMPL}: Received Event VLR_ULA_E_LU_COMPL_SUCCESS
 DVLR lu_compl_vlr_fsm(IMSI-901700000010650:MSISDN-42342:UTRAN-Iu:LU){LU_COMPL_VLR_S_DONE}: Terminating (cause = OSMO_FSM_TERM_PARENT)
@@ -1412,13 +1412,13 @@ DREF msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:LU){MSC_A_
 DMSC msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:LU){MSC_A_ST_AUTHENTICATED}: Received Event MSC_A_EV_UNUSED
 DMSC msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:LU){MSC_A_ST_AUTHENTICATED}: state_chg to MSC_A_ST_RELEASING
 DIUCS msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:LU){MSC_A_ST_RELEASING}: Releasing: msc_a use is 0 (-)
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + msc_a_fsm_releasing_onenter: now used by 3 (active-conn,attached,msc_a_fsm_releasing_onenter)
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + vlr_subscr_cancel_attach_fsm: now used by 4 (active-conn,attached,msc_a_fsm_releasing_onenter,vlr_subscr_cancel_attach_fsm)
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - vlr_subscr_cancel_attach_fsm: now used by 3 (active-conn,attached,msc_a_fsm_releasing_onenter)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + msc_a_fsm_releasing_onenter: now used by 3 (active-conn,attached,msc_a_fsm_releasing_onenter)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + vlr_subscr_cancel_attach_fsm: now used by 4 (active-conn,attached,msc_a_fsm_releasing_onenter,vlr_subscr_cancel_attach_fsm)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - vlr_subscr_cancel_attach_fsm: now used by 3 (active-conn,attached,msc_a_fsm_releasing_onenter)
 DREF msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:LU){MSC_A_ST_RELEASING}: + wait-Clear-Complete: now used by 1 (wait-Clear-Complete)
 DMSC msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:LU){MSC_A_ST_RELEASING}: RAN encode: CLEAR_COMMAND on UTRAN-Iu
 DMSC dummy_msc_i(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:LU){0}: Received Event MSC_I_EV_FROM_A_FORWARD_ACCESS_SIGNALLING_REQUEST
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - msc_a_fsm_releasing_onenter: now used by 2 (active-conn,attached)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - msc_a_fsm_releasing_onenter: now used by 2 (active-conn,attached)
   iu_release_sent == 1
 DIUCS msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:LU){MSC_A_ST_RELEASING}: RAN decode: CLEAR_COMPLETE
 DREF msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:LU){MSC_A_ST_RELEASING}: - wait-Clear-Complete: now used by 0 (-)
@@ -1441,7 +1441,7 @@ DMSC dummy_msc_i(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:LU){
 DMSC dummy_msc_i(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:LU){0}: Removing from parent msub_fsm
 DMSC dummy_msc_i(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:LU){0}: Deferring: will deallocate with msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:LU)
 DMSC msub(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100) Free
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - active-conn: now used by 1 (attached)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - active-conn: now used by 1 (attached)
 DMSC msub_fsm{terminating}: Deferring: will deallocate with msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:LU)
 DMSC msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:LU){MSC_A_ST_RELEASED}: Deallocated, including all deferred deallocations
 - msub gone
@@ -1467,8 +1467,8 @@ DVLR Process_Access_Request_VLR(IMSI-901700000010650:UTRAN-Iu:CM_SERVICE_REQ){PR
 DVLR Process_Access_Request_VLR(IMSI-901700000010650:UTRAN-Iu:CM_SERVICE_REQ){PR_ARQ_S_INIT}: is child of msc_a(IMSI-901700000010650:UTRAN-Iu:CM_SERVICE_REQ)
 DVLR Process_Access_Request_VLR(IMSI-901700000010650:UTRAN-Iu:CM_SERVICE_REQ){PR_ARQ_S_INIT}: rev=R99 net=UTRAN Auth+Ciph
 DVLR Process_Access_Request_VLR(IMSI-901700000010650:UTRAN-Iu:CM_SERVICE_REQ){PR_ARQ_S_INIT}: Received Event PR_ARQ_E_START
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + proc_arq_vlr_fn_init: now used by 2 (attached,proc_arq_vlr_fn_init)
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + active-conn: now used by 3 (attached,proc_arq_vlr_fn_init,active-conn)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + proc_arq_vlr_fn_init: now used by 2 (attached,proc_arq_vlr_fn_init)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + active-conn: now used by 3 (attached,proc_arq_vlr_fn_init,active-conn)
 DMSC msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:CM_SERVICE_REQ){MSC_A_ST_VALIDATE_L3}: Received Event MSC_A_EV_COMPLETE_LAYER_3_OK
 DMSC msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:CM_SERVICE_REQ){MSC_A_ST_VALIDATE_L3}: state_chg to MSC_A_ST_AUTH_CIPH
 DVLR Process_Access_Request_VLR(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:CM_SERVICE_REQ){PR_ARQ_S_INIT}: proc_arq_vlr_fn_post_imsi()
@@ -1482,7 +1482,7 @@ DVLR VLR_Authenticate(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu
 - ...rand=c187a53a5e6b9d573cac7c74451fd46d
 - ...autn=1843a645b98d00005b2d666af46c45d9
 - ...expecting res=7db47cf7f81e4dc7
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - proc_arq_vlr_fn_init: now used by 2 (attached,active-conn)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - proc_arq_vlr_fn_init: now used by 2 (attached,active-conn)
 DREF msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:CM_SERVICE_REQ){MSC_A_ST_AUTH_CIPH}: - rx_from_ms: now used by 1 (cm_service_sms)
   cm_service_result_sent == 0
   auth_request_sent == 1
@@ -1550,13 +1550,13 @@ DREF msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:CM_SERVICE
 DMSC msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:CM_SERVICE_REQ){MSC_A_ST_AUTHENTICATED}: Received Event MSC_A_EV_UNUSED
 DMSC msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:CM_SERVICE_REQ){MSC_A_ST_AUTHENTICATED}: state_chg to MSC_A_ST_RELEASING
 DIUCS msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:CM_SERVICE_REQ){MSC_A_ST_RELEASING}: Releasing: msc_a use is 0 (-)
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + msc_a_fsm_releasing_onenter: now used by 3 (attached,active-conn,msc_a_fsm_releasing_onenter)
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + vlr_subscr_cancel_attach_fsm: now used by 4 (attached,active-conn,msc_a_fsm_releasing_onenter,vlr_subscr_cancel_attach_fsm)
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - vlr_subscr_cancel_attach_fsm: now used by 3 (attached,active-conn,msc_a_fsm_releasing_onenter)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + msc_a_fsm_releasing_onenter: now used by 3 (attached,active-conn,msc_a_fsm_releasing_onenter)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + vlr_subscr_cancel_attach_fsm: now used by 4 (attached,active-conn,msc_a_fsm_releasing_onenter,vlr_subscr_cancel_attach_fsm)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - vlr_subscr_cancel_attach_fsm: now used by 3 (attached,active-conn,msc_a_fsm_releasing_onenter)
 DREF msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:CM_SERVICE_REQ){MSC_A_ST_RELEASING}: + wait-Clear-Complete: now used by 1 (wait-Clear-Complete)
 DMSC msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:CM_SERVICE_REQ){MSC_A_ST_RELEASING}: RAN encode: CLEAR_COMMAND on UTRAN-Iu
 DMSC dummy_msc_i(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:CM_SERVICE_REQ){0}: Received Event MSC_I_EV_FROM_A_FORWARD_ACCESS_SIGNALLING_REQUEST
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - msc_a_fsm_releasing_onenter: now used by 2 (attached,active-conn)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - msc_a_fsm_releasing_onenter: now used by 2 (attached,active-conn)
   iu_release_sent == 1
 DIUCS msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:CM_SERVICE_REQ){MSC_A_ST_RELEASING}: RAN decode: CLEAR_COMPLETE
 DREF msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:CM_SERVICE_REQ){MSC_A_ST_RELEASING}: - wait-Clear-Complete: now used by 0 (-)
@@ -1578,7 +1578,7 @@ DMSC dummy_msc_i(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:CM_S
 DMSC dummy_msc_i(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:CM_SERVICE_REQ){0}: Removing from parent msub_fsm
 DMSC dummy_msc_i(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:CM_SERVICE_REQ){0}: Deferring: will deallocate with msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:CM_SERVICE_REQ)
 DMSC msub(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100) Free
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - active-conn: now used by 1 (attached)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - active-conn: now used by 1 (attached)
 DMSC msub_fsm{terminating}: Deferring: will deallocate with msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:CM_SERVICE_REQ)
 DMSC msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:CM_SERVICE_REQ){MSC_A_ST_RELEASED}: Deallocated, including all deferred deallocations
 - msub gone
@@ -1587,10 +1587,10 @@ DMSC msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:CM_SERVICE
 
 
 - an SMS is sent, MS is paged
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + _test_umts_authen: now used by 2 (attached,_test_umts_authen)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + _test_umts_authen: now used by 2 (attached,_test_umts_authen)
   llist_count(&vsub->cs.requests) == 0
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + SMS-receiver: now used by 3 (attached,_test_umts_authen,SMS-receiver)
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + SMS: now used by 4 (attached,_test_umts_authen,SMS-receiver,SMS)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + SMS-receiver: now used by 3 (attached,_test_umts_authen,SMS-receiver)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + SMS: now used by 4 (attached,_test_umts_authen,SMS-receiver,SMS)
 DLSMS trans(SMS IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 callref-0x40000003 tid-0) New transaction
 DLSMS SMC(0) instance created for network
 DLSMS SMR(0) instance created for network.
@@ -1604,14 +1604,14 @@ DLSMS trans(SMS IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 callref-0x4000
 DPAG Paging: IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 for MT-SMS: Starting paging
   paging request (SIGNALLING_LOW_PRIO) to IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 on UTRAN-Iu
   strcmp(paging_expecting_imsi, vsub->imsi) == 0
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + Paging: now used by 5 (attached,_test_umts_authen,SMS-receiver,SMS,Paging)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + Paging: now used by 5 (attached,_test_umts_authen,SMS-receiver,SMS,Paging)
   llist_count(&vsub->cs.requests) == 1
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - _test_umts_authen: now used by 4 (attached,SMS-receiver,SMS,Paging)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - _test_umts_authen: now used by 4 (attached,SMS-receiver,SMS,Paging)
   paging_sent == 1
 - the subscriber and its pending request should remain
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + _test_umts_authen: now used by 5 (attached,SMS-receiver,SMS,Paging,_test_umts_authen)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + _test_umts_authen: now used by 5 (attached,SMS-receiver,SMS,Paging,_test_umts_authen)
   llist_count(&vsub->cs.requests) == 1
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - _test_umts_authen: now used by 4 (attached,SMS-receiver,SMS,Paging)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - _test_umts_authen: now used by 4 (attached,SMS-receiver,SMS,Paging)
 - MS replies with Paging Response, and VLR sends Auth Request with third key
   MSC <--UTRAN-Iu-- MS: GSM48_MT_RR_PAG_RESP
   new conn
@@ -1630,8 +1630,8 @@ DVLR Process_Access_Request_VLR(IMSI-901700000010650:UTRAN-Iu:PAGING_RESP){PR_AR
 DVLR Process_Access_Request_VLR(IMSI-901700000010650:UTRAN-Iu:PAGING_RESP){PR_ARQ_S_INIT}: is child of msc_a(IMSI-901700000010650:UTRAN-Iu:PAGING_RESP)
 DVLR Process_Access_Request_VLR(IMSI-901700000010650:UTRAN-Iu:PAGING_RESP){PR_ARQ_S_INIT}: rev=R99 net=UTRAN Auth+Ciph
 DVLR Process_Access_Request_VLR(IMSI-901700000010650:UTRAN-Iu:PAGING_RESP){PR_ARQ_S_INIT}: Received Event PR_ARQ_E_START
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + proc_arq_vlr_fn_init: now used by 5 (attached,SMS-receiver,SMS,Paging,proc_arq_vlr_fn_init)
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + active-conn: now used by 6 (attached,SMS-receiver,SMS,Paging,proc_arq_vlr_fn_init,active-conn)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + proc_arq_vlr_fn_init: now used by 5 (attached,SMS-receiver,SMS,Paging,proc_arq_vlr_fn_init)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + active-conn: now used by 6 (attached,SMS-receiver,SMS,Paging,proc_arq_vlr_fn_init,active-conn)
 DMSC msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:PAGING_RESP){MSC_A_ST_VALIDATE_L3}: Received Event MSC_A_EV_COMPLETE_LAYER_3_OK
 DMSC msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:PAGING_RESP){MSC_A_ST_VALIDATE_L3}: state_chg to MSC_A_ST_AUTH_CIPH
 DVLR Process_Access_Request_VLR(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:PAGING_RESP){PR_ARQ_S_INIT}: proc_arq_vlr_fn_post_imsi()
@@ -1645,7 +1645,7 @@ DVLR VLR_Authenticate(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu
 - ...rand=efa9c29a9742148d5c9070348716e1bb
 - ...autn=f9375e6d41e1000096e7fe4ff1c27e39
 - ...expecting res=706f996719ba609c
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - proc_arq_vlr_fn_init: now used by 5 (attached,SMS-receiver,SMS,Paging,active-conn)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - proc_arq_vlr_fn_init: now used by 5 (attached,SMS-receiver,SMS,Paging,active-conn)
 DREF msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:PAGING_RESP){MSC_A_ST_AUTH_CIPH}: - rx_from_ms: now used by 1 (paging-response)
   auth_request_sent == 1
 - needs auth, not yet accepted
@@ -1719,12 +1719,12 @@ DMSC msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:PAGING_RES
 - DTAP --UTRAN-Iu--> MS: SMS:0x01: 09015801000791447758100650004c0005802443f2000007101000000000445079da1e1ee7416937485e9ea7c965373d1d6683c270383b3d0ed3d36ff71c949e83c22072799e9687c5ec32a81d96afcbf4b4fb0c7ac3e9e9b7db05
 - DTAP matches expected message
 DMSC dummy_msc_i(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:PAGING_RESP){0}: Received Event MSC_I_EV_FROM_A_FORWARD_ACCESS_SIGNALLING_REQUEST
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - Paging: now used by 4 (attached,SMS-receiver,SMS,active-conn)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - Paging: now used by 4 (attached,SMS-receiver,SMS,active-conn)
 DREF msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:PAGING_RESP){MSC_A_ST_AUTHENTICATED}: - paging-response: now used by 1 (sms)
 - SMS was delivered, no requests pending for subscr
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + _test_umts_authen: now used by 5 (attached,SMS-receiver,SMS,active-conn,_test_umts_authen)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + _test_umts_authen: now used by 5 (attached,SMS-receiver,SMS,active-conn,_test_umts_authen)
   llist_count(&vsub->cs.requests) == 0
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - _test_umts_authen: now used by 4 (attached,SMS-receiver,SMS,active-conn)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - _test_umts_authen: now used by 4 (attached,SMS-receiver,SMS,active-conn)
 - conn is still open to wait for SMS ack dance
   llist_count(&msub_list) == 1
 - MS replies with CP-ACK for received SMS
@@ -1758,7 +1758,7 @@ DLSMS SMR(0) message MNSMS-DATA-IND received in state WAIT_FOR_RP_ACK
 DLSMS SMR(0) RX SMS RP-ACK
 DLSMS SMR(0) new RP state WAIT_FOR_RP_ACK -> IDLE
 DLSMS trans(SMS IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:PAGING_RESP callref-0x40000003 tid-0) RX SMS RP-ACK (MO)
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - SMS-receiver: now used by 3 (attached,SMS,active-conn)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - SMS-receiver: now used by 3 (attached,SMS,active-conn)
 DLSMS SMR(0) TX: MNSMS-REL-REQ
 DLSMS SMC(0) message MNSMS-REL-REQ received in state MM_ESTABLISHED
 DLSMS SMC(0) new CP state MM_ESTABLISHED -> IDLE
@@ -1766,19 +1766,19 @@ DLSMS trans(SMS IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:PAGIN
 DLSMS trans(SMS IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:PAGING_RESP callref-0x40000003 tid-0) Freeing transaction
 DLSMS SMR(0) clearing SMR instance
 DLSMS SMC(0) clearing instance
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - SMS: now used by 2 (attached,active-conn)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - SMS: now used by 2 (attached,active-conn)
 DREF msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:PAGING_RESP){MSC_A_ST_AUTHENTICATED}: - sms: now used by 1 (rx_from_ms)
 DREF msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:PAGING_RESP){MSC_A_ST_AUTHENTICATED}: - rx_from_ms: now used by 0 (-)
 DMSC msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:PAGING_RESP){MSC_A_ST_AUTHENTICATED}: Received Event MSC_A_EV_UNUSED
 DMSC msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:PAGING_RESP){MSC_A_ST_AUTHENTICATED}: state_chg to MSC_A_ST_RELEASING
 DIUCS msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:PAGING_RESP){MSC_A_ST_RELEASING}: Releasing: msc_a use is 0 (-)
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + msc_a_fsm_releasing_onenter: now used by 3 (attached,active-conn,msc_a_fsm_releasing_onenter)
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + vlr_subscr_cancel_attach_fsm: now used by 4 (attached,active-conn,msc_a_fsm_releasing_onenter,vlr_subscr_cancel_attach_fsm)
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - vlr_subscr_cancel_attach_fsm: now used by 3 (attached,active-conn,msc_a_fsm_releasing_onenter)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + msc_a_fsm_releasing_onenter: now used by 3 (attached,active-conn,msc_a_fsm_releasing_onenter)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + vlr_subscr_cancel_attach_fsm: now used by 4 (attached,active-conn,msc_a_fsm_releasing_onenter,vlr_subscr_cancel_attach_fsm)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - vlr_subscr_cancel_attach_fsm: now used by 3 (attached,active-conn,msc_a_fsm_releasing_onenter)
 DREF msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:PAGING_RESP){MSC_A_ST_RELEASING}: + wait-Clear-Complete: now used by 1 (wait-Clear-Complete)
 DMSC msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:PAGING_RESP){MSC_A_ST_RELEASING}: RAN encode: CLEAR_COMMAND on UTRAN-Iu
 DMSC dummy_msc_i(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:PAGING_RESP){0}: Received Event MSC_I_EV_FROM_A_FORWARD_ACCESS_SIGNALLING_REQUEST
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - msc_a_fsm_releasing_onenter: now used by 2 (attached,active-conn)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - msc_a_fsm_releasing_onenter: now used by 2 (attached,active-conn)
   dtap_tx_confirmed == 1
   iu_release_sent == 1
 DIUCS msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:PAGING_RESP){MSC_A_ST_RELEASING}: RAN decode: CLEAR_COMPLETE
@@ -1801,7 +1801,7 @@ DMSC dummy_msc_i(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:PAGI
 DMSC dummy_msc_i(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:PAGING_RESP){0}: Removing from parent msub_fsm
 DMSC dummy_msc_i(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:PAGING_RESP){0}: Deferring: will deallocate with msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:PAGING_RESP)
 DMSC msub(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100) Free
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - active-conn: now used by 1 (attached)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - active-conn: now used by 1 (attached)
 DMSC msub_fsm{terminating}: Deferring: will deallocate with msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:PAGING_RESP)
 DMSC msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:PAGING_RESP){MSC_A_ST_RELEASED}: Deallocated, including all deferred deallocations
 - msub gone
@@ -1822,24 +1822,24 @@ DREF msc_a(unknown:UTRAN-Iu:NONE){MSC_A_ST_VALIDATE_L3}: + rx_from_ms: now used 
 DIUCS msc_a(unknown:UTRAN-Iu:NONE){MSC_A_ST_VALIDATE_L3}: RAN decode: COMPL_L3
 DRLL msc_a(unknown:UTRAN-Iu:NONE){MSC_A_ST_VALIDATE_L3}: Dispatching 04.08 message: MM GSM48_MT_MM_IMSI_DETACH_IND
 DMM IMSI DETACH INDICATION: IMSI-901700000010650
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + gsm48_rx_mm_imsi_detach_ind: now used by 2 (attached,gsm48_rx_mm_imsi_detach_ind)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + gsm48_rx_mm_imsi_detach_ind: now used by 2 (attached,gsm48_rx_mm_imsi_detach_ind)
 DMM IMSI DETACH for IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + active-conn: now used by 3 (attached,gsm48_rx_mm_imsi_detach_ind,active-conn)
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + vlr_subscr_cancel_attach_fsm: now used by 4 (attached,gsm48_rx_mm_imsi_detach_ind,active-conn,vlr_subscr_cancel_attach_fsm)
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - vlr_subscr_cancel_attach_fsm: now used by 3 (attached,gsm48_rx_mm_imsi_detach_ind,active-conn)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + active-conn: now used by 3 (attached,gsm48_rx_mm_imsi_detach_ind,active-conn)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + vlr_subscr_cancel_attach_fsm: now used by 4 (attached,gsm48_rx_mm_imsi_detach_ind,active-conn,vlr_subscr_cancel_attach_fsm)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - vlr_subscr_cancel_attach_fsm: now used by 3 (attached,gsm48_rx_mm_imsi_detach_ind,active-conn)
 DVLR set Last E-UTRAN PLMN ID on subscriber: (none)
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - attached: now used by 2 (gsm48_rx_mm_imsi_detach_ind,active-conn)
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - gsm48_rx_mm_imsi_detach_ind: now used by 1 (active-conn)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - attached: now used by 2 (gsm48_rx_mm_imsi_detach_ind,active-conn)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - gsm48_rx_mm_imsi_detach_ind: now used by 1 (active-conn)
 DMSC msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:NONE){MSC_A_ST_VALIDATE_L3}: Received Event MSC_A_EV_CN_CLOSE
 DMSC msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:NONE){MSC_A_ST_VALIDATE_L3}: state_chg to MSC_A_ST_RELEASING
 DIUCS msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:NONE){MSC_A_ST_RELEASING}: Releasing: msc_a use is 1 (rx_from_ms)
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + msc_a_fsm_releasing_onenter: now used by 2 (active-conn,msc_a_fsm_releasing_onenter)
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + vlr_subscr_cancel_attach_fsm: now used by 3 (active-conn,msc_a_fsm_releasing_onenter,vlr_subscr_cancel_attach_fsm)
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - vlr_subscr_cancel_attach_fsm: now used by 2 (active-conn,msc_a_fsm_releasing_onenter)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + msc_a_fsm_releasing_onenter: now used by 2 (active-conn,msc_a_fsm_releasing_onenter)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + vlr_subscr_cancel_attach_fsm: now used by 3 (active-conn,msc_a_fsm_releasing_onenter,vlr_subscr_cancel_attach_fsm)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - vlr_subscr_cancel_attach_fsm: now used by 2 (active-conn,msc_a_fsm_releasing_onenter)
 DREF msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:NONE){MSC_A_ST_RELEASING}: + wait-Clear-Complete: now used by 2 (rx_from_ms,wait-Clear-Complete)
 DMSC msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:NONE){MSC_A_ST_RELEASING}: RAN encode: CLEAR_COMMAND on UTRAN-Iu
 DMSC dummy_msc_i(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:NONE){0}: Received Event MSC_I_EV_FROM_A_FORWARD_ACCESS_SIGNALLING_REQUEST
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - msc_a_fsm_releasing_onenter: now used by 1 (active-conn)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - msc_a_fsm_releasing_onenter: now used by 1 (active-conn)
 DREF msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:NONE){MSC_A_ST_RELEASING}: - rx_from_ms: now used by 1 (wait-Clear-Complete)
   iu_release_sent == 1
 DIUCS msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:NONE){MSC_A_ST_RELEASING}: RAN decode: CLEAR_COMPLETE
@@ -1859,7 +1859,7 @@ DMSC dummy_msc_i(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:NONE
 DMSC dummy_msc_i(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:NONE){0}: Removing from parent msub_fsm
 DMSC dummy_msc_i(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:NONE){0}: Deferring: will deallocate with msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:NONE)
 DMSC msub(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100) Free
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - active-conn: now used by 0 (-)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - active-conn: now used by 0 (-)
 DVLR SUBSCR(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100) freeing VLR subscr (max total use count was 6)
 DMSC msub_fsm{terminating}: Deferring: will deallocate with msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:NONE)
 DMSC msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:NONE){MSC_A_ST_RELEASED}: Deallocated, including all deferred deallocations
@@ -1888,13 +1888,13 @@ DVLR vlr_lu_fsm(IMSI-901700000010650:GERAN-A:LU){VLR_ULA_S_IDLE}: Allocated
 DVLR vlr_lu_fsm(IMSI-901700000010650:GERAN-A:LU){VLR_ULA_S_IDLE}: is child of msc_a(IMSI-901700000010650:GERAN-A:LU)
 DVLR vlr_lu_fsm(IMSI-901700000010650:GERAN-A:LU){VLR_ULA_S_IDLE}: rev=R99 net=GERAN Auth (no Ciph)
 DVLR vlr_lu_fsm(IMSI-901700000010650:GERAN-A:LU){VLR_ULA_S_IDLE}: Received Event VLR_ULA_E_UPDATE_LA
-DREF VLR subscr unknown + _lu_fsm_associate_vsub: now used by 1 (_lu_fsm_associate_vsub)
+DVLR VLR subscr unknown + _lu_fsm_associate_vsub: now used by 1 (_lu_fsm_associate_vsub)
 DVLR set IMSI on subscriber; IMSI=901700000010650 id=901700000010650
 DVLR New subscr, IMSI: 901700000010650
-DREF VLR subscr IMSI-901700000010650 + active-conn: now used by 2 (_lu_fsm_associate_vsub,active-conn)
+DVLR VLR subscr IMSI-901700000010650 + active-conn: now used by 2 (_lu_fsm_associate_vsub,active-conn)
 DMSC msc_a(IMSI-901700000010650:GERAN-A:LU){MSC_A_ST_VALIDATE_L3}: Received Event MSC_A_EV_COMPLETE_LAYER_3_OK
 DMSC msc_a(IMSI-901700000010650:GERAN-A:LU){MSC_A_ST_VALIDATE_L3}: state_chg to MSC_A_ST_AUTH_CIPH
-DREF VLR subscr IMSI-901700000010650 - _lu_fsm_associate_vsub: now used by 1 (active-conn)
+DVLR VLR subscr IMSI-901700000010650 - _lu_fsm_associate_vsub: now used by 1 (active-conn)
 DVLR set Last E-UTRAN PLMN ID on subscriber: (none)
 DVLR vlr_lu_fsm(IMSI-901700000010650:GERAN-A:LU){VLR_ULA_S_IDLE}: vlr_loc_upd_node1_pre()
 DVLR vlr_lu_fsm(IMSI-901700000010650:GERAN-A:LU){VLR_ULA_S_IDLE}: vlr_loc_upd_node1()
@@ -1909,7 +1909,7 @@ DREF msc_a(IMSI-901700000010650:GERAN-A:LU){MSC_A_ST_AUTH_CIPH}: - rx_from_ms: n
   lu_result_sent == 0
 - from HLR, rx _SEND_AUTH_INFO_RESULT; VLR sends Auth Req to MS
 <-- GSUP rx OSMO_GSUP_MSGT_SEND_AUTH_INFO_RESULT: 0a010809710000000156f00362201039fa2f4e3d523d8619a73b4f65c3e14d21049b36efdf2208059a4f668f6fbe39231027497388b6cb044648f396aa155b95ef2410f64735036e5871319c679f4742a75ea125108704f5ba55f30000d2ee44b22c8ea9192708e229c19e791f2e410a0101
-DREF VLR subscr IMSI-901700000010650 + vlr_gsup_rx: now used by 2 (active-conn,vlr_gsup_rx)
+DVLR VLR subscr IMSI-901700000010650 + vlr_gsup_rx: now used by 2 (active-conn,vlr_gsup_rx)
 DVLR VLR_Authenticate(IMSI-901700000010650:GERAN-A:LU){VLR_SUB_AS_NEEDS_AUTH_WAIT_AI}: Received Event VLR_AUTH_E_HLR_SAI_ACK
 DVLR SUBSCR(IMSI-901700000010650) Received 1 auth tuples
 DVLR VLR_Authenticate(IMSI-901700000010650:GERAN-A:LU){VLR_SUB_AS_NEEDS_AUTH_WAIT_AI}: state_chg to VLR_SUB_AS_WAIT_RESP
@@ -1918,7 +1918,7 @@ DVLR VLR_Authenticate(IMSI-901700000010650:GERAN-A:LU){VLR_SUB_AS_WAIT_RESP}: go
 - ...rand=39fa2f4e3d523d8619a73b4f65c3e14d
 - ...autn=8704f5ba55f30000d2ee44b22c8ea919
 - ...expecting res=e229c19e791f2e41
-DREF VLR subscr IMSI-901700000010650 - vlr_gsup_rx: now used by 1 (active-conn)
+DVLR VLR subscr IMSI-901700000010650 - vlr_gsup_rx: now used by 1 (active-conn)
 <-- GSUP rx OSMO_GSUP_MSGT_SEND_AUTH_INFO_RESULT: vlr_gsupc_read_cb() returns 0
   auth_request_sent == 1
   lu_result_sent == 0
@@ -1937,7 +1937,7 @@ DREF msc_a(IMSI-901700000010650:GERAN-A:LU){MSC_A_ST_AUTH_CIPH}: - rx_from_ms: n
   lu_result_sent == 0
 - HLR replies with new tuples
 <-- GSUP rx OSMO_GSUP_MSGT_SEND_AUTH_INFO_RESULT: 0a010809710000000156f0036220100f1feb1623e1bf626334e37ec448ac182104efde99da220814778c855c52373023108a90c769b7272f3bb7a1c1fbb1ea9349241043ffc1cf8c89a7fd6ab94bd8d6162cbf251002a83f62e9470000660d51afc75f169d27081df5f0b4f22b696e03622010ac21d34937b4e1142a2c757af294931921047818bfdc2208d175571f41f314a42310ff8edbceb6dd24799c77c3b9a6790c102410157c39022ca9d885a7f0766a7dfee44825108a43b91898e500002cf354c6f5d1f8c32708f748a7078f5018db0a0101
-DREF VLR subscr IMSI-901700000010650 + vlr_gsup_rx: now used by 2 (active-conn,vlr_gsup_rx)
+DVLR VLR subscr IMSI-901700000010650 + vlr_gsup_rx: now used by 2 (active-conn,vlr_gsup_rx)
 DVLR VLR_Authenticate(IMSI-901700000010650:GERAN-A:LU){VLR_SUB_AS_NEEDS_AUTH_WAIT_SAI_RESYNC}: Received Event VLR_AUTH_E_HLR_SAI_ACK
 DVLR SUBSCR(IMSI-901700000010650) Received 2 auth tuples
 DVLR VLR_Authenticate(IMSI-901700000010650:GERAN-A:LU){VLR_SUB_AS_NEEDS_AUTH_WAIT_SAI_RESYNC}: state_chg to VLR_SUB_AS_WAIT_RESP_RESYNC
@@ -1946,7 +1946,7 @@ DVLR VLR_Authenticate(IMSI-901700000010650:GERAN-A:LU){VLR_SUB_AS_WAIT_RESP_RESY
 - ...rand=0f1feb1623e1bf626334e37ec448ac18
 - ...autn=02a83f62e9470000660d51afc75f169d
 - ...expecting res=1df5f0b4f22b696e
-DREF VLR subscr IMSI-901700000010650 - vlr_gsup_rx: now used by 1 (active-conn)
+DVLR VLR subscr IMSI-901700000010650 - vlr_gsup_rx: now used by 1 (active-conn)
 <-- GSUP rx OSMO_GSUP_MSGT_SEND_AUTH_INFO_RESULT: vlr_gsupc_read_cb() returns 0
   auth_request_sent == 1
   lu_result_sent == 0
@@ -1981,16 +1981,16 @@ DREF msc_a(IMSI-901700000010650:GERAN-A:LU){MSC_A_ST_AUTH_CIPH}: - rx_from_ms: n
   lu_result_sent == 0
 - HLR sends _INSERT_DATA_REQUEST, VLR responds with _INSERT_DATA_RESULT
 <-- GSUP rx OSMO_GSUP_MSGT_INSERT_DATA_REQUEST: 10010809710000000156f00804032443f20a0101
-DREF VLR subscr IMSI-901700000010650 + vlr_gsup_rx: now used by 2 (active-conn,vlr_gsup_rx)
+DVLR VLR subscr IMSI-901700000010650 + vlr_gsup_rx: now used by 2 (active-conn,vlr_gsup_rx)
 DVLR IMSI:901700000010650 has MSISDN:42342
 DMSC msub(IMSI-901700000010650:MSISDN-42342) VLR: update for IMSI=901700000010650 (MSISDN=42342)
 GSUP --> HLR: OSMO_GSUP_MSGT_INSERT_DATA_RESULT: 12010809710000000156f00a0101
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342 - vlr_gsup_rx: now used by 1 (active-conn)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342 - vlr_gsup_rx: now used by 1 (active-conn)
 <-- GSUP rx OSMO_GSUP_MSGT_INSERT_DATA_REQUEST: vlr_gsupc_read_cb() returns 0
   lu_result_sent == 0
 - HLR also sends GSUP _UPDATE_LOCATION_RESULT
 <-- GSUP rx OSMO_GSUP_MSGT_UPDATE_LOCATION_RESULT: 06010809710000000156f00a0101
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342 + vlr_gsup_rx: now used by 2 (active-conn,vlr_gsup_rx)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342 + vlr_gsup_rx: now used by 2 (active-conn,vlr_gsup_rx)
 DVLR vlr_lu_fsm(IMSI-901700000010650:MSISDN-42342:GERAN-A:LU){VLR_ULA_S_WAIT_HLR_UPD}: Received Event VLR_ULA_E_HLR_LU_RES
 DVLR upd_hlr_vlr_fsm(IMSI-901700000010650:GERAN-A:LU){UPD_HLR_VLR_S_WAIT_FOR_DATA}: Received Event UPD_HLR_VLR_E_UPD_LOC_ACK
 DVLR upd_hlr_vlr_fsm(IMSI-901700000010650:GERAN-A:LU){UPD_HLR_VLR_S_WAIT_FOR_DATA}: state_chg to UPD_HLR_VLR_S_DONE
@@ -2008,7 +2008,7 @@ DMSC msub(IMSI-901700000010650:MSISDN-42342:TMSInew-0x03020100) VLR: update for 
 DVLR lu_compl_vlr_fsm(IMSI-901700000010650:MSISDN-42342:GERAN-A:LU){LU_COMPL_VLR_S_WAIT_SUB_PRES}: state_chg to LU_COMPL_VLR_S_WAIT_TMSI_CNF
 - sending LU Accept for IMSI-901700000010650:MSISDN-42342:TMSInew-0x03020100:GERAN-A:LU, with TMSI 0x03020100
 DVLR upd_hlr_vlr_fsm(IMSI-901700000010650:GERAN-A:LU){UPD_HLR_VLR_S_DONE}: Deallocated
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSInew-0x03020100 - vlr_gsup_rx: now used by 1 (active-conn)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSInew-0x03020100 - vlr_gsup_rx: now used by 1 (active-conn)
 <-- GSUP rx OSMO_GSUP_MSGT_UPDATE_LOCATION_RESULT: vlr_gsupc_read_cb() returns 0
   lu_result_sent == 1
 - a LU Accept with a new TMSI was sent, waiting for TMSI Realloc Compl
@@ -2032,12 +2032,12 @@ DRLL msc_a(IMSI-901700000010650:MSISDN-42342:TMSInew-0x03020100:GERAN-A:LU){MSC_
 DBSSAP msc_a(IMSI-901700000010650:MSISDN-42342:TMSInew-0x03020100:GERAN-A:LU){MSC_A_ST_AUTH_CIPH}: Message not permitted for initial conn: SMS:0x01
 DBSSAP msc_a(IMSI-901700000010650:MSISDN-42342:TMSInew-0x03020100:GERAN-A:LU){MSC_A_ST_AUTH_CIPH}: RAN decode error (rc=-13) for DTAP from MSC-I
 - even though the TMSI is not acked, we can already find the subscr with it
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSInew-0x03020100 + _test_umts_authen_resync: now used by 2 (active-conn,_test_umts_authen_resync)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSInew-0x03020100 + _test_umts_authen_resync: now used by 2 (active-conn,_test_umts_authen_resync)
   vsub != NULL == 1
   strcmp(vsub->imsi, imsi) == 0
   vsub->tmsi_new == 0x03020100
   vsub->tmsi == 0xffffffff
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSInew-0x03020100 - _test_umts_authen_resync: now used by 1 (active-conn)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSInew-0x03020100 - _test_umts_authen_resync: now used by 1 (active-conn)
 - MS sends TMSI Realloc Complete
   MSC <--GERAN-A-- MS: GSM48_MT_MM_TMSI_REALL_COMPL
 DREF msc_a(IMSI-901700000010650:MSISDN-42342:TMSInew-0x03020100:GERAN-A:LU){MSC_A_ST_AUTH_CIPH}: + rx_from_ms: now used by 2 (lu,rx_from_ms)
@@ -2047,7 +2047,7 @@ DMM msc_a(IMSI-901700000010650:MSISDN-42342:TMSInew-0x03020100:GERAN-A:LU){MSC_A
 DVLR vlr_lu_fsm(IMSI-901700000010650:MSISDN-42342:TMSInew-0x03020100:GERAN-A:LU){VLR_ULA_S_WAIT_LU_COMPL}: Received Event VLR_ULA_E_NEW_TMSI_ACK
 DVLR lu_compl_vlr_fsm(IMSI-901700000010650:MSISDN-42342:GERAN-A:LU){LU_COMPL_VLR_S_WAIT_TMSI_CNF}: Received Event LU_COMPL_VLR_E_NEW_TMSI_ACK
 DMSC msub(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100) VLR: update for IMSI=901700000010650 (MSISDN=42342)
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + attached: now used by 2 (active-conn,attached)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + attached: now used by 2 (active-conn,attached)
 DVLR lu_compl_vlr_fsm(IMSI-901700000010650:MSISDN-42342:GERAN-A:LU){LU_COMPL_VLR_S_WAIT_TMSI_CNF}: state_chg to LU_COMPL_VLR_S_DONE
 DVLR vlr_lu_fsm(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:GERAN-A:LU){VLR_ULA_S_WAIT_LU_COMPL}: Received Event VLR_ULA_E_LU_COMPL_SUCCESS
 DVLR lu_compl_vlr_fsm(IMSI-901700000010650:MSISDN-42342:GERAN-A:LU){LU_COMPL_VLR_S_DONE}: Terminating (cause = OSMO_FSM_TERM_PARENT)
@@ -2061,13 +2061,13 @@ DREF msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:GERAN-A:LU){MSC_A_S
 DMSC msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:GERAN-A:LU){MSC_A_ST_AUTHENTICATED}: Received Event MSC_A_EV_UNUSED
 DMSC msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:GERAN-A:LU){MSC_A_ST_AUTHENTICATED}: state_chg to MSC_A_ST_RELEASING
 DBSSAP msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:GERAN-A:LU){MSC_A_ST_RELEASING}: Releasing: msc_a use is 0 (-)
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + msc_a_fsm_releasing_onenter: now used by 3 (active-conn,attached,msc_a_fsm_releasing_onenter)
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + vlr_subscr_cancel_attach_fsm: now used by 4 (active-conn,attached,msc_a_fsm_releasing_onenter,vlr_subscr_cancel_attach_fsm)
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - vlr_subscr_cancel_attach_fsm: now used by 3 (active-conn,attached,msc_a_fsm_releasing_onenter)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + msc_a_fsm_releasing_onenter: now used by 3 (active-conn,attached,msc_a_fsm_releasing_onenter)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + vlr_subscr_cancel_attach_fsm: now used by 4 (active-conn,attached,msc_a_fsm_releasing_onenter,vlr_subscr_cancel_attach_fsm)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - vlr_subscr_cancel_attach_fsm: now used by 3 (active-conn,attached,msc_a_fsm_releasing_onenter)
 DREF msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:GERAN-A:LU){MSC_A_ST_RELEASING}: + wait-Clear-Complete: now used by 1 (wait-Clear-Complete)
 DMSC msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:GERAN-A:LU){MSC_A_ST_RELEASING}: RAN encode: CLEAR_COMMAND on GERAN-A
 DMSC dummy_msc_i(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:GERAN-A:LU){0}: Received Event MSC_I_EV_FROM_A_FORWARD_ACCESS_SIGNALLING_REQUEST
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - msc_a_fsm_releasing_onenter: now used by 2 (active-conn,attached)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - msc_a_fsm_releasing_onenter: now used by 2 (active-conn,attached)
   bssap_clear_sent == 1
 DBSSAP msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:GERAN-A:LU){MSC_A_ST_RELEASING}: RAN decode: CLEAR_COMPLETE
 DREF msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:GERAN-A:LU){MSC_A_ST_RELEASING}: - wait-Clear-Complete: now used by 0 (-)
@@ -2090,7 +2090,7 @@ DMSC dummy_msc_i(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:GERAN-A:LU){0
 DMSC dummy_msc_i(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:GERAN-A:LU){0}: Removing from parent msub_fsm
 DMSC dummy_msc_i(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:GERAN-A:LU){0}: Deferring: will deallocate with msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:GERAN-A:LU)
 DMSC msub(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100) Free
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - active-conn: now used by 1 (attached)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - active-conn: now used by 1 (attached)
 DMSC msub_fsm{terminating}: Deferring: will deallocate with msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:GERAN-A:LU)
 DMSC msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:GERAN-A:LU){MSC_A_ST_RELEASED}: Deallocated, including all deferred deallocations
 - msub gone
@@ -2120,13 +2120,13 @@ DVLR vlr_lu_fsm(IMSI-901700000010650:UTRAN-Iu:LU){VLR_ULA_S_IDLE}: Allocated
 DVLR vlr_lu_fsm(IMSI-901700000010650:UTRAN-Iu:LU){VLR_ULA_S_IDLE}: is child of msc_a(IMSI-901700000010650:UTRAN-Iu:LU)
 DVLR vlr_lu_fsm(IMSI-901700000010650:UTRAN-Iu:LU){VLR_ULA_S_IDLE}: rev=R99 net=UTRAN Auth (no Ciph)
 DVLR vlr_lu_fsm(IMSI-901700000010650:UTRAN-Iu:LU){VLR_ULA_S_IDLE}: Received Event VLR_ULA_E_UPDATE_LA
-DREF VLR subscr unknown + _lu_fsm_associate_vsub: now used by 1 (_lu_fsm_associate_vsub)
+DVLR VLR subscr unknown + _lu_fsm_associate_vsub: now used by 1 (_lu_fsm_associate_vsub)
 DVLR set IMSI on subscriber; IMSI=901700000010650 id=901700000010650
 DVLR New subscr, IMSI: 901700000010650
-DREF VLR subscr IMSI-901700000010650 + active-conn: now used by 2 (_lu_fsm_associate_vsub,active-conn)
+DVLR VLR subscr IMSI-901700000010650 + active-conn: now used by 2 (_lu_fsm_associate_vsub,active-conn)
 DMSC msc_a(IMSI-901700000010650:UTRAN-Iu:LU){MSC_A_ST_VALIDATE_L3}: Received Event MSC_A_EV_COMPLETE_LAYER_3_OK
 DMSC msc_a(IMSI-901700000010650:UTRAN-Iu:LU){MSC_A_ST_VALIDATE_L3}: state_chg to MSC_A_ST_AUTH_CIPH
-DREF VLR subscr IMSI-901700000010650 - _lu_fsm_associate_vsub: now used by 1 (active-conn)
+DVLR VLR subscr IMSI-901700000010650 - _lu_fsm_associate_vsub: now used by 1 (active-conn)
 DVLR set Last E-UTRAN PLMN ID on subscriber: (none)
 DVLR vlr_lu_fsm(IMSI-901700000010650:UTRAN-Iu:LU){VLR_ULA_S_IDLE}: vlr_loc_upd_node1_pre()
 DVLR vlr_lu_fsm(IMSI-901700000010650:UTRAN-Iu:LU){VLR_ULA_S_IDLE}: vlr_loc_upd_node1()
@@ -2141,7 +2141,7 @@ DREF msc_a(IMSI-901700000010650:UTRAN-Iu:LU){MSC_A_ST_AUTH_CIPH}: - rx_from_ms: 
   lu_result_sent == 0
 - from HLR, rx _SEND_AUTH_INFO_RESULT; VLR sends Auth Req to MS
 <-- GSUP rx OSMO_GSUP_MSGT_SEND_AUTH_INFO_RESULT: 0a010809710000000156f00362201039fa2f4e3d523d8619a73b4f65c3e14d21049b36efdf2208059a4f668f6fbe39231027497388b6cb044648f396aa155b95ef2410f64735036e5871319c679f4742a75ea125108704f5ba55f30000d2ee44b22c8ea9192708e229c19e791f2e410a0101
-DREF VLR subscr IMSI-901700000010650 + vlr_gsup_rx: now used by 2 (active-conn,vlr_gsup_rx)
+DVLR VLR subscr IMSI-901700000010650 + vlr_gsup_rx: now used by 2 (active-conn,vlr_gsup_rx)
 DVLR VLR_Authenticate(IMSI-901700000010650:UTRAN-Iu:LU){VLR_SUB_AS_NEEDS_AUTH_WAIT_AI}: Received Event VLR_AUTH_E_HLR_SAI_ACK
 DVLR SUBSCR(IMSI-901700000010650) Received 1 auth tuples
 DVLR VLR_Authenticate(IMSI-901700000010650:UTRAN-Iu:LU){VLR_SUB_AS_NEEDS_AUTH_WAIT_AI}: state_chg to VLR_SUB_AS_WAIT_RESP
@@ -2150,7 +2150,7 @@ DVLR VLR_Authenticate(IMSI-901700000010650:UTRAN-Iu:LU){VLR_SUB_AS_WAIT_RESP}: g
 - ...rand=39fa2f4e3d523d8619a73b4f65c3e14d
 - ...autn=8704f5ba55f30000d2ee44b22c8ea919
 - ...expecting res=e229c19e791f2e41
-DREF VLR subscr IMSI-901700000010650 - vlr_gsup_rx: now used by 1 (active-conn)
+DVLR VLR subscr IMSI-901700000010650 - vlr_gsup_rx: now used by 1 (active-conn)
 <-- GSUP rx OSMO_GSUP_MSGT_SEND_AUTH_INFO_RESULT: vlr_gsupc_read_cb() returns 0
   auth_request_sent == 1
   lu_result_sent == 0
@@ -2169,7 +2169,7 @@ DREF msc_a(IMSI-901700000010650:UTRAN-Iu:LU){MSC_A_ST_AUTH_CIPH}: - rx_from_ms: 
   lu_result_sent == 0
 - HLR replies with new tuples
 <-- GSUP rx OSMO_GSUP_MSGT_SEND_AUTH_INFO_RESULT: 0a010809710000000156f0036220100f1feb1623e1bf626334e37ec448ac182104efde99da220814778c855c52373023108a90c769b7272f3bb7a1c1fbb1ea9349241043ffc1cf8c89a7fd6ab94bd8d6162cbf251002a83f62e9470000660d51afc75f169d27081df5f0b4f22b696e03622010ac21d34937b4e1142a2c757af294931921047818bfdc2208d175571f41f314a42310ff8edbceb6dd24799c77c3b9a6790c102410157c39022ca9d885a7f0766a7dfee44825108a43b91898e500002cf354c6f5d1f8c32708f748a7078f5018db0a0101
-DREF VLR subscr IMSI-901700000010650 + vlr_gsup_rx: now used by 2 (active-conn,vlr_gsup_rx)
+DVLR VLR subscr IMSI-901700000010650 + vlr_gsup_rx: now used by 2 (active-conn,vlr_gsup_rx)
 DVLR VLR_Authenticate(IMSI-901700000010650:UTRAN-Iu:LU){VLR_SUB_AS_NEEDS_AUTH_WAIT_SAI_RESYNC}: Received Event VLR_AUTH_E_HLR_SAI_ACK
 DVLR SUBSCR(IMSI-901700000010650) Received 2 auth tuples
 DVLR VLR_Authenticate(IMSI-901700000010650:UTRAN-Iu:LU){VLR_SUB_AS_NEEDS_AUTH_WAIT_SAI_RESYNC}: state_chg to VLR_SUB_AS_WAIT_RESP_RESYNC
@@ -2178,7 +2178,7 @@ DVLR VLR_Authenticate(IMSI-901700000010650:UTRAN-Iu:LU){VLR_SUB_AS_WAIT_RESP_RES
 - ...rand=0f1feb1623e1bf626334e37ec448ac18
 - ...autn=02a83f62e9470000660d51afc75f169d
 - ...expecting res=1df5f0b4f22b696e
-DREF VLR subscr IMSI-901700000010650 - vlr_gsup_rx: now used by 1 (active-conn)
+DVLR VLR subscr IMSI-901700000010650 - vlr_gsup_rx: now used by 1 (active-conn)
 <-- GSUP rx OSMO_GSUP_MSGT_SEND_AUTH_INFO_RESULT: vlr_gsupc_read_cb() returns 0
   auth_request_sent == 1
   lu_result_sent == 0
@@ -2223,16 +2223,16 @@ DVLR upd_hlr_vlr_fsm(IMSI-901700000010650:UTRAN-Iu:LU){UPD_HLR_VLR_S_INIT}: stat
   lu_result_sent == 0
 - HLR sends _INSERT_DATA_REQUEST, VLR responds with _INSERT_DATA_RESULT
 <-- GSUP rx OSMO_GSUP_MSGT_INSERT_DATA_REQUEST: 10010809710000000156f00804032443f20a0101
-DREF VLR subscr IMSI-901700000010650 + vlr_gsup_rx: now used by 2 (active-conn,vlr_gsup_rx)
+DVLR VLR subscr IMSI-901700000010650 + vlr_gsup_rx: now used by 2 (active-conn,vlr_gsup_rx)
 DVLR IMSI:901700000010650 has MSISDN:42342
 DMSC msub(IMSI-901700000010650:MSISDN-42342) VLR: update for IMSI=901700000010650 (MSISDN=42342)
 GSUP --> HLR: OSMO_GSUP_MSGT_INSERT_DATA_RESULT: 12010809710000000156f00a0101
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342 - vlr_gsup_rx: now used by 1 (active-conn)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342 - vlr_gsup_rx: now used by 1 (active-conn)
 <-- GSUP rx OSMO_GSUP_MSGT_INSERT_DATA_REQUEST: vlr_gsupc_read_cb() returns 0
   lu_result_sent == 0
 - HLR also sends GSUP _UPDATE_LOCATION_RESULT
 <-- GSUP rx OSMO_GSUP_MSGT_UPDATE_LOCATION_RESULT: 06010809710000000156f00a0101
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342 + vlr_gsup_rx: now used by 2 (active-conn,vlr_gsup_rx)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342 + vlr_gsup_rx: now used by 2 (active-conn,vlr_gsup_rx)
 DVLR vlr_lu_fsm(IMSI-901700000010650:MSISDN-42342:UTRAN-Iu:LU){VLR_ULA_S_WAIT_HLR_UPD}: Received Event VLR_ULA_E_HLR_LU_RES
 DVLR upd_hlr_vlr_fsm(IMSI-901700000010650:UTRAN-Iu:LU){UPD_HLR_VLR_S_WAIT_FOR_DATA}: Received Event UPD_HLR_VLR_E_UPD_LOC_ACK
 DVLR upd_hlr_vlr_fsm(IMSI-901700000010650:UTRAN-Iu:LU){UPD_HLR_VLR_S_WAIT_FOR_DATA}: state_chg to UPD_HLR_VLR_S_DONE
@@ -2250,7 +2250,7 @@ DMSC msub(IMSI-901700000010650:MSISDN-42342:TMSInew-0x03020100) VLR: update for 
 DVLR lu_compl_vlr_fsm(IMSI-901700000010650:MSISDN-42342:UTRAN-Iu:LU){LU_COMPL_VLR_S_WAIT_SUB_PRES}: state_chg to LU_COMPL_VLR_S_WAIT_TMSI_CNF
 - sending LU Accept for IMSI-901700000010650:MSISDN-42342:TMSInew-0x03020100:UTRAN-Iu:LU, with TMSI 0x03020100
 DVLR upd_hlr_vlr_fsm(IMSI-901700000010650:UTRAN-Iu:LU){UPD_HLR_VLR_S_DONE}: Deallocated
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSInew-0x03020100 - vlr_gsup_rx: now used by 1 (active-conn)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSInew-0x03020100 - vlr_gsup_rx: now used by 1 (active-conn)
 <-- GSUP rx OSMO_GSUP_MSGT_UPDATE_LOCATION_RESULT: vlr_gsupc_read_cb() returns 0
   lu_result_sent == 1
 - a LU Accept with a new TMSI was sent, waiting for TMSI Realloc Compl
@@ -2274,12 +2274,12 @@ DRLL msc_a(IMSI-901700000010650:MSISDN-42342:TMSInew-0x03020100:UTRAN-Iu:LU){MSC
 DIUCS msc_a(IMSI-901700000010650:MSISDN-42342:TMSInew-0x03020100:UTRAN-Iu:LU){MSC_A_ST_AUTH_CIPH}: Message not permitted for initial conn: SMS:0x01
 DIUCS msc_a(IMSI-901700000010650:MSISDN-42342:TMSInew-0x03020100:UTRAN-Iu:LU){MSC_A_ST_AUTH_CIPH}: RAN decode error (rc=-13) for DTAP from MSC-I
 - even though the TMSI is not acked, we can already find the subscr with it
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSInew-0x03020100 + _test_umts_authen_resync: now used by 2 (active-conn,_test_umts_authen_resync)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSInew-0x03020100 + _test_umts_authen_resync: now used by 2 (active-conn,_test_umts_authen_resync)
   vsub != NULL == 1
   strcmp(vsub->imsi, imsi) == 0
   vsub->tmsi_new == 0x03020100
   vsub->tmsi == 0xffffffff
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSInew-0x03020100 - _test_umts_authen_resync: now used by 1 (active-conn)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSInew-0x03020100 - _test_umts_authen_resync: now used by 1 (active-conn)
 - MS sends TMSI Realloc Complete
   MSC <--UTRAN-Iu-- MS: GSM48_MT_MM_TMSI_REALL_COMPL
 DREF msc_a(IMSI-901700000010650:MSISDN-42342:TMSInew-0x03020100:UTRAN-Iu:LU){MSC_A_ST_AUTH_CIPH}: + rx_from_ms: now used by 2 (lu,rx_from_ms)
@@ -2289,7 +2289,7 @@ DMM msc_a(IMSI-901700000010650:MSISDN-42342:TMSInew-0x03020100:UTRAN-Iu:LU){MSC_
 DVLR vlr_lu_fsm(IMSI-901700000010650:MSISDN-42342:TMSInew-0x03020100:UTRAN-Iu:LU){VLR_ULA_S_WAIT_LU_COMPL}: Received Event VLR_ULA_E_NEW_TMSI_ACK
 DVLR lu_compl_vlr_fsm(IMSI-901700000010650:MSISDN-42342:UTRAN-Iu:LU){LU_COMPL_VLR_S_WAIT_TMSI_CNF}: Received Event LU_COMPL_VLR_E_NEW_TMSI_ACK
 DMSC msub(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100) VLR: update for IMSI=901700000010650 (MSISDN=42342)
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + attached: now used by 2 (active-conn,attached)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + attached: now used by 2 (active-conn,attached)
 DVLR lu_compl_vlr_fsm(IMSI-901700000010650:MSISDN-42342:UTRAN-Iu:LU){LU_COMPL_VLR_S_WAIT_TMSI_CNF}: state_chg to LU_COMPL_VLR_S_DONE
 DVLR vlr_lu_fsm(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:LU){VLR_ULA_S_WAIT_LU_COMPL}: Received Event VLR_ULA_E_LU_COMPL_SUCCESS
 DVLR lu_compl_vlr_fsm(IMSI-901700000010650:MSISDN-42342:UTRAN-Iu:LU){LU_COMPL_VLR_S_DONE}: Terminating (cause = OSMO_FSM_TERM_PARENT)
@@ -2303,13 +2303,13 @@ DREF msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:LU){MSC_A_
 DMSC msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:LU){MSC_A_ST_AUTHENTICATED}: Received Event MSC_A_EV_UNUSED
 DMSC msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:LU){MSC_A_ST_AUTHENTICATED}: state_chg to MSC_A_ST_RELEASING
 DIUCS msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:LU){MSC_A_ST_RELEASING}: Releasing: msc_a use is 0 (-)
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + msc_a_fsm_releasing_onenter: now used by 3 (active-conn,attached,msc_a_fsm_releasing_onenter)
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + vlr_subscr_cancel_attach_fsm: now used by 4 (active-conn,attached,msc_a_fsm_releasing_onenter,vlr_subscr_cancel_attach_fsm)
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - vlr_subscr_cancel_attach_fsm: now used by 3 (active-conn,attached,msc_a_fsm_releasing_onenter)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + msc_a_fsm_releasing_onenter: now used by 3 (active-conn,attached,msc_a_fsm_releasing_onenter)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + vlr_subscr_cancel_attach_fsm: now used by 4 (active-conn,attached,msc_a_fsm_releasing_onenter,vlr_subscr_cancel_attach_fsm)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - vlr_subscr_cancel_attach_fsm: now used by 3 (active-conn,attached,msc_a_fsm_releasing_onenter)
 DREF msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:LU){MSC_A_ST_RELEASING}: + wait-Clear-Complete: now used by 1 (wait-Clear-Complete)
 DMSC msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:LU){MSC_A_ST_RELEASING}: RAN encode: CLEAR_COMMAND on UTRAN-Iu
 DMSC dummy_msc_i(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:LU){0}: Received Event MSC_I_EV_FROM_A_FORWARD_ACCESS_SIGNALLING_REQUEST
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - msc_a_fsm_releasing_onenter: now used by 2 (active-conn,attached)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - msc_a_fsm_releasing_onenter: now used by 2 (active-conn,attached)
   iu_release_sent == 1
 DIUCS msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:LU){MSC_A_ST_RELEASING}: RAN decode: CLEAR_COMPLETE
 DREF msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:LU){MSC_A_ST_RELEASING}: - wait-Clear-Complete: now used by 0 (-)
@@ -2332,7 +2332,7 @@ DMSC dummy_msc_i(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:LU){
 DMSC dummy_msc_i(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:LU){0}: Removing from parent msub_fsm
 DMSC dummy_msc_i(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:LU){0}: Deferring: will deallocate with msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:LU)
 DMSC msub(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100) Free
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - active-conn: now used by 1 (attached)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - active-conn: now used by 1 (attached)
 DMSC msub_fsm{terminating}: Deferring: will deallocate with msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:LU)
 DMSC msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:LU){MSC_A_ST_RELEASED}: Deallocated, including all deferred deallocations
 - msub gone
@@ -2362,13 +2362,13 @@ DVLR vlr_lu_fsm(IMSI-901700000010650:UTRAN-Iu:LU){VLR_ULA_S_IDLE}: Allocated
 DVLR vlr_lu_fsm(IMSI-901700000010650:UTRAN-Iu:LU){VLR_ULA_S_IDLE}: is child of msc_a(IMSI-901700000010650:UTRAN-Iu:LU)
 DVLR vlr_lu_fsm(IMSI-901700000010650:UTRAN-Iu:LU){VLR_ULA_S_IDLE}: rev=R99 net=UTRAN Auth+Ciph
 DVLR vlr_lu_fsm(IMSI-901700000010650:UTRAN-Iu:LU){VLR_ULA_S_IDLE}: Received Event VLR_ULA_E_UPDATE_LA
-DREF VLR subscr unknown + _lu_fsm_associate_vsub: now used by 1 (_lu_fsm_associate_vsub)
+DVLR VLR subscr unknown + _lu_fsm_associate_vsub: now used by 1 (_lu_fsm_associate_vsub)
 DVLR set IMSI on subscriber; IMSI=901700000010650 id=901700000010650
 DVLR New subscr, IMSI: 901700000010650
-DREF VLR subscr IMSI-901700000010650 + active-conn: now used by 2 (_lu_fsm_associate_vsub,active-conn)
+DVLR VLR subscr IMSI-901700000010650 + active-conn: now used by 2 (_lu_fsm_associate_vsub,active-conn)
 DMSC msc_a(IMSI-901700000010650:UTRAN-Iu:LU){MSC_A_ST_VALIDATE_L3}: Received Event MSC_A_EV_COMPLETE_LAYER_3_OK
 DMSC msc_a(IMSI-901700000010650:UTRAN-Iu:LU){MSC_A_ST_VALIDATE_L3}: state_chg to MSC_A_ST_AUTH_CIPH
-DREF VLR subscr IMSI-901700000010650 - _lu_fsm_associate_vsub: now used by 1 (active-conn)
+DVLR VLR subscr IMSI-901700000010650 - _lu_fsm_associate_vsub: now used by 1 (active-conn)
 DVLR set Last E-UTRAN PLMN ID on subscriber: (none)
 DVLR vlr_lu_fsm(IMSI-901700000010650:UTRAN-Iu:LU){VLR_ULA_S_IDLE}: vlr_loc_upd_node1_pre()
 DVLR vlr_lu_fsm(IMSI-901700000010650:UTRAN-Iu:LU){VLR_ULA_S_IDLE}: vlr_loc_upd_node1()
@@ -2383,7 +2383,7 @@ DREF msc_a(IMSI-901700000010650:UTRAN-Iu:LU){MSC_A_ST_AUTH_CIPH}: - rx_from_ms: 
   lu_result_sent == 0
 - from HLR, rx _SEND_AUTH_INFO_RESULT; VLR sends Auth Req to MS
 <-- GSUP rx OSMO_GSUP_MSGT_SEND_AUTH_INFO_RESULT: 0a010809710000000156f00362201039fa2f4e3d523d8619a73b4f65c3e14d21049b36efdf2208059a4f668f6fbe39231027497388b6cb044648f396aa155b95ef2410f64735036e5871319c679f4742a75ea125108704f5ba55f30000d2ee44b22c8ea9192708e229c19e791f2e410a0101
-DREF VLR subscr IMSI-901700000010650 + vlr_gsup_rx: now used by 2 (active-conn,vlr_gsup_rx)
+DVLR VLR subscr IMSI-901700000010650 + vlr_gsup_rx: now used by 2 (active-conn,vlr_gsup_rx)
 DVLR VLR_Authenticate(IMSI-901700000010650:UTRAN-Iu:LU){VLR_SUB_AS_NEEDS_AUTH_WAIT_AI}: Received Event VLR_AUTH_E_HLR_SAI_ACK
 DVLR SUBSCR(IMSI-901700000010650) Received 1 auth tuples
 DVLR VLR_Authenticate(IMSI-901700000010650:UTRAN-Iu:LU){VLR_SUB_AS_NEEDS_AUTH_WAIT_AI}: state_chg to VLR_SUB_AS_WAIT_RESP
@@ -2392,7 +2392,7 @@ DVLR VLR_Authenticate(IMSI-901700000010650:UTRAN-Iu:LU){VLR_SUB_AS_WAIT_RESP}: g
 - ...rand=39fa2f4e3d523d8619a73b4f65c3e14d
 - ...autn=8704f5ba55f30000d2ee44b22c8ea919
 - ...expecting res=e229c19e791f2e41
-DREF VLR subscr IMSI-901700000010650 - vlr_gsup_rx: now used by 1 (active-conn)
+DVLR VLR subscr IMSI-901700000010650 - vlr_gsup_rx: now used by 1 (active-conn)
 <-- GSUP rx OSMO_GSUP_MSGT_SEND_AUTH_INFO_RESULT: vlr_gsupc_read_cb() returns 0
   auth_request_sent == 1
   lu_result_sent == 0
@@ -2411,7 +2411,7 @@ DREF msc_a(IMSI-901700000010650:UTRAN-Iu:LU){MSC_A_ST_AUTH_CIPH}: - rx_from_ms: 
   lu_result_sent == 0
 - HLR replies with new tuples
 <-- GSUP rx OSMO_GSUP_MSGT_SEND_AUTH_INFO_RESULT: 0a010809710000000156f0036220100f1feb1623e1bf626334e37ec448ac182104efde99da220814778c855c52373023108a90c769b7272f3bb7a1c1fbb1ea9349241043ffc1cf8c89a7fd6ab94bd8d6162cbf251002a83f62e9470000660d51afc75f169d27081df5f0b4f22b696e03622010ac21d34937b4e1142a2c757af294931921047818bfdc2208d175571f41f314a42310ff8edbceb6dd24799c77c3b9a6790c102410157c39022ca9d885a7f0766a7dfee44825108a43b91898e500002cf354c6f5d1f8c32708f748a7078f5018db0a0101
-DREF VLR subscr IMSI-901700000010650 + vlr_gsup_rx: now used by 2 (active-conn,vlr_gsup_rx)
+DVLR VLR subscr IMSI-901700000010650 + vlr_gsup_rx: now used by 2 (active-conn,vlr_gsup_rx)
 DVLR VLR_Authenticate(IMSI-901700000010650:UTRAN-Iu:LU){VLR_SUB_AS_NEEDS_AUTH_WAIT_SAI_RESYNC}: Received Event VLR_AUTH_E_HLR_SAI_ACK
 DVLR SUBSCR(IMSI-901700000010650) Received 2 auth tuples
 DVLR VLR_Authenticate(IMSI-901700000010650:UTRAN-Iu:LU){VLR_SUB_AS_NEEDS_AUTH_WAIT_SAI_RESYNC}: state_chg to VLR_SUB_AS_WAIT_RESP_RESYNC
@@ -2420,7 +2420,7 @@ DVLR VLR_Authenticate(IMSI-901700000010650:UTRAN-Iu:LU){VLR_SUB_AS_WAIT_RESP_RES
 - ...rand=0f1feb1623e1bf626334e37ec448ac18
 - ...autn=02a83f62e9470000660d51afc75f169d
 - ...expecting res=1df5f0b4f22b696e
-DREF VLR subscr IMSI-901700000010650 - vlr_gsup_rx: now used by 1 (active-conn)
+DVLR VLR subscr IMSI-901700000010650 - vlr_gsup_rx: now used by 1 (active-conn)
 <-- GSUP rx OSMO_GSUP_MSGT_SEND_AUTH_INFO_RESULT: vlr_gsupc_read_cb() returns 0
   auth_request_sent == 1
   lu_result_sent == 0
@@ -2465,16 +2465,16 @@ DVLR upd_hlr_vlr_fsm(IMSI-901700000010650:UTRAN-Iu:LU){UPD_HLR_VLR_S_INIT}: stat
   lu_result_sent == 0
 - HLR sends _INSERT_DATA_REQUEST, VLR responds with _INSERT_DATA_RESULT
 <-- GSUP rx OSMO_GSUP_MSGT_INSERT_DATA_REQUEST: 10010809710000000156f00804032443f20a0101
-DREF VLR subscr IMSI-901700000010650 + vlr_gsup_rx: now used by 2 (active-conn,vlr_gsup_rx)
+DVLR VLR subscr IMSI-901700000010650 + vlr_gsup_rx: now used by 2 (active-conn,vlr_gsup_rx)
 DVLR IMSI:901700000010650 has MSISDN:42342
 DMSC msub(IMSI-901700000010650:MSISDN-42342) VLR: update for IMSI=901700000010650 (MSISDN=42342)
 GSUP --> HLR: OSMO_GSUP_MSGT_INSERT_DATA_RESULT: 12010809710000000156f00a0101
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342 - vlr_gsup_rx: now used by 1 (active-conn)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342 - vlr_gsup_rx: now used by 1 (active-conn)
 <-- GSUP rx OSMO_GSUP_MSGT_INSERT_DATA_REQUEST: vlr_gsupc_read_cb() returns 0
   lu_result_sent == 0
 - HLR also sends GSUP _UPDATE_LOCATION_RESULT
 <-- GSUP rx OSMO_GSUP_MSGT_UPDATE_LOCATION_RESULT: 06010809710000000156f00a0101
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342 + vlr_gsup_rx: now used by 2 (active-conn,vlr_gsup_rx)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342 + vlr_gsup_rx: now used by 2 (active-conn,vlr_gsup_rx)
 DVLR vlr_lu_fsm(IMSI-901700000010650:MSISDN-42342:UTRAN-Iu:LU){VLR_ULA_S_WAIT_HLR_UPD}: Received Event VLR_ULA_E_HLR_LU_RES
 DVLR upd_hlr_vlr_fsm(IMSI-901700000010650:UTRAN-Iu:LU){UPD_HLR_VLR_S_WAIT_FOR_DATA}: Received Event UPD_HLR_VLR_E_UPD_LOC_ACK
 DVLR upd_hlr_vlr_fsm(IMSI-901700000010650:UTRAN-Iu:LU){UPD_HLR_VLR_S_WAIT_FOR_DATA}: state_chg to UPD_HLR_VLR_S_DONE
@@ -2492,7 +2492,7 @@ DMSC msub(IMSI-901700000010650:MSISDN-42342:TMSInew-0x03020100) VLR: update for 
 DVLR lu_compl_vlr_fsm(IMSI-901700000010650:MSISDN-42342:UTRAN-Iu:LU){LU_COMPL_VLR_S_WAIT_SUB_PRES}: state_chg to LU_COMPL_VLR_S_WAIT_TMSI_CNF
 - sending LU Accept for IMSI-901700000010650:MSISDN-42342:TMSInew-0x03020100:UTRAN-Iu:LU, with TMSI 0x03020100
 DVLR upd_hlr_vlr_fsm(IMSI-901700000010650:UTRAN-Iu:LU){UPD_HLR_VLR_S_DONE}: Deallocated
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSInew-0x03020100 - vlr_gsup_rx: now used by 1 (active-conn)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSInew-0x03020100 - vlr_gsup_rx: now used by 1 (active-conn)
 <-- GSUP rx OSMO_GSUP_MSGT_UPDATE_LOCATION_RESULT: vlr_gsupc_read_cb() returns 0
   lu_result_sent == 1
 - a LU Accept with a new TMSI was sent, waiting for TMSI Realloc Compl
@@ -2516,12 +2516,12 @@ DRLL msc_a(IMSI-901700000010650:MSISDN-42342:TMSInew-0x03020100:UTRAN-Iu:LU){MSC
 DIUCS msc_a(IMSI-901700000010650:MSISDN-42342:TMSInew-0x03020100:UTRAN-Iu:LU){MSC_A_ST_AUTH_CIPH}: Message not permitted for initial conn: SMS:0x01
 DIUCS msc_a(IMSI-901700000010650:MSISDN-42342:TMSInew-0x03020100:UTRAN-Iu:LU){MSC_A_ST_AUTH_CIPH}: RAN decode error (rc=-13) for DTAP from MSC-I
 - even though the TMSI is not acked, we can already find the subscr with it
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSInew-0x03020100 + _test_umts_authen_resync: now used by 2 (active-conn,_test_umts_authen_resync)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSInew-0x03020100 + _test_umts_authen_resync: now used by 2 (active-conn,_test_umts_authen_resync)
   vsub != NULL == 1
   strcmp(vsub->imsi, imsi) == 0
   vsub->tmsi_new == 0x03020100
   vsub->tmsi == 0xffffffff
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSInew-0x03020100 - _test_umts_authen_resync: now used by 1 (active-conn)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSInew-0x03020100 - _test_umts_authen_resync: now used by 1 (active-conn)
 - MS sends TMSI Realloc Complete
   MSC <--UTRAN-Iu-- MS: GSM48_MT_MM_TMSI_REALL_COMPL
 DREF msc_a(IMSI-901700000010650:MSISDN-42342:TMSInew-0x03020100:UTRAN-Iu:LU){MSC_A_ST_AUTH_CIPH}: + rx_from_ms: now used by 2 (lu,rx_from_ms)
@@ -2531,7 +2531,7 @@ DMM msc_a(IMSI-901700000010650:MSISDN-42342:TMSInew-0x03020100:UTRAN-Iu:LU){MSC_
 DVLR vlr_lu_fsm(IMSI-901700000010650:MSISDN-42342:TMSInew-0x03020100:UTRAN-Iu:LU){VLR_ULA_S_WAIT_LU_COMPL}: Received Event VLR_ULA_E_NEW_TMSI_ACK
 DVLR lu_compl_vlr_fsm(IMSI-901700000010650:MSISDN-42342:UTRAN-Iu:LU){LU_COMPL_VLR_S_WAIT_TMSI_CNF}: Received Event LU_COMPL_VLR_E_NEW_TMSI_ACK
 DMSC msub(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100) VLR: update for IMSI=901700000010650 (MSISDN=42342)
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + attached: now used by 2 (active-conn,attached)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + attached: now used by 2 (active-conn,attached)
 DVLR lu_compl_vlr_fsm(IMSI-901700000010650:MSISDN-42342:UTRAN-Iu:LU){LU_COMPL_VLR_S_WAIT_TMSI_CNF}: state_chg to LU_COMPL_VLR_S_DONE
 DVLR vlr_lu_fsm(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:LU){VLR_ULA_S_WAIT_LU_COMPL}: Received Event VLR_ULA_E_LU_COMPL_SUCCESS
 DVLR lu_compl_vlr_fsm(IMSI-901700000010650:MSISDN-42342:UTRAN-Iu:LU){LU_COMPL_VLR_S_DONE}: Terminating (cause = OSMO_FSM_TERM_PARENT)
@@ -2545,13 +2545,13 @@ DREF msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:LU){MSC_A_
 DMSC msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:LU){MSC_A_ST_AUTHENTICATED}: Received Event MSC_A_EV_UNUSED
 DMSC msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:LU){MSC_A_ST_AUTHENTICATED}: state_chg to MSC_A_ST_RELEASING
 DIUCS msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:LU){MSC_A_ST_RELEASING}: Releasing: msc_a use is 0 (-)
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + msc_a_fsm_releasing_onenter: now used by 3 (active-conn,attached,msc_a_fsm_releasing_onenter)
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + vlr_subscr_cancel_attach_fsm: now used by 4 (active-conn,attached,msc_a_fsm_releasing_onenter,vlr_subscr_cancel_attach_fsm)
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - vlr_subscr_cancel_attach_fsm: now used by 3 (active-conn,attached,msc_a_fsm_releasing_onenter)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + msc_a_fsm_releasing_onenter: now used by 3 (active-conn,attached,msc_a_fsm_releasing_onenter)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 + vlr_subscr_cancel_attach_fsm: now used by 4 (active-conn,attached,msc_a_fsm_releasing_onenter,vlr_subscr_cancel_attach_fsm)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - vlr_subscr_cancel_attach_fsm: now used by 3 (active-conn,attached,msc_a_fsm_releasing_onenter)
 DREF msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:LU){MSC_A_ST_RELEASING}: + wait-Clear-Complete: now used by 1 (wait-Clear-Complete)
 DMSC msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:LU){MSC_A_ST_RELEASING}: RAN encode: CLEAR_COMMAND on UTRAN-Iu
 DMSC dummy_msc_i(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:LU){0}: Received Event MSC_I_EV_FROM_A_FORWARD_ACCESS_SIGNALLING_REQUEST
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - msc_a_fsm_releasing_onenter: now used by 2 (active-conn,attached)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - msc_a_fsm_releasing_onenter: now used by 2 (active-conn,attached)
   iu_release_sent == 1
 DIUCS msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:LU){MSC_A_ST_RELEASING}: RAN decode: CLEAR_COMPLETE
 DREF msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:LU){MSC_A_ST_RELEASING}: - wait-Clear-Complete: now used by 0 (-)
@@ -2574,7 +2574,7 @@ DMSC dummy_msc_i(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:LU){
 DMSC dummy_msc_i(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:LU){0}: Removing from parent msub_fsm
 DMSC dummy_msc_i(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:LU){0}: Deferring: will deallocate with msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:LU)
 DMSC msub(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100) Free
-DREF VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - active-conn: now used by 1 (attached)
+DVLR VLR subscr IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100 - active-conn: now used by 1 (attached)
 DMSC msub_fsm{terminating}: Deferring: will deallocate with msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:LU)
 DMSC msc_a(IMSI-901700000010650:MSISDN-42342:TMSI-0x03020100:UTRAN-Iu:LU){MSC_A_ST_RELEASED}: Deallocated, including all deferred deallocations
 - msub gone
@@ -2604,13 +2604,13 @@ DVLR vlr_lu_fsm(IMSI-901700000010650:GERAN-A:LU){VLR_ULA_S_IDLE}: Allocated
 DVLR vlr_lu_fsm(IMSI-901700000010650:GERAN-A:LU){VLR_ULA_S_IDLE}: is child of msc_a(IMSI-901700000010650:GERAN-A:LU)
 DVLR vlr_lu_fsm(IMSI-901700000010650:GERAN-A:LU){VLR_ULA_S_IDLE}: rev=R99 net=GERAN Auth (no Ciph)
 DVLR vlr_lu_fsm(IMSI-901700000010650:GERAN-A:LU){VLR_ULA_S_IDLE}: Received Event VLR_ULA_E_UPDATE_LA
-DREF VLR subscr unknown + _lu_fsm_associate_vsub: now used by 1 (_lu_fsm_associate_vsub)
+DVLR VLR subscr unknown + _lu_fsm_associate_vsub: now used by 1 (_lu_fsm_associate_vsub)
 DVLR set IMSI on subscriber; IMSI=901700000010650 id=901700000010650
 DVLR New subscr, IMSI: 901700000010650
-DREF VLR subscr IMSI-901700000010650 + active-conn: now used by 2 (_lu_fsm_associate_vsub,active-conn)
+DVLR VLR subscr IMSI-901700000010650 + active-conn: now used by 2 (_lu_fsm_associate_vsub,active-conn)
 DMSC msc_a(IMSI-901700000010650:GERAN-A:LU){MSC_A_ST_VALIDATE_L3}: Received Event MSC_A_EV_COMPLETE_LAYER_3_OK
 DMSC msc_a(IMSI-901700000010650:GERAN-A:LU){MSC_A_ST_VALIDATE_L3}: state_chg to MSC_A_ST_AUTH_CIPH
-DREF VLR subscr IMSI-901700000010650 - _lu_fsm_associate_vsub: now used by 1 (active-conn)
+DVLR VLR subscr IMSI-901700000010650 - _lu_fsm_associate_vsub: now used by 1 (active-conn)
 DVLR set Last E-UTRAN PLMN ID on subscriber: (none)
 DVLR vlr_lu_fsm(IMSI-901700000010650:GERAN-A:LU){VLR_ULA_S_IDLE}: vlr_loc_upd_node1_pre()
 DVLR vlr_lu_fsm(IMSI-901700000010650:GERAN-A:LU){VLR_ULA_S_IDLE}: vlr_loc_upd_node1()
@@ -2625,7 +2625,7 @@ DREF msc_a(IMSI-901700000010650:GERAN-A:LU){MSC_A_ST_AUTH_CIPH}: - rx_from_ms: n
   lu_result_sent == 0
 - from HLR, rx _SEND_AUTH_INFO_RESULT; VLR sends Auth Req to MS
 <-- GSUP rx OSMO_GSUP_MSGT_SEND_AUTH_INFO_RESULT: 0a010809710000000156f00362201039fa2f4e3d523d8619a73b4f65c3e14d21049b36efdf2208059a4f668f6fbe39231027497388b6cb044648f396aa155b95ef2410f64735036e5871319c679f4742a75ea125108704f5ba55f30000d2ee44b22c8ea9192708e229c19e791f2e4103622010c187a53a5e6b9d573cac7c74451fd46d210485aa31302208d3d50a000bf04f6e23101159ec926a50e98c034a6b7d7c9f418d2410df3a03d9ca5335641efc8e36d76cd20b25101843a645b98d00005b2d666af46c45d927087db47cf7f81e4dc703622010efa9c29a9742148d5c9070348716e1bb210469d5f9fb22083df176f0c29f1a3d2310eb50e770ddcc3060101d2f43b6c2b884241076542abce5ff9345b0e8947f4c6e019c2510f9375e6d41e1000096e7fe4ff1c27e392708706f996719ba609c03622010f023d5a3b24726e0631b64b3840f82532104d570c03f2208ec011be8919883d62310c4e58af4ba43f3bcd904e16984f086d724100593f65e752e5cb7f473862bda05aa0a2510541ff1f077270000c5ea00d658bc7e9a27083fd26072eaa2a04d036220102f8f90c780d6a9c0c53da7ac57b6707e2104b072446f220823f39f9f425ad6e6231065af0527fda95b0dc5ae4aa515cdf32f2410537c3b35a3b13b08d08eeb28098f45cc25104bf4e564f75300009bc796706bc6574427080edb0eadbea94ac20a0101
-DREF VLR subscr IMSI-901700000010650 + vlr_gsup_rx: now used by 2 (active-conn,vlr_gsup_rx)
+DVLR VLR subscr IMSI-901700000010650 + vlr_gsup_rx: now used by 2 (active-conn,vlr_gsup_rx)
 DVLR VLR_Authenticate(IMSI-901700000010650:GERAN-A:LU){VLR_SUB_AS_NEEDS_AUTH_WAIT_AI}: Received Event VLR_AUTH_E_HLR_SAI_ACK
 DVLR SUBSCR(IMSI-901700000010650) Received 5 auth tuples
 DVLR VLR_Authenticate(IMSI-901700000010650:GERAN-A:LU){VLR_SUB_AS_NEEDS_AUTH_WAIT_AI}: state_chg to VLR_SUB_AS_WAIT_RESP
@@ -2634,7 +2634,7 @@ DVLR VLR_Authenticate(IMSI-901700000010650:GERAN-A:LU){VLR_SUB_AS_WAIT_RESP}: go
 - ...rand=39fa2f4e3d523d8619a73b4f65c3e14d
 - ...autn=8704f5ba55f30000d2ee44b22c8ea919
 - ...expecting res=e229c19e791f2e41
-DREF VLR subscr IMSI-901700000010650 - vlr_gsup_rx: now used by 1 (active-conn)
+DVLR VLR subscr IMSI-901700000010650 - vlr_gsup_rx: now used by 1 (active-conn)
 <-- GSUP rx OSMO_GSUP_MSGT_SEND_AUTH_INFO_RESULT: vlr_gsupc_read_cb() returns 0
   auth_request_sent == 1
   lu_result_sent == 0
@@ -2659,13 +2659,13 @@ DMSC msc_a(IMSI-901700000010650:GERAN-A:LU){MSC_A_ST_AUTH_CIPH}: Received Event 
 DREF msc_a(IMSI-901700000010650:GERAN-A:LU){MSC_A_ST_AUTH_CIPH}: - lu: now used by 1 (rx_from_ms)
 DMSC msc_a(IMSI-901700000010650:GERAN-A:LU){MSC_A_ST_AUTH_CIPH}: state_chg to MSC_A_ST_RELEASING
 DBSSAP msc_a(IMSI-901700000010650:GERAN-A:LU){MSC_A_ST_RELEASING}: Releasing: msc_a use is 1 (rx_from_ms)
-DREF VLR subscr IMSI-901700000010650 + msc_a_fsm_releasing_onenter: now used by 2 (active-conn,msc_a_fsm_releasing_onenter)
-DREF VLR subscr IMSI-901700000010650 + vlr_subscr_cancel_attach_fsm: now used by 3 (active-conn,msc_a_fsm_releasing_onenter,vlr_subscr_cancel_attach_fsm)
-DREF VLR subscr IMSI-901700000010650 - vlr_subscr_cancel_attach_fsm: now used by 2 (active-conn,msc_a_fsm_releasing_onenter)
+DVLR VLR subscr IMSI-901700000010650 + msc_a_fsm_releasing_onenter: now used by 2 (active-conn,msc_a_fsm_releasing_onenter)
+DVLR VLR subscr IMSI-901700000010650 + vlr_subscr_cancel_attach_fsm: now used by 3 (active-conn,msc_a_fsm_releasing_onenter,vlr_subscr_cancel_attach_fsm)
+DVLR VLR subscr IMSI-901700000010650 - vlr_subscr_cancel_attach_fsm: now used by 2 (active-conn,msc_a_fsm_releasing_onenter)
 DREF msc_a(IMSI-901700000010650:GERAN-A:LU){MSC_A_ST_RELEASING}: + wait-Clear-Complete: now used by 2 (rx_from_ms,wait-Clear-Complete)
 DMSC msc_a(IMSI-901700000010650:GERAN-A:LU){MSC_A_ST_RELEASING}: RAN encode: CLEAR_COMMAND on GERAN-A
 DMSC dummy_msc_i(IMSI-901700000010650:GERAN-A:LU){0}: Received Event MSC_I_EV_FROM_A_FORWARD_ACCESS_SIGNALLING_REQUEST
-DREF VLR subscr IMSI-901700000010650 - msc_a_fsm_releasing_onenter: now used by 1 (active-conn)
+DVLR VLR subscr IMSI-901700000010650 - msc_a_fsm_releasing_onenter: now used by 1 (active-conn)
 DVLR VLR_Authenticate(IMSI-901700000010650:GERAN-A:LU){VLR_SUB_AS_AUTH_FAILED}: Deallocated
 DREF msc_a(IMSI-901700000010650:GERAN-A:LU){MSC_A_ST_RELEASING}: - rx_from_ms: now used by 1 (wait-Clear-Complete)
   lu_result_sent == 2
@@ -2691,7 +2691,7 @@ DMSC dummy_msc_i(IMSI-901700000010650:GERAN-A:LU){0}: Terminating in cascade, de
 DMSC dummy_msc_i(IMSI-901700000010650:GERAN-A:LU){0}: Removing from parent msub_fsm
 DMSC dummy_msc_i(IMSI-901700000010650:GERAN-A:LU){0}: Deferring: will deallocate with msc_a(IMSI-901700000010650:GERAN-A:LU)
 DMSC msub(IMSI-901700000010650) Free
-DREF VLR subscr IMSI-901700000010650 - active-conn: now used by 0 (-)
+DVLR VLR subscr IMSI-901700000010650 - active-conn: now used by 0 (-)
 DVLR SUBSCR(IMSI-901700000010650) freeing VLR subscr (max total use count was 3)
 DMSC msub_fsm{terminating}: Deferring: will deallocate with msc_a(IMSI-901700000010650:GERAN-A:LU)
 DMSC msc_a(IMSI-901700000010650:GERAN-A:LU){MSC_A_ST_RELEASED}: Deallocated, including all deferred deallocations
@@ -2720,13 +2720,13 @@ DVLR vlr_lu_fsm(IMSI-901700000010650:UTRAN-Iu:LU){VLR_ULA_S_IDLE}: Allocated
 DVLR vlr_lu_fsm(IMSI-901700000010650:UTRAN-Iu:LU){VLR_ULA_S_IDLE}: is child of msc_a(IMSI-901700000010650:UTRAN-Iu:LU)
 DVLR vlr_lu_fsm(IMSI-901700000010650:UTRAN-Iu:LU){VLR_ULA_S_IDLE}: rev=R99 net=UTRAN Auth+Ciph
 DVLR vlr_lu_fsm(IMSI-901700000010650:UTRAN-Iu:LU){VLR_ULA_S_IDLE}: Received Event VLR_ULA_E_UPDATE_LA
-DREF VLR subscr unknown + _lu_fsm_associate_vsub: now used by 1 (_lu_fsm_associate_vsub)
+DVLR VLR subscr unknown + _lu_fsm_associate_vsub: now used by 1 (_lu_fsm_associate_vsub)
 DVLR set IMSI on subscriber; IMSI=901700000010650 id=901700000010650
 DVLR New subscr, IMSI: 901700000010650
-DREF VLR subscr IMSI-901700000010650 + active-conn: now used by 2 (_lu_fsm_associate_vsub,active-conn)
+DVLR VLR subscr IMSI-901700000010650 + active-conn: now used by 2 (_lu_fsm_associate_vsub,active-conn)
 DMSC msc_a(IMSI-901700000010650:UTRAN-Iu:LU){MSC_A_ST_VALIDATE_L3}: Received Event MSC_A_EV_COMPLETE_LAYER_3_OK
 DMSC msc_a(IMSI-901700000010650:UTRAN-Iu:LU){MSC_A_ST_VALIDATE_L3}: state_chg to MSC_A_ST_AUTH_CIPH
-DREF VLR subscr IMSI-901700000010650 - _lu_fsm_associate_vsub: now used by 1 (active-conn)
+DVLR VLR subscr IMSI-901700000010650 - _lu_fsm_associate_vsub: now used by 1 (active-conn)
 DVLR set Last E-UTRAN PLMN ID on subscriber: (none)
 DVLR vlr_lu_fsm(IMSI-901700000010650:UTRAN-Iu:LU){VLR_ULA_S_IDLE}: vlr_loc_upd_node1_pre()
 DVLR vlr_lu_fsm(IMSI-901700000010650:UTRAN-Iu:LU){VLR_ULA_S_IDLE}: vlr_loc_upd_node1()
@@ -2741,7 +2741,7 @@ DREF msc_a(IMSI-901700000010650:UTRAN-Iu:LU){MSC_A_ST_AUTH_CIPH}: - rx_from_ms: 
   lu_result_sent == 0
 - from HLR, rx _SEND_AUTH_INFO_RESULT; VLR sends Auth Req to MS
 <-- GSUP rx OSMO_GSUP_MSGT_SEND_AUTH_INFO_RESULT: 0a010809710000000156f00362201039fa2f4e3d523d8619a73b4f65c3e14d21049b36efdf2208059a4f668f6fbe39231027497388b6cb044648f396aa155b95ef2410f64735036e5871319c679f4742a75ea125108704f5ba55f30000d2ee44b22c8ea9192708e229c19e791f2e4103622010c187a53a5e6b9d573cac7c74451fd46d210485aa31302208d3d50a000bf04f6e23101159ec926a50e98c034a6b7d7c9f418d2410df3a03d9ca5335641efc8e36d76cd20b25101843a645b98d00005b2d666af46c45d927087db47cf7f81e4dc703622010efa9c29a9742148d5c9070348716e1bb210469d5f9fb22083df176f0c29f1a3d2310eb50e770ddcc3060101d2f43b6c2b884241076542abce5ff9345b0e8947f4c6e019c2510f9375e6d41e1000096e7fe4ff1c27e392708706f996719ba609c03622010f023d5a3b24726e0631b64b3840f82532104d570c03f2208ec011be8919883d62310c4e58af4ba43f3bcd904e16984f086d724100593f65e752e5cb7f473862bda05aa0a2510541ff1f077270000c5ea00d658bc7e9a27083fd26072eaa2a04d036220102f8f90c780d6a9c0c53da7ac57b6707e2104b072446f220823f39f9f425ad6e6231065af0527fda95b0dc5ae4aa515cdf32f2410537c3b35a3b13b08d08eeb28098f45cc25104bf4e564f75300009bc796706bc6574427080edb0eadbea94ac20a0101
-DREF VLR subscr IMSI-901700000010650 + vlr_gsup_rx: now used by 2 (active-conn,vlr_gsup_rx)
+DVLR VLR subscr IMSI-901700000010650 + vlr_gsup_rx: now used by 2 (active-conn,vlr_gsup_rx)
 DVLR VLR_Authenticate(IMSI-901700000010650:UTRAN-Iu:LU){VLR_SUB_AS_NEEDS_AUTH_WAIT_AI}: Received Event VLR_AUTH_E_HLR_SAI_ACK
 DVLR SUBSCR(IMSI-901700000010650) Received 5 auth tuples
 DVLR VLR_Authenticate(IMSI-901700000010650:UTRAN-Iu:LU){VLR_SUB_AS_NEEDS_AUTH_WAIT_AI}: state_chg to VLR_SUB_AS_WAIT_RESP
@@ -2750,7 +2750,7 @@ DVLR VLR_Authenticate(IMSI-901700000010650:UTRAN-Iu:LU){VLR_SUB_AS_WAIT_RESP}: g
 - ...rand=39fa2f4e3d523d8619a73b4f65c3e14d
 - ...autn=8704f5ba55f30000d2ee44b22c8ea919
 - ...expecting res=e229c19e791f2e41
-DREF VLR subscr IMSI-901700000010650 - vlr_gsup_rx: now used by 1 (active-conn)
+DVLR VLR subscr IMSI-901700000010650 - vlr_gsup_rx: now used by 1 (active-conn)
 <-- GSUP rx OSMO_GSUP_MSGT_SEND_AUTH_INFO_RESULT: vlr_gsupc_read_cb() returns 0
   auth_request_sent == 1
   lu_result_sent == 0
@@ -2775,13 +2775,13 @@ DMSC msc_a(IMSI-901700000010650:UTRAN-Iu:LU){MSC_A_ST_AUTH_CIPH}: Received Event
 DREF msc_a(IMSI-901700000010650:UTRAN-Iu:LU){MSC_A_ST_AUTH_CIPH}: - lu: now used by 1 (rx_from_ms)
 DMSC msc_a(IMSI-901700000010650:UTRAN-Iu:LU){MSC_A_ST_AUTH_CIPH}: state_chg to MSC_A_ST_RELEASING
 DIUCS msc_a(IMSI-901700000010650:UTRAN-Iu:LU){MSC_A_ST_RELEASING}: Releasing: msc_a use is 1 (rx_from_ms)
-DREF VLR subscr IMSI-901700000010650 + msc_a_fsm_releasing_onenter: now used by 2 (active-conn,msc_a_fsm_releasing_onenter)
-DREF VLR subscr IMSI-901700000010650 + vlr_subscr_cancel_attach_fsm: now used by 3 (active-conn,msc_a_fsm_releasing_onenter,vlr_subscr_cancel_attach_fsm)
-DREF VLR subscr IMSI-901700000010650 - vlr_subscr_cancel_attach_fsm: now used by 2 (active-conn,msc_a_fsm_releasing_onenter)
+DVLR VLR subscr IMSI-901700000010650 + msc_a_fsm_releasing_onenter: now used by 2 (active-conn,msc_a_fsm_releasing_onenter)
+DVLR VLR subscr IMSI-901700000010650 + vlr_subscr_cancel_attach_fsm: now used by 3 (active-conn,msc_a_fsm_releasing_onenter,vlr_subscr_cancel_attach_fsm)
+DVLR VLR subscr IMSI-901700000010650 - vlr_subscr_cancel_attach_fsm: now used by 2 (active-conn,msc_a_fsm_releasing_onenter)
 DREF msc_a(IMSI-901700000010650:UTRAN-Iu:LU){MSC_A_ST_RELEASING}: + wait-Clear-Complete: now used by 2 (rx_from_ms,wait-Clear-Complete)
 DMSC msc_a(IMSI-901700000010650:UTRAN-Iu:LU){MSC_A_ST_RELEASING}: RAN encode: CLEAR_COMMAND on UTRAN-Iu
 DMSC dummy_msc_i(IMSI-901700000010650:UTRAN-Iu:LU){0}: Received Event MSC_I_EV_FROM_A_FORWARD_ACCESS_SIGNALLING_REQUEST
-DREF VLR subscr IMSI-901700000010650 - msc_a_fsm_releasing_onenter: now used by 1 (active-conn)
+DVLR VLR subscr IMSI-901700000010650 - msc_a_fsm_releasing_onenter: now used by 1 (active-conn)
 DVLR VLR_Authenticate(IMSI-901700000010650:UTRAN-Iu:LU){VLR_SUB_AS_AUTH_FAILED}: Deallocated
 DREF msc_a(IMSI-901700000010650:UTRAN-Iu:LU){MSC_A_ST_RELEASING}: - rx_from_ms: now used by 1 (wait-Clear-Complete)
   lu_result_sent == 2
@@ -2807,7 +2807,7 @@ DMSC dummy_msc_i(IMSI-901700000010650:UTRAN-Iu:LU){0}: Terminating in cascade, d
 DMSC dummy_msc_i(IMSI-901700000010650:UTRAN-Iu:LU){0}: Removing from parent msub_fsm
 DMSC dummy_msc_i(IMSI-901700000010650:UTRAN-Iu:LU){0}: Deferring: will deallocate with msc_a(IMSI-901700000010650:UTRAN-Iu:LU)
 DMSC msub(IMSI-901700000010650) Free
-DREF VLR subscr IMSI-901700000010650 - active-conn: now used by 0 (-)
+DVLR VLR subscr IMSI-901700000010650 - active-conn: now used by 0 (-)
 DVLR SUBSCR(IMSI-901700000010650) freeing VLR subscr (max total use count was 3)
 DMSC msub_fsm{terminating}: Deferring: will deallocate with msc_a(IMSI-901700000010650:UTRAN-Iu:LU)
 DMSC msc_a(IMSI-901700000010650:UTRAN-Iu:LU){MSC_A_ST_RELEASED}: Deallocated, including all deferred deallocations
@@ -2836,13 +2836,13 @@ DVLR vlr_lu_fsm(IMSI-901700000010650:GERAN-A:LU){VLR_ULA_S_IDLE}: Allocated
 DVLR vlr_lu_fsm(IMSI-901700000010650:GERAN-A:LU){VLR_ULA_S_IDLE}: is child of msc_a(IMSI-901700000010650:GERAN-A:LU)
 DVLR vlr_lu_fsm(IMSI-901700000010650:GERAN-A:LU){VLR_ULA_S_IDLE}: rev=R99 net=GERAN Auth (no Ciph)
 DVLR vlr_lu_fsm(IMSI-901700000010650:GERAN-A:LU){VLR_ULA_S_IDLE}: Received Event VLR_ULA_E_UPDATE_LA
-DREF VLR subscr unknown + _lu_fsm_associate_vsub: now used by 1 (_lu_fsm_associate_vsub)
+DVLR VLR subscr unknown + _lu_fsm_associate_vsub: now used by 1 (_lu_fsm_associate_vsub)
 DVLR set IMSI on subscriber; IMSI=901700000010650 id=901700000010650
 DVLR New subscr, IMSI: 901700000010650
-DREF VLR subscr IMSI-901700000010650 + active-conn: now used by 2 (_lu_fsm_associate_vsub,active-conn)
+DVLR VLR subscr IMSI-901700000010650 + active-conn: now used by 2 (_lu_fsm_associate_vsub,active-conn)
 DMSC msc_a(IMSI-901700000010650:GERAN-A:LU){MSC_A_ST_VALIDATE_L3}: Received Event MSC_A_EV_COMPLETE_LAYER_3_OK
 DMSC msc_a(IMSI-901700000010650:GERAN-A:LU){MSC_A_ST_VALIDATE_L3}: state_chg to MSC_A_ST_AUTH_CIPH
-DREF VLR subscr IMSI-901700000010650 - _lu_fsm_associate_vsub: now used by 1 (active-conn)
+DVLR VLR subscr IMSI-901700000010650 - _lu_fsm_associate_vsub: now used by 1 (active-conn)
 DVLR set Last E-UTRAN PLMN ID on subscriber: (none)
 DVLR vlr_lu_fsm(IMSI-901700000010650:GERAN-A:LU){VLR_ULA_S_IDLE}: vlr_loc_upd_node1_pre()
 DVLR vlr_lu_fsm(IMSI-901700000010650:GERAN-A:LU){VLR_ULA_S_IDLE}: vlr_loc_upd_node1()
@@ -2857,7 +2857,7 @@ DREF msc_a(IMSI-901700000010650:GERAN-A:LU){MSC_A_ST_AUTH_CIPH}: - rx_from_ms: n
   lu_result_sent == 0
 - from HLR, rx _SEND_AUTH_INFO_RESULT; VLR sends Auth Req to MS
 <-- GSUP rx OSMO_GSUP_MSGT_SEND_AUTH_INFO_RESULT: 0a010809710000000156f00362201039fa2f4e3d523d8619a73b4f65c3e14d21049b36efdf2208059a4f668f6fbe39231027497388b6cb044648f396aa155b95ef2410f64735036e5871319c679f4742a75ea125108704f5ba55f30000d2ee44b22c8ea9192708e229c19e791f2e4103622010c187a53a5e6b9d573cac7c74451fd46d210485aa31302208d3d50a000bf04f6e23101159ec926a50e98c034a6b7d7c9f418d2410df3a03d9ca5335641efc8e36d76cd20b25101843a645b98d00005b2d666af46c45d927087db47cf7f81e4dc703622010efa9c29a9742148d5c9070348716e1bb210469d5f9fb22083df176f0c29f1a3d2310eb50e770ddcc3060101d2f43b6c2b884241076542abce5ff9345b0e8947f4c6e019c2510f9375e6d41e1000096e7fe4ff1c27e392708706f996719ba609c03622010f023d5a3b24726e0631b64b3840f82532104d570c03f2208ec011be8919883d62310c4e58af4ba43f3bcd904e16984f086d724100593f65e752e5cb7f473862bda05aa0a2510541ff1f077270000c5ea00d658bc7e9a27083fd26072eaa2a04d036220102f8f90c780d6a9c0c53da7ac57b6707e2104b072446f220823f39f9f425ad6e6231065af0527fda95b0dc5ae4aa515cdf32f2410537c3b35a3b13b08d08eeb28098f45cc25104bf4e564f75300009bc796706bc6574427080edb0eadbea94ac20a0101
-DREF VLR subscr IMSI-901700000010650 + vlr_gsup_rx: now used by 2 (active-conn,vlr_gsup_rx)
+DVLR VLR subscr IMSI-901700000010650 + vlr_gsup_rx: now used by 2 (active-conn,vlr_gsup_rx)
 DVLR VLR_Authenticate(IMSI-901700000010650:GERAN-A:LU){VLR_SUB_AS_NEEDS_AUTH_WAIT_AI}: Received Event VLR_AUTH_E_HLR_SAI_ACK
 DVLR SUBSCR(IMSI-901700000010650) Received 5 auth tuples
 DVLR VLR_Authenticate(IMSI-901700000010650:GERAN-A:LU){VLR_SUB_AS_NEEDS_AUTH_WAIT_AI}: state_chg to VLR_SUB_AS_WAIT_RESP
@@ -2866,7 +2866,7 @@ DVLR VLR_Authenticate(IMSI-901700000010650:GERAN-A:LU){VLR_SUB_AS_WAIT_RESP}: go
 - ...rand=39fa2f4e3d523d8619a73b4f65c3e14d
 - ...autn=8704f5ba55f30000d2ee44b22c8ea919
 - ...expecting res=e229c19e791f2e41
-DREF VLR subscr IMSI-901700000010650 - vlr_gsup_rx: now used by 1 (active-conn)
+DVLR VLR subscr IMSI-901700000010650 - vlr_gsup_rx: now used by 1 (active-conn)
 <-- GSUP rx OSMO_GSUP_MSGT_SEND_AUTH_INFO_RESULT: vlr_gsupc_read_cb() returns 0
   auth_request_sent == 1
   lu_result_sent == 0
@@ -2891,13 +2891,13 @@ DMSC msc_a(IMSI-901700000010650:GERAN-A:LU){MSC_A_ST_AUTH_CIPH}: Received Event 
 DREF msc_a(IMSI-901700000010650:GERAN-A:LU){MSC_A_ST_AUTH_CIPH}: - lu: now used by 1 (rx_from_ms)
 DMSC msc_a(IMSI-901700000010650:GERAN-A:LU){MSC_A_ST_AUTH_CIPH}: state_chg to MSC_A_ST_RELEASING
 DBSSAP msc_a(IMSI-901700000010650:GERAN-A:LU){MSC_A_ST_RELEASING}: Releasing: msc_a use is 1 (rx_from_ms)
-DREF VLR subscr IMSI-901700000010650 + msc_a_fsm_releasing_onenter: now used by 2 (active-conn,msc_a_fsm_releasing_onenter)
-DREF VLR subscr IMSI-901700000010650 + vlr_subscr_cancel_attach_fsm: now used by 3 (active-conn,msc_a_fsm_releasing_onenter,vlr_subscr_cancel_attach_fsm)
-DREF VLR subscr IMSI-901700000010650 - vlr_subscr_cancel_attach_fsm: now used by 2 (active-conn,msc_a_fsm_releasing_onenter)
+DVLR VLR subscr IMSI-901700000010650 + msc_a_fsm_releasing_onenter: now used by 2 (active-conn,msc_a_fsm_releasing_onenter)
+DVLR VLR subscr IMSI-901700000010650 + vlr_subscr_cancel_attach_fsm: now used by 3 (active-conn,msc_a_fsm_releasing_onenter,vlr_subscr_cancel_attach_fsm)
+DVLR VLR subscr IMSI-901700000010650 - vlr_subscr_cancel_attach_fsm: now used by 2 (active-conn,msc_a_fsm_releasing_onenter)
 DREF msc_a(IMSI-901700000010650:GERAN-A:LU){MSC_A_ST_RELEASING}: + wait-Clear-Complete: now used by 2 (rx_from_ms,wait-Clear-Complete)
 DMSC msc_a(IMSI-901700000010650:GERAN-A:LU){MSC_A_ST_RELEASING}: RAN encode: CLEAR_COMMAND on GERAN-A
 DMSC dummy_msc_i(IMSI-901700000010650:GERAN-A:LU){0}: Received Event MSC_I_EV_FROM_A_FORWARD_ACCESS_SIGNALLING_REQUEST
-DREF VLR subscr IMSI-901700000010650 - msc_a_fsm_releasing_onenter: now used by 1 (active-conn)
+DVLR VLR subscr IMSI-901700000010650 - msc_a_fsm_releasing_onenter: now used by 1 (active-conn)
 DVLR VLR_Authenticate(IMSI-901700000010650:GERAN-A:LU){VLR_SUB_AS_AUTH_FAILED}: Deallocated
 DREF msc_a(IMSI-901700000010650:GERAN-A:LU){MSC_A_ST_RELEASING}: - rx_from_ms: now used by 1 (wait-Clear-Complete)
   lu_result_sent == 2
@@ -2923,7 +2923,7 @@ DMSC dummy_msc_i(IMSI-901700000010650:GERAN-A:LU){0}: Terminating in cascade, de
 DMSC dummy_msc_i(IMSI-901700000010650:GERAN-A:LU){0}: Removing from parent msub_fsm
 DMSC dummy_msc_i(IMSI-901700000010650:GERAN-A:LU){0}: Deferring: will deallocate with msc_a(IMSI-901700000010650:GERAN-A:LU)
 DMSC msub(IMSI-901700000010650) Free
-DREF VLR subscr IMSI-901700000010650 - active-conn: now used by 0 (-)
+DVLR VLR subscr IMSI-901700000010650 - active-conn: now used by 0 (-)
 DVLR SUBSCR(IMSI-901700000010650) freeing VLR subscr (max total use count was 3)
 DMSC msub_fsm{terminating}: Deferring: will deallocate with msc_a(IMSI-901700000010650:GERAN-A:LU)
 DMSC msc_a(IMSI-901700000010650:GERAN-A:LU){MSC_A_ST_RELEASED}: Deallocated, including all deferred deallocations
@@ -2952,13 +2952,13 @@ DVLR vlr_lu_fsm(IMSI-901700000010650:UTRAN-Iu:LU){VLR_ULA_S_IDLE}: Allocated
 DVLR vlr_lu_fsm(IMSI-901700000010650:UTRAN-Iu:LU){VLR_ULA_S_IDLE}: is child of msc_a(IMSI-901700000010650:UTRAN-Iu:LU)
 DVLR vlr_lu_fsm(IMSI-901700000010650:UTRAN-Iu:LU){VLR_ULA_S_IDLE}: rev=R99 net=UTRAN Auth+Ciph
 DVLR vlr_lu_fsm(IMSI-901700000010650:UTRAN-Iu:LU){VLR_ULA_S_IDLE}: Received Event VLR_ULA_E_UPDATE_LA
-DREF VLR subscr unknown + _lu_fsm_associate_vsub: now used by 1 (_lu_fsm_associate_vsub)
+DVLR VLR subscr unknown + _lu_fsm_associate_vsub: now used by 1 (_lu_fsm_associate_vsub)
 DVLR set IMSI on subscriber; IMSI=901700000010650 id=901700000010650
 DVLR New subscr, IMSI: 901700000010650
-DREF VLR subscr IMSI-901700000010650 + active-conn: now used by 2 (_lu_fsm_associate_vsub,active-conn)
+DVLR VLR subscr IMSI-901700000010650 + active-conn: now used by 2 (_lu_fsm_associate_vsub,active-conn)
 DMSC msc_a(IMSI-901700000010650:UTRAN-Iu:LU){MSC_A_ST_VALIDATE_L3}: Received Event MSC_A_EV_COMPLETE_LAYER_3_OK
 DMSC msc_a(IMSI-901700000010650:UTRAN-Iu:LU){MSC_A_ST_VALIDATE_L3}: state_chg to MSC_A_ST_AUTH_CIPH
-DREF VLR subscr IMSI-901700000010650 - _lu_fsm_associate_vsub: now used by 1 (active-conn)
+DVLR VLR subscr IMSI-901700000010650 - _lu_fsm_associate_vsub: now used by 1 (active-conn)
 DVLR set Last E-UTRAN PLMN ID on subscriber: (none)
 DVLR vlr_lu_fsm(IMSI-901700000010650:UTRAN-Iu:LU){VLR_ULA_S_IDLE}: vlr_loc_upd_node1_pre()
 DVLR vlr_lu_fsm(IMSI-901700000010650:UTRAN-Iu:LU){VLR_ULA_S_IDLE}: vlr_loc_upd_node1()
@@ -2973,7 +2973,7 @@ DREF msc_a(IMSI-901700000010650:UTRAN-Iu:LU){MSC_A_ST_AUTH_CIPH}: - rx_from_ms: 
   lu_result_sent == 0
 - from HLR, rx _SEND_AUTH_INFO_RESULT; VLR sends Auth Req to MS
 <-- GSUP rx OSMO_GSUP_MSGT_SEND_AUTH_INFO_RESULT: 0a010809710000000156f00362201039fa2f4e3d523d8619a73b4f65c3e14d21049b36efdf2208059a4f668f6fbe39231027497388b6cb044648f396aa155b95ef2410f64735036e5871319c679f4742a75ea125108704f5ba55f30000d2ee44b22c8ea9192708e229c19e791f2e4103622010c187a53a5e6b9d573cac7c74451fd46d210485aa31302208d3d50a000bf04f6e23101159ec926a50e98c034a6b7d7c9f418d2410df3a03d9ca5335641efc8e36d76cd20b25101843a645b98d00005b2d666af46c45d927087db47cf7f81e4dc703622010efa9c29a9742148d5c9070348716e1bb210469d5f9fb22083df176f0c29f1a3d2310eb50e770ddcc3060101d2f43b6c2b884241076542abce5ff9345b0e8947f4c6e019c2510f9375e6d41e1000096e7fe4ff1c27e392708706f996719ba609c03622010f023d5a3b24726e0631b64b3840f82532104d570c03f2208ec011be8919883d62310c4e58af4ba43f3bcd904e16984f086d724100593f65e752e5cb7f473862bda05aa0a2510541ff1f077270000c5ea00d658bc7e9a27083fd26072eaa2a04d036220102f8f90c780d6a9c0c53da7ac57b6707e2104b072446f220823f39f9f425ad6e6231065af0527fda95b0dc5ae4aa515cdf32f2410537c3b35a3b13b08d08eeb28098f45cc25104bf4e564f75300009bc796706bc6574427080edb0eadbea94ac20a0101
-DREF VLR subscr IMSI-901700000010650 + vlr_gsup_rx: now used by 2 (active-conn,vlr_gsup_rx)
+DVLR VLR subscr IMSI-901700000010650 + vlr_gsup_rx: now used by 2 (active-conn,vlr_gsup_rx)
 DVLR VLR_Authenticate(IMSI-901700000010650:UTRAN-Iu:LU){VLR_SUB_AS_NEEDS_AUTH_WAIT_AI}: Received Event VLR_AUTH_E_HLR_SAI_ACK
 DVLR SUBSCR(IMSI-901700000010650) Received 5 auth tuples
 DVLR VLR_Authenticate(IMSI-901700000010650:UTRAN-Iu:LU){VLR_SUB_AS_NEEDS_AUTH_WAIT_AI}: state_chg to VLR_SUB_AS_WAIT_RESP
@@ -2982,7 +2982,7 @@ DVLR VLR_Authenticate(IMSI-901700000010650:UTRAN-Iu:LU){VLR_SUB_AS_WAIT_RESP}: g
 - ...rand=39fa2f4e3d523d8619a73b4f65c3e14d
 - ...autn=8704f5ba55f30000d2ee44b22c8ea919
 - ...expecting res=e229c19e791f2e41
-DREF VLR subscr IMSI-901700000010650 - vlr_gsup_rx: now used by 1 (active-conn)
+DVLR VLR subscr IMSI-901700000010650 - vlr_gsup_rx: now used by 1 (active-conn)
 <-- GSUP rx OSMO_GSUP_MSGT_SEND_AUTH_INFO_RESULT: vlr_gsupc_read_cb() returns 0
   auth_request_sent == 1
   lu_result_sent == 0
@@ -3007,13 +3007,13 @@ DMSC msc_a(IMSI-901700000010650:UTRAN-Iu:LU){MSC_A_ST_AUTH_CIPH}: Received Event
 DREF msc_a(IMSI-901700000010650:UTRAN-Iu:LU){MSC_A_ST_AUTH_CIPH}: - lu: now used by 1 (rx_from_ms)
 DMSC msc_a(IMSI-901700000010650:UTRAN-Iu:LU){MSC_A_ST_AUTH_CIPH}: state_chg to MSC_A_ST_RELEASING
 DIUCS msc_a(IMSI-901700000010650:UTRAN-Iu:LU){MSC_A_ST_RELEASING}: Releasing: msc_a use is 1 (rx_from_ms)
-DREF VLR subscr IMSI-901700000010650 + msc_a_fsm_releasing_onenter: now used by 2 (active-conn,msc_a_fsm_releasing_onenter)
-DREF VLR subscr IMSI-901700000010650 + vlr_subscr_cancel_attach_fsm: now used by 3 (active-conn,msc_a_fsm_releasing_onenter,vlr_subscr_cancel_attach_fsm)
-DREF VLR subscr IMSI-901700000010650 - vlr_subscr_cancel_attach_fsm: now used by 2 (active-conn,msc_a_fsm_releasing_onenter)
+DVLR VLR subscr IMSI-901700000010650 + msc_a_fsm_releasing_onenter: now used by 2 (active-conn,msc_a_fsm_releasing_onenter)
+DVLR VLR subscr IMSI-901700000010650 + vlr_subscr_cancel_attach_fsm: now used by 3 (active-conn,msc_a_fsm_releasing_onenter,vlr_subscr_cancel_attach_fsm)
+DVLR VLR subscr IMSI-901700000010650 - vlr_subscr_cancel_attach_fsm: now used by 2 (active-conn,msc_a_fsm_releasing_onenter)
 DREF msc_a(IMSI-901700000010650:UTRAN-Iu:LU){MSC_A_ST_RELEASING}: + wait-Clear-Complete: now used by 2 (rx_from_ms,wait-Clear-Complete)
 DMSC msc_a(IMSI-901700000010650:UTRAN-Iu:LU){MSC_A_ST_RELEASING}: RAN encode: CLEAR_COMMAND on UTRAN-Iu
 DMSC dummy_msc_i(IMSI-901700000010650:UTRAN-Iu:LU){0}: Received Event MSC_I_EV_FROM_A_FORWARD_ACCESS_SIGNALLING_REQUEST
-DREF VLR subscr IMSI-901700000010650 - msc_a_fsm_releasing_onenter: now used by 1 (active-conn)
+DVLR VLR subscr IMSI-901700000010650 - msc_a_fsm_releasing_onenter: now used by 1 (active-conn)
 DVLR VLR_Authenticate(IMSI-901700000010650:UTRAN-Iu:LU){VLR_SUB_AS_AUTH_FAILED}: Deallocated
 DREF msc_a(IMSI-901700000010650:UTRAN-Iu:LU){MSC_A_ST_RELEASING}: - rx_from_ms: now used by 1 (wait-Clear-Complete)
   lu_result_sent == 2
@@ -3039,7 +3039,7 @@ DMSC dummy_msc_i(IMSI-901700000010650:UTRAN-Iu:LU){0}: Terminating in cascade, d
 DMSC dummy_msc_i(IMSI-901700000010650:UTRAN-Iu:LU){0}: Removing from parent msub_fsm
 DMSC dummy_msc_i(IMSI-901700000010650:UTRAN-Iu:LU){0}: Deferring: will deallocate with msc_a(IMSI-901700000010650:UTRAN-Iu:LU)
 DMSC msub(IMSI-901700000010650) Free
-DREF VLR subscr IMSI-901700000010650 - active-conn: now used by 0 (-)
+DVLR VLR subscr IMSI-901700000010650 - active-conn: now used by 0 (-)
 DVLR SUBSCR(IMSI-901700000010650) freeing VLR subscr (max total use count was 3)
 DMSC msub_fsm{terminating}: Deferring: will deallocate with msc_a(IMSI-901700000010650:UTRAN-Iu:LU)
 DMSC msc_a(IMSI-901700000010650:UTRAN-Iu:LU){MSC_A_ST_RELEASED}: Deallocated, including all deferred deallocations
@@ -3068,13 +3068,13 @@ DVLR vlr_lu_fsm(IMSI-901700000010650:GERAN-A:LU){VLR_ULA_S_IDLE}: Allocated
 DVLR vlr_lu_fsm(IMSI-901700000010650:GERAN-A:LU){VLR_ULA_S_IDLE}: is child of msc_a(IMSI-901700000010650:GERAN-A:LU)
 DVLR vlr_lu_fsm(IMSI-901700000010650:GERAN-A:LU){VLR_ULA_S_IDLE}: rev=R99 net=GERAN Auth (no Ciph)
 DVLR vlr_lu_fsm(IMSI-901700000010650:GERAN-A:LU){VLR_ULA_S_IDLE}: Received Event VLR_ULA_E_UPDATE_LA
-DREF VLR subscr unknown + _lu_fsm_associate_vsub: now used by 1 (_lu_fsm_associate_vsub)
+DVLR VLR subscr unknown + _lu_fsm_associate_vsub: now used by 1 (_lu_fsm_associate_vsub)
 DVLR set IMSI on subscriber; IMSI=901700000010650 id=901700000010650
 DVLR New subscr, IMSI: 901700000010650
-DREF VLR subscr IMSI-901700000010650 + active-conn: now used by 2 (_lu_fsm_associate_vsub,active-conn)
+DVLR VLR subscr IMSI-901700000010650 + active-conn: now used by 2 (_lu_fsm_associate_vsub,active-conn)
 DMSC msc_a(IMSI-901700000010650:GERAN-A:LU){MSC_A_ST_VALIDATE_L3}: Received Event MSC_A_EV_COMPLETE_LAYER_3_OK
 DMSC msc_a(IMSI-901700000010650:GERAN-A:LU){MSC_A_ST_VALIDATE_L3}: state_chg to MSC_A_ST_AUTH_CIPH
-DREF VLR subscr IMSI-901700000010650 - _lu_fsm_associate_vsub: now used by 1 (active-conn)
+DVLR VLR subscr IMSI-901700000010650 - _lu_fsm_associate_vsub: now used by 1 (active-conn)
 DVLR set Last E-UTRAN PLMN ID on subscriber: (none)
 DVLR vlr_lu_fsm(IMSI-901700000010650:GERAN-A:LU){VLR_ULA_S_IDLE}: vlr_loc_upd_node1_pre()
 DVLR vlr_lu_fsm(IMSI-901700000010650:GERAN-A:LU){VLR_ULA_S_IDLE}: vlr_loc_upd_node1()
@@ -3089,7 +3089,7 @@ DREF msc_a(IMSI-901700000010650:GERAN-A:LU){MSC_A_ST_AUTH_CIPH}: - rx_from_ms: n
   lu_result_sent == 0
 - from HLR, rx _SEND_AUTH_INFO_RESULT; VLR sends Auth Req to MS
 <-- GSUP rx OSMO_GSUP_MSGT_SEND_AUTH_INFO_RESULT: 0a010809710000000156f00362201039fa2f4e3d523d8619a73b4f65c3e14d21049b36efdf2208059a4f668f6fbe39231027497388b6cb044648f396aa155b95ef2410f64735036e5871319c679f4742a75ea125108704f5ba55f30000d2ee44b22c8ea9192708e229c19e791f2e4103622010c187a53a5e6b9d573cac7c74451fd46d210485aa31302208d3d50a000bf04f6e23101159ec926a50e98c034a6b7d7c9f418d2410df3a03d9ca5335641efc8e36d76cd20b25101843a645b98d00005b2d666af46c45d927087db47cf7f81e4dc703622010efa9c29a9742148d5c9070348716e1bb210469d5f9fb22083df176f0c29f1a3d2310eb50e770ddcc3060101d2f43b6c2b884241076542abce5ff9345b0e8947f4c6e019c2510f9375e6d41e1000096e7fe4ff1c27e392708706f996719ba609c03622010f023d5a3b24726e0631b64b3840f82532104d570c03f2208ec011be8919883d62310c4e58af4ba43f3bcd904e16984f086d724100593f65e752e5cb7f473862bda05aa0a2510541ff1f077270000c5ea00d658bc7e9a27083fd26072eaa2a04d036220102f8f90c780d6a9c0c53da7ac57b6707e2104b072446f220823f39f9f425ad6e6231065af0527fda95b0dc5ae4aa515cdf32f2410537c3b35a3b13b08d08eeb28098f45cc25104bf4e564f75300009bc796706bc6574427080edb0eadbea94ac20a0101
-DREF VLR subscr IMSI-901700000010650 + vlr_gsup_rx: now used by 2 (active-conn,vlr_gsup_rx)
+DVLR VLR subscr IMSI-901700000010650 + vlr_gsup_rx: now used by 2 (active-conn,vlr_gsup_rx)
 DVLR VLR_Authenticate(IMSI-901700000010650:GERAN-A:LU){VLR_SUB_AS_NEEDS_AUTH_WAIT_AI}: Received Event VLR_AUTH_E_HLR_SAI_ACK
 DVLR SUBSCR(IMSI-901700000010650) Received 5 auth tuples
 DVLR VLR_Authenticate(IMSI-901700000010650:GERAN-A:LU){VLR_SUB_AS_NEEDS_AUTH_WAIT_AI}: state_chg to VLR_SUB_AS_WAIT_RESP
@@ -3098,7 +3098,7 @@ DVLR VLR_Authenticate(IMSI-901700000010650:GERAN-A:LU){VLR_SUB_AS_WAIT_RESP}: go
 - ...rand=39fa2f4e3d523d8619a73b4f65c3e14d
 - ...autn=8704f5ba55f30000d2ee44b22c8ea919
 - ...expecting res=e229c19e791f2e41
-DREF VLR subscr IMSI-901700000010650 - vlr_gsup_rx: now used by 1 (active-conn)
+DVLR VLR subscr IMSI-901700000010650 - vlr_gsup_rx: now used by 1 (active-conn)
 <-- GSUP rx OSMO_GSUP_MSGT_SEND_AUTH_INFO_RESULT: vlr_gsupc_read_cb() returns 0
   auth_request_sent == 1
   lu_result_sent == 0
@@ -3123,13 +3123,13 @@ DMSC msc_a(IMSI-901700000010650:GERAN-A:LU){MSC_A_ST_AUTH_CIPH}: Received Event 
 DREF msc_a(IMSI-901700000010650:GERAN-A:LU){MSC_A_ST_AUTH_CIPH}: - lu: now used by 1 (rx_from_ms)
 DMSC msc_a(IMSI-901700000010650:GERAN-A:LU){MSC_A_ST_AUTH_CIPH}: state_chg to MSC_A_ST_RELEASING
 DBSSAP msc_a(IMSI-901700000010650:GERAN-A:LU){MSC_A_ST_RELEASING}: Releasing: msc_a use is 1 (rx_from_ms)
-DREF VLR subscr IMSI-901700000010650 + msc_a_fsm_releasing_onenter: now used by 2 (active-conn,msc_a_fsm_releasing_onenter)
-DREF VLR subscr IMSI-901700000010650 + vlr_subscr_cancel_attach_fsm: now used by 3 (active-conn,msc_a_fsm_releasing_onenter,vlr_subscr_cancel_attach_fsm)
-DREF VLR subscr IMSI-901700000010650 - vlr_subscr_cancel_attach_fsm: now used by 2 (active-conn,msc_a_fsm_releasing_onenter)
+DVLR VLR subscr IMSI-901700000010650 + msc_a_fsm_releasing_onenter: now used by 2 (active-conn,msc_a_fsm_releasing_onenter)
+DVLR VLR subscr IMSI-901700000010650 + vlr_subscr_cancel_attach_fsm: now used by 3 (active-conn,msc_a_fsm_releasing_onenter,vlr_subscr_cancel_attach_fsm)
+DVLR VLR subscr IMSI-901700000010650 - vlr_subscr_cancel_attach_fsm: now used by 2 (active-conn,msc_a_fsm_releasing_onenter)
 DREF msc_a(IMSI-901700000010650:GERAN-A:LU){MSC_A_ST_RELEASING}: + wait-Clear-Complete: now used by 2 (rx_from_ms,wait-Clear-Complete)
 DMSC msc_a(IMSI-901700000010650:GERAN-A:LU){MSC_A_ST_RELEASING}: RAN encode: CLEAR_COMMAND on GERAN-A
 DMSC dummy_msc_i(IMSI-901700000010650:GERAN-A:LU){0}: Received Event MSC_I_EV_FROM_A_FORWARD_ACCESS_SIGNALLING_REQUEST
-DREF VLR subscr IMSI-901700000010650 - msc_a_fsm_releasing_onenter: now used by 1 (active-conn)
+DVLR VLR subscr IMSI-901700000010650 - msc_a_fsm_releasing_onenter: now used by 1 (active-conn)
 DVLR VLR_Authenticate(IMSI-901700000010650:GERAN-A:LU){VLR_SUB_AS_AUTH_FAILED}: Deallocated
 DREF msc_a(IMSI-901700000010650:GERAN-A:LU){MSC_A_ST_RELEASING}: - rx_from_ms: now used by 1 (wait-Clear-Complete)
   lu_result_sent == 2
@@ -3155,7 +3155,7 @@ DMSC dummy_msc_i(IMSI-901700000010650:GERAN-A:LU){0}: Terminating in cascade, de
 DMSC dummy_msc_i(IMSI-901700000010650:GERAN-A:LU){0}: Removing from parent msub_fsm
 DMSC dummy_msc_i(IMSI-901700000010650:GERAN-A:LU){0}: Deferring: will deallocate with msc_a(IMSI-901700000010650:GERAN-A:LU)
 DMSC msub(IMSI-901700000010650) Free
-DREF VLR subscr IMSI-901700000010650 - active-conn: now used by 0 (-)
+DVLR VLR subscr IMSI-901700000010650 - active-conn: now used by 0 (-)
 DVLR SUBSCR(IMSI-901700000010650) freeing VLR subscr (max total use count was 3)
 DMSC msub_fsm{terminating}: Deferring: will deallocate with msc_a(IMSI-901700000010650:GERAN-A:LU)
 DMSC msc_a(IMSI-901700000010650:GERAN-A:LU){MSC_A_ST_RELEASED}: Deallocated, including all deferred deallocations
@@ -3184,13 +3184,13 @@ DVLR vlr_lu_fsm(IMSI-901700000010650:UTRAN-Iu:LU){VLR_ULA_S_IDLE}: Allocated
 DVLR vlr_lu_fsm(IMSI-901700000010650:UTRAN-Iu:LU){VLR_ULA_S_IDLE}: is child of msc_a(IMSI-901700000010650:UTRAN-Iu:LU)
 DVLR vlr_lu_fsm(IMSI-901700000010650:UTRAN-Iu:LU){VLR_ULA_S_IDLE}: rev=R99 net=UTRAN Auth+Ciph
 DVLR vlr_lu_fsm(IMSI-901700000010650:UTRAN-Iu:LU){VLR_ULA_S_IDLE}: Received Event VLR_ULA_E_UPDATE_LA
-DREF VLR subscr unknown + _lu_fsm_associate_vsub: now used by 1 (_lu_fsm_associate_vsub)
+DVLR VLR subscr unknown + _lu_fsm_associate_vsub: now used by 1 (_lu_fsm_associate_vsub)
 DVLR set IMSI on subscriber; IMSI=901700000010650 id=901700000010650
 DVLR New subscr, IMSI: 901700000010650
-DREF VLR subscr IMSI-901700000010650 + active-conn: now used by 2 (_lu_fsm_associate_vsub,active-conn)
+DVLR VLR subscr IMSI-901700000010650 + active-conn: now used by 2 (_lu_fsm_associate_vsub,active-conn)
 DMSC msc_a(IMSI-901700000010650:UTRAN-Iu:LU){MSC_A_ST_VALIDATE_L3}: Received Event MSC_A_EV_COMPLETE_LAYER_3_OK
 DMSC msc_a(IMSI-901700000010650:UTRAN-Iu:LU){MSC_A_ST_VALIDATE_L3}: state_chg to MSC_A_ST_AUTH_CIPH
-DREF VLR subscr IMSI-901700000010650 - _lu_fsm_associate_vsub: now used by 1 (active-conn)
+DVLR VLR subscr IMSI-901700000010650 - _lu_fsm_associate_vsub: now used by 1 (active-conn)
 DVLR set Last E-UTRAN PLMN ID on subscriber: (none)
 DVLR vlr_lu_fsm(IMSI-901700000010650:UTRAN-Iu:LU){VLR_ULA_S_IDLE}: vlr_loc_upd_node1_pre()
 DVLR vlr_lu_fsm(IMSI-901700000010650:UTRAN-Iu:LU){VLR_ULA_S_IDLE}: vlr_loc_upd_node1()
@@ -3205,7 +3205,7 @@ DREF msc_a(IMSI-901700000010650:UTRAN-Iu:LU){MSC_A_ST_AUTH_CIPH}: - rx_from_ms: 
   lu_result_sent == 0
 - from HLR, rx _SEND_AUTH_INFO_RESULT; VLR sends Auth Req to MS
 <-- GSUP rx OSMO_GSUP_MSGT_SEND_AUTH_INFO_RESULT: 0a010809710000000156f00362201039fa2f4e3d523d8619a73b4f65c3e14d21049b36efdf2208059a4f668f6fbe39231027497388b6cb044648f396aa155b95ef2410f64735036e5871319c679f4742a75ea125108704f5ba55f30000d2ee44b22c8ea9192708e229c19e791f2e4103622010c187a53a5e6b9d573cac7c74451fd46d210485aa31302208d3d50a000bf04f6e23101159ec926a50e98c034a6b7d7c9f418d2410df3a03d9ca5335641efc8e36d76cd20b25101843a645b98d00005b2d666af46c45d927087db47cf7f81e4dc703622010efa9c29a9742148d5c9070348716e1bb210469d5f9fb22083df176f0c29f1a3d2310eb50e770ddcc3060101d2f43b6c2b884241076542abce5ff9345b0e8947f4c6e019c2510f9375e6d41e1000096e7fe4ff1c27e392708706f996719ba609c03622010f023d5a3b24726e0631b64b3840f82532104d570c03f2208ec011be8919883d62310c4e58af4ba43f3bcd904e16984f086d724100593f65e752e5cb7f473862bda05aa0a2510541ff1f077270000c5ea00d658bc7e9a27083fd26072eaa2a04d036220102f8f90c780d6a9c0c53da7ac57b6707e2104b072446f220823f39f9f425ad6e6231065af0527fda95b0dc5ae4aa515cdf32f2410537c3b35a3b13b08d08eeb28098f45cc25104bf4e564f75300009bc796706bc6574427080edb0eadbea94ac20a0101
-DREF VLR subscr IMSI-901700000010650 + vlr_gsup_rx: now used by 2 (active-conn,vlr_gsup_rx)
+DVLR VLR subscr IMSI-901700000010650 + vlr_gsup_rx: now used by 2 (active-conn,vlr_gsup_rx)
 DVLR VLR_Authenticate(IMSI-901700000010650:UTRAN-Iu:LU){VLR_SUB_AS_NEEDS_AUTH_WAIT_AI}: Received Event VLR_AUTH_E_HLR_SAI_ACK
 DVLR SUBSCR(IMSI-901700000010650) Received 5 auth tuples
 DVLR VLR_Authenticate(IMSI-901700000010650:UTRAN-Iu:LU){VLR_SUB_AS_NEEDS_AUTH_WAIT_AI}: state_chg to VLR_SUB_AS_WAIT_RESP
@@ -3214,7 +3214,7 @@ DVLR VLR_Authenticate(IMSI-901700000010650:UTRAN-Iu:LU){VLR_SUB_AS_WAIT_RESP}: g
 - ...rand=39fa2f4e3d523d8619a73b4f65c3e14d
 - ...autn=8704f5ba55f30000d2ee44b22c8ea919
 - ...expecting res=e229c19e791f2e41
-DREF VLR subscr IMSI-901700000010650 - vlr_gsup_rx: now used by 1 (active-conn)
+DVLR VLR subscr IMSI-901700000010650 - vlr_gsup_rx: now used by 1 (active-conn)
 <-- GSUP rx OSMO_GSUP_MSGT_SEND_AUTH_INFO_RESULT: vlr_gsupc_read_cb() returns 0
   auth_request_sent == 1
   lu_result_sent == 0
@@ -3239,13 +3239,13 @@ DMSC msc_a(IMSI-901700000010650:UTRAN-Iu:LU){MSC_A_ST_AUTH_CIPH}: Received Event
 DREF msc_a(IMSI-901700000010650:UTRAN-Iu:LU){MSC_A_ST_AUTH_CIPH}: - lu: now used by 1 (rx_from_ms)
 DMSC msc_a(IMSI-901700000010650:UTRAN-Iu:LU){MSC_A_ST_AUTH_CIPH}: state_chg to MSC_A_ST_RELEASING
 DIUCS msc_a(IMSI-901700000010650:UTRAN-Iu:LU){MSC_A_ST_RELEASING}: Releasing: msc_a use is 1 (rx_from_ms)
-DREF VLR subscr IMSI-901700000010650 + msc_a_fsm_releasing_onenter: now used by 2 (active-conn,msc_a_fsm_releasing_onenter)
-DREF VLR subscr IMSI-901700000010650 + vlr_subscr_cancel_attach_fsm: now used by 3 (active-conn,msc_a_fsm_releasing_onenter,vlr_subscr_cancel_attach_fsm)
-DREF VLR subscr IMSI-901700000010650 - vlr_subscr_cancel_attach_fsm: now used by 2 (active-conn,msc_a_fsm_releasing_onenter)
+DVLR VLR subscr IMSI-901700000010650 + msc_a_fsm_releasing_onenter: now used by 2 (active-conn,msc_a_fsm_releasing_onenter)
+DVLR VLR subscr IMSI-901700000010650 + vlr_subscr_cancel_attach_fsm: now used by 3 (active-conn,msc_a_fsm_releasing_onenter,vlr_subscr_cancel_attach_fsm)
+DVLR VLR subscr IMSI-901700000010650 - vlr_subscr_cancel_attach_fsm: now used by 2 (active-conn,msc_a_fsm_releasing_onenter)
 DREF msc_a(IMSI-901700000010650:UTRAN-Iu:LU){MSC_A_ST_RELEASING}: + wait-Clear-Complete: now used by 2 (rx_from_ms,wait-Clear-Complete)
 DMSC msc_a(IMSI-901700000010650:UTRAN-Iu:LU){MSC_A_ST_RELEASING}: RAN encode: CLEAR_COMMAND on UTRAN-Iu
 DMSC dummy_msc_i(IMSI-901700000010650:UTRAN-Iu:LU){0}: Received Event MSC_I_EV_FROM_A_FORWARD_ACCESS_SIGNALLING_REQUEST
-DREF VLR subscr IMSI-901700000010650 - msc_a_fsm_releasing_onenter: now used by 1 (active-conn)
+DVLR VLR subscr IMSI-901700000010650 - msc_a_fsm_releasing_onenter: now used by 1 (active-conn)
 DVLR VLR_Authenticate(IMSI-901700000010650:UTRAN-Iu:LU){VLR_SUB_AS_AUTH_FAILED}: Deallocated
 DREF msc_a(IMSI-901700000010650:UTRAN-Iu:LU){MSC_A_ST_RELEASING}: - rx_from_ms: now used by 1 (wait-Clear-Complete)
   lu_result_sent == 2
@@ -3271,7 +3271,7 @@ DMSC dummy_msc_i(IMSI-901700000010650:UTRAN-Iu:LU){0}: Terminating in cascade, d
 DMSC dummy_msc_i(IMSI-901700000010650:UTRAN-Iu:LU){0}: Removing from parent msub_fsm
 DMSC dummy_msc_i(IMSI-901700000010650:UTRAN-Iu:LU){0}: Deferring: will deallocate with msc_a(IMSI-901700000010650:UTRAN-Iu:LU)
 DMSC msub(IMSI-901700000010650) Free
-DREF VLR subscr IMSI-901700000010650 - active-conn: now used by 0 (-)
+DVLR VLR subscr IMSI-901700000010650 - active-conn: now used by 0 (-)
 DVLR SUBSCR(IMSI-901700000010650) freeing VLR subscr (max total use count was 3)
 DMSC msub_fsm{terminating}: Deferring: will deallocate with msc_a(IMSI-901700000010650:UTRAN-Iu:LU)
 DMSC msc_a(IMSI-901700000010650:UTRAN-Iu:LU){MSC_A_ST_RELEASED}: Deallocated, including all deferred deallocations

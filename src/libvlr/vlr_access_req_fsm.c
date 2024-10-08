@@ -23,7 +23,6 @@
 #include <osmocom/gsm/gsup.h>
 #include <osmocom/gsm/gsm48.h>
 #include <osmocom/vlr/vlr.h>
-#include <osmocom/msc/debug.h>
 
 #include "vlr_core.h"
 #include "vlr_auth_fsm.h"
