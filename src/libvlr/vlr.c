@@ -1551,7 +1551,7 @@ struct vlr_instance *vlr_alloc(void *ctx, const struct vlr_ops *ops)
 	osmo_tdefs_reset(msc_tdefs_vlr);
 
 	/* osmo_auth_fsm.c */
-	OSMO_ASSERT(osmo_fsm_register(&vlr_auth_fsm) == 0);
+	vlr_auth_fsm_init();
 	/* osmo_lu_fsm.c */
 	vlr_lu_fsm_init();
 	/* vlr_access_request_fsm.c */
@@ -1699,7 +1699,7 @@ void osmo_vlr_set_log_cat(enum osmo_vlr_cat logc, int logc_num)
 
 	switch (logc) {
 	case OSMO_VLR_LOGC_VLR:
-		vlr_auth_fsm.log_subsys = logc_num;
+		vlr_auth_fsm_set_log_subsys(logc_num);
 		vlr_parq_fsm_set_log_subsys(logc_num);
 		vlr_lu_fsm_set_log_subsys(logc_num);
 		break;

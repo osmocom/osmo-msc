@@ -603,7 +603,7 @@ static const struct osmo_fsm_state auth_fsm_states[] = {
 	},
 };
 
-struct osmo_fsm vlr_auth_fsm = {
+static struct osmo_fsm vlr_auth_fsm = {
 	.name = "VLR_Authenticate",
 	.states = auth_fsm_states,
 	.num_states = ARRAY_SIZE(auth_fsm_states),
@@ -613,6 +613,16 @@ struct osmo_fsm vlr_auth_fsm = {
 	.event_names = fsm_auth_event_names,
 	.cleanup = auth_fsm_cleanup,
 };
+
+void vlr_auth_fsm_init(void)
+{
+	OSMO_ASSERT(osmo_fsm_register(&vlr_auth_fsm) == 0);
+}
+
+void vlr_auth_fsm_set_log_subsys(int log_level)
+{
+	vlr_auth_fsm.log_subsys = log_level;
+}
 
 /***********************************************************************
  * User API (for SGSN/MSC code)
