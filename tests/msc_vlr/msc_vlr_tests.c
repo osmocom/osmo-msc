@@ -934,7 +934,7 @@ void crcx_ok(enum rtp_direction dir)
 	osmo_fsm_inst_dispatch(cl->fi, CALL_LEG_EV_RTP_STREAM_ADDR_AVAILABLE, cl->rtp[dir]);
 }
 
-static int fake_vlr_tx_lu_acc(void *msc_conn_ref, uint32_t send_tmsi)
+static int fake_vlr_tx_lu_acc(void *msc_conn_ref, uint32_t send_tmsi, enum vlr_lu_type lu_type)
 {
 	struct msc_a *msc_a = msc_conn_ref;
 	if (send_tmsi == GSM_RESERVED_TMSI)
@@ -946,7 +946,7 @@ static int fake_vlr_tx_lu_acc(void *msc_conn_ref, uint32_t send_tmsi)
 	return 0;
 }
 
-static int fake_vlr_tx_lu_rej(void *msc_conn_ref, enum gsm48_reject_value cause)
+static int fake_vlr_tx_lu_rej(void *msc_conn_ref, enum gsm48_reject_value cause, enum vlr_lu_type lu_type)
 {
 	struct msc_a *msc_a = msc_conn_ref;
 	btw("sending LU Reject for %s, cause %u", msc_a->c.fi->id, cause);

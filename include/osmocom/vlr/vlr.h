@@ -239,8 +239,8 @@ struct vlr_ops {
 	/* encode + transmit an IDENTITY REQUEST towards the MS */
 	int (*tx_id_req)(void *msc_conn_ref, uint8_t mi_type);
 
-	int (*tx_lu_acc)(void *msc_conn_ref, uint32_t send_tmsi);
-	int (*tx_lu_rej)(void *msc_conn_ref, enum gsm48_reject_value cause);
+	int (*tx_lu_acc)(void *msc_conn_ref, uint32_t send_tmsi, enum vlr_lu_type lu_type);
+	int (*tx_lu_rej)(void *msc_conn_ref, enum gsm48_reject_value cause, enum vlr_lu_type lu_type);
 	int (*tx_cm_serv_acc)(void *msc_conn_ref, enum osmo_cm_service_type cm_service_type);
 	int (*tx_cm_serv_rej)(void *msc_conn_ref, enum osmo_cm_service_type cm_service_type,
 			      enum gsm48_reject_value cause);
@@ -298,7 +298,7 @@ vlr_loc_update(struct osmo_fsm_inst *parent,
 	       uint32_t parent_event_failure,
 	       void *parent_event_data,
 	       struct vlr_instance *vlr, void *msc_conn_ref,
-	       enum vlr_lu_type type, uint32_t tmsi, const char *imsi,
+	       enum vlr_lu_type lu_type, uint32_t tmsi, const char *imsi,
 	       const struct osmo_location_area_id *old_lai,
 	       const struct osmo_location_area_id *new_lai,
 	       bool authentication_required,

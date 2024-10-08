@@ -339,6 +339,7 @@ struct lu_compl_vlr_priv {
 	enum vlr_fsm_result result;
 	uint8_t cause;
 	bool assign_tmsi;
+	enum vlr_lu_type lu_type;
 };
 
 static inline struct lu_compl_vlr_priv *lu_compl_vlr_fi_priv(struct osmo_fsm_inst *fi);
@@ -434,7 +435,7 @@ static void lu_compl_vlr_new_tmsi(struct osmo_fsm_inst *fi)
 	osmo_fsm_inst_state_chg(fi, LU_COMPL_VLR_S_WAIT_TMSI_CNF,
 				vlr_timer_secs(vlr, 3250), 3250);
 
-	vlr->ops.tx_lu_acc(lcvp->msc_conn_ref, vsub->tmsi_new);
+	vlr->ops.tx_lu_acc(lcvp->msc_conn_ref, vsub->tmsi_new, lcvp->lu_type);
 }
 
 /* After completion of Subscriber_Present_VLR */
@@ -473,7 +474,7 @@ static void lu_compl_vlr_wait_subscr_pres(struct osmo_fsm_inst *fi,
 	vsub->tmsi = GSM_RESERVED_TMSI;
 
 	/* Location Updating Accept */
-	vlr->ops.tx_lu_acc(lcvp->msc_conn_ref, GSM_RESERVED_TMSI);
+	vlr->ops.tx_lu_acc(lcvp->msc_conn_ref, GSM_RESERVED_TMSI, lcvp->lu_type);
 	vlr_lu_compl_fsm_success(fi);
 }
 
@@ -520,7 +521,7 @@ static void lu_compl_vlr_wait_imei(struct osmo_fsm_inst *fi, uint32_t event,
 	vsub->tmsi = GSM_RESERVED_TMSI;
 
 	/* No TMSI needed, accept now. */
-	vlr->ops.tx_lu_acc(lcvp->msc_conn_ref, GSM_RESERVED_TMSI);
+	vlr->ops.tx_lu_acc(lcvp->msc_conn_ref, GSM_RESERVED_TMSI, lcvp->lu_type);
 	vlr_lu_compl_fsm_success(fi);
 }
 
@@ -616,7 +617,8 @@ lu_compl_vlr_proc_alloc(struct osmo_fsm_inst *parent,
 			void *msc_conn_ref,
 			uint32_t parent_event_success,
 			uint32_t parent_event_failure,
-			bool assign_tmsi)
+			bool assign_tmsi,
+			enum vlr_lu_type lu_type)
 {
 	struct osmo_fsm_inst *fi;
 	struct lu_compl_vlr_priv *lcvp;
@@ -632,6 +634,7 @@ lu_compl_vlr_proc_alloc(struct osmo_fsm_inst *parent,
 	lcvp->parent_event_success = parent_event_success;
 	lcvp->parent_event_failure = parent_event_failure;
 	lcvp->assign_tmsi = assign_tmsi;
+	lcvp->lu_type = lu_type;
 	fi->priv = lcvp;
 
 	return fi;
@@ -675,7 +678,7 @@ struct lu_fsm_priv {
 	enum vlr_fsm_result result;
 	uint8_t rej_cause;
 
-	enum vlr_lu_type type;
+	enum vlr_lu_type lu_type;
 	bool lu_by_tmsi;
 	char imsi[16];
 	uint32_t tmsi;
@@ -762,7 +765,7 @@ static void lu_fsm_success(struct osmo_fsm_inst *fi)
 static void lu_fsm_failure(struct osmo_fsm_inst *fi, enum gsm48_reject_value rej_cause)
 {
 	struct lu_fsm_priv *lfp = lu_fsm_fi_priv(fi);
-	lfp->vlr->ops.tx_lu_rej(lfp->msc_conn_ref, rej_cause ? : GSM48_REJECT_NETWORK_FAILURE);
+	lfp->vlr->ops.tx_lu_rej(lfp->msc_conn_ref, rej_cause ? : GSM48_REJECT_NETWORK_FAILURE, lfp->lu_type);
 	_lu_fsm_done(fi, VLR_FSM_RESULT_FAILURE);
 }
 
@@ -773,7 +776,8 @@ static void vlr_loc_upd_start_lu_compl_fsm(struct osmo_fsm_inst *fi)
 		lu_compl_vlr_proc_alloc(fi, lfp->vsub, lfp->msc_conn_ref,
 					VLR_ULA_E_LU_COMPL_SUCCESS,
 					VLR_ULA_E_LU_COMPL_FAILURE,
-					lfp->assign_tmsi);
+					lfp->assign_tmsi,
+					lfp->lu_type);
 
 	osmo_fsm_inst_dispatch(lfp->lu_compl_vlr_fsm, LU_COMPL_VLR_E_START, NULL);
 }
@@ -1106,7 +1110,7 @@ static void lu_fsm_idle(struct osmo_fsm_inst *fi, uint32_t event,
 
 	/* See 3GPP TS 23.012, procedure Retrieve_IMEISV_If_Required */
 	if ((!vlr->cfg.retrieve_imeisv_early)
-	    || (lfp->type == VLR_LU_TYPE_PERIODIC && lfp->vsub->imeisv[0])) {
+	    || (lfp->lu_type == VLR_LU_TYPE_PERIODIC && lfp->vsub->imeisv[0])) {
 		/* R_IMEISV_IR1 passed */
 		_start_lu_main(fi);
 	} else {
@@ -1307,7 +1311,7 @@ static void lu_fsm_wait_lu_compl(struct osmo_fsm_inst *fi, uint32_t event,
 		/* TODO: Notify_gsmSCF 23.078 */
 		/* TODO: Authenticated Radio Contact Established -> ARC */
 
-		if (lfp->type == VLR_LU_TYPE_IMSI_ATTACH)
+		if (lfp->lu_type == VLR_LU_TYPE_IMSI_ATTACH)
 			lfp->vlr->ops.tx_mm_info(lfp->msc_conn_ref);
 
 		lu_fsm_success(fi);
@@ -1529,7 +1533,7 @@ vlr_loc_update(struct osmo_fsm_inst *parent,
 	lfp->vlr = vlr;
 	lfp->msc_conn_ref = msc_conn_ref;
 	lfp->tmsi = tmsi;
-	lfp->type = type;
+	lfp->lu_type = type;
 	lfp->old_lai = *old_lai;
 	lfp->new_lai = *new_lai;
 	lfp->lu_by_tmsi = true;

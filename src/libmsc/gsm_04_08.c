@@ -1474,14 +1474,14 @@ static int msc_vlr_tx_id_req(void *msc_conn_ref, uint8_t mi_type)
 }
 
 /* VLR asks us to transmit a Location Update Accept */
-static int msc_vlr_tx_lu_acc(void *msc_conn_ref, uint32_t send_tmsi)
+static int msc_vlr_tx_lu_acc(void *msc_conn_ref, uint32_t send_tmsi, enum vlr_lu_type lu_type)
 {
 	struct msc_a *msc_a = msc_conn_ref;
 	return gsm0408_loc_upd_acc(msc_a, send_tmsi);
 }
 
 /* VLR asks us to transmit a Location Update Reject */
-static int msc_vlr_tx_lu_rej(void *msc_conn_ref, enum gsm48_reject_value cause)
+static int msc_vlr_tx_lu_rej(void *msc_conn_ref, enum gsm48_reject_value cause, enum vlr_lu_type lu_type)
 {
 	struct msc_a *msc_a = msc_conn_ref;
 	return gsm0408_loc_upd_rej(msc_a, cause);
