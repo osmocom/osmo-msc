@@ -107,20 +107,20 @@ void gsm_network_set_mncc_sock_path(struct gsm_network *net, const char *mncc_so
 /* Allocate net->vlr so that the VTY may configure the VLR's data structures */
 int msc_vlr_alloc(struct gsm_network *net)
 {
-       net->vlr = vlr_alloc(net, &msc_vlr_ops);
-       if (!net->vlr)
-               return -ENOMEM;
-       net->vlr->user_ctx = net;
-       return 0;
+	net->vlr = vlr_alloc(net, &msc_vlr_ops);
+	if (!net->vlr)
+		return -ENOMEM;
+	net->vlr->user_ctx = net;
+	return 0;
 }
 
 /* Launch the VLR, i.e. its GSUP connection */
 int msc_vlr_start(struct gsm_network *net)
 {
-       OSMO_ASSERT(net->vlr);
-       OSMO_ASSERT(net->gcm);
+	OSMO_ASSERT(net->vlr);
+	OSMO_ASSERT(net->gcm);
 
-       return vlr_start(net->vlr, net->gcm);
+	return vlr_start(net->vlr, net->gcm);
 }
 
 int msc_gsup_client_start(struct gsm_network *net)
