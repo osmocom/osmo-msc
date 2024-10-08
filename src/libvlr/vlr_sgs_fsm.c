@@ -355,7 +355,7 @@ static struct osmo_fsm sgs_ue_fsm = {
 		S(SGS_UE_E_RX_LU_FROM_A_IU_GS),
 	.allstate_action = sgs_ue_fsm_allstate,
 	.timer_cb = sgs_ue_fsm_timer_cb,
-	.log_subsys = DSGS,
+	.log_subsys = DLGLOBAL,
 	.event_names = sgs_ue_fsm_event_names,
 };
 
@@ -364,6 +364,12 @@ void vlr_sgs_fsm_init(void)
 {
 	if (osmo_fsm_find_by_name(sgs_ue_fsm.name) != &sgs_ue_fsm)
 		OSMO_ASSERT(osmo_fsm_register(&sgs_ue_fsm) == 0);
+}
+
+/*! Set the log level of the fsm */
+void vlr_sgs_fsm_set_log_subsys(int log_level)
+{
+	sgs_ue_fsm.log_subsys = log_level;
 }
 
 /*! Crate SGs FSM in struct vlr_subscr.

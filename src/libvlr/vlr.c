@@ -454,7 +454,7 @@ void vlr_subscr_free(struct vlr_subscr *vsub)
 {
 	llist_del(&vsub->list);
 	vlr_stat_item_dec(vsub->vlr, VLR_STAT_SUBSCRIBER_COUNT);
-	DEBUGP(DVLR, "freeing VLR subscr %s (max total use count was %d)\n", vlr_subscr_name(vsub),
+	LOGVSUBP(LOGL_DEBUG, vsub, "freeing VLR subscr (max total use count was %d)\n",
 	       vsub->max_total_use_count);
 
 	/* Make sure SGs timer Ts5 is removed */
@@ -478,7 +478,7 @@ int vlr_subscr_alloc_tmsi(struct vlr_subscr *vsub)
 	for (tried = 0; tried < 100; tried++) {
 		rc = osmo_get_rand_id((uint8_t *) &tmsi, sizeof(tmsi));
 		if (rc < 0) {
-			LOGP(DVLR, LOGL_ERROR, "osmo_get_rand_id() failed: %s\n", strerror(-rc));
+			LOGVLR(LOGL_ERROR, "osmo_get_rand_id() failed: %s\n", strerror(-rc));
 			return rc;
 		}
 
@@ -486,7 +486,7 @@ int vlr_subscr_alloc_tmsi(struct vlr_subscr *vsub)
 			int16_t nri_v;
 			osmo_tmsi_nri_v_limit_by_ranges(&tmsi, vlr->cfg.nri_ranges, vlr->cfg.nri_bitlen);
 			osmo_tmsi_nri_v_get(&nri_v, tmsi, vlr->cfg.nri_bitlen);
-			LOGP(DVLR, LOGL_DEBUG, "New NRI from range [%s] = 0x%x --> TMSI 0x%08x\n",
+			LOGVLR(LOGL_DEBUG, "New NRI from range [%s] = 0x%x --> TMSI 0x%08x\n",
 			     osmo_nri_ranges_to_str_c(OTC_SELECT, vlr->cfg.nri_ranges), nri_v, tmsi);
 		}
 
@@ -515,8 +515,8 @@ int vlr_subscr_alloc_tmsi(struct vlr_subscr *vsub)
 		return 0;
 	}
 
-	LOGP(DVLR, LOGL_ERROR, "subscr %s: unable to generate valid TMSI"
-	     " after %d tries\n", vlr_subscr_name(vsub), tried);
+	LOGVSUBP(LOGL_ERROR, vsub, "Unable to generate valid TMSI"
+	     " after %d tries\n", tried);
 	return -1;
 }
 
@@ -544,7 +544,7 @@ struct vlr_subscr *_vlr_subscr_find_or_create_by_imsi(struct vlr_instance *vlr,
 		return NULL;
 	vlr_subscr_get_src(vsub, use, file, line);
 	vlr_subscr_set_imsi(vsub, imsi);
-	LOGP(DVLR, LOGL_INFO, "New subscr, IMSI: %s\n", vsub->imsi);
+	LOGVLR(LOGL_INFO, "New subscr, IMSI: %s\n", vsub->imsi);
 	if (created)
 		*created = true;
 	return vsub;
@@ -574,7 +574,7 @@ struct vlr_subscr *_vlr_subscr_find_or_create_by_tmsi(struct vlr_instance *vlr,
 		return NULL;
 	vlr_subscr_get_src(vsub, use, file, line);
 	vsub->tmsi = tmsi;
-	LOGP(DVLR, LOGL_INFO, "New subscr, TMSI: 0x%08x\n", vsub->tmsi);
+	LOGVLR(LOGL_INFO, "New subscr, TMSI: 0x%08x\n", vsub->tmsi);
 	if (created)
 		*created = true;
 	return vsub;
@@ -585,10 +585,9 @@ static void dedup_vsub(struct vlr_subscr *exists, struct vlr_subscr *vsub)
 	struct vlr_instance *vlr = exists->vlr;
 	int i;
 	int j;
-	LOGP(DVLR, LOGL_NOTICE,
-	     "There is an existing subscriber for IMSI %s used by %s, replacing with new VLR subscr: %s used by %s\n",
+	LOGVSUBP(LOGL_NOTICE, vsub,
+	     "There is an existing subscriber for IMSI %s used by %s, replacing with this VLR subscr, used by %s\n",
 	     exists->imsi, osmo_use_count_to_str_c(OTC_SELECT, &exists->use_count),
-	     vlr_subscr_name(vsub),
 	     osmo_use_count_to_str_c(OTC_SELECT, &vsub->use_count));
 
 	/* Take over some state from the previous vsub */
@@ -638,13 +637,13 @@ void vlr_subscr_set_imsi(struct vlr_subscr *vsub, const char *imsi)
 
 	/* Set the IMSI on the new subscriber, here. */
 	if (OSMO_STRLCPY_ARRAY(vsub->imsi, imsi) >= sizeof(vsub->imsi)) {
-		LOGP(DVLR, LOGL_NOTICE, "IMSI was truncated: full IMSI=%s, truncated IMSI=%s\n",
+		LOGVLR(LOGL_NOTICE, "IMSI was truncated: full IMSI=%s, truncated IMSI=%s\n",
 		       imsi, vsub->imsi);
 		/* XXX Set truncated IMSI anyway, we currently cannot return an error from here. */
 	}
 
 	vsub->id = atoll(vsub->imsi);
-	DEBUGP(DVLR, "set IMSI on subscriber; IMSI=%s id=%llu\n",
+	LOGVLR(LOGL_DEBUG, "set IMSI on subscriber; IMSI=%s id=%llu\n",
 	       vsub->imsi, vsub->id);
 }
 
@@ -653,7 +652,7 @@ void vlr_subscr_set_imei(struct vlr_subscr *vsub, const char *imei)
 	if (!vsub)
 		return;
 	OSMO_STRLCPY_ARRAY(vsub->imei, imei);
-	DEBUGP(DVLR, "set IMEI on subscriber; IMSI=%s IMEI=%s\n",
+	LOGVLR(LOGL_DEBUG, "set IMEI on subscriber; IMSI=%s IMEI=%s\n",
 	       vsub->imsi, vsub->imei);
 }
 
@@ -662,7 +661,7 @@ void vlr_subscr_set_imeisv(struct vlr_subscr *vsub, const char *imeisv)
 	if (!vsub)
 		return;
 	OSMO_STRLCPY_ARRAY(vsub->imeisv, imeisv);
-	DEBUGP(DVLR, "set IMEISV on subscriber; IMSI=%s IMEISV=%s\n",
+	LOGVLR(LOGL_DEBUG, "set IMEISV on subscriber; IMSI=%s IMEISV=%s\n",
 	       vsub->imsi, vsub->imeisv);
 
 	/* Copy IMEISV to IMEI (additional SV digits get cut off) */
@@ -675,7 +674,7 @@ void vlr_subscr_set_msisdn(struct vlr_subscr *vsub, const char *msisdn)
 	if (!vsub)
 		return;
 	OSMO_STRLCPY_ARRAY(vsub->msisdn, msisdn);
-	DEBUGP(DVLR, "set MSISDN on subscriber; IMSI=%s MSISDN=%s\n",
+	LOGVLR(LOGL_DEBUG, "set MSISDN on subscriber; IMSI=%s MSISDN=%s\n",
 	       vsub->imsi, vsub->msisdn);
 }
 
@@ -690,7 +689,7 @@ void vlr_subscr_set_last_used_eutran_plmn_id(struct vlr_subscr *vsub,
 	} else {
 		vsub->sgs.last_eutran_plmn_present = false;
 	}
-	DEBUGP(DVLR, "set Last E-UTRAN PLMN ID on subscriber: %s\n",
+	LOGVLR(LOGL_DEBUG, "set Last E-UTRAN PLMN ID on subscriber: %s\n",
 	       vsub->sgs.last_eutran_plmn_present ?
 	         osmo_plmn_name(&vsub->sgs.last_eutran_plmn) :
 		 "(none)");
@@ -723,7 +722,7 @@ bool vlr_subscr_matches_imei(struct vlr_subscr *vsub, const char *imei)
 int vlr_subscr_changed(struct vlr_subscr *vsub)
 {
 	/* FIXME */
-	LOGP(DVLR, LOGL_ERROR, "Not implemented: %s\n", __func__);
+	LOGVLR(LOGL_ERROR, "Not implemented: %s\n", __func__);
 	return 0;
 }
 
@@ -735,8 +734,8 @@ void vlr_subscr_enable_expire_lu(struct vlr_subscr *vsub)
 	if (osmo_clock_gettime(CLOCK_MONOTONIC, &now) == 0) {
 		vsub->expire_lu = now.tv_sec + vlr_timer_secs(vsub->vlr, 3212);
 	} else {
-		LOGP(DVLR, LOGL_ERROR,
-		     "%s: Could not enable Location Update expiry: unable to read current time\n", vlr_subscr_name(vsub));
+		LOGVSUBP(LOGL_ERROR, vsub,
+		     "Could not enable Location Update expiry: unable to read current time\n");
 		/* Disable LU expiry for this subscriber. This subscriber will only be freed after an explicit IMSI detach. */
 		vsub->expire_lu = VLR_SUBSCRIBER_NO_EXPIRATION;
 	}
@@ -757,7 +756,7 @@ void vlr_subscr_expire_lu(void *data)
 		goto done;
 
 	if (osmo_clock_gettime(CLOCK_MONOTONIC, &now) != 0) {
-		LOGP(DVLR, LOGL_ERROR, "Skipping Location Update expiry: Could not read current time\n");
+		LOGVLR(LOGL_ERROR, "Skipping Location Update expiry: Could not read current time\n");
 		goto done;
 	}
 
@@ -765,7 +764,7 @@ void vlr_subscr_expire_lu(void *data)
 		if (vsub->expire_lu == VLR_SUBSCRIBER_NO_EXPIRATION || vsub->expire_lu > now.tv_sec)
 			continue;
 
-		LOGP(DVLR, LOGL_DEBUG, "%s: Location Update expired\n", vlr_subscr_name(vsub));
+		LOGVLR(LOGL_DEBUG, "%s: Location Update expired\n", vlr_subscr_name(vsub));
 		vlr_rate_ctr_inc(vlr, VLR_CTR_DETACH_BY_T3212);
 		vlr_subscr_detach(vsub);
 	}
@@ -843,20 +842,20 @@ static int vlr_rx_gsup_unknown_imsi(struct vlr_instance *vlr,
 				    const struct osmo_gsup_message *gsup_msg)
 {
 	if (OSMO_GSUP_IS_MSGT_REQUEST(gsup_msg->message_type)) {
-		LOGP(DVLR, LOGL_NOTICE,
+		LOGVLR(LOGL_NOTICE,
 		     "Unknown IMSI %s, discarding GSUP request "
 		     "of type 0x%02x\n",
 		     gsup_msg->imsi, gsup_msg->message_type);
 		gsup_client_mux_tx_error_reply(vlr->gcm, gsup_msg, GMM_CAUSE_IMSI_UNKNOWN);
 	} else if (OSMO_GSUP_IS_MSGT_ERROR(gsup_msg->message_type)) {
-		LOGP(DVLR, LOGL_NOTICE,
+		LOGVLR(LOGL_NOTICE,
 		     "Unknown IMSI %s, discarding GSUP error "
 		     "of type 0x%02x, cause '%s' (%d)\n",
 		     gsup_msg->imsi, gsup_msg->message_type,
 		     get_value_string(gsm48_gmm_cause_names, gsup_msg->cause),
 		     gsup_msg->cause);
 	} else {
-		LOGP(DVLR, LOGL_NOTICE,
+		LOGVLR(LOGL_NOTICE,
 		     "Unknown IMSI %s, discarding GSUP response "
 		     "of type 0x%02x\n",
 		     gsup_msg->imsi, gsup_msg->message_type);
@@ -1028,13 +1027,13 @@ static void vlr_subscr_gsup_insert_data(struct vlr_subscr *vsub,
 		gsm48_decode_bcd_number2(vsub->msisdn, sizeof(vsub->msisdn),
 					 gsup_msg->msisdn_enc,
 					 gsup_msg->msisdn_enc_len, 0);
-		LOGP(DVLR, LOGL_DEBUG, "IMSI:%s has MSISDN:%s\n",
+		LOGVLR(LOGL_DEBUG, "IMSI:%s has MSISDN:%s\n",
 		     vsub->imsi, vsub->msisdn);
 	}
 
 	if (gsup_msg->hlr_enc) {
 		if (gsup_msg->hlr_enc_len > sizeof(vsub->hlr.buf)) {
-			LOGP(DVLR, LOGL_ERROR, "HLR-Number too long (%zu)\n",
+			LOGVLR(LOGL_ERROR, "HLR-Number too long (%zu)\n",
 				gsup_msg->hlr_enc_len);
 			vsub->hlr.len = 0;
 		} else {
@@ -1047,7 +1046,7 @@ static void vlr_subscr_gsup_insert_data(struct vlr_subscr *vsub,
 	if (gsup_msg->pdp_info_compl) {
 		rc = vlr_subscr_pdp_data_clear(vsub);
 		if (rc > 0)
-			LOGP(DVLR, LOGL_INFO, "Cleared existing PDP info\n");
+			LOGVLR(LOGL_INFO, "Cleared existing PDP info\n");
 	}
 
 	for (idx = 0; idx < gsup_msg->num_pdp_infos; idx++) {
@@ -1688,4 +1687,27 @@ void log_set_filter_vlr_subscr(struct log_target *target,
 		*fsub = vlr_subscr;
 	} else
 		target->filter_map &= ~(1 << LOG_FLT_VLR_SUBSCR);
+}
+
+int g_vlr_log_cat[_OSMO_VLR_LOGC_MAX];
+
+void osmo_vlr_set_log_cat(enum osmo_vlr_cat logc, int logc_num)
+{
+	if (logc < OSMO_VLR_LOGC_VLR || logc >= _OSMO_VLR_LOGC_MAX)
+		return;
+
+	g_vlr_log_cat[logc] = logc_num;
+
+	switch (logc) {
+	case OSMO_VLR_LOGC_VLR:
+		vlr_auth_fsm.log_subsys = logc_num;
+		vlr_parq_fsm_set_log_subsys(logc_num);
+		vlr_lu_fsm_set_log_subsys(logc_num);
+		break;
+	case OSMO_VLR_LOGC_SGS:
+		vlr_sgs_fsm_set_log_subsys(logc_num);
+		break;
+	default:
+		break;
+	}
 }

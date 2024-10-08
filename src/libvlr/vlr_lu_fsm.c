@@ -150,7 +150,7 @@ static struct osmo_fsm upd_hlr_vlr_fsm = {
 	.num_states = ARRAY_SIZE(upd_hlr_vlr_states),
 	.allstate_event_mask = 0,
 	.allstate_action = NULL,
-	.log_subsys = DVLR,
+	.log_subsys = DLGLOBAL,
 	.event_names = upd_hlr_vlr_event_names,
 };
 
@@ -262,7 +262,7 @@ static struct osmo_fsm sub_pres_vlr_fsm = {
 	.num_states = ARRAY_SIZE(sub_pres_vlr_states),
 	.allstate_event_mask = 0,
 	.allstate_action = NULL,
-	.log_subsys = DVLR,
+	.log_subsys = DLGLOBAL,
 	.event_names = sub_pres_vlr_event_names,
 };
 
@@ -601,7 +601,7 @@ static struct osmo_fsm lu_compl_vlr_fsm = {
 	.num_states = ARRAY_SIZE(lu_compl_vlr_states),
 	.allstate_event_mask = 0,
 	.allstate_action = NULL,
-	.log_subsys = DVLR,
+	.log_subsys = DLGLOBAL,
 	.event_names = lu_compl_vlr_event_names,
 };
 
@@ -1492,7 +1492,7 @@ static struct osmo_fsm vlr_lu_fsm = {
 	.num_states = ARRAY_SIZE(vlr_lu_fsm_states),
 	.allstate_event_mask = 0,
 	.allstate_action = NULL,
-	.log_subsys = DVLR,
+	.log_subsys = DLGLOBAL,
 	.event_names = fsm_lu_event_names,
 	.cleanup = fsm_lu_cleanup,
 };
@@ -1594,4 +1594,12 @@ void vlr_lu_fsm_init(void)
 	OSMO_ASSERT(osmo_fsm_register(&upd_hlr_vlr_fsm) == 0);
 	OSMO_ASSERT(osmo_fsm_register(&sub_pres_vlr_fsm) == 0);
 	OSMO_ASSERT(osmo_fsm_register(&lu_compl_vlr_fsm) == 0);
+}
+
+void vlr_lu_fsm_set_log_subsys(int log_subsys)
+{
+	vlr_lu_fsm.log_subsys = log_subsys;
+	upd_hlr_vlr_fsm.log_subsys = log_subsys;
+	sub_pres_vlr_fsm.log_subsys = log_subsys;
+	lu_compl_vlr_fsm.log_subsys = log_subsys;
 }

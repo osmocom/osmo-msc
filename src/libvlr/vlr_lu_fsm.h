@@ -17,3 +17,4 @@ enum vlr_lu_state {
 };
 
 void vlr_lu_fsm_init(void);
+void vlr_lu_fsm_set_log_subsys(int log_subsys);
