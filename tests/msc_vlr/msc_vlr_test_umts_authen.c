@@ -335,6 +335,7 @@ static void _test_umts_authen(enum osmo_rat_type via_ran)
 
 	BTW("subscriber detaches");
 	expect_release_clear(via_ran);
+	gsup_expect_tx("0c010809710000000156f0" CN_DOMAIN VLR_TO_HLR);
 	ms_sends_msg("050130"
 		     "089910070000106005" /* IMSI */);
 	ASSERT_RELEASE_CLEAR(via_ran);

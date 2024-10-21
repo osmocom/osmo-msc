@@ -1496,8 +1496,13 @@ bool vlr_subscr_expire(struct vlr_subscr *vsub)
 
 static int vlr_subscr_detach(struct vlr_subscr *vsub)
 {
+	int rc = 0;
+
 	/* paranoia: should any LU or PARQ FSMs still be running, stop them. */
 	vlr_subscr_cancel_attach_fsm(vsub, OSMO_FSM_TERM_ERROR, GSM48_REJECT_CONGESTION);
+
+	if (!vsub->imsi_detached_flag)
+		rc = vlr_subscr_purge(vsub);
 
 	vsub->imsi_detached_flag = true;
 	vsub->expire_lu = VLR_SUBSCRIBER_NO_EXPIRATION;
@@ -1507,7 +1512,7 @@ static int vlr_subscr_detach(struct vlr_subscr *vsub)
 
 	vlr_subscr_expire(vsub);
 
-	return 0;
+	return rc;
 }
 
 /* See TS 23.012 version 9.10.0 4.3.2.1 "Process Detach_IMSI_VLR" */

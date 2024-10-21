@@ -149,6 +149,7 @@ static void test_no_authen()
 
 	BTW("subscriber detaches");
 	expect_bssap_clear();
+	gsup_expect_tx("0c010809710000004026f0" CN_DOMAIN VLR_TO_HLR);
 	ms_sends_msg("050130089910070000006402");
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
@@ -367,6 +368,7 @@ static void test_no_authen_tmsi()
 
 	BTW("subscriber detaches, using new TMSI");
 	expect_bssap_clear();
+	gsup_expect_tx("0c010809710000004026f0" CN_DOMAIN VLR_TO_HLR);
 	ms_sends_msg("050130" "05f4" "07060504");
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
@@ -441,6 +443,7 @@ static void test_no_authen_imei()
 
 	BTW("subscriber detaches");
 	expect_bssap_clear();
+	gsup_expect_tx("0c010809710000004026f0" CN_DOMAIN VLR_TO_HLR);
 	ms_sends_msg("050130089910070000006402");
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
@@ -524,6 +527,7 @@ static void test_no_authen_tmsi_imei()
 
 	BTW("subscriber detaches");
 	expect_bssap_clear();
+	gsup_expect_tx("0c010809710000004026f0" CN_DOMAIN VLR_TO_HLR);
 	ms_sends_msg("050130089910070000006402");
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
@@ -587,6 +591,7 @@ static void test_no_authen_imeisv()
 
 	BTW("subscriber detaches");
 	expect_bssap_clear();
+	gsup_expect_tx("0c010809710000004026f0" CN_DOMAIN VLR_TO_HLR);
 	ms_sends_msg("050130089910070000006402");
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
@@ -658,6 +663,7 @@ static void test_no_authen_imeisv_imei()
 
 	BTW("subscriber detaches");
 	expect_bssap_clear();
+	gsup_expect_tx("0c010809710000004026f0" CN_DOMAIN VLR_TO_HLR);
 	ms_sends_msg("050130089910070000006402");
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
@@ -799,6 +805,7 @@ static void test_no_authen_imeisv_tmsi()
 
 	BTW("subscriber detaches, using new TMSI");
 	expect_bssap_clear();
+	gsup_expect_tx("0c010809710000004026f0" CN_DOMAIN VLR_TO_HLR);
 	ms_sends_msg("050130" "05f4" "07060504");
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
@@ -884,6 +891,7 @@ static void test_no_authen_imeisv_tmsi_imei()
 
 	BTW("subscriber detaches");
 	expect_bssap_clear();
+	gsup_expect_tx("0c010809710000004026f0" CN_DOMAIN VLR_TO_HLR);
 	ms_sends_msg("050130089910070000006402");
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
@@ -939,6 +947,9 @@ static void test_no_authen_subscr_expire()
 	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi, __func__);
 	OSMO_ASSERT(vsub);
 	vlr_subscr_put(vsub, __func__);
+
+	/* expect a HLR Purge MS */
+	gsup_expect_tx("0c010809710000004026f0" CN_DOMAIN VLR_TO_HLR);
 
 	/* Let T3212 (periodic Location update timer) expire */
 	fake_time_passes(vlr_timer_secs(net->vlr, 3212, 3312) + 60 * 4, 0);

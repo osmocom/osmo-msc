@@ -414,6 +414,7 @@ DMM IMSI DETACH for IMSI-901700000004620:MSISDN-46071
 DVLR VLR subscr IMSI-901700000004620:MSISDN-46071 + active-conn: now used by 3 (attached,gsm48_rx_mm_imsi_detach_ind,active-conn)
 DVLR VLR subscr IMSI-901700000004620:MSISDN-46071 + vlr_subscr_cancel_attach_fsm: now used by 4 (attached,gsm48_rx_mm_imsi_detach_ind,active-conn,vlr_subscr_cancel_attach_fsm)
 DVLR VLR subscr IMSI-901700000004620:MSISDN-46071 - vlr_subscr_cancel_attach_fsm: now used by 3 (attached,gsm48_rx_mm_imsi_detach_ind,active-conn)
+GSUP --> HLR: OSMO_GSUP_MSGT_PURGE_MS_REQUEST: 0c010809710000004026f02801020a0101
 DVLR set Last E-UTRAN PLMN ID on subscriber: (none)
 DVLR VLR subscr IMSI-901700000004620:MSISDN-46071 - attached: now used by 2 (gsm48_rx_mm_imsi_detach_ind,active-conn)
 DVLR VLR subscr IMSI-901700000004620:MSISDN-46071 - gsm48_rx_mm_imsi_detach_ind: now used by 1 (active-conn)
@@ -1105,6 +1106,7 @@ DMM IMSI DETACH for IMSI-901700000004620:MSISDN-46071:TMSI-0x07060504
 DVLR VLR subscr IMSI-901700000004620:MSISDN-46071:TMSI-0x07060504 + active-conn: now used by 3 (attached,gsm48_rx_mm_imsi_detach_ind,active-conn)
 DVLR VLR subscr IMSI-901700000004620:MSISDN-46071:TMSI-0x07060504 + vlr_subscr_cancel_attach_fsm: now used by 4 (attached,gsm48_rx_mm_imsi_detach_ind,active-conn,vlr_subscr_cancel_attach_fsm)
 DVLR VLR subscr IMSI-901700000004620:MSISDN-46071:TMSI-0x07060504 - vlr_subscr_cancel_attach_fsm: now used by 3 (attached,gsm48_rx_mm_imsi_detach_ind,active-conn)
+GSUP --> HLR: OSMO_GSUP_MSGT_PURGE_MS_REQUEST: 0c010809710000004026f02801020a0101
 DVLR set Last E-UTRAN PLMN ID on subscriber: (none)
 DVLR VLR subscr IMSI-901700000004620:MSISDN-46071:TMSI-0x07060504 - attached: now used by 2 (gsm48_rx_mm_imsi_detach_ind,active-conn)
 DVLR VLR subscr IMSI-901700000004620:MSISDN-46071:TMSI-0x07060504 - gsm48_rx_mm_imsi_detach_ind: now used by 1 (active-conn)
@@ -1357,6 +1359,7 @@ DMM IMSI DETACH for IMSI-901700000004620:MSISDN-46071
 DVLR VLR subscr IMSI-901700000004620:MSISDN-46071 + active-conn: now used by 3 (attached,gsm48_rx_mm_imsi_detach_ind,active-conn)
 DVLR VLR subscr IMSI-901700000004620:MSISDN-46071 + vlr_subscr_cancel_attach_fsm: now used by 4 (attached,gsm48_rx_mm_imsi_detach_ind,active-conn,vlr_subscr_cancel_attach_fsm)
 DVLR VLR subscr IMSI-901700000004620:MSISDN-46071 - vlr_subscr_cancel_attach_fsm: now used by 3 (attached,gsm48_rx_mm_imsi_detach_ind,active-conn)
+GSUP --> HLR: OSMO_GSUP_MSGT_PURGE_MS_REQUEST: 0c010809710000004026f02801020a0101
 DVLR set Last E-UTRAN PLMN ID on subscriber: (none)
 DVLR VLR subscr IMSI-901700000004620:MSISDN-46071 - attached: now used by 2 (gsm48_rx_mm_imsi_detach_ind,active-conn)
 DVLR VLR subscr IMSI-901700000004620:MSISDN-46071 - gsm48_rx_mm_imsi_detach_ind: now used by 1 (active-conn)
@@ -1644,6 +1647,7 @@ DMM IMSI DETACH for IMSI-901700000004620:MSISDN-46071:TMSI-0x03020100
 DVLR VLR subscr IMSI-901700000004620:MSISDN-46071:TMSI-0x03020100 + active-conn: now used by 3 (attached,gsm48_rx_mm_imsi_detach_ind,active-conn)
 DVLR VLR subscr IMSI-901700000004620:MSISDN-46071:TMSI-0x03020100 + vlr_subscr_cancel_attach_fsm: now used by 4 (attached,gsm48_rx_mm_imsi_detach_ind,active-conn,vlr_subscr_cancel_attach_fsm)
 DVLR VLR subscr IMSI-901700000004620:MSISDN-46071:TMSI-0x03020100 - vlr_subscr_cancel_attach_fsm: now used by 3 (attached,gsm48_rx_mm_imsi_detach_ind,active-conn)
+GSUP --> HLR: OSMO_GSUP_MSGT_PURGE_MS_REQUEST: 0c010809710000004026f02801020a0101
 DVLR set Last E-UTRAN PLMN ID on subscriber: (none)
 DVLR VLR subscr IMSI-901700000004620:MSISDN-46071:TMSI-0x03020100 - attached: now used by 2 (gsm48_rx_mm_imsi_detach_ind,active-conn)
 DVLR VLR subscr IMSI-901700000004620:MSISDN-46071:TMSI-0x03020100 - gsm48_rx_mm_imsi_detach_ind: now used by 1 (active-conn)
@@ -1866,6 +1870,7 @@ DMM IMSI DETACH for IMSI-901700000004620:MSISDN-46071
 DVLR VLR subscr IMSI-901700000004620:MSISDN-46071 + active-conn: now used by 3 (attached,gsm48_rx_mm_imsi_detach_ind,active-conn)
 DVLR VLR subscr IMSI-901700000004620:MSISDN-46071 + vlr_subscr_cancel_attach_fsm: now used by 4 (attached,gsm48_rx_mm_imsi_detach_ind,active-conn,vlr_subscr_cancel_attach_fsm)
 DVLR VLR subscr IMSI-901700000004620:MSISDN-46071 - vlr_subscr_cancel_attach_fsm: now used by 3 (attached,gsm48_rx_mm_imsi_detach_ind,active-conn)
+GSUP --> HLR: OSMO_GSUP_MSGT_PURGE_MS_REQUEST: 0c010809710000004026f02801020a0101
 DVLR set Last E-UTRAN PLMN ID on subscriber: (none)
 DVLR VLR subscr IMSI-901700000004620:MSISDN-46071 - attached: now used by 2 (gsm48_rx_mm_imsi_detach_ind,active-conn)
 DVLR VLR subscr IMSI-901700000004620:MSISDN-46071 - gsm48_rx_mm_imsi_detach_ind: now used by 1 (active-conn)
@@ -2099,6 +2104,7 @@ DMM IMSI DETACH for IMSI-901700000004620:MSISDN-46071
 DVLR VLR subscr IMSI-901700000004620:MSISDN-46071 + active-conn: now used by 3 (attached,gsm48_rx_mm_imsi_detach_ind,active-conn)
 DVLR VLR subscr IMSI-901700000004620:MSISDN-46071 + vlr_subscr_cancel_attach_fsm: now used by 4 (attached,gsm48_rx_mm_imsi_detach_ind,active-conn,vlr_subscr_cancel_attach_fsm)
 DVLR VLR subscr IMSI-901700000004620:MSISDN-46071 - vlr_subscr_cancel_attach_fsm: now used by 3 (attached,gsm48_rx_mm_imsi_detach_ind,active-conn)
+GSUP --> HLR: OSMO_GSUP_MSGT_PURGE_MS_REQUEST: 0c010809710000004026f02801020a0101
 DVLR set Last E-UTRAN PLMN ID on subscriber: (none)
 DVLR VLR subscr IMSI-901700000004620:MSISDN-46071 - attached: now used by 2 (gsm48_rx_mm_imsi_detach_ind,active-conn)
 DVLR VLR subscr IMSI-901700000004620:MSISDN-46071 - gsm48_rx_mm_imsi_detach_ind: now used by 1 (active-conn)
@@ -2569,6 +2575,7 @@ DMM IMSI DETACH for IMSI-901700000004620:MSISDN-46071:TMSI-0x07060504
 DVLR VLR subscr IMSI-901700000004620:MSISDN-46071:TMSI-0x07060504 + active-conn: now used by 3 (attached,gsm48_rx_mm_imsi_detach_ind,active-conn)
 DVLR VLR subscr IMSI-901700000004620:MSISDN-46071:TMSI-0x07060504 + vlr_subscr_cancel_attach_fsm: now used by 4 (attached,gsm48_rx_mm_imsi_detach_ind,active-conn,vlr_subscr_cancel_attach_fsm)
 DVLR VLR subscr IMSI-901700000004620:MSISDN-46071:TMSI-0x07060504 - vlr_subscr_cancel_attach_fsm: now used by 3 (attached,gsm48_rx_mm_imsi_detach_ind,active-conn)
+GSUP --> HLR: OSMO_GSUP_MSGT_PURGE_MS_REQUEST: 0c010809710000004026f02801020a0101
 DVLR set Last E-UTRAN PLMN ID on subscriber: (none)
 DVLR VLR subscr IMSI-901700000004620:MSISDN-46071:TMSI-0x07060504 - attached: now used by 2 (gsm48_rx_mm_imsi_detach_ind,active-conn)
 DVLR VLR subscr IMSI-901700000004620:MSISDN-46071:TMSI-0x07060504 - gsm48_rx_mm_imsi_detach_ind: now used by 1 (active-conn)
@@ -2839,6 +2846,7 @@ DMM IMSI DETACH for IMSI-901700000004620:MSISDN-46071:TMSI-0x03020100
 DVLR VLR subscr IMSI-901700000004620:MSISDN-46071:TMSI-0x03020100 + active-conn: now used by 3 (attached,gsm48_rx_mm_imsi_detach_ind,active-conn)
 DVLR VLR subscr IMSI-901700000004620:MSISDN-46071:TMSI-0x03020100 + vlr_subscr_cancel_attach_fsm: now used by 4 (attached,gsm48_rx_mm_imsi_detach_ind,active-conn,vlr_subscr_cancel_attach_fsm)
 DVLR VLR subscr IMSI-901700000004620:MSISDN-46071:TMSI-0x03020100 - vlr_subscr_cancel_attach_fsm: now used by 3 (attached,gsm48_rx_mm_imsi_detach_ind,active-conn)
+GSUP --> HLR: OSMO_GSUP_MSGT_PURGE_MS_REQUEST: 0c010809710000004026f02801020a0101
 DVLR set Last E-UTRAN PLMN ID on subscriber: (none)
 DVLR VLR subscr IMSI-901700000004620:MSISDN-46071:TMSI-0x03020100 - attached: now used by 2 (gsm48_rx_mm_imsi_detach_ind,active-conn)
 DVLR VLR subscr IMSI-901700000004620:MSISDN-46071:TMSI-0x03020100 - gsm48_rx_mm_imsi_detach_ind: now used by 1 (active-conn)
@@ -3009,6 +3017,7 @@ DVLR VLR subscr IMSI-901700000004620:MSISDN-46071 - test_no_authen_subscr_expire
 DVLR IMSI-901700000004620:MSISDN-46071: Location Update expired
 DVLR VLR subscr IMSI-901700000004620:MSISDN-46071 + vlr_subscr_cancel_attach_fsm: now used by 2 (attached,vlr_subscr_cancel_attach_fsm)
 DVLR VLR subscr IMSI-901700000004620:MSISDN-46071 - vlr_subscr_cancel_attach_fsm: now used by 1 (attached)
+GSUP --> HLR: OSMO_GSUP_MSGT_PURGE_MS_REQUEST: 0c010809710000004026f02801020a0101
 DVLR set Last E-UTRAN PLMN ID on subscriber: (none)
 DVLR VLR subscr IMSI-901700000004620:MSISDN-46071 - attached: now used by 0 (-)
 DVLR SUBSCR(IMSI-901700000004620:MSISDN-46071) freeing VLR subscr (max total use count was 5)
