@@ -16,5 +16,5 @@ enum vlr_lu_state {
 	VLR_ULA_S_DONE
 };
 
-void vlr_lu_fsm_init(void);
+void vlr_lu_fsm_init(bool is_ps);
 void vlr_lu_fsm_set_log_subsys(int log_subsys);

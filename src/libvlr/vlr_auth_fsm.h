@@ -37,6 +37,6 @@ struct osmo_fsm_inst *auth_fsm_start(struct vlr_subscr *vsub,
 				     bool is_r99,
 				     bool is_utran);
 
-void vlr_auth_fsm_init(void);
+void vlr_auth_fsm_init(bool is_ps);
 void vlr_auth_fsm_set_log_subsys(int log_level);
 bool auth_try_reuse_tuple(struct vlr_subscr *vsub, uint8_t key_seq);
