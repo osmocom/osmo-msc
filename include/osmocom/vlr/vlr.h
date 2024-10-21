@@ -251,7 +251,8 @@ struct vlr_ops {
 	 * with this msc_conn_ref */
 	int (*subscr_assoc)(void *msc_conn_ref, struct vlr_subscr *vsub);
 	/* notify MSC that the given subscriber is no longer valid */
-	void (*subscr_inval)(void *msc_conn_ref, struct vlr_subscr *vsub);
+	void (*subscr_inval)(void *msc_conn_ref, struct vlr_subscr *vsub,
+			     enum gsm48_reject_value cause, bool cancel_by_update);
 };
 
 /* An instance of the VLR codebase */

@@ -629,7 +629,7 @@ static void dedup_vsub(struct vlr_subscr *exists, struct vlr_subscr *vsub)
 			 exists->imsi);
 
 	if (vlr->ops.subscr_inval)
-		vlr->ops.subscr_inval(exists->msc_conn_ref, exists);
+		vlr->ops.subscr_inval(exists->msc_conn_ref, exists, 0, true);
 	vlr_subscr_free(exists);
 }
 
