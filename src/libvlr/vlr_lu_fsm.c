@@ -879,12 +879,20 @@ static void vlr_loc_upd_node_4(struct osmo_fsm_inst *fi)
 		/* FIXME: Delete subscriber record */
 		/* LU REJ: Roaming not allowed */
 		lu_fsm_failure(fi, GSM48_REJECT_ROAMING_NOT_ALLOWED);
-	} else {
+		return;
+	}
+
+	if (lfp->lu_type == VLR_LU_TYPE_IMSI_ATTACH) {
 		/* Update_HLR_VLR */
 		osmo_fsm_inst_state_chg(fi, VLR_ULA_S_WAIT_HLR_UPD,
 					LU_TIMEOUT_LONG, 0);
 		lfp->upd_hlr_vlr_fsm =
 			upd_hlr_vlr_proc_start(fi, vsub, VLR_ULA_E_UPD_HLR_COMPL);
+	} else {
+		/* PERIODIC and REGULAR, as long we don't support multiple MSC with different Location Areas */
+		osmo_fsm_inst_state_chg(fi, VLR_ULA_S_WAIT_LU_COMPL,
+					LU_TIMEOUT_LONG, 0);
+		vlr_loc_upd_start_lu_compl_fsm(fi);
 	}
 }
 
