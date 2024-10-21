@@ -1572,7 +1572,7 @@ static int msc_vlr_subscr_assoc(void *msc_conn_ref,
 	return 0;
 }
 
-static void msc_vlr_subscr_inval(void *msc_conn_ref, struct vlr_subscr *vsub)
+static void msc_vlr_subscr_inval(void *msc_conn_ref, struct vlr_subscr *vsub, enum vlr_inval_reason reason)
 {
 	/* Search vsub backwards to make sure msc_conn_ref is a valid msc_a instance. */
 	struct msub *msub;

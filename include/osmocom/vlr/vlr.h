@@ -204,6 +204,13 @@ enum vlr_ciph {
 	VLR_CIPH_A5_3 = 3, /*< A5/3, 'new secure' encryption */
 };
 
+enum vlr_inval_reason {
+	VLR_INVAL_REASON_WITHDRAWN, /*< HLR cancel location, reason subscription withdrawn */
+	VLR_INVAL_REASON_UPDATE_LOCATION, /*< HLR cancel location, reason update location */
+	VLR_INVAL_REASON_LOCATION_EXPIRED, /*< Location Update timer ran out */
+	VLR_INVAL_REASON_DUPLICATE_SUBSCR, /*< A newer record of the same subscriber exists. This is the old entry. */
+};
+
 static inline uint8_t vlr_ciph_to_gsm0808_alg_id(enum vlr_ciph ciph)
 {
 	switch (ciph) {
@@ -250,8 +257,8 @@ struct vlr_ops {
 	/* notify MSC/SGSN that the given subscriber has been associated
 	 * with this msc_conn_ref */
 	int (*subscr_assoc)(void *msc_conn_ref, struct vlr_subscr *vsub);
-	/* notify MSC that the given subscriber is no longer valid */
-	void (*subscr_inval)(void *msc_conn_ref, struct vlr_subscr *vsub);
+	/* notify MSC that the given subscriber is no longer valid. */
+	void (*subscr_inval)(void *msc_conn_ref, struct vlr_subscr *vsub, enum vlr_inval_reason reason);
 };
 
 /* An instance of the VLR codebase */
