@@ -200,14 +200,28 @@ struct osmo_tdef msc_tdefs_vlr[] = {
 	{ /* terminator */ }
 };
 
+/* 3GPP TS 24.008, table 11.2 Mobility management timers (network-side) */
+struct osmo_tdef sgsn_tdefs_vlr[] = {
+	{ .T = 3312, .default_val = 60, .unit = OSMO_TDEF_M, .desc = "Subscriber expiration timeout" },
+	{ .T = 3350, .default_val = 6, .desc = "Attach/RAU Complete Reallocation procedure" },
+	{ .T = 3360, .default_val = 6, .desc = "Authentication procedure" },
+	{ .T = 3370, .default_val = 6, .desc = "Identification procedure" },
+	{ /* terminator */ }
+};
+
+struct osmo_tdef *vlr_tdefs;
+
 /* This is just a wrapper around the osmo_tdef API.
  * TODO: we should start using osmo_tdef_fsm_inst_state_chg() */
-unsigned long vlr_timer_secs(struct vlr_instance *vlr, int timer)
+unsigned long vlr_timer_secs(struct vlr_instance *vlr, int cs_timer, int ps_timer)
 {
 	/* NOTE: since we usually do not need more than one instance of the VLR,
 	 * and since libosmocore's osmo_tdef API does not (yet) support dynamic
 	 * configuration, we always use the global instance of msc_tdefs_vlr. */
-	return osmo_tdef_get(msc_tdefs_vlr, timer, OSMO_TDEF_S, 0);
+	if (vlr_is_cs(vlr))
+		return osmo_tdef_get(vlr_tdefs, cs_timer, OSMO_TDEF_S, 0);
+	else
+		return osmo_tdef_get(vlr_tdefs, ps_timer, OSMO_TDEF_S, 0);
 }
 
 /* return static buffer with printable name of VLR subscriber */
@@ -731,7 +745,7 @@ void vlr_subscr_enable_expire_lu(struct vlr_subscr *vsub)
 
 	/* Mark the subscriber as inactive if it stopped to do periodical location updates. */
 	if (osmo_clock_gettime(CLOCK_MONOTONIC, &now) == 0) {
-		vsub->expire_lu = now.tv_sec + vlr_timer_secs(vsub->vlr, 3212);
+		vsub->expire_lu = now.tv_sec + vlr_timer_secs(vsub->vlr, 3212, 3312);
 	} else {
 		LOGVSUBP(LOGL_ERROR, vsub,
 		     "Could not enable Location Update expiry: unable to read current time\n");
@@ -748,7 +762,7 @@ void vlr_subscr_expire_lu(void *data)
 
 	/* Periodic location update might be disabled from the VTY,
 	 * so we shall not expire subscribers until explicit IMSI Detach. */
-	if (!vlr_timer_secs(vlr, 3212))
+	if (!vlr_timer_secs(vlr, 3212, 3312))
 		goto done;
 
 	if (llist_empty(&vlr->subscribers))
@@ -1550,15 +1564,22 @@ struct vlr_instance *vlr_alloc(void *ctx, const struct vlr_ops *ops, bool is_ps)
 
 	/* reset shared timer definitions */
 	osmo_tdefs_reset(msc_tdefs_vlr);
+	osmo_tdefs_reset(sgsn_tdefs_vlr);
 
 	/* osmo_auth_fsm.c */
-	vlr_auth_fsm_init();
+	vlr_auth_fsm_init(is_ps);
+
 	/* osmo_lu_fsm.c */
-	vlr_lu_fsm_init();
+	vlr_lu_fsm_init(is_ps);
 	/* vlr_access_request_fsm.c */
-	vlr_parq_fsm_init();
+	vlr_parq_fsm_init(is_ps);
 	/* vlr_sgs_fsm.c */
 	vlr_sgs_fsm_init();
+
+	if (is_ps)
+		vlr_tdefs = sgsn_tdefs_vlr;
+	else
+		vlr_tdefs = msc_tdefs_vlr;
 
 	return vlr;
 

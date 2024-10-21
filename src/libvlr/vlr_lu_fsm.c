@@ -20,6 +20,7 @@
  */
 
 #include <osmocom/core/fsm.h>
+#include <osmocom/core/tdef.h>
 #include <osmocom/gsm/gsm48.h>
 #include <osmocom/vlr/vlr.h>
 
@@ -328,6 +329,20 @@ static const struct value_string lu_compl_vlr_event_names[] = {
 	{ 0, NULL }
 };
 
+struct osmo_tdef_state_timeout msc_lu_compl_tdef_states[32] = {
+	[LU_COMPL_VLR_S_WAIT_IMEI]	= { .T = 3270 },
+	[LU_COMPL_VLR_S_WAIT_IMEI_TMSI]	= { .T = 3270 },
+	[LU_COMPL_VLR_S_WAIT_TMSI_CNF]	= { .T = 3250 },
+};
+
+struct osmo_tdef_state_timeout sgsn_lu_compl_tdef_states[32] = {
+	[LU_COMPL_VLR_S_WAIT_IMEI]	= { .T = 3370 },
+	[LU_COMPL_VLR_S_WAIT_IMEI_TMSI]	= { .T = 3370 },
+	[LU_COMPL_VLR_S_WAIT_TMSI_CNF]	= { .T = 3350 },
+};
+
+struct osmo_tdef_state_timeout *lu_compl_fsm_state_tdef;
+
 struct lu_compl_vlr_priv {
 	struct vlr_subscr *vsub;
 	void *msc_conn_ref;
@@ -431,8 +446,7 @@ static void lu_compl_vlr_new_tmsi(struct osmo_fsm_inst *fi)
 		return;
 	}
 
-	osmo_fsm_inst_state_chg(fi, LU_COMPL_VLR_S_WAIT_TMSI_CNF,
-				vlr_timer_secs(vlr, 3250), 3250);
+	osmo_tdef_fsm_inst_state_chg(fi, LU_COMPL_VLR_S_WAIT_TMSI_CNF, lu_compl_fsm_state_tdef, vlr_tdefs, -1);
 
 	vlr->ops.tx_lu_acc(lcvp->msc_conn_ref, vsub->tmsi_new, lcvp->lu_type);
 }
@@ -455,11 +469,11 @@ static void lu_compl_vlr_wait_subscr_pres(struct osmo_fsm_inst *fi,
 	/* If imeisv_early is enabled: IMEI already retrieved and checked (vlr_loc_upd_node1_pre), don't do it again. */
 	if (vlr->cfg.check_imei_rqd && !vlr->cfg.retrieve_imeisv_early) {
 		/* Check IMEI VLR */
-		osmo_fsm_inst_state_chg(fi,
+		osmo_tdef_fsm_inst_state_chg(fi,
 					lcvp->assign_tmsi ?
 					  LU_COMPL_VLR_S_WAIT_IMEI_TMSI
 					: LU_COMPL_VLR_S_WAIT_IMEI,
-					vlr_timer_secs(vlr, 3270), 3270);
+					lu_compl_fsm_state_tdef, vlr_tdefs, -1);
 		vlr->ops.tx_id_req(lcvp->msc_conn_ref, GSM_MI_TYPE_IMEI);
 		return;
 	}
@@ -664,6 +678,20 @@ static const struct value_string fsm_lu_event_names[] = {
 	OSMO_VALUE_STRING(VLR_ULA_E_NEW_TMSI_ACK),
 	{ 0, NULL }
 };
+
+struct osmo_tdef_state_timeout msc_lu_tdef_states[32] = {
+	[VLR_ULA_S_WAIT_IMEISV] = { .T = 3270 },
+	[VLR_ULA_S_WAIT_HLR_CHECK_IMEI_EARLY] = { .T = 3270 },
+	[VLR_ULA_S_WAIT_IMSI] = { .T = 3270 },
+};
+
+struct osmo_tdef_state_timeout sgsn_lu_tdef_states[32] = {
+	[VLR_ULA_S_WAIT_IMEISV] = { .T = 3370 },
+	[VLR_ULA_S_WAIT_HLR_CHECK_IMEI_EARLY] = { .T = 3370 },
+	[VLR_ULA_S_WAIT_IMSI] = { .T = 3370 },
+};
+
+struct osmo_tdef_state_timeout *lu_fsm_state_tdef;
 
 struct lu_fsm_priv {
 	struct vlr_instance *vlr;
@@ -942,7 +970,7 @@ static void vlr_loc_upd_node1_pre(struct osmo_fsm_inst *fi)
 	LOGPFSM(fi, "%s()\n", __func__);
 
 	if (vlr->cfg.check_imei_rqd && vlr->cfg.retrieve_imeisv_early) {
-		osmo_fsm_inst_state_chg(fi, VLR_ULA_S_WAIT_HLR_CHECK_IMEI_EARLY, vlr_timer_secs(lfp->vlr, 3270), 3270);
+		osmo_tdef_fsm_inst_state_chg(fi, VLR_ULA_S_WAIT_HLR_CHECK_IMEI_EARLY, lu_fsm_state_tdef, vlr_tdefs, -1);
 		vlr_subscr_tx_req_check_imei(lfp->vsub);
 	} else {
 		vlr_loc_upd_node1(fi);
@@ -977,8 +1005,7 @@ static void vlr_loc_upd_want_imsi(struct osmo_fsm_inst *fi)
 	OSMO_ASSERT(lfp->vsub);
 
 	/* Obtain_IMSI_VLR */
-	osmo_fsm_inst_state_chg(fi, VLR_ULA_S_WAIT_IMSI,
-				vlr_timer_secs(vlr, 3270), 3270);
+	osmo_tdef_fsm_inst_state_chg(fi, VLR_ULA_S_WAIT_IMSI, lu_fsm_state_tdef, vlr_tdefs, -1);
 	vlr->ops.tx_id_req(lfp->msc_conn_ref, GSM_MI_TYPE_IMSI);
 	/* will continue at vlr_loc_upd_node1_pre() once IMSI arrives */
 }
@@ -1114,8 +1141,7 @@ static void lu_fsm_idle(struct osmo_fsm_inst *fi, uint32_t event,
 		_start_lu_main(fi);
 	} else {
 		vlr->ops.tx_id_req(lfp->msc_conn_ref, GSM_MI_TYPE_IMEISV);
-		osmo_fsm_inst_state_chg(fi, VLR_ULA_S_WAIT_IMEISV,
-					vlr_timer_secs(vlr, 3270), 3270);
+		osmo_tdef_fsm_inst_state_chg(fi, VLR_ULA_S_WAIT_IMEISV, lu_fsm_state_tdef, vlr_tdefs, -1);
 	}
 }
 
@@ -1587,8 +1613,16 @@ void vlr_loc_update_cancel(struct osmo_fsm_inst *fi,
 		lu_fsm_failure(fi, gsm48_cause);
 }
 
-void vlr_lu_fsm_init(void)
+void vlr_lu_fsm_init(bool is_ps)
 {
+	if (is_ps) {
+		lu_fsm_state_tdef = sgsn_lu_tdef_states;
+		lu_compl_fsm_state_tdef = sgsn_lu_compl_tdef_states;
+	} else {
+		lu_fsm_state_tdef = msc_lu_tdef_states;
+		lu_compl_fsm_state_tdef = msc_lu_compl_tdef_states;
+	}
+
 	OSMO_ASSERT(osmo_fsm_register(&vlr_lu_fsm) == 0);
 	OSMO_ASSERT(osmo_fsm_register(&upd_hlr_vlr_fsm) == 0);
 	OSMO_ASSERT(osmo_fsm_register(&sub_pres_vlr_fsm) == 0);

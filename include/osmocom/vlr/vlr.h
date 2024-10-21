@@ -421,7 +421,10 @@ bool vlr_subscr_matches_tmsi(struct vlr_subscr *vsub, uint32_t tmsi);
 bool vlr_subscr_matches_msisdn(struct vlr_subscr *vsub, const char *msisdn);
 bool vlr_subscr_matches_imei(struct vlr_subscr *vsub, const char *imei);
 
-unsigned long vlr_timer_secs(struct vlr_instance *vlr, int timer);
+unsigned long vlr_timer_secs(struct vlr_instance *vlr, int cs_timer, int ps_timer);
+
+/* vlr_tdefs is pointing to msc_tdefs_vlr or sgsn_tdefs_vlr depending on the domain*/
+extern struct osmo_tdef *vlr_tdefs;
 
 int vlr_subscr_changed(struct vlr_subscr *vsub);
 int vlr_subscr_purge(struct vlr_subscr *vsub) __attribute__((warn_unused_result));

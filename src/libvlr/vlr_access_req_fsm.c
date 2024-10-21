@@ -20,6 +20,7 @@
  */
 
 #include <osmocom/core/fsm.h>
+#include <osmocom/core/tdef.h>
 #include <osmocom/gsm/gsup.h>
 #include <osmocom/gsm/gsm48.h>
 #include <osmocom/vlr/vlr.h>
@@ -49,6 +50,18 @@ static const struct value_string proc_arq_vlr_event_names[] = {
 	OSMO_VALUE_STRING(PR_ARQ_E_TMSI_ACK),
 	{ 0, NULL }
 };
+
+struct osmo_tdef_state_timeout msc_parq_tdef_states[32] = {
+	[PR_ARQ_S_WAIT_CHECK_IMEI]	= { .T = 3270 },
+	[PR_ARQ_S_WAIT_OBTAIN_IMSI]	= { .T = 3270 },
+};
+
+struct osmo_tdef_state_timeout sgsn_parq_tdef_states[32] = {
+	[PR_ARQ_S_WAIT_CHECK_IMEI]	= { .T = 3370 },
+	[PR_ARQ_S_WAIT_OBTAIN_IMSI]	= { .T = 3370 },
+};
+
+struct osmo_tdef_state_timeout *parq_fsm_state_tdef;
 
 struct proc_arq_priv {
 	struct vlr_instance *vlr;
@@ -201,8 +214,7 @@ static void _proc_arq_vlr_post_trace(struct osmo_fsm_inst *fi)
 	if (0 /* IMEI check required */) {
 		/* Chck_IMEI_VLR */
 		vlr->ops.tx_id_req(par->msc_conn_ref, GSM_MI_TYPE_IMEI);
-		osmo_fsm_inst_state_chg(fi, PR_ARQ_S_WAIT_CHECK_IMEI,
-					vlr_timer_secs(vlr, 3270), 3270);
+		osmo_tdef_fsm_inst_state_chg(fi, PR_ARQ_S_WAIT_CHECK_IMEI, parq_fsm_state_tdef, vlr_tdefs, -1);
 	} else
 		_proc_arq_vlr_post_imei(fi);
 }
@@ -404,8 +416,7 @@ static void proc_arq_vlr_fn_init(struct osmo_fsm_inst *fi,
 		/* TMSI was included, are we permitted to use it? */
 		if (vlr->cfg.parq_retrieve_imsi) {
 			/* Obtain_IMSI_VLR */
-			osmo_fsm_inst_state_chg(fi, PR_ARQ_S_WAIT_OBTAIN_IMSI,
-						vlr_timer_secs(vlr, 3270), 3270);
+			osmo_tdef_fsm_inst_state_chg(fi, PR_ARQ_S_WAIT_OBTAIN_IMSI, parq_fsm_state_tdef, vlr_tdefs, -1);
 			return;
 		} else {
 			/* Set User Error: Unidentified Subscriber */
@@ -803,8 +814,13 @@ static struct osmo_fsm upd_loc_child_vlr_fsm = {
 };
 #endif
 
-void vlr_parq_fsm_init(void)
+void vlr_parq_fsm_init(bool is_ps)
 {
+	if (is_ps)
+		parq_fsm_state_tdef = sgsn_parq_tdef_states;
+	else
+		parq_fsm_state_tdef = msc_parq_tdef_states;
+
 	//OSMO_ASSERT(osmo_fsm_register(&upd_loc_child_vlr_fsm) == 0);
 	OSMO_ASSERT(osmo_fsm_register(&proc_arq_vlr_fsm) == 0);
 }

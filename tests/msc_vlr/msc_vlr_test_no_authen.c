@@ -941,7 +941,7 @@ static void test_no_authen_subscr_expire()
 	vlr_subscr_put(vsub, __func__);
 
 	/* Let T3212 (periodic Location update timer) expire */
-	fake_time_passes(vlr_timer_secs(net->vlr, 3212) + 60 * 4, 0);
+	fake_time_passes(vlr_timer_secs(net->vlr, 3212, 3312) + 60 * 4, 0);
 
 	/* The subscriber should now be gone. */
 	vsub = vlr_subscr_find_by_imsi(net->vlr, imsi, __func__);
