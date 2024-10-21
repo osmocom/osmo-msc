@@ -769,11 +769,12 @@ static void lu_fsm_dispatch_result(struct osmo_fsm_inst *fi,
 		LOGPFSML(fi, LOGL_ERROR, "No parent FSM\n");
 		return;
 	}
-	osmo_fsm_inst_dispatch(fi->proc.parent,
-			       (lfp->result == VLR_FSM_RESULT_SUCCESS)
-			       ? lfp->parent_event_success
-			       : lfp->parent_event_failure,
-			       lfp->parent_event_data);
+	if (lfp->result == VLR_FSM_RESULT_SUCCESS)
+		fi->proc.parent_term_event = lfp->parent_event_success;
+	else
+		fi->proc.parent_term_event = lfp->parent_event_failure;
+
+	osmo_fsm_inst_term(fi, OSMO_FSM_TERM_REGULAR, lfp->parent_event_data);
 }
 
 static void _lu_fsm_done(struct osmo_fsm_inst *fi,
