@@ -696,3 +696,4 @@ bool auth_try_reuse_tuple(struct vlr_subscr *vsub, uint8_t key_seq)
 	at->use_count++;
 	return true;
 }
+

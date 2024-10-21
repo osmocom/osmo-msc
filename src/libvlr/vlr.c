@@ -35,7 +35,6 @@
 #include <osmocom/vlr/vlr_sgs.h>
 #include <osmocom/vlr/vlr.h>
 #include <osmocom/msc/gsup_client_mux.h>
-#include <osmocom/msc/paging.h>
 
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -175,7 +174,6 @@ static const struct rate_ctr_group_desc vlr_ctrg_desc = {
 	osmo_stat_item_dec(osmo_stat_item_group_get_item((vlr)->statg, idx), 1)
 #define vlr_stat_item_set(vlr, idx, val) \
 	osmo_stat_item_set(osmo_stat_item_group_get_item((vlr)->statg, idx), val)
-
 
 /***********************************************************************
  * Convenience functions
@@ -604,8 +602,6 @@ static void dedup_vsub(struct vlr_subscr *exists, struct vlr_subscr *vsub)
 	     vlr_subscr_name(vsub),
 	     osmo_use_count_to_str_c(OTC_SELECT, &vsub->use_count));
 
-	/* Take over some state from the previous vsub */
-	paging_request_join_vsub(vsub, exists);
 	if (!vsub->msisdn[0])
 		OSMO_STRLCPY_ARRAY(vsub->msisdn, exists->msisdn);
 	if (!vsub->name[0])
