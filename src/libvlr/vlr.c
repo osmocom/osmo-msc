@@ -1610,8 +1610,10 @@ int vlr_subscr_disconnected(struct vlr_subscr *vsub)
 {
 	/* This corresponds to a MAP-ABORT from MSC->VLR on a classic B
 	 * interface */
-	osmo_fsm_inst_term(vsub->lu_fsm, OSMO_FSM_TERM_REQUEST, NULL);
-	osmo_fsm_inst_term(vsub->auth_fsm, OSMO_FSM_TERM_REQUEST, NULL);
+	if (vsub->lu_fsm)
+		osmo_fsm_inst_term(vsub->lu_fsm, OSMO_FSM_TERM_REQUEST, NULL);
+	if (vsub->auth_fsm)
+		osmo_fsm_inst_term(vsub->auth_fsm, OSMO_FSM_TERM_REQUEST, NULL);
 	vsub->msc_conn_ref = NULL;
 
 	return 0;
