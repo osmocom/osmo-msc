@@ -354,6 +354,7 @@ struct lu_compl_vlr_priv {
 	uint8_t cause;
 	bool assign_tmsi;
 	enum vlr_lu_type lu_type;
+	int N; /*! counter of timeouts */
 };
 
 static inline struct lu_compl_vlr_priv *lu_compl_vlr_fi_priv(struct osmo_fsm_inst *fi);
@@ -407,6 +408,7 @@ static void lu_compl_vlr_init(struct osmo_fsm_inst *fi, uint32_t event,
 	OSMO_ASSERT(vlr);
 
 	OSMO_ASSERT(event == LU_COMPL_VLR_E_START);
+	lcvp->N = 0;
 
 	/* TODO: National Roaming restrictions? */
 	/* TODO: Roaming restriction due to unsupported feature in subscriber
@@ -564,6 +566,43 @@ static void lu_compl_vlr_wait_tmsi(struct osmo_fsm_inst *fi, uint32_t event,
 	vlr_lu_compl_fsm_success(fi);
 }
 
+static void vlr_lu_compl_fsm_reset_n(struct osmo_fsm_inst *fi, uint32_t prev_state)
+{
+	struct lu_compl_vlr_priv *lcvp = lu_compl_vlr_fi_priv(fi);
+	lcvp->N = 0;
+}
+
+static int lu_compl_vlr_timeout(struct osmo_fsm_inst *fi)
+{
+	struct lu_compl_vlr_priv *lcvp = lu_compl_vlr_fi_priv(fi);
+	struct vlr_instance *vlr = lcvp->vsub->vlr;
+	struct vlr_subscr *vsub = lcvp->vsub;
+
+	/* on cs: terminate the FSM */
+	if (vlr_is_cs(lcvp->vsub->vlr))
+		return 1;
+
+	/* PS: we have to resend the complete message 5x times, before failing */
+	if (++lcvp->N >= 5)
+		return 1;
+
+	LOGPFSML(fi, LOGL_ERROR, "LU Compl timeout %d / %d\n", fi->T, lcvp->N);
+
+	switch (fi->state) {
+	case LU_COMPL_VLR_S_WAIT_IMEI:
+	case LU_COMPL_VLR_S_WAIT_IMEI_TMSI:
+		vlr->ops.tx_id_req(lcvp->msc_conn_ref, GSM_MI_TYPE_IMEI);
+		break;
+	case LU_COMPL_VLR_S_WAIT_TMSI_CNF:
+		vlr->ops.tx_lu_acc(lcvp->msc_conn_ref, vsub->tmsi_new, lcvp->lu_type);
+		break;
+	}
+
+	osmo_timer_schedule(&fi->timer, vlr_timer_secs(vlr, fi->T, fi->T), 0);
+
+	return 0;
+}
+
 static const struct osmo_fsm_state lu_compl_vlr_states[] = {
 	[LU_COMPL_VLR_S_INIT] = {
 		.in_event_mask = S(LU_COMPL_VLR_E_START),
@@ -586,6 +625,7 @@ static const struct osmo_fsm_state lu_compl_vlr_states[] = {
 				 S(LU_COMPL_VLR_E_IMEI_CHECK_NACK),
 		.out_state_mask = S(LU_COMPL_VLR_S_DONE),
 		.name = OSMO_STRINGIFY(LU_COMPL_VLR_S_WAIT_IMEI),
+		.onenter = vlr_lu_compl_fsm_reset_n,
 		.action = lu_compl_vlr_wait_imei,
 	},
 	[LU_COMPL_VLR_S_WAIT_IMEI_TMSI] = {
@@ -594,12 +634,14 @@ static const struct osmo_fsm_state lu_compl_vlr_states[] = {
 		.out_state_mask = S(LU_COMPL_VLR_S_DONE) |
 				  S(LU_COMPL_VLR_S_WAIT_TMSI_CNF),
 		.name = OSMO_STRINGIFY(LU_COMPL_VLR_S_WAIT_IMEI_TMSI),
+		.onenter = vlr_lu_compl_fsm_reset_n,
 		.action = lu_compl_vlr_wait_imei,
 	},
 	[LU_COMPL_VLR_S_WAIT_TMSI_CNF] = {
 		.in_event_mask = S(LU_COMPL_VLR_E_NEW_TMSI_ACK),
 		.out_state_mask = S(LU_COMPL_VLR_S_DONE),
 		.name = OSMO_STRINGIFY(LU_COMPL_VLR_S_WAIT_TMSI_CNF),
+		.onenter = vlr_lu_compl_fsm_reset_n,
 		.action = lu_compl_vlr_wait_tmsi,
 	},
 	[LU_COMPL_VLR_S_DONE] = {
@@ -616,6 +658,7 @@ static struct osmo_fsm lu_compl_vlr_fsm = {
 	.allstate_action = NULL,
 	.log_subsys = DLGLOBAL,
 	.event_names = lu_compl_vlr_event_names,
+	.timer_cb = lu_compl_vlr_timeout,
 };
 
 static inline struct lu_compl_vlr_priv *lu_compl_vlr_fi_priv(struct osmo_fsm_inst *fi)
@@ -711,6 +754,8 @@ struct lu_fsm_priv {
 	uint32_t tmsi;
 	struct osmo_location_area_id old_lai;
 	struct osmo_location_area_id new_lai;
+	struct osmo_routing_area_id old_rai;
+	struct osmo_routing_area_id new_rai;
 	bool authentication_required;
 	/* is_ciphering_to_be_attempted: true when any A5/n > 0 are enabled. Ciphering is allowed, always attempt to get Auth Info from
 	 * the HLR. */
@@ -722,6 +767,9 @@ struct lu_fsm_priv {
 	bool is_r99;
 	bool is_utran;
 	bool assign_tmsi;
+
+	/*! count times timer T timed out */
+	int N;
 };
 
 
@@ -1386,6 +1434,12 @@ static void lu_fsm_wait_lu_compl_standalone(struct osmo_fsm_inst *fi,
 	}
 }
 
+static void lu_fsm_reset_n(struct osmo_fsm_inst *fi, uint32_t prev_state)
+{
+	struct lu_fsm_priv *lfp = lu_fsm_fi_priv(fi);
+	lfp->N = 0;
+}
+
 static const struct osmo_fsm_state vlr_lu_fsm_states[] = {
 	[VLR_ULA_S_IDLE] = {
 		.in_event_mask = S(VLR_ULA_E_UPDATE_LA),
@@ -1450,6 +1504,7 @@ static const struct osmo_fsm_state vlr_lu_fsm_states[] = {
 				  S(VLR_ULA_S_WAIT_HLR_UPD) |
 				  S(VLR_ULA_S_DONE),
 		.name = OSMO_STRINGIFY(VLR_ULA_S_WAIT_IMSI),
+		.onenter = lu_fsm_reset_n,
 		.action = lu_fsm_wait_imsi,
 	},
 	[VLR_ULA_S_WAIT_HLR_CHECK_IMEI_EARLY] = {
@@ -1511,6 +1566,54 @@ static void fsm_lu_cleanup(struct osmo_fsm_inst *fi, enum osmo_fsm_term_cause ca
 		vsub->lu_fsm = NULL;
 }
 
+static void fsm_lu_preterm(struct osmo_fsm_inst *fi, enum osmo_fsm_term_cause cause)
+{
+	struct lu_fsm_priv *lfp = lu_fsm_fi_priv(fi);
+	uint8_t gsm48_cause;
+
+	if (vlr_is_cs(lfp->vlr))
+		return;
+
+	if (cause != OSMO_FSM_TERM_TIMEOUT)
+		return;
+
+	switch (fi->state) {
+	case VLR_ULA_S_WAIT_IMSI:
+		gsm48_cause = GSM48_REJECT_MS_IDENTITY_NOT_DERVIVABLE;
+		break;
+	case VLR_ULA_S_WAIT_AUTH:
+	default:
+		gsm48_cause = GSM48_REJECT_NETWORK_FAILURE;
+	}
+
+	lfp->vlr->ops.tx_lu_rej(lfp->msc_conn_ref, gsm48_cause, lfp->lu_type);
+}
+
+int fsm_lu_timer_cb(struct osmo_fsm_inst *fi)
+{
+	struct lu_fsm_priv *lfp = lu_fsm_fi_priv(fi);
+	struct vlr_instance *vlr = lfp->vlr;
+
+	/* only PS requires resending, CS termiante FSM */
+	if (vlr_is_cs(vlr))
+		return 1;
+
+	/* PS: we have to resend the complete message 5x times, before failing */
+	if (++lfp->N >= 5)
+		return 1;
+
+	switch (fi->state) {
+	case VLR_ULA_S_WAIT_IMSI:
+		vlr->ops.tx_id_req(lfp->msc_conn_ref, GSM_MI_TYPE_IMSI);
+		break;
+	}
+
+	osmo_timer_schedule(&fi->timer, vlr_timer_secs(vlr, fi->T, fi->T), 0);
+
+	return 0;
+}
+
+
 static struct osmo_fsm vlr_lu_fsm = {
 	.name = "vlr_lu_fsm",
 	.states = vlr_lu_fsm_states,
@@ -1520,6 +1623,8 @@ static struct osmo_fsm vlr_lu_fsm = {
 	.log_subsys = DLGLOBAL,
 	.event_names = fsm_lu_event_names,
 	.cleanup = fsm_lu_cleanup,
+	.pre_term = fsm_lu_preterm,
+	.timer_cb = fsm_lu_timer_cb,
 };
 
 static inline struct lu_fsm_priv *lu_fsm_fi_priv(struct osmo_fsm_inst *fi)
@@ -1528,8 +1633,8 @@ static inline struct lu_fsm_priv *lu_fsm_fi_priv(struct osmo_fsm_inst *fi)
 	return (struct lu_fsm_priv*)fi->priv;
 }
 
-struct osmo_fsm_inst *
-vlr_loc_update(struct osmo_fsm_inst *parent,
+static struct osmo_fsm_inst *
+_vlr_loc_update(struct osmo_fsm_inst *parent,
 	       uint32_t parent_event_success,
 	       uint32_t parent_event_failure,
 	       void *parent_event_data,
@@ -1578,6 +1683,103 @@ vlr_loc_update(struct osmo_fsm_inst *parent,
 		lfp->lu_by_tmsi = false;
 	}
 	fi->priv = lfp;
+
+	return fi;
+}
+
+struct osmo_fsm_inst *
+vlr_loc_update(struct osmo_fsm_inst *parent,
+	       uint32_t parent_event_success,
+	       uint32_t parent_event_failure,
+	       void *parent_event_data,
+	       struct vlr_instance *vlr, void *msc_conn_ref,
+	       enum vlr_lu_type type, uint32_t tmsi, const char *imsi,
+	       const struct osmo_location_area_id *old_lai,
+	       const struct osmo_location_area_id *new_lai,
+	       bool authentication_required,
+	       bool is_ciphering_to_be_attempted,
+	       bool is_ciphering_required,
+	       uint8_t key_seq,
+	       bool is_r99, bool is_utran,
+	       bool assign_tmsi)
+{
+	struct osmo_fsm_inst *fi = _vlr_loc_update(
+		parent,
+		parent_event_success,
+		parent_event_failure,
+		parent_event_data,
+		vlr, msc_conn_ref,
+		type, tmsi, imsi,
+		old_lai,
+		new_lai,
+		authentication_required,
+		is_ciphering_to_be_attempted,
+		is_ciphering_required,
+		key_seq,
+		is_r99, is_utran,
+		assign_tmsi);
+
+	if (!fi)
+		return NULL;
+
+	LOGPFSM(fi, "rev=%s net=%s%s%s\n",
+		is_r99 ? "R99" : "GSM",
+		is_utran ? "UTRAN" : "GERAN",
+		(authentication_required || is_ciphering_to_be_attempted) ?
+		    " Auth" : " (no Auth)",
+		(authentication_required || is_ciphering_to_be_attempted) ?
+		    (is_ciphering_to_be_attempted ? "+Ciph" : " (no Ciph)")
+									  : "");
+
+	if (is_utran && !authentication_required)
+		LOGPFSML(fi, LOGL_ERROR,
+			 "Authentication off on UTRAN network. Good luck.\n");
+
+	osmo_fsm_inst_dispatch(fi, VLR_ULA_E_UPDATE_LA, NULL);
+
+	return fi;
+}
+
+
+struct osmo_fsm_inst *
+vlr_ra_update(struct osmo_fsm_inst *parent,
+	       uint32_t parent_event_success,
+	       uint32_t parent_event_failure,
+	       void *parent_event_data,
+	       struct vlr_instance *vlr, void *msc_conn_ref,
+	       enum vlr_lu_type type, uint32_t tmsi, const char *imsi,
+	       const struct osmo_routing_area_id *old_rai,
+	       const struct osmo_routing_area_id *new_rai,
+	       bool authentication_required,
+	       bool is_ciphering_to_be_attempted,
+	       bool is_ciphering_required,
+	       uint8_t key_seq,
+	       bool is_r99, bool is_utran,
+	       bool assign_tmsi)
+{
+	struct lu_fsm_priv *lfp;
+	struct osmo_fsm_inst *fi = _vlr_loc_update(
+	    parent,
+	    parent_event_success,
+	    parent_event_failure,
+	    parent_event_data,
+	    vlr, msc_conn_ref,
+	    type, tmsi, imsi,
+	    &old_rai->lac,
+	    &new_rai->lac,
+	    authentication_required,
+	    is_ciphering_to_be_attempted,
+	    is_ciphering_required,
+	    key_seq,
+	    is_r99, is_utran,
+	    assign_tmsi);
+
+	if (!fi)
+		return NULL;
+
+	lfp = fi->priv;
+	lfp->old_rai = *old_rai;
+	lfp->new_rai = *new_rai;
 
 	LOGPFSM(fi, "rev=%s net=%s%s%s\n",
 		is_r99 ? "R99" : "GSM",

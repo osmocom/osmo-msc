@@ -1481,6 +1481,16 @@ int vlr_subscr_rx_tmsi_reall_compl(struct vlr_subscr *vsub)
 	}
 }
 
+/* SGSN->VLR: Subscriber has provided ATTACH/RAU Complete */
+int vlr_subscr_rx_rau_complete(struct vlr_subscr *vsub)
+{
+	if (!vsub->lu_fsm)
+		return -EINVAL;
+
+	return osmo_fsm_inst_dispatch(vsub->lu_fsm,
+					      VLR_ULA_E_NEW_TMSI_ACK, NULL);
+}
+
 bool vlr_subscr_expire(struct vlr_subscr *vsub)
 {
 	if (vsub->lu_complete) {
