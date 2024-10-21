@@ -261,6 +261,7 @@ static void test_reject_lu_during_cm()
 
 	BTW("subscriber detaches");
 	expect_bssap_clear();
+	gsup_expect_tx("0c010809710000004026f0" CN_DOMAIN VLR_TO_HLR);
 	ms_sends_msg("050130089910070000006402");
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 	ran_sends_clear_complete();
@@ -285,6 +286,7 @@ static void test_reject_cm_during_cm()
 
 	BTW("subscriber detaches");
 	expect_bssap_clear();
+	gsup_expect_tx("0c010809710000004026f0" CN_DOMAIN VLR_TO_HLR);
 	ms_sends_msg("050130089910070000006402");
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 	ran_sends_clear_complete();
@@ -375,6 +377,7 @@ static void test_accept_cm_during_paging_resp()
 
 	BTW("subscriber detaches");
 	expect_bssap_clear();
+	gsup_expect_tx("0c010809710000004026f0" CN_DOMAIN VLR_TO_HLR);
 	ms_sends_msg("050130089910070000006402");
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 	ran_sends_clear_complete();

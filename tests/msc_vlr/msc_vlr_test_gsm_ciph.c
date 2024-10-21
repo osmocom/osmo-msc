@@ -227,6 +227,7 @@ static void test_ciph()
 
 	BTW("subscriber detaches");
 	expect_bssap_clear();
+	gsup_expect_tx("0c010809710000004026f0" CN_DOMAIN VLR_TO_HLR);
 	ms_sends_msg("050130089910070000006402");
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
@@ -462,6 +463,7 @@ static void test_ciph_tmsi()
 
 	BTW("subscriber detaches, using TMSI");
 	expect_bssap_clear();
+	gsup_expect_tx("0c010809710000004026f0" CN_DOMAIN VLR_TO_HLR);
 	ms_sends_msg("050130" "05f4" "03020100");
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
@@ -572,6 +574,7 @@ static void test_ciph_imei()
 
 	BTW("subscriber detaches");
 	expect_bssap_clear();
+	gsup_expect_tx("0c010809710000004026f0" CN_DOMAIN VLR_TO_HLR);
 	ms_sends_msg("050130089910070000006402");
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
@@ -672,6 +675,7 @@ static void test_ciph_imeisv()
 
 	BTW("subscriber detaches");
 	expect_bssap_clear();
+	gsup_expect_tx("0c010809710000004026f0" CN_DOMAIN VLR_TO_HLR);
 	ms_sends_msg("050130089910070000006402");
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
@@ -800,6 +804,7 @@ static void test_ciph_tmsi_imei()
 
 	BTW("subscriber detaches, using TMSI");
 	expect_bssap_clear();
+	gsup_expect_tx("0c010809710000004026f0" CN_DOMAIN VLR_TO_HLR);
 	ms_sends_msg("050130" "05f4" "03020100");
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
@@ -1045,6 +1050,7 @@ static void test_gsm_ciph_in_umts_env()
 
 	BTW("subscriber detaches");
 	expect_bssap_clear();
+	gsup_expect_tx("0c010809710000000156f0" CN_DOMAIN VLR_TO_HLR);
 	ms_sends_msg("050130"
 		     "089910070000106005" /* IMSI */);
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
@@ -1257,6 +1263,7 @@ static void test_a5_3_supported()
 
 	BTW("subscriber detaches");
 	expect_bssap_clear();
+	gsup_expect_tx("0c010809710000004026f0" CN_DOMAIN VLR_TO_HLR);
 	ms_sends_msg("050130089910070000006402");
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
@@ -1482,6 +1489,7 @@ static void test_cm_service_needs_classmark_update()
 
 	BTW("subscriber detaches");
 	expect_bssap_clear();
+	gsup_expect_tx("0c010809710000004026f0" CN_DOMAIN VLR_TO_HLR);
 	ms_sends_msg("050130089910070000006402");
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 

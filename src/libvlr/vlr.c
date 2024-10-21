@@ -1513,8 +1513,15 @@ static int vlr_subscr_detach(struct vlr_subscr *vsub)
 /* See TS 23.012 version 9.10.0 4.3.2.1 "Process Detach_IMSI_VLR" */
 int vlr_subscr_rx_imsi_detach(struct vlr_subscr *vsub)
 {
+	int rc = 0;
+
 	vlr_rate_ctr_inc(vsub->vlr, VLR_CTR_DETACH_BY_REQ);
-	return vlr_subscr_detach(vsub);
+
+	if (!vsub->imsi_detached_flag)
+		rc = vlr_subscr_purge(vsub);
+
+	rc |= vlr_subscr_detach(vsub);
+	return rc;
 }
 
 /* Tear down any running FSMs due to MSC connection timeout.

@@ -149,6 +149,7 @@ static void test_two_lu()
 
 	BTW("subscriber detaches");
 	expect_bssap_clear();
+	gsup_expect_tx("0c010809710000004026f0" CN_DOMAIN VLR_TO_HLR);
 	ms_sends_msg("050130089910070000006402");
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
 
