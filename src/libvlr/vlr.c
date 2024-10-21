@@ -1289,27 +1289,31 @@ enum gsm48_reject_value vlr_reject_causes_cs(enum gsm48_reject_value reject_caus
 static int vlr_subscr_handle_cancel_req(struct vlr_subscr *vsub,
 					const struct osmo_gsup_message *gsup_msg)
 {
+	enum gsm48_reject_value gsm48_rej;
 	enum osmo_fsm_term_cause fsm_cause = OSMO_FSM_TERM_ERROR;
+	struct vlr_instance *vlr = vsub->vlr;
 	struct osmo_gsup_message gsup_reply = {0};
-	int rc, is_update_procedure = !gsup_msg->cancel_type ||
+	int is_update_procedure = !gsup_msg->cancel_type ||
 		gsup_msg->cancel_type == OSMO_GSUP_CANCEL_TYPE_UPDATE;
 
-	vlr_rate_ctr_inc(vsub->vlr, VLR_CTR_GSUP_TX_CANCEL_RES);
+	vlr_rate_ctr_inc(vlr, VLR_CTR_GSUP_TX_CANCEL_RES);
 
 	LOGVSUBP(LOGL_INFO, vsub, "Cancelling MS subscriber (%s)\n",
 		 is_update_procedure ?
 		 "update procedure" : "subscription withdraw");
 
-	gsup_reply.message_type = OSMO_GSUP_MSGT_LOCATION_CANCEL_RESULT;
-	gsup_reply.cn_domain = vlr_is_cs(vsub->vlr) ? OSMO_GSUP_CN_DOMAIN_CS : OSMO_GSUP_CN_DOMAIN_PS;
-	rc = vlr_subscr_tx_gsup_message(vsub, &gsup_reply);
+	gsm48_rej = vlr_gmm_cause_to_reject_cause_domain(gsup_msg->cause, vlr_is_cs(vlr));
+	vlr_subscr_cancel_attach_fsm(vsub, fsm_cause, gsm48_rej);
 
-	vlr_subscr_cancel_attach_fsm(vsub, fsm_cause, vlr_gmm_cause_to_reject_cause_domain(gsup_msg->cause, true));
+	if (vlr->ops.subscr_inval)
+		vlr->ops.subscr_inval(vsub->msc_conn_ref, vsub, gsm48_rej, is_update_procedure);
 
-	vlr_rate_ctr_inc(vsub->vlr, VLR_CTR_DETACH_BY_CANCEL);
+	vlr_rate_ctr_inc(vlr, VLR_CTR_DETACH_BY_CANCEL);
 	vlr_subscr_detach(vsub);
 
-	return rc;
+	gsup_reply.message_type = OSMO_GSUP_MSGT_LOCATION_CANCEL_RESULT;
+	gsup_reply.cn_domain = vlr_is_cs(vlr) ? OSMO_GSUP_CN_DOMAIN_CS : OSMO_GSUP_CN_DOMAIN_PS;
+	return vlr_subscr_tx_gsup_message(vsub, &gsup_reply);
 }
 
 /* Handle Check_IMEI_VLR result and error from HLR */
