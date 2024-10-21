@@ -110,7 +110,7 @@ int msc_vlr_alloc(struct gsm_network *net)
 {
 	osmo_vlr_set_log_cat(OSMO_VLR_LOGC_VLR, DVLR);
 	osmo_vlr_set_log_cat(OSMO_VLR_LOGC_SGS, DSGS);
-	net->vlr = vlr_alloc(net, &msc_vlr_ops);
+	net->vlr = vlr_alloc(net, &msc_vlr_ops, false);
 	if (!net->vlr)
 		return -ENOMEM;
 	net->vlr->user_ctx = net;

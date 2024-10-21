@@ -318,7 +318,7 @@ void vlr_subscr_rx_ciph_res(struct vlr_subscr *vsub, enum vlr_ciph_result_cause 
 int vlr_subscr_rx_tmsi_reall_compl(struct vlr_subscr *vsub);
 int vlr_subscr_rx_imsi_detach(struct vlr_subscr *vsub);
 
-struct vlr_instance *vlr_alloc(void *ctx, const struct vlr_ops *ops);
+struct vlr_instance *vlr_alloc(void *ctx, const struct vlr_ops *ops, bool is_ps);
 int vlr_start(struct vlr_instance *vlr, struct gsup_client_mux *gcm);
 int vlr_gsup_rx(struct gsup_client_mux *gcm, void *data, const struct osmo_gsup_message *gsup_msg);
 
