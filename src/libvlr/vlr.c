@@ -1511,7 +1511,7 @@ void vlr_ran_conn_timeout(struct vlr_subscr *vsub)
 	vlr_subscr_cancel_attach_fsm(vsub, OSMO_FSM_TERM_TIMEOUT, GSM48_REJECT_CONGESTION);
 }
 
-struct vlr_instance *vlr_alloc(void *ctx, const struct vlr_ops *ops)
+struct vlr_instance *vlr_alloc(void *ctx, const struct vlr_ops *ops, bool is_ps)
 {
 	struct vlr_instance *vlr = talloc_zero(ctx, struct vlr_instance);
 	OSMO_ASSERT(vlr);
@@ -1535,6 +1535,7 @@ struct vlr_instance *vlr_alloc(void *ctx, const struct vlr_ops *ops)
 	memcpy(&vlr->ops, ops, sizeof(vlr->ops));
 
 	/* defaults */
+	vlr->cfg.is_ps = is_ps;
 	vlr->cfg.assign_tmsi = true;
 	vlr->cfg.nri_bitlen = OSMO_NRI_BITLEN_DEFAULT;
 	vlr->cfg.nri_ranges = osmo_nri_ranges_alloc(vlr);
