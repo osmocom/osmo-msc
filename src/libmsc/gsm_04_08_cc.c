@@ -961,6 +961,13 @@ static int gsm48_cc_tx_setup(struct gsm_trans *trans, void *arg)
 	case GSM48_BCAP_ITCAP_3k1_AUDIO:
 	case GSM48_BCAP_ITCAP_FAX_G3:
 	case GSM48_BCAP_ITCAP_UNR_DIG_INF:
+		bearer_cap = (struct gsm_mncc_bearer_cap){
+			.transfer = trans->bearer_cap.transfer,
+			.mode = GSM48_BCAP_TMOD_CIRCUIT,
+			.coding = GSM48_BCAP_CODING_GSM_STD,
+			.radio = GSM48_BCAP_RRQ_FR_ONLY,
+		};
+
 		if (csd_bs_list_to_bearer_cap(&bearer_cap, &trans->cc.local.bearer_services) == 0) {
 			LOG_TRANS(trans, LOGL_ERROR, "Error composing Bearer Capability for CC Setup\n");
 

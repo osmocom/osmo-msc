@@ -426,13 +426,6 @@ int csd_bs_list_to_gsm0808_channel_type(struct gsm0808_channel_type *ct, const s
 
 int csd_bs_list_to_bearer_cap(struct gsm_mncc_bearer_cap *cap, const struct csd_bs_list *list)
 {
-	*cap = (struct gsm_mncc_bearer_cap){
-		.transfer = GSM_MNCC_BCAP_UNR_DIG,
-		.mode = GSM48_BCAP_TMOD_CIRCUIT,
-		.coding = GSM48_BCAP_CODING_GSM_STD,
-		.radio = GSM48_BCAP_RRQ_FR_ONLY,
-	};
-
 	for (unsigned int i = 0; i < list->count; i++) {
 		const enum csd_bs bs = list->bs[i];
 
