@@ -429,7 +429,10 @@ int csd_bs_list_to_bearer_cap(struct gsm_mncc_bearer_cap *cap, const struct csd_
 	for (unsigned int i = 0; i < list->count; i++) {
 		const enum csd_bs bs = list->bs[i];
 
-		cap->data.rate_adaption = GSM48_BCAP_RA_V110_X30;
+		if (cap->transfer == GSM48_BCAP_ITCAP_UNR_DIG_INF)
+			cap->data.rate_adaption = GSM48_BCAP_RA_V110_X30;
+		else /* GSM48_BCAP_ITCAP_3k1_AUDIO or GSM48_BCAP_ITCAP_FAX_G3 */
+			cap->data.rate_adaption = GSM48_BCAP_RA_NONE;
 		cap->data.sig_access = GSM48_BCAP_SA_I440_I450;
 		cap->data.async = bs_map[bs].async;
 		if (bs_map[bs].transp)
