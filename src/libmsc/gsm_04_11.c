@@ -231,6 +231,20 @@ static int gsm411_cp_sendmsg(struct msgb *msg, struct gsm_trans *trans,
 	return gsm411_sendmsg(trans, msg);
 }
 
+int gsm411_send_cp_error(struct msc_a *msc_a, uint8_t pdisc, uint8_t cause)
+{
+	struct msgb *msg = gsm411_msgb_alloc();
+	struct gsm48_hdr *gh;
+
+	msgb_put_u8(msg, cause);
+
+	gh = (struct gsm48_hdr *) msgb_push(msg, sizeof(*gh));
+	gh->proto_discr = pdisc;
+	gh->msg_type = GSM411_MT_CP_ERROR;
+
+	return msc_a_tx_dtap_to_i(msc_a, msg);
+}
+
 /* mm_send: receive MMCCSMS sap message from SMC */
 static int gsm411_mm_send(struct gsm411_smc_inst *inst, int msg_type,
 			struct msgb *msg, int cp_msg_type)
@@ -1339,6 +1353,12 @@ int gsm0411_rcv_sms(struct msc_a *msc_a, struct msgb *msg)
 			"to us anymore. We are ignoring it, maybe a CP-ERROR "
 			"from a MS?\n",
 			transaction_id);
+		/* Decrement use counter that has been incremented by CM Service Request (SMS).
+		 * If there is no other service request, the BSS connection will be released. */
+		if (!osmo_use_count_by(&msc_a->use_count, MSC_A_USE_CM_SERVICE_SMS))
+			LOG_TRANS(trans, LOGL_ERROR, "MO SMS without prior CM Service Request\n");
+		else
+			msc_a_put(msc_a, MSC_A_USE_CM_SERVICE_SMS);
 		return -EINVAL;
 	}
 
@@ -1346,7 +1366,15 @@ int gsm0411_rcv_sms(struct msc_a *msc_a, struct msgb *msg)
 		new_trans = 1;
 		trans = gsm411_trans_init(net, vsub, msc_a, transaction_id, true);
 		if (!trans) {
-			/* FIXME: send some error message */
+			/* Send error message. */
+			gsm411_send_cp_error(msc_a, GSM48_PDISC_SMS | (transaction_id << 4),
+					     GSM411_CP_CAUSE_NET_FAIL);
+			/* Decrement use counter that has been incremented by CM Service Request (SMS).
+			 * If there is no other service request, the BSS connection will be released. */
+			if (!osmo_use_count_by(&msc_a->use_count, MSC_A_USE_CM_SERVICE_SMS))
+				LOG_TRANS(trans, LOGL_ERROR, "MO SMS without prior CM Service Request\n");
+			else
+				msc_a_put(msc_a, MSC_A_USE_CM_SERVICE_SMS);
 			return -ENOMEM;
 		}
 
