@@ -2649,6 +2649,9 @@ int gsm0408_rcv_cc(struct msc_a *msc_a, struct msgb *msg)
 
 	if (!vsub) {
 		LOG_TRANS(trans, LOGL_ERROR, "Invalid conn: no subscriber\n");
+		/* Decrement use counter that has been incremented by CM Service Request (CC).
+		 * If there is no other service request, the BSS connection will be released. */
+		msc_a_put(msc_a, MSC_A_USE_CM_SERVICE_CC);
 		return -EINVAL;
 	}
 
@@ -2666,6 +2669,9 @@ int gsm0408_rcv_cc(struct msc_a *msc_a, struct msgb *msg)
 			rc = gsm48_tx_simple(msc_a,
 					     GSM48_PDISC_CC | (transaction_id << 4),
 					     GSM48_MT_CC_RELEASE_COMPL);
+			/* Decrement use counter that has been incremented by CM Service Request (CC).
+			 * If there is no other service request, the BSS connection will be released. */
+			msc_a_put(msc_a, MSC_A_USE_CM_SERVICE_CC);
 			return -ENOMEM;
 		}
 		if (osmo_fsm_inst_dispatch(msc_a->c.fi, MSC_A_EV_TRANSACTION_ACCEPTED, trans)) {
