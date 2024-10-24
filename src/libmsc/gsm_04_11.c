@@ -231,6 +231,19 @@ static int gsm411_cp_sendmsg(struct msgb *msg, struct gsm_trans *trans,
 	return gsm411_sendmsg(trans, msg);
 }
 
+int gsm411_send_cp_error(struct gsm_trans *trans, uint8_t msg_ref,
+			 uint8_t cause)
+{
+	struct msgb *msg = gsm411_msgb_alloc();
+
+	msgb_tv_put(msg, 1, cause);
+
+	LOG_TRANS(trans, LOGL_NOTICE, "TX: SMS CP ERROR, cause %d (%s)\n", cause,
+		get_value_string(gsm411_cp_cause_strs, cause));
+
+	return gsm411_cp_sendmsg(msg, trans, GSM411_MT_CP_ERROR_MT);
+}
+
 /* mm_send: receive MMCCSMS sap message from SMC */
 static int gsm411_mm_send(struct gsm411_smc_inst *inst, int msg_type,
 			struct msgb *msg, int cp_msg_type)
@@ -1318,7 +1331,11 @@ int gsm0411_rcv_sms(struct msc_a *msc_a, struct msgb *msg)
 		new_trans = 1;
 		trans = gsm411_trans_init(net, vsub, msc_a, transaction_id, true);
 		if (!trans) {
-			/* FIXME: send some error message */
+			/* Send error message. */
+			gsm411_send_cp_error(trans, rph->msg_ref, GSM411_CP_CAUSE_NET_FAIL);
+			/* Decrement use counter that has been incremented by CM Service Request (SMS).
+			 * If there is no other service request, the BSS connection will be released. */
+			msc_a_put(msc_a, MSC_A_USE_CM_SERVICE_SMS);
 			return -ENOMEM;
 		}
 
