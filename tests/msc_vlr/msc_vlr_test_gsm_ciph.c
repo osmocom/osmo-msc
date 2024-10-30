@@ -843,6 +843,7 @@ static void test_gsm_ciph_in_umts_env()
 	rx_from_ran = OSMO_RAT_GERAN_A;
 
 	btw("Location Update request causes a GSUP Send Auth Info request to HLR");
+	release_99 = true;
 	lu_result_sent = RES_NONE;
 	gsup_expect_tx("080108" "09710000000156f0" CN_DOMAIN VLR_TO_HLR);
 	ms_sends_msg("0508" /* MM LU */
@@ -1048,6 +1049,7 @@ static void test_gsm_ciph_in_umts_env()
 	ms_sends_msg("050130"
 		     "089910070000106005" /* IMSI */);
 	VERBOSE_ASSERT(bssap_clear_sent, == true, "%d");
+	release_99 = false;
 
 	ran_sends_clear_complete();
 	EXPECT_CONN_COUNT(0);

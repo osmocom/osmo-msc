@@ -1468,9 +1468,6 @@ int gsm44068_rcv_bcc_gcc(struct msc_a *msc_a, struct gsm_trans *trans, struct ms
 	uint8_t da, ua, comm, oi;
 	int rc = 0;
 
-	/* Remove sequence number (bit 7) from message type. */
-	msg_type &= 0xbf;
-
 	/* Parse messages. */
 	switch (msg_type) {
 	case OSMO_GSM44068_MSGT_SETUP:

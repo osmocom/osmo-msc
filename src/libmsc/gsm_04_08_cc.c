@@ -2632,6 +2632,7 @@ static struct datastate {
 #define DATASLLEN \
 	(sizeof(datastatelist) / sizeof(struct datastate))
 
+
 int gsm0408_rcv_cc(struct msc_a *msc_a, struct msgb *msg)
 {
 	struct gsm48_hdr *gh = msgb_l3(msg);
@@ -2641,11 +2642,6 @@ int gsm0408_rcv_cc(struct msc_a *msc_a, struct msgb *msg)
 	struct vlr_subscr *vsub = msc_a_vsub(msc_a);
 	struct gsm_network *net = msc_a_net(msc_a);
 	int i, rc = 0;
-
-	if (msg_type & 0x80) {
-		LOG_TRANS(trans, LOGL_DEBUG, "MSG 0x%2x not defined for PD error\n", msg_type);
-		return -EINVAL;
-	}
 
 	if (!vsub) {
 		LOG_TRANS(trans, LOGL_ERROR, "Invalid conn: no subscriber\n");

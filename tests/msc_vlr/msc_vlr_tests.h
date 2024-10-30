@@ -120,6 +120,8 @@ extern bool cc_to_mncc_tx_confirmed;
 extern uint32_t cc_to_mncc_tx_got_callref;
 extern char cc_to_mncc_tx_last_sdp[1024];
 
+extern bool release_99;
+
 extern struct gsm_mncc *on_call_release_mncc_sends_to_cc_data;
 
 static inline void expect_iu_release()

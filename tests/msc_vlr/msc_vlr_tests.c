@@ -90,6 +90,8 @@ char cc_to_mncc_tx_last_sdp[1024] = {};
 bool expecting_crcx[2] = {};
 bool got_crcx[2] = {};
 
+bool release_99 = false;
+
 extern int ran_dec_dtap_undup_pdisc_ctr_bin(uint8_t pdisc);
 
 /* static state variables for the L3 send sequence numbers */
@@ -105,10 +107,10 @@ static void patch_l3_seq_nr(struct msgb *msg)
 
 	if (bin >= 0 && bin < ARRAY_SIZE(n_sd)) {
 		/* patch in n_sd into the msg_type octet */
-		*msg_type_oct = (*msg_type_oct & 0x3f) | ((n_sd[bin] & 0x3) << 6);
+		*msg_type_oct = (*msg_type_oct & 0x3f) | ((n_sd[bin] & (release_99 ? 0x3 : 0x1)) << 6);
 		//fprintf(stderr, "pdisc=0x%02x bin=%d, patched n_sd=%u\n\n", pdisc, bin, n_sd[bin] & 3);
 		/* increment N(SD) */
-		n_sd[bin] = (n_sd[bin] + 1) % 4;
+		n_sd[bin] = (n_sd[bin] + 1) % (release_99 ? 4 : 2);
 	} else {
 		//fprintf(stderr, "pdisc=0x%02x NO SEQ\n\n", pdisc);
 	}

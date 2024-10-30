@@ -1453,6 +1453,45 @@ int msc_a_up_l3(struct msc_a *msc_a, struct msgb *msg)
 		return silent_call_rx(conn, msg);
 #endif
 
+	/* Check for corrct Bit 8.
+	 * In R99 or above, it is used as sequence number for MM, CC and SS protocol.
+	 * In any other case it must be set to default (0). */
+	if (!is_r99 || (pdisc != GSM48_PDISC_MM && pdisc != GSM48_PDISC_CC && pdisc != GSM48_PDISC_NC_SS)) {
+		if ((gh->msg_type & 0x80)) {
+			LOG_MSC_A_CAT(msc_a, DRLL, LOGL_NOTICE, "MSG 0x%2x not defined for PD (bit 8 is not 0)\n",
+				      gh->msg_type);
+			return -EINVAL;
+		}
+	}
+
+	/* Check for correct Bit 7.
+	 * For MM, CC, SS, GCC, BCC and LCS, it is used as sequence number.
+	 * For RR it is part of the message type.
+	 * For any other case it must be set to default (1 for SM, 0 for others). */
+	switch (pdisc) {
+	case GSM48_PDISC_CC:
+	case GSM48_PDISC_MM:
+	case GSM48_PDISC_NC_SS:
+	case GSM48_PDISC_GROUP_CC:
+	case GSM48_PDISC_BCAST_CC:
+	case GSM48_PDISC_LOC:
+	case GSM48_PDISC_RR:
+		break;
+	case GSM48_PDISC_SM_GPRS:
+		if (!(gh->msg_type & 0x40)) {
+			LOG_MSC_A_CAT(msc_a, DRLL, LOGL_NOTICE, "SM MSG 0x%2x not defined for PD (bit 7 is not 1)\n",
+				      gh->msg_type);
+			return -EINVAL;
+		}
+		break;
+	default:
+		if ((gh->msg_type & 0x40)) {
+			LOG_MSC_A_CAT(msc_a, DRLL, LOGL_NOTICE, "MSG 0x%2x not defined for PD (bit 7 is not 0)\n",
+				      gh->msg_type);
+			return -EINVAL;
+		}
+	}
+
 	switch (pdisc) {
 	case GSM48_PDISC_GROUP_CC:
 	case GSM48_PDISC_BCAST_CC:

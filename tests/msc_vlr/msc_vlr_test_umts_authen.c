@@ -23,6 +23,8 @@
 
 #include "msc_vlr_tests.h"
 
+
+
 static void _test_umts_authen(enum osmo_rat_type via_ran)
 {
 	struct vlr_subscr *vsub;
@@ -57,6 +59,7 @@ static void _test_umts_authen(enum osmo_rat_type via_ran)
 	rx_from_ran = via_ran;
 
 	btw("Location Update request causes a GSUP Send Auth Info request to HLR");
+	release_99 = true;
 	lu_result_sent = RES_NONE;
 	gsup_expect_tx("080108" "09710000000156f0" CN_DOMAIN VLR_TO_HLR);
 	ms_sends_msg("0508" /* MM LU */
@@ -337,6 +340,7 @@ static void _test_umts_authen(enum osmo_rat_type via_ran)
 	expect_release_clear(via_ran);
 	ms_sends_msg("050130"
 		     "089910070000106005" /* IMSI */);
+	release_99 = false;
 	ASSERT_RELEASE_CLEAR(via_ran);
 	ran_sends_clear_complete(via_ran);
 
@@ -389,6 +393,7 @@ static void _test_umts_authen_resync(enum osmo_rat_type via_ran)
 	rx_from_ran = via_ran;
 
 	btw("Location Update request causes a GSUP Send Auth Info request to HLR");
+	release_99 = true;
 	lu_result_sent = RES_NONE;
 	gsup_expect_tx("080108" "09710000000156f0" CN_DOMAIN VLR_TO_HLR);
 	ms_sends_msg("0508" /* MM LU */
@@ -597,6 +602,7 @@ static void _test_umts_authen_resync(enum osmo_rat_type via_ran)
 	btw("MS sends TMSI Realloc Complete");
 	expect_release_clear(via_ran);
 	ms_sends_msg("055b");
+	release_99 = false;
 	ASSERT_RELEASE_CLEAR(via_ran);
 	ran_sends_clear_complete(via_ran);
 

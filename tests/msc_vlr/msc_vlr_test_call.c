@@ -53,6 +53,7 @@ static void lu_utran_tmsi()
 	rx_from_ran = OSMO_RAT_UTRAN_IU;
 
 	btw("Location Update request causes a GSUP Send Auth Info request to HLR");
+	release_99 = true;
 	lu_result_sent = RES_NONE;
 	gsup_expect_tx("080108" "09710000000156f0" CN_DOMAIN VLR_TO_HLR);
 	ms_sends_msg("0508" /* MM LU */
@@ -171,6 +172,7 @@ static void lu_geran_noauth(void)
 	net->vlr->cfg.assign_tmsi = false;
 
 	btw("Location Update request causes a GSUP LU request to HLR");
+	release_99 = true;
 	lu_result_sent = RES_NONE;
 	gsup_expect_tx("04010809710000000156f0280102" VLR_TO_HLR);
 	ms_sends_msg("0508" /* MM LU */
@@ -319,6 +321,7 @@ static void test_call_mo()
 	EXPECT_CONN_COUNT(0);
 	clear_vlr();
 	comment_end();
+	release_99 = false;
 }
 
 static void test_call_mt()
@@ -455,6 +458,7 @@ static void test_call_mt()
 	EXPECT_CONN_COUNT(0);
 	clear_vlr();
 	comment_end();
+	release_99 = false;
 }
 
 static void test_call_mt2()
@@ -580,6 +584,7 @@ static void test_call_mt2()
 
 	clear_vlr();
 	comment_end();
+	release_99 = false;
 }
 
 static void test_call_mo_to_unknown()
@@ -678,6 +683,7 @@ static void test_call_mo_to_unknown()
 	EXPECT_CONN_COUNT(0);
 	clear_vlr();
 	comment_end();
+	release_99 = false;
 }
 
 static void test_call_mo_to_unknown_timeout()
@@ -777,6 +783,7 @@ static void test_call_mo_to_unknown_timeout()
 	EXPECT_CONN_COUNT(0);
 	clear_vlr();
 	comment_end();
+	release_99 = false;
 }
 
 #define LIST_END 0xffff
@@ -1634,6 +1641,7 @@ static void test_codecs(void)
 	EXPECT_CONN_COUNT(0);
 	clear_vlr();
 	comment_end();
+	release_99 = false;
 }
 
 msc_vlr_test_func_t msc_vlr_tests[] = {
