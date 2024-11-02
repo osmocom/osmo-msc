@@ -27,6 +27,7 @@
 
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <netinet/tcp.h>
 
 #include <smpp34.h>
 #include <smpp34_structs.h>
@@ -984,7 +985,7 @@ static void smpp_smsc_stop(struct smsc *smsc)
  */
 int smpp_smsc_start(struct smsc *smsc, const char *bind_addr, uint16_t port)
 {
-	int rc;
+	int rc, val;
 
 	LOGP(DSMPP, LOGL_NOTICE, "SMPP at %s %d\n",
 	     bind_addr ? bind_addr : "0.0.0.0", port ? port : SMPP_PORT);
@@ -994,6 +995,11 @@ int smpp_smsc_start(struct smsc *smsc, const char *bind_addr, uint16_t port)
 				OSMO_SOCK_F_BIND);
 	if (rc < 0)
 		return rc;
+
+	val = 1;
+	rc = setsockopt(smsc->listen_ofd.fd, IPPROTO_TCP, TCP_NODELAY, &val, sizeof(val));
+	if (rc < 0)
+		LOGP(DSMPP, LOGL_ERROR, "Failed to set TCP_NODELAY: %s\n", strerror(errno));
 
 	/* store new address and port */
 	rc = smpp_smsc_conf(smsc, bind_addr, port ? port : SMPP_PORT);

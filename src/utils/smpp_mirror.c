@@ -5,6 +5,7 @@
 #include <string.h>
 
 #include <netinet/in.h>
+#include <netinet/tcp.h>
 
 #include <smpp34.h>
 #include <smpp34_structs.h>
@@ -241,7 +242,7 @@ static int esme_write_cb(struct osmo_fd *ofd, struct msgb *msg)
 
 static int smpp_esme_init(struct esme *esme, const char *host, uint16_t port)
 {
-	int rc;
+	int rc, val;
 
 	if (port == 0)
 		port = SMPP_PORT;
@@ -254,6 +255,11 @@ static int smpp_esme_init(struct esme *esme, const char *host, uint16_t port)
 				IPPROTO_TCP, host, port, OSMO_SOCK_F_CONNECT);
 	if (rc < 0)
 		return rc;
+
+	val = 1;
+	rc = setsockopt(esme->wqueue.bfd.fd, IPPROTO_TCP, TCP_NODELAY, &val, sizeof(val));
+	if (rc < 0)
+		LOGP(DSMPP, LOGL_ERROR, "Failed to set TCP_NODELAY: %s\n", strerror(errno));
 
 	return bind_transceiver(esme);
 }
