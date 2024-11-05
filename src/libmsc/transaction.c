@@ -124,7 +124,8 @@ struct osmo_lcls *trans_lcls_compose(const struct gsm_trans *trans, bool use_lac
 
 	struct osmo_ss7_instance *ss7 = osmo_sccp_get_ss7(trans->net->a.sri->sccp);
 	struct osmo_lcls *lcls;
-	uint8_t w = osmo_ss7_pc_width(&ss7->cfg.pc_fmt);
+	const struct osmo_ss7_pc_fmt *pc_fmt = osmo_ss7_instance_get_pc_fmt(ss7);
+	uint8_t w = osmo_ss7_pc_width(pc_fmt);
 
 	if (!trans->net->lcls_permitted) {
 		LOGP(DCC, LOGL_NOTICE, "LCLS disabled globally\n");
@@ -150,7 +151,7 @@ struct osmo_lcls *trans_lcls_compose(const struct gsm_trans *trans, bool use_lac
 	LOGP(DCC, LOGL_INFO, "LCLS: using %u bits (%u bytes) for node ID\n", w, w / 8);
 
 	lcls->gcr.net_len = 3;
-	lcls->gcr.node = ss7->cfg.primary_pc;
+	lcls->gcr.node = osmo_ss7_instance_get_primary_pc(ss7);
 
 	/* net id from Q.1902.3 3-5 bytes, this function gives 3 bytes exactly */
 	osmo_plmn_to_bcd(lcls->gcr.net, &trans->msc_a->via_cell.lai.plmn);
