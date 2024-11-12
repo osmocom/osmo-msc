@@ -803,10 +803,21 @@ TODO: we probably want some of the _net_ ctrl commands from bsc_base_ctrl_cmds_i
 		ret = 10;
 		goto error;
 	}
+
+#ifdef SIGTRAN_PRIVATE_STRUCTS
+	const struct osmo_ss7_instance *ss7;
+	ss7 = osmo_sccp_get_ss7(msc_network->a.sri->sccp);
+	OSMO_ASSERT(ss7);
+	LOGP(DMSC, LOGL_NOTICE, "A-interface: SCCP user %s, cs7-instance %u (%s)\n",
+	     osmo_sccp_user_name(msc_network->a.sri->scu),
+	     osmo_ss7_instance_get_id(ss7),
+	     osmo_ss7_instance_get_name(ss7));
+#else
 	LOGP(DMSC, LOGL_NOTICE, "A-interface: SCCP user %s, cs7-instance %u (%s)\n",
 	     osmo_sccp_user_name(msc_network->a.sri->scu),
 	     osmo_sccp_get_ss7(msc_network->a.sri->sccp)->cfg.id,
 	     osmo_sccp_get_ss7(msc_network->a.sri->sccp)->cfg.name);
+#endif
 
 #ifdef BUILD_IU
 	talloc_asn1_ctx = talloc_named_const(tall_msc_ctx, 0, "asn1");
@@ -823,11 +834,18 @@ TODO: we probably want some of the _net_ ctrl commands from bsc_base_ctrl_cmds_i
 	/* Compatibility with legacy osmo-hnbgw that was unable to properly handle RESET messages. */
 	msc_network->iu.sri->ignore_missing_reset = true;
 
+#ifdef SIGTRAN_PRIVATE_STRUCTS
+	LOGP(DMSC, LOGL_NOTICE, "Iu-interface: SCCP user %s, cs7-instance %u (%s)\n",
+	     osmo_sccp_user_name(msc_network->iu.sri->scu),
+	     osmo_ss7_instance_get_id(ss7),
+	     osmo_ss7_instance_get_name(ss7));
+#else
 	LOGP(DMSC, LOGL_NOTICE, "Iu-interface: SCCP user %s, cs7-instance %u (%s)\n",
 	     osmo_sccp_user_name(msc_network->iu.sri->scu),
 	     osmo_sccp_get_ss7(msc_network->iu.sri->sccp)->cfg.id,
 	     osmo_sccp_get_ss7(msc_network->iu.sri->sccp)->cfg.name);
 #endif
+#endif /* BUILD_IU */
 
 	/* Init RRLP handlers */
 	msc_rrlp_init();
