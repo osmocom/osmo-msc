@@ -1,3 +1,9 @@
+osmo-msc (1.12.2) unstable; urgency=medium
+
+  * Make compatible with private sigtran structs
+
+ -- Oliver Smith <osmith@sysmocom.de>  Wed, 13 Nov 2024 13:11:47 +0100
+
 osmo-msc (1.12.1) unstable; urgency=medium
 
   [ Harald Welte ]
