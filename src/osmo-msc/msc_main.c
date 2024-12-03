@@ -71,7 +71,7 @@
 #include <osmocom/msc/msub.h>
 #include <osmocom/msc/call_leg.h>
 #include <osmocom/msc/msc_ho.h>
-#include <osmocom/msc/gsup_client_mux.h>
+#include <osmocom/gsupclient/gsup_client_mux.h>
 #include <osmocom/msc/e_link.h>
 #include <osmocom/msc/mncc_call.h>
 

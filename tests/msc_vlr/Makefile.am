@@ -20,8 +20,8 @@ AM_CFLAGS = \
 	$(NULL)
 
 AM_LDFLAGS = \
-	-Wl,--wrap=osmo_gsup_client_create2 \
-	-Wl,--wrap=osmo_gsup_client_send \
+	-Wl,--wrap=gsup_client_mux_start \
+	-Wl,--wrap=gsup_client_mux_tx \
 	-Wl,--wrap=gsm340_gen_scts \
 	-Wl,--wrap=osmo_get_rand_id \
 	-Wl,--wrap=ran_peers_down_paging \

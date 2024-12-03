@@ -41,7 +41,6 @@ libmsc_a_SOURCES = \
 	gsm_04_14.c \
 	gsm_04_80.c \
 	gsm_09_11.c \
-	gsup_client_mux.c \
 	mncc.c \
 	mncc_builtin.c \
 	mncc_sock.c \

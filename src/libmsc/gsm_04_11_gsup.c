@@ -32,7 +32,7 @@
 #include <osmocom/msc/debug.h>
 #include <osmocom/vlr/vlr.h>
 #include <osmocom/msc/msub.h>
-#include <osmocom/msc/gsup_client_mux.h>
+#include <osmocom/gsupclient/gsup_client_mux.h>
 #include <osmocom/msc/msc_a.h>
 
 /* Common helper for preparing to be encoded GSUP message */

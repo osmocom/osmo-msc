@@ -25,7 +25,7 @@
 #include <osmocom/gsupclient/gsup_client.h>
 
 #include <osmocom/msc/gsm_data.h>
-#include <osmocom/msc/gsup_client_mux.h>
+#include <osmocom/gsupclient/gsup_client_mux.h>
 #include <osmocom/msc/e_link.h>
 #include <osmocom/msc/msub.h>
 #include <osmocom/msc/msc_roles.h>

@@ -50,7 +50,7 @@
 #include <osmocom/msc/msc_a.h>
 #include <osmocom/msc/msub.h>
 #include <osmocom/msc/paging.h>
-#include <osmocom/msc/gsup_client_mux.h>
+#include <osmocom/gsupclient/gsup_client_mux.h>
 
 /* FIXME: choose a proper range */
 static uint32_t new_callref = 0x20000001;

@@ -17,7 +17,6 @@ noinst_HEADERS = \
 	gsm_data.h \
 	gsm_data_shared.h \
 	gsm_subscriber.h \
-	gsup_client_mux.h \
 	mncc.h \
 	mncc_call.h \
 	mncc_int.h \

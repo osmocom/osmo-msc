@@ -30,7 +30,7 @@
 #include <osmocom/core/application.h>
 #include <osmocom/gsm/protocol/gsm_04_11.h>
 #include <osmocom/gsm/gsup.h>
-#include <osmocom/msc/gsup_client_mux.h>
+#include <osmocom/gsupclient/gsup_client_mux.h>
 #include <osmocom/msc/gsm_04_11.h>
 #include <osmocom/msc/debug.h>
 #include <osmocom/msc/gsm_04_08.h>
@@ -136,6 +136,26 @@ static const char *gh_type_name(struct gsm48_hdr *gh)
 					gsm48_hdr_msg_type(gh));
 }
 
+static int _gsup_client_mux_rx(struct gsup_client_mux *gcm, struct msgb *msg)
+{
+	struct osmo_gsup_message gsup;
+	int rc;
+
+	rc = osmo_gsup_decode(msgb_l2(msg), msgb_l2len(msg), &gsup);
+	if (rc < 0) {
+		LOGP(DLGSUP, LOGL_ERROR, "Failed to decode GSUP message: '%s' (%d) [ %s]\n",
+		     get_value_string(gsm48_gmm_cause_names, -rc), -rc, osmo_hexdump(msg->data, msg->len));
+		goto msgb_free_and_return;
+	}
+
+	OSMO_ASSERT(gcm->rx_cb[gsup.message_class].func);
+	rc = gcm->rx_cb[gsup.message_class].func(gcm, gcm->rx_cb[gsup.message_class].data, &gsup);
+
+msgb_free_and_return:
+	msgb_free(msg);
+	return rc;
+}
+
 void gsup_rx(const char *rx_hex, const char *expect_tx_hex)
 {
 	int rc;
@@ -149,7 +169,7 @@ void gsup_rx(const char *rx_hex, const char *expect_tx_hex)
 	fprintf(stderr, "<-- GSUP rx %s: %s\n", label,
 		osmo_hexdump_nospc(msgb_l2(msg), msgb_l2len(msg)));
 	/* GSUP read cb takes ownership of msgb */
-	rc = gsup_client_mux_rx(net->gcm->gsup_client, msg);
+	rc = _gsup_client_mux_rx(net->gcm, msg);
 	fprintf(stderr, "<-- GSUP rx %s: vlr_gsupc_read_cb() returns %d\n",
 		label, rc);
 	if (expect_tx_hex)
@@ -810,27 +830,32 @@ int mncc_recv(struct gsm_network *net, struct msgb *msg)
 	return 0;
 }
 
+/* override, requires '-Wl,--wrap=gsup_client_mux_start' */
 struct osmo_gsup_client *
-__real_osmo_gsup_client_create2(struct ipaccess_unit *ipa_dev, const char *ip_addr,
-				unsigned int tcp_port, osmo_gsup_client_read_cb_t read_cb,
-				struct osmo_oap_client_config *oap_config);
+__real_gsup_client_mux_start(struct gsup_client_mux *gcm, const char *gsup_server_addr_str, uint16_t gsup_server_port,
+			  struct ipaccess_unit *ipa_dev);
 struct osmo_gsup_client *
-__wrap_osmo_gsup_client_create2(struct ipaccess_unit *ipa_dev, const char *ip_addr,
-				unsigned int tcp_port, osmo_gsup_client_read_cb_t read_cb,
-				struct osmo_oap_client_config *oap_config)
+__wrap_gsup_client_mux_start(struct gsup_client_mux *gcm, const char *gsup_server_addr_str, uint16_t gsup_server_port,
+			  struct ipaccess_unit *ipa_dev)
 {
-	struct osmo_gsup_client *gsupc;
-	gsupc = talloc_zero(msc_vlr_tests_ctx, struct osmo_gsup_client);
-	OSMO_ASSERT(gsupc);
-	return gsupc;
+	return 0;
 }
 
-/* override, requires '-Wl,--wrap=gsup_client_send' */
-int __real_osmo_gsup_client_send(struct osmo_gsup_client *gsupc, struct msgb *msg);
-int __wrap_osmo_gsup_client_send(struct osmo_gsup_client *gsupc, struct msgb *msg)
+/* override, requires '-Wl,--wrap=gsup_client_mux_tx' */
+int __real_gsup_client_mux_tx(struct gsup_client_mux *gcm, const struct osmo_gsup_message *gsup_msg);
+int __wrap_gsup_client_mux_tx(struct gsup_client_mux *gcm, const struct osmo_gsup_message *gsup_msg)
 {
 	uint8_t buf[512];
 	int len;
+	struct msgb *msg;
+	int rc;
+
+	msg = osmo_gsup_client_msgb_alloc();
+	rc = osmo_gsup_encode(msg, gsup_msg);
+	if (rc < 0) {
+		fprintf(stderr, "Failed to encode GSUP message: '%s'\n", strerror(-rc));
+		return rc;
+	}
 
 	fprintf(stderr, "GSUP --> HLR: %s: %s\n",
 		osmo_gsup_message_type_name(msg->data[0]), osmo_hexdump_nospc(msg->data, msg->len));

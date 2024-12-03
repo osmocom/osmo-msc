@@ -8,3 +8,4 @@
 # If any interfaces have been removed or changed since the last public release: c:r:0.
 #library	what			description / commit summary line
 libosmo-sigtran   >2.0.1   osmo_ss7_instance_get_id(), osmo_ss7_instance_get_name(), osmo_ss7_instance_get_pc_fmt(), osmo_ss7_instance_get_primary_pc()
+libosmo-gsup-client >1.8.0  gsup_client_mux.h
