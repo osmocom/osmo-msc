@@ -114,10 +114,13 @@ int e_prep_gsup_msg(struct e_link *e, struct osmo_gsup_message *gsup_msg)
 	struct vlr_subscr *vsub;
 	const char *local_msc_name = NULL;
 
-	if (e->gcm && e->gcm->gsup_client && e->gcm->gsup_client->ipa_dev) {
-		local_msc_name = e->gcm->gsup_client->ipa_dev->serno;
-		if (!local_msc_name)
-			local_msc_name = e->gcm->gsup_client->ipa_dev->unit_name;
+	if (e->gcm && e->gcm->gsup_client) {
+		const struct ipaccess_unit *ipa_dev = osmo_gsup_client_get_ipaccess_unit(e->gcm->gsup_client);
+		if (ipa_dev) {
+			local_msc_name = ipa_dev->serno;
+			if (!local_msc_name)
+				local_msc_name = ipa_dev->unit_name;
+		}
 	}
 
 	if (!local_msc_name) {
