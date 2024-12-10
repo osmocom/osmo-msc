@@ -33,7 +33,7 @@ osmo-clean-workspace.sh
 
 mkdir "$deps" || true
 
-osmo-build-dep.sh libosmocore "" ac_cv_path_DOXYGEN=false
+osmo-build-dep.sh libosmocore "" --disable-doxygen
 
 verify_value_string_arrays_are_terminated.py $(find . -name "*.[hc]")
 
@@ -43,7 +43,7 @@ export PATH="$inst/bin:$PATH"
 
 osmo-build-dep.sh libosmo-netif "" --disable-doxygen
 osmo-build-dep.sh libosmo-abis
-osmo-build-dep.sh libosmo-sigtran
+osmo-build-dep.sh libosmo-sigtran "" --disable-doxygen
 osmo-build-dep.sh libsmpp34
 osmo-build-dep.sh osmo-mgw
 osmo-build-dep.sh osmo-hlr
