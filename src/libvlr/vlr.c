@@ -439,8 +439,10 @@ int vlr_subscr_purge(struct vlr_subscr *vsub)
 	gsup_msg.message_type = OSMO_GSUP_MSGT_PURGE_MS_REQUEST;
 
 	/* provide HLR number in case we know it */
-	gsup_msg.hlr_enc_len = vsub->hlr.len;
-	gsup_msg.hlr_enc = vsub->hlr.buf;
+	if (vsub->hlr.len) {
+		gsup_msg.hlr_enc_len = vsub->hlr.len;
+		gsup_msg.hlr_enc = vsub->hlr.buf;
+	}
 
 	gsup_msg.cn_domain = vlr_is_cs(vsub->vlr) ? OSMO_GSUP_CN_DOMAIN_CS : OSMO_GSUP_CN_DOMAIN_PS;
 
