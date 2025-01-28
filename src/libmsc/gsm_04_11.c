@@ -852,7 +852,19 @@ static int gsm411_rx_rp_ack(struct gsm_trans *trans,
 
 	if (trans->net->sms_over_gsup) {
 		/* Forward towards SMSC via GSUP */
-		return gsm411_gsup_mt_fwd_sm_res(trans, rph->msg_ref);
+		uint8_t ui_len = 0;
+		uint8_t *ui_buf = NULL;
+		/* check for:
+		 * - sufficient size for tag, length and data
+		 * - RP-User-Data tag
+		 * - user data length is valid */
+		if (rph->len > 2 &&
+		    rph->data[0] == GSM411_IE_RP_USER_DATA &&
+		    rph->data[1] <= (rph->len - 2)) {
+			ui_len = rph->data[1];
+			ui_buf = &(rph->data[2]);
+		}
+		return gsm411_gsup_mt_fwd_sm_res(trans, rph->msg_ref, ui_buf, ui_len);
 	}
 
 	if (!sms) {
@@ -893,7 +905,23 @@ static int gsm411_rx_rp_error(struct gsm_trans *trans,
 
 	if (trans->net->sms_over_gsup) {
 		/* Forward towards SMSC via GSUP */
-		return gsm411_gsup_mt_fwd_sm_err(trans, rph->msg_ref, cause);
+		uint8_t ui_len = 0;
+		uint8_t *ui_buf = NULL;
+		uint8_t ui_tag_idx = cause_len + 1;
+		uint8_t ui_len_idx = ui_tag_idx + 1;
+		uint8_t ui_buf_idx = ui_len_idx + 1;
+		/* check for:
+		 * - sufficient size for tag, length and data
+		 * - RP-User-Data tag
+		 * - user data length is valid */
+		if (rph->len > ui_buf_idx &&
+		    rph->data[ui_tag_idx] == GSM411_IE_RP_USER_DATA &&
+		    rph->data[ui_len_idx] <= (rph->len - ui_buf_idx)) {
+			ui_len = rph->data[ui_len_idx];
+			ui_buf = &(rph->data[ui_buf_idx]);
+		}
+
+		return gsm411_gsup_mt_fwd_sm_err(trans, rph->msg_ref, cause, ui_buf, ui_len);
 	}
 
 	if (!sms) {
