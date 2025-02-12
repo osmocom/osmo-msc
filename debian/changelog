@@ -1,3 +1,51 @@
+osmo-msc (1.13.0) unstable; urgency=medium
+
+  [ Andreas Eversberg ]
+  * Remove speech codec list from bearer_cap for phase 1 mobile station
+  * Release BSS connection when SS message is rejected
+
+  [ Vadim Yanitskiy ]
+  * silent-call: add CSD channel modes
+  * csd_bs: cosmetic changes to csd_bs_list_to_bearer_cap()
+  * csd_bs: do not hard-code GSM48_BCAP_ITCAP_UNR_DIG_INF
+  * csd_bs: fix setting of Rate Adaptation for FAX and 3.1 kHz audio
+  * smpp: set TCP_NODELAY sockopt
+
+  [ Alexander Couzens ]
+  * libvlr: replace direct call of paging_expired() into a callback
+  * msc/gsup_client_mux.h: remove include of itself
+  * libvlr: fix tab/space issue
+  * libvlr: use correct log facility within the VLR
+  * Move vlr.h & vlr_sgs.h into osmocom/vlr/
+  * vlr: refactor the reject cause codes
+  * vlr: fix typo in comment
+  * vlr: refactor and rename vlr_timer into vlr_timer_val
+  * vlr: add functions for vlr_is_cs() vlr_is_ps()
+  * vlr: set the correct CN domain on GSUP messages
+  * vlr: add the location update type to the callbacks tx_lu_acc/tx_lu_rej
+  * vlr_auth_fsm: fix missing space
+  * msc_net_init: replace spaces with tabs as indention
+  * vlr: add a logging layer
+  * vlr: drop msc/debug.h header
+  * vlr: make vlr_parq_fsm_init() private
+  * vlr: vlr_auth_fsm: make the fsm private
+  * vlr: add bool is_ps to vlr_alloc()
+  * vlr: Add support for CS and PS timers
+  * vlr: on subscriber disconnect, check if LU & Auth FSM are even valid
+  * vlr: only set HLR number if field is present
+
+  [ Pau Espin Pedrol ]
+  * Use new libosmo-sigtran APIs to access osmo_ss7_instance
+  * jenkins.sh: libosmo-netif no longer depends on libosmo-abis
+  * Use gsup_client_mux from libosmo-gsup-client
+  * vty: Avoid accessing gsupclient object fields directly
+  * jenkins.sh: No need to build libosmo-sigtran with doxygen
+
+  [ Simon Cornish ]
+  * Include SM-RP-UI in outgoing GSUP message when presesnt
+
+ -- Oliver Smith <osmith@sysmocom.de>  Wed, 12 Feb 2025 13:10:30 +0100
+
 osmo-msc (1.12.1) unstable; urgency=medium
 
   [ Harald Welte ]

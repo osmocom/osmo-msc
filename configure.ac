@@ -37,15 +37,15 @@ fi
 PKG_PROG_PKG_CONFIG([0.20])
 
 PKG_CHECK_MODULES(LIBSQLITE3, sqlite3)
-PKG_CHECK_MODULES(LIBOSMOCORE, libosmocore >= 1.10.0)
-PKG_CHECK_MODULES(LIBOSMOVTY, libosmovty >= 1.10.0)
-PKG_CHECK_MODULES(LIBOSMOCTRL, libosmoctrl >= 1.10.0)
-PKG_CHECK_MODULES(LIBOSMOGSM, libosmogsm >= 1.10.0)
-PKG_CHECK_MODULES(LIBOSMOABIS, libosmoabis >= 1.6.0)
-PKG_CHECK_MODULES(LIBOSMONETIF, libosmo-netif >= 1.5.0)
-PKG_CHECK_MODULES(LIBOSMOSIGTRAN, libosmo-sigtran >= 2.0.0)
-PKG_CHECK_MODULES(LIBOSMOMGCPCLIENT, libosmo-mgcp-client >= 1.13.0)
-PKG_CHECK_MODULES(LIBOSMOGSUPCLIENT, libosmo-gsup-client >= 1.8.0)
+PKG_CHECK_MODULES(LIBOSMOCORE, libosmocore >= 1.11.0)
+PKG_CHECK_MODULES(LIBOSMOVTY, libosmovty >= 1.11.0)
+PKG_CHECK_MODULES(LIBOSMOCTRL, libosmoctrl >= 1.11.0)
+PKG_CHECK_MODULES(LIBOSMOGSM, libosmogsm >= 1.11.0)
+PKG_CHECK_MODULES(LIBOSMOABIS, libosmoabis >= 2.0.0)
+PKG_CHECK_MODULES(LIBOSMONETIF, libosmo-netif >= 1.6.0)
+PKG_CHECK_MODULES(LIBOSMOSIGTRAN, libosmo-sigtran >= 2.1.0)
+PKG_CHECK_MODULES(LIBOSMOMGCPCLIENT, libosmo-mgcp-client >= 1.14.0)
+PKG_CHECK_MODULES(LIBOSMOGSUPCLIENT, libosmo-gsup-client >= 1.9.0)
 
 AC_CHECK_FUNC([timegm], [AC_DEFINE(HAVE_TIMEGM, 1, Define if libc implements timegm)])
 
@@ -105,7 +105,7 @@ AC_ARG_ENABLE([iu], [AS_HELP_STRING([--enable-iu], [Build 3G support, aka IuPS a
     [osmo_ac_iu="$enableval"],[osmo_ac_iu="no"])
 if test "x$osmo_ac_iu" = "xyes" ; then
     PKG_CHECK_MODULES(LIBASN1C, libasn1c >= 0.9.30)
-    PKG_CHECK_MODULES(LIBOSMORANAP, libosmo-ranap >= 1.6.0)
+    PKG_CHECK_MODULES(LIBOSMORANAP, libosmo-ranap >= 1.7.0)
     AC_DEFINE(BUILD_IU, 1, [Define if we want to build IuPS and IuCS interfaces support])
 fi
 AM_CONDITIONAL(BUILD_IU, test "x$osmo_ac_iu" = "xyes")
