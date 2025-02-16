@@ -540,8 +540,7 @@ static void auth_fsm_wait_imsi(struct osmo_fsm_inst *fi, uint32_t event,
 			LOGVSUBP(LOGL_ERROR, vsub, "IMSI in ID RESP differs:"
 				 " %s\n", mi_string);
 		} else {
-			strncpy(vsub->imsi, mi_string, sizeof(vsub->imsi));
-			vsub->imsi[sizeof(vsub->imsi)-1] = '\0';
+			OSMO_STRLCPY_ARRAY(vsub->imsi, mi_string);
 		}
 		/* retry with identity=IMSI */
 		afp->by_imsi = true;

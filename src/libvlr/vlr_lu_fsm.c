@@ -1573,8 +1573,7 @@ vlr_loc_update(struct osmo_fsm_inst *parent,
 	lfp->is_utran = is_utran;
 	lfp->assign_tmsi = assign_tmsi;
 	if (imsi) {
-		strncpy(lfp->imsi, imsi, sizeof(lfp->imsi)-1);
-		lfp->imsi[sizeof(lfp->imsi)-1] = '\0';
+		OSMO_STRLCPY_ARRAY(lfp->imsi, imsi);
 		lfp->lu_by_tmsi = false;
 	}
 	fi->priv = lfp;

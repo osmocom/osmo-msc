@@ -96,7 +96,7 @@ int vlr_sgs_loc_update(struct vlr_instance *vlr, struct vlr_sgs_cfg *cfg,
 	vsub->sgs.mminfo_cb = mminfo_cb;
 	vlr_subscr_set_imsi(vsub, imsi);
 	vlr_subscr_set_last_used_eutran_plmn_id(vsub, last_eutran_plmn);
-	osmo_strlcpy(vsub->sgs.mme_name, mme_name, sizeof(vsub->sgs.mme_name));
+	OSMO_STRLCPY_ARRAY(vsub->sgs.mme_name, mme_name);
 
 	osmo_fsm_inst_dispatch(vsub->sgs_fsm, SGS_UE_E_RX_LU_FROM_MME, NULL);
 
