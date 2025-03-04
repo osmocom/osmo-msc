@@ -354,29 +354,10 @@ static int msc_vty_go_parent(struct vty *vty)
 	return vty->node;
 }
 
-static int msc_vty_is_config_node(struct vty *vty, int node)
-{
-	/* Check if libosmo-sigtran declares the node in
-	 * question as config node */
-	if (osmo_ss7_is_config_node(vty, node))
-		return 1;
-
-	switch (node) {
-	/* add items that are not config */
-	case SUBSCR_NODE:
-	case CONFIG_NODE:
-		return 0;
-
-	default:
-		return 1;
-	}
-}
-
 static struct vty_app_info msc_vty_info = {
 	.name		= "OsmoMSC",
 	.version	= PACKAGE_VERSION,
 	.go_parent_cb	= msc_vty_go_parent,
-	.is_config_node	= msc_vty_is_config_node,
 };
 
 #define DEFAULT_M3UA_LOCAL_IP "localhost"
