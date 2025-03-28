@@ -503,6 +503,7 @@ int gsm0911_gsup_rx(struct gsup_client_mux *gcm, void *data, const struct osmo_g
 
 	/* We don't need subscriber info anymore */
 	vlr_subscr_put(vsub, __func__);
+	vsub = NULL;
 
 	/* (Re)schedule the inactivity timer */
 	if (net->ncss_guard_timeout > 0) {
