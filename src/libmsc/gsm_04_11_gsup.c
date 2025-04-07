@@ -208,11 +208,16 @@ int gsm411_gsup_mt_fwd_sm_res(struct gsm_trans *trans, uint8_t sm_rp_mr, const u
 		gsup_msg.sm_rp_ui = ui_buf;
 	}
 
+	trans->sms.gsup_rsp_pending = false;
+
 	return gsup_client_mux_tx(trans->net->gcm, &gsup_msg);
 }
 
 int gsm411_gsup_mt_fwd_sm_err(struct gsm_trans *trans,
-	uint8_t sm_rp_mr, uint8_t cause, const uint8_t *ui_buf, uint8_t ui_len)
+			      uint8_t sm_rp_mr,
+			      const int *net_cause, /* indicated by network, may be NULL */
+			      const uint8_t *sm_rp_cause, /* indicated by MS/UE, may be NULL */
+			      const uint8_t *ui_buf, uint8_t ui_len)
 {
 	struct osmo_gsup_message gsup_msg;
 
@@ -230,14 +235,19 @@ int gsm411_gsup_mt_fwd_sm_err(struct gsm_trans *trans,
 	gsup_msg.destination_name_len = trans->sms.gsup_source_name_len;
 	gsup_client_mux_tx_set_source(trans->net->gcm, &gsup_msg);
 
-	/* SM-RP-Cause value */
-	gsup_msg.sm_rp_cause = &cause;
+	/* SM-RP-Cause IE value (indicated by MS/UE) */
+	gsup_msg.sm_rp_cause = sm_rp_cause;
+	/* Cause IE value (indicated by network) */
+	if (net_cause != NULL)
+		gsup_msg.cause = (enum gsm48_gmm_cause)(*net_cause);
 
 	/* include optional SM-RP-UI field if present */
 	if (ui_len) {
 		gsup_msg.sm_rp_ui_len = ui_len;
 		gsup_msg.sm_rp_ui = ui_buf;
 	}
+
+	trans->sms.gsup_rsp_pending = false;
 
 	return gsup_client_mux_tx(trans->net->gcm, &gsup_msg);
 }

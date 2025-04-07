@@ -43,6 +43,7 @@
 #include <osmocom/gsm/gsm0411_utils.h>
 #include <osmocom/gsm/protocol/gsm_04_11.h>
 #include <osmocom/gsm/protocol/gsm_03_40.h>
+#include <osmocom/gsm/protocol/gsm_04_08_gprs.h>
 
 #include <osmocom/msc/debug.h>
 #include <osmocom/msc/gsm_data.h>
@@ -935,7 +936,11 @@ static int gsm411_rx_rp_error(struct gsm_trans *trans,
 			ui_buf = &(rph->data[ui_buf_idx]);
 		}
 
-		return gsm411_gsup_mt_fwd_sm_err(trans, rph->msg_ref, cause, ui_buf, ui_len);
+		return gsm411_gsup_mt_fwd_sm_err(trans,
+						 rph->msg_ref,
+						 NULL, /* Cause (not indicated by network) */
+						 &cause, /* SM-RP-Cause (indicated by MS/UE) */
+						 ui_buf, ui_len);
 	}
 
 	if (!sms) {
@@ -1284,6 +1289,7 @@ int gsm411_send_rp_data(struct gsm_network *net, struct vlr_subscr *vsub,
 {
 	struct gsm_trans *trans;
 	struct msgb *msg;
+	int rc;
 
 	/* Allocate a new transaction for MT SMS */
 	trans = gsm411_alloc_mt_trans(net, vsub);
@@ -1325,9 +1331,13 @@ int gsm411_send_rp_data(struct gsm_network *net, struct vlr_subscr *vsub,
 	/* FIXME: MT SMS is not guaranteed to be delivered (e.g. the MS may be detached) */
 	rate_ctr_inc(rate_ctr_group_get_ctr(net->msc_ctrs, MSC_CTR_SMS_DELIVERED));
 
-	return gsm411_rp_sendmsg(&trans->sms.smr_inst, msg,
-		GSM411_MT_RP_DATA_MT, trans->sms.sm_rp_mr,
-		GSM411_SM_RL_DATA_REQ);
+	rc = gsm411_rp_sendmsg(&trans->sms.smr_inst, msg,
+			       GSM411_MT_RP_DATA_MT,
+			       trans->sms.sm_rp_mr,
+			       GSM411_SM_RL_DATA_REQ);
+	if (rc == 0)
+		trans->sms.gsup_rsp_pending = true;
+	return rc;
 }
 
 /* Entry point for incoming GSM48_PDISC_SMS from abis_rsl.c */
@@ -1434,6 +1444,17 @@ void _gsm411_sms_trans_free(struct gsm_trans *trans)
 		send_signal(S_SMS_UNKNOWN_ERROR, trans, trans->sms.sms, 0);
 		sms_free(trans->sms.sms);
 		trans->sms.sms = NULL;
+	}
+
+	if (trans->net->sms_over_gsup) {
+		if (trans->sms.gsup_rsp_pending) {
+			const int net_cause = GMM_CAUSE_NET_FAIL;
+			gsm411_gsup_mt_fwd_sm_err(trans,
+						  trans->sms.sm_rp_mr,
+						  &net_cause, /* Cause IE (indicated by network) */
+						  NULL, /* SM-RP-Cause (not indicated by MS/UE) */
+						  NULL, 0 /* SM-RP-UI */);
+		}
 	}
 }
 

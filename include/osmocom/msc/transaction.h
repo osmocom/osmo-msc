@@ -152,6 +152,7 @@ struct gsm_trans {
 
 			uint8_t *gsup_source_name;
 			size_t gsup_source_name_len;
+			bool gsup_rsp_pending;
 		} sms;
 		struct {
 			/**
