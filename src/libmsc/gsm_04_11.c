@@ -918,6 +918,11 @@ static int gsm411_rx_rp_error(struct gsm_trans *trans,
 	LOG_TRANS(trans, LOGL_NOTICE, "RX SMS RP-ERROR, cause %d:%d (%s)\n",
 		      cause_len, cause, get_value_string(gsm411_rp_cause_strs, cause));
 
+	if (cause == GSM411_RP_CAUSE_MT_MEM_EXCEEDED)
+		rate_ctr_inc2(net->msc_ctrs, MSC_CTR_SMS_RP_ERR_MEM);
+	else
+		rate_ctr_inc2(net->msc_ctrs, MSC_CTR_SMS_RP_ERR_OTHER);
+
 	if (trans->net->sms_over_gsup) {
 		/* Forward towards SMSC via GSUP */
 		uint8_t ui_len = 0;
@@ -957,10 +962,8 @@ static int gsm411_rx_rp_error(struct gsm_trans *trans,
 		 * to store this in our database and wait for a SMMA message */
 		/* FIXME */
 		send_signal(S_SMS_MEM_EXCEEDED, trans, sms, 0);
-		rate_ctr_inc(rate_ctr_group_get_ctr(net->msc_ctrs, MSC_CTR_SMS_RP_ERR_MEM));
 	} else {
 		send_signal(S_SMS_UNKNOWN_ERROR, trans, sms, 0);
-		rate_ctr_inc(rate_ctr_group_get_ctr(net->msc_ctrs, MSC_CTR_SMS_RP_ERR_OTHER));
 	}
 
 	sms_free(sms);
