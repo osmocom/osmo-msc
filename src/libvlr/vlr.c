@@ -211,8 +211,7 @@ struct osmo_tdef sgsn_tdefs_vlr[] = {
 
 struct osmo_tdef *vlr_tdefs;
 
-/* This is just a wrapper around the osmo_tdef API.
- * TODO: we should start using osmo_tdef_fsm_inst_state_chg() */
+/* This is just a wrapper around the osmo_tdef API. */
 unsigned long vlr_timer_secs(struct vlr_instance *vlr, int cs_timer, int ps_timer)
 {
 	/* NOTE: since we usually do not need more than one instance of the VLR,
