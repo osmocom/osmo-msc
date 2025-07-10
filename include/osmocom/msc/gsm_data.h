@@ -109,6 +109,8 @@ static const struct rate_ctr_desc msc_ctr_description[] = {
 enum {
 	MSC_STAT_ACTIVE_CALLS,
 	MSC_STAT_ACTIVE_NC_SS,
+	MSC_STAT_RAN_PEERS_TOTAL,
+	MSC_STAT_RAN_PEERS_ACTIVE,
 };
 
 static const struct rate_ctr_group_desc msc_ctrg_desc = {
@@ -120,8 +122,10 @@ static const struct rate_ctr_group_desc msc_ctrg_desc = {
 };
 
 static const struct osmo_stat_item_desc msc_stat_item_description[] = {
-	[MSC_STAT_ACTIVE_CALLS] = { "msc.active_calls", "Currently active calls "          , OSMO_STAT_ITEM_NO_UNIT, 4, 0},
-	[MSC_STAT_ACTIVE_NC_SS]        = { "msc.active_nc_ss", "Currently active SS/USSD sessions", OSMO_STAT_ITEM_NO_UNIT, 4, 0},
+	[MSC_STAT_ACTIVE_CALLS]		= { "msc.active_calls", "Currently active calls ", OSMO_STAT_ITEM_NO_UNIT, 4, 0},
+	[MSC_STAT_ACTIVE_NC_SS]		= { "msc.active_nc_ss", "Currently active SS/USSD sessions", OSMO_STAT_ITEM_NO_UNIT, 4, 0},
+	[MSC_STAT_RAN_PEERS_TOTAL]	= { "msc.ran_peers.total", "Total RAN peers (BSC, RNC) seen since startup", OSMO_STAT_ITEM_NO_UNIT, 4, 0},
+	[MSC_STAT_RAN_PEERS_ACTIVE]	= { "msc.ran_peers.active", "Currently active RAN peers (BSSAP/RANAP ready)", OSMO_STAT_ITEM_NO_UNIT, 4, 0},
 };
 
 static const struct osmo_stat_item_group_desc msc_statg_desc = {
