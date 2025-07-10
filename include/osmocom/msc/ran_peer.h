@@ -1,5 +1,6 @@
 #pragma once
 
+#include <stdint.h>
 #include <osmocom/core/linuxlist.h>
 #include <osmocom/gsm/gsm0808.h>
 #include <osmocom/sigtran/sccp_sap.h>
@@ -80,6 +81,8 @@ enum ran_peer_event {
 	RAN_PEER_EV_MSG_DOWN_CO,
 	RAN_PEER_EV_RX_RESET,
 	RAN_PEER_EV_RX_RESET_ACK,
+	RAN_PEER_EV_AVAILABLE,
+	RAN_PEER_EV_UNAVAILABLE
 };
 
 struct ran_peer_ev_ctx {
@@ -90,6 +93,7 @@ struct ran_peer_ev_ctx {
 
 struct ran_peer *ran_peer_find_or_create(struct sccp_ran_inst *sri, const struct osmo_sccp_addr *peer_addr);
 struct ran_peer *ran_peer_find_by_addr(const struct sccp_ran_inst *sri, const struct osmo_sccp_addr *peer_addr);
+struct ran_peer *ran_peer_find_by_pc(const struct sccp_ran_inst *sri, uint32_t pc);
 
 void ran_peer_cells_seen_add(struct ran_peer *ran_peer, const struct gsm0808_cell_id *id);
 

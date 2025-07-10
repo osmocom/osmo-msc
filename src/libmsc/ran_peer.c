@@ -98,6 +98,21 @@ struct ran_peer *ran_peer_find_by_addr(const struct sccp_ran_inst *sri, const st
 	return NULL;
 }
 
+/* Find a ran_peer (BSC/RNC) by its remote Point Code */
+struct ran_peer *ran_peer_find_by_pc(const struct sccp_ran_inst *sri, uint32_t pc)
+{
+	struct ran_peer *rp;
+	struct osmo_ss7_instance *cs7 = osmo_sccp_get_ss7(sri->sccp);
+	struct osmo_sccp_addr rem_addr;
+
+	osmo_sccp_make_addr_pc_ssn(&rem_addr, pc, sri->ran->ssn);
+	rp = ran_peer_find_by_addr(sri, &rem_addr);
+	if (rp)
+		return rp;
+	LOGP(DMSC, LOGL_DEBUG, "No ran_peer found under remote address: %s\n", osmo_sccp_addr_name(cs7, &rem_addr));
+	return NULL;
+}
+
 void ran_peer_cells_seen_add(struct ran_peer *ran_peer, const struct gsm0808_cell_id *cid)
 {
 	if (!cell_id_list_add_cell(ran_peer, &ran_peer->cells_seen, cid))
@@ -292,6 +307,15 @@ static void ran_peer_st_wait_rx_reset(struct osmo_fsm_inst *fi, uint32_t event, 
 		ran_peer_rx_reset(rp, msg);
 		return;
 
+	case RAN_PEER_EV_AVAILABLE:
+		/* Send a RESET to the peer. */
+		ran_peer_reset(rp);
+		return;
+
+	case RAN_PEER_EV_UNAVAILABLE:
+		/* Do nothing, wait for peer to come up again. */
+		return;
+
 	default:
 		LOG_RAN_PEER(rp, LOGL_ERROR, "Unhandled event: %s\n", osmo_fsm_event_name(&ran_peer_fsm, event));
 		return;
@@ -325,6 +349,15 @@ static void ran_peer_st_wait_rx_reset_ack(struct osmo_fsm_inst *fi, uint32_t eve
 	case RAN_PEER_EV_RX_RESET:
 		msg = (struct msgb*)data;
 		ran_peer_rx_reset(rp, msg);
+		return;
+
+	case RAN_PEER_EV_AVAILABLE:
+		/* Send a RESET to the peer. */
+		ran_peer_reset(rp);
+		return;
+
+	case RAN_PEER_EV_UNAVAILABLE:
+		ran_peer_state_chg(rp, RAN_PEER_ST_WAIT_RX_RESET);
 		return;
 
 	default:
@@ -441,6 +474,15 @@ static void ran_peer_st_ready(struct osmo_fsm_inst *fi, uint32_t event, void *da
 		ran_peer_rx_reset(rp, msg);
 		return;
 
+	case RAN_PEER_EV_AVAILABLE:
+		/* Do nothing, we were already up. */
+		return;
+
+	case RAN_PEER_EV_UNAVAILABLE:
+		ran_peer_discard_all_conns(rp);
+		ran_peer_state_chg(rp, RAN_PEER_ST_WAIT_RX_RESET);
+		return;
+
 	default:
 		LOG_RAN_PEER(rp, LOGL_ERROR, "Unhandled event: %s\n", osmo_fsm_event_name(&ran_peer_fsm, event));
 		return;
@@ -470,6 +512,8 @@ static const struct value_string ran_peer_fsm_event_names[] = {
 	OSMO_VALUE_STRING(RAN_PEER_EV_MSG_DOWN_CO),
 	OSMO_VALUE_STRING(RAN_PEER_EV_RX_RESET),
 	OSMO_VALUE_STRING(RAN_PEER_EV_RX_RESET_ACK),
+	OSMO_VALUE_STRING(RAN_PEER_EV_AVAILABLE),
+	OSMO_VALUE_STRING(RAN_PEER_EV_UNAVAILABLE),
 	{}
 };
 
@@ -483,6 +527,8 @@ static const struct osmo_fsm_state ran_peer_fsm_states[] = {
 			| S(RAN_PEER_EV_RX_RESET)
 			| S(RAN_PEER_EV_MSG_UP_CO_INITIAL)
 			| S(RAN_PEER_EV_MSG_UP_CO)
+			| S(RAN_PEER_EV_AVAILABLE)
+			| S(RAN_PEER_EV_UNAVAILABLE)
 			,
 		.out_state_mask = 0
 			| S(RAN_PEER_ST_WAIT_RX_RESET)
@@ -499,6 +545,8 @@ static const struct osmo_fsm_state ran_peer_fsm_states[] = {
 			| S(RAN_PEER_EV_RX_RESET_ACK)
 			| S(RAN_PEER_EV_MSG_UP_CO_INITIAL)
 			| S(RAN_PEER_EV_MSG_UP_CO)
+			| S(RAN_PEER_EV_AVAILABLE)
+			| S(RAN_PEER_EV_UNAVAILABLE)
 			,
 		.out_state_mask = 0
 			| S(RAN_PEER_ST_WAIT_RX_RESET)
@@ -517,6 +565,8 @@ static const struct osmo_fsm_state ran_peer_fsm_states[] = {
 			| S(RAN_PEER_EV_MSG_DOWN_CO_INITIAL)
 			| S(RAN_PEER_EV_MSG_DOWN_CO)
 			| S(RAN_PEER_EV_MSG_DOWN_CL)
+			| S(RAN_PEER_EV_AVAILABLE)
+			| S(RAN_PEER_EV_UNAVAILABLE)
 			,
 		.out_state_mask = 0
 			| S(RAN_PEER_ST_WAIT_RX_RESET)
