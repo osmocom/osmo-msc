@@ -106,6 +106,7 @@ int ran_peer_down_paging(struct ran_peer *rp, const struct gsm0808_cell_id *page
 
 void ran_peer_reset(struct ran_peer *rp);
 void ran_peer_becomes_unreachable(struct ran_peer *rp);
+void ran_peer_discard_all_conns(struct ran_peer *rp);
 
 struct ran_peer *ran_peer_find_by_cell_id(struct sccp_ran_inst *sri, const struct gsm0808_cell_id *cid,
 					  bool expecting_single_match);

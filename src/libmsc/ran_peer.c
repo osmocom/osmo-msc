@@ -1,5 +1,5 @@
 /*
- * (C) 2019 by sysmocom - s.f.m.c. GmbH <info@sysmocom.de>
+ * (C) 2019-2025 by sysmocom - s.f.m.c. GmbH <info@sysmocom.de>
  * All Rights Reserved
  *
  * SPDX-License-Identifier: AGPL-3.0+
@@ -42,16 +42,23 @@ static __attribute__((constructor)) void ran_peer_init()
 	OSMO_ASSERT( osmo_fsm_register(&ran_peer_fsm) == 0);
 }
 
-/* Allocate a RAN peer with FSM instance. To deallocate, call osmo_fsm_inst_term(ran_peer->fi). */
+/* Allocate a RAN peer with FSM instance. To deallocate, call ran_peer_free(). */
 static struct ran_peer *ran_peer_alloc(struct sccp_ran_inst *sri, const struct osmo_sccp_addr *peer_addr)
 {
 	struct ran_peer *rp;
-	struct osmo_fsm_inst *fi;
 	char *sccp_addr;
 	char *pos;
 
-	fi = osmo_fsm_inst_alloc(&ran_peer_fsm, sri, NULL, LOGL_DEBUG, NULL);
-	OSMO_ASSERT(fi);
+	rp = talloc(sri, struct ran_peer);
+	OSMO_ASSERT(rp);
+	*rp = (struct ran_peer){
+		.sri = sri,
+		.peer_addr = *peer_addr,
+	};
+	INIT_LLIST_HEAD(&rp->cells_seen);
+
+	rp->fi = osmo_fsm_inst_alloc(&ran_peer_fsm, rp, rp, LOGL_DEBUG, NULL);
+	OSMO_ASSERT(rp->fi);
 
 	/* Unfortunately, osmo_sccp_inst_addr_name() returns "RI=SSN_PC,PC=0.24.1,SSN=BSSAP" but neither commas nor
 	 * full-stops are allowed as FSM inst id. Make it "RI=SSN_PC:PC-0-24-1:SSN-BSSAP". */
@@ -62,21 +69,24 @@ static struct ran_peer *ran_peer_alloc(struct sccp_ran_inst *sri, const struct o
 		else if (*pos == '.' || *pos == '=')
 			*pos = '-';
 	}
-	osmo_fsm_inst_update_id_f(fi, "%s:%s", osmo_rat_type_name(sri->ran->type), sccp_addr);
-
-	rp = talloc_zero(fi, struct ran_peer);
-	OSMO_ASSERT(rp);
-	*rp = (struct ran_peer){
-		.sri = sri,
-		.peer_addr = *peer_addr,
-		.fi = fi,
-	};
-	INIT_LLIST_HEAD(&rp->cells_seen);
-	fi->priv = rp;
+	osmo_fsm_inst_update_id_f(rp->fi, "%s:%s", osmo_rat_type_name(sri->ran->type), sccp_addr);
 
 	llist_add(&rp->entry, &sri->ran_peers);
 
 	return rp;
+}
+
+void ran_peer_free(struct ran_peer *rp)
+{
+	if (!rp)
+		return;
+
+	ran_peer_discard_all_conns(rp);
+
+	osmo_fsm_inst_free(rp->fi);
+	rp->fi = NULL;
+	llist_del(&rp->entry);
+	talloc_free(rp);
 }
 
 struct ran_peer *ran_peer_find_or_create(struct sccp_ran_inst *sri, const struct osmo_sccp_addr *peer_addr)
@@ -461,13 +471,6 @@ static int ran_peer_fsm_timer_cb(struct osmo_fsm_inst *fi)
 	return 0;
 }
 
-void ran_peer_fsm_cleanup(struct osmo_fsm_inst *fi, enum osmo_fsm_term_cause cause)
-{
-	struct ran_peer *rp = fi->priv;
-	ran_peer_discard_all_conns(rp);
-	llist_del(&rp->entry);
-}
-
 static const struct value_string ran_peer_fsm_event_names[] = {
 	OSMO_VALUE_STRING(RAN_PEER_EV_MSG_UP_CL),
 	OSMO_VALUE_STRING(RAN_PEER_EV_MSG_UP_CO_INITIAL),
@@ -548,7 +551,6 @@ static struct osmo_fsm ran_peer_fsm = {
 	.log_subsys = DRR,
 	.event_names = ran_peer_fsm_event_names,
 	.timer_cb = ran_peer_fsm_timer_cb,
-	.cleanup = ran_peer_fsm_cleanup,
 	.allstate_action = ran_peer_allstate_action,
 	.allstate_event_mask = 0
 		| S(RAN_PEER_EV_MSG_UP_CL)
