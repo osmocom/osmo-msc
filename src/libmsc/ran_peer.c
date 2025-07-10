@@ -87,7 +87,7 @@ struct ran_peer *ran_peer_find_or_create(struct sccp_ran_inst *sri, const struct
 	return ran_peer_alloc(sri, peer_addr);
 }
 
-struct ran_peer *ran_peer_find_by_addr(struct sccp_ran_inst *sri, const struct osmo_sccp_addr *peer_addr)
+struct ran_peer *ran_peer_find_by_addr(const struct sccp_ran_inst *sri, const struct osmo_sccp_addr *peer_addr)
 {
 	struct ran_peer *rp;
 	llist_for_each_entry(rp, &sri->ran_peers, entry) {
@@ -126,6 +126,13 @@ void ran_peer_discard_all_conns(struct ran_peer *rp)
 			vgcs_vbs_clear_cpl_channel(conn->vgcs.cell, NULL);
 		else ran_conn_discard(conn);
 	}
+}
+
+/* N-PCSTATE.ind informs us the peer went down and is no longer reachable: */
+void ran_peer_becomes_unreachable(struct ran_peer *rp)
+{
+	ran_peer_discard_all_conns(rp);
+	ran_peer_state_chg(rp, RAN_PEER_ST_WAIT_RX_RESET);
 }
 
 static void ran_peer_update_osmux_support(struct ran_peer *rp, int supports_osmux)
