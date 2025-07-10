@@ -23,6 +23,7 @@
 #include <osmocom/core/linuxlist.h>
 #include <osmocom/core/logging.h>
 #include <osmocom/core/fsm.h>
+#include <osmocom/core/stat_item.h>
 #include <osmocom/sigtran/sccp_helpers.h>
 
 #include <osmocom/msc/ran_peer.h>
@@ -45,6 +46,7 @@ static __attribute__((constructor)) void ran_peer_init()
 /* Allocate a RAN peer with FSM instance. To deallocate, call ran_peer_free(). */
 static struct ran_peer *ran_peer_alloc(struct sccp_ran_inst *sri, const struct osmo_sccp_addr *peer_addr)
 {
+	struct gsm_network *net = sri->user_data;
 	struct ran_peer *rp;
 	char *sccp_addr;
 	char *pos;
@@ -72,16 +74,23 @@ static struct ran_peer *ran_peer_alloc(struct sccp_ran_inst *sri, const struct o
 	osmo_fsm_inst_update_id_f(rp->fi, "%s:%s", osmo_rat_type_name(sri->ran->type), sccp_addr);
 
 	llist_add(&rp->entry, &sri->ran_peers);
+	osmo_stat_item_inc(osmo_stat_item_group_get_item(net->statg, MSC_STAT_RAN_PEERS_TOTAL), 1);
 
 	return rp;
 }
 
 void ran_peer_free(struct ran_peer *rp)
 {
+	struct gsm_network *net;
 	if (!rp)
 		return;
 
 	ran_peer_discard_all_conns(rp);
+
+	net = rp->sri->user_data;
+	if (rp->fi->state == RAN_PEER_ST_READY)
+		osmo_stat_item_dec(osmo_stat_item_group_get_item(net->statg, MSC_STAT_RAN_PEERS_ACTIVE), 1);
+	osmo_stat_item_dec(osmo_stat_item_group_get_item(net->statg, MSC_STAT_RAN_PEERS_TOTAL), 1);
 
 	osmo_fsm_inst_free(rp->fi);
 	rp->fi = NULL;
@@ -376,6 +385,14 @@ static struct ran_conn *new_incoming_conn(struct ran_peer *rp, uint32_t conn_id)
 	return msc_i->ran_conn;
 }
 
+void ran_peer_st_ready_onenter(struct osmo_fsm_inst *fi, uint32_t prev_state)
+{
+	struct ran_peer *rp = fi->priv;
+	struct gsm_network *net = rp->sri->user_data;
+	if (prev_state != RAN_PEER_ST_READY)
+		osmo_stat_item_inc(osmo_stat_item_group_get_item(net->statg, MSC_STAT_RAN_PEERS_ACTIVE), 1);
+}
+
 void ran_peer_st_ready(struct osmo_fsm_inst *fi, uint32_t event, void *data)
 {
 	struct ran_peer *rp = fi->priv;
@@ -464,6 +481,14 @@ void ran_peer_st_ready(struct osmo_fsm_inst *fi, uint32_t event, void *data)
 	}
 }
 
+void ran_peer_st_ready_onleave(struct osmo_fsm_inst *fi, uint32_t next_state)
+{
+	struct ran_peer *rp = fi->priv;
+	struct gsm_network *net = rp->sri->user_data;
+	if (next_state != RAN_PEER_ST_READY)
+		osmo_stat_item_dec(osmo_stat_item_group_get_item(net->statg, MSC_STAT_RAN_PEERS_ACTIVE), 1);
+}
+
 static int ran_peer_fsm_timer_cb(struct osmo_fsm_inst *fi)
 {
 	struct ran_peer *rp = fi->priv;
@@ -524,6 +549,8 @@ static const struct osmo_fsm_state ran_peer_fsm_states[] = {
 	[RAN_PEER_ST_READY] = {
 		.name = "READY",
 		.action = ran_peer_st_ready,
+		.onenter = ran_peer_st_ready_onenter,
+		.onleave = ran_peer_st_ready_onleave,
 		.in_event_mask = 0
 			| S(RAN_PEER_EV_RX_RESET)
 			| S(RAN_PEER_EV_MSG_UP_CO_INITIAL)
