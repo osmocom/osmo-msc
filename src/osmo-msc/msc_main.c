@@ -76,7 +76,6 @@
 #include <osmocom/msc/mncc_call.h>
 
 #ifdef BUILD_IU
-#include <osmocom/ranap/iu_client.h>
 #include <asn1c/asn_internal.h>
 #endif
 
