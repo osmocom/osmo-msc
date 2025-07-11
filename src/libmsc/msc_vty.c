@@ -43,10 +43,6 @@
 #include <osmocom/vty/misc.h>
 #include <osmocom/vty/stats.h>
 
-#ifdef BUILD_IU
-#include <osmocom/ranap/iu_client.h>
-#endif
-
 #include <osmocom/msc/vty.h>
 #include <osmocom/msc/gsm_data.h>
 #include <osmocom/msc/gsm_subscriber.h>
@@ -815,9 +811,6 @@ static int config_write_msc(struct vty *vty)
 	}
 
 	mgcp_client_config_write(vty, " ");
-#ifdef BUILD_IU
-	ranap_iu_vty_config_write(vty, " ");
-#endif
 
 	neighbor_ident_vty_write(vty);
 
@@ -2125,9 +2118,6 @@ void msc_vty_init(struct gsm_network *msc_network)
 	/* Deprecated: Old MGCP config without pooling support in MSC node: */
 	mgcp_client_vty_init(msc_network, MSC_NODE, msc_network->mgw.conf);
 
-#ifdef BUILD_IU
-	ranap_iu_vty_init(MSC_NODE, (enum ranap_nsap_addr_enc*)&msc_network->iu.rab_assign_addr_enc);
-#endif
 	sgs_vty_init();
 	smsc_vty_init(msc_network);
 	asci_vty_init(msc_network);
