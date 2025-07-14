@@ -470,8 +470,6 @@ static const struct value_string ran_peer_fsm_event_names[] = {
 	OSMO_VALUE_STRING(RAN_PEER_EV_MSG_DOWN_CO),
 	OSMO_VALUE_STRING(RAN_PEER_EV_RX_RESET),
 	OSMO_VALUE_STRING(RAN_PEER_EV_RX_RESET_ACK),
-	OSMO_VALUE_STRING(RAN_PEER_EV_CONNECTION_SUCCESS),
-	OSMO_VALUE_STRING(RAN_PEER_EV_CONNECTION_TIMEOUT),
 	{}
 };
 
@@ -485,7 +483,6 @@ static const struct osmo_fsm_state ran_peer_fsm_states[] = {
 			| S(RAN_PEER_EV_RX_RESET)
 			| S(RAN_PEER_EV_MSG_UP_CO_INITIAL)
 			| S(RAN_PEER_EV_MSG_UP_CO)
-			| S(RAN_PEER_EV_CONNECTION_TIMEOUT)
 			,
 		.out_state_mask = 0
 			| S(RAN_PEER_ST_WAIT_RX_RESET)
@@ -502,7 +499,6 @@ static const struct osmo_fsm_state ran_peer_fsm_states[] = {
 			| S(RAN_PEER_EV_RX_RESET_ACK)
 			| S(RAN_PEER_EV_MSG_UP_CO_INITIAL)
 			| S(RAN_PEER_EV_MSG_UP_CO)
-			| S(RAN_PEER_EV_CONNECTION_TIMEOUT)
 			,
 		.out_state_mask = 0
 			| S(RAN_PEER_ST_WAIT_RX_RESET)
