@@ -114,7 +114,7 @@ static const struct osmo_tdef_state_timeout ran_peer_fsm_timeouts[32] = {
 #define ran_peer_state_chg(RAN_PEER, NEXT_STATE) \
 	osmo_tdef_fsm_inst_state_chg((RAN_PEER)->fi, NEXT_STATE, ran_peer_fsm_timeouts, g_sccp_tdefs, 5)
 
-void ran_peer_discard_all_conns(struct ran_peer *rp)
+static void ran_peer_discard_all_conns(struct ran_peer *rp)
 {
 	struct ran_conn *conn, *next;
 
@@ -183,7 +183,7 @@ static void ran_peer_rx_reset_ack(struct ran_peer *rp, struct msgb* msg)
 	ran_peer_state_chg(rp, RAN_PEER_ST_READY);
 }
 
-void ran_peer_reset(struct ran_peer *rp)
+static void ran_peer_reset(struct ran_peer *rp)
 {
 	struct msgb *reset;
 
@@ -205,7 +205,7 @@ void ran_peer_reset(struct ran_peer *rp)
 	}
 }
 
-void ran_peer_allstate_action(struct osmo_fsm_inst *fi, uint32_t event, void *data)
+static void ran_peer_allstate_action(struct osmo_fsm_inst *fi, uint32_t event, void *data)
 {
 	struct ran_peer *rp = fi->priv;
 	struct ran_peer_ev_ctx *ctx = data;
@@ -236,7 +236,7 @@ void ran_peer_allstate_action(struct osmo_fsm_inst *fi, uint32_t event, void *da
 	}
 }
 
-void clear_and_disconnect(struct ran_peer *rp, uint32_t conn_id)
+static void clear_and_disconnect(struct ran_peer *rp, uint32_t conn_id)
 {
 	struct msgb *clear;
 	struct ran_msg ran_enc_msg = {
@@ -254,7 +254,7 @@ void clear_and_disconnect(struct ran_peer *rp, uint32_t conn_id)
 	sccp_ran_disconnect(rp->sri, conn_id, 0);
 }
 
-void ran_peer_st_wait_rx_reset(struct osmo_fsm_inst *fi, uint32_t event, void *data)
+static void ran_peer_st_wait_rx_reset(struct osmo_fsm_inst *fi, uint32_t event, void *data)
 {
 	struct ran_peer *rp = fi->priv;
 	struct ran_peer_ev_ctx *ctx;
@@ -298,7 +298,7 @@ void ran_peer_st_wait_rx_reset(struct osmo_fsm_inst *fi, uint32_t event, void *d
 	}
 }
 
-void ran_peer_st_wait_rx_reset_ack(struct osmo_fsm_inst *fi, uint32_t event, void *data)
+static void ran_peer_st_wait_rx_reset_ack(struct osmo_fsm_inst *fi, uint32_t event, void *data)
 {
 	struct ran_peer *rp = fi->priv;
 	struct ran_peer_ev_ctx *ctx;
@@ -359,7 +359,7 @@ static struct ran_conn *new_incoming_conn(struct ran_peer *rp, uint32_t conn_id)
 	return msc_i->ran_conn;
 }
 
-void ran_peer_st_ready(struct osmo_fsm_inst *fi, uint32_t event, void *data)
+static void ran_peer_st_ready(struct osmo_fsm_inst *fi, uint32_t event, void *data)
 {
 	struct ran_peer *rp = fi->priv;
 	struct ran_peer_ev_ctx *ctx;
@@ -454,7 +454,7 @@ static int ran_peer_fsm_timer_cb(struct osmo_fsm_inst *fi)
 	return 0;
 }
 
-void ran_peer_fsm_cleanup(struct osmo_fsm_inst *fi, enum osmo_fsm_term_cause cause)
+static void ran_peer_fsm_cleanup(struct osmo_fsm_inst *fi, enum osmo_fsm_term_cause cause)
 {
 	struct ran_peer *rp = fi->priv;
 	ran_peer_discard_all_conns(rp);
