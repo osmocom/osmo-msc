@@ -87,7 +87,7 @@ struct ran_peer *ran_peer_find_or_create(struct sccp_ran_inst *sri, const struct
 	return ran_peer_alloc(sri, peer_addr);
 }
 
-struct ran_peer *ran_peer_find_by_addr(struct sccp_ran_inst *sri, const struct osmo_sccp_addr *peer_addr)
+struct ran_peer *ran_peer_find_by_addr(const struct sccp_ran_inst *sri, const struct osmo_sccp_addr *peer_addr)
 {
 	struct ran_peer *rp;
 	llist_for_each_entry(rp, &sri->ran_peers, entry) {
