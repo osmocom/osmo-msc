@@ -60,6 +60,36 @@ struct sccp_ran_inst *sccp_ran_init(void *talloc_ctx, struct osmo_sccp_instance 
 	return sri;
 }
 
+static void handle_notice_ind(struct sccp_ran_inst *sri, const struct osmo_scu_notice_param *ni)
+{
+	struct ran_peer *rp;
+
+	rp = ran_peer_find_by_addr(sri, &ni->calling_addr);
+	if (!rp) {
+		LOGP(DMSC, LOGL_DEBUG, "(calling_addr=%s) N-NOTICE.ind cause=%u='%s' importance=%u didn't match any ran_peer, ignoring\n",
+		     osmo_sccp_addr_dump(&ni->calling_addr),
+		     ni->cause, osmo_sccp_return_cause_name(ni->cause),
+		     ni->importance);
+		return;
+	}
+
+	LOG_RAN_PEER(rp, LOGL_NOTICE, "N-NOTICE.ind cause=%u='%s' importance=%u\n",
+		     ni->cause, osmo_sccp_return_cause_name(ni->cause),
+		     ni->importance);
+
+	switch (ni->cause) {
+	case SCCP_RETURN_CAUSE_SUBSYSTEM_CONGESTION:
+	case SCCP_RETURN_CAUSE_NETWORK_CONGESTION:
+		/* Transient failures (hopefully), keep going. */
+		return;
+	default:
+		break;
+	}
+
+	/* Messages are not arriving to ran_peer. Signal it is unavailable to update local state. */
+	osmo_fsm_inst_dispatch(rp->fi, RAN_PEER_EV_UNAVAILABLE, NULL);
+}
+
 static void handle_pcstate_ind(struct sccp_ran_inst *sri, const struct osmo_scu_pcstate_param *pcst)
 {
 	struct osmo_ss7_instance *cs7 = osmo_sccp_get_ss7(sri->sccp);
@@ -230,6 +260,11 @@ static int sccp_ran_sap_up(struct osmo_prim_hdr *oph, void *_scu)
 					osmo_sccp_inst_addr_name(sri->sccp, my_addr));
 
 		rc = sri->ran->sccp_ran_ops.up_l2(sri, peer_addr, false, 0, oph->msg);
+		break;
+
+	case OSMO_PRIM(OSMO_SCU_PRIM_N_NOTICE, PRIM_OP_INDICATION):
+		handle_notice_ind(sri, &prim->u.notice);
+		rc = 0;
 		break;
 
 	case OSMO_PRIM(OSMO_SCU_PRIM_N_PCSTATE, PRIM_OP_INDICATION):
