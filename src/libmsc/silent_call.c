@@ -152,8 +152,9 @@ int gsm_silent_call_start(struct vlr_subscr *vsub,
 	}
 	trans->silent_call.from_vty = vty;
 
-	if (!paging_request_start(vsub, PAGING_CAUSE_CALL_BACKGROUND, paging_cb_silent, trans,
-				  "establish silent call")) {
+	trans->paging_request = paging_request_start(vsub, PAGING_CAUSE_CALL_BACKGROUND, paging_cb_silent, trans,
+						     "establish silent call");
+	if (!trans->paging_request) {
 		trans_free(trans);
 		return -ENODEV;
 	}
