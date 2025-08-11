@@ -49,7 +49,7 @@ void paging_cb_silent(struct msc_a *msc_a, struct gsm_trans *trans)
 	struct ran_msg assignment;
 
 	if (!msc_a) {
-		LOG_MSC_A(msc_a, LOGL_ERROR, "Silent call: MS not responding to Paging\n");
+		LOG_TRANS(trans, LOGL_ERROR, "Silent call: MS not responding to Paging\n");
 		osmo_signal_dispatch(SS_SCALL, S_SCALL_FAILED, &sigdata);
 		trans_free(trans);
 		return;
