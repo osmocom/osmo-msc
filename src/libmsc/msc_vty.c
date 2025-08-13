@@ -1048,9 +1048,9 @@ static void vty_dump_one_subscr(struct vty *vty, struct vlr_subscr *vsub,
 		MSC_VTY_DUMP(vty, offset, "Expires: never%s",
 			     VTY_NEWLINE);
 	} else if (osmo_clock_gettime(CLOCK_MONOTONIC, &now) == 0) {
-		MSC_VTY_DUMP(vty, offset, "Expires: in %ld min %ld sec%s",
-			     (vsub->expire_lu - now.tv_sec) / 60,
-			     (vsub->expire_lu - now.tv_sec) % 60,
+		MSC_VTY_DUMP(vty, offset, "Expires: in %lld min %lld sec%s",
+			     (long long int) ((vsub->expire_lu - now.tv_sec) / 60),
+			     (long long int) ((vsub->expire_lu - now.tv_sec) % 60),
 			     VTY_NEWLINE);
 	}
 
