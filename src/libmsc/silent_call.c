@@ -142,6 +142,9 @@ int gsm_silent_call_start(struct vlr_subscr *vsub,
 	struct gsm_network *net = vsub->vlr->user_ctx;
 	struct gsm_trans *trans;
 
+	if (msc_a_for_vsub(vsub, true) != NULL)
+		return -EBUSY;
+
 	trans = trans_alloc(net, vsub, TRANS_SILENT_CALL, 0, 0);
 	if (trans == NULL)
 		return -ENODEV;

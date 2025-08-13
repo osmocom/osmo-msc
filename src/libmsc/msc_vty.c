@@ -1596,6 +1596,9 @@ DEFUN(subscriber_silent_call_start,
 	case -ENODEV:
 		vty_out(vty, "%% Subscriber not attached%s", VTY_NEWLINE);
 		break;
+	case -EBUSY:
+		vty_out(vty, "%% Subscriber already has an active connection%s", VTY_NEWLINE);
+		break;
 	default:
 		if (rc)
 			vty_out(vty, "%% Cannot start silent call (rc=%d)%s", rc, VTY_NEWLINE);
