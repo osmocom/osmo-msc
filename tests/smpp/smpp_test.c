@@ -86,7 +86,7 @@ static void test_smpp_parse_time_format(void)
 		time_t t = smpp_parse_time_format(smpp_time_tests[i], &t_now);
 		char buf[32];
 		strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S", gmtime(&t));
-		printf("'%s': %ld == %s\n", smpp_time_tests[i], t, buf);
+		printf("'%s': %lld == %s\n", smpp_time_tests[i], (long long int) t, buf);
 	}
 
 	if (orig_tz)
