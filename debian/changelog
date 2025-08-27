@@ -1,3 +1,43 @@
+osmo-msc (1.14.0) unstable; urgency=medium
+
+  [ Andreas Eversberg ]
+  * Release BSS connection when CC transaction fails
+  * Indicate error and release BSS connection when SMS transaction fails
+
+  [ Pau Espin Pedrol ]
+  * Drop use of deprecated vty is_config_node() cb
+  * msc_main: Remove unnedeed include of ranap/iu_client.h
+  * vty: Get rid of unneeded iu_client vty config
+  * constify ptr arg in ran_peer_find_by_addr()
+  * ran_peer: Mark multiple funcs as static
+  * ran_peer: Avoid paging attempt if not ready
+  * ran_peer: Drop unused events CONNECTION_{SUCCESS,TIMEOUT}
+  * msc: Initial implementation of N-PCSTATE.ind
+  * ran_peer: Introduce stats msc.ran_peers.{total,active}
+  * sccp: Handle N-NOTICE.ind (Routing Failure of SCCP CL messages)
+
+  [ Vadim Yanitskiy ]
+  * gsm0911_gsup_rx(): invalidate vsub pointer
+  * SMS-over-GSUP: send network-originated MT-forwardSM-Err
+  * SMS-over-GSUP: properly update MSC_CTR_SMS_RP_ERR_{MEM,OTHER}
+  * gsm0911_rcv_nc_ss(): avoid assertion failure in msc_a_put()
+  * silent_call: use LOG_TRANS when msc_a is NULL
+  * silent_call: check if subscriber has a connection
+
+  [ Alexander Couzens ]
+  * libvlr: replace strncpy with OSMO_STRLCPY_ARRAY
+  * vlr: extend the subscriber invalidate callback with reasons
+  * vlr: when receiving imsi detach, purge the subscriber towards HLR
+
+  [ Matan Perelman ]
+  * silent_call: Fix use after free of paging request
+
+  [ Oliver Smith ]
+  * Fix building for debian 13 armv7l
+  * tests/smpp: fix building for debian 13 armv7l
+
+ -- Oliver Smith <osmith@sysmocom.de>  Wed, 27 Aug 2025 08:23:05 +0200
+
 osmo-msc (1.13.0) unstable; urgency=medium
 
   [ Andreas Eversberg ]
