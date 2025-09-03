@@ -386,7 +386,7 @@ static void test_call_mt()
 	VERBOSE_ASSERT(security_mode_ctrl_sent, == true, "%d");
 
 	btw("MS sends SecurityModeControl acceptance, VLR accepts, sends CC Setup");
-	dtap_expect_tx("0305" /* CC: Setup */ "04 04 60 04 05 8b" /* Bearer Cap, speech ver of AMR-FR and AMR-HR */);
+	dtap_expect_tx("0305" /* CC: Setup */ "04 01 a0" /* Bearer Cap, TS 24.008 § D.1.2 (OS#6657) */);
 	ms_sends_security_mode_complete(1);
 
 	btw("MS confirms call, we create a RAN-side RTP and forward MNCC_CALL_CONF_IND");
@@ -524,7 +524,7 @@ static void test_call_mt2()
 	VERBOSE_ASSERT(security_mode_ctrl_sent, == true, "%d");
 
 	btw("MS sends SecurityModeControl acceptance, VLR accepts, sends CC Setup");
-	dtap_expect_tx("0305" /* CC: Setup */ "04 04 60 04 05 8b" /* Bearer Cap, speech ver of AMR-FR and AMR-HR */);
+	dtap_expect_tx("0305" /* CC: Setup */ "04 01 a0" /* Bearer Cap, TS 24.008 § D.1.2 (OS#6657) */);
 	ms_sends_security_mode_complete(1);
 
 	btw("MS confirms call, we create a RAN-side RTP and forward MNCC_CALL_CONF_IND");
@@ -1510,17 +1510,13 @@ static void test_codecs_mt(const struct codec_test *t)
 		return;
 	}
 
-	btw("VLR accepts, MSC sends CC Setup with Bearer Capability = %s",
-	    bcap_name(t->mt_tx_cc_setup_bcap));
-	char *cc_setup_bcap = talloc_asprintf(msc_vlr_tests_ctx, "0305%s",
-					      bcap_hexstr(t->mt_tx_cc_setup_bcap));
-	dtap_expect_tx(cc_setup_bcap);
+	btw("VLR accepts, MSC sends CC Setup with Bearer Capability = TS 24.008 § D.1.2");
+	dtap_expect_tx("0305" /* CC: Setup */ "04 01 a0" /* Bearer Cap, TS 24.008 § D.1.2 (OS#6657) */);
 	ms_sends_compl_l3("062707"
 			  "03575886" /* classmark 2 */
 			  "089910070000106005" /* IMSI */,
 			  codec_list(t->mt_rx_compl_l3_codec_list_bss_supported));
 	OSMO_ASSERT(dtap_tx_confirmed);
-	talloc_free(cc_setup_bcap);
 
 	btw("MS confirms call, we create a RAN-side RTP and forward MNCC_CALL_CONF_IND");
 	expect_crcx(RTP_TO_CN);
