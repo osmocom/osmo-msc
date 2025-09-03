@@ -909,6 +909,79 @@ static int gsm48_cc_tx_setup_select_codecs(struct gsm_trans *trans, const struct
 	return 0;
 }
 
+/* Compose Bearer Capability information that reflects only the codecs (Speech
+ * Versions) / CSD bearer services remaining after intersecting MS, BSS and
+ * remote call leg restrictions. To store in trans for later use, and to
+ * include in the outgoing CC Setup message. */
+static int gsm48_cc_tx_setup_set_bearer_cap(struct gsm_trans *trans, struct gsm_mncc_bearer_cap *bearer_cap,
+					    const struct gsm_mncc *setup)
+{
+	int rc;
+
+	switch (trans->bearer_cap.transfer) {
+	case GSM48_BCAP_ITCAP_SPEECH:
+		*bearer_cap = (struct gsm_mncc_bearer_cap){
+			.speech_ver = { -1 },
+		};
+		sdp_audio_codecs_to_bearer_cap(bearer_cap, &trans->cc.local.audio_codecs);
+		rc = bearer_cap_set_radio(bearer_cap);
+		if (rc) {
+			LOG_TRANS(trans, LOGL_ERROR, "Error composing Bearer Capability for CC Setup\n");
+			return -1;
+		}
+		/* If no resulting codecs remain, error out. We cannot find a
+		 * codec that matches both call legs. If the MGW were able to
+		 * transcode, we could use non-identical codecs on each conn of
+		 * the MGW endpoint, but we are aiming for finding a matching
+		 * codec. */
+		if (bearer_cap->speech_ver[0] == -1) {
+			LOG_TRANS(trans, LOGL_ERROR, "%s: no codec match possible: %s\n",
+				  get_mncc_name(setup->msg_type),
+				  codec_filter_to_str(&trans->cc.codecs, &trans->cc.local, &trans->cc.remote));
+
+			/* incompatible codecs */
+			mncc_release_ind(trans->net, trans, trans->callref,
+					 GSM48_CAUSE_LOC_PRN_S_LU,
+					 GSM48_CC_CAUSE_INCOMPAT_DEST /* TODO: correct cause code? */);
+			trans->callref = 0;
+			return -1;
+		}
+		rc = bearer_cap_filter_rev_lev(bearer_cap, trans->vsub->classmark.classmark1.rev_lev);
+		if (rc) {
+			LOG_TRANS(trans, LOGL_ERROR, "No codec offered is supported by phase 1 mobile.\n");
+			return -1;
+		}
+		break;
+	case GSM48_BCAP_ITCAP_3k1_AUDIO:
+	case GSM48_BCAP_ITCAP_FAX_G3:
+	case GSM48_BCAP_ITCAP_UNR_DIG_INF:
+		*bearer_cap = (struct gsm_mncc_bearer_cap){
+			.transfer = trans->bearer_cap.transfer,
+			.mode = GSM48_BCAP_TMOD_CIRCUIT,
+			.coding = GSM48_BCAP_CODING_GSM_STD,
+			.radio = GSM48_BCAP_RRQ_FR_ONLY,
+		};
+
+		if (csd_bs_list_to_bearer_cap(bearer_cap, &trans->cc.local.bearer_services) == 0) {
+			LOG_TRANS(trans, LOGL_ERROR, "Error composing Bearer Capability for CC Setup\n");
+
+			/* incompatible codecs */
+			mncc_release_ind(trans->net, trans, trans->callref,
+					 GSM48_CAUSE_LOC_PRN_S_LU,
+					 GSM48_CC_CAUSE_INCOMPAT_DEST /* TODO: correct cause code? */);
+			trans->callref = 0;
+			return -1;
+		}
+		break;
+	}
+
+	/* Create a copy of the bearer capability in the transaction struct, so
+	 * we can use this information later */
+	trans->bearer_cap = *bearer_cap;
+
+	return 0;
+}
+
 static int gsm48_cc_tx_setup(struct gsm_trans *trans, void *arg)
 {
 	struct msgb *msg;
@@ -930,66 +1003,9 @@ static int gsm48_cc_tx_setup(struct gsm_trans *trans, void *arg)
 	if (rc < 0)
 		goto error;
 
-	/* Compose Bearer Capability information that reflects only the codecs (Speech Versions) / CSD bearer services
-	 * remaining after intersecting MS, BSS and remote call leg restrictions. To store in trans for later use, and
-	 * to include in the outgoing CC Setup message. */
-	switch (trans->bearer_cap.transfer) {
-	case GSM48_BCAP_ITCAP_SPEECH:
-		bearer_cap = (struct gsm_mncc_bearer_cap){
-			.speech_ver = { -1 },
-		};
-		sdp_audio_codecs_to_bearer_cap(&bearer_cap, &trans->cc.local.audio_codecs);
-		rc = bearer_cap_set_radio(&bearer_cap);
-		if (rc) {
-			LOG_TRANS(trans, LOGL_ERROR, "Error composing Bearer Capability for CC Setup\n");
-			goto error;
-		}
-		/* If no resulting codecs remain, error out. We cannot find a codec that matches both call legs. If the MGW were
-		 * able to transcode, we could use non-identical codecs on each conn of the MGW endpoint, but we are aiming for
-		 * finding a matching codec. */
-		if (bearer_cap.speech_ver[0] == -1) {
-			LOG_TRANS(trans, LOGL_ERROR, "%s: no codec match possible: %s\n",
-				  get_mncc_name(setup->msg_type),
-				  codec_filter_to_str(&trans->cc.codecs, &trans->cc.local, &trans->cc.remote));
-
-			/* incompatible codecs */
-			rc = mncc_release_ind(trans->net, trans, trans->callref,
-					      GSM48_CAUSE_LOC_PRN_S_LU,
-					      GSM48_CC_CAUSE_INCOMPAT_DEST /* TODO: correct cause code? */);
-			trans->callref = 0;
-			goto error;
-		}
-		rc = bearer_cap_filter_rev_lev(&bearer_cap, trans->vsub->classmark.classmark1.rev_lev);
-		if (rc) {
-			LOG_TRANS(trans, LOGL_ERROR, "No codec offered is supported by phase 1 mobile.\n");
-			goto error;
-		}
-		break;
-	case GSM48_BCAP_ITCAP_3k1_AUDIO:
-	case GSM48_BCAP_ITCAP_FAX_G3:
-	case GSM48_BCAP_ITCAP_UNR_DIG_INF:
-		bearer_cap = (struct gsm_mncc_bearer_cap){
-			.transfer = trans->bearer_cap.transfer,
-			.mode = GSM48_BCAP_TMOD_CIRCUIT,
-			.coding = GSM48_BCAP_CODING_GSM_STD,
-			.radio = GSM48_BCAP_RRQ_FR_ONLY,
-		};
-
-		if (csd_bs_list_to_bearer_cap(&bearer_cap, &trans->cc.local.bearer_services) == 0) {
-			LOG_TRANS(trans, LOGL_ERROR, "Error composing Bearer Capability for CC Setup\n");
-
-			/* incompatible codecs */
-			rc = mncc_release_ind(trans->net, trans, trans->callref,
-					      GSM48_CAUSE_LOC_PRN_S_LU,
-					      GSM48_CC_CAUSE_INCOMPAT_DEST /* TODO: correct cause code? */);
-			trans->callref = 0;
-			goto error;
-		}
-		break;
-	}
-
-	/* Create a copy of the bearer capability in the transaction struct, so we can use this information later */
-	trans->bearer_cap = bearer_cap;
+	rc = gsm48_cc_tx_setup_set_bearer_cap(trans, &bearer_cap, setup);
+	if (rc < 0)
+		goto error;
 
 	msg = gsm48_msgb_alloc_name("GSM 04.08 CC SETUP");
 	gh = (struct gsm48_hdr *) msgb_put(msg, sizeof(*gh));
