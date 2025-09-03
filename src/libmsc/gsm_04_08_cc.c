@@ -836,37 +836,49 @@ static void rx_mncc_sdp(struct gsm_trans *trans, uint32_t mncc_msg_type, const c
 	msc_a_tx_assignment_cmd(trans->msc_a);
 }
 
+static int gsm48_cc_tx_setup_set_transaction_id(struct gsm_trans *trans)
+{
+	int id;
+
+	/* Transaction ID must not be assigned */
+	if (trans->transaction_id != TRANS_ID_UNASSIGNED) {
+		LOG_TRANS(trans, LOGL_ERROR, "TX Setup with assigned transaction. This is not allowed!\n");
+		/* Temporarily out of order */
+		mncc_release_ind(trans->net, trans, trans->callref,
+				 GSM48_CAUSE_LOC_PRN_S_LU,
+				 GSM48_CC_CAUSE_RESOURCE_UNAVAIL);
+		trans->callref = 0;
+		return -1;
+	}
+
+	/* Get free transaction ID */
+	id = trans_assign_trans_id(trans->net, trans->vsub, TRANS_CC);
+	if (id < 0) {
+		/* No free transaction ID */
+		LOG_TRANS(trans, LOGL_ERROR, "TX Setup: could not get a free transaction ID!\n");
+		mncc_release_ind(trans->net, trans, trans->callref,
+				 GSM48_CAUSE_LOC_PRN_S_LU,
+				 GSM48_CC_CAUSE_RESOURCE_UNAVAIL);
+		trans->callref = 0;
+		return -1;
+	}
+
+	trans->transaction_id = id;
+	return 0;
+}
+
+
 static int gsm48_cc_tx_setup(struct gsm_trans *trans, void *arg)
 {
 	struct msgb *msg;
 	struct gsm48_hdr *gh;
 	struct gsm_mncc *setup = arg;
-	int rc, trans_id;
+	int rc;
 	struct gsm_mncc_bearer_cap bearer_cap;
 
-	/* transaction id must not be assigned */
-	if (trans->transaction_id != TRANS_ID_UNASSIGNED) {
-		LOG_TRANS(trans, LOGL_DEBUG, "TX Setup with assigned transaction. "
-			"This is not allowed!\n");
-		/* Temporarily out of order */
-		rc = mncc_release_ind(trans->net, trans, trans->callref,
-				      GSM48_CAUSE_LOC_PRN_S_LU,
-				      GSM48_CC_CAUSE_RESOURCE_UNAVAIL);
-		trans->callref = 0;
+	rc = gsm48_cc_tx_setup_set_transaction_id(trans);
+	if (rc < 0)
 		goto error;
-	}
-
-	/* Get free transaction_id */
-	trans_id = trans_assign_trans_id(trans->net, trans->vsub, TRANS_CC);
-	if (trans_id < 0) {
-		/* no free transaction ID */
-		rc = mncc_release_ind(trans->net, trans, trans->callref,
-				      GSM48_CAUSE_LOC_PRN_S_LU,
-				      GSM48_CC_CAUSE_RESOURCE_UNAVAIL);
-		trans->callref = 0;
-		goto error;
-	}
-	trans->transaction_id = trans_id;
 
 	gsm48_start_cc_timer(trans, 0x303, GSM48_T303);
 
