@@ -982,10 +982,50 @@ static int gsm48_cc_tx_setup_set_bearer_cap(struct gsm_trans *trans, struct gsm_
 	return 0;
 }
 
+static struct msgb *gsm48_cc_tx_setup_encode_msg(const struct gsm_mncc_bearer_cap *bearer_cap,
+						 const struct gsm_mncc *setup)
+{
+	struct msgb *msg = gsm48_msgb_alloc_name("GSM 04.08 CC SETUP");
+	struct gsm48_hdr *gh = (struct gsm48_hdr *) msgb_put(msg, sizeof(*gh));
+
+	gh->msg_type = GSM48_MT_CC_SETUP;
+
+	gsm48_encode_bearer_cap(msg, 0, bearer_cap);
+
+	/* Facility */
+	if (setup->fields & MNCC_F_FACILITY)
+		gsm48_encode_facility(msg, 0, &setup->facility);
+	/* Progress */
+	if (setup->fields & MNCC_F_PROGRESS)
+		gsm48_encode_progress(msg, 0, &setup->progress);
+	/* Calling party BCD number */
+	if (setup->fields & MNCC_F_CALLING)
+		gsm48_encode_calling(msg, &setup->calling);
+	/* Called party BCD number */
+	if (setup->fields & MNCC_F_CALLED)
+		gsm48_encode_called(msg, &setup->called);
+	/* Low layer compatibility */
+	if (setup->fields & MNCC_F_LOWL_COMPAT && setup->llc.len > 0 && setup->llc.len <= sizeof(setup->llc.compat))
+		msgb_tlv_put(msg, GSM48_IE_LOWL_COMPAT, setup->llc.len, setup->llc.compat);
+	/* High layer compatibility */
+	if (setup->fields & MNCC_F_HIGHL_COMPAT && setup->hlc.len > 0 && setup->hlc.len <= sizeof(setup->hlc.compat))
+		msgb_tlv_put(msg, GSM48_IE_HIGHL_COMPAT, setup->hlc.len, setup->hlc.compat);
+	/* User-user */
+	if (setup->fields & MNCC_F_USERUSER)
+		gsm48_encode_useruser(msg, 0, &setup->useruser);
+	/* Redirecting party BCD number */
+	if (setup->fields & MNCC_F_REDIRECTING)
+		gsm48_encode_redirecting(msg, &setup->redirecting);
+	/* Signal */
+	if (setup->fields & MNCC_F_SIGNAL)
+		gsm48_encode_signal(msg, setup->signal);
+
+	return msg;
+}
+
 static int gsm48_cc_tx_setup(struct gsm_trans *trans, void *arg)
 {
 	struct msgb *msg;
-	struct gsm48_hdr *gh;
 	struct gsm_mncc *setup = arg;
 	int rc;
 	struct gsm_mncc_bearer_cap bearer_cap;
@@ -1007,39 +1047,7 @@ static int gsm48_cc_tx_setup(struct gsm_trans *trans, void *arg)
 	if (rc < 0)
 		goto error;
 
-	msg = gsm48_msgb_alloc_name("GSM 04.08 CC SETUP");
-	gh = (struct gsm48_hdr *) msgb_put(msg, sizeof(*gh));
-	gh->msg_type = GSM48_MT_CC_SETUP;
-
-	gsm48_encode_bearer_cap(msg, 0, &bearer_cap);
-
-	/* facility */
-	if (setup->fields & MNCC_F_FACILITY)
-		gsm48_encode_facility(msg, 0, &setup->facility);
-	/* progress */
-	if (setup->fields & MNCC_F_PROGRESS)
-		gsm48_encode_progress(msg, 0, &setup->progress);
-	/* calling party BCD number */
-	if (setup->fields & MNCC_F_CALLING)
-		gsm48_encode_calling(msg, &setup->calling);
-	/* called party BCD number */
-	if (setup->fields & MNCC_F_CALLED)
-		gsm48_encode_called(msg, &setup->called);
-	/* low layer compatibility */
-	if (setup->fields & MNCC_F_LOWL_COMPAT && setup->llc.len > 0 && setup->llc.len <= sizeof(setup->llc.compat))
-		msgb_tlv_put(msg, GSM48_IE_LOWL_COMPAT, setup->llc.len, setup->llc.compat);
-	/* high layer compatibility */
-	if (setup->fields & MNCC_F_HIGHL_COMPAT && setup->hlc.len > 0 && setup->hlc.len <= sizeof(setup->hlc.compat))
-		msgb_tlv_put(msg, GSM48_IE_HIGHL_COMPAT, setup->hlc.len, setup->hlc.compat);
-	/* user-user */
-	if (setup->fields & MNCC_F_USERUSER)
-		gsm48_encode_useruser(msg, 0, &setup->useruser);
-	/* redirecting party BCD number */
-	if (setup->fields & MNCC_F_REDIRECTING)
-		gsm48_encode_redirecting(msg, &setup->redirecting);
-	/* signal */
-	if (setup->fields & MNCC_F_SIGNAL)
-		gsm48_encode_signal(msg, setup->signal);
+	msg = gsm48_cc_tx_setup_encode_msg(&bearer_cap, setup);
 
 	new_cc_state(trans, GSM_CSTATE_CALL_PRESENT);
 
