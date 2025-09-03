@@ -855,9 +855,7 @@ static int gsm48_cc_tx_setup(struct gsm_trans *trans, void *arg)
 				      GSM48_CAUSE_LOC_PRN_S_LU,
 				      GSM48_CC_CAUSE_RESOURCE_UNAVAIL);
 		trans->callref = 0;
-		trans_free(trans);
-		msgb_free(msg);
-		return rc;
+		goto error;
 	}
 
 	/* Get free transaction_id */
@@ -868,9 +866,7 @@ static int gsm48_cc_tx_setup(struct gsm_trans *trans, void *arg)
 				      GSM48_CAUSE_LOC_PRN_S_LU,
 				      GSM48_CC_CAUSE_RESOURCE_UNAVAIL);
 		trans->callref = 0;
-		trans_free(trans);
-		msgb_free(msg);
-		return rc;
+		goto error;
 	}
 	trans->transaction_id = trans_id;
 
@@ -929,9 +925,7 @@ static int gsm48_cc_tx_setup(struct gsm_trans *trans, void *arg)
 		rc = bearer_cap_set_radio(&bearer_cap);
 		if (rc) {
 			LOG_TRANS(trans, LOGL_ERROR, "Error composing Bearer Capability for CC Setup\n");
-			trans_free(trans);
-			msgb_free(msg);
-			return rc;
+			goto error;
 		}
 		/* If no resulting codecs remain, error out. We cannot find a codec that matches both call legs. If the MGW were
 		 * able to transcode, we could use non-identical codecs on each conn of the MGW endpoint, but we are aiming for
@@ -946,16 +940,12 @@ static int gsm48_cc_tx_setup(struct gsm_trans *trans, void *arg)
 					      GSM48_CAUSE_LOC_PRN_S_LU,
 					      GSM48_CC_CAUSE_INCOMPAT_DEST /* TODO: correct cause code? */);
 			trans->callref = 0;
-			trans_free(trans);
-			msgb_free(msg);
-			return rc;
+			goto error;
 		}
 		rc = bearer_cap_filter_rev_lev(&bearer_cap, trans->vsub->classmark.classmark1.rev_lev);
 		if (rc) {
 			LOG_TRANS(trans, LOGL_ERROR, "No codec offered is supported by phase 1 mobile.\n");
-			trans_free(trans);
-			msgb_free(msg);
-			return rc;
+			goto error;
 		}
 		break;
 	case GSM48_BCAP_ITCAP_3k1_AUDIO:
@@ -976,9 +966,7 @@ static int gsm48_cc_tx_setup(struct gsm_trans *trans, void *arg)
 					      GSM48_CAUSE_LOC_PRN_S_LU,
 					      GSM48_CC_CAUSE_INCOMPAT_DEST /* TODO: correct cause code? */);
 			trans->callref = 0;
-			trans_free(trans);
-			msgb_free(msg);
-			return rc;
+			goto error;
 		}
 		break;
 	}
@@ -1021,6 +1009,10 @@ static int gsm48_cc_tx_setup(struct gsm_trans *trans, void *arg)
 	rate_ctr_inc(rate_ctr_group_get_ctr(trans->net->msc_ctrs, MSC_CTR_CALL_MT_SETUP));
 
 	return trans_tx_gsm48(trans, msg);
+error:
+	trans_free(trans);
+	msgb_free(msg);
+	return rc;
 }
 
 static int gsm48_cc_rx_call_conf(struct gsm_trans *trans, struct msgb *msg)
