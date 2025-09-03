@@ -838,13 +838,11 @@ static void rx_mncc_sdp(struct gsm_trans *trans, uint32_t mncc_msg_type, const c
 
 static int gsm48_cc_tx_setup(struct gsm_trans *trans, void *arg)
 {
-	struct msgb *msg = gsm48_msgb_alloc_name("GSM 04.08 CC SETUP");
+	struct msgb *msg;
 	struct gsm48_hdr *gh;
 	struct gsm_mncc *setup = arg;
 	int rc, trans_id;
 	struct gsm_mncc_bearer_cap bearer_cap;
-
-	gh = (struct gsm48_hdr *) msgb_put(msg, sizeof(*gh));
 
 	/* transaction id must not be assigned */
 	if (trans->transaction_id != TRANS_ID_UNASSIGNED) {
@@ -869,8 +867,6 @@ static int gsm48_cc_tx_setup(struct gsm_trans *trans, void *arg)
 		goto error;
 	}
 	trans->transaction_id = trans_id;
-
-	gh->msg_type = GSM48_MT_CC_SETUP;
 
 	gsm48_start_cc_timer(trans, 0x303, GSM48_T303);
 
@@ -974,6 +970,10 @@ static int gsm48_cc_tx_setup(struct gsm_trans *trans, void *arg)
 	/* Create a copy of the bearer capability in the transaction struct, so we can use this information later */
 	trans->bearer_cap = bearer_cap;
 
+	msg = gsm48_msgb_alloc_name("GSM 04.08 CC SETUP");
+	gh = (struct gsm48_hdr *) msgb_put(msg, sizeof(*gh));
+	gh->msg_type = GSM48_MT_CC_SETUP;
+
 	gsm48_encode_bearer_cap(msg, 0, &bearer_cap);
 
 	/* facility */
@@ -1011,7 +1011,6 @@ static int gsm48_cc_tx_setup(struct gsm_trans *trans, void *arg)
 	return trans_tx_gsm48(trans, msg);
 error:
 	trans_free(trans);
-	msgb_free(msg);
 	return rc;
 }
 
