@@ -7,3 +7,4 @@
 # If any interfaces have been added since the last public release: c:r:a + 1.
 # If any interfaces have been removed or changed since the last public release: c:r:0.
 #library	what			description / commit summary line
+libosmocore	> 1.11.0		uses new GSM48_BCAP_RRQ_SPARE_NETWORK_TO_MS (I97101c977104eae82e4850d40f9abd15aa03e33e)

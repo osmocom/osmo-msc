@@ -911,8 +911,7 @@ static int gsm48_cc_tx_setup_select_codecs(struct gsm_trans *trans, const struct
 
 /* Compose Bearer Capability information that reflects only the codecs (Speech
  * Versions) / CSD bearer services remaining after intersecting MS, BSS and
- * remote call leg restrictions. To store in trans for later use, and to
- * include in the outgoing CC Setup message. */
+ * remote call leg restrictions. To store in trans for later use. */
 static int gsm48_cc_tx_setup_set_bearer_cap(struct gsm_trans *trans, const struct gsm_mncc *setup)
 {
 	int rc;
@@ -978,11 +977,30 @@ static int gsm48_cc_tx_setup_set_bearer_cap(struct gsm_trans *trans, const struc
 	return 0;
 }
 
-static struct msgb *gsm48_cc_tx_setup_encode_msg(const struct gsm_mncc_bearer_cap *bearer_cap,
+static struct msgb *gsm48_cc_tx_setup_encode_msg(const struct gsm_mncc_bearer_cap *bearer_cap_orig,
 						 const struct gsm_mncc *setup)
 {
 	struct msgb *msg = gsm48_msgb_alloc_name("GSM 04.08 CC SETUP");
 	struct gsm48_hdr *gh = (struct gsm48_hdr *) msgb_put(msg, sizeof(*gh));
+	const struct gsm_mncc_bearer_cap *bearer_cap = bearer_cap_orig;
+
+	/* Send the bearer capability IE from 3GPP TS 24.008 § D.1.2 for speech
+	 * instead of the result from gsm48_cc_tx_setup_set_bearer_cap() for
+	 * the network to MS direction. This is needed, because:
+	 *  - We shall send spare bits for the radio channel requirement in the
+	 *    network to MS direction (3GPP TS 24.008 § D.1.1 and Table
+	 *    10.5.102).
+	 *  - We could in theory send a speech version list that MS are then
+	 *    supposed to ignore (end of Table 10.5.103), but this causes bugs
+	 *    in some MS so it is better to not send it (OS#6656). */
+	static const struct gsm_mncc_bearer_cap bcap_speech = {
+		.transfer = GSM48_BCAP_ITCAP_SPEECH,
+		.radio = GSM48_BCAP_RRQ_SPARE_NETWORK_TO_MS,
+		.speech_ver = { -1 },
+	};
+
+	if (bearer_cap->transfer == GSM48_BCAP_ITCAP_SPEECH)
+		bearer_cap = &bcap_speech;
 
 	gh->msg_type = GSM48_MT_CC_SETUP;
 
