@@ -44,7 +44,7 @@ PKG_CHECK_MODULES(LIBOSMOGSM, libosmogsm >= 1.12.0)
 PKG_CHECK_MODULES(LIBOSMOABIS, libosmoabis >= 2.1.0)
 PKG_CHECK_MODULES(LIBOSMONETIF, libosmo-netif >= 1.7.0)
 PKG_CHECK_MODULES(LIBOSMOSIGTRAN, libosmo-sigtran >= 2.2.0)
-PKG_CHECK_MODULES(LIBOSMOMGCPCLIENT, libosmo-mgcp-client >= 1.15.0)
+PKG_CHECK_MODULES(LIBOSMOMGCPCLIENT, libosmo-mgcp-client >= 1.14.0)
 PKG_CHECK_MODULES(LIBOSMOGSUPCLIENT, libosmo-gsup-client >= 1.9.0)
 
 AC_CHECK_FUNC([timegm], [AC_DEFINE(HAVE_TIMEGM, 1, Define if libc implements timegm)])
