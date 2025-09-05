@@ -842,7 +842,7 @@ static int gsm48_cc_tx_setup_set_transaction_id(struct gsm_trans *trans)
 
 	/* Transaction ID must not be assigned */
 	if (trans->transaction_id != TRANS_ID_UNASSIGNED) {
-		LOG_TRANS(trans, LOGL_ERROR, "TX Setup with assigned transaction. This is not allowed!\n");
+		LOG_TRANS(trans, LOGL_ERROR, "TX Setup: transaction ID is already assigned!\n");
 		mncc_release_ind(trans->net, trans, trans->callref,
 				 GSM48_CAUSE_LOC_PRN_S_LU,
 				 GSM48_CC_CAUSE_RESOURCE_UNAVAIL);
