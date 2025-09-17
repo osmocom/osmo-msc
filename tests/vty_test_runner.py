@@ -20,6 +20,7 @@ import time
 import unittest
 import socket
 import subprocess
+import tempfile
 
 import osmopy.obscvty as obscvty
 import osmopy.osmoutil as osmoutil
@@ -51,8 +52,12 @@ class TestVTYBase(unittest.TestCase):
             cfi = config_index + 1
             osmo_vty_cmd[cfi] = os.path.join(confpath, osmo_vty_cmd[cfi])
 
+        self.stdout = tempfile.TemporaryFile()
+        self.stderr = tempfile.TemporaryFile()
         try:
-            self.proc = osmoutil.popen_devnull(osmo_vty_cmd)
+            # self.proc = osmoutil.popen_devnull(osmo_vty_cmd)
+            print("Launching: PWD=%s %s" % (os.getcwd(), ' '.join([repr(c) for c in osmo_vty_cmd])))
+            self.proc = subprocess.Popen(osmo_vty_cmd, stdout=self.stdout, stderr=self.stderr)
         except OSError:
             print("Current directory: %s" % os.getcwd(), file=sys.stderr)
             print("Consider setting -b", file=sys.stderr)
@@ -61,13 +66,25 @@ class TestVTYBase(unittest.TestCase):
         appport = self.vty_app()[0]
         self.vty = obscvty.VTYInteract(appstring, "127.0.0.1", appport)
 
+    def dump_file(self, file, name):
+        file.seek(0)
+        data = file.read()
+        print('=' * 80)
+        print(name)
+        print('=' * 80)
+        print(data.decode())
+
     def tearDown(self):
         if self.vty:
             self.vty._close_socket()
         self.vty = None
         rc = osmoutil.end_proc(self.proc)
         if rc is not None and rc != 0:
+            self.dump_file(self.stdout, 'stdout')
+            self.dump_file(self.stderr, 'stderr')
             raise Exception("Process returned %d" % rc)
+        self.stdout.close()
+        self.stderr.close()
 
 class TestVTYMSC(TestVTYBase):
 
