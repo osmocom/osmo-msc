@@ -186,3 +186,13 @@ int gsm_silent_call_stop(struct vlr_subscr *vsub)
 	trans_free(trans);
 	return 0;
 }
+
+/* Does the subscriber have an ongoing silent call transaction? */
+int gsm_silent_call_is_ongoing(struct vlr_subscr *vsub)
+{
+	struct msc_a *msc_a = msc_a_for_vsub(vsub, true);
+	if (!msc_a)
+		return false;
+
+	return trans_find_by_type(msc_a, TRANS_SILENT_CALL) != NULL;
+}

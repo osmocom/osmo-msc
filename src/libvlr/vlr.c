@@ -36,6 +36,7 @@
 #include <osmocom/vlr/vlr.h>
 #include <osmocom/gsupclient/gsup_client_mux.h>
 #include <osmocom/msc/paging.h>
+#include <osmocom/msc/silent_call.h>
 
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -641,6 +642,12 @@ void vlr_subscr_set_imsi(struct vlr_subscr *vsub, const char *imsi)
 	/* If the same IMSI is already set, nothing changes. */
 	if (!strcmp(vsub->imsi, imsi))
 		return;
+
+	/* If the same subscriber has silent call (probably pending) stop the silent call to prevent
+	 * use count mismatch when freeing the transaction. */
+	exists = vlr_subscr_find_by_imsi(vsub->vlr, imsi, NULL);
+	if (gsm_silent_call_is_ongoing(exists))
+		gsm_silent_call_stop(exists);
 
 	/* We've just learned about this new IMSI, our primary key in the VLR. make sure to invalidate any prior VLR
 	 * entries for this IMSI. */

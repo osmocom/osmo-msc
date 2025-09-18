@@ -10,6 +10,7 @@ int gsm_silent_call_start(struct vlr_subscr *vsub,
 	struct vty *vty);
 
 extern int gsm_silent_call_stop(struct vlr_subscr *vsub);
+extern int gsm_silent_call_is_ongoing(struct vlr_subscr *vsub);
 
 void trans_silent_call_free(struct gsm_trans *trans);
 
