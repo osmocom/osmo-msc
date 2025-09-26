@@ -1664,19 +1664,35 @@ void vlr_subscr_rx_ciph_res(struct vlr_subscr *vsub, enum vlr_ciph_result_cause 
 
 /* Internal evaluation of requested ciphering mode.
  * Send set_ciph_mode() to MSC depending on the ciph_mode argument.
- * \param[in] vlr  VLR instance.
- * \param[in] fi  Calling FSM instance, for logging.
- * \param[in] msc_conn_ref  MSC conn to send to.
- * \param[in] ciph_mode  Ciphering config, to decide whether to do ciphering.
+ * \param[in] vlr VLR instance.
+ * \param[in] fi Calling FSM instance, for logging.
+ * \param[in] msc_conn_ref MSC conn to send to.
+ * \param[in] sec_ctx the security context to be established.
+ * \param[in] retrieve_imeisv request the IMEI in the ciphering mode command.
  * \returns 0 if no ciphering is needed or message was sent successfully,
  *          or a negative value if ciph_mode is invalid or sending failed.
  */
 int vlr_set_ciph_mode(struct vlr_instance *vlr,
 		      struct osmo_fsm_inst *fi,
 		      void *msc_conn_ref,
-		      bool umts_aka,
+		      enum vlr_subscr_security_context sec_ctx,
 		      bool retrieve_imeisv)
 {
+	bool umts_aka;
+
+	switch (sec_ctx) {
+	case VLR_SEC_CTX_GSM:
+		umts_aka = false;
+		break;
+	case VLR_SEC_CTX_UMTS:
+		umts_aka = true;
+		break;
+	case VLR_SEC_CTX_NONE:
+		return 0;
+	default:
+		return -EINVAL;
+	}
+
 	LOGPFSML(fi, LOGL_DEBUG, "Set Ciphering Mode\n");
 	return vlr->ops.set_ciph_mode(msc_conn_ref, umts_aka, retrieve_imeisv);
 }

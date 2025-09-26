@@ -488,7 +488,7 @@ void vlr_parq_cancel(struct osmo_fsm_inst *fi,
 int vlr_set_ciph_mode(struct vlr_instance *vlr,
 		      struct osmo_fsm_inst *fi,
 		      void *msc_conn_ref,
-		      bool umts_aka,
+		      enum vlr_subscr_security_context sec_ctx,
 		      bool retrieve_imeisv);
 
 bool vlr_use_umts_aka(struct osmo_auth_vector *vec, bool is_r99);
