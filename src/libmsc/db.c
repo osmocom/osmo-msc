@@ -747,6 +747,22 @@ static struct gsm_sms *sms_from_result(struct gsm_network *net, sqlite3_stmt *st
 	if (!sms)
 		return NULL;
 
+	daddr = (const char *)sqlite3_column_text(stmt, COL_DEST_ADDR);
+	if (daddr)
+		OSMO_STRLCPY_ARRAY(sms->dst.addr, daddr);
+
+	if (net != NULL) { /* db_sms_test passes NULL, so we need to be tolerant */
+		sms->receiver = vlr_subscr_find_by_msisdn(net->vlr, sms->dst.addr,
+							  VSUB_USE_SMS_RECEIVER);
+		if (!sms->receiver || !sms->receiver->lu_complete) {
+			LOGP(DLSMS, LOGL_DEBUG,
+			     "Subscriber %s%s is not attached, skipping SMS\n",
+			     sms->receiver ? "" : "MSISDN-",
+			     sms->receiver ? vlr_subscr_msisdn_or_name(sms->receiver) : daddr);
+			return sms;
+		}
+	}
+
 	sms->id = sqlite3_column_int64(stmt, COL_ID);
 
 	sms->created = sqlite3_column_int64(stmt, COL_CREATED);
@@ -763,13 +779,6 @@ static struct gsm_sms *sms_from_result(struct gsm_network *net, sqlite3_stmt *st
 
 	sms->dst.npi = sqlite3_column_int(stmt, COL_DEST_NPI);
 	sms->dst.ton = sqlite3_column_int(stmt, COL_DEST_TON);
-	daddr = (const char *)sqlite3_column_text(stmt, COL_DEST_ADDR);
-	if (daddr)
-		OSMO_STRLCPY_ARRAY(sms->dst.addr, daddr);
-
-	if (net != NULL) /* db_sms_test passes NULL, so we need to be tolerant */
-		sms->receiver = vlr_subscr_find_by_msisdn(net->vlr, sms->dst.addr,
-							  VSUB_USE_SMS_RECEIVER);
 
 	sms->src.npi = sqlite3_column_int(stmt, COL_SRC_NPI);
 	sms->src.ton = sqlite3_column_int(stmt, COL_SRC_TON);
