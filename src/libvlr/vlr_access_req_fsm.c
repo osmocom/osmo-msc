@@ -301,9 +301,13 @@ static void _proc_arq_vlr_node2(struct osmo_fsm_inst *fi)
 	LOGPFSM(fi, "%s()\n", __func__);
 
 	/* Continue with ciphering, if enabled.
-	 * If auth/ciph is optional and the HLR returned no auth info, continue without ciphering. */
+	 * If auth/ciph is optional and the HLR returned no auth info, continue without ciphering.
+	 * Also continue without ciphering, if ASCI call was requested. According to TS 143.068/069 Clause 7.3
+	 * ciphering has not been completely specified. The SIM does not support key storage. */
 	if (!is_cmc_smc_to_be_attempted(par)
-	    || (vsub->sec_ctx == VLR_SEC_CTX_NONE && !par->is_ciphering_required)) {
+	    || (vsub->sec_ctx == VLR_SEC_CTX_NONE && !par->is_ciphering_required)
+	    || par->cm_service_type == GSM48_CMSERV_VGCS
+	    || par->cm_service_type == GSM48_CMSERV_VBS) {
 		_proc_arq_vlr_node2_post_ciph(fi);
 		return;
 	}
