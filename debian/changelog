@@ -1,3 +1,38 @@
+osmo-msc (1.15.0) unstable; urgency=medium
+
+  [ Oliver Smith ]
+  * gsm48_cc_tx_setup: add goto error
+  * gsm48_cc_tx_setup: move msgb_alloc down
+  * gsm48_cc_tx_setup_set_transaction_id: split out
+  * gsm48_cc_tx_setup_set_transaction_id: tweak error msg
+  * gsm48_cc_tx_setup_select_codecs: split out
+  * gsm48_cc_tx_setup_set_bearer_cap: split out
+  * gsm48_cc_tx_setup_encode_msg: split out
+  * gsm48_cc_tx_setup: remove extra bearer_cap var
+  * gsm48_cc_tx_setup: fix speech bearer capabilities
+
+  [ Vadim Yanitskiy ]
+  * tests/{ctrl,vty}_test_runner.py: dump stdout/stderr
+
+  [ Alexander Couzens ]
+  * vlr_lu_fsm: terminate the FSM instead of dispatching only a signal to the parent
+  * vlr: remove old TODO to switch to osmo_tdef_fsm_inst_state_chg
+  * vlr: vlr_set_ciph_mode(): use vlr_subscr_security_context instead of umts_aka
+
+  [ Matan Perelman ]
+  * vlr: Stop silent call before deduping subscribers
+
+  [ Keith ]
+  * sqlite optimisation: check VLR earlier for dest. subscriber
+
+  [ Keith Whyte ]
+  * sqlite optimisation: Avoid unneeded database operation
+
+  [ Andreas Eversberg ]
+  * ASCI: Fix establishment of calls when ciphering is enabled
+
+ -- Pau Espin Pedrol <pespin@sysmocom.de>  Wed, 03 Dec 2025 19:36:22 +0100
+
 osmo-msc (1.14.0) unstable; urgency=medium
 
   [ Andreas Eversberg ]
