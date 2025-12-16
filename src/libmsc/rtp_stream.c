@@ -329,13 +329,11 @@ static int rtp_stream_do_mgcp_verb(struct rtp_stream *rtps, enum mgcp_verb verb,
 					 codec->subtype_name);
 				continue;
 			}
-			verb_info.codecs[i] = m->mgcp;
 			verb_info.ptmap[i] = (struct ptmap){
 				.codec = m->mgcp,
 				.pt = codec->payload_type,
 			};
 			i++;
-			verb_info.codecs_len = i;
 			verb_info.ptmap_len = i;
 		}
 		rtps->codecs_sent_to_mgw = true;
