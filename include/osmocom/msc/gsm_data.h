@@ -265,6 +265,24 @@ struct gsm_network {
 	/* Whether we want to use Osmux against BSCs. Controlled via VTY */
 	enum osmux_usage use_osmux;
 
+	/* For every GSM speech codec supported in Osmocom, there are two
+	 * possible RTP representations: the standard one originally invented
+	 * by IETF and then adopted by 3GPP in Rel8 (globally recognized
+	 * standard, but suffers from information loss relative to TRAU frame
+	 * formats of previous GSM/3GPP releases), and an alternative format
+	 * invented by Themyscira Wireless that restores TRAU-like information
+	 * content at the price of non-standard RTP format.  A similar
+	 * situation exists for GSM CSD, although here the diff between
+	 * 3GPP-standard and ThemWi RTP formats is a matter of encoding
+	 * efficiency and payload size economy rather than information content.
+	 * Osmocom BSS supports these AoIP RTP extensions, requested via a
+	 * BSSMAP extension IE, and if they are desired, they need to be
+	 * enabled from the MSC.  The RTP extension selection octet sent via
+	 * that BSSMAP extension (TW-TS-003) is a bit mask - allow it to be
+	 * configured via vty.
+	 */
+	uint8_t tw_rtp_formats;
+
 	/* Whether to use call waiting on the network */
 	bool call_waiting;
 

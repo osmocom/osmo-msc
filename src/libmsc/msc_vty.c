@@ -34,6 +34,7 @@
 #include <osmocom/gsm/protocol/gsm_04_14.h>
 #include <osmocom/gsm/protocol/gsm_08_08.h>
 #include <osmocom/gsm/gsm23236.h>
+#include <osmocom/gsm/rtp_extensions.h>
 
 #include <osmocom/sigtran/sccp_helpers.h>
 
@@ -684,6 +685,43 @@ DEFUN(cfg_msc_osmux,
 	return CMD_SUCCESS;
 }
 
+#define TWFORMAT_STR "Use ThemWi RTP formats\n"
+#define TWCODEC_MULT "(fr|hr|amr|csd)"
+#define TWCODEC_OPT " [" TWCODEC_MULT "]"
+#define TWCODEC_STR "TW-TS-001 for FR & EFR\nTW-TS-002 for HRv1\n" \
+		    "TW-TS-006 for AMR\nTW-TS-007 for CSD\n"
+
+DEFUN(cfg_msc_twformat,
+      cfg_msc_twformat_cmd,
+      "tw-rtp-formats " TWCODEC_MULT TWCODEC_OPT TWCODEC_OPT TWCODEC_OPT,
+      TWFORMAT_STR TWCODEC_STR TWCODEC_STR TWCODEC_STR TWCODEC_STR)
+{
+	uint8_t mask = 0;
+	int i;
+
+	for (i = 0; i < argc; i++) {
+		if (!strcmp(argv[i], "fr"))
+			mask |= OSMO_RTP_EXT_TWTS001;
+		else if (!strcmp(argv[i], "hr"))
+			mask |= OSMO_RTP_EXT_TWTS002;
+		else if (!strcmp(argv[i], "amr"))
+			mask |= OSMO_RTP_EXT_TWTS006;
+		else if (!strcmp(argv[i], "csd"))
+			mask |= OSMO_RTP_EXT_TWTS007;
+	}
+	gsmnet->tw_rtp_formats = mask;
+	return CMD_SUCCESS;
+}
+
+DEFUN(cfg_msc_no_twformat,
+      cfg_msc_no_twformat_cmd,
+      "no tw-rtp-formats",
+      NO_STR TWFORMAT_STR)
+{
+	gsmnet->tw_rtp_formats = 0;
+	return CMD_SUCCESS;
+}
+
 #define NRI_STR "Mapping of Network Resource Indicators to this MSC, for MSC pooling\n"
 DEFUN(cfg_msc_nri_bitlen, cfg_msc_nri_bitlen_cmd,
       "nri bitlen <0-15>",
@@ -808,6 +846,19 @@ static int config_write_msc(struct vty *vty)
 	if (gsmnet->use_osmux != OSMUX_USAGE_OFF) {
 		vty_out(vty, " osmux %s%s", gsmnet->use_osmux == OSMUX_USAGE_ON ? "on" : "only",
 			VTY_NEWLINE);
+	}
+
+	if (gsmnet->tw_rtp_formats) {
+		vty_out(vty, " tw-rtp-formats");
+		if (gsmnet->tw_rtp_formats & OSMO_RTP_EXT_TWTS001)
+			vty_out(vty, " fr");
+		if (gsmnet->tw_rtp_formats & OSMO_RTP_EXT_TWTS002)
+			vty_out(vty, " hr");
+		if (gsmnet->tw_rtp_formats & OSMO_RTP_EXT_TWTS006)
+			vty_out(vty, " amr");
+		if (gsmnet->tw_rtp_formats & OSMO_RTP_EXT_TWTS007)
+			vty_out(vty, " csd");
+		vty_out(vty, "%s", VTY_NEWLINE);
 	}
 
 	mgcp_client_config_write(vty, " ");
@@ -2108,6 +2159,8 @@ void msc_vty_init(struct gsm_network *msc_network)
 	install_element(MSC_NODE, &cfg_msc_sms_over_gsup_cmd);
 	install_element(MSC_NODE, &cfg_msc_no_sms_over_gsup_cmd);
 	install_element(MSC_NODE, &cfg_msc_osmux_cmd);
+	install_element(MSC_NODE, &cfg_msc_twformat_cmd);
+	install_element(MSC_NODE, &cfg_msc_no_twformat_cmd);
 	install_element(MSC_NODE, &cfg_msc_handover_number_range_cmd);
 	install_element(MSC_NODE, &cfg_msc_nri_bitlen_cmd);
 	install_element(MSC_NODE, &cfg_msc_nri_add_cmd);

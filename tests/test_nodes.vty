@@ -67,6 +67,8 @@ OsmoMSC(config-msc)# list
   sms-over-gsup
   no sms-over-gsup
   osmux (on|off|only)
+  tw-rtp-formats (fr|hr|amr|csd) [(fr|hr|amr|csd)] [(fr|hr|amr|csd)] [(fr|hr|amr|csd)]
+  no tw-rtp-formats
   handover-number range MSISDN_FIRST MSISDN_LAST
   nri bitlen <0-15>
   nri add <0-32767> [<0-32767>]

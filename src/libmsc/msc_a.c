@@ -682,6 +682,7 @@ void msc_a_tx_assignment_cmd(struct msc_a *msc_a)
 	struct ran_msg msg;
 	struct gsm_trans *cc_trans = msc_a->cc.active_trans;
 	struct gsm0808_channel_type channel_type;
+	struct gsm_network *net = msc_a_net(msc_a);
 
 	/* Do not dispatch another Assignment Command before an earlier assignment is completed. This is a sanity
 	 * safeguard, ideally callers should not even invoke this function when an Assignment is already ongoing.
@@ -756,6 +757,7 @@ void msc_a_tx_assignment_cmd(struct msc_a *msc_a)
 			.channel_type = &channel_type,
 			.osmux_present = msc_a->cc.call_leg->rtp[RTP_TO_RAN]->use_osmux,
 			.osmux_cid = msc_a->cc.call_leg->rtp[RTP_TO_RAN]->local_osmux_cid,
+			.rtp_extensions = net->tw_rtp_formats,
 			.call_id_present = true,
 			.call_id = cc_trans->call_id,
 			.lcls = cc_trans->cc.lcls,

@@ -106,6 +106,7 @@ struct ran_assignment_command {
 	enum nsap_addr_enc rab_assign_addr_enc;
 	bool osmux_present;
 	uint8_t osmux_cid;
+	uint8_t rtp_extensions;
 	bool call_id_present;
 	uint32_t call_id;
 	struct osmo_lcls *lcls;

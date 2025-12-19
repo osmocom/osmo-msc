@@ -1465,6 +1465,8 @@ static struct msgb *ran_a_make_assignment_command(struct osmo_fsm_inst *log_fi,
 		gsm0808_enc_group_callref(msg, &ac->callref);
 	if (ac->osmux_present)
 		msgb_tv_put(msg, GSM0808_IE_OSMO_OSMUX_CID, ac->osmux_cid);
+	if (ac->rtp_extensions)
+		msgb_tlv_put(msg, GSM0808_IE_THEMWI_RTP_EXTENSIONS, 1, &ac->rtp_extensions);
 	msg->l3h[1] = msgb_l3len(msg) - 2;
 	return msg;
 }
