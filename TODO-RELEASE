@@ -8,3 +8,4 @@
 # If any interfaces have been removed or changed since the last public release: c:r:0.
 #library	what			description / commit summary line
 libosmovty	>=1.12.1		working optional-multi-choice
+libosmocore >1.12.0     log_get_context(), log_{get,set}_filter(_data)()

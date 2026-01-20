@@ -1733,21 +1733,23 @@ bool vlr_use_umts_aka(struct osmo_auth_vector *vec, bool is_r99)
 void log_set_filter_vlr_subscr(struct log_target *target,
 			       struct vlr_subscr *vlr_subscr)
 {
-	struct vlr_subscr **fsub = (void*)&target->filter_data[LOG_FLT_VLR_SUBSCR];
-	const char *use = "logfilter";
+	struct vlr_subscr *fsub = log_get_filter_data(target, LOG_FLT_VLR_SUBSCR);
+	static const char *use = "logfilter";
 
 	/* free the old data */
-	if (*fsub) {
-		vlr_subscr_put(*fsub, use);
-		*fsub = NULL;
+	if (fsub) {
+		log_set_filter_data(target, LOG_FLT_VLR_SUBSCR, NULL);
+		vlr_subscr_put(fsub, use);
 	}
 
 	if (vlr_subscr) {
-		target->filter_map |= (1 << LOG_FLT_VLR_SUBSCR);
 		vlr_subscr_get(vlr_subscr, use);
-		*fsub = vlr_subscr;
-	} else
-		target->filter_map &= ~(1 << LOG_FLT_VLR_SUBSCR);
+		log_set_filter_data(target, LOG_FLT_VLR_SUBSCR, vlr_subscr);
+		log_set_filter(target, LOG_FLT_VLR_SUBSCR, true);
+	} else {
+		log_set_filter_data(target, LOG_FLT_VLR_SUBSCR, NULL);
+		log_set_filter(target, LOG_FLT_VLR_SUBSCR, false);
+	}
 }
 
 int g_vlr_log_cat[_OSMO_VLR_LOGC_MAX];
