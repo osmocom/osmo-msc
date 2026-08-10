@@ -58,7 +58,37 @@ static int get_subscriber_list(struct ctrl_cmd *cmd, void *d)
 	}
 	return CTRL_CMD_REPLY;
 }
+
+static int get_subscriber_list_v2(struct ctrl_cmd *cmd, void *d)
+{
+	struct vlr_subscr *vsub;
+
+	if (!msc_ctrl_net) {
+		cmd->reply = "MSC CTRL commands not initialized";
+		return CTRL_CMD_ERROR;
+	}
+
+	if (!msc_ctrl_net->vlr) {
+		cmd->reply = "VLR not initialized";
+		return CTRL_CMD_ERROR;
+	}
+
+	cmd->reply = talloc_strdup(cmd, "");
+
+	llist_for_each_entry(vsub, &msc_ctrl_net->vlr->subscribers, list) {
+		/* Do not list subscribers that aren't successfully attached. */
+		if (!vsub->lu_complete)
+			continue;
+		cmd->reply = talloc_asprintf_append(cmd->reply, "%s,%s,%s,%s\n",
+						    vsub->imsi, vsub->msisdn,
+						    osmo_rat_type_name(vsub->cs.attached_via_ran),
+						    osmo_fsm_inst_state_name(vsub->sgs_fsm));
+	}
+	return CTRL_CMD_REPLY;
+}
+
 CTRL_CMD_DEFINE_RO(subscriber_list, "subscriber-list-active-v1");
+CTRL_CMD_DEFINE_RO(subscriber_list_v2, "subscriber-list-active-v2");
 
 CTRL_CMD_DEFINE_WO_NOVRF(sub_expire, "subscriber-expire");
 static int set_sub_expire(struct ctrl_cmd *cmd, void *data)
@@ -102,6 +132,7 @@ int msc_ctrl_cmds_install(struct gsm_network *net)
 	msc_ctrl_net = net;
 
 	rc |= ctrl_cmd_install(CTRL_NODE_ROOT, &cmd_subscriber_list);
+	rc |= ctrl_cmd_install(CTRL_NODE_ROOT, &cmd_subscriber_list_v2);
 	rc |= ctrl_cmd_install(CTRL_NODE_ROOT, &cmd_sub_expire);
 
 	return rc;
