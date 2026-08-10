@@ -965,6 +965,61 @@ static void vty_dump_one_conn(struct vty *vty, const struct msub *msub,
 	}
 }
 
+static const struct value_string osmo_rat_type_summary_names[] = {
+        { OSMO_RAT_UNKNOWN, "-" },
+        { OSMO_RAT_GERAN_A, "G" },
+        { OSMO_RAT_UTRAN_IU, "U" },
+        { OSMO_RAT_EUTRAN_SGS, "E" },
+        {}
+};
+
+static const struct value_string vlr_sgs_fsm_states_summary_names[] = {
+	{ SGS_UE_ST_NULL, "NULL" },
+	{ SGS_UE_ST_LA_UPD_PRES, "LUR" },
+	{ SGS_UE_ST_ASSOCIATED, "ASSOC" },
+	{}
+};
+
+static void dump_summary_table_vty(struct vty *vty, bool header)
+{
+	const char *texts = "MSISDN       IMSI             IMEI            R  SGs    PAG  LAC/CID  EXP";
+	const char *lines = "-----------  ---------------  --------------  -  -----  ---  -------  ------";
+
+	if (header) {
+		vty_out(vty, "%s%s%s%s", texts, VTY_NEWLINE, lines, VTY_NEWLINE);
+	} else {
+		vty_out(vty, "%s%s%s%s", lines, VTY_NEWLINE, texts, VTY_NEWLINE);
+	}
+}
+
+static void vty_dump_one_subscr_summary(struct vty *vty, struct vlr_subscr *vsub)
+{
+	struct timespec now;
+	char expires[6];
+
+	if (!vlr_timer_secs(vsub->vlr, 3212, 3312) ||
+	    vsub->expire_lu == VLR_SUBSCRIBER_NO_EXPIRATION) {
+		snprintf(expires, sizeof(expires), "No");
+	} else if (osmo_clock_gettime(CLOCK_MONOTONIC, &now) == 0) {
+		snprintf(expires, sizeof(expires), "%lld:%lld",
+			  (long long int) ((vsub->expire_lu - now.tv_sec) / 60),
+			  (long long int) ((vsub->expire_lu - now.tv_sec) % 60));
+	}
+	vty_out(vty, "%-12s %-16s %-15s %-2s %-6s %-4s %-4u/%-3u %-6s",
+		vsub->msisdn[0] != '\0' ? vsub->msisdn : "none",
+		vsub->imsi,
+		vsub->imei[0] != '\0' ? vsub->imei : "none",
+		get_value_string(osmo_rat_type_summary_names, vsub->cs.attached_via_ran),
+		get_value_string(vlr_sgs_fsm_states_summary_names, vsub->sgs_fsm->state),
+		vsub->cs.is_paging ? "Yes" : "No",
+		vsub->cgi.lai.lac, vsub->cgi.cell_identity,
+		expires
+		);
+
+	vty_out_newline(vty);
+
+}
+
 static void vty_dump_one_subscr(struct vty *vty, struct vlr_subscr *vsub,
 				int offset, uint8_t dump_flags)
 {
@@ -1181,6 +1236,28 @@ DEFUN(show_subscr_cache, show_subscr_cache_cmd,
 
 	return CMD_SUCCESS;
 }
+
+DEFUN(show_subscr_cache_summary, show_subscr_cache_summary_cmd,
+	"show subscriber cache-summary",
+	SHOW_STR "Show information about subscribers\n"
+	"Display summarised contents of subscriber cache\n"
+	)
+{
+	struct vlr_subscr *vsub;
+	unsigned int count = 0;
+	dump_summary_table_vty(vty, true);
+	llist_for_each_entry(vsub, &gsmnet->vlr->subscribers, list) {
+		if (++count > 200) {
+			vty_out(vty, "%% More than %d subscribers in cache,"
+				" stopping here.%s", count-1, VTY_NEWLINE);
+			break;
+		}
+		vty_dump_one_subscr_summary(vty, vsub);
+	}
+
+	return CMD_SUCCESS;
+}
+
 
 DEFUN(sms_send_pend,
       sms_send_pend_cmd,
@@ -2131,6 +2208,7 @@ void msc_vty_init(struct gsm_network *msc_network)
 
 	install_element_ve(&show_subscr_cmd);
 	install_element_ve(&show_subscr_cache_cmd);
+	install_element_ve(&show_subscr_cache_summary_cmd);
 	install_element_ve(&show_bsc_cmd);
 	install_element_ve(&show_msc_conn_cmd);
 	install_element_ve(&show_msc_transaction_cmd);
