@@ -162,27 +162,37 @@ static struct sgs_mme_ctx *sgs_mme_alloc(struct sgs_state *sgs, const char *mme_
 /* Decode and verify MME name */
 static int decode_mme_name(char *mme_name, size_t mme_name_len, const struct tlv_parsed *tp)
 {
+	/* The MME name is a fixed length FQDN (e.g. mmec00.mmegi0000.mme.epc.mncMNC.mccMCC.3gppnetwork.org,
+	 * see also 3GPP TS 23.003, section 19.4.2.1 and 3GPP TS 29.118, section 9.4.13 */
 	const uint8_t *mme_name_enc = TLVP_VAL_MINLEN(tp, SGSAP_IE_MME_NAME, SGS_MME_NAME_LEN);
+	size_t mme_name_enc_len = TLVP_LEN(tp, SGSAP_IE_MME_NAME);
 	struct osmo_gummei gummei;
 
 	if (!mme_name_enc)
 		return -EINVAL;
 
-	/* do not accept over-long SGSAP_IE_MME_NAME IEs which would exceed the length
+	/* Do not accept over-long SGSAP_IE_MME_NAME IEs which would exceed the length
 	 * of the output buffer. */
-	if (TLVP_LEN(tp, SGSAP_IE_MME_NAME) >= mme_name_len)
+	if (mme_name_enc_len >= mme_name_len)
 		return -EINVAL;
 
-	/* some implementations use FDQN format violating TS 29.118 9.3.14 */
+	/* We attempt to parse the MME name into a GUMMEI to make sure it has the form
+	 * specified by 3GPP TS 29.118, section 9.4.13. In that case, we may copy the
+	 * MME name to the output buffer and exit. */
 	if (!osmo_parse_mme_domain(&gummei, (const char *) mme_name_enc)) {
-		memcpy(mme_name, mme_name_enc, TLVP_LEN(tp, SGSAP_IE_MME_NAME));
+		memcpy(mme_name, mme_name_enc, mme_name_enc_len);
+		mme_name[mme_name_enc_len] = '\0';
 		return 0;
 	}
 
-	/* decode the MME name from DNS labels to string */
-	osmo_apn_to_str(mme_name, TLVP_VAL(tp, SGSAP_IE_MME_NAME), TLVP_LEN(tp, SGSAP_IE_MME_NAME));
+	/* In some cases the MME name may be supplied in the domain name format specified
+	 * by RFC-1035, section 3.1, which is a spec violation we want to tolerate. We
+	 * may convert the domain name from the LV representtaion into the string string
+	 * representation required by 3GPP TS 29.118, section 9.4.13 */
+	osmo_apn_to_str(mme_name, mme_name_enc, mme_name_enc_len);
 
-	/* try to parse the MME name into a GUMMEI as a test for the format */
+	/* To make sure the format conversion has produced a valid MME name, we attempt to
+	 * parse the output buffer again. */
 	if (osmo_parse_mme_domain(&gummei, mme_name) < 0)
 		return -EINVAL;
 
