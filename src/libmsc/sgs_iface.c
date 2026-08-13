@@ -160,12 +160,17 @@ static struct sgs_mme_ctx *sgs_mme_alloc(struct sgs_state *sgs, const char *mme_
 }
 
 /* Decode and verify MME name */
-static int decode_mme_name(char *mme_name, const struct tlv_parsed *tp)
+static int decode_mme_name(char *mme_name, size_t mme_name_len, const struct tlv_parsed *tp)
 {
 	const uint8_t *mme_name_enc = TLVP_VAL_MINLEN(tp, SGSAP_IE_MME_NAME, SGS_MME_NAME_LEN);
 	struct osmo_gummei gummei;
 
 	if (!mme_name_enc)
+		return -EINVAL;
+
+	/* do not accept over-long SGSAP_IE_MME_NAME IEs which would exceed the length
+	 * of the output buffer. */
+	if (TLVP_LEN(tp, SGSAP_IE_MME_NAME) >= mme_name_len)
 		return -EINVAL;
 
 	/* some implementations use FDQN format violating TS 29.118 9.3.14 */
@@ -1040,7 +1045,7 @@ int sgs_iface_rx(struct sgs_connection *sgc, struct msgb *msg)
 	}
 
 	if (TLVP_PRESENT(&tp, SGSAP_IE_MME_NAME)) {
-		if (decode_mme_name(mme_name, &tp) != 0) {
+		if (decode_mme_name(mme_name, sizeof(mme_name), &tp) != 0) {
 			TX_STATUS_AND_LOG(sgc, msg_type, SGSAP_SGS_CAUSE_INVALID_MAND_IE,
 					  "SGsAP Message %s with invalid MME-Name, dropping\n");
 			goto error;
