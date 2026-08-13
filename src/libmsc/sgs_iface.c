@@ -168,6 +168,10 @@ static int decode_mme_name(char *mme_name, const struct tlv_parsed *tp)
 	if (!mme_name_enc)
 		return -EINVAL;
 
+	/* do not accept IEs which exceed SGS_MME_NAME_LEN */
+	if (TLVP_LEN(tp, SGSAP_IE_MME_NAME) > SGS_MME_NAME_LEN)
+		return -EINVAL;
+
 	/* some implementations use FDQN format violating TS 29.118 9.3.14 */
 	if (!osmo_parse_mme_domain(&gummei, (const char *) mme_name_enc)) {
 		memcpy(mme_name, mme_name_enc, TLVP_LEN(tp, SGSAP_IE_MME_NAME));
