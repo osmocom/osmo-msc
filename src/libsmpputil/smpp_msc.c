@@ -132,6 +132,7 @@ static int submit_to_sms(struct gsm_sms **psms, struct gsm_network *net,
 	struct tlv_t *t;
 	int mode;
 	int can_store_sms = ((submit->esm_class & SMPP34_MSG_MODE_MASK) != 2); /* != forward mode */
+	int rc;
 
 	dest = subscr_by_dst(net, submit->dest_addr_npi,
 			     submit->dest_addr_ton,
@@ -247,21 +248,39 @@ static int submit_to_sms(struct gsm_sms **psms, struct gsm_network *net,
 			ud_len = *sms_msg + 1;
 			if (ud_len > sms_msg_len) {
 				sms_free(sms);
-				LOGP(DLSMS, LOGL_ERROR, "invalid ud_len=%u > sms_msg_len=%u\n", ud_len,
-				     sms_msg_len);
+				LOGP(DLSMS, LOGL_ERROR, "invalid ud_len=%u > sms_msg_len=%u\n",
+				     ud_len, sms_msg_len);
+				return ESME_RINVPARLEN;
+			}
+			if (ud_len > sizeof(sms->user_data)) {
+				sms_free(sms);
+				LOGP(DLSMS, LOGL_ERROR, "invalid sms_msg_len=%u > %zu\n",
+				     sms_msg_len, sizeof(sms->user_data));
 				return ESME_RINVPARLEN;
 			}
 			printf("copying %u bytes user data...\n", ud_len);
-			memcpy(sms->user_data, sms_msg,
-				OSMO_MIN(ud_len, sizeof(sms->user_data)));
+			memcpy(sms->user_data, sms_msg, ud_len);
 			sms_msg += ud_len;
 			sms_msg_len -= ud_len;
 			padbits = 7 - (ud_len % 7);
 		}
-		gsm_septet_pack(sms->user_data+ud_len, sms_msg, sms_msg_len, padbits);
+		rc = gsm_septet_pack2(sms->user_data + ud_len, sizeof(sms->user_data) - ud_len,
+				      sms_msg, sms_msg_len, padbits);
+		if (rc < 0) {
+			sms_free(sms);
+			LOGP(DLSMS, LOGL_ERROR, "invalid ud_len=%u + sms_msg_len=%u > %zu\n",
+			     ud_len, sms_msg_len, sizeof(sms->user_data));
+			return ESME_RINVPARLEN;
+		}
 		sms->user_data_len = (ud_len*8 + padbits)/7 + sms_msg_len;/* SEPTETS */
 		/* FIXME: sms->text */
 	} else {
+		if (sms_msg_len > sizeof(sms->user_data)) {
+			sms_free(sms);
+			LOGP(DLSMS, LOGL_ERROR, "invalid sms_msg_len=%u > %zu\n",
+			     sms_msg_len, sizeof(sms->user_data));
+			return ESME_RINVPARLEN;
+		}
 		memcpy(sms->user_data, sms_msg, sms_msg_len);
 		sms->user_data_len = sms_msg_len;
 	}
