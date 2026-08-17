@@ -10,3 +10,4 @@
 libosmovty	>=1.12.1		working optional-multi-choice
 libosmocore >1.12.0     log_get_context(), log_{get,set}_filter(_data)()
 libosmogsm	>1.14.1 		gsm_septet_pack2()
+osmo-iuh        >1.8.0                  ranap_new_msg_rab_assign_voice2()

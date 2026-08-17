@@ -348,7 +348,7 @@ static struct msgb *ran_iu_make_rab_assignment(struct osmo_fsm_inst *caller_fi, 
 {
 	struct msgb *msg;
 	bool use_x213_nsap;
-	uint32_t cn_rtp_ip;
+	struct osmo_sockaddr cn_rtp_addr = {};
 	static uint8_t next_rab_id = 1;
 	uint8_t rab_id = next_rab_id;
 
@@ -356,14 +356,14 @@ static struct msgb *ran_iu_make_rab_assignment(struct osmo_fsm_inst *caller_fi, 
 	if (!next_rab_id)
 		next_rab_id = 1;
 
-	cn_rtp_ip = osmo_htonl(inet_addr(ac->cn_rtp->ip));
-
-	if (cn_rtp_ip == INADDR_NONE) {
-		LOG_RAN_IU_ENC(caller_fi, LOGL_ERROR, "Error during RAB Assignment: invalid RTP IP-Address\n");
-		return NULL;
-	}
+	OSMO_ASSERT(ac->cn_rtp);
 	if (ac->cn_rtp->port == 0) {
 		LOG_RAN_IU_ENC(caller_fi, LOGL_ERROR, "Error during RAB Assignment: invalid RTP port\n");
+		return NULL;
+	}
+
+	if (osmo_sockaddr_str_to_osa(ac->cn_rtp, &cn_rtp_addr) < 0) {
+		LOG_RAN_IU_ENC(caller_fi, LOGL_ERROR, "Error during RAB Assignment: invalid RTP IP-Address\n");
 		return NULL;
 	}
 
@@ -371,7 +371,14 @@ static struct msgb *ran_iu_make_rab_assignment(struct osmo_fsm_inst *caller_fi, 
 	LOG_RAN_IU_ENC(caller_fi, LOGL_DEBUG, "RAB Assignment: rab_id=%d, rtp=" OSMO_SOCKADDR_STR_FMT ", use_x213_nsap=%d\n",
 			rab_id, OSMO_SOCKADDR_STR_FMT_ARGS(ac->cn_rtp), use_x213_nsap);
 
-	msg = ranap_new_msg_rab_assign_voice(rab_id, cn_rtp_ip, ac->cn_rtp->port, use_x213_nsap);
+	msg = ranap_new_msg_rab_assign_voice2(rab_id, &cn_rtp_addr, use_x213_nsap);
+	if (!msg) {
+		LOG_RAN_IU_ENC(caller_fi, LOGL_ERROR,
+			       "Error during RAB Assignment: Encoding failed rab_id=%d, rtp="
+			       OSMO_SOCKADDR_STR_FMT ", use_x213_nsap=%d\n",
+			       rab_id, OSMO_SOCKADDR_STR_FMT_ARGS(ac->cn_rtp), use_x213_nsap);
+		return NULL;
+	}
 	msg->l2h = msg->data;
 
 	return msg;
