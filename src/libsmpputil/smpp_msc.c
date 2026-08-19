@@ -258,7 +258,6 @@ static int submit_to_sms(struct gsm_sms **psms, struct gsm_network *net,
 				     sms_msg_len, sizeof(sms->user_data));
 				return ESME_RINVPARLEN;
 			}
-			printf("copying %u bytes user data...\n", ud_len);
 			memcpy(sms->user_data, sms_msg, ud_len);
 			sms_msg += ud_len;
 			sms_msg_len -= ud_len;
