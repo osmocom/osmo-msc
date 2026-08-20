@@ -1,3 +1,27 @@
+osmo-msc (1.16.0) unstable; urgency=medium
+
+  [ Mychaela N. Falconia ]
+  * rtp_stream: drop use of codecs[] in struct mgcp_conn_peer
+  * add vty setting for ThemWi RTP formats
+
+  [ Alexander Couzens ]
+  * vlr: add PS support
+
+  [ Pau Espin Pedrol ]
+  * Avoid accessing struct log_target members directly
+  * smpp: Fix potential write buffer overflow on sms->user_data
+  * iu: Fix encoding of IPv6 RTP address in RAB Ass Req
+  * smpp: Remove unnecessary printf
+
+  [ Andreas Eversberg ]
+  * Check for protocol extension bit in message type at a central location
+  * Reset 'release_99' flag in test cases at comment_start()
+
+  [ Philipp Maier ]
+  * sgs_iface: guard against over-long MME name IEs.
+
+ -- Pau Espin Pedrol <pespin@sysmocom.de>  Thu, 20 Aug 2026 13:17:10 +0200
+
 osmo-msc (1.15.0) unstable; urgency=medium
 
   [ Oliver Smith ]
