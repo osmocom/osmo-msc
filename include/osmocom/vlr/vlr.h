@@ -309,6 +309,22 @@ vlr_loc_update(struct osmo_fsm_inst *parent,
 	       bool is_r99, bool is_utran,
 	       bool assign_tmsi);
 
+struct osmo_fsm_inst *
+vlr_ra_update(struct osmo_fsm_inst *parent,
+	      uint32_t parent_event_success,
+	      uint32_t parent_event_failure,
+	      void *parent_event_data,
+	      struct vlr_instance *vlr, void *msc_conn_ref,
+	      enum vlr_lu_type type, uint32_t tmsi, const char *imsi,
+	      const struct osmo_routing_area_id *old_rai,
+	      const struct osmo_routing_area_id *new_rai,
+	      bool authentication_required,
+	      bool is_ciphering_to_be_attempted,
+	      bool is_ciphering_required,
+	      uint8_t key_seq,
+	      bool is_r99, bool is_utran,
+	      bool assign_tmsi);
+
 void vlr_loc_update_cancel(struct osmo_fsm_inst *fi,
 			   enum osmo_fsm_term_cause fsm_cause,
 			   uint8_t gsm48_cause);
