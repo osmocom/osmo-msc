@@ -22,7 +22,6 @@
 
 #include <osmocom/core/logging.h>
 
-#include <osmocom/sccp/sccp_types.h>
 #include <osmocom/sigtran/sccp_sap.h>
 #include <osmocom/sigtran/sccp_helpers.h>
 
@@ -68,18 +67,18 @@ static void handle_notice_ind(struct sccp_ran_inst *sri, const struct osmo_scu_n
 	if (!rp) {
 		LOGP(DMSC, LOGL_DEBUG, "(calling_addr=%s) N-NOTICE.ind cause=%u='%s' importance=%u didn't match any ran_peer, ignoring\n",
 		     osmo_sccp_addr_dump(&ni->calling_addr),
-		     ni->cause, osmo_sccp_return_cause_name(ni->cause),
+		     ni->cause, osmo_sccp_return_reason_name(ni->cause),
 		     ni->importance);
 		return;
 	}
 
 	LOG_RAN_PEER(rp, LOGL_NOTICE, "N-NOTICE.ind cause=%u='%s' importance=%u\n",
-		     ni->cause, osmo_sccp_return_cause_name(ni->cause),
+		     ni->cause, osmo_sccp_return_reason_name(ni->cause),
 		     ni->importance);
 
 	switch (ni->cause) {
-	case SCCP_RETURN_CAUSE_SUBSYSTEM_CONGESTION:
-	case SCCP_RETURN_CAUSE_NETWORK_CONGESTION:
+	case OSMO_SCCP_RETURN_REASON_SUBSYSTEM_CONGESTION:
+	case OSMO_SCCP_RETURN_REASON_NETWORK_CONGESTION:
 		/* Transient failures (hopefully), keep going. */
 		return;
 	default:

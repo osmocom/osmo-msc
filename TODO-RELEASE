@@ -8,3 +8,4 @@
 # If any interfaces have been removed or changed since the last public release: c:r:0.
 #library	what			description / commit summary line
 libosmo-sigtran >2.3.0                  OSMO_SCCP_REL_REASON_NSU_*
+libosmo-sigtran >2.3.0                  OSMO_SCCP_RETURN_REASON_*, osmo_sccp_return_reason_name()
