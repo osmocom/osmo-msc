@@ -220,7 +220,8 @@ static int sccp_ran_sap_up(struct osmo_prim_hdr *oph, void *_scu)
 
 		rc = sri->ran->sccp_ran_ops.up_l2(sri, peer_addr, true, conn_id, oph->msg);
 		if (rc)
-			osmo_sccp_tx_disconn(scu, conn_id, my_addr, SCCP_RETURN_CAUSE_UNQUALIFIED);
+			osmo_sccp_tx_disconn(scu, conn_id, my_addr,
+					     OSMO_SCCP_REL_REASON_NSU_CREF_END_USER_ORIGIN);
 		break;
 
 	case OSMO_PRIM(OSMO_SCU_PRIM_N_DATA, PRIM_OP_INDICATION):
@@ -349,7 +350,7 @@ int sccp_ran_down_l2_cl(struct sccp_ran_inst *sri, const struct osmo_sccp_addr *
 	return osmo_sccp_user_sap_down_nofree(sri->scu, &prim->oph);
 }
 
-int sccp_ran_disconnect(struct sccp_ran_inst *sri, uint32_t conn_id, uint32_t cause)
+int sccp_ran_disconnect(struct sccp_ran_inst *sri, uint32_t conn_id, enum osmo_sccp_release_reason_nsu reason)
 {
-	return osmo_sccp_tx_disconn(sri->scu, conn_id, NULL, cause);
+	return osmo_sccp_tx_disconn(sri->scu, conn_id, NULL, reason);
 }

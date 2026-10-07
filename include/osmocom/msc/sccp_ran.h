@@ -280,4 +280,4 @@ int sccp_ran_down_l2_co_initial(struct sccp_ran_inst *sri,
 int sccp_ran_down_l2_co(struct sccp_ran_inst *sri, uint32_t conn_id, struct msgb *l2);
 int sccp_ran_down_l2_cl(struct sccp_ran_inst *sri, const struct osmo_sccp_addr *called_addr, struct msgb *l2);
 
-int sccp_ran_disconnect(struct sccp_ran_inst *ran, uint32_t conn_id, uint32_t cause);
+int sccp_ran_disconnect(struct sccp_ran_inst *ran, uint32_t conn_id, enum osmo_sccp_release_reason_nsu reason);

@@ -269,7 +269,7 @@ static void clear_and_disconnect(struct ran_peer *rp, uint32_t conn_id)
 	    || sccp_ran_down_l2_co(rp->sri, conn_id, clear))
 		LOG_RAN_PEER(rp, LOGL_ERROR, "Cannot sent Clear command\n");
 
-	sccp_ran_disconnect(rp->sri, conn_id, 0);
+	sccp_ran_disconnect(rp->sri, conn_id, OSMO_SCCP_REL_REASON_NSU_DISC_NORMAL);
 }
 
 static void ran_peer_st_wait_rx_reset(struct osmo_fsm_inst *fi, uint32_t event, void *data)
@@ -344,7 +344,8 @@ static void ran_peer_st_wait_rx_reset_ack(struct osmo_fsm_inst *fi, uint32_t eve
 		OSMO_ASSERT(ctx);
 		LOG_RAN_PEER(rp, LOGL_ERROR, "Receiving CO message on RAN peer that has not done a proper RESET yet."
 			     " Disconnecting on incoming message, sending RESET to RAN peer.\n");
-		sccp_ran_disconnect(rp->sri, ctx->conn_id, 0);
+		sccp_ran_disconnect(rp->sri, ctx->conn_id,
+				    OSMO_SCCP_REL_REASON_NSU_DISC_END_USER_FAILURE);
 		/* No valid RESET procedure has happened here yet. */
 		ran_peer_reset(rp);
 		return;

@@ -148,7 +148,9 @@ void ran_conn_close(struct ran_conn *conn)
 
 	if (conn->ran_peer) {
 		/* Todo: pass a useful SCCP cause? */
-		sccp_ran_disconnect(conn->ran_peer->sri, conn->sccp_conn_id, 0);
+		sccp_ran_disconnect(conn->ran_peer->sri,
+				    conn->sccp_conn_id,
+				    OSMO_SCCP_REL_REASON_NSU_DISC_NORMAL);
 		conn->ran_peer = NULL;
 	}
 
