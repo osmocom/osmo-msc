@@ -379,7 +379,9 @@ static void vlr_lu_compl_fsm_success(struct osmo_fsm_inst *fi)
 		vlr_subscr_get(vsub, VSUB_USE_ATTACHED);
 	}
 	_vlr_lu_compl_fsm_done(fi, VLR_FSM_RESULT_SUCCESS, 0);
-	vlr_sgs_fsm_update_id(vsub);
+
+	if (vlr_is_cs(vsub->vlr))
+		vlr_sgs_fsm_update_id(vsub);
 }
 
 static void vlr_lu_compl_fsm_dispatch_result(struct osmo_fsm_inst *fi,

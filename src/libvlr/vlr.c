@@ -420,7 +420,8 @@ static struct vlr_subscr *_vlr_subscr_alloc(struct vlr_instance *vlr)
 	/* Create an SGs FSM, which is needed to control CSFB,
 	 * in cases where CSFB/SGs is not in use, this FSM will
 	 * just do nothing. (see also: sgs_iface.c) */
-	vlr_sgs_fsm_create(vsub);
+	if (vlr_is_cs(vlr))
+		vlr_sgs_fsm_create(vsub);
 
 	llist_add_tail(&vsub->list, &vlr->subscribers);
 	vlr_stat_item_inc(vlr, VLR_STAT_SUBSCRIBER_COUNT);
@@ -476,7 +477,8 @@ void vlr_subscr_free(struct vlr_subscr *vsub)
 	osmo_timer_del(&vsub->sgs.Ts5);
 
 	/* Remove SGs FSM (see also: sgs_iface.c) */
-	vlr_sgs_fsm_remove(vsub);
+	if (vlr_is_cs(vsub->vlr))
+		vlr_sgs_fsm_remove(vsub);
 
 	talloc_free(vsub);
 }
@@ -1621,13 +1623,14 @@ struct vlr_instance *vlr_alloc(void *ctx, const struct vlr_ops *ops, bool is_ps)
 	vlr_lu_fsm_init(is_ps);
 	/* vlr_access_request_fsm.c */
 	vlr_parq_fsm_init(is_ps);
-	/* vlr_sgs_fsm.c */
-	vlr_sgs_fsm_init();
 
 	if (is_ps)
 		vlr_tdefs = sgsn_tdefs_vlr;
-	else
+	else { /* is_cs */
+		/* vlr_sgs_fsm.c */
+		vlr_sgs_fsm_init();
 		vlr_tdefs = msc_tdefs_vlr;
+	}
 
 	return vlr;
 
