@@ -469,7 +469,7 @@ struct msgb *gsm48_create_mm_info(struct gsm_network *net)
 	struct msgb *msg = gsm48_msgb_alloc_name("GSM 04.08 MM INF");
 	struct gsm48_hdr *gh;
 	uint8_t *ptr8;
-	int name_len, name_pad;
+	int name_len, name_pad, octets;
 
 	time_t cur_t;
 	struct tm* gmt_time;
@@ -508,7 +508,7 @@ struct msgb *gsm48_create_mm_info(struct gsm_network *net)
 		ptr8[2] = 0x80 | name_pad; /* Cell Broadcast DCS, no CI */
 
 		ptr8 = msgb_put(msg, name_len);
-		gsm_7bit_encode_n(ptr8, name_len, net->name_long, NULL);
+		gsm_7bit_encode_n_ussd(ptr8, name_len, net->name_long, &octets);
 
 	}
 
@@ -536,7 +536,7 @@ struct msgb *gsm48_create_mm_info(struct gsm_network *net)
 		ptr8[2] = 0x80 | name_pad; /* Cell Broadcast DCS, no CI */
 
 		ptr8 = msgb_put(msg, name_len);
-		gsm_7bit_encode_n(ptr8, name_len, net->name_short, NULL);
+		gsm_7bit_encode_n_ussd(ptr8, name_len, net->name_short, &octets);
 
 	}
 
