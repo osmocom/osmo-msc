@@ -306,7 +306,7 @@ static int _mncc_recvmsg(const char *file, int line,
 	unsigned char *data;
 
 	mncc->msg_type = msg_type;
-	log_mncc_rx_tx(trans, "tx", (union mncc_msg *)mncc);
+	_log_mncc_rx_tx(file, line, trans, "tx", (union mncc_msg *)mncc);
 
 	msg = msgb_alloc(sizeof(struct gsm_mncc), "MNCC");
 	if (!msg)
