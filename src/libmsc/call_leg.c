@@ -58,6 +58,7 @@ void call_leg_init(struct gsm_network *net)
 {
 	gsmnet = net;
 	OSMO_ASSERT( osmo_fsm_register(&call_leg_fsm) == 0 );
+	rtp_stream_init(net);
 }
 
 /* Allocate a call leg FSM instance as child of an arbitrary other FSM instance.

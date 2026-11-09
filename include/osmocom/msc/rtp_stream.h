@@ -61,6 +61,8 @@ struct rtp_stream {
 #define RTP_STREAM_FMT "local=" RTP_IP_PORT_FMT ",remote=" RTP_IP_PORT_FMT
 #define RTP_STREAM_ARGS(RS) RTP_IP_PORT_ARGS(&(RS)->local), RTP_IP_PORT_ARGS(&(RS)->remote),
 
+void rtp_stream_init(struct gsm_network *net);
+
 struct rtp_stream *rtp_stream_alloc(struct osmo_fsm_inst *parent_fi, uint32_t event_gone, uint32_t event_avail,
 				    uint32_t event_estab, enum rtp_direction dir, uint32_t call_id,
 				    struct gsm_trans *for_trans);

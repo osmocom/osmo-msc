@@ -33,6 +33,8 @@
 #define LOG_RTPS(rtps, level, fmt, args...) \
 	LOGPFSML(rtps->fi, level, fmt, ##args)
 
+static struct gsm_network *gsmnet = NULL;
+
 enum rtp_stream_event {
 	RTP_STREAM_EV_CRCX_OK,
 	RTP_STREAM_EV_CRCX_FAIL,
@@ -56,8 +58,9 @@ static struct osmo_tdef_state_timeout rtp_stream_fsm_timeouts[32] = {
 #define rtp_stream_state_chg(rtps, state) \
 	osmo_tdef_fsm_inst_state_chg((rtps)->fi, state, rtp_stream_fsm_timeouts, g_mgw_tdefs, 5)
 
-static __attribute__((constructor)) void rtp_stream_init()
+void rtp_stream_init(struct gsm_network *net)
 {
+	gsmnet = net;
 	OSMO_ASSERT(osmo_fsm_register(&rtp_stream_fsm) == 0);
 }
 
@@ -314,6 +317,21 @@ static int rtp_stream_do_mgcp_verb(struct rtp_stream *rtps, enum mgcp_verb verb,
 		.x_osmo_osmux_use = rtps->use_osmux,
 		.x_osmo_osmux_cid = rtps->remote_osmux_cid,
 	};
+
+	if (verb == MGCP_VERB_CRCX && gsmnet->mgw_indicate_side) {
+		const char *side_name;
+		switch (rtps->dir) {
+		case RTP_TO_CN:
+			side_name = "CN";
+			break;
+		case RTP_TO_RAN:
+			side_name = "RAN";
+			break;
+		default:
+			OSMO_ASSERT(0);
+		}
+		OSMO_STRLCPY_ARRAY(verb_info.x_side, side_name);
+	}
 
 	verb_info.conn_mode = rtps->crcx_conn_mode;
 

@@ -283,6 +283,10 @@ struct gsm_network {
 	 */
 	uint8_t tw_rtp_formats;
 
+	/* Should we send X-Side extension parameter line to our attached MGW,
+	 * telling it which CRCX is for CN vs RAN? */
+	bool mgw_indicate_side;
+
 	/* Whether to use call waiting on the network */
 	bool call_waiting;
 

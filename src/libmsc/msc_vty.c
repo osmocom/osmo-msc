@@ -724,6 +724,26 @@ DEFUN(cfg_msc_no_twformat,
 	return CMD_SUCCESS;
 }
 
+#define MGW_STR MGCP_CLIENT_MGW_STR
+
+DEFUN(cfg_msc_mgw_side,
+      cfg_msc_mgw_side_cmd,
+      "mgw indicate-side",
+      MGW_STR "Send X-Side extension parameter with CRCX commands\n")
+{
+	gsmnet->mgw_indicate_side = true;
+	return CMD_SUCCESS;
+}
+
+DEFUN(cfg_msc_no_mgw_side,
+      cfg_msc_no_mgw_side_cmd,
+      "no mgw indicate-side",
+      NO_STR MGW_STR "Send X-Side extension parameter with CRCX commands\n")
+{
+	gsmnet->mgw_indicate_side = false;
+	return CMD_SUCCESS;
+}
+
 #define NRI_STR "Mapping of Network Resource Indicators to this MSC, for MSC pooling\n"
 DEFUN(cfg_msc_nri_bitlen, cfg_msc_nri_bitlen_cmd,
       "nri bitlen <0-15>",
@@ -862,6 +882,9 @@ static int config_write_msc(struct vty *vty)
 			vty_out(vty, " csd");
 		vty_out(vty, "%s", VTY_NEWLINE);
 	}
+
+	if (gsmnet->mgw_indicate_side)
+		vty_out(vty, " mgw indicate-side%s", VTY_NEWLINE);
 
 	mgcp_client_config_write(vty, " ");
 
@@ -2163,6 +2186,8 @@ void msc_vty_init(struct gsm_network *msc_network)
 	install_element(MSC_NODE, &cfg_msc_osmux_cmd);
 	install_element(MSC_NODE, &cfg_msc_twformat_cmd);
 	install_element(MSC_NODE, &cfg_msc_no_twformat_cmd);
+	install_element(MSC_NODE, &cfg_msc_mgw_side_cmd);
+	install_element(MSC_NODE, &cfg_msc_no_mgw_side_cmd);
 	install_element(MSC_NODE, &cfg_msc_handover_number_range_cmd);
 	install_element(MSC_NODE, &cfg_msc_nri_bitlen_cmd);
 	install_element(MSC_NODE, &cfg_msc_nri_add_cmd);
