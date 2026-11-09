@@ -55,6 +55,8 @@ OsmoMSC(config-msc)# list
   no lcls-permitted
   mncc internal
   mncc external MNCC_SOCKET_PATH
+  mncc mode standard
+  mncc mode raw
   mncc guard-timeout <0-255>
   ncss guard-timeout <0-255>
   no assign-tmsi
@@ -95,6 +97,7 @@ OsmoMSC(config-msc)# mncc?
 OsmoMSC(config-msc)# mncc ?
   internal       Use internal MNCC handler (default; changes need a program restart)
   external       Use external MNCC handler (changes need a program restart)
+  mode           Select MNCC interface variant to be used
   guard-timeout  Set global guard timer for mncc interface activity
 
 OsmoMSC(config-msc)# mncc external ?

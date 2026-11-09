@@ -442,6 +442,26 @@ DEFUN(cfg_msc_mncc_external,
 	return CMD_SUCCESS;
 }
 
+DEFUN(cfg_msc_mncc_mode_std,
+      cfg_msc_mncc_mode_std_cmd,
+      "mncc mode standard",
+      MNCC_STR "Select MNCC interface variant to be used\n"
+      "Traditional Osmocom MNCC\n")
+{
+	gsmnet->mncc_raw_mode = false;
+	return CMD_SUCCESS;
+}
+
+DEFUN(cfg_msc_mncc_mode_raw,
+      cfg_msc_mncc_mode_raw_cmd,
+      "mncc mode raw",
+      MNCC_STR "Select MNCC interface variant to be used\n"
+      "MNCC with raw CC messages and explicit assignment control\n")
+{
+	gsmnet->mncc_raw_mode = true;
+	return CMD_SUCCESS;
+}
+
 DEFUN(cfg_msc_mncc_guard_timeout,
       cfg_msc_mncc_guard_timeout_cmd,
       "mncc guard-timeout <0-255>",
@@ -832,6 +852,8 @@ static int config_write_msc(struct vty *vty)
 		vty_out(vty, " mncc external %s%s", gsmnet->mncc_sock_path, VTY_NEWLINE);
 	else
 		vty_out(vty, " mncc internal%s", VTY_NEWLINE);
+	if (gsmnet->mncc_raw_mode)
+		vty_out(vty, " mncc mode raw%s", VTY_NEWLINE);
 	vty_out(vty, " mncc guard-timeout %i%s",
 		gsmnet->mncc_guard_timeout, VTY_NEWLINE);
 	vty_out(vty, " ncss guard-timeout %i%s",
@@ -2183,6 +2205,8 @@ void msc_vty_init(struct gsm_network *msc_network)
 	install_element(MSC_NODE, &cfg_msc_no_lcls_disable_cmd);
 	install_element(MSC_NODE, &cfg_msc_mncc_internal_cmd);
 	install_element(MSC_NODE, &cfg_msc_mncc_external_cmd);
+	install_element(MSC_NODE, &cfg_msc_mncc_mode_std_cmd);
+	install_element(MSC_NODE, &cfg_msc_mncc_mode_raw_cmd);
 	install_element(MSC_NODE, &cfg_msc_mncc_guard_timeout_cmd);
 	install_element(MSC_NODE, &cfg_msc_deprecated_mncc_guard_timeout_cmd);
 	install_element(MSC_NODE, &cfg_msc_ncss_guard_timeout_cmd);

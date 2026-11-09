@@ -294,6 +294,13 @@ struct gsm_network {
 	 * telling it which CRCX is for CN vs RAN? */
 	bool mgw_indicate_side;
 
+	/* MNCC raw mode: exchange raw CC messages for the most part,
+	 * and require the external MNCC to issue explicit AssCon
+	 * (Assign & Connect) commands to trigger assignment on BSSMAP
+	 * and connection at the OsmoMSC-controlled MGW.
+	 */
+	bool mncc_raw_mode;
+
 	/* Whether to use call waiting on the network */
 	bool call_waiting;
 

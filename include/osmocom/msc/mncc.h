@@ -130,9 +130,10 @@ struct gsm_call {
 #define MNCC_F_GCR		0x4000
 #define MNCC_F_HIGHL_COMPAT	0x8000
 #define MNCC_F_LOWL_COMPAT	0x10000
+#define MNCC_F_RAW_MODE		0x20000
 
 /* UPDATEME when adding new MNCC_F_* entries above */
-#define MNCC_F_ALL		0x1ffff
+#define MNCC_F_ALL		0x3ffff
 
 #define GSM_MAX_LOWL_COMPAT	16 /* (18 with TLV) */
 #define GSM_MAX_HIGHL_COMPAT	3 /* (5 with TLV) */
@@ -192,6 +193,20 @@ struct gsm_mncc {
 		uint8_t	len;
 		uint8_t	compat[GSM_MAX_HIGHL_COMPAT];
 	} hlc;
+
+	/* raw CC message */
+	struct gsm_mncc_raw_cc {
+		/* The length and body carried in this structure capture
+		 * the remainder of the CC message _after_ struct gsm48_hdr.
+		 * Rationale for stripping proto_disc and msg_type bytes:
+		 * - the function of TID in PD byte is replaced by callref
+		 *   in MNCC;
+		 * - there is a 1:1 correspondence between CC and MNCC
+		 *   message types, hence CC msg_type would be redundant.
+		 */
+		uint8_t len;
+		uint8_t data[255];	/* maximum with 1-byte length */
+	} raw;
 };
 
 struct gsm_data_frame {

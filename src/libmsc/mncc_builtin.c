@@ -76,6 +76,14 @@ static int mncc_setup_ind(struct gsm_call *call,
 	if (call->remote_ref)
 		return 0;
 
+	if (setup->fields & MNCC_F_RAW_MODE) {
+		LOGP(DMNCC, LOGL_ERROR,
+		     "internal MNCC is incompatible with raw mode\n");
+		mncc_set_cause(&mncc, GSM48_CAUSE_LOC_PRN_S_LU,
+				GSM48_CC_CAUSE_NETWORK_OOO);
+		goto out_reject;
+	}
+
 	/* transfer mode 1 would be packet mode, which was never specified */
 	if (setup->bearer_cap.mode != 0) {
 		LOGP(DMNCC, LOGL_NOTICE, "(call %x) We don't support "
