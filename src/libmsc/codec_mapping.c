@@ -218,6 +218,14 @@ const struct codec_mapping codec_map[] = {
 		},
 		.mgcp = CODEC_CLEARMODE,
 	},
+	{
+		.sdp = {
+			.payload_type = 127,
+			.subtype_name = "VND.THEMWI.CCSD",
+			.rate = 8000,
+		},
+		.mgcp = CODEC_COMPR_CSD,
+	},
 };
 
 #define foreach_codec_mapping(CODEC_MAPPING) \
