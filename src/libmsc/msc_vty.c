@@ -726,6 +726,17 @@ DEFUN(cfg_msc_no_twformat,
 
 #define MGW_STR MGCP_CLIENT_MGW_STR
 
+DEFUN(cfg_msc_mgw_type,
+      cfg_msc_mgw_type_cmd,
+      "mgw type (rtpbridge|transcoder)",
+      MGW_STR "Type of Media Gateway to be used\n"
+      "Symmetric RTP bridge (Osmocom standard)\n"
+      "Asymmetric transcoding MGW\n")
+{
+	gsmnet->use_transcoder_mgw = (strcmp(argv[0], "transcoder") == 0);
+	return CMD_SUCCESS;
+}
+
 DEFUN(cfg_msc_mgw_side,
       cfg_msc_mgw_side_cmd,
       "mgw indicate-side",
@@ -883,6 +894,8 @@ static int config_write_msc(struct vty *vty)
 		vty_out(vty, "%s", VTY_NEWLINE);
 	}
 
+	if (gsmnet->use_transcoder_mgw)
+		vty_out(vty, " mgw type transcoder%s", VTY_NEWLINE);
 	if (gsmnet->mgw_indicate_side)
 		vty_out(vty, " mgw indicate-side%s", VTY_NEWLINE);
 
@@ -2186,6 +2199,7 @@ void msc_vty_init(struct gsm_network *msc_network)
 	install_element(MSC_NODE, &cfg_msc_osmux_cmd);
 	install_element(MSC_NODE, &cfg_msc_twformat_cmd);
 	install_element(MSC_NODE, &cfg_msc_no_twformat_cmd);
+	install_element(MSC_NODE, &cfg_msc_mgw_type_cmd);
 	install_element(MSC_NODE, &cfg_msc_mgw_side_cmd);
 	install_element(MSC_NODE, &cfg_msc_no_mgw_side_cmd);
 	install_element(MSC_NODE, &cfg_msc_handover_number_range_cmd);

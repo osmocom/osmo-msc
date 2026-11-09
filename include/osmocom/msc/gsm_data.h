@@ -283,6 +283,13 @@ struct gsm_network {
 	 */
 	uint8_t tw_rtp_formats;
 
+	/* OsmoMSC requires an associated MGCP-speaking MGW, but it can now be
+	 * one of two types: either rtpbridge (standard OsmoMGW) or transcoder
+	 * (Themyscira Wireless add-ons to Osmocom CNI suite).  The selection
+	 * is configured via vty.
+	 */
+	bool use_transcoder_mgw;
+
 	/* Should we send X-Side extension parameter line to our attached MGW,
 	 * telling it which CRCX is for CN vs RAN? */
 	bool mgw_indicate_side;

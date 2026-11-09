@@ -291,14 +291,20 @@ int call_leg_ensure_rtp_alloc(struct call_leg *cl, enum rtp_direction dir, uint3
 
 	if (!cl->mgw_endpoint) {
 		struct mgcp_client *mgcp_client = mgcp_client_pool_get(gsmnet->mgw.mgw_pool);
+		const char *mgw_wildcard;
+
 		if (!mgcp_client) {
 			LOG_CALL_LEG(cl, LOGL_ERROR,
 				     "cannot ensure MGW endpoint -- no MGW configured, check configuration!\n");
 			return -ENODEV;
 		}
+		if (gsmnet->use_transcoder_mgw)
+			mgw_wildcard = mgcp_client_transcoder_wildcard(mgcp_client);
+		else
+			mgw_wildcard = mgcp_client_rtpbridge_wildcard(mgcp_client);
 		cl->mgw_endpoint = osmo_mgcpc_ep_alloc(cl->fi, CALL_LEG_EV_MGW_ENDPOINT_GONE,
 						       mgcp_client, gsmnet->mgw.tdefs, cl->fi->id,
-						       "%s", mgcp_client_rtpbridge_wildcard(mgcp_client));
+						       "%s", mgw_wildcard);
 	}
 	if (!cl->mgw_endpoint) {
 		LOG_CALL_LEG(cl, LOGL_ERROR, "failed to setup MGW endpoint\n");
