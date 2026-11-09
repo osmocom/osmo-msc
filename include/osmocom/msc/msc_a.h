@@ -134,6 +134,14 @@ struct msc_a {
 		struct call_leg *call_leg;
 		struct mncc_call *mncc_forwarding_to_remote_ran;
 
+		/* Channel Type corresponding to the most recently executed
+		 * Assignment procedure to this subscriber.  When we process
+		 * AssCon (Assign & Connect) requests from MNCC, we compare
+		 * the newly requested Channel Type against the already
+		 * established one - and if they match, we skip the step of
+		 * reassignment. */
+		struct gsm0808_channel_type channel_type;
+
 		/* There may be up to 7 incoming calls for this subscriber. This is the currently serviced voice call,
 		 * as in, the other person the subscriber is currently talking to. */
 		struct gsm_trans *active_trans;
@@ -221,6 +229,7 @@ bool msc_a_is_establishing_auth_ciph(const struct msc_a *msc_a);
 
 int msc_a_ensure_cn_local_rtp(struct msc_a *msc_a, struct gsm_trans *cc_trans);
 int msc_a_try_call_assignment(struct gsm_trans *cc_trans);
+int msc_a_perform_asscon(struct gsm_trans *cc_trans);
 void msc_a_tx_assignment_cmd(struct msc_a *msc_a);
 
 const char *msc_a_cm_service_type_to_use(struct msc_a *msc_a, enum osmo_cm_service_type cm_service_type);

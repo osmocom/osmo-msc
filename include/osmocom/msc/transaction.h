@@ -57,6 +57,21 @@ static inline const char *trans_type_name(enum trans_type val)
 
 uint8_t trans_type_to_gsm48_proto(enum trans_type type);
 
+/* MNCC AssCon operation being attempted or in progress: this struct
+ * is allocated when MNCC_ASSCON_REQ is received, and is freed upon
+ * completion or failure of the operation.  This temporary state
+ * structure is always a slave to a particular CC trans. */
+struct asscon_op {
+	/* information from the request */
+	struct gsm0808_channel_type channel_type;
+	struct sdp_msg remote;
+	enum mgcp_connection_mode conn_mode;
+	bool allow_switch;
+	/* state of operation in progress */
+	bool assignment_done;
+	bool got_cn_rtp_addr;
+};
+
 /* One transaction */
 struct gsm_trans {
 	/* Entry in list of all transactions */
@@ -138,6 +153,8 @@ struct gsm_trans {
 			/* Resulting choice from codecs/bearer services and the
 			 * local RTP address to be sent to the remote call leg. */
 			struct sdp_msg local;
+			/* any MNCC AssCon operation in progress? */
+			struct asscon_op *asscon;
 		} cc;
 		struct {
 			struct gsm411_smc_inst smc_inst;

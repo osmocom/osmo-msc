@@ -676,6 +676,63 @@ int msc_a_ensure_cn_local_rtp(struct msc_a *msc_a, struct gsm_trans *cc_trans)
 
 static void assignment_request_timeout_cb(void *data);
 
+/* The standard path for generation of Assignment Request, i.e., the path
+ * that is used in standard Osmocom network configurations, as opposed to
+ * Osmocom+ThemWi hybrid networks that use MNCC raw mode with AssCon commands.
+ */
+static int tx_assignment_std_path(struct msc_a *msc_a,
+				  struct gsm_trans *cc_trans,
+				  struct gsm0808_channel_type *channel_type)
+{
+	trans_cc_filter_run(cc_trans);
+	LOG_TRANS(cc_trans, LOGL_DEBUG, "Sending Assignment Command\n");
+
+	switch (cc_trans->bearer_cap.transfer) {
+	case GSM48_BCAP_ITCAP_SPEECH:
+		if (!cc_trans->cc.local.audio_codecs.count) {
+			LOG_TRANS(cc_trans, LOGL_ERROR, "Assignment not possible, no matching codec: %s\n",
+				  codec_filter_to_str(&cc_trans->cc.codecs, &cc_trans->cc.local, &cc_trans->cc.remote));
+			call_leg_release(msc_a->cc.call_leg);
+			return -EINVAL;
+		}
+
+		/* Compose 48.008 Channel Type from the current set of codecs
+		 * determined from both local and remote codec capabilities. */
+		if (sdp_audio_codecs_to_gsm0808_channel_type(channel_type, &cc_trans->cc.local.audio_codecs)) {
+			LOG_MSC_A(msc_a, LOGL_ERROR, "Cannot compose Channel Type (Permitted Speech) from codecs: %s\n",
+				  codec_filter_to_str(&cc_trans->cc.codecs, &cc_trans->cc.local, &cc_trans->cc.remote));
+			trans_free(cc_trans);
+			return -EINVAL;
+		}
+		break;
+	case GSM48_BCAP_ITCAP_3k1_AUDIO:
+	case GSM48_BCAP_ITCAP_FAX_G3:
+	case GSM48_BCAP_ITCAP_UNR_DIG_INF:
+		if (!cc_trans->cc.local.bearer_services.count) {
+			LOG_TRANS(cc_trans, LOGL_ERROR, "Assignment not possible, no matching bearer service: %s\n",
+				  csd_filter_to_str(&cc_trans->cc.csd, &cc_trans->cc.local, &cc_trans->cc.remote));
+			call_leg_release(msc_a->cc.call_leg);
+			return -EINVAL;
+		}
+
+		/* Compose 48.008 Channel Type from the current set of bearer
+		 * services determined from local and remote capabilities. */
+		if (csd_bs_list_to_gsm0808_channel_type(channel_type, &cc_trans->cc.local.bearer_services)) {
+			LOG_MSC_A(msc_a, LOGL_ERROR, "Cannot compose channel type from: %s\n",
+				  csd_filter_to_str(&cc_trans->cc.csd, &cc_trans->cc.local, &cc_trans->cc.remote));
+			return -EINVAL;
+		}
+		break;
+	default:
+		LOG_TRANS(cc_trans, LOGL_ERROR, "Assignment not possible for information transfer capability %d\n",
+			  cc_trans->bearer_cap.transfer);
+		call_leg_release(msc_a->cc.call_leg);
+		return -EINVAL;
+	}
+
+	return 0;
+}
+
 /* The MGW has given us a local IP address for the RAN side. Ready to start the Assignment of a voice channel. */
 void msc_a_tx_assignment_cmd(struct msc_a *msc_a)
 {
@@ -683,6 +740,7 @@ void msc_a_tx_assignment_cmd(struct msc_a *msc_a)
 	struct gsm_trans *cc_trans = msc_a->cc.active_trans;
 	struct gsm0808_channel_type channel_type;
 	struct gsm_network *net = msc_a_net(msc_a);
+	int rc;
 
 	/* Do not dispatch another Assignment Command before an earlier assignment is completed. This is a sanity
 	 * safeguard, ideally callers should not even invoke this function when an Assignment is already ongoing.
@@ -703,50 +761,13 @@ void msc_a_tx_assignment_cmd(struct msc_a *msc_a)
 		return;
 	}
 
-	trans_cc_filter_run(cc_trans);
-	LOG_TRANS(cc_trans, LOGL_DEBUG, "Sending Assignment Command\n");
-
-	switch (cc_trans->bearer_cap.transfer) {
-	case GSM48_BCAP_ITCAP_SPEECH:
-		if (!cc_trans->cc.local.audio_codecs.count) {
-			LOG_TRANS(cc_trans, LOGL_ERROR, "Assignment not possible, no matching codec: %s\n",
-				  codec_filter_to_str(&cc_trans->cc.codecs, &cc_trans->cc.local, &cc_trans->cc.remote));
-			call_leg_release(msc_a->cc.call_leg);
+	if (cc_trans->cc.asscon) {
+		memcpy(&channel_type, &cc_trans->cc.asscon->channel_type,
+			sizeof(channel_type));
+	} else {
+		rc = tx_assignment_std_path(msc_a, cc_trans, &channel_type);
+		if (rc)
 			return;
-		}
-
-		/* Compose 48.008 Channel Type from the current set of codecs
-		 * determined from both local and remote codec capabilities. */
-		if (sdp_audio_codecs_to_gsm0808_channel_type(&channel_type, &cc_trans->cc.local.audio_codecs)) {
-			LOG_MSC_A(msc_a, LOGL_ERROR, "Cannot compose Channel Type (Permitted Speech) from codecs: %s\n",
-				  codec_filter_to_str(&cc_trans->cc.codecs, &cc_trans->cc.local, &cc_trans->cc.remote));
-			trans_free(cc_trans);
-			return;
-		}
-		break;
-	case GSM48_BCAP_ITCAP_3k1_AUDIO:
-	case GSM48_BCAP_ITCAP_FAX_G3:
-	case GSM48_BCAP_ITCAP_UNR_DIG_INF:
-		if (!cc_trans->cc.local.bearer_services.count) {
-			LOG_TRANS(cc_trans, LOGL_ERROR, "Assignment not possible, no matching bearer service: %s\n",
-				  csd_filter_to_str(&cc_trans->cc.csd, &cc_trans->cc.local, &cc_trans->cc.remote));
-			call_leg_release(msc_a->cc.call_leg);
-			return;
-		}
-
-		/* Compose 48.008 Channel Type from the current set of bearer
-		 * services determined from local and remote capabilities. */
-		if (csd_bs_list_to_gsm0808_channel_type(&channel_type, &cc_trans->cc.local.bearer_services)) {
-			LOG_MSC_A(msc_a, LOGL_ERROR, "Cannot compose channel type from: %s\n",
-				  csd_filter_to_str(&cc_trans->cc.csd, &cc_trans->cc.local, &cc_trans->cc.remote));
-			return;
-		}
-		break;
-	default:
-		LOG_TRANS(cc_trans, LOGL_ERROR, "Assignment not possible for information transfer capability %d\n",
-			  cc_trans->bearer_cap.transfer);
-		call_leg_release(msc_a->cc.call_leg);
-		return;
 	}
 
 	/* The RAN side RTP address is known, so the voice/CSD Assignment can commence. */
@@ -768,6 +789,10 @@ void msc_a_tx_assignment_cmd(struct msc_a *msc_a)
 		trans_free(cc_trans);
 		return;
 	}
+
+	/* Save the channel type we just requested of the BSS, to assist
+	 * future MNCC AssCon operations. */
+	memcpy(&msc_a->cc.channel_type, &channel_type, sizeof(struct gsm0808_channel_type));
 }
 
 static struct gsm_trans *find_waiting_call(struct msc_a *msc_a)
@@ -1574,19 +1599,24 @@ static void msc_a_up_call_assignment_complete(struct msc_a *msc_a, const struct 
 	if (codec_if_known) {
 		const struct codec_mapping *codec_assigned;
 
-		/* Check for unexpected codec with CSD */
-		switch (cc_trans->bearer_cap.transfer) {
-		case GSM48_BCAP_ITCAP_FAX_G3:
-		case GSM48_BCAP_ITCAP_3k1_AUDIO:
-		case GSM48_BCAP_ITCAP_UNR_DIG_INF:
-			if (codec_if_known->type == GSM0808_SCT_CSD)
-				break; /* we're good */
-			LOG_TRANS(cc_trans, LOGL_ERROR, "Unexpected codec in Assignment Complete for CSD: %s\n",
-				  gsm0808_speech_codec_type_name(codec_if_known->type));
-			call_leg_release(msc_a->cc.call_leg);
-			return;
-		default:
-			break;
+		/* Check for unexpected codec with CSD - but not if we are
+		 * executing as a result of AssCon, as there will be no
+		 * OsmoMSC-interpreted BC-IE with MNCC raw mode. */
+		if (!cc_trans->cc.asscon) {
+			switch (cc_trans->bearer_cap.transfer) {
+			case GSM48_BCAP_ITCAP_FAX_G3:
+			case GSM48_BCAP_ITCAP_3k1_AUDIO:
+			case GSM48_BCAP_ITCAP_UNR_DIG_INF:
+				if (codec_if_known->type == GSM0808_SCT_CSD)
+					break; /* we're good */
+				LOG_TRANS(cc_trans, LOGL_ERROR,
+					  "Unexpected codec in Assignment Complete for CSD: %s\n",
+					  gsm0808_speech_codec_type_name(codec_if_known->type));
+				call_leg_release(msc_a->cc.call_leg);
+				return;
+			default:
+				break;
+			}
 		}
 
 		/* For 2G:
@@ -1630,14 +1660,17 @@ static void msc_a_up_call_assignment_complete(struct msc_a *msc_a, const struct 
 						ac->assignment_complete.osmux_cid);
 	rtp_stream_commit(rtps_to_ran);
 
-	/* Remember the Codec List (BSS Supported) */
-	if (ac->assignment_complete.codec_list_bss_supported)
-		codec_filter_set_bss(&cc_trans->cc.codecs, ac->assignment_complete.codec_list_bss_supported);
-
-	trans_cc_filter_run(cc_trans);
-	LOG_TRANS(cc_trans, LOGL_INFO, "Assignment Complete: RAN: %s, CN: %s\n",
-		  sdp_audio_codecs_to_str(&rtps_to_ran->codecs),
-		  sdp_audio_codecs_to_str(&cc_trans->cc.local.audio_codecs));
+	/* Remember the Codec List (BSS Supported) - but once again all of this
+	 * codec filter logic has to be suppressed for MNCC raw mode AssCon
+	 * operations. */
+	if (!cc_trans->cc.asscon) {
+		if (ac->assignment_complete.codec_list_bss_supported)
+			codec_filter_set_bss(&cc_trans->cc.codecs, ac->assignment_complete.codec_list_bss_supported);
+		trans_cc_filter_run(cc_trans);
+		LOG_TRANS(cc_trans, LOGL_INFO, "Assignment Complete: RAN: %s, CN: %s\n",
+			  sdp_audio_codecs_to_str(&rtps_to_ran->codecs),
+			  sdp_audio_codecs_to_str(&cc_trans->cc.local.audio_codecs));
+	}
 
 	if (cc_on_assignment_done(cc_trans)) {
 		/* If an error occurred, it was logged in cc_assignment_done() */
@@ -2198,8 +2231,11 @@ static int msc_a_start_assignment(struct msc_a *msc_a, struct gsm_trans *cc_tran
 	if (!cl)
 		return -EINVAL;
 
-	/* See if we can set a preliminary codec. If not, pass none for the time being. */
-	trans_cc_filter_run(cc_trans);
+	/* See if we can set a preliminary codec. If not, pass none for the
+	 * time being. And if we executing as a result of MNCC AssCon, then
+	 * suppress all codecs business. */
+	if (!cc_trans->cc.asscon)
+		trans_cc_filter_run(cc_trans);
 
 	cn_rtp_available = call_leg_local_ip(cl, RTP_TO_CN);
 	ran_rtp_available = call_leg_local_ip(cl, RTP_TO_RAN);
@@ -2207,13 +2243,23 @@ static int msc_a_start_assignment(struct msc_a *msc_a, struct gsm_trans *cc_tran
 	/* Set up RTP ports for both RAN and CN side. Even though we ask for both at the same time, the
 	 * osmo_mgcpc_ep_fsm automagically waits for the first CRCX to complete before firing the second CRCX. The one
 	 * issued first here will also be the first CRCX sent to the MGW. Usually both still need to be set up. */
-	if (!cn_rtp_available)
+	if (!cn_rtp_available) {
+		struct sdp_audio_codecs *codecs;
+		/* If we are executing via AssCon path, then all usual OsmoMSC
+		 * intelligence about codecs needs to be suppressed. */
+		if (cc_trans->cc.asscon)
+			codecs = NULL;
+		else
+			codecs = &cc_trans->cc.local.audio_codecs;
 		call_leg_ensure_ci(cl, RTP_TO_CN, cc_trans->call_id, cc_trans,
-				   &cc_trans->cc.local.audio_codecs, NULL);
+				   codecs, NULL);
+	}
 	if (!ran_rtp_available) {
 		struct sdp_audio_codecs *codecs;
 		if (msc_a->c.ran->force_mgw_codecs_to_ran.count)
 			codecs = &msc_a->c.ran->force_mgw_codecs_to_ran;
+		else if (cc_trans->cc.asscon)
+			codecs = NULL;
 		else
 			codecs = &cc_trans->cc.local.audio_codecs;
 		return call_leg_ensure_ci(cl, RTP_TO_RAN, cc_trans->call_id, cc_trans, codecs, NULL);
@@ -2245,6 +2291,56 @@ int msc_a_try_call_assignment(struct gsm_trans *cc_trans)
 	}
 
 	LOG_MSC_A(msc_a, LOGL_DEBUG, "Starting call assignment\n");
+	return msc_a_start_assignment(msc_a, cc_trans);
+}
+
+/* Alternative way of doing assignment: instead of osmo-msc deciding on its
+ * own, using its codec filter logic, when to perform assignment, what channel
+ * type to ask for and what codecs should be indicated to the MSC-associated
+ * MGW, the external MNCC software makes all of these decisions and sends us
+ * an Assign & Connect request when it is ready to roll. */
+int msc_a_perform_asscon(struct gsm_trans *cc_trans)
+{
+	struct msc_a *msc_a = cc_trans->msc_a;
+	struct asscon_op *ac_op = cc_trans->cc.asscon;
+	struct call_leg *cl;
+
+	OSMO_ASSERT(cc_trans->type == TRANS_CC);
+
+	if (msc_a->cc.active_trans && msc_a->cc.active_trans != cc_trans) {
+		if (msc_a->cc.active_trans->cc.asscon)
+			return cc_asscon_busy_other_call(cc_trans, true);
+		if (!ac_op->allow_switch)
+			return cc_asscon_busy_other_call(cc_trans, false);
+		/* The other call is not in the middle of assignment,
+		 * and we are allowed to switch - hence we take ownership
+		 * of the user plane channel to the MS. */
+		msc_a->cc.active_trans = cc_trans;
+	}
+
+	/* perform the Connect part of AssCon: CN side of our MGW */
+	cl = msc_a_ensure_call_leg(msc_a, cc_trans);
+	if (!cl)
+		return cc_asscon_network_failure(cc_trans);
+	cl->crcx_conn_mode[RTP_TO_CN] = ac_op->conn_mode;
+	call_leg_ensure_ci(cl, RTP_TO_CN, cc_trans->call_id, cc_trans,
+			   &ac_op->remote.audio_codecs, &ac_op->remote.rtp);
+	if (call_leg_local_ip(cl, RTP_TO_CN))
+		ac_op->got_cn_rtp_addr = true;
+
+	/* Assignment part: we may be doing initial assignment or a reassignment
+	 * for changing Channel Type, but if the AssCon is asking for the same
+	 * CT which we've already assigned, then don't reassign, i.e., AssCon
+	 * proceeds without BSS involvement. */
+	if (memcmp(&ac_op->channel_type, &msc_a->cc.channel_type,
+		   sizeof(struct gsm0808_channel_type)) == 0)
+		return cc_on_assignment_done(cc_trans);
+
+	/* We are doing (re)assignment for real.  A quirk in the existing
+	 * OsmoMSC code requires active_trans to be NULL as we enter that
+	 * code path. */
+	msc_a->cc.active_trans = NULL;
+	LOG_MSC_A(msc_a, LOGL_DEBUG, "Starting call assignment via AssCon\n");
 	return msc_a_start_assignment(msc_a, cc_trans);
 }
 

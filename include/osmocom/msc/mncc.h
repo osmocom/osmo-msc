@@ -97,6 +97,9 @@ struct gsm_call {
 #define MNCC_RTP_CREATE		0x0204
 #define MNCC_RTP_CONNECT	0x0205
 #define MNCC_RTP_FREE		0x0206
+#define MNCC_ASSCON_REQ		0x0207
+#define MNCC_ASSCON_CNF		0x0208
+#define MNCC_ASSCON_REJ		0x0209
 
 #define GSM_TCHF_FRAME		0x0300
 #define GSM_TCHF_FRAME_EFR	0x0301
@@ -227,6 +230,44 @@ struct gsm_mncc_bridge {
 	uint32_t	callref[2];
 };
 
+enum mncc_asscon_rej_cause {
+	/* The request is invalid in some way */
+	MNCC_ASSCON_REJ_INVALID_REQ,
+	/* Request is premature: no subscriber connection exists yet */
+	MNCC_ASSCON_REJ_PREMATURE,
+	/* Another AssCon is outstanding on the same CC trans */
+	MNCC_ASSCON_REJ_BUSY_SAME_CALL,
+	/* A different CC trans has an AssCon in progress */
+	MNCC_ASSCON_REJ_BUSY_ANOTHER_CALL,
+	/* User plane is held by another call, no switch permission given */
+	MNCC_ASSCON_REJ_NOT_SWITCHING,
+	/* Internal failure of some kind, such as talloc failure */
+	MNCC_ASSCON_REJ_NETWORK_FAIL,
+};
+
+struct gsm_mncc_asscon {
+	/* common part for Assign & Connect requests and responses */
+	uint32_t	msg_type;
+	uint32_t	callref;
+	uint32_t	flags;
+	/* GSM 08.08 channel type IE (section 3.2.2.11) only for requests */
+	uint8_t		ct_len;
+	uint8_t		ct_body[11];
+	/* Connection mode is also used only for requests; values follow
+	 * enum mgcp_connection_mode of libosmo-mgcp-client. */
+	uint8_t		conn_mode;
+	/* error reason for MNCC_ASSCON_REJ */
+	enum mncc_asscon_rej_cause	rej_cause;
+	/* Put SDP at the end like it is in gsm_mncc and gsm_mncc_rtp,
+	 * used to preen incoming MNCC messages for basic validity. */
+	char		sdp[1024];
+};
+
+/* MNCC_ASSCON_REQ flag: if set, this operation may switch the user plane
+ * channel to the MS to the present call, taking it away from another call
+ * that held it previously. */
+#define	MNCC_ASSCON_F_SWITCH	0x0001
+
 union mncc_msg {
 	uint32_t msg_type;
 	struct gsm_mncc signal;
@@ -234,6 +275,7 @@ union mncc_msg {
 	struct gsm_data_frame data_frame;
 	struct gsm_mncc_rtp rtp;
 	struct gsm_mncc_bridge bridge;
+	struct gsm_mncc_asscon asscon;
 };
 
 const char *get_mncc_name(int value);

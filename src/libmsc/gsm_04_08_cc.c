@@ -62,6 +62,7 @@
 #include <osmocom/gsm/gsm48.h>
 #include <osmocom/gsm/gsm0480.h>
 #include <osmocom/gsm/gsm_utils.h>
+#include <osmocom/gsm/gsm0808_utils.h>
 #include <osmocom/gsm/protocol/gsm_04_08.h>
 #include <osmocom/core/msgb.h>
 #include <osmocom/core/talloc.h>
@@ -266,6 +267,11 @@ static void _log_mncc_rx_tx(const char *file, int line,
 		sdp = mncc->signal.sdp;
 		break;
 
+	case MNCC_ASSCON_REQ:
+	case MNCC_ASSCON_CNF:
+		sdp = mncc->asscon.sdp;
+		break;
+
 	default:
 		break;
 	}
@@ -314,6 +320,33 @@ static int _mncc_recvmsg(const char *file, int line,
 
 	data = msgb_put(msg, sizeof(struct gsm_mncc));
 	memcpy(data, mncc, sizeof(struct gsm_mncc));
+
+	cc_tx_to_mncc(net, msg);
+	/* trans may be NULL when sending an MNCC error reply upon an invalid MNCC request */
+	if (trans)
+		trans->cc.mncc_initiated = true;
+
+	return 0;
+}
+
+#define mncc_recvmsg_asscon(ARGS...) _mncc_recvmsg_asscon(__FILE__, __LINE__, ##ARGS)
+static int _mncc_recvmsg_asscon(const char *file, int line,
+				struct gsm_network *net,
+				struct gsm_trans *trans, int msg_type,
+				struct gsm_mncc_asscon *mncc_ac)
+{
+	struct msgb *msg;
+	unsigned char *data;
+
+	mncc_ac->msg_type = msg_type;
+	_log_mncc_rx_tx(file, line, trans, "tx", (union mncc_msg *)mncc_ac);
+
+	msg = msgb_alloc(sizeof(struct gsm_mncc_asscon), "MNCC");
+	if (!msg)
+		return -ENOMEM;
+
+	data = msgb_put(msg, sizeof(struct gsm_mncc_asscon));
+	memcpy(data, mncc_ac, sizeof(struct gsm_mncc_asscon));
 
 	cc_tx_to_mncc(net, msg);
 	/* trans may be NULL when sending an MNCC error reply upon an invalid MNCC request */
@@ -2099,6 +2132,182 @@ static int gsm48_cc_rx_userinfo(struct gsm_trans *trans, struct msgb *msg)
 	return mncc_recvmsg(trans->net, trans, MNCC_USERINFO_IND, &user);
 }
 
+static int send_asscon_rej(struct gsm_network *net, struct gsm_trans *trans,
+			   uint32_t callref, enum mncc_asscon_rej_cause cause)
+{
+	struct gsm_mncc_asscon mncc_ac;
+
+	memset(&mncc_ac, 0, sizeof(mncc_ac));
+	mncc_ac.callref = callref;
+	mncc_ac.rej_cause = cause;
+	return mncc_recvmsg_asscon(net, trans, MNCC_ASSCON_REJ, &mncc_ac);
+}
+
+static int handle_asscon_req(struct gsm_network *net,
+			     const struct gsm_mncc_asscon *mncc_ac)
+{
+	struct gsm_trans *trans;
+	struct asscon_op *ac_op;
+	int rc;
+
+	/* Find callref */
+	trans = trans_find_by_callref(net, TRANS_CC, mncc_ac->callref);
+	if (!trans) {
+		LOG_TRANS_CAT(trans, DMNCC, LOGL_ERROR,
+			      "AssCon REQ for non-existing trans\n");
+		return send_asscon_rej(net, trans, mncc_ac->callref,
+					MNCC_ASSCON_REJ_INVALID_REQ);
+	}
+	log_set_context(LOG_CTX_VLR_SUBSCR, trans->vsub);
+	log_mncc_rx_tx(trans, "rx", (const union mncc_msg *)mncc_ac);
+	if (!trans->msc_a) {
+		LOG_TRANS_CAT(trans, DMNCC, LOGL_ERROR,
+			      "AssCon REQ for trans without conn\n");
+		return send_asscon_rej(net, trans, mncc_ac->callref,
+					MNCC_ASSCON_REJ_PREMATURE);
+	}
+
+	/* It is naturally impossible to have more than one AssCon
+	 * in progress at the same time. */
+	if (trans->cc.asscon) {
+		LOG_TRANS_CAT(trans, DMNCC, LOGL_ERROR,
+			      "repeated AssCon REQ on the same trans\n");
+		return send_asscon_rej(net, trans, mncc_ac->callref,
+					MNCC_ASSCON_REJ_BUSY_SAME_CALL);
+	}
+
+	/* now we can get to work */
+	ac_op = talloc_zero(trans, struct asscon_op);
+	if (!ac_op) {
+		LOG_TRANS_CAT(trans, DMNCC, LOGL_ERROR,
+			      "talloc failed for struct asscon_op\n");
+		return send_asscon_rej(net, trans, mncc_ac->callref,
+					MNCC_ASSCON_REJ_NETWORK_FAIL);
+	}
+	rc = gsm0808_dec_channel_type(&ac_op->channel_type, mncc_ac->ct_body,
+					mncc_ac->ct_len);
+	if (rc < 0) {
+		LOG_TRANS_CAT(trans, DMNCC, LOGL_ERROR,
+			      "AssCon REQ: invalid Channel Type IE\n");
+		talloc_free(ac_op);
+		return send_asscon_rej(net, trans, mncc_ac->callref,
+					MNCC_ASSCON_REJ_INVALID_REQ);
+	}
+	rc = sdp_msg_from_sdp_str(&ac_op->remote, mncc_ac->sdp);
+	if (rc < 0) {
+		LOG_TRANS_CAT(trans, DMNCC, LOGL_ERROR,
+			      "AssCon REQ: invalid SDP\n");
+		talloc_free(ac_op);
+		return send_asscon_rej(net, trans, mncc_ac->callref,
+					MNCC_ASSCON_REJ_INVALID_REQ);
+	}
+	if (!osmo_sockaddr_str_is_nonzero(&ac_op->remote.rtp)) {
+		LOG_TRANS_CAT(trans, DMNCC, LOGL_ERROR,
+			      "AssCon REQ: SDP failed to specify RTP addr\n");
+		talloc_free(ac_op);
+		return send_asscon_rej(net, trans, mncc_ac->callref,
+					MNCC_ASSCON_REJ_INVALID_REQ);
+	}
+	if (!ac_op->remote.audio_codecs.count) {
+		LOG_TRANS_CAT(trans, DMNCC, LOGL_ERROR,
+			      "AssCon REQ: SDP failed to specify codec(s)\n");
+		talloc_free(ac_op);
+		return send_asscon_rej(net, trans, mncc_ac->callref,
+					MNCC_ASSCON_REJ_INVALID_REQ);
+	}
+	ac_op->conn_mode = mncc_ac->conn_mode;
+	if (mncc_ac->flags & MNCC_ASSCON_F_SWITCH)
+		ac_op->allow_switch = true;
+
+	/* at this point we hand the work off to MSC-A */
+	trans->cc.asscon = ac_op;
+	return msc_a_perform_asscon(trans);
+}
+
+int cc_asscon_busy_other_call(struct gsm_trans *trans, bool asscon_in_progress)
+{
+	enum mncc_asscon_rej_cause cause;
+
+	if (trans->cc.asscon) {
+		talloc_free(trans->cc.asscon);
+		trans->cc.asscon = NULL;
+	}
+	if (asscon_in_progress)
+		cause = MNCC_ASSCON_REJ_BUSY_ANOTHER_CALL;
+	else
+		cause = MNCC_ASSCON_REJ_NOT_SWITCHING;
+	return send_asscon_rej(trans->net, trans, trans->callref, cause);
+}
+
+int cc_asscon_network_failure(struct gsm_trans *trans)
+{
+	if (trans->cc.asscon) {
+		talloc_free(trans->cc.asscon);
+		trans->cc.asscon = NULL;
+	}
+	return send_asscon_rej(trans->net, trans, trans->callref,
+				MNCC_ASSCON_REJ_NETWORK_FAIL);
+}
+
+static int check_asscon_complete(struct gsm_trans *trans)
+{
+	struct msc_a *msc_a = trans->msc_a;
+	struct asscon_op *ac_op = trans->cc.asscon;
+	struct gsm_mncc_asscon mncc_ac;
+	struct sdp_msg sdp;
+
+	if (!ac_op->assignment_done)
+		return 0;
+	if (!ac_op->got_cn_rtp_addr)
+		return 0;
+
+	/* All done - send MNCC_ASSCON_CNF! */
+	memset(&mncc_ac, 0, sizeof(mncc_ac));
+	mncc_ac.callref = trans->callref;
+
+	/* We have to include SDP in our MNCC_ASSCON_CNF response.  Ideally
+	 * we would simply pass through the SDP block we received in MGCP,
+	 * but the existing libosmo-mgcp-client API offers no such support.
+	 * We could implement logic to parse the ptmap array which
+	 * libosmo-mgcp-client constructs from the MGCP response and turn it
+	 * back into SDP ourselves, but it would be completely wasted work
+	 * as the external MNCC sw only cares about RTP IP:port address
+	 * and won't look at any of the codec info.  But we still have to
+	 * generate a valid SDP...  Our solution: we simply echo back
+	 * the codec info we got with SDP in MNCC_ASSCON_REQ.
+	 */
+	memset(&sdp, 0, sizeof(sdp));
+	memcpy(&sdp.rtp, &msc_a->cc.call_leg->rtp[RTP_TO_CN]->local,
+		sizeof(struct osmo_sockaddr_str));
+	memcpy(&sdp.audio_codecs, &ac_op->remote.audio_codecs,
+		sizeof(struct sdp_audio_codecs));
+	sdp_msg_to_sdp_str_buf(mncc_ac.sdp, sizeof(mncc_ac.sdp), &sdp);
+
+	/* We can finally dispose of the finished AssCon state structure. */
+	talloc_free(ac_op);
+	trans->cc.asscon = NULL;
+
+	/* ... and send off the response! */
+	return mncc_recvmsg_asscon(trans->net, trans, MNCC_ASSCON_CNF,
+				   &mncc_ac);
+}
+
+static int asscon_assignment_done(struct gsm_trans *trans)
+{
+	struct asscon_op *ac_op = trans->cc.asscon;
+
+	ac_op->assignment_done = true;
+	return check_asscon_complete(trans);
+}
+
+static int asscon_got_cn_rtp_addr(struct gsm_trans *trans)
+{
+	struct asscon_op *ac_op = trans->cc.asscon;
+
+	ac_op->got_cn_rtp_addr = true;
+	return check_asscon_complete(trans);
+}
+
 static int mncc_recv_rtp(struct gsm_network *net, struct gsm_trans *trans, uint32_t callref,
 			 int cmd, struct osmo_sockaddr_str *rtp_addr, uint32_t payload_type,
 			 uint32_t payload_msg_type, const struct sdp_msg *sdp)
@@ -2152,6 +2361,9 @@ static int tch_rtp_create(struct gsm_network *net, const struct gsm_mncc_rtp *rt
 
 int cc_on_cn_local_rtp_port_known(struct gsm_trans *cc_trans)
 {
+	if (cc_trans->cc.asscon)
+		return asscon_got_cn_rtp_addr(cc_trans);
+
 	/* Depending on MO or MT call, dispatch the event differently */
 	switch (cc_trans->cc.state) {
 	case GSM_CSTATE_INITIATED:
@@ -2177,6 +2389,9 @@ int cc_on_cn_local_rtp_port_known(struct gsm_trans *cc_trans)
 int cc_on_assignment_done(struct gsm_trans *trans)
 {
 	struct msc_a *msc_a = trans->msc_a;
+
+	if (trans->cc.asscon)
+		return asscon_assignment_done(trans);
 
 	switch (trans->cc.state) {
 	case GSM_CSTATE_INITIATED:
@@ -2376,6 +2591,14 @@ static int mncc_tx_to_gsm_cc(struct gsm_network *net, const union mncc_msg *msg)
 	case MNCC_RTP_FREE:
 		/* unused right now */
 		return -EIO;
+	case MNCC_ASSCON_REQ:
+		return handle_asscon_req(net, &msg->asscon);
+	case MNCC_ASSCON_CNF:
+	case MNCC_ASSCON_REJ:
+		/* These messages are responses from CC to MNCC, hence
+		 * they should never appear in MNCC->CC request direction.
+		 */
+		return -EINVAL;
 
 	case MNCC_FRAME_DROP:
 	case MNCC_FRAME_RECV:
@@ -2580,6 +2803,11 @@ struct mncc_call *mncc_find_by_callref_from_msg(const union mncc_msg *msg)
 	case MNCC_RTP_CREATE:
 	case MNCC_RTP_CONNECT:
 		callref = msg->rtp.callref;
+		break;
+	case MNCC_ASSCON_REQ:
+	case MNCC_ASSCON_CNF:
+	case MNCC_ASSCON_REJ:
+		callref = msg->asscon.callref;
 		break;
 
 	case MNCC_RTP_FREE:

@@ -49,6 +49,8 @@ void gsm48_cc_rx_setup_cn_local_rtp_port_known(struct gsm_trans *trans);
 void gsm48_cc_rx_call_conf_cn_local_rtp_port_known(struct gsm_trans *trans);
 int cc_on_cn_local_rtp_port_known(struct gsm_trans *trans);
 int cc_on_assignment_done(struct gsm_trans *trans);
+int cc_asscon_busy_other_call(struct gsm_trans *trans, bool asscon_in_progress);
+int cc_asscon_network_failure(struct gsm_trans *trans);
 
 int mncc_tx_to_cc(struct gsm_network *net, void *arg);
 

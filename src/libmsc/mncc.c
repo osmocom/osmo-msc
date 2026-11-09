@@ -84,6 +84,9 @@ static const struct value_string mncc_names[] = {
 	{ MNCC_RTP_CREATE, "MNCC_RTP_CREATE" },
 	{ MNCC_RTP_CONNECT, "MNCC_RTP_CONNECT" },
 	{ MNCC_RTP_FREE, "MNCC_RTP_FREE" },
+	{ MNCC_ASSCON_REQ, "MNCC_ASSCON_REQ" },
+	{ MNCC_ASSCON_CNF, "MNCC_ASSCON_CNF" },
+	{ MNCC_ASSCON_REJ, "MNCC_ASSCON_REJ" },
 	{ GSM_TCHF_FRAME, "GSM_TCHF_FRAME" },
 	{ GSM_TCHF_FRAME_EFR, "GSM_TCHF_FRAME_EFR" },
 	{ GSM_TCHH_FRAME, "GSM_TCHH_FRAME" },
@@ -289,6 +292,11 @@ int mncc_prim_check(const struct gsm_mncc *mncc_prim, unsigned int len)
 	case MNCC_RTP_CONNECT:
 	case MNCC_RTP_CREATE:
 		return mncc_check_sdp_termination("MNCC RTP", mncc_prim, len, ((struct gsm_mncc_rtp*)mncc_prim)->sdp);
+	case MNCC_ASSCON_REQ:
+	case MNCC_ASSCON_CNF:
+	case MNCC_ASSCON_REJ:
+		return mncc_check_sdp_termination("MNCC AssCon", mncc_prim, len,
+				((struct gsm_mncc_asscon *)mncc_prim)->sdp);
 	case MNCC_LCHAN_MODIFY:
 	case MNCC_FRAME_DROP:
 	case MNCC_FRAME_RECV:
